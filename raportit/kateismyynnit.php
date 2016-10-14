@@ -2,6 +2,11 @@
 
 require '../inc/parametrit.inc';
 
+if ($tee == "NAYTATILAUS") {
+  readfile($pupe_root_polku."/dataout/".$filenimi);
+  exit;
+}
+
 echo "<font class='head'>".t("Käteismyynnit")."</font><hr>";
 
 // Tarkistetaan oikeus
@@ -2378,6 +2383,15 @@ elseif ($tee != '') {
 
       // Tulostusdialogi
       echo js_openPrintDialog($pdfnimi);
+
+      js_openFormInNewWindow();
+
+      echo "<form id='pdf_formi' name='pdf_formi' method='post' autocomplete='off'>
+            <input type='hidden' name='toim' value='$toim'>
+            <input type='hidden' name='tee' value='NAYTATILAUS'>
+            <input type='hidden' name='filenimi' value='".basename($filenimi.".pdf")."'>
+            <input type='hidden' name='nayta_pdf' value='1'>
+            <input type='submit' value='".t("Näytä pdf")."' onClick=\"js_openFormInNewWindow('pdf_formi', 'pdf_formi'); return false;\"></form><br><br>";
     }
 
     if (!empty($printteri)) {

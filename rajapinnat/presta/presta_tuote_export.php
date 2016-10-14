@@ -95,6 +95,14 @@ if (!isset($presta_laskutusosoitteen_muutos)) {
   // jos false, otetaan aina pupesoftin asiakkaan laskutusosoite
   $presta_laskutusosoitteen_muutos = true;
 }
+if (!isset($presta_asiakaskasittely)) {
+  // PrestaShopin asiakkaan määrittely joko "asiakkaittain" tai "yhteyshenkiloittain".
+  // "asiakkaittain" = Pupesoftin yhteyshenkilöstä tehdään PrestaShopin asiakas. PrestaShopin
+  // asiakkaalla on yksi osoite, joka tulee Pupesoftin yhteyshenkiloltä.
+  // "yhteyshenkiloittain" = Pupesoftin asiakkaat yhdistetään yhteyshenkilön mukaan. PrestaShopin
+  // asiakkaalle tulee useampi osoitetieto, jotka tulevat Pupesoftin eri asiakkailta.
+  $presta_asiakaskasittely = 'asiakkaittain';
+}
 if (!isset($presta_haettavat_tilaus_statukset)) {
   // Missä tilassa olevia tilauksia haetaan Prestasta
   /* Tämä on Prestan default status list;
@@ -300,11 +308,12 @@ if (presta_ajetaanko_sykronointi('asiakasryhmat', $synkronoi)) {
 }
 
 if (presta_ajetaanko_sykronointi('asiakkaat', $synkronoi)) {
-  $asiakkaat = presta_hae_asiakkaat();
+  $asiakkaat = presta_hae_asiakkaat($presta_asiakaskasittely);
 
   presta_echo("Siirretään asiakkaat.");
   $presta_customer = new PrestaCustomers($presta_url, $presta_api_key, 'presta_asiakkaat');
 
+  $presta_customer->set_customer_handling($presta_asiakaskasittely);
   $presta_customer->set_default_groups($presta_vakioasiakasryhmat);
   $presta_customer->set_dynamic_fields($presta_dynaamiset_asiakasparametrit);
   $presta_customer->sync_customers($asiakkaat);

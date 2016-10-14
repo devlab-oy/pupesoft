@@ -1088,6 +1088,16 @@ if (!function_exists("ppg_queue")) {
   }
 }
 
+if (!function_exists("talenom_queue")) {
+  function talenom_queue($invoice_number, $xmlstring, $kieli) {
+    global $kukarow, $yhtiorow, $pupe_root_polku;
+
+    // Siirret‰‰n l‰hetysjonoon
+    file_put_contents("{$pupe_root_polku}/dataout/talenom_error/laskutus-$kukarow[yhtio]-".date("Ymd")."-$invoice_number.xml", $xmlstring);
+    return "Lasku siirretty l‰hetysjonoon";
+  }
+}
+
 if (!function_exists("apix_queue")) {
   function apix_queue($apix_finvoice, $apix_invoicenum, $kieli, $liitteet = array()) {
     global $kukarow, $yhtiorow, $pupe_root_polku;
@@ -3350,8 +3360,11 @@ if (!function_exists("jalkilaske_valmistus")) {
                     and otunnus        = '$prow[otunnus]'
                     and perheid        = '$prow[perheid]'
                     and tuoteno        = '$prow[tuoteno]'
-                    and tyyppi         = 'D'
-                    and toimitettuaika = '0000-00-00 00:00:00'";
+                    and (
+                      (tyyppi = 'D' and toimitettuaika = '0000-00-00 00:00:00')
+                      OR
+                      (tyyppi = 'O')
+                    )";
           $sumres = pupe_query($query);
           $sumrow = mysql_fetch_array($sumres);
 
@@ -8838,7 +8851,7 @@ if (!function_exists('tallenna_liite')) {
     }
 
     $data     = mysql_real_escape_string(file_get_contents($file["tmp_name"]));
-    $filename   = preg_replace("/[^A-Z0-9\._\-%]/i", "", $file["name"]);
+    $filename   = preg_replace("/[^A-Z0-9\.#_\-%]/i", "", $file["name"]);
     $filetype  = mysql_real_escape_string($file["type"]);
     $filesize  = mysql_real_escape_string($file["size"]);
     $selite    = mysql_real_escape_string($selite);
@@ -20814,51 +20827,14 @@ if (!function_exists("pupesoft_tulosta_lahete")) {
 
     // tsekataan pit‰‰kˆ tuote korvata osaluettelolla
     while ($row = mysql_fetch_assoc($riresult)) {
-
       if ($yhtiorow["pura_osaluettelot"] != "") {
         // Korvataanko tilauksella oleva rivi osaluettelolla
-        $query = "SELECT tuote.tuoteno, tuote.yksikko, tuote.nimitys,
-                  tuoteperhe.kerroin,
-                  tuoteperhe.hintakerroin myyntihinta,
-                  round(tuoteperhe.hintakerroin * tuoteperhe.kerroin * ({$row['varattu']}+{$row['jt']}+{$row['kpl']}) * (1-{$row['aleyhteensa']}/100),'$yhtiorow[hintapyoristys]') rivihinta
-                  FROM tuoteperhe
-                  JOIN tuote ON (tuoteperhe.yhtio=tuote.yhtio and tuoteperhe.tuoteno=tuote.tuoteno)
-                  WHERE tuoteperhe.yhtio    = '$kukarow[yhtio]'
-                  AND tuoteperhe.isatuoteno = '$row[tuoteno]'
-                  AND tuoteperhe.tyyppi     = 'O'
-                  ORDER BY tuote.tuoteno";
-        $tuoteperhe_result = pupe_query($query);
-
-        if (mysql_num_rows($tuoteperhe_result) > 0) {
-          while ($tuoteperhe_row = mysql_fetch_assoc($tuoteperhe_result)) {
-
-            $lisarow = $row;
-
-            $lisarow["tuoteno"] = $tuoteperhe_row["tuoteno"];
-            $lisarow["nimitys"] = $tuoteperhe_row["nimitys"];
-            $lisarow["yksikko"] = $tuoteperhe_row["yksikko"];
-
-            $lisarow["hinta"]       = $tuoteperhe_row["myyntihinta"];
-            $lisarow["myyntihinta"] = $tuoteperhe_row["myyntihinta"];
-            $lisarow["rivihinta"]   = $tuoteperhe_row["rivihinta"];
-
-            $lisarow["tilkpl"]  = $tuoteperhe_row["kerroin"]*$row["tilkpl"];
-            $lisarow["varattu"] = $tuoteperhe_row["kerroin"]*$row["varattu"];
-            $lisarow["jt"]      = $tuoteperhe_row["kerroin"]*$row["jt"];
-            $lisarow["kpl"]     = $tuoteperhe_row["kerroin"]*$row["kpl"];
-
-            $laheterows[] = $lisarow;
+        $laheterows = array_merge($laheterows, pura_osaluettelot($laskurow, $row));
           }
-        }
         else {
           $laheterows[] = $row;
         }
       }
-      else {
-        $laheterows[] = $row;
-      }
-    }
-
 
     foreach ($laheterows as $row) {
 
@@ -24410,6 +24386,14 @@ if  (!function_exists('verkkolaskuputkeen')) {
     global $yhtiorow;
 
     // T‰ss‰ pohditaan laitetaanko verkkolaskuputkeen...
+
+    // Talenomiin laitetaan KAIKKI laskut (paitsi k‰teiskuitit)
+    if ($yhtiorow["verkkolasku_lah"] == "talenom" and $masrow["kateinen"] == "") {
+      if ($info) {
+        echo t("Talenom-siirto");
+      }
+      return TRUE;
+    }
 
     // Maksuehdon takaa voidaan s‰‰t‰‰, ett‰ laskut eiv‰t mene verkkolaskuputkeen
     if ($masrow["itsetulostus"] != "") {
@@ -33733,6 +33717,73 @@ if (!function_exists('hae_toimitustapa')) {
   }
 }
 
+if (!function_exists("pura_osaluettelot")) {
+  function pura_osaluettelot($laskurow, $row, $laskutyyppi=0) {
+    global $kukarow, $yhtiorow;
+
+    $osaluettelo = array();
+
+    if (!empty($row['laskutettu'])) {
+      $maara = $row['kpl'];
+    }
+    else {
+      $maara = $row['varattu']+$row['jt']+$row['kpl'];
+    }
+
+    // Korvataanko tilauksella oleva rivi osaluettelolla
+    $query = "SELECT tuote.tuoteno, tuote.yksikko, tuote.nimitys,
+              tuoteperhe.kerroin,
+              tuoteperhe.hintakerroin myyntihinta,
+              tuoteperhe.hintakerroin hinta,
+              round(tuoteperhe.hintakerroin / if ('$yhtiorow[alv_kasittely]' = '' and {$row['alv']} < 500, (1+{$row['alv']}/100), 1) * tuoteperhe.kerroin * {$maara} * (1-{$row['aleyhteensa']}/100), $yhtiorow[hintapyoristys]) rivihinta,
+              round(tuoteperhe.hintakerroin * if ('$yhtiorow[alv_kasittely]' != '' and {$row['alv']} < 500, (1+{$row['alv']}/100), 1) * tuoteperhe.kerroin * {$maara} * (1-{$row['aleyhteensa']}/100), $yhtiorow[hintapyoristys]) rivihinta_verollinen,
+              ((tuoteperhe.hintakerroin / {$laskurow["vienti_kurssi"]}) / if ('$yhtiorow[alv_kasittely]'  = '' and {$row['alv']} < 500, (1+{$row['alv']}/100), 1) * tuoteperhe.kerroin * {$maara} * (1-{$row['aleyhteensa']}/100)) rivihinta_valuutassa,
+              ((tuoteperhe.hintakerroin / {$laskurow["vienti_kurssi"]}) * if ('$yhtiorow[alv_kasittely]' != '' and {$row['alv']} < 500, (1+{$row['alv']}/100), 1) * tuoteperhe.kerroin * {$maara} * (1-{$row['aleyhteensa']}/100)) rivihinta_valuutassa_verollinen
+              FROM tuoteperhe
+              JOIN tuote ON (tuoteperhe.yhtio=tuote.yhtio and tuoteperhe.tuoteno=tuote.tuoteno)
+              WHERE tuoteperhe.yhtio    = '$kukarow[yhtio]'
+              AND tuoteperhe.isatuoteno = '$row[tuoteno]'
+              AND tuoteperhe.tyyppi     = 'O'
+              ORDER BY tuote.tuoteno";
+    $tuoteperhe_result = pupe_query($query);
+
+    if (mysql_num_rows($tuoteperhe_result) > 0) {
+      while ($tuoteperhe_row = mysql_fetch_assoc($tuoteperhe_result)) {
+
+        $lisarow = $row;
+
+        $lisarow["tuoteno"] = $tuoteperhe_row["tuoteno"];
+        $lisarow["nimitys"] = $tuoteperhe_row["nimitys"];
+        $lisarow["yksikko"] = $tuoteperhe_row["yksikko"];
+
+        $lisarow["hinta"] = $tuoteperhe_row["hinta"];
+        $lisarow["myyntihinta"] = $tuoteperhe_row["myyntihinta"];
+        $lisarow["rivihinta"] = $tuoteperhe_row["rivihinta"];
+        $lisarow["rivihinta_verollinen"] = $tuoteperhe_row["rivihinta_verollinen"];
+        $lisarow["rivihinta_valuutassa"] = $tuoteperhe_row["rivihinta_valuutassa"];
+        $lisarow["rivihinta_valuutassa_verollinen"] = $tuoteperhe_row["rivihinta_valuutassa_verollinen"];
+
+        $lisarow["tilkpl"] = $tuoteperhe_row["kerroin"]*$row["tilkpl"];
+        $lisarow["varattu"] = $tuoteperhe_row["kerroin"]*$row["varattu"];
+        $lisarow["jt"] = $tuoteperhe_row["kerroin"]*$row["jt"];
+        $lisarow["kpl"] = $tuoteperhe_row["kerroin"]*$row["kpl"];
+
+        if ($laskutyyppi == 21 or $laskutyyppi == 22) {
+          $lisarow['kpl'] = $lisarow['kpl'] * 1;
+          $lisarow['tilkpl'] = $lisarow['tilkpl'] * 1;
+        }
+
+        $osaluettelo[] = $lisarow;
+      }
+    }
+    else {
+      $osaluettelo[] = $row;
+    }
+
+    return $osaluettelo;
+  }
+}
+
 if (!function_exists('product_statuses')) {
   function product_statuses() {
     return array(
@@ -33799,6 +33850,117 @@ if (!function_exists('humanize_ohjelma_moduli')) {
     if (!isset($map[strtolower($ohjelma_moduli)])) return '';
 
     return $map[strtolower($ohjelma_moduli)];
+  }
+}
+
+if (!function_exists('tilausrivin_esisyotto')) {
+  function tilausrivin_esisyotto($params) {
+    global $kukarow, $yhtiorow;
+    /*
+    ###PARAMS###
+    $tilausnumero
+    $tuoteno
+    $hinta_ajax
+    $kpl
+    $ale1
+    $ale2
+    $ale3
+    $tilausrivi_alvillisuus
+    netto
+    alv
+    */
+
+    if (!isset($params['tilausnumero'])) return false;
+    if (!isset($params['tuoteno'])) return false;
+    if (!isset($params['hinta_ajax'])) return false;
+    if (!isset($params['kpl'])) return false;
+
+    $tilausnumero           = $params['tilausnumero'];
+    $tuoteno                = $params['tuoteno'];
+    $hinta_ajax             = $params['hinta_ajax'];
+    $kpl                    = $params['kpl'];
+    $ale1                   = $params['ale1'];
+    $ale2                   = $params['ale2'];
+    $ale3                   = $params['ale3'];
+    $netto                  = $params['netto'];
+    $alv                    = $params['alv'];
+    $tilausrivi_alvillisuus = $params['tilausrivi_alvillisuus'];
+
+    $lquery = "SELECT *
+               FROM lasku
+               WHERE yhtio = '{$kukarow['yhtio']}'
+               AND tunnus  = '{$tilausnumero}'";
+    $lresult  = pupe_query($lquery);
+    $laskurow = mysql_fetch_assoc($lresult);
+
+    $query = "SELECT *
+              FROM tuote
+              WHERE yhtio  = '{$kukarow['yhtio']}'
+              and  tuoteno = '{$tuoteno}'";
+    $aresult = pupe_query($query);
+    $tuoterow = mysql_fetch_assoc($aresult);
+
+    // Tutkitaan onko t‰m‰ myyty ulkomaan alvilla
+    list($hinta, $netto, $ale, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $tuoterow, $kpl);
+
+    $hinta = trim($hinta_ajax) != '' ? $hinta_ajax : $hinta;
+
+    $ale_arr = array();
+
+    for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+      $alename = 'ale'.$alepostfix;
+      if (!empty($$alename)) {
+        $ale_arr[$alename] = str_replace(',', '.', $$alename);
+      }
+    }
+
+    $ale_arr['netto'] = $netto;
+    $ale_arr['erikoisale'] = 0;
+    $ale_arr['erikoisale_saapuminen'] = 0;
+
+    if ($yhtiorow['alv_kasittely'] == '') {
+      $alv = trim($alv) == '' ? $tuoterow['alv'] : $alv;
+
+      $alvillisuus = $hinta / (1 + $alv / 100);
+    }
+    else {
+      $alvillisuus = $hinta;
+    }
+
+    // lis‰t‰‰n alvit (jos hintamuunnos p‰‰ll‰)
+    if ($tuoterow['alv'] < 500 and isset($tilausrivi_alvillisuus) and $tilausrivi_alvillisuus == "E" and $yhtiorow["alv_kasittely"] == '' and $yhtiorow["alv_kasittely_hintamuunnos"] == 'o') {
+      $alvillisuus = round($alvillisuus * (1+$tuoterow['alv']/100), 6);
+    }
+    // poistetaan alvit (jos hintamuunnos p‰‰ll‰)
+    if ($tuoterow['alv'] < 500 and isset($tilausrivi_alvillisuus) and $tilausrivi_alvillisuus == "K" and $yhtiorow["alv_kasittely"] == 'o' and $yhtiorow["alv_kasittely_hintamuunnos"] == 'o') {
+      $alvillisuus = round($alvillisuus / (1+$tuoterow['alv']/100), 6);
+    }
+
+    $kotisumma      = $hinta * $kpl * generoi_alekentta_php($ale_arr, 'M', 'kerto', 'ei_erikoisale');
+    $kotisumma_kate = $alvillisuus * $kpl * generoi_alekentta_php($ale_arr, 'M', 'kerto', 'ei_erikoisale');
+    $ykshinta       = $hinta * generoi_alekentta_php($ale_arr, 'M', 'kerto', 'ei_erikoisale');
+
+    $arr = array(
+      'sarjanumeroseuranta' => '',
+      'tuoteno' => $tuoteno,
+      'varattu' => $kpl,
+      'jt' => 0,
+    );
+
+    $kate = laske_tilausrivin_kate($arr, $kotisumma_kate, $tuoterow['kehahin']);
+
+    if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"])) and $laskurow["vienti_kurssi"] != 0) {
+      $hinta = hintapyoristys(laskuval($hinta, $laskurow["vienti_kurssi"]));
+    }
+
+    return array(
+        'hinta' => round($hinta, $yhtiorow['hintapyoristys']),
+        'netto' => $netto,
+        'ale' => $ale_arr,
+        'kate' => $kate,
+        'ykshinta' => round($ykshinta, $yhtiorow['hintapyoristys']),
+        'rivihinta' => round($kotisumma, $yhtiorow['hintapyoristys'])
+    );
   }
 }
 

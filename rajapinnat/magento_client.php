@@ -1428,41 +1428,48 @@ class MagentoClient {
     $reply = false;
     $asiakaskohtainenhintadata = array();
 
-    try {
-      // Haetaan Pupesta kaikki Magento-asiakkaat ja näiden yhteyshenkilöt
-      $asiakkaat_per_yhteyshenkilo = $this->hae_magentoasiakkaat_ja_yhteyshenkilot($kukarow['yhtio']);
+    // Haetaan Pupesta kaikki Magento-asiakkaat ja näiden yhteyshenkilöt
+    $asiakkaat_per_yhteyshenkilo = $this->hae_magentoasiakkaat_ja_yhteyshenkilot();
 
-      if (count($asiakkaat_per_yhteyshenkilo) < 1) {
-        return false;
-      }
+    if ($asiakkaat_per_yhteyshenkilo === false) {
+      return false;
+    }
 
-      // Ensin poistetaan tuotteen asiakashinnat Magentosta
-      $this->poista_tuotteen_asiakaskohtaiset_hinnat($asiakkaat_per_yhteyshenkilo, $magento_tuotenumero);
+    // Ensin poistetaan tuotteen asiakashinnat Magentosta
+    $this->poista_tuotteen_asiakaskohtaiset_hinnat($asiakkaat_per_yhteyshenkilo, $magento_tuotenumero);
 
-      // Sitten haetaan asiakaskohtainen hintadata Pupesta
-      $asiakaskohtainenhintadata = $this->hae_tuotteen_asiakaskohtaiset_hinnat($asiakkaat_per_yhteyshenkilo, $tuotenumero);
+    // Sitten haetaan asiakaskohtainen hintadata Pupesta
+    $asiakaskohtainenhintadata = $this->hae_tuotteen_asiakaskohtaiset_hinnat($asiakkaat_per_yhteyshenkilo, $tuotenumero);
 
-      // Lopuksi siirretään tuotteen kaikki asiakaskohtaiset hinnat Magentoon
-      if (count($asiakaskohtainenhintadata) > 0) {
+    // Lopuksi siirretään tuotteen kaikki asiakaskohtaiset hinnat Magentoon
+    if ($asiakaskohtainenhintadata === false) {
+      return false;
+    }
+
+    foreach($asiakaskohtainenhintadata as $hintadata) {
+      try {
         $reply = $this->_proxy->call(
           $this->_session,
           'price_per_customer.setPriceForCustomersPerProduct',
-          array($magento_tuotenumero, $asiakaskohtainenhintadata)
+          array($magento_tuotenumero, $hintadata)
         );
 
-        $this->log('magento_tuotteet', "Tuotteen {$magento_tuotenumero} asiakaskohtaiset hinnat lisätty");
-        $this->debug('magento_tuotteet', $asiakaskohtainenhintadata);
+        $this->log('magento_tuotteet', "Tuotteen {$magento_tuotenumero} asiakaskohtaiset ({$hintadata['customerEmail']}) hinnat lisätty");
+        $this->debug('magento_tuotteet', $hintadata);
       }
-    }
-    catch (Exception $e) {
-      $this->_error_count++;
-      $this->log('magento_tuotteet', "Virhe!", $e);
+      catch (Exception $e) {
+        $this->_error_count++;
+        $this->log('magento_tuotteet', "Virhe! Tuotteen {$magento_tuotenumero} asiakaskohtaisen ({$hintadata['customerEmail']}) hinnan lisäys epäonnistui", $e);
+      }
     }
 
     return $reply;
   }
 
-  private function hae_magentoasiakkaat_ja_yhteyshenkilot($yhtio) {
+  private function hae_magentoasiakkaat_ja_yhteyshenkilot() {
+    global $kukarow, $yhtiorow;
+
+    $yhtio = $kukarow['yhtio'];
     $asiakkaat_per_yhteyshenkilo = array();
 
     $query = "SELECT asiakas.tunnus asiakastunnus,
@@ -1486,6 +1493,10 @@ class MagentoClient {
         'ytunnus'               => $rivi['ytunnus']
       );
       $asiakkaat_per_yhteyshenkilo[] = $asiakasdata;
+    }
+
+    if (count($asiakkaat_per_yhteyshenkilo) < 1) {
+      return false;
     }
 
     return $asiakkaat_per_yhteyshenkilo;
@@ -1686,6 +1697,10 @@ class MagentoClient {
           'delete'        => 0
         );
       }
+    }
+
+    if (count($asiakaskohtaiset_hinnat_data) == 0) {
+      return false;
     }
 
     return $asiakaskohtaiset_hinnat_data;

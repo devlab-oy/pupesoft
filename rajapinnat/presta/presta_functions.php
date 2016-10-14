@@ -1,7 +1,25 @@
 <?php
 
-function presta_hae_asiakkaat() {
+function presta_hae_asiakkaat($asiakaskasittely) {
+  if ($asiakaskasittely == 'asiakkaittain') {
+    $asiakkaat = presta_hae_asiakkaat_asiakkaittain();
+  }
+  elseif ($asiakaskasittely == 'yhteyshenkiloittain') {
+    $asiakkaat = presta_hae_asiakkaat_yhteyshenkiloittain();
+  }
+  else {
+    presta_echo("Virheellinen asiakaskäsittely.");
+
+    $asiakkaat = array();
+  }
+
+  return $asiakkaat;
+}
+
+function presta_hae_asiakkaat_asiakkaittain() {
   global $kukarow, $yhtiorow, $ajetaanko_kaikki;
+
+  $asiakkaat = array();
 
   $datetime_checkpoint = presta_export_checkpoint('PSTS_ASIAKAS');
 
@@ -17,9 +35,23 @@ function presta_hae_asiakkaat() {
     $muutoslisa = "";
   }
 
-  $query = "SELECT asiakas.*,
-            yhteyshenkilo.*,
-            avainsana.selitetark_5 AS presta_customergroup_id
+  $query = "SELECT
+            asiakas.tunnus as asiakas_tunnus,
+            asiakas.kuljetusohje,
+            avainsana.selitetark_5,
+            yhteyshenkilo.email,
+            yhteyshenkilo.gsm,
+            yhteyshenkilo.maa,
+            yhteyshenkilo.nimi,
+            yhteyshenkilo.osoite,
+            yhteyshenkilo.postino,
+            yhteyshenkilo.postitp,
+            yhteyshenkilo.puh,
+            yhteyshenkilo.tunnus as yhteyshenkilo_tunnus,
+            yhteyshenkilo.ulkoinen_asiakasnumero,
+            yhteyshenkilo.verkkokauppa_nakyvyys,
+            yhteyshenkilo.verkkokauppa_salasana,
+            yhteyshenkilo.yhtio
             FROM yhteyshenkilo
             INNER JOIN asiakas
             ON (asiakas.yhtio = yhteyshenkilo.yhtio
@@ -33,12 +65,160 @@ function presta_hae_asiakkaat() {
             {$muutoslisa}";
   $result = pupe_query($query);
 
-  $asiakkaat = array();
   while ($asiakas = mysql_fetch_assoc($result)) {
-    $asiakkaat[] = $asiakas;
+    $osoitteet = array();
+    $osoitteet[] = array(
+      "asiakas_id" => $asiakas['asiakas_tunnus'],
+      "gsm"        => $asiakas['gsm'],
+      "maa"        => $asiakas['maa'],
+      "nimi"       => $asiakas['nimi'],
+      "osoite"     => $asiakas['osoite'],
+      "postino"    => $asiakas['postino'],
+      "postitp"    => $asiakas['postitp'],
+      "puh"        => $asiakas['puh'],
+    );
+
+    $asiakkaat[] = array(
+      "email"                   => $asiakas['email'],
+      "kuljetusohje"            => $asiakas['kuljetusohje'],
+      "nimi"                    => $asiakas['nimi'],
+      "osoitteet"               => $osoitteet,
+      "presta_customergroup_id" => $asiakas['selitetark_5'],
+      "tunnus"                  => $asiakas['yhteyshenkilo_tunnus'],
+      "ulkoinen_asiakasnumero"  => $asiakas['ulkoinen_asiakasnumero'],
+      "verkkokauppa_nakyvyys"   => $asiakas['verkkokauppa_nakyvyys'],
+      "verkkokauppa_salasana"   => $asiakas['verkkokauppa_salasana'],
+      "yhtio"                   => $asiakas['yhtio'],
+    );
   }
 
   return $asiakkaat;
+}
+
+function presta_hae_asiakkaat_yhteyshenkiloittain() {
+  global $kukarow, $yhtiorow;
+
+  $asiakkaat = array();
+
+  // Haetaan kaikki yhteyshenkilöt ja niiden asiakkaat
+  $query = "SELECT yhteyshenkilo.email,
+            max(avainsana.selitetark_5) as selitetark_5,
+            max(yhteyshenkilo.gsm) as gsm,
+            max(yhteyshenkilo.nimi) as nimi,
+            max(yhteyshenkilo.puh) as puh,
+            max(yhteyshenkilo.tunnus) as tunnus,
+            max(yhteyshenkilo.ulkoinen_asiakasnumero) as ulkoinen_asiakasnumero,
+            max(yhteyshenkilo.verkkokauppa_nakyvyys) as verkkokauppa_nakyvyys,
+            max(yhteyshenkilo.verkkokauppa_salasana) as verkkokauppa_salasana,
+            max(yhteyshenkilo.yhtio) as yhtio,
+            max(asiakas.kuljetusohje) as kuljetusohje,
+            group_concat(yhteyshenkilo.liitostunnus) as asiakkaat
+            FROM yhteyshenkilo
+            INNER JOIN asiakas ON (asiakas.yhtio = yhteyshenkilo.yhtio
+              AND asiakas.tunnus = yhteyshenkilo.liitostunnus)
+            LEFT JOIN avainsana ON (avainsana.yhtio = asiakas.yhtio
+              AND avainsana.selite = asiakas.ryhma
+              AND avainsana.laji = 'ASIAKASRYHMA')
+            WHERE yhteyshenkilo.yhtio = '{$kukarow['yhtio']}'
+            AND yhteyshenkilo.rooli = 'Presta'
+            AND yhteyshenkilo.email != ''
+            AND yhteyshenkilo.nimi != ''
+            GROUP BY yhteyshenkilo.email";
+  $result = pupe_query($query);
+
+  while ($yhteyshenkilo = mysql_fetch_assoc($result)) {
+    $asiakas_tunnukset = $yhteyshenkilo['asiakkaat'];
+    $osoitteet = array();
+
+    // haetaan kaikki osoitteet asiakkailta
+    $query = "SELECT distinct
+              asiakas.tunnus,
+              asiakas.osoite,
+              asiakas.postino,
+              asiakas.postitp,
+              asiakas.maa
+              FROM asiakas
+              WHERE asiakas.yhtio = '{$kukarow['yhtio']}'
+              AND asiakas.tunnus in ($asiakas_tunnukset)
+              AND asiakas.osoite != ''";
+    $osoite_result = pupe_query($query);
+
+    while ($osoite = mysql_fetch_assoc($osoite_result)) {
+      $osoitteet[] = array(
+        "asiakas_id" => $osoite['tunnus'],
+        "gsm"        => $yhteyshenkilo['gsm'],
+        "maa"        => $osoite['maa'],
+        "nimi"       => $yhteyshenkilo['nimi'],
+        "osoite"     => $osoite['osoite'],
+        "postino"    => $osoite['postino'],
+        "postitp"    => $osoite['postitp'],
+        "puh"        => $yhteyshenkilo['puh'],
+      );
+    }
+
+    // haetaan kaikki toimitusosoitteet asiakkailta
+    $query = "SELECT distinct
+              asiakas.tunnus,
+              asiakas.toim_osoite,
+              asiakas.toim_postino,
+              asiakas.toim_postitp,
+              asiakas.toim_maa
+              FROM asiakas
+              WHERE asiakas.yhtio = '{$kukarow['yhtio']}'
+              AND asiakas.tunnus in ($asiakas_tunnukset)
+              AND asiakas.toim_osoite != ''";
+    $osoite_result = pupe_query($query);
+
+    while ($osoite = mysql_fetch_assoc($osoite_result)) {
+      $osoitteet[] = array(
+        "asiakas_id" => $osoite['tunnus'],
+        "gsm"        => $yhteyshenkilo['gsm'],
+        "maa"        => $osoite['toim_maa'],
+        "nimi"       => $yhteyshenkilo['nimi'],
+        "osoite"     => $osoite['toim_osoite'],
+        "postino"    => $osoite['toim_postino'],
+        "postitp"    => $osoite['toim_postitp'],
+        "puh"        => $yhteyshenkilo['puh'],
+      );
+    }
+
+    // lisätään asiakas array
+    $asiakkaat[] = array(
+      "email"                   => $yhteyshenkilo['email'],
+      "kuljetusohje"            => $yhteyshenkilo['kuljetusohje'],
+      "nimi"                    => $yhteyshenkilo['nimi'],
+      "osoitteet"               => $osoitteet,
+      "presta_customergroup_id" => $yhteyshenkilo['selitetark_5'],
+      "tunnus"                  => $yhteyshenkilo['tunnus'],
+      "ulkoinen_asiakasnumero"  => $yhteyshenkilo['ulkoinen_asiakasnumero'],
+      "verkkokauppa_nakyvyys"   => $yhteyshenkilo['verkkokauppa_nakyvyys'],
+      "verkkokauppa_salasana"   => $yhteyshenkilo['verkkokauppa_salasana'],
+      "yhtio"                   => $yhteyshenkilo['yhtio'],
+    );
+  }
+
+  return $asiakkaat;
+}
+
+function presta_hae_asiakas_tunnuksella($tunnus) {
+  global $kukarow, $yhtiorow;
+
+  if (empty($tunnus)) {
+    return null;
+  }
+
+  $query = "SELECT asiakas.*
+            FROM asiakas
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND tunnus = {$tunnus}
+            LIMIT 1";
+  $result = pupe_query($query);
+
+  if (mysql_num_rows($result) != 1) {
+    return null;
+  }
+
+  return mysql_fetch_assoc($result);
 }
 
 function presta_hae_yhteyshenkilon_asiakas_ulkoisella_asiakasnumerolla($asiakasnumero) {
@@ -52,8 +232,8 @@ function presta_hae_yhteyshenkilon_asiakas_ulkoisella_asiakasnumerolla($asiakasn
             FROM yhteyshenkilo
             INNER JOIN asiakas
             ON (asiakas.yhtio = yhteyshenkilo.yhtio
-              AND asiakas.tunnus                     = yhteyshenkilo.liitostunnus)
-            WHERE yhteyshenkilo.yhtio                = '{$kukarow['yhtio']}'
+              AND asiakas.tunnus = yhteyshenkilo.liitostunnus)
+            WHERE yhteyshenkilo.yhtio = '{$kukarow['yhtio']}'
             AND yhteyshenkilo.ulkoinen_asiakasnumero = {$asiakasnumero}
             LIMIT 1";
   $result = pupe_query($query);

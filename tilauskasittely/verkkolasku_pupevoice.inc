@@ -131,7 +131,7 @@ if (!function_exists('pupevoice_otsik')) {
     fputs($tootxml, "<InvoiceDetails>\n");
 
     xml_add("InvoiceType",              $tyyppi,                       $tootxml);
-    xml_add("InvoicedPartyIdentifier",        $lasrow['ytunnus'],                 $tootxml);
+    xml_add("InvoicedPartyIdentifier",        tulosta_ytunnus($lasrow['ytunnus']),                 $tootxml);
     xml_add("InvoicedPartyOVT",            $lasrow['ovttunnus'],                $tootxml);
     xml_add("InvoicedPartyEBA",            $lasrow['verkkotunnus'],               $tootxml);
     xml_add("InvoicedCustNumber",          $asiakasrow['asiakasnro'],               $tootxml);

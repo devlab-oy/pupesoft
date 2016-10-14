@@ -108,15 +108,20 @@ if (!isset($mista))               $mista = "";
 
 // Tutkitaan vähän alias_settejä ja rajattua näkymää
 $al_lisa = " and selitetark_2 = 'Default' and nakyvyys != '' ";
+$al_lisa_defaultit = " and selitetark_2 = 'Default'";
 
 if ($alias_set != '') {
   if ($rajattu_nakyma != '') {
-    $al_lisa = " and selitetark_2 = '$alias_set' and nakyvyys != '' ";
+    $al_lisa = " and selitetark_2 = '{$alias_set}' and nakyvyys != '' ";
+    $al_lisa_defaultit = " and selitetark_2 = '{$alias_set}'";
   }
   else {
-    $al_lisa = " and (selitetark_2 = '$alias_set' or selitetark_2 = 'Default') and nakyvyys != '' ";
+    $al_lisa = " and (selitetark_2 = '{$alias_set}' or selitetark_2 = 'Default') and nakyvyys != '' ";
+    $al_lisa_defaultit = " and (selitetark_2 = '{$alias_set}' or selitetark_2 = 'Default')";
   }
 }
+
+$al_lisa_defaultit .= $tunnus == '' ? " and (nakyvyys != '' or selitetark_4 != '') " : " and nakyvyys != '' ";
 
 // pikkuhäkki, ettei rikota css kenttää
 if (isset($_POST["toim"]) and $_POST["toim"] == "yhtion_parametrit") {
@@ -318,16 +323,20 @@ if ($upd == 1) {
 
     $query = "SELECT *
               FROM avainsana
-              WHERE yhtio = '$kukarow[yhtio]'
+              WHERE yhtio = '{$kukarow['yhtio']}'
               and laji    = 'MYSQLALIAS'
-              and selite  = '$toim.$al_nimi'
-              $al_lisa";
+              and selite  = '{$toim}.{$al_nimi}'
+              {$al_lisa_defaultit}";
     $al_res = pupe_query($query);
     $pakollisuuden_tarkistus_rivi = mysql_fetch_assoc($al_res);
 
     if (mysql_num_rows($al_res) == 0 and $rajattu_nakyma != '' and isset($t[$i])) {
       $virhe[$i] = t("Sinulla ei ole oikeutta päivittää tätä kenttää");
       $errori = 1;
+    }
+
+    if ($tunnus == '' and $t[$i] == '' and $pakollisuuden_tarkistus_rivi['selitetark_4'] != '') {
+      $t[$i] = $pakollisuuden_tarkistus_rivi['selitetark_4'];
     }
 
     $tiedostopaate = "";
@@ -569,7 +578,14 @@ if ($upd == 1) {
       generoi_hinnastot($tunnus);
     }
 
-    if ($tunnus > 0 and isset($paivita_myos_avoimet_tilaukset) and $toim == "asiakas") {
+    $array_chk = array(
+      $paivita_myos_avoimet_tilaukset,
+      $paivita_myos_toimitustapa,
+      $paivita_myos_maksuehto,
+      $paivita_myos_kanavointitieto
+    );
+
+    if ($tunnus > 0 and count(array_filter($array_chk, 'strlen')) > 0 and $toim == "asiakas") {
 
       $query = "SELECT *
                 FROM asiakas
@@ -591,8 +607,7 @@ if ($upd == 1) {
                       (tila IN ('A','0'))
                     )
                   and liitostunnus  = '$otsikrow[tunnus]'
-                  and tapvm         = '0000-00-00'
-                  and chn          != 999";
+                  and tapvm         = '0000-00-00'";
         $laskuores = pupe_query($query);
 
         while ($laskuorow = mysql_fetch_array($laskuores)) {
@@ -627,15 +642,21 @@ if ($upd == 1) {
             $paivita_sisviesti1 = ", sisviesti1 = trim(concat(sisviesti1,' ', '{$otsikrow["sisviesti1"]}')) ";
           }
 
-          $paivita_myos_lisa = "";
-
           // Ei päivitetää toimitettujen ja rahtikirjasyötettyjen myyntitilausten toimitustapoja
           if ($paivita_myos_toimitustapa != "" and $laskuorow["tila"] != 'L' or ($laskuorow["tila"] == 'L' and ($laskuorow["alatila"] == 'A' or $laskuorow["alatila"] == 'C'))) {
-            $paivita_myos_lisa .= ", toimitustapa = '$otsikrow[toimitustapa]' ";
+            $query = "UPDATE lasku SET
+                      toimitustapa = '{$otsikrow['toimitustapa']}'
+                      WHERE yhtio  = '{$kukarow['yhtio']}'
+                      and tunnus   = '{$laskuorow['tunnus']}'";
+            $updaresult = pupe_query($query);
           }
 
           if ($paivita_myos_maksuehto != "") {
-            $paivita_myos_lisa .= ", maksuehto = '$otsikrow[maksuehto]' ";
+            $query = "UPDATE lasku SET
+                      maksuehto = '{$otsikrow['maksuehto']}'
+                      WHERE yhtio  = '{$kukarow['yhtio']}'
+                      and tunnus   = '{$laskuorow['tunnus']}'";
+            $updaresult = pupe_query($query);
           }
 
           if ($paivita_myos_kanavointitieto != "") {
@@ -646,9 +667,10 @@ if ($upd == 1) {
                       and tunnus   = '{$laskuorow['tunnus']}'";
             $updaresult = pupe_query($query);
           }
-          else {
+
+          if ($paivita_myos_avoimet_tilaukset) {
             $query = "UPDATE lasku
-                      SET ytunnus      = '$otsikrow[ytunnus]',
+                      SET ytunnus    = '$otsikrow[ytunnus]',
                       ovttunnus      = '$otsikrow[ovttunnus]',
                       nimi           = '$otsikrow[nimi]',
                       nimitark       = '$otsikrow[nimitark]',
@@ -667,7 +689,6 @@ if ($upd == 1) {
                       toim_postitp   = '$otsikrow[toim_postitp]',
                       toim_maa       = '$otsikrow[toim_maa]',
                       laskutusvkopv  = '$otsikrow[laskutusvkopv]'
-                      $paivita_myos_lisa
                       $paivita_sisviesti1
                       WHERE yhtio    = '$kukarow[yhtio]'
                       and tunnus     = '$laskuorow[tunnus]'";
@@ -2150,24 +2171,147 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
     $nimi = t("Päivitä $otsikko_nappi");
   }
 
-  echo "<br><input type = 'submit' name='yllapitonappi' value = '$nimi'>";
+  echo "<br><input type = 'submit' name='yllapitonappi' value = '{$nimi}'>";
 
   if (($toim == "asiakas" or $toim == "yhtio") and $uusi != 1) {
-    echo "<br><br><input type = 'submit' name='paivita_myos_avoimet_tilaukset' value = '$nimi ".t("ja päivitä tiedot myös avoimille tilauksille")."'>";
+    echo "<br><br>";
+
+    $chktxt = "{$nimi} ".t("ja päivitä tiedot myös avoimille tilauksille");
+    echo "<input type='checkbox' name='paivita_myos_avoimet_tilaukset' value='OK'> {$chktxt}";
+    echo "<div id='div_paivita_myos_avoimet_tilaukset_popup' class='popup' style='width: 400px;'>";
+    echo t("Päivitettävät kentät");
+    echo "<ul>";
+
+    if ($toim == "yhtio") {
+      $paivitettavat_kentat = array(
+        'yhtio_nimi',
+        'yhtio_osoite',
+        'yhtio_postino',
+        'yhtio_postitp',
+        'yhtio_maa',
+        'yhtio_ovttunnus',
+        'yhtio_kotipaikka',
+        'alv_tili',
+      );
+    }
+    else {
+      $paivitettavat_kentat = array(
+        'ytunnus',
+        'ovttunnus',
+        'nimi',
+        'nimitark',
+        'osoite',
+        'postino',
+        'postitp',
+        'maa',
+        'chn',
+        'verkkotunnus',
+        'vienti',
+        'toim_ovttunnu',
+        'toim_nimi',
+        'toim_nimitark',
+        'toim_osoite',
+        'toim_postino',
+        'toim_postitp',
+        'toim_maa',
+        'laskutusvkopv',
+        'kolm_ovttunnus',
+        'kolm_nimi',
+        'kolm_nimitark',
+        'kolm_osoite',
+        'kolm_postino',
+        'kolm_postitp',
+        'kolm_maa',
+        'laskutus_nimi',
+        'laskutus_nimitark',
+        'laskutus_osoite',
+        'laskutus_postino',
+        'laskutus_postitp',
+        'laskutus_maa',
+      );
+    }
+
+    foreach ($paivitettavat_kentat as $kentta) {
+      echo "<li>".ucfirst($kentta)."</li>";
+    }
+
+    echo "</ul>";
+    echo "</div>";
+
+    echo "&nbsp;<img src='{$palvelin2}pics/lullacons/info.png' class='tooltip' id='paivita_myos_avoimet_tilaukset_popup' />";
 
     if ($toim == "asiakas") {
-      echo "<br><input type = 'checkbox' name='paivita_myos_toimitustapa' value = 'OK'> ".t("Päivitä myös toimitustapa avoimille tilauksille");
-      echo "<br><input type = 'checkbox' name='paivita_myos_maksuehto' value = 'OK'> ".t("Päivitä myös maksuehto avoimille tilauksille");
-      echo "<br><input type = 'checkbox' name='paivita_myos_kanavointitieto' value = 'OK'> ".t("Päivitä vain verkkolaskutunnus ja kanavointitieto avoimille tilauksille");
+      $chktxt = t("Päivitä myös toimitustapa avoimille tilauksille");
+      echo "<br><input type = 'checkbox' name='paivita_myos_toimitustapa' value = 'OK'> {$chktxt}";
+
+      $chktxt = t("Päivitä myös maksuehto avoimille tilauksille");
+      echo "<br><input type = 'checkbox' name='paivita_myos_maksuehto' value = 'OK'> {$chktxt}";
+
+      $chktxt = t("Päivitä vain verkkolaskutunnus ja kanavointitieto avoimille tilauksille");
+      echo "<br><input type = 'checkbox' name='paivita_myos_kanavointitieto' value = 'OK'> {$chktxt}";
     }
   }
   if ($toim == "toimi" and $uusi != 1) {
-    echo "<br><input type = 'submit' name='paivita_myos_avoimet_tilaukset' value = '$nimi ".t("ja päivitä tiedot myös avoimille laskuille")."'>";
+    $chktxt = "{$nimi} ".t("ja päivitä tiedot myös avoimille laskuille");
+    echo "<br><input type='checkbox' name='paivita_myos_avoimet_tilaukset' value='OK'> {$chktxt}";
+    echo "<div id='div_paivita_myos_avoimet_tilaukset_popup' class='popup' style='width: 400px;'>";
+    echo t("Päivitettävät kentät");
+    echo "<ul>";
+
+    $paivitettavat_kentat = array(
+      'erpcm',
+      'kapvm',
+      'kasumma',
+      'olmapvm',
+      'hyvak1',
+      'hyvak2',
+      'hyvak3',
+      'hyvak4',
+      'hyvak5',
+      'h1time',
+      'h2time',
+      'h3time',
+      'h4time',
+      'h5time',
+      'hyvaksyja_nyt',
+      'ytunnus',
+      'tilinumero',
+      'nimi',
+      'nimitark',
+      'osoite',
+      'osoitetark',
+      'postino',
+      'postitp',
+      'maa',
+      'tila',
+      'ultilno',
+      'pankki_haltija',
+      'swift',
+      'pankki1',
+      'pankki2',
+      'pankki3',
+      'pankki4',
+      'comments',
+      'hyvaksynnanmuutos',
+      'suoraveloitus',
+      'sisviesti1',
+    );
+
+    foreach ($paivitettavat_kentat as $kentta) {
+      echo "<li>".ucfirst($kentta)."</li>";
+    }
+
+    echo "</ul>";
+    echo "</div>";
+
+    echo "&nbsp;<img src='{$palvelin2}pics/lullacons/info.png' class='tooltip' id='paivita_myos_avoimet_tilaukset_popup' />";
+
   }
 
   if ($lukossa == "ON") {
-    echo "<input type='hidden' name='lukossa' value = '$lukossa'>";
-    echo "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type = 'submit' name='paluunappi' value = '".t("Palaa avainsanoihin")."'>";
+    echo "<input type='hidden' name='lukossa' value = '{$lukossa}'>";
+    echo "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
+    echo "<input type = 'submit' name='paluunappi' value = '".t("Palaa avainsanoihin")."'>";
   }
 
   echo "</td>";

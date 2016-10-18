@@ -1278,8 +1278,8 @@ else {
     }
 
     if ($row["tuoteno"] == $yhtiorow["ennakkomaksu_tuotenumero"]) {
-      $ennas_yht += $row["summa"];
-      $ennaa_yht += $row["rivihinta"];
+      $ennas_yht += $row["summa_valuutassa"];
+      $ennaa_yht += $row["rivihinta_valuutassa"];
     }
     else {
 

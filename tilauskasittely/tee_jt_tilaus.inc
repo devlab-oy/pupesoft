@@ -138,6 +138,9 @@ if (!function_exists("tee_jt_tilaus")) {
         }
         $otsikkorivi = mysql_fetch_assoc($stresult);
 
+        //alk.per laatija jos ei tulla jtselauksen kautta
+        if (strpos($_SERVER['SCRIPT_NAME'], "jtselaus.php") === FALSE) $kukarow['kuka'] = $otsikkorivi['laatija'];
+
         $query = "SELECT *
                   FROM laskun_lisatiedot
                   WHERE yhtio = '$kukarow[yhtio]'
@@ -343,8 +346,8 @@ if (!function_exists("tee_jt_tilaus")) {
               $query .= "tilaustyyppi='".$otsikkorivi[$fieldname]."',";
             }
           }
-          // laatijaksi klikkaaja. saapumisen kautta vapautuvan jt otsikon laatijaksi alk.per.laatija
-          elseif ($fieldname == 'laatija' and strpos($_SERVER['SCRIPT_NAME'], "jtselaus.php") !== FALSE) {
+          // laatijaksi klikkaaja
+          elseif ($fieldname == 'laatija') {
             $query .= "laatija='$kukarow[kuka]',";
           }
           // varasto

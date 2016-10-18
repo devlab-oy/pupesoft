@@ -343,8 +343,8 @@ if (!function_exists("tee_jt_tilaus")) {
               $query .= "tilaustyyppi='".$otsikkorivi[$fieldname]."',";
             }
           }
-          // laatijaksi klikkaaja
-          elseif ($fieldname == 'laatija') {
+          // laatijaksi klikkaaja. saapumisen kautta vapautuvan jt otsikon laatijaksi alk.per.laatija
+          elseif ($fieldname == 'laatija' and strpos($_SERVER['SCRIPT_NAME'], "jtselaus.php") !== FALSE) {
             $query .= "laatija='$kukarow[kuka]',";
           }
           // varasto

@@ -484,10 +484,11 @@ if (strpos($_SERVER['SCRIPT_NAME'], "maksusopimus_laskutukseen.php") !== FALSE) 
               count(*) AS yhteensa_kpl,
               round(sum(if (maksupositio.uusiotunnus = 0 or (maksupositio.uusiotunnus > 0 and uusiolasku.alatila!='X'), maksupositio.summa/lasku.vienti_kurssi, 0)), 2) laskuttamatta,
               round(sum(if (maksupositio.uusiotunnus > 0 and uusiolasku.tila='L' and uusiolasku.alatila='X', maksupositio.summa/lasku.vienti_kurssi, 0)), 2) laskutettu,
-              round(sum(maksupositio.summa/lasku.vienti_kurssi), 2) yhteensa
+              round(sum(maksupositio.summa/lasku.vienti_kurssi), 2) yhteensa, toimitustapa.nouto nouto
               FROM lasku
               JOIN maksupositio ON maksupositio.yhtio = lasku.yhtio and maksupositio.otunnus = lasku.tunnus
               JOIN maksuehto ON maksuehto.yhtio = lasku.yhtio and maksuehto.tunnus = lasku.maksuehto and maksuehto.jaksotettu != ''
+              JOIN toimitustapa ON toimitustapa.yhtio = lasku.yhtio and toimitustapa.selite = lasku.toimitustapa
               LEFT JOIN lasku uusiolasku ON maksupositio.yhtio = uusiolasku.yhtio and maksupositio.uusiotunnus = uusiolasku.tunnus
               WHERE lasku.yhtio     = '$kukarow[yhtio]'
               and lasku.jaksotettu  > 0
@@ -621,7 +622,8 @@ if (strpos($_SERVER['SCRIPT_NAME'], "maksusopimus_laskutukseen.php") !== FALSE) 
         $tarkres = pupe_query($query);
         $tarkrow = mysql_fetch_assoc($tarkres);
 
-        if (mysql_num_rows($tarkres) == 0 or $tarkrow["tilaok"] <> $tarkrow["toimituksia"] or $tarkrow["toimittamatta"] > 0) {
+        if (mysql_num_rows($tarkres) == 0 or $tarkrow["tilaok"] <> $tarkrow["toimituksia"] 
+          or ($tarkrow["toimittamatta"] > 0 and $row["nouto"] == '')) {
           echo "<td class='back'>";
           echo "<font class='error'>".t("Ei valmis loppulaskutettavaksi, koska tilausta ei ole vielä toimitettu").".</font>";
 

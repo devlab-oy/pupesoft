@@ -1480,7 +1480,8 @@ class MagentoClient {
     $query = "SELECT asiakas.tunnus asiakastunnus,
               asiakas.ytunnus,
               yhteyshenkilo.email asiakas_email,
-              yhteyshenkilo.ulkoinen_asiakasnumero
+              yhteyshenkilo.ulkoinen_asiakasnumero,
+              asiakas.ryhma
               FROM yhteyshenkilo
               JOIN asiakas ON (yhteyshenkilo.yhtio = asiakas.yhtio
                 AND yhteyshenkilo.liitostunnus            = asiakas.tunnus)
@@ -1495,7 +1496,8 @@ class MagentoClient {
         'asiakastunnus'         => $rivi['asiakastunnus'],
         'asiakas_email'         => $rivi['asiakas_email'],
         'magento_asiakastunnus' => $rivi['ulkoinen_asiakasnumero'],
-        'ytunnus'               => $rivi['ytunnus']
+        'ytunnus'               => $rivi['ytunnus'],
+        'ryhma'                 => $rivi['ryhma']
       );
       $asiakkaat_per_yhteyshenkilo[] = $asiakasdata;
     }
@@ -1688,7 +1690,7 @@ class MagentoClient {
         $query = "SELECT '1' prio, alennus, alennuslaji, minkpl, IFNULL(TO_DAYS(CURRENT_DATE)-TO_DAYS(alkupvm),9999999999999) aika, tunnus
                    FROM asiakasalennus asale1 USE INDEX (yhtio_asiakas_ryhma)
                    WHERE yhtio  = '$kukarow[yhtio]'
-                   AND asiakas_ryhma  = '$asryrow[ryhma]'
+                   AND asiakas_ryhma  = '$asiakas[ryhma]'
                    AND asiakas_ryhma  > 0
                    AND ryhma    = '$tuoterow[aleryhma]'
                    AND ryhma   != ''

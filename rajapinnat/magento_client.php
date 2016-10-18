@@ -1684,6 +1684,27 @@ class MagentoClient {
         }
       }
 
+      if (!isset($row)) {
+        $query = "SELECT '1' prio, alennus, alennuslaji, minkpl, IFNULL(TO_DAYS(CURRENT_DATE)-TO_DAYS(alkupvm),9999999999999) aika, tunnus
+                   FROM asiakasalennus asale1 USE INDEX (yhtio_asiakas_ryhma)
+                   WHERE yhtio  = '$kukarow[yhtio]'
+                   AND asiakas_ryhma  = '$asryrow[ryhma]'
+                   AND asiakas_ryhma  > 0
+                   AND ryhma    = '$tuoterow[aleryhma]'
+                   AND ryhma   != ''
+                   AND (minkpl = 0 OR (minkpl <= $kpl AND monikerta = '') OR (MOD($kpl, minkpl) = 0 AND monikerta != ''))
+                   AND ((alkupvm <= CURRENT_DATE AND IF (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= CURRENT_DATE) OR (alkupvm='0000-00-00' AND loppupvm='0000-00-00'))
+                   AND alennus  >= 0
+                   AND alennus  <= 100
+                   ORDER BY alennuslaji, prio, minkpl DESC, aika, alennus DESC, tunnus desc
+                   LIMIT 1";
+        $result = pupe_query($query);
+
+        if (mysql_num_rows($result) > 0) {
+          $row = mysql_fetch_assoc($result);
+        }
+      }
+      
       // Asetetaan hintamuuttujaan joko:
       if (isset($row)) {
         // löydetty asiakashinta

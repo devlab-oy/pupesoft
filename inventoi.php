@@ -1118,7 +1118,7 @@ if ($tee == 'VALMIS') {
               $ksrow = mysql_fetch_assoc($ksres);
 
               // kehahin matikka, tuotteella pit‰‰ olla saldoa ennen ja j‰lkeen ett‰ edes tehd‰‰n matikkaa, sek‰ jakolaskun osoittaja pit‰‰ olla positiivinen
-              $kehahin = round(($ksrow['saldo'] * $row['kehahin'] + $otrow['ostohinta'] * $erotus) / ($salrow['saldo'] + $erotus), 6);
+              $kehahin = round(($ksrow['kokonaissaldo'] * $row['kehahin'] + $otrow['ostohinta'] * $erotus) / ($ksrow['kokonaissaldo'] + $erotus), 6);
 
               $query = "UPDATE tuote set
                         kehahin     = $kehahin,

@@ -54,7 +54,7 @@ if (!function_exists('finvoice_otsik')) {
     case '003709227412':
       $tulostuspalvelu  = "TULOSTUSPALVELU";
       break;
-    case 'xxx':
+    case 'ARVATO':
       $tulostuspalvelu  = "TULOSTUSPALVELU";
       break;
     case 'ITELFIHH':

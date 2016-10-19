@@ -355,24 +355,13 @@ class Unifaun {
     $uni_receiver->addAttribute('rcvid', utf8_encode($this->asiakasrow["tunnus"]));
 
     // jos vastaanottaja maksaa rahdin, haetaan sopimusnumero asiakkaan rahtisopimukselta
-    if ($this->toitarow['merahti'] == '') {
+    if ($this->rakir_row['merahti'] == '') {
 
       // Lähettäjän rahtisopimustiedot
       $uni_receiver_partner = $uni_receiver->addChild('partner'); // Attribute parid corresponds to carrier's ID. See SUP-112-Services-en.xls.
       $uni_receiver_partner->addAttribute('parid', utf8_encode($this->toitarow['rahdinkuljettaja']));
 
-      $query = "SELECT rahtisopimus
-                FROM rahtisopimukset
-                WHERE yhtio       = '{$this->kukarow['yhtio']}'
-                AND (asiakas = '{$this->postirow['liitostunnus']}' OR ytunnus = '{$this->postirow['ytunnus']}')
-                AND toimitustapa  = '{$this->toitarow['selite']}'
-                AND rahtisopimus != ''
-                ORDER BY asiakas DESC
-                LIMIT 1";
-      $rahtisopimus_res = pupe_query($query);
-      $rahtisopimus_row = mysql_fetch_assoc($rahtisopimus_res);
-
-      $rahtisopimusnro = mysql_num_rows($rahtisopimus_res) == 0 ? 0 : $rahtisopimus_row['rahtisopimus'];
+      $rahtisopimusnro = $this->rakir_row['rahtisopimus'];
 
       // Jos sopparinumero puuttuu
       if ((is_numeric($rahtisopimusnro) and (int) $rahtisopimusnro == 0) or (!is_numeric($rahtisopimusnro) and (string) $rahtisopimusnro == "")) {

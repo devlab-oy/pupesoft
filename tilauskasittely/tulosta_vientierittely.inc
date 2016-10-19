@@ -86,7 +86,7 @@ if ($Xtunnukset2 != "") {
 
   $Xquery = "SELECT
              {$select}
-             sum(tilausrivi.rivihinta) summa,
+             sum(round(tilausrivi.rivihinta / if ($laskurow[vienti_kurssi] > 0, $laskurow[vienti_kurssi], 1),2)) summa,
              sum(tilausrivi.kpl) kpl,
              round(sum((tilausrivi.rivihinta/$laskurow[summa])*$Xkilot),0) paino
              FROM tilausrivi

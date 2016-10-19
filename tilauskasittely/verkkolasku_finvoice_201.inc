@@ -97,6 +97,10 @@ if (!function_exists('finvoice_otsik')) {
       // Jos vastaanottaja on tyhj‰‰ tai ollaan valittu lasku tulostuspalveluun chn 100 "Verkkolasku, tulostuspalvelu"
       if (($receiverpartyid == "" and $yhtiorow["verkkolasku_lah"] != "apix") or $lasrow["chn"] == "100") {
         $receiverpartyid = $tulostuspalvelu;
+
+        if ($yhtiorow["verkkolasku_lah"] == "maventa") {
+          $receiverintermediator = $tulostuspalvelu;
+        }
       }
 
       // Talenomiin l‰hetet‰‰n kaikki laskut, joten t‰g‰t‰‰n itse l‰heteyt s‰hkˆpostilaskut n‰in

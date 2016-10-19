@@ -399,7 +399,7 @@ if ($tee != "" and isset($painoinnappia)) {
 
         // tuloutukset ja siirrot
         $query = "SELECT
-                  round(sum(if(laji = 'tulo', kplhinta, 0))) tulotVA,
+                  round(sum(if(laji = 'tulo', kpl*kplhinta, 0))) tulotVA,
                   round(sum(if(laji = 'tulo', kpl, 0))) tulotkplVA,
                   round(sum(if(laji = 'siirto', kpl*hinta, 0))) siirrotVA
                   FROM tapahtuma

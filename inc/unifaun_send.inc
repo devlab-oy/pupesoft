@@ -724,14 +724,14 @@ class Unifaun {
     //$uni_ser_val = $uni_booking->addChild('val', ""); # Booking office, numeric code. See SUP-112-Services-en.xls for valid codes.
     //$uni_ser_val->addAttribute('n', "bookingoffice");
 
-    if ($this->toitarow['merahti'] == "" and in_array($this->toitarow['virallinen_selite'], $allowed_rpay)) {
+    if ($this->rakir_row['merahti'] == "" and in_array($this->toitarow['virallinen_selite'], $allowed_rpay)) {
       $uni_addon = $uni_service->addChild('addon');
       $uni_addon->addAttribute('adnid', 'rpay');
 
       $uni_add_val = $uni_addon->addChild('val', utf8_encode($rahtisopimusnro));
       $uni_add_val->addAttribute('n', 'custno');
     }
-    elseif ($this->toitarow['merahti'] == "" and in_array($this->toitarow['virallinen_selite'], $allowed_opay)) {
+    elseif ($this->rakir_row['merahti'] == "" and in_array($this->toitarow['virallinen_selite'], $allowed_opay)) {
       $uni_addon = $uni_service->addChild('addon');
       $uni_addon->addAttribute('adnid', 'opay');
 

@@ -433,7 +433,7 @@ function sepa_download_file_list($params) {
       "status"                      => $status,
       "environment"                 => SEPA_ENVIRONMENT,
     ),
-    "url" => SEPA_ADDRESS . "/{$bank}/download_file_list",
+    "url" => SEPA_ADDRESS . "/" . bank_provider($bank) . "/download_file_list",
     "headers" => array(
       "Content-Type: application/json",
       "Authorization: Token token={$sepa_pankkiyhteys_token}"
@@ -502,7 +502,7 @@ function sepa_download_files($params) {
         "environment"                 => SEPA_ENVIRONMENT,
         "status"                      => 'NEW',
       ),
-      "url" => SEPA_ADDRESS . "/{$bank}/download_file",
+      "url" => SEPA_ADDRESS . "/" . bank_provider($bank) . "/download_file",
       "headers" => array(
         "Content-Type: application/json",
         "Authorization: Token token={$sepa_pankkiyhteys_token}"
@@ -578,7 +578,7 @@ function sepa_upload_file($params) {
       "content"                     => $maksuaineisto,
       "environment"                 => SEPA_ENVIRONMENT,
     ),
-    "url"     => SEPA_ADDRESS . "/{$bank}/upload_file",
+    "url"     => SEPA_ADDRESS . "/" . bank_provider($bank) . "/upload_file",
     "headers" => array(
       "Content-Type: application/json",
       "Authorization: Token token={$sepa_pankkiyhteys_token}"
@@ -619,7 +619,7 @@ function sepa_get_certificate($params) {
       "signing_csr" => base64_encode($signing_csr),
       "encryption_csr" => base64_encode($encryption_csr),
     ),
-    "url" => SEPA_ADDRESS . "/{$bank}/get_certificate",
+    "url" => SEPA_ADDRESS . "/" . bank_provider($bank) . "/get_certificate",
     "headers" => array(
       "Content-Type: application/json",
       "Authorization: Token token={$sepa_pankkiyhteys_token}"
@@ -668,6 +668,14 @@ function sepa_renew_certificate($params) {
     $csr_params['company_name'] = $old_cert_info['subject']['CN'];
   case 'danske':
     $customer_id = $pankkiyhteys['customer_id'];
+  case 'aktia':
+  case 'sp':
+  case 'pop':
+  case 'shb':
+    $customer_id = $old_cert_info['subject']['SN'];
+
+    $csr_params['company_name'] = $old_cert_info['subject']['CN'];
+    $csr_params['customer_id']  = $customer_id;
   }
 
   $generoidut_tunnukset1 = generoi_private_key_ja_csr($csr_params);
@@ -685,7 +693,7 @@ function sepa_renew_certificate($params) {
       "signing_private_key"         => $pankkiyhteys['signing_private_key'],
       "encryption_private_key"      => $pankkiyhteys['encryption_private_key'],
     ),
-    "url" => SEPA_ADDRESS . "/{$bank}/renew_certificate",
+    "url" => SEPA_ADDRESS . "/" . bank_provider($bank) . "/renew_certificate",
     "headers" => array(
       "Content-Type: application/json",
       "Authorization: Token token={$sepa_pankkiyhteys_token}"
@@ -723,7 +731,7 @@ function sepa_get_bank_certificate($params) {
       "customer_id" => $customer_id,
       "environment" => SEPA_ENVIRONMENT,
     ),
-    "url" => SEPA_ADDRESS . "/{$bank}/get_bank_certificate",
+    "url" => SEPA_ADDRESS . "/" . bank_provider($bank) . "/get_bank_certificate",
     "headers" => array(
       "Content-Type: application/json",
       "Authorization: Token token={$sepa_pankkiyhteys_token}"
@@ -765,7 +773,7 @@ function sepa_get_user_info($params) {
       "customer_id"                 => $pankkiyhteys["customer_id"],
       "environment"                 => SEPA_ENVIRONMENT,
     ),
-    "url" => SEPA_ADDRESS . "/{$pankkiyhteys['bank']}/get_user_info",
+    "url" => SEPA_ADDRESS . "/" . bank_provider($pankkiyhteys["bank"]) . "/get_user_info",
     "headers" => array(
       "Content-Type: application/json",
       "Authorization: Token token={$sepa_pankkiyhteys_token}"
@@ -896,6 +904,54 @@ function sepa_file_type_check($bank, $file_type) {
     // Lähtevät verkkolaskut
     if ($file_type == 'LAHLASKUT') {
       $file_type = 'XS';
+    }
+  }
+
+  // Aktia, Säästöpankki & POP Pankki-muunnokset
+  if (in_array($bank, array("aktia", "sp", "pop"))) {
+    switch ($file_type) {
+    // Konekielinen tiliote
+    case 'TITO':
+      return "TO";
+    // Konekielinen viiteaineisto
+    case 'KTL':
+      return "OP";
+    // XML maksuaineisto
+    case 'NDCORPAYS':
+      return "XL";
+    // Maksuaineiston palautesanoma
+    case 'C2BN':
+      return "XP";
+    // Saapuvat verkkolaskut
+    case 'HAELASKUT':
+      return "VN";
+    // Lähtevät verkkolaskut
+    case 'LAHLASKUT':
+      return "VL";
+    }
+  }
+
+  // Handelsbanken-muunnokset
+  if ($bank == "shb") {
+    switch ($file_type) {
+    // Konekielinen tiliote
+    case 'TITO':
+      return "0700";
+    // Konekielinen viiteaineisto
+    case 'KTL':
+      return "0250";
+    // XML maksuaineisto
+    case 'NDCORPAYS':
+      return "0900";
+    // Maksuaineiston palautesanoma
+    case 'C2BN':
+      return "0910";
+    // Saapuvat verkkolaskut
+    case 'HAELASKUT':
+      return "0820";
+    // Lähtevät verkkolaskut
+    case 'LAHLASKUT':
+      return "0800";
     }
   }
 
@@ -1122,11 +1178,15 @@ function generoi_private_key_ja_csr($params = array()) {
   case "op":
     $csr_info[] = "CN={$customer_id}";
     break;
-  default:
+  case "danske":
     $csr_info[] = "CN={$yhtiorow['nimi']}";
     $csr_info[] = "emailAddress={$yhtiorow["email"]}";
     $csr_info[] = "L={$yhtiorow["kotipaikka"]}";
     $csr_info[] = "O={$yhtiorow['nimi']}";
+  default:
+    $csr_info[] = "SN={$customer_id}";
+    $csr_info[] = "CN={$company_name}";
+    $csr_info[] = "O=Aineistopalvelut-Samlink";
   }
 
   $csr_dir    = "/tmp/" . uniqid('csr-', true);
@@ -1275,6 +1335,22 @@ function tuetut_pankit() {
       "nimi"       => "OP",
       "lyhyt_nimi" => "op",
     ),
+    "HELSFIHH" => array(
+      "nimi"       => "Aktia",
+      "lyhyt_nimi" => "aktia",
+    ),
+    "ITELFIHH" => array(
+      "nimi"       => "Säästöpankki",
+      "lyhyt_nimi" => "sp",
+    ),
+    "POPFFI22" => array(
+      "nimi"       => "POP Pankki",
+      "lyhyt_nimi" => "pop",
+    ),
+    "HANDFIHH" => array(
+      "nimi"       => "Handelsbanken",
+      "lyhyt_nimi" => "shb",
+    ),
   );
 }
 
@@ -1345,4 +1421,16 @@ function hae_tilin_saldo($params) {
     "saldo"    => (float) ($saldo_kentat["saldo"] / 100),
     "valuutta" => $saldo_kentat["rahayksikon_koodi"] == 1 ? "EUR" : null
   );
+}
+
+function bank_provider($bank) {
+  switch ($bank) {
+  case 'aktia':
+  case 'sp':
+  case 'pop':
+  case 'shb':
+    return 'samlink';
+  default:
+    return $bank;
+  }
 }

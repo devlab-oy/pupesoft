@@ -277,7 +277,7 @@ if ($tee == 'D' and $oikeurow['paivitys'] == '1') {
 
     $query = "SELECT *
               FROM lasku
-              WHERE $hyvaklisa 
+              WHERE $hyvaklisa
               and yhtio            = '$kukarow[yhtio]'
               and tunnus           = '$tunnus'";
     $result = pupe_query($query);
@@ -1511,7 +1511,7 @@ if (strlen($tunnus) != 0) {
   echo "<table><tr>";
 
   //  Onko kuva tietokannassa?
-  $liitteet = ebid($laskurow["tunnus"], true);
+  $liitteet = ebid($laskurow["tunnus"], true, true);
 
   if (is_array($liitteet) and count($liitteet) > 0) {
     echo "<form method='post'>

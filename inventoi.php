@@ -1099,7 +1099,7 @@ if ($tee == 'VALMIS') {
               $otres = pupe_query($query);
               $otrow = mysql_fetch_assoc($otres);
 
-              if ($ostohinta != 0 and $otrow['ostohinta'] != $ostohinta) {
+              if ($fileesta != 'ON' and $ostohinta != 0 and $otrow['ostohinta'] != $ostohinta) {
                 $query = "UPDATE tuotteen_toimittajat set
                           ostohinta     = $ostohinta
                           WHERE yhtio = '$kukarow[yhtio]'
@@ -1512,7 +1512,15 @@ if ($tee == 'VALMIS') {
           }
 
           if ($fileesta == "ON") {
-            echo "<font class='message'>".t("Tuote")."   $tuoteno $hyllyalue $hyllynro $hyllyvali $hyllytaso ".t("inventoitu")."!</font><br>";
+
+            if (substr($toim, 0, 4) == "OSTO") {
+              $_laji = t("tuloutettu");
+            }
+            else {
+              $_laji = t("inventoitu");
+            }
+
+            echo "<font class='message'>".t("Tuote")."   $tuoteno $hyllyalue $hyllynro $hyllyvali $hyllytaso {$_laji}!</font><br>";
           }
         }
       }

@@ -506,7 +506,8 @@ if ($tee == 'VALMIS') {
       if (substr($toim, 0, 4) == "OSTO") {
 
         $kpl = (float) preg_replace("/[^0-9\.]/", "", $kpl);
-        $ostohinta = (float) preg_replace("/[^0-9\.]/", "", $ostohinnat[$i]);
+        $ostohinta = str_replace(",", ".", $ostohinnat[$i]);
+        $ostohinta = (float) preg_replace("/[^0-9\.]/", "", $ostohinta);
         $tuotteen_toimittaja  = $tuotteen_toimittajat[$i];
 
         if (!empty($kpl)) {

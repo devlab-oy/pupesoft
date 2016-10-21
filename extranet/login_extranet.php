@@ -14,17 +14,22 @@ if (isset($_REQUEST["user"]) and $_REQUEST["user"] != '') {
   $session = "";
   srand((double) microtime() * 1000000);
 
-  $query = "SELECT kuka.kuka, kuka.session, kuka.salasana
+  $query = "SELECT
+              kuka.kuka,
+              kuka.session,
+              kuka.salasana
             FROM kuka
-            JOIN asiakas ON (asiakas.yhtio = kuka.yhtio
+            JOIN asiakas
+              ON (asiakas.yhtio = kuka.yhtio
               AND asiakas.tunnus = kuka.oletus_asiakas
               AND asiakas.laji != 'P')
-            JOIN oikeu ON (oikeu.yhtio = kuka.yhtio
-              AND oikeu.kuka = kuka.kuka)
-            WHERE kuka.kuka = '{$user}'
+            WHERE kuka.kuka = '$user'
             AND kuka.extranet != ''
             AND kuka.oletus_asiakas != ''
-            GROUP BY 1, 2, 3";
+            AND EXISTS(SELECT 1
+                       FROM oikeu
+                       WHERE oikeu.yhtio = kuka.yhtio
+                       AND oikeu.kuka = kuka.kuka)";
   $result = pupe_query($query);
   $krow = mysql_fetch_array($result);
 
@@ -52,15 +57,19 @@ if (isset($_REQUEST["user"]) and $_REQUEST["user"] != '') {
       }
 
       $query = "UPDATE kuka
-                JOIN asiakas ON (asiakas.yhtio = kuka.yhtio
+                JOIN asiakas
+                  ON (asiakas.yhtio = kuka.yhtio
                   AND asiakas.tunnus = kuka.oletus_asiakas
                   AND asiakas.laji != 'P')
-                JOIN oikeu ON (oikeu.yhtio = kuka.yhtio
-                  AND oikeu.kuka = kuka.kuka)
-                SET kuka.session = '$session', kuka.lastlogin = now()
-                WHERE kuka.kuka = '$user'
-                AND kuka.extranet != ''
-                AND kuka.oletus_asiakas != ''";
+                SET session    = '{$session}',
+                    lastlogin  = now()
+                WHERE kuka = '{$user}'
+                  AND extranet != ''
+                  AND oletus_asiakas != ''
+                  AND EXISTS(SELECT 1
+                             FROM oikeu
+                             WHERE oikeu.yhtio = kuka.yhtio
+                             AND oikeu.kuka = kuka.kuka)";
       if (strlen($yhtio) > 0) {
         $query .= " and kuka.yhtio = '$yhtio'";
       }
@@ -174,14 +183,19 @@ echo "</a></td>
 ";
 
 if (isset($usea) and $usea == 1) {
-  $query = "SELECT yhtio.nimi, yhtio.yhtio
+  $query = "SELECT
+              yhtio.nimi,
+              yhtio.yhtio
             FROM kuka
-            INNER JOIN yhtio ON (yhtio.yhtio = kuka.yhtio)
-            INNER JOIN oikeu ON (oikeu.yhtio = kuka.yhtio and oikeu.kuka = kuka.kuka)
-            WHERE kuka.kuka = '$user'
-            AND kuka.extranet != ''
-            AND kuka.oletus_asiakas != ''
-            GROUP BY 1, 2";
+            INNER JOIN yhtio
+              ON (yhtio.yhtio = kuka.yhtio)
+            WHERE kuka.kuka = '{$user}'
+              AND kuka.extranet != ''
+              AND kuka.oletus_asiakas != ''
+              AND EXISTS(SELECT 1
+                         FROM oikeu
+                         WHERE oikeu.yhtio = kuka.yhtio
+                         AND oikeu.kuka = kuka.kuka)";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) == 0) {

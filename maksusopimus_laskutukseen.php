@@ -613,6 +613,7 @@ if (strpos($_SERVER['SCRIPT_NAME'], "maksusopimus_laskutukseen.php") !== FALSE) 
         $query = "SELECT
                   sum(if (lasku.tila='L' and lasku.alatila IN ('J','X'),1,0)) tilaok,
                   sum(if (tilausrivi.toimitettu='',1,0)) toimittamatta,
+                  sum(if (tilausrivi.keratty='',1,0)) keraamatta,
                   count(*) toimituksia
                   FROM lasku
                   JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.jaksotettu=lasku.jaksotettu and tilausrivi.tyyppi != 'D' and tilausrivi.var != 'P')
@@ -623,7 +624,7 @@ if (strpos($_SERVER['SCRIPT_NAME'], "maksusopimus_laskutukseen.php") !== FALSE) 
         $tarkrow = mysql_fetch_assoc($tarkres);
 
         if (mysql_num_rows($tarkres) == 0 or $tarkrow["tilaok"] <> $tarkrow["toimituksia"] 
-          or ($tarkrow["toimittamatta"] > 0 and $row["nouto"] == '')) {
+          or ($tarkrow["toimittamatta"] > 0 and $row["nouto"] == '') or $tarkrow["keraamatta"] > 0) {
           echo "<td class='back'>";
           echo "<font class='error'>".t("Ei valmis loppulaskutettavaksi, koska tilausta ei ole vielä toimitettu").".</font>";
 

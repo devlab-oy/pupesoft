@@ -23,7 +23,7 @@ if (isset($_REQUEST["user"]) and $_REQUEST["user"] != '') {
               ON (asiakas.yhtio = kuka.yhtio
               AND asiakas.tunnus = kuka.oletus_asiakas
               AND asiakas.laji != 'P')
-            WHERE kuka.kuka = '$user'
+            WHERE kuka.kuka = '{$user}'
             AND kuka.extranet != ''
             AND kuka.oletus_asiakas != ''
             AND EXISTS(SELECT 1
@@ -61,11 +61,11 @@ if (isset($_REQUEST["user"]) and $_REQUEST["user"] != '') {
                   ON (asiakas.yhtio = kuka.yhtio
                   AND asiakas.tunnus = kuka.oletus_asiakas
                   AND asiakas.laji != 'P')
-                SET session    = '{$session}',
-                    lastlogin  = now()
-                WHERE kuka = '{$user}'
-                  AND extranet != ''
-                  AND oletus_asiakas != ''
+                SET kuka.session    = '{$session}',
+                    kuka.lastlogin  = now()
+                WHERE kuka.kuka = '{$user}'
+                  AND kuka.extranet != ''
+                  AND kuka.oletus_asiakas != ''
                   AND EXISTS(SELECT 1
                              FROM oikeu
                              WHERE oikeu.yhtio = kuka.yhtio

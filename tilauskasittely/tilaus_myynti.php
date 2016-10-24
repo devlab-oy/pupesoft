@@ -2764,7 +2764,7 @@ if ($tee == '') {
   if ($kukarow["kesken"] > 0 and (
       (isset($toimitustapa) and $toimitustapa != '' and $toimitustapa != $laskurow["toimitustapa"]) or
       (isset($rahtisopimus) and $rahtisopimus != '' and $rahtisopimus != $laskurow["rahtisopimus"]) or
-      (isset($viesti) and $viesti != $laskurow["viesti"] and $viesti !== "0") or
+      (isset($viesti) and $viesti != $laskurow["viesti"]) or
       (isset($asiakkaan_tilausnumero) and $asiakkaan_tilausnumero != $laskurow["asiakkaan_tilausnumero"]) or
       (isset($tilausvahvistus) and $tilausvahvistus != $laskurow["tilausvahvistus"]) or
       (isset($myyjanro) and $myyjanro > 0 and $myyjanro != $v_myyjanro) or

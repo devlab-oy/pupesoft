@@ -574,8 +574,8 @@ if (isset($jatka) and ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" o
   }
 }
 
-if (isset($jatka) and $viesti === "0" and in_array($toim, array('PIKATILAUS','RIVISYOTTO'))) {
-  echo "<font class='error'>".t("VIRHE: Tilausviite ei saa olla nolla")."!</font><br>";
+if (isset($jatka) and $kasinsyotetty_viite === "0" and in_array($toim, array('PIKATILAUS','RIVISYOTTO'))) {
+  echo "<font class='error'>".t("VIRHE: Viitenumero ei saa olla nolla")."!</font><br>";
 
   $tee  = "OTSIK";
   $tila   = "";

@@ -1428,47 +1428,65 @@ class MagentoClient {
     $reply = false;
     $asiakaskohtainenhintadata = array();
 
-    try {
-      // Haetaan Pupesta kaikki Magento-asiakkaat ja näiden yhteyshenkilöt
-      $asiakkaat_per_yhteyshenkilo = $this->hae_magentoasiakkaat_ja_yhteyshenkilot($kukarow['yhtio']);
+    // Haetaan Pupesta kaikki Magento-asiakkaat ja näiden yhteyshenkilöt
+    $asiakkaat_per_yhteyshenkilo = $this->hae_magentoasiakkaat_ja_yhteyshenkilot();
 
-      if (count($asiakkaat_per_yhteyshenkilo) < 1) {
-        return false;
-      }
+    if ($asiakkaat_per_yhteyshenkilo === false) {
+      return false;
+    }
 
-      // Ensin poistetaan tuotteen asiakashinnat Magentosta
+    // Ensin poistetaan tuotteen asiakashinnat Magentosta kaikki kerralla
+    $onnistuiko_paivitys = $this->poista_tuotteen_asiakaskohtaiset_hinnat($asiakkaat_per_yhteyshenkilo, $magento_tuotenumero, true);
+
+    if ($onnistuiko_paivitys === false) {
+      // Ensin poistetaan tuotteen asiakashinnat Magentosta yksitellen
       $this->poista_tuotteen_asiakaskohtaiset_hinnat($asiakkaat_per_yhteyshenkilo, $magento_tuotenumero);
+    }
 
-      // Sitten haetaan asiakaskohtainen hintadata Pupesta
-      $asiakaskohtainenhintadata = $this->hae_tuotteen_asiakaskohtaiset_hinnat($asiakkaat_per_yhteyshenkilo, $tuotenumero);
+    // Sitten haetaan asiakaskohtainen hintadata Pupesta
+    $asiakaskohtainenhintadata = $this->hae_tuotteen_asiakaskohtaiset_hinnat($asiakkaat_per_yhteyshenkilo, $tuotenumero);
 
-      // Lopuksi siirretään tuotteen kaikki asiakaskohtaiset hinnat Magentoon
-      if (count($asiakaskohtainenhintadata) > 0) {
+    // Lopuksi siirretään tuotteen kaikki asiakaskohtaiset hinnat Magentoon
+    if ($asiakaskohtainenhintadata === false) {
+      return false;
+    }
+
+    $current = 0;
+    $total = count($asiakaskohtainenhintadata);
+
+    foreach($asiakaskohtainenhintadata as $hintadata) {
+      $current++;
+
+      try {
         $reply = $this->_proxy->call(
           $this->_session,
           'price_per_customer.setPriceForCustomersPerProduct',
-          array($magento_tuotenumero, $asiakaskohtainenhintadata)
+          array($magento_tuotenumero, $hintadata)
         );
 
-        $this->log('magento_tuotteet', "Tuotteen {$magento_tuotenumero} asiakaskohtaiset hinnat lisätty");
-        $this->debug('magento_tuotteet', $asiakaskohtainenhintadata);
+        $this->log('magento_tuotteet', "({$current}/{$total}): Tuotteen {$magento_tuotenumero} asiakaskohtaiset ({$hintadata['customerEmail']}) hinnat lisätty");
+        $this->debug('magento_tuotteet', $hintadata);
       }
-    }
-    catch (Exception $e) {
-      $this->_error_count++;
-      $this->log('magento_tuotteet', "Virhe!", $e);
+      catch (Exception $e) {
+        $this->_error_count++;
+        $this->log('magento_tuotteet', "Virhe! Tuotteen {$magento_tuotenumero} asiakaskohtaisen ({$hintadata['customerEmail']}) hinnan lisäys epäonnistui", $e);
+      }
     }
 
     return $reply;
   }
 
-  private function hae_magentoasiakkaat_ja_yhteyshenkilot($yhtio) {
+  private function hae_magentoasiakkaat_ja_yhteyshenkilot() {
+    global $kukarow, $yhtiorow;
+
+    $yhtio = $kukarow['yhtio'];
     $asiakkaat_per_yhteyshenkilo = array();
 
     $query = "SELECT asiakas.tunnus asiakastunnus,
               asiakas.ytunnus,
               yhteyshenkilo.email asiakas_email,
-              yhteyshenkilo.ulkoinen_asiakasnumero
+              yhteyshenkilo.ulkoinen_asiakasnumero,
+              asiakas.ryhma
               FROM yhteyshenkilo
               JOIN asiakas ON (yhteyshenkilo.yhtio = asiakas.yhtio
                 AND yhteyshenkilo.liitostunnus            = asiakas.tunnus)
@@ -1483,20 +1501,27 @@ class MagentoClient {
         'asiakastunnus'         => $rivi['asiakastunnus'],
         'asiakas_email'         => $rivi['asiakas_email'],
         'magento_asiakastunnus' => $rivi['ulkoinen_asiakasnumero'],
-        'ytunnus'               => $rivi['ytunnus']
+        'ytunnus'               => $rivi['ytunnus'],
+        'ryhma'                 => $rivi['ryhma']
       );
       $asiakkaat_per_yhteyshenkilo[] = $asiakasdata;
+    }
+
+    if (count($asiakkaat_per_yhteyshenkilo) < 1) {
+      return false;
     }
 
     return $asiakkaat_per_yhteyshenkilo;
   }
 
-  private function poista_tuotteen_asiakaskohtaiset_hinnat($asiakkaat_per_yhteyshenkilo, $magento_tuotenumero) {
-    // Poistetaan kaikkien asiakkaiden hinta tältä tuotteelta
-    $toiminto = false;
-    try {
-      $asiakashinnat = array();
+  private function poista_tuotteen_asiakaskohtaiset_hinnat(Array $asiakkaat_per_yhteyshenkilo, $magento_tuotenumero, $kaikki_kerralla = false) {
+    $current = 0;
+    $total = count($asiakkaat_per_yhteyshenkilo);
+    $asiakashinnat = array();
+    $offset = 0;
 
+    if ($kaikki_kerralla) {
+      // Poistetaan kaikkien asiakkaiden hinta tältä tuotteelta
       foreach ($asiakkaat_per_yhteyshenkilo as $asiakas) {
         $asiakashinnat[] = array(
           'customerEmail' => $asiakas['asiakas_email'],
@@ -1505,21 +1530,56 @@ class MagentoClient {
         );
       }
 
-      $toiminto = $this->_proxy->call(
-        $this->_session,
-        'price_per_customer.setPriceForCustomersPerProduct',
-        array($magento_tuotenumero, $asiakashinnat)
-      );
+      // Pilkotaan array blockeihin että Magento ei hirtä kiinni
+      while ($asiakashinta = array_slice($asiakashinnat, $offset, 500)) {
+        try {
+          $this->_proxy->call(
+            $this->_session,
+            'price_per_customer.setPriceForCustomersPerProduct',
+            array($magento_tuotenumero, $asiakashinta)
+          );
 
-      $this->log('magento_tuotteet', "Tuotteen {$magento_tuotenumero} asiakaskohtaiset hinnat poistettu");
-      $this->debug('magento_tuotteet', $asiakaskohtainenhintadata);
-    }
-    catch (Exception $e) {
-      $this->_error_count++;
-      $this->log('magento_tuotteet', "Virhe asiakaskohtaisten hintojen poistossa!", $e);
-    }
+          $this->log('magento_tuotteet', "({$offset}/{$total}) Tuotteen {$magento_tuotenumero} kaikki asiakaskohtaiset hinnat poistettu. Block size 500");
+          $offset += 500;
+        }
+        catch(Exception $e) {
+          $this->_error_count++;
+          $this->log('magento_tuotteet', "Virhe asiakaskohtaisten hintojen poistossa! Magento-tuoteno {$magento_tuotenumero}, website-code: {$this->_asiakaskohtaiset_tuotehinnat}", $e);
 
-    return $toiminto;
+          return false;
+        }
+      }
+
+      return true;
+    }
+    else {
+      // Poistetaan kaikkien asiakkaiden hinta tältä tuotteelta
+      foreach ($asiakkaat_per_yhteyshenkilo as $asiakas) {
+        $current++;
+
+        $asiakashinnat = array(
+          'customerEmail' => $asiakas['asiakas_email'],
+          'websiteCode' => $this->_asiakaskohtaiset_tuotehinnat,
+          'delete' => 1
+        );
+
+        try {
+          $this->_proxy->call(
+            $this->_session,
+            'price_per_customer.setPriceForCustomersPerProduct',
+            array($magento_tuotenumero, $asiakashinnat)
+          );
+
+          $this->log('magento_tuotteet', "({$current}/{$total}): Tuotteen {$magento_tuotenumero} asiakaskohtaiset hinnat poistettu ({$asiakas['asiakas_email']})");
+        }
+        catch(Exception $e) {
+          $this->_error_count++;
+          $this->log('magento_tuotteet', "Virhe asiakaskohtaisten hintojen poistossa! Magento-tuoteno {$magento_tuotenumero}, asiakas_email: {$asiakas['asiakas_email']}, website-code: {$this->_asiakaskohtaiset_tuotehinnat}", $e);
+        }
+      }
+
+      return true;
+    }
   }
 
   private function hae_tuotteen_asiakaskohtaiset_hinnat($asiakkaat_per_yhteyshenkilo, $tuotenumero) {
@@ -1669,6 +1729,27 @@ class MagentoClient {
         }
       }
 
+      if (!isset($row)) {
+        $query = "SELECT '1' prio, alennus, alennuslaji, minkpl, IFNULL(TO_DAYS(CURRENT_DATE)-TO_DAYS(alkupvm),9999999999999) aika, tunnus
+                   FROM asiakasalennus asale1 USE INDEX (yhtio_asiakas_ryhma)
+                   WHERE yhtio  = '$kukarow[yhtio]'
+                   AND asiakas_ryhma  = '$asiakas[ryhma]'
+                   AND asiakas_ryhma  > 0
+                   AND ryhma    = '$tuoterow[aleryhma]'
+                   AND ryhma   != ''
+                   AND (minkpl = 0 OR (minkpl <= $kpl AND monikerta = '') OR (MOD($kpl, minkpl) = 0 AND monikerta != ''))
+                   AND ((alkupvm <= CURRENT_DATE AND IF (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= CURRENT_DATE) OR (alkupvm='0000-00-00' AND loppupvm='0000-00-00'))
+                   AND alennus  >= 0
+                   AND alennus  <= 100
+                   ORDER BY alennuslaji, prio, minkpl DESC, aika, alennus DESC, tunnus desc
+                   LIMIT 1";
+        $result = pupe_query($query);
+
+        if (mysql_num_rows($result) > 0) {
+          $row = mysql_fetch_assoc($result);
+        }
+      }
+
       // Asetetaan hintamuuttujaan joko:
       if (isset($row)) {
         // löydetty asiakashinta
@@ -1692,6 +1773,10 @@ class MagentoClient {
           'delete'        => 0
         );
       }
+    }
+
+    if (count($asiakaskohtaiset_hinnat_data) == 0) {
+      return false;
     }
 
     return $asiakaskohtaiset_hinnat_data;

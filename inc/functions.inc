@@ -6977,7 +6977,7 @@ if (!function_exists('js_openUrlNewWindow')) {
 }
 
 if (!function_exists('ebid')) {
-  function ebid($lasku_tunnus, $url_only = false) {
+  function ebid($lasku_tunnus, $url_only = false, $from_liitetiedostot = false) {
     global $kukarow, $yhtiorow, $palvelin2;
 
     $lasku_tunnus = (int) $lasku_tunnus;
@@ -6991,7 +6991,7 @@ if (!function_exists('ebid')) {
 
     $laskurow = mysql_fetch_assoc($res);
 
-    if ($laskurow['ebid'] != "" and $laskurow['ebid'] != "FINVOICEXML" and $laskurow['ebid'] != "MAVENTAXML" and $laskurow['ebid'] != "TECCOM-INVOICE" and $laskurow['ebid'] != "UNIKKO-INVOICE") {
+    if ($from_liitetiedostot === false and $laskurow['ebid'] != "" and $laskurow['ebid'] != "FINVOICEXML" and $laskurow['ebid'] != "MAVENTAXML" and $laskurow['ebid'] != "TECCOM-INVOICE" and $laskurow['ebid'] != "UNIKKO-INVOICE") {
       $ebid = $laskurow['ebid'];
 
       $verkkolaskutunnus = $yhtiorow['verkkotunnus_vas'];
@@ -7053,11 +7053,21 @@ if (!function_exists('ebid')) {
       return $out;
     }
     else {
+
+      $sellisa = $orderlisa = "";
+
+      if ($from_liitetiedostot === true) {
+        $sellisa = ", if(filetype = 'application/pdf', 0, 1) as jarj";
+        $orderlisa = "order by jarj";
+      }
+
       $query = "SELECT tunnus, filename, selite
+                {$sellisa}
                 from liitetiedostot
-                where liitostunnus = '$laskurow[tunnus]'
+                where liitostunnus = '{$laskurow['tunnus']}'
                 and liitos = 'lasku'
-                and yhtio = '$kukarow[yhtio]'";
+                and yhtio = '{$kukarow['yhtio']}'
+                {$orderlisa}";
       $res = pupe_query($query);
 
       if ($url_only) {

@@ -2213,7 +2213,7 @@ if ($tee == 'INVENTOI') {
 
         if (mysql_num_rows($otres) == 0) {
 
-          if (($toikrow = tarkista_oikeus("yllapito.php", "tuotteen_toimittajat%", "", "OK", $toimi_array)) !== FALSE) {
+          if (($toikrow = tarkista_oikeus("yllapito.php", "tuotteen_toimittajat%", "", "OK")) !== FALSE) {
             $_toimiecho = "<td valign='top'><a href='yllapito.php?toim=".$toikrow['alanimi']."&haku[1]=$tuoterow[tuoteno]&uusi=1&t[1]=$tuoterow[tuoteno]&lopetus=". $palvelin2. "inventoi.php////toim=$toim//tee=INVENTOI//tuoteno=$tuoteno'>".t("Perusta tuotteen toimittajat ennen tuloutusta")."</a><br>(".t("jotta voit antaa ostohinnan").")</td>";
           }
           else {

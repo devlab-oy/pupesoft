@@ -41,7 +41,7 @@ function apix_edi_receive($apix_keys) {
   $timestamp  = gmdate("YmdHis");
 
   // Muodostetaan apixin vaatima salaus ja url
-  $digest_src = "{$software}+{$version}+{$apix_keys['apix_tunnus']}+{$timestamp}+{$apix_keys['apix_avain']}";
+  $digest_src = "{$apix_keys['apix_tunnus']}+{$timestamp}+{$apix_keys['apix_avain']}";
   $dt  = substr(hash("sha256", $digest_src), 0, 64);
   $real_url = "{$url}?TraID={$apix_keys['apix_tunnus']}&t={$timestamp}&soft={$software}&ver={$version}&d=SHA-256:{$dt}";
 

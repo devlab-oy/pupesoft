@@ -310,6 +310,10 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
 
   $laskurow = mysql_fetch_assoc($aresult);
 
+  // Tehd‰‰n t‰m‰, jotta saadaan toimipaikan tiedot oikein tilaukselle
+  $kukarow['toimipaikka'] = $laskurow['vanhatunnus'];
+  $yhtiorow               = hae_yhtion_parametrit($kukarow["yhtio"]);
+
   $query = "SELECT *
             FROM toimi
             WHERE tunnus = '$laskurow[liitostunnus]'

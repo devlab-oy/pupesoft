@@ -3226,7 +3226,7 @@ else {
                 $komento = "";
               }
 
-              $kutsu = t("Lasku", $kieli)." $lasku ".t("Vientierittely", $kieli);
+              $kutsu = t("Lasku", $kieli)." $laskurow[laskunro] ".t("Vientierittely", $kieli);
 
               if ($yhtiorow["liitetiedostojen_nimeaminen"] == "N") {
                 $kutsu .= ", ".trim($laskurow["nimi"]);
@@ -3255,7 +3255,7 @@ else {
 
         require_once "tilauskasittely/tulosta_lasku.inc";
 
-        if ($silent == "") $tulos_ulos .= "<br>\n".t("Tulostetaan sähköpostilaskuja").":<br>\n";
+        if ($silent == "" or $silent == "VIENTI") $tulos_ulos .= "<br>\n".t("Tulostetaan sähköpostilaskuja").":<br>\n";
 
         foreach ($tulostettavat_email as $lasku) {
 
@@ -3271,7 +3271,7 @@ else {
           $laresult = pupe_query($query);
           $laskurow = mysql_fetch_assoc($laresult);
 
-          if ($silent == "") $tulos_ulos .= t("Lähetetään lasku").": $laskurow[laskunro]<br>\n";
+          if ($silent == "" or $silent == "VIENTI") $tulos_ulos .= t("Lähetetään lasku").": $laskurow[laskunro]<br>\n";
 
           if (($laskurow["vienti"] == "E" or $laskurow["vienti"] == "K") and $yhtiorow["vienti_erittelyn_tulostus"] != "E") {
             $uusiotunnus = $laskurow["tunnus"];
@@ -3297,7 +3297,7 @@ else {
                 $komento = "";
               }
 
-              $kutsu = t("Lasku", $kieli)." $lasku ".t("Vientierittely", $kieli);
+              $kutsu = t("Lasku", $kieli)." $laskurow[laskunro] ".t("Vientierittely", $kieli);
 
               if ($yhtiorow["liitetiedostojen_nimeaminen"] == "N") {
                 $kutsu .= ", ".trim($laskurow["nimi"]);
@@ -3310,7 +3310,7 @@ else {
               include "inc/sahkoposti.inc"; // sanotaan include eikä require niin ei kuolla
             }
 
-            if ($silent == "") $tulos_ulos .= t("Vientierittely lähetetään")."...<br>\n";
+            if ($silent == "" or $silent == "VIENTI") $tulos_ulos .= t("Vientierittely lähetetään")."...<br>\n";
 
             unset($Xpdf);
           }

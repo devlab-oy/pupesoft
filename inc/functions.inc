@@ -2577,7 +2577,7 @@ if (!function_exists("synkronoi")) {
                   // Jos kent‰lle on m‰‰ritelty oletusarvo avainsanoihin niin haetaan se
                   $query = "SELECT *
                             FROM avainsana
-                            WHERE yhtio = '{$kukarow['yhtio']}'
+                            WHERE yhtio = '{$yhtio}'
                             and laji    = 'MYSQLALIAS'
                             and selite  = '{$table}.{$key}'
                             and selitetark_2 = 'Default'

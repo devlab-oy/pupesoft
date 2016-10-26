@@ -698,7 +698,7 @@ if ($tee != "" and isset($painoinnappia)) {
 
       $excelsarake = 0;
 
-      if (in_array($toim, array('','rajattu'))) {
+      if ($toim == '') {
         $worksheet->writeString($excelrivi, $excelsarake++, $row["osasto"]);
         $worksheet->writeString($excelrivi, $excelsarake++, $row["try"]);
         $worksheet->writeString($excelrivi, $excelsarake++, $row["malli"]);

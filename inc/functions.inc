@@ -2584,10 +2584,16 @@ if (!function_exists("synkronoi")) {
                             and selitetark_4 != ''";
                   $mysqlalias_default_res = pupe_query($query);
 
+                  query_dump($query);
+
                   if (mysql_num_rows($mysqlalias_default_res) != 0) {
                     $mysqlalias_default_row = mysql_fetch_assoc($mysqlalias_default_res);
 
+                    echo "<pre>",var_dump($mysqlalias_default_row),"</pre>";
+
                     $muutokset[$key] .= $mysqlalias_default_row['selitetark_4'];
+
+                    echo "<pre>",var_dump($muutokset),"</pre>";
                   }
                 }
                 else {

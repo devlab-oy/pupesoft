@@ -1100,7 +1100,7 @@ if ($tee == 'VALMIS') {
               $otres = pupe_query($query);
               $otrow = mysql_fetch_assoc($otres);
 
-              if ($fileesta != 'ON' and $ostohinta != 0 and $otrow['ostohinta'] != $ostohinta) {
+              if ($fileesta != 'ON' and $ostohinta != 0 and $otrow['ostohinta'] != $ostohinta and $tuotteen_toimittaja != '') {
                 $query = "UPDATE tuotteen_toimittajat set
                           ostohinta     = $ostohinta
                           WHERE yhtio = '$kukarow[yhtio]'
@@ -1974,6 +1974,7 @@ if ($tee == 'INVENTOI') {
   if (substr($toim, 0, 4) == "OSTO") {
     echo "<th>".t("Tuloutettava määrä")."</th>";
     echo "<th>".t("Ostohinta")."</th>";
+    echo "<th>".t("Toimittaja")."</th>";
   }
   else {
     echo "<th>".t("Laskettu hyllyssä")."</th>";
@@ -2200,17 +2201,37 @@ if ($tee == 'INVENTOI') {
 
       if (substr($toim, 0, 4) == "OSTO") {
 
-        $query = "SELECT *, if (jarjestys = 0, 9999, jarjestys) sorttaus
+        $query = "SELECT tuotteen_toimittajat.*, if (tuotteen_toimittajat.jarjestys = 0, 9999, tuotteen_toimittajat.jarjestys) sorttaus, toimi.nimi toimittajannimi
                   FROM tuotteen_toimittajat
-                  WHERE yhtio = '$kukarow[yhtio]'
-                  and tuoteno = '$tuoterow[tuoteno]'
+                  JOIN toimi on (toimi.yhtio = tuotteen_toimittajat.yhtio and toimi.tunnus = tuotteen_toimittajat.liitostunnus)
+                  WHERE tuotteen_toimittajat.yhtio = '$kukarow[yhtio]'
+                  and tuotteen_toimittajat.tuoteno = '$tuoterow[tuoteno]'
                   ORDER BY sorttaus
                   LIMIT 1";
         $otres = pupe_query($query);
         $otrow = mysql_fetch_assoc($otres);
 
-        echo "<td valign='top'><input type='text' size='7' name='ostohinnat[$tuoterow[tptunnus]]' value='".round($otrow['ostohinta'], $yhtiorow['hintapyoristys'])."'></td>";
-        echo "<input type='hidden' name='tuotteen_toimittajat[$tuoterow[tptunnus]]' value='$otrow[liitostunnus]'>";
+        if (mysql_num_rows($otres) == 0) {
+
+          if (($toikrow = tarkista_oikeus("yllapito.php", "tuotteen_toimittajat%", "", "OK")) !== FALSE) {
+            $_toimiecho = "<td valign='top'><a href='yllapito.php?toim=".$toikrow['alanimi']."&haku[1]=$tuoterow[tuoteno]&uusi=1&t[1]=$tuoterow[tuoteno]&lopetus=". $palvelin2. "inventoi.php////toim=$toim//tee=INVENTOI//tuoteno=$tuoteno'>".t("Perusta tuotteen toimittajat ennen tuloutusta")."</a><br>(".t("jotta voit antaa ostohinnan").")</td>";
+          }
+          else {
+            $_toimiecho = "<td valign='top'>".t("Tuotteen toimittajaa ei löydy")."</td>";
+          }
+
+          $_hinta = "<td>0</td>";
+          $_liitostunnus = "<input type='hidden' name='tuotteen_toimittajat[$tuoterow[tptunnus]]' value=''>";
+        }
+        else {
+          $_hinta = "<td valign='top'><input type='text' size='7' name='ostohinnat[$tuoterow[tptunnus]]' value='".round($otrow['ostohinta'], $yhtiorow['hintapyoristys'])."'></td>";
+          $_toimiecho = "<td valign='top'>$otrow[toimittajannimi]</td>";
+          $_liitostunnus = "<input type='hidden' name='tuotteen_toimittajat[$tuoterow[tptunnus]]' value='$otrow[liitostunnus]'>";
+        }
+
+        echo $_hinta;
+        echo $_toimiecho;
+        echo $_liitostunnus;
       }
 
       if (in_array($tuoterow["sarjanumeroseuranta"], array("S", "T", "V"))) {

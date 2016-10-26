@@ -2,7 +2,7 @@
 
 if (!function_exists('finvoice_otsik')) {
   function finvoice_otsik($tootfinvoice, $lasrow, $kieli, $pankkitiedot, $masrow, $myyrow, $tyyppi, $toimaikarow, $tulos_ulos, $silent, $nosoap = "") {
-    global $yhtiorow, $err_finvoice, $tulos_ulos, $palvelin2;
+    global $yhtiorow, $err_finvoice, $tulos_ulos, $palvelin2, $tulostettavat_email;
 
     //  Koitetaan ollaanko virheettömiä
     //  Jos tapahtuu virhe, eli tietoja puuttuu niin tuota loppua ei saa tehdä tai koko aineisto voi mennä virheelliseksi!
@@ -103,9 +103,14 @@ if (!function_exists('finvoice_otsik')) {
         }
       }
 
-      // Talenomiin lähetetään kaikki laskut, joten tägätään itse läheteyt sähköpostilaskut näin
-      if ($yhtiorow["verkkolasku_lah"] == "talenom" and $lasrow["chn_orig"] == "666") {
+      // Talenomiin lähetetään kaikki laskut, joten tägätään itse läheteyt sähköpostilaskut ja sisäiset laskut näin
+      if ($yhtiorow["verkkolasku_lah"] == "talenom" and ($lasrow["chn_orig"] == "666" or $lasrow["chn_orig"] == "667")) {
         $receiverpartyid = "Email";
+
+        // halutaan lähettää lasku suoraan asiakkaalle sähköpostilla.. mutta ei nollalaskua
+        if ($lasrow["chn_orig"] == "666" and $lasrow["summa"] != 0) {
+          $tulostettavat_email[] = $lasrow["tunnus"];
+        }
       }
 
       // Tulostetaan virhe jos pakotettiin lasku tulostuspalveluun

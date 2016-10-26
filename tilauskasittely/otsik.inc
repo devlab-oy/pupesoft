@@ -3235,7 +3235,13 @@ if ($tila == "" and !isset($jatka)) {
           pupe_query($updquery);
         }
       }
-
+      
+      if ($kukarow['kieli'] != '') {
+        $kieli = $kukarow['kieli'];
+      }
+      else {
+        $kieli = $yhtiorow['kieli'];
+      }
       $query = "SELECT tyomaarayksen_tapahtumat.*,
                 ifnull(tilataulu.selitetark, '') tilassa,
                 ifnull(jonotaulu.selitetark, '') jonossa
@@ -3243,9 +3249,11 @@ if ($tila == "" and !isset($jatka)) {
                 LEFT JOIN avainsana tilataulu ON tilataulu.yhtio = tyomaarayksen_tapahtumat.yhtio
                   AND tilataulu.laji                           = 'TYOM_TYOSTATUS'
                   AND tilataulu.selite                         = tyomaarayksen_tapahtumat.tyostatus_selite
+                  AND tilataulu.kieli                           = '$kieli'
                 LEFT JOIN avainsana jonotaulu ON jonotaulu.yhtio = tyomaarayksen_tapahtumat.yhtio
                   AND jonotaulu.laji                           = 'TYOM_TYOJONO'
                   AND jonotaulu.selite                         = tyomaarayksen_tapahtumat.tyojono_selite
+                  AND jonotaulu.kieli                           = '$kieli'
                 WHERE tyomaarayksen_tapahtumat.yhtio           = '{$kukarow['yhtio']}'
                 AND tyomaarayksen_tapahtumat.tyomaarays_tunnus = '$tilausnumero'
                 ORDER BY tyomaarayksen_tapahtumat.luontiaika desc";

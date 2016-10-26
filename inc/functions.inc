@@ -2574,6 +2574,21 @@ if (!function_exists("synkronoi")) {
               if (is_string($key) and !in_array($key, array("tunnus", "muuttaja", "muutospvm", "laatija", "luontiaika"))) {
                 if (isset($synkronoi_kiellot[$table]) and in_array($key, $synkronoi_kiellot[$table])) {
                   // Ohitetaan t‰m‰ koska se on synkronoi kielloissa
+                  // Jos kent‰lle on m‰‰ritelty oletusarvo avainsanoihin niin haetaan se
+                  $query = "SELECT *
+                            FROM avainsana
+                            WHERE yhtio = '{$kukarow['yhtio']}'
+                            and laji    = 'MYSQLALIAS'
+                            and selite  = '{$table}.{$key}'
+                            and selitetark_2 = 'Default'
+                            and selitetark_4 != ''";
+                  $mysqlalias_default_res = pupe_query($query);
+
+                  if (mysql_num_rows($mysqlalias_default_res) != 0) {
+                    $mysqlalias_default_row = mysql_fetch_assoc($mysqlalias_default_res);
+
+                    $muutokset[$key] .= $mysqlalias_default_row['selitetark_4'];
+                  }
                 }
                 else {
                   $muutokset[$key] .= $value;

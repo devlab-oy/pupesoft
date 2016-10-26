@@ -37,6 +37,7 @@ if ($fieldname == "verkkolasku_lah") {
   $sel8 = "";
   $sel9 = "";
   $selA = "";
+  $selB = "";
 
   if ($trow[$i] == 'iPost') {
     $sel3 = "selected";
@@ -65,6 +66,9 @@ if ($fieldname == "verkkolasku_lah") {
   elseif ($trow[$i] == 'talenom') {
     $selA = "selected";
   }
+  elseif ($trow[$i] == 'arvato') {
+    $selB = "selected";
+  }
   else {
     $sel1 = "selected";
   }
@@ -79,6 +83,7 @@ if ($fieldname == "verkkolasku_lah") {
   $ulos .= "<option value = 'ppg' $sel8>".t("PPG Laskutuspalvelu");
   $ulos .= "<option value = 'sepa' $sel9>".t("SEPA-pankkiyhteys");
   $ulos .= "<option value = 'talenom' $selA>".t("Talenom Myyntilaskutuspalvelu");
+  $ulos .= "<option value = 'arvato' $selB>".t("Arvato Laskutuspalvelu");
   $ulos .= "</select></td>";
 
   $jatko = 0;

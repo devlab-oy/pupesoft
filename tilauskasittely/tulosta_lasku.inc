@@ -2793,7 +2793,7 @@ if (!function_exists('alvierittely')) {
 }
 
 if (!function_exists('PalautaPankkiviivakoodi')) {
-  function PalautaPankkiviivakoodi($tilinumero, $laskun_summa = 0, $erapv = "00.00.0000", $viitenumero = 0, $versio = 2) {
+  function PalautaPankkiviivakoodi($tilinumero, $laskun_summa = 0, $erapv = "00.00.00", $viitenumero = 0, $versio = 2) {
 
     // Fonttimuuttujat
     extract(lasku_fontit($laskutyyppi));
@@ -2837,7 +2837,7 @@ if (!function_exists('PalautaPankkiviivakoodi')) {
     // Erapaiva
     $pp = substr($erapv, 8, 2);
     $kk = substr($erapv, 5, 2);
-    $vv = substr($erapv, 0, 4);
+    $vv = substr($erapv, 2, 2);
 
     $konekielinen_erapv = $vv.$kk.$pp;
 

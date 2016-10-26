@@ -194,11 +194,11 @@ if ($tee == "laheta" and $laskunumerot != "") {
       echo t("Vientierittely lähetetään")."...<br>\n";
 
       unset($Xpdf);
-
-      // Ei laiteta kaikkia sähköposteja samaan aikaan. Odotetaan muutama sekuntti
-      flush();
-      sleep(5);
     }
+
+    // Ei laiteta kaikkia sähköposteja samaan aikaan. Odotetaan muutama sekuntti
+    flush();
+    sleep(5);
   }
 }
 else {

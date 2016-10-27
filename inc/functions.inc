@@ -2943,6 +2943,15 @@ if (!function_exists("synkronoi")) {
               }
             }
 
+            if ($update_insert == "UPDATE") {
+              $query = "SELECT *
+                        FROM {$table}
+                        WHERE yhtio ='{$kohderow['yhtio']}'
+                        {$where}";
+              $abures = pupe_query($query);
+              $aburow = mysql_fetch_assoc($abures);
+            }
+
             //  Duunataan itse päivitys/insert kysely!!!
             for ($i = 1; $i < mysql_num_fields($masterres); $i++) {
               $kennimi = mysql_field_name($masterres, $i);

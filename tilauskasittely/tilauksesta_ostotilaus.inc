@@ -569,9 +569,35 @@ if (!function_exists("tilauksesta_ostotilaus")) {
 
         foreach ($tunnukset as $otunnus) {
 
-          $komento['Ostotilaus'] = 'edi';
+          $query = "SELECT toimi.*
+                    FROM lasku
+                    JOIN toimi ON (toimi.yhtio = lasku.yhtio AND toimi.tunnus = lasku.liitostunnus)
+                    WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+                    AND lasku.tunnus = '{$otunnus}'";
+          $ostotilaus_res = pupe_query($query);
+          $ostotilaus_row = mysql_fetch_assoc($ostotilaus_res);
 
-          require 'tilauskasittely/tulosta_ostotilaus.inc';
+          $edi_array = array(
+            $ostotilaus_row['edi_palvelin'],
+            $ostotilaus_row['edi_kayttaja'],
+            $ostotilaus_row['edi_salasana'],
+            $ostotilaus_row['edi_kuvaus'],
+            $ostotilaus_row['edi_polku']
+          );
+
+          if (count(array_filter($edi_array)) > 0) {
+            $komento['Ostotilaus'] = 'edi';
+          }
+          elseif (!empty($ostotilaus_row['email'])) {
+            $komento['Ostotilaus'] = "toimittajaemail{$ostotilaus_row['email']}";
+          }
+          else {
+            $komento['Ostotilaus'] = '';
+          }
+
+          if (!empty($komento['Ostotilaus'])) {
+            require 'tilauskasittely/tulosta_ostotilaus.inc';
+          }
 
           if (isset($luodaan_aineisto) and $luodaan_aineisto) {
             // p‰ivitet‰‰n t‰ss‰ tilaus tulostetuksi

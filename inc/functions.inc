@@ -2954,17 +2954,16 @@ if (!function_exists("synkronoi")) {
 
               // Ohitetaan t‰m‰ koska se on synkronoi kielloissa
               if (isset($synkronoi_kiellot[$table]) and in_array($kennimi, $synkronoi_kiellot[$table])) {
-                // Jos kent‰lle on m‰‰ritelty oletusarvo avainsanoihin niin haetaan se
-                $query = "SELECT *
-                          FROM avainsana
-                          WHERE yhtio = '{$kohderow['yhtio']}'
-                          and laji    = 'MYSQLALIAS'
-                          and selite  = '{$table}.{$kennimi}'
-                          and selitetark_2 = 'Default'
-                          and selitetark_4 != ''";
-                $mysqlalias_default_res = pupe_query($query);
-
-                if (mysql_num_rows($mysqlalias_default_res) != 0) {
+                if ($update_insert == "INSERT" or empty($aburow[$kennimi])) {
+                  // Jos kent‰lle on m‰‰ritelty oletusarvo avainsanoihin niin haetaan se
+                  $query = "SELECT *
+                            FROM avainsana
+                            WHERE yhtio = '{$kohderow['yhtio']}'
+                            and laji    = 'MYSQLALIAS'
+                            and selite  = '{$table}.{$kennimi}'
+                            and selitetark_2 = 'Default'
+                            and selitetark_4 != ''";
+                  $mysqlalias_default_res = pupe_query($query);
                   $mysqlalias_default_row = mysql_fetch_assoc($mysqlalias_default_res);
                   $override[$kennimi] = $mysqlalias_default_row['selitetark_4'];
                 }

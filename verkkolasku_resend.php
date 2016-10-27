@@ -450,7 +450,7 @@ if ($handle = opendir($kansio)) {
     // Logitetaan ajo
     cron_log("{$pupe_root_polku}/dataout/$lasku");
 
-    $ftphost = "xxx.xxx.xxx.xxx";
+    $ftphost = "file.gothiagroup.com";
     $ftpuser = $yhtiorow['verkkotunnus_lah'];
     $ftppass = $yhtiorow['verkkosala_lah'];
     //$ftppath = "test/invoice/finvoice/";

@@ -66,8 +66,9 @@ if (!function_exists('finvoice_otsik')) {
       $tulostuspalvelu  = "TULOSTUSPALVELU";
       break;
     default:
-      $tulostuspalvelu  = "";
-      break;
+      // Katsotaan löytyykö avainsanoista sopivaa, muuten laitetaan tyhjäksi
+      $avainsana       = t_avainsana("FINV_TULPALVELU", '', "AND selite = '{$senderintermediator}'", '', '', "selitetark");
+      $tulostuspalvelu = $avainsana ? $avainsana : "";
     }
 
     //  Aloitellaan aineiston luontia. Kaikki tiedot pitää olla kunnossa, tai chn 112 "Pupesoft-Finvoice: Verkkolasku Pupesoftista-Pupesoftiin"
@@ -108,7 +109,7 @@ if (!function_exists('finvoice_otsik')) {
       if ($receiverintermediator == '' and $yhtiorow["verkkolasku_lah"] == "maventa")  {
         $receiverintermediator = 'n/a';
       }
-      
+
       // Talenomiin lähetetään kaikki laskut, joten tägätään itse läheteyt sähköpostilaskut ja sisäiset laskut näin
       if ($yhtiorow["verkkolasku_lah"] == "talenom" and ($lasrow["chn_orig"] == "666" or $lasrow["chn_orig"] == "667")) {
         $receiverpartyid = "Email";

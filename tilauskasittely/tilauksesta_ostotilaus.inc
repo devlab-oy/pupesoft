@@ -569,27 +569,33 @@ if (!function_exists("tilauksesta_ostotilaus")) {
 
         foreach ($tunnukset as $otunnus) {
 
-          $query = "SELECT toimi.*
+          $query = "SELECT lasku.*,
+                    toimi.edi_palvelin,
+                    toimi.edi_kayttaja,
+                    toimi.edi_salasana,
+                    toimi.edi_kuvaus,
+                    toimi.edi_polku,
+                    toimi.email
                     FROM lasku
                     JOIN toimi ON (toimi.yhtio = lasku.yhtio AND toimi.tunnus = lasku.liitostunnus)
                     WHERE lasku.yhtio = '{$kukarow['yhtio']}'
                     AND lasku.tunnus = '{$otunnus}'";
           $ostotilaus_res = pupe_query($query);
-          $ostotilaus_row = mysql_fetch_assoc($ostotilaus_res);
+          $laskurow = mysql_fetch_assoc($ostotilaus_res);
 
           $edi_array = array(
-            $ostotilaus_row['edi_palvelin'],
-            $ostotilaus_row['edi_kayttaja'],
-            $ostotilaus_row['edi_salasana'],
-            $ostotilaus_row['edi_kuvaus'],
-            $ostotilaus_row['edi_polku']
+            $laskurow['edi_palvelin'],
+            $laskurow['edi_kayttaja'],
+            $laskurow['edi_salasana'],
+            $laskurow['edi_kuvaus'],
+            $laskurow['edi_polku']
           );
 
           if (count(array_filter($edi_array)) > 0) {
             $komento['Ostotilaus'] = 'edi';
           }
-          elseif (!empty($ostotilaus_row['email'])) {
-            $komento['Ostotilaus'] = "toimittajaemail{$ostotilaus_row['email']}";
+          elseif (!empty($laskurow['email'])) {
+            $komento['Ostotilaus'] = "toimittajaemail{$laskurow['email']}";
           }
           else {
             $komento['Ostotilaus'] = '';

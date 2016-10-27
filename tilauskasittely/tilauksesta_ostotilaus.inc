@@ -595,6 +595,7 @@ if (!function_exists("tilauksesta_ostotilaus")) {
             $komento['Ostotilaus'] = '';
           }
 
+          $komento['Ostotilaus'] = 'edi';
           echo "<pre>",var_dump($komento),"</pre>";
 
           if (!empty($komento['Ostotilaus'])) {

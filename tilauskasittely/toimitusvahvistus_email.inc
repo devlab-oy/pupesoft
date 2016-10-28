@@ -101,7 +101,7 @@ if ($toimitusvahvistus_email_lahetys) {
 
   while ($rivi_loop_row = mysql_fetch_assoc($rivi_loop_res)) {
 
-    if ($_toimvahvistus == "eihintaa") {
+    if ($_toimvahvistus['selitetark_2'] == "eihintaa") {
       $_hinta = "";
     }
     else {

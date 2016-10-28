@@ -2793,7 +2793,7 @@ if (!function_exists('alvierittely')) {
 }
 
 if (!function_exists('PalautaPankkiviivakoodi')) {
-  function PalautaPankkiviivakoodi($tilinumero, $laskun_summa = 0, $erapv = "00.00.0000", $viitenumero = 0, $versio = 2) {
+  function PalautaPankkiviivakoodi($tilinumero, $laskun_summa = 0, $erapv = "00.00.00", $viitenumero = 0, $versio = 2) {
 
     // Fonttimuuttujat
     extract(lasku_fontit($laskutyyppi));
@@ -2837,7 +2837,7 @@ if (!function_exists('PalautaPankkiviivakoodi')) {
     // Erapaiva
     $pp = substr($erapv, 8, 2);
     $kk = substr($erapv, 5, 2);
-    $vv = substr($erapv, 0, 4);
+    $vv = substr($erapv, 2, 2);
 
     $konekielinen_erapv = $vv.$kk.$pp;
 
@@ -3293,7 +3293,7 @@ if (!function_exists("tulosta_lasku")) {
       //Työnnetään tuo pdf vaan putkeen!
       echo file_get_contents($pdf_laskufilenimi);
     }
-    elseif ($tee == 'VERKKOLASKU_APIX' or $tee == 'VERKKOLASKU_PPG' or $tee == 'VERKKOLASKU_TALENOM') {
+    elseif ($tee == 'VERKKOLASKU_APIX' or $tee == 'VERKKOLASKU_PPG' or $tee == 'VERKKOLASKU_TALENOM' or $tee == 'VERKKOLASKU_ARVATO') {
       // Palautetaan laskunumero ja $pdf_laskufilenimi jotta apixkoodi saa sen zipattua jne.
       return $pdf_laskufilenimi;
     }

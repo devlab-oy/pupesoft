@@ -423,7 +423,7 @@ default:
 }
 
 //  Tarkastetaan käsinsyötetty viite
-if (isset($jatka) and $kasinsyotetty_viite != "" and $viitten_kasinsyotto_sallittu) {
+if (isset($jatka) and !empty($kasinsyotetty_viite) and $viitten_kasinsyotto_sallittu) {
   if (substr($kasinsyotetty_viite, 0, 2) != "RF" and tarkista_viite($kasinsyotetty_viite) === FALSE) {
     echo "<font class='error'>".t("VIRHE: Syötetty viite '%s' on väärin", $kieli, $kasinsyotetty_viite)."!</font><br>";
     $tee  = "OTSIK";
@@ -572,15 +572,6 @@ if (isset($jatka) and ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" o
       }
     }
   }
-}
-
-if (isset($jatka) and $kasinsyotetty_viite === "0" and in_array($toim, array('PIKATILAUS','RIVISYOTTO'))) {
-  echo "<font class='error'>".t("VIRHE: Viitenumero ei saa olla nolla")."!</font><br>";
-
-  $tee  = "OTSIK";
-  $tila   = "";
-
-  unset($jatka);
 }
 
 // tehdään oikeellisuus
@@ -3244,7 +3235,7 @@ if ($tila == "" and !isset($jatka)) {
           pupe_query($updquery);
         }
       }
-      
+
       if ($kukarow['kieli'] != '') {
         $kieli = $kukarow['kieli'];
       }

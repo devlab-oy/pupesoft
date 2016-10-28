@@ -59,6 +59,9 @@ if (!function_exists('finvoice_otsik')) {
     case '003709227412':
       $tulostuspalvelu  = "TULOSTUSPALVELU";
       break;
+    case 'ARVATO':
+      $tulostuspalvelu  = "TULOSTUSPALVELU";
+      break;
     case 'ITELFIHH':
       $tulostuspalvelu  = "TULOSTUSPALVELU";
       break;
@@ -102,7 +105,10 @@ if (!function_exists('finvoice_otsik')) {
           $receiverintermediator = $tulostuspalvelu;
         }
       }
-
+      if ($receiverintermediator == '' and $yhtiorow["verkkolasku_lah"] == "maventa")  {
+        $receiverintermediator = 'n/a';
+      }
+      
       // Talenomiin lähetetään kaikki laskut, joten tägätään itse läheteyt sähköpostilaskut ja sisäiset laskut näin
       if ($yhtiorow["verkkolasku_lah"] == "talenom" and ($lasrow["chn_orig"] == "666" or $lasrow["chn_orig"] == "667")) {
         $receiverpartyid = "Email";

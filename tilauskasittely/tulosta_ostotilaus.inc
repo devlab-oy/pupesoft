@@ -59,6 +59,8 @@ if ($komento['Ostotilaus'] == 'edi') {
 //muuten siit‰ tehd‰‰n peedee‰ff‰
 else {
 
+  error_log("tulosta_ostotilaus.inc else-haara");
+
   require_once "pdflib/phppdflib.class.php";
 
   if ($kieli== '') {

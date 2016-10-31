@@ -662,6 +662,8 @@ else {
       // Luodaan muuttujat
       extract($params);
 
+      error_log("tulosta_ostotilaus.inc function print_pdf");
+
       if ($komento["Ostotilaus"] != '' or $tee == 'NAYTATILAUS') {
         //keksitään uudelle failille joku varmasti uniikki nimi:
         list($usec, $sec) = explode(' ', microtime());
@@ -672,6 +674,8 @@ else {
         $fh = fopen($pdffilenimi, "w+");
         if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF kirjoitus epäonnistui $pdffilenimi");
         fclose($fh);
+
+        error_log("komento[Ostotilaus]: {$komento['Ostotilaus']}");
 
         // itse print komento...
         if ($komento["Ostotilaus"] == 'email' or substr($komento["Ostotilaus"], 0, 15) == 'toimittajaemail') {
@@ -687,6 +691,8 @@ else {
           if ($yhtiorow["liitetiedostojen_nimeaminen"] == "N") {
             $kutsu .= $laskunimi;
           }
+
+          error_log("Kutsutaan icn/sahkoposti.inc");
 
           require "inc/sahkoposti.inc";
           $tulosta_ostotilaus_ulos .= t("Tilaus tulostuu")."...<br>";

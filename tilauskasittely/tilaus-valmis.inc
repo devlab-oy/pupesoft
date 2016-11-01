@@ -856,6 +856,8 @@ else {
           $valittu_tulostin = "AUTOMAAGINEN_VALINTA";
         }
 
+        $edi_ulos .= "1 verkkolasku.php\n";
+
         require "tilauskasittely/verkkolasku.php";
 
         unset($valittu_tulostin);
@@ -1197,6 +1199,8 @@ else {
         $valittu_tulostin = "AUTOMAAGINEN_VALINTA";
       }
 
+      $edi_ulos .= "2 verkkolasku.php\n";
+
       require "tilauskasittely/verkkolasku.php";
 
       /**
@@ -1383,6 +1387,8 @@ else {
         elseif ($valittu_tulostin == 0) {
           $valittu_tulostin = "AUTOMAAGINEN_VALINTA";
         }
+
+        $edi_ulos .= "3 verkkolasku.php\n";
 
         require "tilauskasittely/verkkolasku.php";
 

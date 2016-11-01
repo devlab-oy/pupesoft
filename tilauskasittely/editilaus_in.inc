@@ -1759,8 +1759,6 @@ while ($tietue = fgets($fd)) {
       $result = pupe_query($query);
       $id = mysql_insert_id($GLOBALS["masterlink"]);
 
-      $edi_ulos .= query_dump($query);
-
       $query = "INSERT INTO laskun_lisatiedot SET
                 laskutus_nimi       = '$arow[laskutus_nimi]',
                 laskutus_nimitark   = '$arow[laskutus_nimitark]',
@@ -2313,8 +2311,6 @@ while ($tietue = fgets($fd)) {
                 $ttres = pupe_query($query);
                 $ttrow = mysql_fetch_assoc($ttres);
 
-                $edi_ulos .= "ei_esteta_laskutusta: ".(int) $ei_esteta_laskutusta."\n";
-
                 if ($suoratoimitus_varastoon and in_array($ttrow["suoratoimitus"], array('', 'X')) and
                     !empty($ttrow['liitostunnus'])) {
                   $sallitaanjt = '';
@@ -2328,8 +2324,6 @@ while ($tietue = fgets($fd)) {
                   $paikka = "!!!{$ttrow['liitostunnus']}";
                   $ei_esteta_laskutusta = false;
                 }
-
-                $edi_ulos .= "ei_esteta_laskutusta: ".(int) $ei_esteta_laskutusta."\n";
               }
               else {
                 $query = "SELECT distinct varastopaikat.tunnus varasto, varastopaikat.prioriteetti
@@ -2566,8 +2560,6 @@ while ($tietue = fgets($fd)) {
         // paitsi tilaustyyppi 9, jossa halutaan ohittaa varastoprosessi
         $paivita_takaisin_keraysjonoon = ($laskutettu_magento_tilaus and $editilaus_tilaustyyppi != "9");
 
-        $edi_ulos .= "ei_esteta_laskutusta: ".(int) $ei_esteta_laskutusta."\n";
-
         if ($ei_esteta_laskutusta) {
           $kateisohitus = "";
         }
@@ -2577,8 +2569,6 @@ while ($tietue = fgets($fd)) {
 
         // jos meillä on maksettu magento tilaus
         if ($laskutettu_magento_tilaus and $ei_esteta_laskutusta) {
-
-          $edi_ulos .= "ei tänne...\n";
 
           // jos on annettu toimitusaika, asetetaan se laskun tapahtumapäiväksi
           if (!empty($editilaus_tilausaika)) {
@@ -2595,8 +2585,6 @@ while ($tietue = fgets($fd)) {
             $laskurow['sisainen'] = 'o';
           }
         }
-
-        $edi_ulos .= "\n".var_dump($laskurow)."\n";
 
         // Laitetaan tilaus valmiiksi
         require "tilaus-valmis.inc";

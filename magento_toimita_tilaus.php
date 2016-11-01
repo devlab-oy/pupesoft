@@ -52,7 +52,7 @@ try {
 
     foreach ($match[0] as $nro) {
       $nro = str_replace(" ", "", $nro);
-      $magLinkurl .= "<a target=newikkuna href='http://www.verkkoposti.com/e3/TrackinternetServlet?lang=fi&LOTUS_hae=Hae&LOTUS_side=1&LOTUS_trackId={$nro}&LOTUS_hae=Hae'>{$nro}</a><br>";
+      $magLinkurl .= "<a target=newikkuna href='http://www.posti.fi/henkiloasiakkaat/seuranta/#/{$nro}'>{$nro}</a><br>";
     }
 
     $magLinkurl = substr($magLinkurl, 0, -4); // vika br pois

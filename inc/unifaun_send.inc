@@ -739,17 +739,17 @@ class Unifaun {
       'PO2144_00',
     );
 
-    if (in_array($this->toitarow['virallinen_selite'], $_DLV09) {
+    if (in_array($this->toitarow['virallinen_selite'], $_DLV09)) {
       $uni_ser_val = $uni_service->addChild('addon');
       $uni_ser_val->addAttribute('adnid', "DLV09");
     }
     
-    if (in_array($this->toitarow['virallinen_selite'], $_DLV21) {
+    if (in_array($this->toitarow['virallinen_selite'], $_DLV21)) {
       $uni_ser_val = $uni_service->addChild('addon');
       $uni_ser_val->addAttribute('adnid', "DLV21");
     }
 
-    if (in_array($this->toitarow['virallinen_selite'], $_DLV00) {
+    if (in_array($this->toitarow['virallinen_selite'], $_DLV00)) {
       $uni_ser_val = $uni_service->addChild('addon');
       $uni_ser_val->addAttribute('adnid', "DLV00");
     }

@@ -58,7 +58,7 @@ try {
     $magLinkurl = substr($magLinkurl, 0, -4); // vika br pois
   }
   elseif (stripos($magento_api_met, "mypack") !== FALSE) {
-    $magLinkurl .= "<a target=newikkuna href='http://www.postnordlogistics.fi/en/Online-services/Pages/Track-and-Trace.aspx?search={$magento_api_rak}'>{$magento_api_rak}</a><br>";
+    $magLinkurl .= "<a target=newikkuna href='http://www.postnord.fi/fi/yritysasiakkaat/asiakaspalvelu/sahkoinen-asiointi/Sivut/Lahetysten-seuranta.aspx?view=item&itemid={$magento_api_rak}'>{$magento_api_rak}</a><br>";
   }
   else {
     $magLinkurl .= "$magento_api_met / $magento_api_rak<br>";

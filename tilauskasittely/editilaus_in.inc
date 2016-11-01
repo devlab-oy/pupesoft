@@ -2558,14 +2558,9 @@ while ($tietue = fgets($fd)) {
 
         // jos magentosta tullut tilaus on jo maksettu, päivitetään se takaisin keräysjonoon
         // paitsi tilaustyyppi 9, jossa halutaan ohittaa varastoprosessi
-        $paivita_takaisin_keraysjonoon = ($laskutettu_magento_tilaus and $editilaus_tilaustyyppi != "9");
+        $paivita_takaisin_keraysjonoon = ($laskutettu_magento_tilaus and $editilaus_tilaustyyppi != "9" and $ei_esteta_laskutusta);
 
-        if ($ei_esteta_laskutusta) {
-          $kateisohitus = "";
-        }
-        else {
-          $kateisohitus = "X";
-        }
+        $kateisohitus = $ei_esteta_laskutusta ? "" : "X";
 
         // jos meillä on maksettu magento tilaus
         if ($laskutettu_magento_tilaus and $ei_esteta_laskutusta) {

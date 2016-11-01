@@ -619,7 +619,7 @@ if ($tee == 'I') {
     $tee = 'E';
   }
 
-  if (trim($hyvak[1]) == "") {
+  if (trim($hyvak[1]) == "" and laskun_hyvaksyjia()) {
     $errormsg .= "<font class='error'>".t("Laskulla on pakko olla ensimm‰inen hyv‰ksyj‰")."!</font><br>";
     $tee = 'E';
   }
@@ -1707,11 +1707,6 @@ if ($tee == 'P' or $tee == 'E') {
       $ulos .= "<option value ='$vrow[kuka]' $sel>$vrow[nimi]";
     }
 
-    // K‰yd‰‰n sama data l‰pi uudestaan
-    if (!mysql_data_seek($vresult, 0)) {
-      echo "mysql_data_seek failed!";
-      exit;
-    }
     echo "<select name='hyvak[$i]' tabindex='24'>
         <option value = ' '>".t("Ei kukaan")."
         $ulos

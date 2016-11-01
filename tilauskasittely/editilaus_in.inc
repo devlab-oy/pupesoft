@@ -250,6 +250,7 @@ $yhteyshenkilon_puhelin       = "";
 $ovt_tunnus                   = "";
 $ovt_tunnuswhere              = "";
 $noutopisteen_tunnus          = "";
+$ei_esteta_laskutusta         = true;
 
 // nollataan kaikki rivin muuttujat (nämä samat pitää tehdä tuote insertin jälkeen)
 $tuoteerror        = 1; // oletetaan aina ettei  tuotetta löydy
@@ -2314,12 +2315,14 @@ while ($tietue = fgets($fd)) {
                     !empty($ttrow['liitostunnus'])) {
                   $sallitaanjt = '';
                   $paikka = "¡¡¡{$ttrow['liitostunnus']}";
+                  $ei_esteta_laskutusta = false;
                 }
 
                 if ($suoratoimitus_asiakkaalle and in_array($ttrow["suoratoimitus"], array('', 'U')) and
                   !empty($ttrow['liitostunnus'])) {
                   $sallitaanjt = '';
                   $paikka = "!!!{$ttrow['liitostunnus']}";
+                  $ei_esteta_laskutusta = false;
                 }
               }
               else {
@@ -2558,7 +2561,7 @@ while ($tietue = fgets($fd)) {
         $paivita_takaisin_keraysjonoon = ($laskutettu_magento_tilaus and $editilaus_tilaustyyppi != "9");
 
         // jos meillä on maksettu magento tilaus
-        if ($laskutettu_magento_tilaus) {
+        if ($laskutettu_magento_tilaus and $ei_esteta_laskutusta) {
           // jos on annettu toimitusaika, asetetaan se laskun tapahtumapäiväksi
           if (!empty($editilaus_tilausaika)) {
             $_temp_date = strtotime($editilaus_tilausaika);

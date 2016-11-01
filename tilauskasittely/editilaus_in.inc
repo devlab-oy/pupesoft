@@ -2311,6 +2311,8 @@ while ($tietue = fgets($fd)) {
                 $ttres = pupe_query($query);
                 $ttrow = mysql_fetch_assoc($ttres);
 
+                $edi_ulos .= "ei_esteta_laskutusta: ".(int) $ei_esteta_laskutusta."\n";
+
                 if ($suoratoimitus_varastoon and in_array($ttrow["suoratoimitus"], array('', 'X')) and
                     !empty($ttrow['liitostunnus'])) {
                   $sallitaanjt = '';
@@ -2324,6 +2326,8 @@ while ($tietue = fgets($fd)) {
                   $paikka = "!!!{$ttrow['liitostunnus']}";
                   $ei_esteta_laskutusta = false;
                 }
+
+                $edi_ulos .= "ei_esteta_laskutusta: ".(int) $ei_esteta_laskutusta."\n";
               }
               else {
                 $query = "SELECT distinct varastopaikat.tunnus varasto, varastopaikat.prioriteetti
@@ -2559,6 +2563,8 @@ while ($tietue = fgets($fd)) {
         // jos magentosta tullut tilaus on jo maksettu, päivitetään se takaisin keräysjonoon
         // paitsi tilaustyyppi 9, jossa halutaan ohittaa varastoprosessi
         $paivita_takaisin_keraysjonoon = ($laskutettu_magento_tilaus and $editilaus_tilaustyyppi != "9");
+
+        $edi_ulos .= "ei_esteta_laskutusta: ".(int) $ei_esteta_laskutusta."\n";
 
         // jos meillä on maksettu magento tilaus
         if ($laskutettu_magento_tilaus and $ei_esteta_laskutusta) {

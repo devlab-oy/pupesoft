@@ -1759,6 +1759,8 @@ while ($tietue = fgets($fd)) {
       $result = pupe_query($query);
       $id = mysql_insert_id($GLOBALS["masterlink"]);
 
+      $edi_ulos .= query_dump($query);
+
       $query = "INSERT INTO laskun_lisatiedot SET
                 laskutus_nimi       = '$arow[laskutus_nimi]',
                 laskutus_nimitark   = '$arow[laskutus_nimitark]',
@@ -2568,6 +2570,9 @@ while ($tietue = fgets($fd)) {
 
         // jos meillä on maksettu magento tilaus
         if ($laskutettu_magento_tilaus and $ei_esteta_laskutusta) {
+
+          $edi_ulos .= "ei tänne...\n";
+
           // jos on annettu toimitusaika, asetetaan se laskun tapahtumapäiväksi
           if (!empty($editilaus_tilausaika)) {
             $_temp_date = strtotime($editilaus_tilausaika);
@@ -2583,6 +2588,8 @@ while ($tietue = fgets($fd)) {
             $laskurow['sisainen'] = 'o';
           }
         }
+
+        $edi_ulos .= "\n".var_dump($laskurow)."\n";
 
         // Laitetaan tilaus valmiiksi
         require "tilaus-valmis.inc";

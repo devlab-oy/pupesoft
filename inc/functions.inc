@@ -33991,7 +33991,8 @@ if (!function_exists("laskun_hyvaksyjia")) {
     $query = " SELECT count(*) kpl
                FROM kuka
                WHERE yhtio = '$kukarow[yhtio]'
-               AND hyvaksyja != ''";
+               AND hyvaksyja != ''
+               AND extranet = ''";
     $hyv_res = pupe_query($query);
     $hyv_row = mysql_fetch_assoc($hyv_res);
     

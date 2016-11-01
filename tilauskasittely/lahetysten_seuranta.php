@@ -202,7 +202,7 @@ if ($tee == 'hae') {
             }
 
             if (substr($era_row['sscc_ulkoinen'], 0, 4) == "JJFI") {
-              echo " / <a class='linkki' target=newikkuna href='http://www.posti.fi/henkiloasiakkaat/seuranta/#/{$era_row['sscc_ulkoinen']'>Posti</a>";
+              echo " / <a class='linkki' target=newikkuna href='http://www.posti.fi/henkiloasiakkaat/seuranta/#/lahetys/{$era_row['sscc_ulkoinen']'>Posti</a>";
             }
 
             if (substr($era_row['sscc_ulkoinen'], 0, 2) == "MA") {

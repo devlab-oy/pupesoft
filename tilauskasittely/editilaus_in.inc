@@ -2568,6 +2568,13 @@ while ($tietue = fgets($fd)) {
 
         $edi_ulos .= "ei_esteta_laskutusta: ".(int) $ei_esteta_laskutusta."\n";
 
+        if ($ei_esteta_laskutusta) {
+          $kateisohitus = "";
+        }
+        else {
+          $kateisohitus = "X";
+        }
+
         // jos meillä on maksettu magento tilaus
         if ($laskutettu_magento_tilaus and $ei_esteta_laskutusta) {
 

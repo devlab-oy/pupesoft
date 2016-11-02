@@ -108,7 +108,7 @@ if (!function_exists('finvoice_otsik')) {
       if ($receiverintermediator == '' and $yhtiorow["verkkolasku_lah"] == "maventa")  {
         $receiverintermediator = 'n/a';
       }
-      
+
       // Talenomiin l‰hetet‰‰n kaikki laskut, joten t‰g‰t‰‰n itse l‰heteyt s‰hkˆpostilaskut ja sis‰iset laskut n‰in
       if ($yhtiorow["verkkolasku_lah"] == "talenom" and ($lasrow["chn_orig"] == "666" or $lasrow["chn_orig"] == "667")) {
         $receiverpartyid = "Email";
@@ -502,7 +502,7 @@ if (!function_exists('finvoice_otsik')) {
       xml_add("OriginCode", "Original", $tootfinvoice);
       xml_add("InvoiceNumber", $lasrow['laskunro'], $tootfinvoice, 20, 1);
       xml_add("InvoiceDate Format=\"CCYYMMDD\"", vlas_dateconv($lasrow['tapvm']), $tootfinvoice);
-      xml_add("SellerReferenceIdentifier", $lasrow['tunnus'], $tootfinvoice);
+      xml_add("SellerReferenceIdentifier", $lasrow['tilausnumerot'], $tootfinvoice);
 
       if ($yhtiorow["verkkolasku_lah"] == "talenom") {
         xml_add("SellersBuyerIdentifier", substr($asiakasrow["asiakasnro"], 0, 35), $tootfinvoice, 35);
@@ -705,11 +705,6 @@ if (!function_exists('finvoice_row_freetext')) {
 
     if ($tilrow['tuoteno'] != $yhtiorow["kuljetusvakuutus_tuotenumero"] and $tilrow['tuoteno'] != $yhtiorow["laskutuslisa_tuotenumero"] and $tilrow['seuraava_otunnus'] != $tilrow["otunnus"]) {
 
-      // Laitetaan tilausviite t‰h‰n
-      if ($tilrow["laskuviesti"] != "") {
-        $lisakomm .= $tilrow["laskuviesti"];
-      }
-
       // T‰m‰ on tilauksen vika rivi, laitetaan tyˆm‰‰rystiedot t‰h‰n
       $query = "SELECT tyomaarays.*
                 FROM lasku
@@ -766,9 +761,19 @@ if (!function_exists('finvoice_row_freetext')) {
       }
     }
 
-    // Lis‰t‰‰n asiakkaan tilausnumero kommenttikentt‰‰n
-    if ($tilrow['asiakkaan_tilausnumero'] != "") {
-      $tilrow["kommentti"] .= "|"."Asiakkaan tilausnumero: ".$tilrow['asiakkaan_tilausnumero'];
+    // Laitetaan tilausnumero t‰h‰n
+    if ($yhtiorow["verkkolasku_lah"] == "talenom") {
+      $lisakomm .= "|".t("Tilaus", $kieli).": ".$tilrow["otunnus"];
+    }
+
+    // Laitetaan tilausviite t‰h‰n
+    if (!empty($tilrow["laskuviesti"])) {
+      $lisakomm .= "|".t("Viitteenne").": ".$tilrow["laskuviesti"];
+    }
+
+    // Laitetaan asiakkaan tilausnumero t‰h‰n
+    if (!empty($tilrow['asiakkaan_tilausnumero'])) {
+      $lisakomm .= "|".t("Tilauksenne", $kieli).": ".$tilrow['asiakkaan_tilausnumero'];
     }
 
     if (!empty($tullinimike_ja_alkuperamaa) and $tullinimike_ja_alkuperamaa != "") {

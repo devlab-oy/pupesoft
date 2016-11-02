@@ -596,15 +596,13 @@ if (!function_exists("tilauksesta_ostotilaus")) {
           }
           elseif (!empty($laskurow['email'])) {
             $komento['Ostotilaus'] = "toimittajaemail{$laskurow['email']}";
+            $luodaan_aineisto = true;
           }
           else {
             $komento['Ostotilaus'] = '';
           }
 
-          echo "<pre>",var_dump($komento),"</pre>";
-
           if (!empty($komento['Ostotilaus'])) {
-            echo "tulostellaan...";
             require 'tilauskasittely/tulosta_ostotilaus.inc';
           }
 

@@ -264,7 +264,11 @@ if (!function_exists('finvoice_otsik')) {
       fputs($tootfinvoice, "</MessageSenderDetails>\r\n");
 
       fputs($tootfinvoice, "<MessageReceiverDetails>\r\n");
-      xml_add("ToIdentifier", $receiverpartyid, $tootfinvoice, 35, 2);
+
+      // PPG:llä tässä voi olla sähköpostiosite, siksi pitempi.
+      $toid_len = ($yhtiorow["verkkolasku_lah"] == "ppg") ? 76 : 35;
+
+      xml_add("ToIdentifier", $receiverpartyid, $tootfinvoice, $toid_len, 2);
       xml_add("ToIntermediator", $receiverintermediator, $tootfinvoice, 35, 2);
       fputs($tootfinvoice, "</MessageReceiverDetails>\r\n");
 

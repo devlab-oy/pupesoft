@@ -5,7 +5,7 @@
 
 if (!function_exists("tilauksesta_ostotilaus")) {
   function tilauksesta_ostotilaus($otunnus, $tyyppi) {
-    global $yhtiorow, $kukarow, $toim, $pupe_root_polku;
+    global $yhtiorow, $kukarow, $toim, $pupe_root_polku, $komento;
 
     $tilauksesta_ostotilaus = "";
     $lisa_varattusiirto = "";

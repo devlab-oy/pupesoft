@@ -80,6 +80,12 @@ if (!function_exists('finvoice_otsik')) {
       }
       elseif (strpos($lasrow["verkkotunnus"], "@") !== FALSE) {
         list($receiverpartyid, $receiverintermediator) = explode("@", $lasrow["verkkotunnus"]);
+
+        // Verkkotunnus voi olla sähköpostiosoite:
+        if ($yhtiorow["verkkolasku_lah"] == "ppg" and strpos($receiverintermediator, ".") !== FALSE) {
+          $receiverpartyid = $lasrow["verkkotunnus"];
+          $receiverintermediator = "EMAIL";
+        }
       }
       else {
         $receiverpartyid = $lasrow["verkkotunnus"];

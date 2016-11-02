@@ -59,8 +59,6 @@ if ($komento['Ostotilaus'] == 'edi') {
 //muuten siitä tehdään peedeeäffä
 else {
 
-  pupesoft_log("tulosta_ostotilaus.inc", "tulosta_ostotilaus.inc else-haara");
-
   require_once "pdflib/phppdflib.class.php";
 
   if ($kieli== '') {
@@ -664,8 +662,6 @@ else {
       // Luodaan muuttujat
       extract($params);
 
-      pupesoft_log("tulosta_ostotilaus.inc", "tulosta_ostotilaus.inc function print_pdf");
-
       if ($komento["Ostotilaus"] != '' or $tee == 'NAYTATILAUS') {
         //keksitään uudelle failille joku varmasti uniikki nimi:
         list($usec, $sec) = explode(' ', microtime());
@@ -676,8 +672,6 @@ else {
         $fh = fopen($pdffilenimi, "w+");
         if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF kirjoitus epäonnistui $pdffilenimi");
         fclose($fh);
-
-        pupesoft_log("tulosta_ostotilaus.inc", "komento[Ostotilaus]: {$komento['Ostotilaus']}");
 
         // itse print komento...
         if ($komento["Ostotilaus"] == 'email' or substr($komento["Ostotilaus"], 0, 15) == 'toimittajaemail') {
@@ -693,8 +687,6 @@ else {
           if ($yhtiorow["liitetiedostojen_nimeaminen"] == "N") {
             $kutsu .= $laskunimi;
           }
-
-          pupesoft_log("tulosta_ostotilaus.inc", "Kutsutaan icn/sahkoposti.inc");
 
           require "inc/sahkoposti.inc";
           $tulosta_ostotilaus_ulos .= t("Tilaus tulostuu")."...<br>";

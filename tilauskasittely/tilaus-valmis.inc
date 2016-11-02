@@ -786,10 +786,18 @@ else {
     if ($laskurow['eilahetetta'] != '' or $laskurow['sisainen'] != '') {
       if ($laskurow['sisainen'] == '' and ($kateinen == 'X' or $itsetulostus == "X"
           or $laskurow["vienti"] != '')) {
+
         // Jos kyseess‰ on k‰teismyynti‰ tai maksuehdolla on itsetulostust‰pp‰ tai vienti‰,
         // merkataan tilaukset ker‰tyksi mutta ei toimitetuksi ja alatila C/B
         // tai toimitettu tilaus muutetaan maksuehdosta k‰teiseksi, tila pysyy D
-        if ($laskurow["alatila"] == 'D') {
+
+        // Magento p‰‰stet‰‰n suoraan toimitetuksi, vaikka olisikin k‰teismyynniksi merkitty
+        $_magento = false;
+        if (($laskurow['laatija'] == 'Magento' and $laskurow['ohjelma_moduli'] == 'MAGENTO' and $kateinen == 'X') {
+          $_magento = true;
+        }
+
+        if ($laskurow["alatila"] == 'D' or $_magento) {
           $alat = "D";
         }
         elseif ($laskurow["vienti"] != '') {

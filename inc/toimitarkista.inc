@@ -29,7 +29,7 @@ if (!function_exists("toimitarkista")) {
         $t[$i] = $tmp_nimi;
       }
 
-      if (trim($t[$i]) == '' and ($yhtiorow['jalkilaskenta_kuluperuste'] != 'VS' or $alias_set == "KAYTTAJA")) {
+      if (trim($t[$i]) == '' and ($yhtiorow['jalkilaskenta_kuluperuste'] != 'VS' or $alias_set == "KAYTTAJA") and laskun_hyvaksyjia()) {
         $virhe[$i] = t("Tieto puuttuu");
       }
     }

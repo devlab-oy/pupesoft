@@ -793,7 +793,7 @@ else {
 
         // Magento p‰‰stet‰‰n suoraan toimitetuksi, vaikka olisikin k‰teismyynniksi merkitty
         $_magento = false;
-        if (($laskurow['laatija'] == 'Magento' and $laskurow['ohjelma_moduli'] == 'MAGENTO' and $kateinen == 'X') {
+        if ($laskurow['laatija'] == 'Magento' and $laskurow['ohjelma_moduli'] == 'MAGENTO' and $kateinen == 'X') {
           $_magento = true;
         }
 

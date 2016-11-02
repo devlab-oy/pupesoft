@@ -465,7 +465,8 @@ if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumer
         $komm .= "\n".t("Tilaaja", $laskun_kieli).": ".$lasrow['tilausyhteyshenkilo'];
       }
 
-      if (trim($lasrow['asiakkaan_tilausnumero']) != '') {
+      // Talenomilla tämä visualisoidaan muutenkin, eli ei tarvtse änkeä tähän kommenttiin.
+      if ($yhtiorow["verkkolasku_lah"] != "talenom" and trim($lasrow['asiakkaan_tilausnumero']) != '') {
         $komm .= "\n".t("Tilauksenne", $laskun_kieli).": ".$lasrow['asiakkaan_tilausnumero'];
       }
 

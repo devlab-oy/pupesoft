@@ -788,7 +788,7 @@ if ($tila == "" and !isset($jatka)) {
       $tiedot_laskulta = "YES";
     }
 
-    if (strtolower($from) == 'asiakasyllapito' and $asiakasid != '') {
+    if (strtolower($from) == 'asiakasyllapito' and !empty($asiakasid) and !empty($kukarow["kesken"])) {
       $tiedot_laskulta = "YES";
     }
 

@@ -33984,6 +33984,27 @@ if (!function_exists('tilausrivin_esisyotto')) {
   }
 }
 
+if (!function_exists("laskun_hyvaksyjia")) {
+  function laskun_hyvaksyjia() {
+    global $kukarow, $yhtiorow;
+
+    $query = " SELECT count(*) kpl
+               FROM kuka
+               WHERE yhtio = '$kukarow[yhtio]'
+               AND hyvaksyja != ''
+               AND extranet = ''";
+    $hyv_res = pupe_query($query);
+    $hyv_row = mysql_fetch_assoc($hyv_res);
+    
+    if ($hyv_row['kpl'] > 0) {
+      return true;
+    }
+    else {
+      return false;
+    }
+  }
+}
+
 if (!function_exists("laske_korko")) {
   function laske_korko(Array $params) {
     global $kukarow, $yhtiorow;

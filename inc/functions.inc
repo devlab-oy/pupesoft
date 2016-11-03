@@ -33923,6 +33923,10 @@ if (!function_exists('tilausrivin_esisyotto')) {
     // Tutkitaan onko tämä myyty ulkomaan alvilla
     list($hinta, $netto, $ale, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $tuoterow, $kpl);
 
+    if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"])) and $laskurow["vienti_kurssi"] != 0) {
+      $hinta = hintapyoristys(laskuval($hinta, $laskurow["vienti_kurssi"]));
+    }
+
     $hinta = trim($hinta_ajax) != '' ? $hinta_ajax : $hinta;
 
     $ale_arr = array();
@@ -33969,10 +33973,6 @@ if (!function_exists('tilausrivin_esisyotto')) {
 
     $kate = laske_tilausrivin_kate($arr, $kotisumma_kate, $tuoterow['kehahin']);
 
-    if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"])) and $laskurow["vienti_kurssi"] != 0) {
-      $hinta = hintapyoristys(laskuval($hinta, $laskurow["vienti_kurssi"]));
-    }
-
     return array(
         'hinta' => round($hinta, $yhtiorow['hintapyoristys']),
         'netto' => $netto,
@@ -33995,7 +33995,7 @@ if (!function_exists("laskun_hyvaksyjia")) {
                AND extranet = ''";
     $hyv_res = pupe_query($query);
     $hyv_row = mysql_fetch_assoc($hyv_res);
-    
+
     if ($hyv_row['kpl'] > 0) {
       return true;
     }

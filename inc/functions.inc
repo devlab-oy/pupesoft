@@ -33897,7 +33897,7 @@ if (!function_exists('tilausrivin_esisyotto')) {
 
     $tilausnumero           = $params['tilausnumero'];
     $tuoteno                = $params['tuoteno'];
-    $hinta_ajax             = $params['hinta_ajax'];
+    $hinta_ajax             = str_replace(",", ".", $params['hinta_ajax']);
     $kpl                    = $params['kpl'];
     $ale1                   = $params['ale1'];
     $ale2                   = $params['ale2'];

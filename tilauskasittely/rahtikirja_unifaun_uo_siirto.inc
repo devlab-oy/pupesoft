@@ -75,7 +75,7 @@ if ($yhtiorow['kerayserat'] != 'K' and $kollityht > 0) {
     }
 
     $unifaun->setKirjoitin($kirjoitin_row['unifaun_nimi']);
-    $unifaun->_getXML();
+    $unifaun->_getXML($vak_tiedot);
 
     foreach ($pakkaus as $indeksi => $pakkaus_selite) {
 

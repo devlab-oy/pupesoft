@@ -225,7 +225,7 @@ class Unifaun {
 
   }
 
-  public function _getXML() {
+  public function _getXML($vak_tuotteita = array()) {
 
     $xmlstr  = '<?xml version="1.0" encoding="UTF-8"?><printserver></printserver>';
 
@@ -752,6 +752,19 @@ class Unifaun {
     if (in_array($this->toitarow['virallinen_selite'], $_DLV00)) {
       $uni_ser_val = $uni_service->addChild('addon');
       $uni_ser_val->addAttribute('adnid', "DLV00");
+    }
+
+    // Postin peruspalvelukoodit jotka tukee lisäpalvelua "Vaarallisten aineiden kuljetus (VAK) / LQ Kuljetus"
+    $_sallitut_posti_vak_palvelut = array(
+      'POF1',
+      'PO2144',
+      'PO2102',
+      'PO2104',
+    );
+
+    if (count($vak_tuotteita) > 0 and in_array($_virallinen_selite, $_sallitut_posti_vak_palvelut)) {
+      $uni_ser_val = $uni_service->addChild('addon');
+      $uni_ser_val->addAttribute('adnid', "DNG");
     }
 
     if (trim($this->toitarow['lajittelupiste']) != "") {

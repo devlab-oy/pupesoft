@@ -423,7 +423,7 @@ default:
 }
 
 //  Tarkastetaan käsinsyötetty viite
-if (isset($jatka) and $kasinsyotetty_viite != "" and $viitten_kasinsyotto_sallittu) {
+if (isset($jatka) and !empty($kasinsyotetty_viite) and $viitten_kasinsyotto_sallittu) {
   if (substr($kasinsyotetty_viite, 0, 2) != "RF" and tarkista_viite($kasinsyotetty_viite) === FALSE) {
     echo "<font class='error'>".t("VIRHE: Syötetty viite '%s' on väärin", $kieli, $kasinsyotetty_viite)."!</font><br>";
     $tee  = "OTSIK";
@@ -3235,7 +3235,7 @@ if ($tila == "" and !isset($jatka)) {
           pupe_query($updquery);
         }
       }
-      
+
       if ($kukarow['kieli'] != '') {
         $kieli = $kukarow['kieli'];
       }

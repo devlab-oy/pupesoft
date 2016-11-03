@@ -52,13 +52,13 @@ try {
 
     foreach ($match[0] as $nro) {
       $nro = str_replace(" ", "", $nro);
-      $magLinkurl .= "<a target=newikkuna href='http://www.verkkoposti.com/e3/TrackinternetServlet?lang=fi&LOTUS_hae=Hae&LOTUS_side=1&LOTUS_trackId={$nro}&LOTUS_hae=Hae'>{$nro}</a><br>";
+      $magLinkurl .= "<a target=newikkuna href='http://www.posti.fi/henkiloasiakkaat/seuranta/#/lahetys/{$nro}'>{$nro}</a><br>";
     }
 
     $magLinkurl = substr($magLinkurl, 0, -4); // vika br pois
   }
   elseif (stripos($magento_api_met, "mypack") !== FALSE) {
-    $magLinkurl .= "<a target=newikkuna href='http://www.postnordlogistics.fi/en/Online-services/Pages/Track-and-Trace.aspx?search={$magento_api_rak}'>{$magento_api_rak}</a><br>";
+    $magLinkurl .= "<a target=newikkuna href='http://www.postnord.fi/fi/yritysasiakkaat/asiakaspalvelu/sahkoinen-asiointi/Sivut/Lahetysten-seuranta.aspx?view=item&itemid={$magento_api_rak}'>{$magento_api_rak}</a><br>";
   }
   else {
     $magLinkurl .= "$magento_api_met / $magento_api_rak<br>";

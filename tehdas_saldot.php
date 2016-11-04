@@ -13,8 +13,6 @@ else {
     die ("Et antanut lähettävää yhtiötä!\n");
   }
 
-  $cli = true;
-
   date_default_timezone_set('Europe/Helsinki');
 
   // otetaan includepath aina rootista
@@ -30,8 +28,18 @@ else {
   $kukarow['kuka']  = 'admin';
   $kukarow['kieli'] = 'fi';
   $operaattori      = 'tehdas_saldot';
+  $yhtiorow         = hae_yhtion_parametrit($kukarow['yhtio']);
+  $cli              = true;
+  $tuotenumeron_sijainti_pupessa = 'tuoteno';
 
-  $yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
+  if (isset($argv[2])) {
+    $argv[2] = trim($argv[2]);
+
+    $tuotenumeron_sijainti_pupessa = $argv[2] == 'toim_tuoteno' ? 'toim_tuoteno' : 'tuoteno';
+  }
+
+  // Setataan tämä, niin ftp-get.php toimii niin kuin pitäisikin
+  $argv[1] = $operaattori;
 
   /******* Tarvittavat ftpget-muuttujat *******
   * $ftpget_email
@@ -46,9 +54,6 @@ else {
   * $ftpget_filt (optional)
   * $ftpget_no_delete (optional)
   */
-
-  // Setataan tämä, niin ftp-get.php toimii niin kuin pitäisikin
-  $argv[1] = $operaattori;
 
   require 'ftp-get.php';
 
@@ -314,6 +319,25 @@ if ($tee == 'GO' and $error == 0) {
       }
 
       foreach ($tuote as $index => $tuoteno) {
+
+        if ($cli === true) {
+          $query = "SELECT tt.liitostunnus, if (tt.jarjestys = 0, 9999, tt.jarjestys) sorttaus
+                    FROM tuotteen_toimittajat AS tt
+                    JOIN toimi on (toimi.yhtio = tt.yhtio and toimi.tunnus = tt.liitostunnus)
+                    WHERE tt.yhtio = '{$kukarow['yhtio']}'
+                    and tt.tuoteno = '{$tuoteno}'
+                    ORDER BY sorttaus
+                    LIMIT 1";
+          $ttres = pupe_query($query);
+
+          if (mysql_num_rows($ttres) == 0) {
+            pupesoft_log('tehdas_saldot', "Tuotteen toimittajaa ei löydy tuotteelle {$tuoteno}");
+            continue;
+          }
+
+          $ttrow = mysql_fetch_assoc($ttres);
+          $tuotteen_toimittaja = $ttrow['liitostunnus'];
+        }
 
         $query = "UPDATE tuotteen_toimittajat SET
                   tehdas_saldo            = '{$saldo[$index]}',

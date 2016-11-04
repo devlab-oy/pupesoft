@@ -55,6 +55,8 @@ else {
   * $ftpget_no_delete (optional)
   */
 
+  pupesoft_log('tehdas_saldot', "Aloitetaan tehtaan saldojen haku FTP:llä osoitteesta {$ftpget_host[$operaattori]}");
+
   require 'ftp-get.php';
 
   $handle = opendir($ftpget_dest[$operaattori]);

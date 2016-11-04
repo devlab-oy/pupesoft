@@ -201,14 +201,18 @@ if ($tee == 'GO' and $error == 0) {
       $error++;
     }
 
-    if (is_uploaded_file($_FILES['userfile']['tmp_name']) === true) {
+    if ($error == 0 and is_uploaded_file($_FILES['userfile']['tmp_name']) === true) {
       $file = tarkasta_liite("userfile", array("XLS", "TXT", "CSV"));
     }
     else {
       $error++;
     }
 
-    if ($file === false) $error++;
+    if ($file !== true) {
+      pupesoft_log('tehdas_saldot', $file);
+
+      $error++;
+    }
   }
 
   if ($error == 0) {

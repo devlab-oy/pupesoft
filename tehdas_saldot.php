@@ -1,8 +1,89 @@
 <?php
 
-require "inc/parametrit.inc";
+// Kutsutaanko CLI:st‰
+if (PHP_SAPI != 'cli') {
+  require "inc/parametrit.inc";
 
-echo "<font class='head'>".t("Tehtaan saldot")."</font><hr>";
+  $cli = false;
+
+  echo "<font class='head'>".t("Tehtaan saldot")."</font><hr>";
+}
+else {
+  if (trim($argv[1]) == '') {
+    die ("Et antanut l‰hett‰v‰‰ yhtiˆt‰!\n");
+  }
+
+  $cli = true;
+
+  date_default_timezone_set('Europe/Helsinki');
+
+  // otetaan includepath aina rootista
+  ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(__FILE__).PATH_SEPARATOR."/usr/share/pear");
+  error_reporting(E_ALL ^E_WARNING ^E_NOTICE);
+  ini_set("display_errors", 0);
+
+  // otetaan tietokanta connect
+  require "inc/connect.inc";
+  require "inc/functions.inc";
+
+  $kukarow['yhtio'] = (string) $argv[1];
+  $kukarow['kuka']  = 'admin';
+  $kukarow['kieli'] = 'fi';
+  $operaattori      = 'tehdas_saldot';
+
+  $yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
+
+  /******* Tarvittavat ftpget-muuttujat *******
+  * $ftpget_email
+  * $ftpget_emailfrom
+  * $ftpget_host
+  * $ftpget_user
+  * $ftpget_pass
+  * $ftpget_path
+  * $ftpget_dest
+  * $ftpget_port (optional)
+  * $ftpget_ei_passive (optional)
+  * $ftpget_filt (optional)
+  * $ftpget_no_delete (optional)
+  */
+
+  // Setataan t‰m‰, niin ftp-get.php toimii niin kuin pit‰isikin
+  $argv[1] = $operaattori;
+
+  require 'ftp-get.php';
+
+  $handle = opendir($ftpget_dest[$operaattori]);
+
+  if ($handle === false) {
+    pupesoft_log('tehdas_saldot', "Kansiota {$ftpget_dest[$operaattori]} ei pysty avaamaan");
+    exit;
+  }
+
+  while (($file = readdir($handle)) !== false) {
+    if (is_file($ftpget_dest[$operaattori]."/".$file) === false) continue;
+
+    $userfile = $ftpget_dest[$operaattori]."/".$file;
+
+    $file = array();
+    $file["name"]     = basename($userfile);
+    $file["type"]     = mime_content_type($userfile);
+    $file["tmp_name"] = $userfile;
+    $file["error"]    = 0;
+    $file["size"]     = filesize($userfile);
+
+    $_FILES[$userfile] = $file;
+
+    $tee = 'GO';
+    $error = 0;
+
+    break;
+  }
+
+  if (empty($file)) {
+    pupesoft_log('tehdas_saldot', "Yht‰‰n luettavaa tiedostoa ei lˆytynyt kansiosta {$ftpget_dest[$operaattori]}");
+    exit;
+  }
+}
 
 if (!isset($tee)) $tee = '';
 if (!isset($tuotteen_toimittaja)) $tuotteen_toimittaja = '';
@@ -49,73 +130,80 @@ if ($tee == 'uusiraportti') {
 
 if ($tee == 'GO' and $error == 0) {
 
-  if (trim($tuotteen_toimittaja) == '') {
-    echo "<font class='error'>", t("Et valinnut toimittajaa"), "!</font><br/>";
-    $tee = '';
-    $error++;
-  }
-
-  if (trim($tuotenumeron_sarake) == '') {
-    echo "<font class='error'>", t("Et sy‰tt‰nyt tuotenumeron sarakenumeroa"), "!</font><br/>";
-    $tee = '';
-    $error++;
-  }
-  elseif (!is_numeric($tuotenumeron_sarake)) {
-    echo "<font class='error'>", t("Tuotenumeron sarakenumero t‰ytyy olla numeerinen"), "!</font><br/>";
-    $tee = '';
-    $error++;
-  }
-
-  if (trim($tehtaan_saldon_sarake) == '') {
-    echo "<font class='error'>", t("Et sy‰tt‰nyt tehtaan saldon sarakenumeroa"), "!</font><br/>";
-    $tee = '';
-    $error++;
-  }
-  elseif (!is_numeric($tehtaan_saldon_sarake)) {
-    echo "<font class='error'>", t("Tehtaan saldon sarakenumero t‰ytyy olla numeerinen"), "!</font><br/>";
-    $tee = '';
-    $error++;
-  }
-
-  if ($tuotenumeron_sarake == $tehtaan_saldon_sarake) {
-    echo "<font class='error'>", t("Tuotenumeron sarakenumero ja tehtaan saldon sarakenumero eiv‰t saa olla samat"), "!</font><br/>";
-    $tee = '';
-    $error++;
-  }
-
-  if ($tuotenumeron_sarake == 0 or $tehtaan_saldon_sarake == 0) {
-    echo "<font class='error'>", t("Tuotenumeron sarakenumero tai tehtaan saldon sarakenumero eiv‰t saa olla nollaa"), "!</font><br/>";
-    $tee = '';
-    $error++;
-  }
-
-  if (!isset($_FILES['userfile']['error']) or $_FILES['userfile']['error'] == 4) {
-    echo "<font class='error'>", t("Et valinnut tiedostoa"), "!</font><br/>";
-    $tee = '';
-    $error++;
-  }
-  else {
-
-    $path_parts = pathinfo($_FILES['userfile']['name']);
-
-    if (strtolower($path_parts['extension']) != 'xls' and strtolower($path_parts['extension']) != 'txt' and strtolower($path_parts['extension']) != 'csv') {
-      echo "<font class='error'>", t("Virheellinen tiedostop‰‰te"), "!</font><br/>";
+  if ($cli === false) {
+     if (trim($tuotteen_toimittaja) == '') {
+      echo "<font class='error'>", t("Et valinnut toimittajaa"), "!</font><br/>";
       $tee = '';
       $error++;
     }
 
-    if (is_uploaded_file($_FILES['userfile']['tmp_name']) == TRUE) {
+    if (trim($tuotenumeron_sarake) == '') {
+      echo "<font class='error'>", t("Et sy‰tt‰nyt tuotenumeron sarakenumeroa"), "!</font><br/>";
+      $tee = '';
+      $error++;
+    }
+    elseif (!is_numeric($tuotenumeron_sarake)) {
+      echo "<font class='error'>", t("Tuotenumeron sarakenumero t‰ytyy olla numeerinen"), "!</font><br/>";
+      $tee = '';
+      $error++;
+    }
+
+    if (trim($tehtaan_saldon_sarake) == '') {
+      echo "<font class='error'>", t("Et sy‰tt‰nyt tehtaan saldon sarakenumeroa"), "!</font><br/>";
+      $tee = '';
+      $error++;
+    }
+    elseif (!is_numeric($tehtaan_saldon_sarake)) {
+      echo "<font class='error'>", t("Tehtaan saldon sarakenumero t‰ytyy olla numeerinen"), "!</font><br/>";
+      $tee = '';
+      $error++;
+    }
+
+    if ($tuotenumeron_sarake == $tehtaan_saldon_sarake) {
+      echo "<font class='error'>", t("Tuotenumeron sarakenumero ja tehtaan saldon sarakenumero eiv‰t saa olla samat"), "!</font><br/>";
+      $tee = '';
+      $error++;
+    }
+
+    if ($tuotenumeron_sarake == 0 or $tehtaan_saldon_sarake == 0) {
+      echo "<font class='error'>", t("Tuotenumeron sarakenumero tai tehtaan saldon sarakenumero eiv‰t saa olla nollaa"), "!</font><br/>";
+      $tee = '';
+      $error++;
+    }
+
+    if (!isset($_FILES['userfile']['error']) or $_FILES['userfile']['error'] == 4) {
+      echo "<font class='error'>", t("Et valinnut tiedostoa"), "!</font><br/>";
+      $tee = '';
+      $error++;
+    }
+  }
+
+  if ($error == 0) {
+    $path_parts = pathinfo($_FILES['userfile']['name']);
+
+    if (strtolower($path_parts['extension']) != 'xls' and strtolower($path_parts['extension']) != 'txt' and strtolower($path_parts['extension']) != 'csv') {
+      if ($cli === true) {
+        pupesoft_log('tehdas_saldot', "Virheellinen tiedostop‰‰te: ".strtolower($path_parts['extension']));
+      }
+      else {
+        echo "<font class='error'>", t("Virheellinen tiedostop‰‰te"), "!</font><br/>";
+      }
+
+      $tee = '';
+      $error++;
+    }
+
+    if (is_uploaded_file($_FILES['userfile']['tmp_name']) === true) {
       $file = tarkasta_liite("userfile", array("XLS", "TXT", "CSV"));
     }
     else {
       $error++;
     }
 
-    if ($file === FALSE) $error++;
+    if ($file === false) $error++;
   }
 
   if ($error == 0) {
-
     $tuo_sarake = (int) $tuotenumeron_sarake - 1;
     $teh_sarake = (int) $tehtaan_saldon_sarake - 1;
 
@@ -134,17 +222,24 @@ if ($tee == 'GO' and $error == 0) {
       $saldo = array();
 
       for ($excei = 0; $excei < $data->sheets[0]['numRows']; $excei++) {
+        $cell = $data->sheets[0]['cells'][$excei];
 
-        if (!isset($data->sheets[0]['cells'][$excei][$tuo_sarake]) or !isset($data->sheets[0]['cells'][$excei][$teh_sarake])) {
-          echo "<font class='error'>", t("Virheellinen sarakenumero"), "!</font><br/>";
+        if (!isset($cell[$tuo_sarake]) or !isset($cell[$teh_sarake])) {
+          if ($cli === true) {
+            pupesoft_log('tehdas_saldot', "Virheellinen sarakenumero: {$teh_sarake}");
+          }
+          else {
+            echo "<font class='error'>", t("Virheellinen sarakenumero"), "!</font><br/>";
+          }
+
           $error++;
           unset($tuote);
           break;
         }
 
         // luetaan rivi tiedostosta..
-        $tuo = mysql_real_escape_string(trim($data->sheets[0]['cells'][$excei][$tuo_sarake]));
-        $sal = (float) str_replace(",", ".", trim($data->sheets[0]['cells'][$excei][$teh_sarake]));
+        $tuo = mysql_real_escape_string(trim($cell[$tuo_sarake]));
+        $sal = (float) str_replace(",", ".", trim($cell[$teh_sarake]));
 
         if ($tuo != '') {
           $tuote[] = $tuo;
@@ -176,7 +271,13 @@ if ($tee == 'GO' and $error == 0) {
         fclose($file);
       }
       else {
-        echo "<font class='error'>", t("Tiedoston avaus ep‰onnistui"), "!</font><br/>";
+        if ($cli === true) {
+          pupesoft_log('tehdas_saldot', "Tiedoston avaus ep‰onnistui: {$_FILES['userfile']['tmp_name']}");
+        }
+        else {
+          echo "<font class='error'>", t("Tiedoston avaus ep‰onnistui"), "!</font><br/>";
+        }
+
         $tee = '';
         $error++;
       }
@@ -186,7 +287,13 @@ if ($tee == 'GO' and $error == 0) {
       $tee = 'OK';
     }
     else {
-      echo "<font class='error'>", t("Tiedostosta ei luettu yht‰‰n tuotetta"), "!</font><br/>";
+      if ($cli === true) {
+        pupesoft_log('tehdas_saldot', "Tiedostosta ei luettu yht‰‰n tuotetta.");
+      }
+      else {
+        echo "<font class='error'>", t("Tiedostosta ei luettu yht‰‰n tuotetta"), "!</font><br/>";
+      }
+
       $tee = '';
       $error++;
     }
@@ -200,8 +307,8 @@ if ($tee == 'GO' and $error == 0) {
         $query = "UPDATE tuotteen_toimittajat SET
                   tehdas_saldo            = '0',
                   tehdas_saldo_paivitetty = now()
-                  WHERE yhtio             = '$kukarow[yhtio]'
-                  AND liitostunnus        = '$tuotteen_toimittaja'";
+                  WHERE yhtio             = '{$kukarow['yhtio']}'
+                  AND liitostunnus        = '{$tuotteen_toimittaja}'";
         $update_saldo_result = pupe_query($query);
       }
 
@@ -210,20 +317,25 @@ if ($tee == 'GO' and $error == 0) {
         $query = "UPDATE tuotteen_toimittajat SET
                   tehdas_saldo            = '{$saldo[$index]}',
                   tehdas_saldo_paivitetty = now()
-                  WHERE yhtio             = '$kukarow[yhtio]'
-                  AND liitostunnus        = '$tuotteen_toimittaja'
-                  AND $tuotenumeron_sijainti_pupessa = '$tuoteno'";
+                  WHERE yhtio             = '{$kukarow['yhtio']}'
+                  AND liitostunnus        = '{$tuotteen_toimittaja}'
+                  AND {$tuotenumeron_sijainti_pupessa} = '{$tuoteno}'";
         $update_saldo_result = pupe_query($query);
       }
 
-      echo "<font class='message'>", t("P‰ivitettiin"), " ", count($tuote), " ", t("tuotteen tehdas saldot"), ".</font><br/>";
+      if ($cli === true) {
+        pupesoft_log('tehdas_saldot', sprintf(t('P‰ivitettiin %d tuotteen tehdas saldot', '', count($tuote))));
+      }
+      else {
+        echo "<font class='message'>".sprintf(t('P‰ivitettiin %d tuotteen tehdas saldot', '', count($tuote))).".</font><br/>";
+      }
 
       $tee = '';
     }
   }
 }
 
-if ($tee == '') {
+if ($cli === false and $tee == '') {
 
   echo "<table>";
   echo "<form method='post' autocomplete='off' enctype='multipart/form-data'>";
@@ -322,4 +434,4 @@ if ($tee == '') {
   echo "</form></table>";
 }
 
-require "inc/footer.inc";
+if ($cli === false) require "inc/footer.inc";

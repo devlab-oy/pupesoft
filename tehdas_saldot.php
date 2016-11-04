@@ -75,6 +75,7 @@ else {
 
     $tee = 'GO';
     $error = 0;
+    $toiminto = '';
 
     break;
   }

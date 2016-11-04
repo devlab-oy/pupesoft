@@ -193,7 +193,7 @@ if ($tee == 'tulosta') {
 
     // Ollaan tässä skriptissä tulostamassa erärahtikirjoja
     // Unifaun keississä tämä tarkoittaa, että kutsutaan _closeWithPrinter() metodia
-    if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE and isset($tulosta_rahtikirjat_nappulatsukka) and ($toitarow["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc' or $toitarow["rahtikirja"] == 'rahtikirja_unifaun_uo_siirto.inc')) {
+    if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE and isset($tulosta_rahtikirjat_nappulatsukka) and preg_match("/rahtikirja_unifaun_(ps|uo)_siirto\.inc/", $toitarow["rahtikirja"])) {
       $tee = "close_with_printer";
     }
   }
@@ -206,8 +206,7 @@ if ($tee == 'tulosta') {
   }
 }
 
-$_onko_unifaun = ($toitarow["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc');
-$_onko_unifaun = ($_onko_unifaun or $toitarow["rahtikirja"] == 'rahtikirja_unifaun_uo_siirto.inc');
+$_onko_unifaun = preg_match("/rahtikirja_unifaun_(ps|uo|xp)_siirto\.inc/", $toitarow["rahtikirja"]);
 
 // Tulostetaan rahtikirja tai kutsutaan unifaunin _closeWithPrinter-metodia
 if ($tee == 'tulosta' or $tee == 'close_with_printer') {
@@ -1040,7 +1039,7 @@ if ($tee == 'tulosta') {
       if (!isset($nayta_pdf)) echo "$rahinta $jvtext<br>";
 
       // Kopsutulostus toistaiseksi vain A4-paperille unifaun keississä
-      if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") !== FALSE and ($toitarow["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc' or $toitarow["rahtikirja"] == 'rahtikirja_unifaun_uo_siirto.inc')) {
+      if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") !== FALSE and preg_match("/rahtikirja_unifaun_(ps|uo|xp)_siirto\.inc/", $toitarow["rahtikirja"])) {
         $toitarow["rahtikirja"] = "rahtikirja_pdf.inc";
       }
 
@@ -1302,7 +1301,7 @@ if ($tee == 'tulosta') {
       if ($_onko_unifaun and $_tulostustapa and $_paktiedot) {
         $tee = '';
       }
-      elseif ($toitarow['tulostustapa'] == 'H' or $toitarow['tulostustapa'] == 'K' or $toitarow["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc' or $toitarow["rahtikirja"] == 'rahtikirja_unifaun_uo_siirto.inc') {
+      elseif ($toitarow['tulostustapa'] == 'H' or $toitarow['tulostustapa'] == 'K' or preg_match("/rahtikirja_unifaun_(ps|uo|xp)_siirto\.inc/", $toitarow["rahtikirja"])) {
         $tee = 'XXX';
       }
       else {

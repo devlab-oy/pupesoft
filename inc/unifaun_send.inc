@@ -20,15 +20,40 @@ class Unifaun {
   private $mehto;
   private $xml;
   private $kirjoitin;
+  private $developerid;
+  private $unifauntype;
 
-  public function __construct($hostname, $username, $password, $ftppath, $ftpport, $ftpfail, $ftpsucc) {
-    $this->hostname = $hostname;
-    $this->username = $username;
-    $this->password = $password;
-    $this->ftppath   = $ftppath;
-    $this->ftpport   = $ftpport;
-    $this->ftpfail   = $ftpfail;
-    $this->ftpsucc   = $ftpsucc;
+  public function __construct() {
+  }
+
+  // FTP-siirto
+  public static function online($hostname, $username, $password, $ftppath, $ftpport, $ftpfail, $ftpsucc) {
+    $instance = new self();
+
+    $instance->unifauntype = "ONLINE";
+    $instance->hostname    = $hostname;
+    $instance->username    = $username;
+    $instance->password    = $password;
+    $instance->ftppath     = $ftppath;
+    $instance->ftpport     = $ftpport;
+    $instance->ftpfail     = $ftpfail;
+    $instance->ftpsucc     = $ftpsucc;
+
+    return $instance;
+  }
+
+  // XML-posting
+  public static function xmlposting($developerid, $username, $password, $ftpfail, $ftpsucc) {
+    $instance = new self();
+
+    $instance->unifauntype = "XMLPOSTING";
+    $instance->developerid = $developerid;
+    $instance->username    = $username;
+    $instance->password    = $password;
+    $instance->ftpfail     = $ftpfail;
+    $instance->ftpsucc     = $ftpsucc;
+
+    return $instance;
   }
 
   public function setYhtioRow($yhtiorow) {
@@ -163,8 +188,62 @@ class Unifaun {
     }
   }
 
+  public function xmlPost() {
+    $filenimi = "/tmp/unifaun-".md5(uniqid(rand(), true)).".txt";
+
+    //kirjoitetaan faili levylle..
+    if (file_put_contents($filenimi, $this->xml->asXML()) === FALSE) {
+      echo "<br><font class='error'>".t("VIRHE: tiedoston kirjoitus epäonnistui")."!</font><br>";
+    }
+    else {
+      $url     = "https://www.unifaunonline.com/ufoweb/order";
+      $user    = $this->username;
+      $pass    = $this->password;
+      $devi    = $this->developerid;
+      $ftpfail = $this->ftpfail;
+      $ftpsucc = $this->ftpsucc;
+
+      $f = fopen($filenimi, "r");
+
+      $ch = curl_init();
+      curl_setopt($ch, CURLOPT_URL, "{$url}?session=ufo_SE&user={$user}&pin={$pass}&developerid={$pass}&type=xml");
+      curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
+      curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, FALSE);
+      curl_setopt($ch, CURLOPT_POST, TRUE);
+      curl_setopt($ch, CURLOPT_HTTPHEADER, array("Content-Type: text/xml"));
+      curl_setopt($ch, CURLOPT_POSTFIELDS, fread($f, filesize($filenimi)));
+      curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+
+      $result = curl_exec($ch);
+
+      if ($result === FALSE) {
+        echo "<font class='error'>VIRHE:</font><br>\n";
+        echo curl_errno($ch) . " - " . curl_error($ch) . "</font><br>";
+        exit(1);
+      }
+      else {
+        echo "<pre>",var_dump($result),"</pre>";
+
+        $basefile = basename($filenimi);
+
+        // PSEUDO-COODIA
+        $KAIKKIOK = TRUE;
+
+        if ($KAIKKIOK and !empty($ftpsucc)) {
+          // Siirretään faili talteen jos siirto onnasi ja ok failit halutaan tallentaa
+          rename($filenimi, $ftpsucc."/".$basefile);
+        }
+        elseif (!empty($ftpfail)) {
+          // Siirretään faili outboxiin odottamaan uutta yritystä jos siirto feilasi
+          rename($filenimi, $ftpfail."/".$basefile);
+        }
+      }
+
+      curl_close($ch);
+    }
+  }
+
   public function _saveForDebug($postfix = "") {
-    //$filenimi = "/Users/sami/Sites/pupesoft/dataout/unifaun-{$postfix}-{$this->toitarow['selite']}-".md5(uniqid(rand(),true)).".txt";
     $filenimi = "/tmp/unifaun-{$postfix}-{$this->toitarow['selite']}-".md5(uniqid(rand(), true)).".txt";
 
     //kirjoitetaan faili levylle..
@@ -222,12 +301,16 @@ class Unifaun {
     $uni_discard_val->addAttribute('n', 'parcelno');
 
     $this->xml = $xml;
-
   }
 
   public function _getXML() {
 
-    $xmlstr  = '<?xml version="1.0" encoding="UTF-8"?><printserver></printserver>';
+    if ($this->unifauntype == "ONLINE") {
+      $xmlstr  = '<?xml version="1.0" encoding="UTF-8"?><printserver></printserver>';
+    }
+    else {
+      $xmlstr  = '<?xml version="1.0" encoding="UTF-8"?><unifaunonline></unifaunonline>';
+    }
 
     $query = "SELECT *
               FROM rahdinkuljettajat

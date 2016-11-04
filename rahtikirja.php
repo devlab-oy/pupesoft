@@ -856,7 +856,7 @@ if ($tee == 'add') {
 
       // tämä toimitustapa pitäisi tulostaa nyt..
       if ($row['nouto'] == '' and ($row['tulostustapa'] == 'H' or $row['tulostustapa'] == 'K' or
-          ($row['tulostustapa'] != 'L' and ($row["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc' or $row["rahtikirja"] == 'rahtikirja_unifaun_uo_siirto.inc')))) {
+          ($row['tulostustapa'] != 'L' and preg_match("/rahtikirja_unifaun_(ps|uo|xp)_siirto\.inc/", $row["rahtikirja"])))) {
         // rahtikirjojen tulostus vaatii seuraavat muuttujat:
 
         // $toimitustapa_varasto  toimitustavan selite!!!!varastopaikan tunnus
@@ -866,12 +866,12 @@ if ($tee == 'add') {
         $tee              = "tulosta";
         $unifaun_era_vainkollitarra = FALSE;
 
-        if ($row['tulostustapa'] == 'E' and ($row["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc' or $row["rahtikirja"] == 'rahtikirja_unifaun_uo_siirto.inc')) {
+        if ($row['tulostustapa'] == 'E' and preg_match("/rahtikirja_unifaun_(ps|uo)_siirto\.inc/", $row["rahtikirja"])) {
           $unifaun_era_vainkollitarra = TRUE;
         }
 
         // triggeröidään tämä, niin ei tulosteta liikaa rahtikirjoja
-        if ($row["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc' or $row["rahtikirja"] == 'rahtikirja_unifaun_uo_siirto.inc') {
+        if (preg_match("/rahtikirja_unifaun_(ps|uo|xp)_siirto\.inc/", $row["rahtikirja"])) {
           $sel_ltun = explode(",", $tunnukset);
         }
 
@@ -2877,7 +2877,7 @@ if (($id == 'dummy' and $mista == 'rahtikirja-tulostus.php') or $id != 0) {
         echo "<input type='hidden' name='erikoispakkaus[{$i}]' value='{$keraysera_row['erikoispakkaus']}'>";
       }
 
-      if ((strtoupper($tulostustapa) == 'E' or strtoupper($tulostustapa) == 'L') and $yhtiorow['oletus_rahtikirja_oslappkpl'] != 0 and $toitarow["rahtikirja"] != 'rahtikirja_unifaun_ps_siirto.inc' and $toitarow["rahtikirja"] != 'rahtikirja_unifaun_uo_siirto.inc') {
+      if ((strtoupper($tulostustapa) == 'E' or strtoupper($tulostustapa) == 'L') and $yhtiorow['oletus_rahtikirja_oslappkpl'] != 0 and !preg_match("/rahtikirja_unifaun_(ps|uo|xp)_siirto\.inc/", $toitarow["rahtikirja"])) {
         echo "<input type='text' size='4' value='{$kollit[$i]}' name='kollit[{$i}]' onKeyUp='summaa_kollit(this);'></td>";
       }
       else {
@@ -2983,7 +2983,7 @@ if (($id == 'dummy' and $mista == 'rahtikirja-tulostus.php') or $id != 0) {
       echo "<input type='hidden' name='erikoispakkaus[$i]' value='$row[pakkaus]'>";
     }
 
-    if ((strtoupper($tulostustapa) == 'E' or strtoupper($tulostustapa) == 'L') and $yhtiorow['oletus_rahtikirja_oslappkpl'] != 0 and $toitarow["rahtikirja"] != 'rahtikirja_unifaun_ps_siirto.inc' and $toitarow["rahtikirja"] != 'rahtikirja_unifaun_uo_siirto.inc') {
+    if ((strtoupper($tulostustapa) == 'E' or strtoupper($tulostustapa) == 'L') and $yhtiorow['oletus_rahtikirja_oslappkpl'] != 0 and !preg_match("/rahtikirja_unifaun_(ps|uo|xp)_siirto\.inc/", $toitarow["rahtikirja"])) {
       echo "<input type='text' size='4' value='$kollit[$i]' name='kollit[$i]' onKeyUp='summaa_kollit(this);'></td>";
     }
     else {
@@ -3220,7 +3220,7 @@ if (($id == 'dummy' and $mista == 'rahtikirja-tulostus.php') or $id != 0) {
     $oslappkpl_hidden = 0;
     $disabled = '';
 
-    if ($toitarow["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc' or $toitarow["rahtikirja"] == 'rahtikirja_unifaun_uo_siirto.inc') {
+    if (preg_match("/rahtikirja_unifaun_(ps|uo|xp)_siirto\.inc/", $toitarow["rahtikirja"])) {
       $oslappkpl = 0;
     }
     elseif ($yhtiorow['oletus_rahtikirja_oslappkpl'] > 0 and ($yhtiorow['kerayserat'] == 'P' or $yhtiorow['kerayserat'] == 'A')) {

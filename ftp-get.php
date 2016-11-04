@@ -86,7 +86,10 @@ if ($ftpget_host[$operaattori] != '' and $ftpget_user[$operaattori] != '' and $f
         }
         elseif ($fileget) {
           rename($temp_filename, $ftpget_dest[$operaattori]."/".$file);
-          ftp_delete($conn_id, $file);
+
+          if (!isset($ftpget_no_delete[$operaattori]) or $ftpget_no_delete[$operaattori] == "") {
+            ftp_delete($conn_id, $file);
+          }
         }
         else {
           echo "VIRHE: Tiedoston $file lataus epaonnistui!\n";

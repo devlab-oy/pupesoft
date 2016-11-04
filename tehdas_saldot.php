@@ -24,12 +24,12 @@ else {
   require "inc/connect.inc";
   require "inc/functions.inc";
 
+  $cli              = true;
   $kukarow['yhtio'] = (string) $argv[1];
   $kukarow['kuka']  = 'admin';
   $kukarow['kieli'] = 'fi';
   $operaattori      = 'tehdas_saldot';
   $yhtiorow         = hae_yhtion_parametrit($kukarow['yhtio']);
-  $cli              = true;
   $tuotenumeron_sijainti_pupessa = 'tuoteno';
 
   if (isset($argv[2])) {

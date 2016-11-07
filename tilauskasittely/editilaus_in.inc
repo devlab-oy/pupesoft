@@ -2555,6 +2555,15 @@ while ($tietue = fgets($fd)) {
 
         // magentotilaus on laskutettu, jos meill‰ on kassalipas
         $laskutettu_magento_tilaus = ($edi_tyyppi == "magento" and $editilaus_kassalipas != "");
+        
+        // jos etuk‰teen maksettu mutta ei haluta laskuttaa, p‰ivitet‰‰n tilaukselle tunnistustiedot
+        if (!$ei_esteta_laskutusta and $laskutettu_magento_tilaus) {
+          $query = "UPDATE lasku SET
+                    ohjelma_moduli = 'MAGENTOJT'
+                    WHERE yhtio = '$kukarow[yhtio]'
+                    AND tunnus  = '$editilaus_lasku_tunnus'";
+          pupe_query($query);
+        }
 
         // jos magentosta tullut tilaus on jo maksettu, p‰ivitet‰‰n se takaisin ker‰ysjonoon
         // paitsi tilaustyyppi 9, jossa halutaan ohittaa varastoprosessi

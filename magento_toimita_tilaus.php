@@ -6,13 +6,55 @@
 // $magento_api_ord = Asiakkaan_tilausnumero
 // $magento_api_noutokuittaus = Noutokuittaus, ilmoitetaan asiakkaalle tilaus noudettavissa
 // $magento_api_toimituskuittaus_viestit (array) = Viesti joka liitetään noutotilauksiin (optional)
+// $magento_api_laskutunnus = Jälkitoimituksien varalta katsotaan että tehdään kuittaus vain kerran
+
+if (!empty($yhtiorow['editilaus_suoratoimitus'])) {
+
+  // Tarkistetaan onko kuittaus jo tehty aikaisemmista tämän Magento-tilauksen Pupe-tilauksista
+  // Jos tilauksia löytyy toimitettuina/laskutettuina, niin ei tehdä uutta kuittausta
+  // Noutotilaukset on kerätty tilassa, huomioidaan nekin
+  $query = "(SELECT tunnus
+            FROM lasku
+            WHERE yhtio                 = '$kukarow[yhtio]'
+            AND tila                    = 'L'
+            AND alatila                 in ('D','X')
+            AND asiakkaan_tilausnumero  = '$magento_api_ord'
+            AND tunnus                  != '$magento_api_laskutunnus'
+            AND ohjelma_moduli          = 'MAGENTO')
+            UNION
+            (SELECT lasku.tunnus as tunnus
+            FROM lasku
+            JOIN toimitustapa on (toimitustapa.yhtio = lasku.yhtio
+              AND toimitustapa.selite = lasku.toimitustapa
+              AND toimitustapa.nouto != '')
+            WHERE lasku.yhtio                 = '$kukarow[yhtio]'
+            AND lasku.tila                    = 'L'
+            AND lasku.alatila                 = 'C'
+            AND lasku.asiakkaan_tilausnumero  = '$magento_api_ord'
+            AND lasku.tunnus                  != '$magento_api_laskutunnus'
+            AND lasku.ohjelma_moduli          = 'MAGENTO')";
+  $checkre = pupe_query($query);
+  
+  echo "<br>$query<br>";
+  exit;
+
+  if (mysql_num_rows($checkre) == 0) {
+    $_kuittaus_jo_tehty = false;
+  }
+  else {
+    $_kuittaus_jo_tehty = true;
+  }
+}
+else {
+  $_kuittaus_jo_tehty = false;
+}
 
 if (!function_exists("log_message")) {
   function log_message($message) {
     pupesoft_log('magento_orders', $message);
   }
 }
-
+exit;
 if (empty($magento_api_toimituskuittaus_viestit)) {
   $magento_api_toimituskuittaus_viestit = array();
 }
@@ -27,7 +69,7 @@ $kuittaukset = array_merge($default_kuittaukset, $magento_api_toimituskuittaus_v
 $magento_api_ord   = (int) $magento_api_ord;
 $_magento_kaytossa = (!empty($magento_api_tt_url) and !empty($magento_api_tt_usr) and !empty($magento_api_tt_pas));
 
-if (!$_magento_kaytossa or $magento_api_ord <= 0) {
+if (!$_magento_kaytossa or $magento_api_ord <= 0 or $_kuittaus_jo_tehty) {
   exit;
 }
 

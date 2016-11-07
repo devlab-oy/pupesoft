@@ -5,6 +5,7 @@
 // $ftpuser --> Käyttäjätunnus
 // $ftppass --> Salasana
 // $ftppath --> Kansio FTP-palvelimella jonne failit työnnetään
+// $ftpdest --> Minne tallennetaan
 // $ftpport --> Custom portti, ei pakollinen
 
 class SFTPConnection {

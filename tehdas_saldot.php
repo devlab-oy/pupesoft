@@ -13,6 +13,22 @@ else {
     die ("Et antanut l‰hett‰v‰‰ yhtiˆt‰!\n");
   }
 
+  if (trim($argv[2]) == '') {
+    die ("Et antanut tuotenumeron_sijainti_pupessa kentt‰‰!\n");
+  }
+
+  if (trim($argv[3]) == '') {
+    die ("Et antanut tuotenumeron sarakenumeroa!\n");
+  }
+
+  if (trim($argv[4]) == '') {
+    die ("Et antanut tehtaan saldon sarakenumeroa!\n");
+  }
+
+  if (trim($argv[5]) == '') {
+    die ("Et antanut sarake-erotinta!\n");
+  }
+
   date_default_timezone_set('Europe/Helsinki');
 
   // otetaan includepath aina rootista
@@ -30,34 +46,20 @@ else {
   $kukarow['kieli'] = 'fi';
   $operaattori      = 'tehdas_saldot';
   $yhtiorow         = hae_yhtion_parametrit($kukarow['yhtio']);
-  $tuotenumeron_sijainti_pupessa = 'tuoteno';
-
-  if (isset($argv[2])) {
-    $argv[2] = trim($argv[2]);
-
-    $tuotenumeron_sijainti_pupessa = $argv[2] == 'toim_tuoteno' ? 'toim_tuoteno' : 'tuoteno';
-  }
-
-  // Setataan t‰m‰, niin ftp-get.php toimii niin kuin pit‰isikin
-  $argv[1] = $operaattori;
-
-  /******* Tarvittavat ftpget-muuttujat *******
-  * $ftpget_email
-  * $ftpget_emailfrom
-  * $ftpget_host
-  * $ftpget_user
-  * $ftpget_pass
-  * $ftpget_path
-  * $ftpget_dest
-  * $ftpget_port (optional)
-  * $ftpget_ei_passive (optional)
-  * $ftpget_filt (optional)
-  * $ftpget_no_delete (optional)
-  */
+  $tuotenumeron_sijainti_pupessa = $argv[2] == 'toim_tuoteno' ? 'toim_tuoteno' : 'tuoteno';
+  $tuotenumeron_sarake = $argv[3];
+  $tehtaan_saldon_sarake = $argv[4];
+  $column_separator = $argv[5];
 
   pupesoft_log('tehdas_saldot', "Aloitetaan tehtaan saldojen haku FTP:ll‰ osoitteesta {$ftpget_host[$operaattori]}");
 
-  require 'ftp-get.php';
+  $ftphost = $ftpget_host['tehdas_saldot'];
+  $ftpuser = $ftpget_user['tehdas_saldot'];
+  $ftppass = $ftpget_pass['tehdas_saldot'];
+  $ftppath = $ftpget_path['tehdas_saldot'];
+  $ftpdest = $ftpget_dest['tehdas_saldot'];
+
+  require 'sftp-get.php';
 
   $handle = opendir($ftpget_dest[$operaattori]);
 
@@ -68,6 +70,7 @@ else {
 
   while (($file = readdir($handle)) !== false) {
     if (is_file($ftpget_dest[$operaattori]."/".$file) === false) continue;
+    if (in_array($file, array('.', '..', '.DS_Store')) === true) continue;
 
     $userfile = $ftpget_dest[$operaattori]."/".$file;
 
@@ -78,7 +81,7 @@ else {
     $file["error"]    = 0;
     $file["size"]     = filesize($userfile);
 
-    $_FILES[$userfile] = $file;
+    $_FILES['userfile'] = $file;
 
     $tee = 'GO';
     $error = 0;
@@ -139,7 +142,7 @@ if ($tee == 'uusiraportti') {
 if ($tee == 'GO' and $error == 0) {
 
   if ($cli === false) {
-     if (trim($tuotteen_toimittaja) == '') {
+    if (trim($tuotteen_toimittaja) == '') {
       echo "<font class='error'>", t("Et valinnut toimittajaa"), "!</font><br/>";
       $tee = '';
       $error++;
@@ -189,7 +192,7 @@ if ($tee == 'GO' and $error == 0) {
   if ($error == 0) {
     $path_parts = pathinfo($_FILES['userfile']['name']);
 
-    if (strtolower($path_parts['extension']) != 'xls' and strtolower($path_parts['extension']) != 'txt' and strtolower($path_parts['extension']) != 'csv') {
+    if (!in_array(strtolower($path_parts['extension']), array('xls','txt','csv'))) {
       if ($cli === true) {
         pupesoft_log('tehdas_saldot', "Virheellinen tiedostop‰‰te: ".strtolower($path_parts['extension']));
       }
@@ -201,16 +204,16 @@ if ($tee == 'GO' and $error == 0) {
       $error++;
     }
 
-    if ($error == 0 and is_uploaded_file($_FILES['userfile']['tmp_name']) === true) {
+    if ($error == 0 and ($cli === true or is_uploaded_file($_FILES['userfile']['tmp_name']) === true)) {
       $file = tarkasta_liite("userfile", array("XLS", "TXT", "CSV"));
+
+      if ($file !== true) {
+        pupesoft_log('tehdas_saldot', $file);
+
+        $error++;
+      }
     }
     else {
-      $error++;
-    }
-
-    if ($file !== true) {
-      pupesoft_log('tehdas_saldot', $file);
-
       $error++;
     }
   }
@@ -264,7 +267,10 @@ if ($tee == 'GO' and $error == 0) {
         while ($rivi = fgets($file)) {
 
           // luetaan rivi tiedostosta..
-          if (strtolower($path_parts['extension']) == 'txt') {
+          if ($cli === true) {
+            $rivi = explode($column_separator, trim($rivi));
+          }
+          elseif (strtolower($path_parts['extension']) == 'txt') {
             $rivi = explode("\t", trim($rivi));
           }
           else {

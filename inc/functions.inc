@@ -32165,7 +32165,7 @@ if (!function_exists("tiliointi_tarkistus")) {
 }
 
 if (!function_exists('hae_lahete_printteri')) {
-  function hae_lahete_printteri($varasto = 0, $toimipaikka = 0, $tilaus = 0, $valittu_tulostin = '', $printterinro = 1) {
+  function hae_lahete_printteri($varasto = 0, $toimipaikka = 0, $tilaus = 0, $valittu_tulostin = '', $printterinro = 0) {
 
     global $kukarow, $yhtiorow;
 

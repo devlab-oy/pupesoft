@@ -172,10 +172,13 @@ echo "<tr>";
 echo "<th>";
 echo t("N‰yt‰ vapaa saldo");
 echo "</th>";
-if ($listaustyyppi == "kappaleet3") {
+
+if ($listaustyyppi == "kappaleet3" and !isset($painoinnappia)) {
   $nayta_vapaa_saldo = "on";
 }
+
 $checked = (isset($nayta_vapaa_saldo) and $nayta_vapaa_saldo == "on") ? "checked" : "";
+
 echo "<td><input type='checkbox' name='nayta_vapaa_saldo' {$checked}/></td>";
 echo "</tr>";
 
@@ -203,9 +206,7 @@ if (($listaustyyppi == "osto" or $listaustyyppi == "ostoryhma") and (
 
 if ($tee != "" and isset($painoinnappia)) {
 
-  if ($listaustyyppi == "kappaleet3") {
-    $left = "LEFT";
-  }
+  $left = $listaustyyppi == "kappaleet3" ? "LEFT" : "";
 
   if ($nollapiilo == "vainsaldo") {
     $saldolisa = " AND tuotepaikat.saldo != 0 ";
@@ -644,9 +645,13 @@ if ($tee != "" and isset($painoinnappia)) {
 
       if ($total_rows <= 1000) {
         $varastotilasto_table .= "<tr class='aktiivi'>";
-        $varastotilasto_table .= "<td nowrap>$row[osasto]</td>";
-        $varastotilasto_table .= "<td nowrap>$row[try]</td>";
-        $varastotilasto_table .= "<td nowrap>$row[malli]</td>";
+
+        if ($listaustyyppi != "kappaleet3") {
+          $varastotilasto_table .= "<td nowrap>$row[osasto]</td>";
+          $varastotilasto_table .= "<td nowrap>$row[try]</td>";
+          $varastotilasto_table .= "<td nowrap>$row[malli]</td>";
+        }
+
         $varastotilasto_table .= "<td><a href='{$palvelin2}tuote.php?tee=Z&tuoteno=".urlencode($row["tuoteno"])."'>$row[tuoteno]</a></td>";
         $varastotilasto_table .= "<td>$row[nimitys]</td>";
         $varastotilasto_table .= "<td align='right'>".hintapyoristys($row['myyntihinta'])."</td>";
@@ -664,7 +669,10 @@ if ($tee != "" and isset($painoinnappia)) {
           $varastotilasto_table .= "<td align='right'>$varastonarvo</td>";
 
           if ($listaustyyppi != "osto" and $listaustyyppi != "ostoryhma") {
-            $varastotilasto_table .= "<td align='right'>$row[varmuus_varasto]</td>";
+            if ($listaustyyppi != "kappaleet3") {
+              $varastotilasto_table .= "<td align='right'>$row[varmuus_varasto]</td>";
+            }
+
             $varastotilasto_table .= "<td align='right'>$ostorivi[tulossa]</td>";
             $varastotilasto_table .= "<td align='right'>".tv1dateconv($ostorivi['toimaika'])."</td>";
           }
@@ -791,14 +799,19 @@ if ($tee != "" and isset($painoinnappia)) {
       echo "<table class='display dataTable' id='$pupe_DataTables'>";
       echo "<thead>";
       echo "<tr>";
-      echo "<th>".t("Osasto")."</th>";
-      echo "<th>".t("Tuoteryhm‰")."</th>";
-      echo "<th>".t("Malli")."</th>";
+
+      if ($listaustyyppi != "kappaleet3") {
+        echo "<th>".t("Osasto")."</th>";
+        echo "<th>".t("Tuoteryhm‰")."</th>";
+        echo "<th>".t("Malli")."</th>";
+        $sarakkeet += 3;
+      }
+
       echo "<th>".t("Tuoteno")."</th>";
       echo "<th>".t("Nimitys")."</th>";
       echo "<th>".t("Myyntihinta")."</th>";
       echo "<th>".t("Saldo")."</th>";
-      $sarakkeet += 7;
+      $sarakkeet += 4;
 
       if ($nayta_vapaa_saldo == "on") {
         echo "<th>".t("Vapaa saldo")."</th>";
@@ -815,10 +828,13 @@ if ($tee != "" and isset($painoinnappia)) {
         $sarakkeet++;
 
         if ($listaustyyppi != "osto" and $listaustyyppi != "ostoryhma") {
-          echo "<th>".t("Varmuusvarasto")."</th>";
+          if ($listaustyyppi != "kappaleet3") {
+            echo "<th>".t("Varmuusvarasto")."</th>";
+            $sarakkeet++;
+          }
           echo "<th>".t("Tilattu m‰‰r‰")."</th>";
           echo "<th>".t("Toimitus aika")."</th>";
-          $sarakkeet += 3;
+          $sarakkeet += 2;
         }
       }
 
@@ -850,9 +866,11 @@ if ($tee != "" and isset($painoinnappia)) {
       echo "</tr>";
 
       echo "<tr>";
-      echo "<td><input type='text' class='search_field' name='search_Osasto'></td>";
-      echo "<td><input type='text' class='search_field' name='search_Tuoteryh'></td>";
-      echo "<td><input type='text' class='search_field' name='search_Tuotemalli'></td>";
+      if ($listaustyyppi != "kappaleet3") {
+        echo "<td><input type='text' class='search_field' name='search_Osasto'></td>";
+        echo "<td><input type='text' class='search_field' name='search_Tuoteryh'></td>";
+        echo "<td><input type='text' class='search_field' name='search_Tuotemalli'></td>";
+      }
       echo "<td><input type='text' class='search_field' name='search_Tuoteno'></td>";
       echo "<td><input type='text' class='search_field' name='search_Nimitys'></td>";
       echo "<td><input type='text' class='search_field' name='search_Myyntihinta'></td>";
@@ -870,7 +888,9 @@ if ($tee != "" and isset($painoinnappia)) {
         echo "<td><input type='text' class='search_field' name='search_Varastonarvo'></td>";
 
         if ($listaustyyppi != "osto" and $listaustyyppi != "ostoryhma") {
-          echo "<td><input type='text' class='search_field' name='search_Varmuusvarasto'></td>";
+          if ($listaustyyppi != "kappaleet3") {
+            echo "<td><input type='text' class='search_field' name='search_Varmuusvarasto'></td>";
+          }
           echo "<td><input type='text' class='search_field' name='search_Tilattumaa'></td>";
           echo "<td><input type='text' class='search_field' name='search_Toimaika'></td>";
         }

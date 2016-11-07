@@ -454,7 +454,8 @@ if (!function_exists("tee_jt_tilaus")) {
 
             // Ei nollata asiakkaan tilausnumeroa, jos se pit‰‰ huomioida otsikon etsinn‰ss‰
             $_asiakkaan_tilno = ($fieldname == 'asiakkaan_tilausnumero');
-            $_asiakkaan_tilno &= ($yhtiorow['jt_asiakkaan_tilausnumero'] == "K");
+            $_magentojt       = (strpos($otsikkorivi['ohjelma_moduli'], "MAGENTO") === TRUE);
+            $_asiakkaan_tilno &= ($yhtiorow['jt_asiakkaan_tilausnumero'] == "K" or $_magentojt);
 
             if ($toim == "ENNAKKO" or $otsikkorivi['jtkielto'] == "Y" or $_asiakkaan_tilno) {
               $query .= $fieldname."='".$otsikkorivi[$fieldname]."',";

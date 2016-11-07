@@ -1805,7 +1805,8 @@ if ($tee == 'P') {
                 lasku.jaksotettu,
                 lasku.yhtio,
                 lasku.kohdistettu,
-                lasku.liitostunnus
+                lasku.liitostunnus,
+                lasku.ohjelma_moduli
                 FROM lasku
                 LEFT JOIN toimitustapa ON (lasku.yhtio = toimitustapa.yhtio and lasku.toimitustapa = toimitustapa.selite)
                 where lasku.yhtio = '$kukarow[yhtio]'
@@ -1862,6 +1863,11 @@ if ($tee == 'P') {
                     AND mapvm   != '0000-00-00'
                     AND chn      = '999'";
           $yoimresult  = pupe_query($query);
+          
+          // Etuk‰teen maksettu Magentotilaus laskutetaan, jos ei ole jo laskuttunut
+          if ($laskurow['ohjelma_moduli'] == 'MAGENTOJT') {
+            laskuta_magentojt($laskurow['tunnus']);
+          }
         }
         elseif ($laskurow["tila"] == 'G' and $laskurow["vienti"] == '' and $laskurow["tulostustapa"] == "X" and $laskurow["nouto"] == "") {
           // Jos meill‰ on maksupositioita laskulla, tulee se siirt‰‰ alatilaan J

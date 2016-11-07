@@ -728,7 +728,7 @@ else {
   else {
     $lisasalker = " ";
   }
-
+  
   // Jos otsikko on ker‰tty tai pidemm‰ll‰
   if ($laskurow["tila"] == "L" and in_array($laskurow["alatila"], array('C', 'D', 'J', 'E'))) {
     $query = "UPDATE tilausrivi
@@ -784,7 +784,7 @@ else {
     // jos on myyntitilaus ja ei haluttu tulostaa l‰hetett‰, merkataan rivit ker‰tyksi
     // ja toimitetuksi ja laitetaan alatila D
     if ($laskurow['eilahetetta'] != '' or $laskurow['sisainen'] != '') {
-      
+
       // Magento p‰‰stet‰‰n suoraan toimitetuksi jos se on k‰teismyynniksi merkitty
       $_magento = false;
       if ($laskurow['ohjelma_moduli'] == 'MAGENTO' and $kateinen == 'X') {
@@ -797,7 +797,7 @@ else {
         // Jos kyseess‰ on k‰teismyynti‰ tai maksuehdolla on itsetulostust‰pp‰ tai vienti‰,
         // merkataan tilaukset ker‰tyksi mutta ei toimitetuksi ja alatila C/B
         // tai toimitettu tilaus muutetaan maksuehdosta k‰teiseksi, tila pysyy D
-        if ($laskurow["alatila"] == 'D' or $_magento) {
+        if ($laskurow["alatila"] == 'D') {
           $alat = "D";
         }
         elseif ($laskurow["vienti"] != '') {

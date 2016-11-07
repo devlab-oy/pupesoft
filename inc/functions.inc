@@ -9060,7 +9060,7 @@ if (!function_exists('tarkasta_liite')) {
       return true;
     }
     elseif ($file["error"] == 7) {
-      $msg =  t("VIRHE: Palvelinasetuksissa on virhe!");
+      $msg = t("VIRHE: Palvelinasetuksissa on virhe!");
     }
     else {
       $msg = t("VIRHE: Tapahtui virhe tallennettaessa tiedostoa!");

@@ -14,7 +14,7 @@ else {
   }
 
   if (trim($argv[2]) == '') {
-    die ("Et antanut tuotenumeron_sijainti_pupessa kentt‰‰!\n");
+    die ("Et antanut tuotenumeron sijaintia Pupesoftissa. Vaihtoehdot ovat toim_tuoteno tai tuoteno!\n");
   }
 
   if (trim($argv[3]) == '') {

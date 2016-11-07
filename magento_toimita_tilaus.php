@@ -34,27 +34,36 @@ if (!empty($yhtiorow['editilaus_suoratoimitus'])) {
             AND lasku.tunnus                  != '$magento_api_laskutunnus'
             AND lasku.ohjelma_moduli          = 'MAGENTO')";
   $checkre = pupe_query($query);
-  
-  echo "<br>$query<br>";
-  exit;
 
   if (mysql_num_rows($checkre) == 0) {
     $_kuittaus_jo_tehty = false;
   }
   else {
     $_kuittaus_jo_tehty = true;
+    
+    $_tilaukset = "";
+    while ($checkrow = mysql_fetch_assoc($checkre)) {
+      $_tilaukset .= $checkrow['tunnus'] . ", ";
+    }
+    
+    $_tilaukset = substr($_tilaukset, -2);
+    $message = "Magento-tilaus oli jo kuitattu Magentoon ($_tilaukset). Ei tehd‰ sit‰ en‰‰ uudelleen tilaukselle $magento_api_laskutunnus ($magento_api_ord)";
+    log_message($message);
   }
 }
 else {
   $_kuittaus_jo_tehty = false;
 }
 
+//debuggauksen vuoksi, poistetaan t‰m‰ lopuksi
+exit;
+
 if (!function_exists("log_message")) {
   function log_message($message) {
     pupesoft_log('magento_orders', $message);
   }
 }
-exit;
+
 if (empty($magento_api_toimituskuittaus_viestit)) {
   $magento_api_toimituskuittaus_viestit = array();
 }

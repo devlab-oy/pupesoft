@@ -330,6 +330,8 @@ if ($tee == 'GO' and $error == 0) {
         $update_saldo_result = pupe_query($query);
       }
 
+      $paivitetty = 0;
+
       foreach ($tuote as $index => $tuoteno) {
 
         if ($cli === true) {
@@ -358,14 +360,16 @@ if ($tee == 'GO' and $error == 0) {
                   AND liitostunnus        = '{$tuotteen_toimittaja}'
                   AND {$tuotenumeron_sijainti_pupessa} = '{$tuoteno}'";
         $update_saldo_result = pupe_query($query);
+
+        $paivitetty++;
       }
 
 
       if ($cli === true) {
-        pupesoft_log('tehdas_saldot', sprintf(t('Päivitettiin %d tuotteen tehdas saldot', '', count($tuote))));
+        pupesoft_log('tehdas_saldot', sprintf(t('Päivitettiin %d tuotteen tehdas saldot', '', $paivitetty)));
       }
       else {
-        echo "<font class='message'>".sprintf(t('Päivitettiin %d tuotteen tehdas saldot', '', count($tuote))).".</font><br/>";
+        echo "<font class='message'>".sprintf(t('Päivitettiin %d tuotteen tehdas saldot', '', $paivitetty)).".</font><br/>";
       }
 
       $tee = '';

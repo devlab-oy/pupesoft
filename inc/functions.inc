@@ -12007,7 +12007,7 @@ if (!function_exists("t_maanimi")) {
 
 if (!function_exists("jt_toimita")) {
   function jt_toimita($toimittaja, $toimittajaid, $varastosta, $jtrivit, $jtrivit_paikat, $automaaginen, $tee, $automaattinen_poiminta = '', $tuotenumero = '', $huomioi_pvm = '', $mista_tullaan = '') {
-    global $yhtiorow, $kukarow, $oikeurow, $myyntitilaus_jaksotettu, $alkuperainen_varasto, $pupe_root_polku;
+    global $yhtiorow, $kukarow, $oikeurow, $myyntitilaus_jaksotettu, $alkuperainen_varasto, $pupe_root_polku, $magento_api_tt_url, $magento_api_tt_usr, $magento_api_tt_pas;
 
     if (!is_array($jtrivit)) $jtrivit = array();
     if (!is_array($jtrivit_paikat)) $jtrivit_paikat = array();
@@ -27071,7 +27071,7 @@ if (!function_exists('paivita_rahtikirjat_tulostetuksi_ja_toimitetuksi')) {
 
 if (!function_exists('laskuta_magentojt')) {
   function laskuta_magentojt($tilausnumerot, $laskutus = true) {
-    global $kukarow, $yhtiorow, $pupe_root_polku;
+    global $kukarow, $yhtiorow, $pupe_root_polku, $magento_api_tt_url, $magento_api_tt_usr, $magento_api_tt_pas;
 
     // Etukäteen maksettu Magentotilaus laskutetaan, jos ei ole jo laskuttunut
     // Haetaan ennen sitä verkkokaupan kassalipas

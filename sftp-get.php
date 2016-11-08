@@ -66,8 +66,6 @@ class SFTPConnection {
 
       fclose($stream);
     }
-
-    fclose($handle);
   }
 }
 

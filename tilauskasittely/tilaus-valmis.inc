@@ -1192,7 +1192,10 @@ else {
         }
       }
 
-      if ($kukarow["kirjoitin"] != 0 and $valittu_tulostin == 0) {
+      if ($laskurow['ohjelma_moduli'] == 'MAGENTO') {
+        $valittu_tulostin = "";
+      }
+      elseif ($kukarow["kirjoitin"] != 0 and $valittu_tulostin == 0) {
         $valittu_tulostin = $kukarow["kirjoitin"];
       }
       elseif ($valittu_tulostin == 0) {

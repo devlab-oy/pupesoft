@@ -27063,7 +27063,7 @@ if (!function_exists('paivita_rahtikirjat_tulostetuksi_ja_toimitetuksi')) {
               AND mapvm   != '0000-00-00'
               AND chn      = '999'";
     $ures  = pupe_query($query);
-    
+
     // Etukäteen maksettu Magentotilaus laskutetaan, jos ei ole jo laskuttunut
     laskuta_magentojt($otunnukset);
   }
@@ -27118,6 +27118,8 @@ if (!function_exists('laskuta_magentojt')) {
                     WHERE yhtio = '{$kukarow['yhtio']}'
                     AND tunnus  = '{$laskurow['tunnus']}'";
         $res = pupe_query($query);
+        
+        $laskurow['ohjelma_moduli'] = "MAGENTO";
       }
 
       if ($laskutus) {

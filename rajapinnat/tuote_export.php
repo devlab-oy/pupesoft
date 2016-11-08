@@ -194,8 +194,10 @@ if (empty($magento_asiakas_aktivointi)) {
 }
 
 // Aktivoidaanko asiakaskohtaiset tuotehinnat
+// T‰h‰n tulee antaa Magenton 'websiteCode', johon asiakashinnat liitet‰‰n
 // HUOM! Vaatii Magenton customointia
 if (empty($magento_asiakaskohtaiset_tuotehinnat)) {
+  // $magento_asiakaskohtaiset_tuotehinnat = 'pro_shop';
   $magento_asiakaskohtaiset_tuotehinnat = false;
 }
 

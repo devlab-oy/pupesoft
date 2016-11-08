@@ -57,6 +57,7 @@ else {
   $ftppass = $ftpget_pass['tehdas_saldot'];
   $ftppath = $ftpget_path['tehdas_saldot'];
   $ftpdest = $ftpget_dest['tehdas_saldot'];
+  $ftpport = $ftpget_port['tehdas_saldot'];
 
   require 'sftp-get.php';
 

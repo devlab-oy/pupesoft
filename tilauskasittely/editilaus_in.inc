@@ -2297,7 +2297,9 @@ while ($tietue = fgets($fd)) {
                 in_array($trow['suoratoimitus'], array('S', 'U'))
               );
 
+              // Suoratoimitukset sallitaan jos käytössä vain Magento
               $salllitaanko_suoratoimitus = ($suoratoimitus_varastoon or $suoratoimitus_asiakkaalle);
+              $salllitaanko_suoratoimitus &= ($edi_laatija == "Magento");
 
               // jos parametri on päällä että halutaan tehdä suoratoimitusrivi kun saldo ei riitä
               if (!empty($yhtiorow['editilaus_suoratoimitus']) and $salllitaanko_suoratoimitus) {

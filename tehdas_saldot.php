@@ -70,7 +70,7 @@ else {
 
   while (($file = readdir($handle)) !== false) {
     if (is_file($ftpget_dest['tehdas_saldot']."/".$file) === false) continue;
-    if (in_array($file, array('.', '..', '.DS_Store')) === true) continue;
+    if ($file !== 'varastosaldot.csv') continue;
 
     $userfile = $ftpget_dest['tehdas_saldot']."/".$file;
 
@@ -279,7 +279,7 @@ if ($tee == 'GO' and $error == 0) {
 
           $tuo = mysql_real_escape_string(trim($rivi[$tuo_sarake]));
           $sal = (float) str_replace(",", ".", trim($rivi[$teh_sarake]));
-          echo "tuoteno: $tuo  -->   saldo: $sal\n";
+
           if ($tuo != '' and $sal != '') {
             $tuote[] = $tuo;
             $saldo[] = $sal;

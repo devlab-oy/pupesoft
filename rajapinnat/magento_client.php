@@ -297,16 +297,18 @@ class MagentoClient {
       foreach ($tuote['asiakashinnat'] as $asiakashintarivi) {
         $asiakasryhma_nimi = $asiakashintarivi['asiakasryhma'];
         $asiakashinta = $asiakashintarivi['hinta'];
-        $asiakasryhma_tunnus = $this->findCustomerGroup(utf8_encode($asiakasryhma_nimi));
+        $asiakasryhma_tunnus = $this->findCustomerGroup($asiakasryhma_nimi);
 
-        if ($asiakasryhma_tunnus != 0) {
-          $tuote_ryhmahinta_data[] = array(
-            'customer_group_id' => $asiakasryhma_tunnus,
-            'price'             => $asiakashinta,
-            'qty'               => 1,
-            'websites'          => explode(" ", $tuote['nakyvyys']),
-          );
+        if ($asiakasryhma_tunnus == 0) {
+          continue;
         }
+
+        $tuote_ryhmahinta_data[] = array(
+          'customer_group_id' => $asiakasryhma_tunnus,
+          'price'             => $asiakashinta,
+          'qty'               => 1,
+          'websites'          => explode(" ", $tuote['nakyvyys']),
+        );
       }
 
       $multi_data = array();
@@ -1038,7 +1040,7 @@ class MagentoClient {
       $count++;
       $this->log('magento_asiakkaat', "[{$count}/{$total_count}] Asiakas '{$asiakas['nimi']}'");
 
-      $asiakasryhma_id = $this->findCustomerGroup(utf8_encode($asiakas['asiakasryhma']));
+      $asiakasryhma_id = $this->findCustomerGroup($asiakas['asiakasryhma']);
 
       $asiakas_data = array(
         'email'       => utf8_encode($asiakas['yhenk_email']),
@@ -2028,6 +2030,8 @@ class MagentoClient {
 
   // Etsii asiakasryhmää nimen perusteella Magentosta, palauttaa id:n
   private function findCustomerGroup($name) {
+    $name = utf8_encode($name);
+
     $this->log('magento_tuotteet', "Etsitään asiakasryhmä nimellä '{$name}'");
 
     $customer_groups = $this->_proxy->call(

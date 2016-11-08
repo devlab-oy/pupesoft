@@ -360,7 +360,6 @@ if ($tee == 'GO' and $error == 0) {
         $update_saldo_result = pupe_query($query);
       }
 
-
       if ($cli === true) {
         pupesoft_log('tehdas_saldot', sprintf(t('Päivitettiin %d tuotteen tehdas saldot', '', count($tuote))));
       }

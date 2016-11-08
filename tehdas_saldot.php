@@ -364,7 +364,6 @@ if ($tee == 'GO' and $error == 0) {
         $paivitetty++;
       }
 
-
       if ($cli === true) {
         pupesoft_log('tehdas_saldot', sprintf(t('Päivitettiin %d tuotteen tehdas saldot', '', $paivitetty)));
       }

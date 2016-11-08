@@ -2028,21 +2028,26 @@ class MagentoClient {
 
   // Etsii asiakasryhmää nimen perusteella Magentosta, palauttaa id:n
   private function findCustomerGroup($name) {
+    $this->log('magento_tuotteet', "Etsitään asiakasryhmä nimellä '{$name}'");
+
     $customer_groups = $this->_proxy->call(
       $this->_session,
       'customer_group.list'
     );
 
-    $id = 0;
-
     foreach ($customer_groups as $asryhma) {
       if (strcasecmp($asryhma['customer_group_code'], $name) == 0) {
         $id = $asryhma['customer_group_id'];
-        break;
+
+        $this->log('magento_tuotteet', "Löydettiin asiakasryhmä '{$id}'");
+
+        return $id;
       }
     }
 
-    return $id;
+    $this->log('magento_tuotteet', "Asiakasryhmää ei löytynyt!");
+
+    return 0;
   }
 
   // Palauttaa attribuutin option id:n annetulle atribuutille ja arvolle

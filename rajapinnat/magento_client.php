@@ -1569,7 +1569,7 @@ class MagentoClient {
           $this->_proxy->call(
             $this->_session,
             'price_per_customer.setPriceForCustomersPerProduct',
-            array($magento_tuotenumero, $asiakashinnat)
+            array($magento_tuotenumero, array($asiakashinnat))
           );
 
           $this->log('magento_tuotteet', "({$current}/{$total}): Tuotteen {$magento_tuotenumero} asiakaskohtaiset hinnat poistettu ({$asiakas['asiakas_email']})");

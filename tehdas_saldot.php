@@ -149,7 +149,7 @@ if ($tee == 'GO' and $error == 0) {
     }
 
     if (trim($tuotenumeron_sarake) == '') {
-      echo "<font class='error'>", t("Et syättänyt tuotenumeron sarakenumeroa"), "!</font><br/>";
+      echo "<font class='error'>", t("Et syöttänyt tuotenumeron sarakenumeroa"), "!</font><br/>";
       $tee = '';
       $error++;
     }
@@ -160,7 +160,7 @@ if ($tee == 'GO' and $error == 0) {
     }
 
     if (trim($tehtaan_saldon_sarake) == '') {
-      echo "<font class='error'>", t("Et syättänyt tehtaan saldon sarakenumeroa"), "!</font><br/>";
+      echo "<font class='error'>", t("Et syöttänyt tehtaan saldon sarakenumeroa"), "!</font><br/>";
       $tee = '';
       $error++;
     }
@@ -279,7 +279,7 @@ if ($tee == 'GO' and $error == 0) {
 
           $tuo = mysql_real_escape_string(trim($rivi[$tuo_sarake]));
           $sal = (float) str_replace(",", ".", trim($rivi[$teh_sarake]));
-
+          echo "tuoteno: $tuo  -->   saldo: $sal\n";
           if ($tuo != '' and $sal != '') {
             $tuote[] = $tuo;
             $saldo[] = $sal;
@@ -359,6 +359,7 @@ if ($tee == 'GO' and $error == 0) {
                   AND {$tuotenumeron_sijainti_pupessa} = '{$tuoteno}'";
         $update_saldo_result = pupe_query($query);
       }
+
 
       if ($cli === true) {
         pupesoft_log('tehdas_saldot', sprintf(t('Päivitettiin %d tuotteen tehdas saldot', '', count($tuote))));

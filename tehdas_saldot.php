@@ -44,14 +44,13 @@ else {
   $kukarow['yhtio'] = (string) $argv[1];
   $kukarow['kuka']  = 'admin';
   $kukarow['kieli'] = 'fi';
-  $operaattori      = 'tehdas_saldot';
   $yhtiorow         = hae_yhtion_parametrit($kukarow['yhtio']);
   $tuotenumeron_sijainti_pupessa = $argv[2] == 'toim_tuoteno' ? 'toim_tuoteno' : 'tuoteno';
   $tuotenumeron_sarake = $argv[3];
   $tehtaan_saldon_sarake = $argv[4];
   $column_separator = $argv[5];
 
-  pupesoft_log('tehdas_saldot', "Aloitetaan tehtaan saldojen haku FTP:llä osoitteesta {$ftpget_host[$operaattori]}");
+  pupesoft_log('tehdas_saldot', "Aloitetaan tehtaan saldojen haku FTP:llä osoitteesta {$ftpget_host['tehdas_saldot']}");
 
   $ftphost = $ftpget_host['tehdas_saldot'];
   $ftpuser = $ftpget_user['tehdas_saldot'];
@@ -61,18 +60,18 @@ else {
 
   require 'sftp-get.php';
 
-  $handle = opendir($ftpget_dest[$operaattori]);
+  $handle = opendir($ftpget_dest['tehdas_saldot']);
 
   if ($handle === false) {
-    pupesoft_log('tehdas_saldot', "Kansiota {$ftpget_dest[$operaattori]} ei pysty avaamaan");
+    pupesoft_log('tehdas_saldot', "Kansiota {$ftpget_dest['tehdas_saldot']} ei pysty avaamaan");
     exit;
   }
 
   while (($file = readdir($handle)) !== false) {
-    if (is_file($ftpget_dest[$operaattori]."/".$file) === false) continue;
+    if (is_file($ftpget_dest['tehdas_saldot']."/".$file) === false) continue;
     if (in_array($file, array('.', '..', '.DS_Store')) === true) continue;
 
-    $userfile = $ftpget_dest[$operaattori]."/".$file;
+    $userfile = $ftpget_dest['tehdas_saldot']."/".$file;
 
     $file = array();
     $file["name"]     = basename($userfile);
@@ -91,7 +90,7 @@ else {
   }
 
   if (empty($file)) {
-    pupesoft_log('tehdas_saldot', "Yhtään luettavaa tiedostoa ei löytynyt kansiosta {$ftpget_dest[$operaattori]}");
+    pupesoft_log('tehdas_saldot', "Yhtään luettavaa tiedostoa ei löytynyt kansiosta {$ftpget_dest['tehdas_saldot']}");
     exit;
   }
 }

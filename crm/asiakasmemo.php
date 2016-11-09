@@ -1051,20 +1051,6 @@ if ($ytunnus != '' and $tee == '') {
     $query .= " and henkilo='$yhtunnus'";
   }
 
-  if (1 == 2 and strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") !== FALSE) {
-    $query .= " UNION ";
-    $query .= "SELECT 'TILAUS' tyyppi, '' tapa, lasku.ytunnus ytunnus, lasku.tilausyhteyshenkilo yhteyshenkilo,
-               if(kuka.nimi!='',kuka.nimi, lasku.laatija) laatija, lasku.viesti viesti, left(lasku.luontiaika,10) paivamaara,
-               '' kentta02, '' kentta03, '' kentta04, '' kentta05, '' kentta06, '' kentta07, '' kentta08,
-               lasku.tunnus laskutunnus, lasku.tila laskutila, lasku.alatila laskualatila, kuka2.nimi laskumyyja, lasku.muutospvm laskumpvm,
-               '' tunnus, '' perheid, lasku.tunnus sorttauskentta
-               FROM lasku
-               LEFT JOIN kuka ON (lasku.yhtio=kuka.yhtio and lasku.laatija=kuka.kuka)
-               LEFT JOIN kuka kuka2 ON (kuka2.yhtio = lasku.yhtio and kuka2.tunnus = lasku.myyja)
-               WHERE lasku.yhtio = '$kukarow[yhtio]'
-               AND lasku.tila in ('N','L','T','0') ";
-  }
-
   $query .= "ORDER by sorttauskentta desc, tunnus";
 
   if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") === FALSE) {

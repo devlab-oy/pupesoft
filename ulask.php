@@ -619,7 +619,7 @@ if ($tee == 'I') {
     $tee = 'E';
   }
 
-  if (trim($hyvak[1]) == "" and onko_hyvaksyjia()) {
+  if (trim($hyvak[1]) == "") {
     $errormsg .= "<font class='error'>".t("Laskulla on pakko olla ensimmäinen hyväksyjä")."!</font><br>";
     $tee = 'E';
   }
@@ -633,7 +633,7 @@ if ($tee == 'I') {
     }
   }
 
-  if (count($apu_hyvak) == 1 and in_array($kukarow["kuka"], $apu_hyvak) and onko_hyvaksyjia()) {
+  if (count($apu_hyvak) == 1 and in_array($kukarow["kuka"], $apu_hyvak)) {
     $errormsg .= "<font class='error'>".t("Laskun syöttäjä ei saa olla ainoa hyväksyjä")."!</font><br>";
     $tee = 'E';
   }
@@ -1683,51 +1683,49 @@ if ($tee == 'P' or $tee == 'E') {
 
   echo "<tr><td colspan='2'><hr></td></tr>";
 
-  if (onko_hyvaksyjia()) {
-    echo "<tr><td valign='top'>".t("Hyväksyjät")."</td><td>";
+  echo "<tr><td valign='top'>".t("Hyväksyjät")."</td><td>";
 
-    $query = "SELECT DISTINCT kuka.kuka, kuka.nimi
-              FROM kuka
-              JOIN oikeu ON oikeu.yhtio = kuka.yhtio and oikeu.kuka = kuka.kuka and oikeu.nimi like '%hyvak.php'
-              WHERE kuka.yhtio    = '$kukarow[yhtio]'
-              AND kuka.aktiivinen = 1
-              AND kuka.extranet   = ''
-              and kuka.hyvaksyja  = 'o'
-              ORDER BY kuka.nimi";
-    $vresult = pupe_query($query);
+  $query = "SELECT DISTINCT kuka.kuka, kuka.nimi
+            FROM kuka
+            JOIN oikeu ON oikeu.yhtio = kuka.yhtio and oikeu.kuka = kuka.kuka and oikeu.nimi like '%hyvak.php'
+            WHERE kuka.yhtio    = '$kukarow[yhtio]'
+            AND kuka.aktiivinen = 1
+            AND kuka.extranet   = ''
+            and kuka.hyvaksyja  = 'o'
+            ORDER BY kuka.nimi";
+  $vresult = pupe_query($query);
 
-    $ulos = '';
-    // Täytetään 5 hyväksyntäkenttää
-    for ($i=1; $i<6; $i++) {
+  $ulos = '';
+  // Täytetään 5 hyväksyntäkenttää
+  for ($i=1; $i<6; $i++) {
 
-      while ($vrow = mysql_fetch_assoc($vresult)) {
-        $sel = "";
-        if ($hyvak[$i] == $vrow['kuka']) {
-          $sel = "selected";
-        }
-        $ulos .= "<option value ='$vrow[kuka]' $sel>$vrow[nimi]";
+    while ($vrow = mysql_fetch_assoc($vresult)) {
+      $sel = "";
+      if ($hyvak[$i] == $vrow['kuka']) {
+        $sel = "selected";
       }
-
-      // Käydään sama data läpi uudestaan
-      if (!mysql_data_seek($vresult, 0)) {
-        echo "mysql_data_seek failed!";
-        exit;
-      }
-      echo "<select name='hyvak[$i]' tabindex='24'>
-          <option value = ' '>".t("Ei kukaan")."
-          $ulos
-          </select>";
-      $ulos="";
-
-      // Tehdään checkbox, jolla annetaan lupa muuttaa hyväksyntälistaa myöhemmin
-      if ($i == 1) {
-        echo " ".t("Listaa saa muuttaa")." <input type='checkbox' name='ohyvaksynnanmuutos' $ohyvaksynnanmuutos tabindex='-1'>";
-      }
-      echo "<br>";
+      $ulos .= "<option value ='$vrow[kuka]' $sel>$vrow[nimi]";
     }
 
-    echo "</td></tr>";
+    // Käydään sama data läpi uudestaan
+    if (!mysql_data_seek($vresult, 0)) {
+      echo "mysql_data_seek failed!";
+      exit;
+    }
+    echo "<select name='hyvak[$i]' tabindex='24'>
+        <option value = ' '>".t("Ei kukaan")."
+        $ulos
+        </select>";
+    $ulos="";
+
+    // Tehdään checkbox, jolla annetaan lupa muuttaa hyväksyntälistaa myöhemmin
+    if ($i == 1) {
+      echo " ".t("Listaa saa muuttaa")." <input type='checkbox' name='ohyvaksynnanmuutos' $ohyvaksynnanmuutos tabindex='-1'>";
+    }
+    echo "<br>";
   }
+
+  echo "</td></tr>";
 
   echo "<tr><td colspan='2'>";
 

@@ -311,7 +311,7 @@ if ($jtselaus_paivitys_oikeus and $kukarow["extranet"] == "" and $tilaus_on_jo =
           require "{$pupe_root_polku}/magento_toimita_tilaus.php";
         }
 
-        list($kukarow["kassamyyja"], $laskurow['kassalipas']) = laskuta_magentojt($laskurow['tunnus'], false);
+        list($kukarow["kassamyyja"], $laskurow['kassalipas'], $laskurow['ohjelma_moduli']) = laskuta_magentojt($laskurow['tunnus'], false);
       }
 
       $kateisohitus = "";

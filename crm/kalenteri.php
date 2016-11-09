@@ -1099,7 +1099,14 @@ function piirra_kalenteripaiva($year, $kuu, $paiva, $aikasarake = TRUE) {
       $left = floor(100 / $max) * ($nyklask + $vasenpad[$aikalask]);
       $nyklask++;
 
-      echo "<div style='background-color: #EEEEEE; border:1px solid $reunavari; -webkit-border-radius: 3px; border-radius: 3px;position: absolute; float: right; top: 0; left: {$left}%; height: {$korkeus}px; width:{$divwidth}%; display: block; overflow: hidden;'>
+      if (($yhtiorow["kayttoliittyma"] == "U" and $kukarow["kayttoliittyma"] == "") or $kukarow["kayttoliittyma"] == "U") {
+        $dbg = "#EEEEEE";
+      }
+      else {
+        $dbg = "#555555";
+      }
+
+      echo "<div style='background-color: $dbg; border:1px solid $reunavari; -webkit-border-radius: 3px; border-radius: 3px;position: absolute; float: right; top: 0; left: {$left}%; height: {$korkeus}px; width:{$divwidth}%; display: block; overflow: hidden;'>
             <div style='padding: 3px;'>";
 
       // Vanhoja kalenteritapahtumia ei saa en‰‰ muuttaa ja Hyv‰ksyttyj‰ lomia ei saa ikin‰ muokata

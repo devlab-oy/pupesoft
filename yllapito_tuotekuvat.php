@@ -671,11 +671,11 @@ if ($tee == 'LISTAA') {
     $lisa .= " and tuote.status in ('".str_replace(',', '\',\'', $status)."') ";
   }
   elseif (count($mul_sta) > 0) {
-    $sel_status = "('','A','T','".str_replace(',', '\',\'', implode(",", $mul_sta))."')";
+    $sel_status = "('A','T','".str_replace(',', '\',\'', implode(",", $mul_sta))."')";
     $lisa .= " and tuote.status in $sel_status ";
   }
   else {
-    $lisa .= " and tuote.status in ('','A','T') ";
+    $lisa .= " and tuote.status in ('A','T') ";
   }
 
   if ($korkeus == 'on') {

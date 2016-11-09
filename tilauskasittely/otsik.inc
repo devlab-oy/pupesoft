@@ -472,7 +472,7 @@ default:
 }
 
 //  Tarkastetaan käsinsyötetty viite
-if (isset($jatka) and $kasinsyotetty_viite != "" and $viitten_kasinsyotto_sallittu) {
+if (isset($jatka) and !empty($kasinsyotetty_viite) and $viitten_kasinsyotto_sallittu) {
   if (substr($kasinsyotetty_viite, 0, 2) != "RF" and tarkista_viite($kasinsyotetty_viite) === FALSE) {
     echo "<font class='error'>".t("VIRHE: Syötetty viite '%s' on väärin", $kieli, $kasinsyotetty_viite)."!</font><br>";
     $tee  = "OTSIK";
@@ -834,6 +834,10 @@ if ($tila == "" and !isset($jatka)) {
                 and otunnus       = '$kukarow[kesken]'";
       $result = pupe_query($query);
 
+      $tiedot_laskulta = "YES";
+    }
+
+    if (strtolower($from) == 'asiakasyllapito' and !empty($asiakasid) and !empty($kukarow["kesken"])) {
       $tiedot_laskulta = "YES";
     }
 
@@ -1316,7 +1320,7 @@ if ($tila == "" and !isset($jatka)) {
     }
 
     if (tarkista_oikeus("yllapito.php", $ealisa, "X")) {
-      echo "<tr><td></td><td><a href='".$palvelin2."yllapito.php?toim=$ealisa&tunnus=$srow[liitostunnus]&lopetus=tilauskasittely/tilaus_myynti.php////toim=$toim//tee=$tee//tilausnumero=$tilausnumero//mista=$mista//tila=$tila//from=ASIAKASYLLAPITO//asiakasid=$asiakasid'>".t("Muuta asiakkaan tietoja")."</a></td></tr>";
+      echo "<tr><td></td><td><a href='".$palvelin2."yllapito.php?toim=$ealisa&tunnus=$srow[liitostunnus]&lopetus=tilauskasittely/tilaus_myynti.php////toim=$toim//tee=$tee//tilausnumero=$tilausnumero//mista=$mista//tila=$tila//ylatila=$ylatila//alatila=$alatila//from=ASIAKASYLLAPITO//asiakasid=$asiakasid'>".t("Muuta asiakkaan tietoja")."</a></td></tr>";
     }
   }
 
@@ -3309,6 +3313,12 @@ if ($tila == "" and !isset($jatka)) {
         }
       }
 
+      if ($kukarow['kieli'] != '') {
+        $kieli = $kukarow['kieli'];
+      }
+      else {
+        $kieli = $yhtiorow['kieli'];
+      }
       $query = "SELECT tyomaarayksen_tapahtumat.*,
                 ifnull(tilataulu.selitetark, '') tilassa,
                 ifnull(jonotaulu.selitetark, '') jonossa
@@ -3316,9 +3326,11 @@ if ($tila == "" and !isset($jatka)) {
                 LEFT JOIN avainsana tilataulu ON tilataulu.yhtio = tyomaarayksen_tapahtumat.yhtio
                   AND tilataulu.laji                           = 'TYOM_TYOSTATUS'
                   AND tilataulu.selite                         = tyomaarayksen_tapahtumat.tyostatus_selite
+                  AND tilataulu.kieli                           = '$kieli'
                 LEFT JOIN avainsana jonotaulu ON jonotaulu.yhtio = tyomaarayksen_tapahtumat.yhtio
                   AND jonotaulu.laji                           = 'TYOM_TYOJONO'
                   AND jonotaulu.selite                         = tyomaarayksen_tapahtumat.tyojono_selite
+                  AND jonotaulu.kieli                           = '$kieli'
                 WHERE tyomaarayksen_tapahtumat.yhtio           = '{$kukarow['yhtio']}'
                 AND tyomaarayksen_tapahtumat.tyomaarays_tunnus = '$tilausnumero'
                 ORDER BY tyomaarayksen_tapahtumat.luontiaika desc";

@@ -28,7 +28,7 @@ if ($php_cli and count(debug_backtrace()) <= 1) {
   require "inc/functions.inc";
 
   // Pupeasennuksen root polku, toimitusvahvistuksia varten
-  $pupe_root_polku = dirname(dirname(__FILE__));
+  $pupe_root_polku = dirname(__FILE__);
 
   $kukarow['yhtio'] = (string) $argv[1];
   $kukarow['kuka']  = 'admin';
@@ -372,7 +372,7 @@ if ($handle = opendir($ftpget_dest[$operaattori])) {
             $desadv_version = "";
           }
 
-          if (file_exists("tilauskasittely/{$laskurow['toimitusvahvistus']}")) {
+          if (file_exists("{$pupe_root_polku}/tilauskasittely/{$laskurow['toimitusvahvistus']}")) {
 
             $rakir_row = $laskurow;
 

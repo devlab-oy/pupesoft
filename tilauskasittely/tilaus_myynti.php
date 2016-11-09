@@ -80,123 +80,23 @@ if ($tila == "KORVAMERKITSE" or $tila == "KORVAMERKITSE_AJAX") {
   $rivitunnus = '';
 }
 
-if ($yhtiorow['tilausrivin_esisyotto'] == 'K' and isset($ajax_toiminto) and trim($ajax_toiminto) == 'esisyotto_kate') {
-
-  $lquery = "SELECT *
-             FROM lasku
-             WHERE yhtio = '{$kukarow['yhtio']}'
-             AND tunnus  = '{$tilausnumero}'";
-  $lresult  = pupe_query($lquery);
-  $laskurow = mysql_fetch_assoc($lresult);
-
-  $query = "SELECT *
-            FROM tuote
-            WHERE yhtio  = '{$kukarow['yhtio']}'
-            and  tuoteno = '{$tuoteno}'";
-  $aresult = pupe_query($query);
-  $tuoterow = mysql_fetch_assoc($aresult);
-
-  $ale_arr = array();
-
-  for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
-    $alename = 'ale'.$alepostfix;
-    if (!empty($$alename)) {
-      $ale_arr[$alename] = str_replace(',', '.', $$alename);
-    }
-  }
-
-  $ale_arr['netto'] = $netto;
-  $ale_arr['erikoisale'] = 0;
-  $ale_arr['erikoisale_saapuminen'] = 0;
-
-  $kotisumma = $hinta * $kpl * generoi_alekentta_php($ale_arr, 'M', 'kerto', 'ei_erikoisale');
-  $ykshinta  = $hinta * generoi_alekentta_php($ale_arr, 'M', 'kerto', 'ei_erikoisale');
-
-  $arr = array(
-    'sarjanumeroseuranta' => '',
-    'tuoteno' => $tuoteno,
-    'varattu' => $kpl,
-    'jt' => 0,
-  );
-
-  $kate = laske_tilausrivin_kate($arr, $kotisumma, $tuoterow['kehahin']);
-
-  if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"])) and $laskurow["vienti_kurssi"] != 0) {
-    $hinta = hintapyoristys(laskuval($hinta, $laskurow["vienti_kurssi"]));
-  }
-
-  echo json_encode(array(
-      'hinta' => round($hinta, $yhtiorow['hintapyoristys']),
-      'netto' => $netto,
-      'ale' => $ale,
-      'kate' => $kate,
-      'ykshinta' => round($ykshinta, $yhtiorow['hintapyoristys']),
-      'rivihinta' => round($kotisumma, $yhtiorow['hintapyoristys'])
-    ));
-
-  exit;
-}
-
 if ($yhtiorow['tilausrivin_esisyotto'] == 'K' and isset($ajax_toiminto) and trim($ajax_toiminto) == 'esisyotto') {
-
-  $lquery = "SELECT *
-             FROM lasku
-             WHERE yhtio = '{$kukarow['yhtio']}'
-             AND tunnus  = '{$tilausnumero}'";
-  $lresult  = pupe_query($lquery);
-  $laskurow = mysql_fetch_assoc($lresult);
-
-  $query = "SELECT *
-            FROM tuote
-            WHERE yhtio  = '{$kukarow['yhtio']}'
-            and  tuoteno = '{$tuoteno}'";
-  $aresult = pupe_query($query);
-  $tuoterow = mysql_fetch_assoc($aresult);
-
-  $hinta_ajax = $hinta;
-
-  // Tutkitaan onko tämä myyty ulkomaan alvilla
-  list($hinta, $netto, $ale, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $tuoterow, $kpl);
-
-  $hinta = $hinta_ajax != '' ? $hinta_ajax : $hinta;
-
-  for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
-    $alename = 'ale'.$alepostfix;
-    if (!empty($$alename)) {
-      $ale[$alename] = str_replace(',', '.', $$alename);
-    }
-  }
-
-  $ale_arr = $ale;
-  $ale_arr['netto'] = $netto;
-  $ale_arr['erikoisale'] = 0;
-  $ale_arr['erikoisale_saapuminen'] = 0;
-
-  $kotisumma = $hinta * $kpl * generoi_alekentta_php($ale_arr, 'M', 'kerto', 'ei_erikoisale');
-  $ykshinta  = $hinta * generoi_alekentta_php($ale_arr, 'M', 'kerto', 'ei_erikoisale');
-
-  $arr = array(
-    'sarjanumeroseuranta' => '',
+  $params = array(
+    'tilausnumero' => $tilausnumero,
     'tuoteno' => $tuoteno,
-    'varattu' => $kpl,
-    'jt' => 0,
+    'hinta_ajax' => $hinta,
+    'kpl' => $kpl,
+    'ale1' => $ale1,
+    'ale2' => $ale2,
+    'ale3' => $ale3,
+    'tilausrivi_alvillisuus' => $tilausrivi_alvillisuus,
+    'netto' => $netto,
+    'alv' => $alv
   );
 
-  $kate = laske_tilausrivin_kate($arr, $kotisumma, $tuoterow['kehahin']);
+  $result = tilausrivin_esisyotto($params);
 
-  if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"])) and $laskurow["vienti_kurssi"] != 0) {
-    $hinta = hintapyoristys(laskuval($hinta, $laskurow["vienti_kurssi"]));
-  }
-
-  echo json_encode(array(
-      'hinta' => round($hinta, $yhtiorow['hintapyoristys']),
-      'netto' => $netto,
-      'ale' => $ale_arr,
-      'kate' => $kate,
-      'ykshinta' => round($ykshinta, $yhtiorow['hintapyoristys']),
-      'rivihinta' => round($kotisumma, $yhtiorow['hintapyoristys'])
-    ));
-
+  echo json_encode($result);
   exit;
 }
 
@@ -1118,6 +1018,18 @@ else {
 
 //tietyissä keisseissä tilaus lukitaan (ei syöttöriviä eikä muota muokkaa/poista-nappuloita)
 $muokkauslukko = $state = "";
+
+# Laitetaan tilaus lukkoon, jos tilaus on lähetetty ulkoiseen varastoon
+$check  = true;
+$check &= (!empty($laskurow['lahetetty_ulkoiseen_varastoon']));
+$check &= ($laskurow['lahetetty_ulkoiseen_varastoon'] != "0000-00-00 00:00:00");
+$check &= ($laskurow['tila'] == 'N' or
+          ($laskurow['tila'] == 'L' and in_array($laskurow['alatila'], array('A','B','BD','C'))) or
+          ($laskurow['tila'] == 'G' and in_array($laskurow['alatila'], array('','J','KJ','A','B'))));
+
+if ($check) {
+  $muokkauslukko = 'LUKOSSA';
+}
 
 //  Projekti voidaan poistaa vain jos meillä ei ole sillä mitään toimituksia
 if (isset($laskurow["tunnusnippu"]) and $laskurow["tunnusnippu"] > 0 and $toim == "PROJEKTI") {
@@ -2220,7 +2132,10 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
               }
             -->
             </script>";
-        echo "<table class='laskuri'><form name='laskuri' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php'>";
+
+        echo "<form name='laskuri' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php'>";
+        echo "<input type='hidden' name='toim' value='{$toim}'>";
+        echo "<table class='laskuri'>";
 
         if (!isset($kateismaksu['kateinen']) or $kateismaksu['kateinen'] == '') {
           $yhteensa_teksti = t("Yhteensä");
@@ -2233,7 +2148,9 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
         echo "<tr><th>$yhteensa_teksti</th><td align='right'>$kaikkiyhteensa</td><td>$laskurow[valkoodi]</td></tr>";
         echo "<tr><th>".t("Annettu")."</th><td><input size='7' autocomplete='off' type='text' id='kateisraha' name='kateisraha' onkeyup='update_summa(\"$kaikkiyhteensa\");'></td><td>$laskurow[valkoodi]</td></tr>";
         echo "<tr><th>".t("Takaisin")."</th><td name='loppusumma' id='loppusumma' align='right'><strong>0.00</strong></td><td>$laskurow[valkoodi]</td></tr>";
-        echo "</table><br>";
+        echo "</table>";
+        echo "</form>";
+        echo "<br>";
 
         require_once "tilauskasittely/tulosta_asiakkaan_kuitti.inc";
 

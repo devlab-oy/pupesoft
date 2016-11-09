@@ -244,7 +244,7 @@ if ($tee == 'GO') {
         $filetuoteno = pupesoft_cleanstring($filetuoteno);
         $filename    = pupesoft_cleanstring($filename);
 
-        $filearray[$filename] = $filetuoteno;
+        $filearray[$filename][] = $filetuoteno;
       }
     }
   }
@@ -349,6 +349,7 @@ if ($tee == 'GO') {
     // pitää kattoo onko nimessä häshsiä
     if (strpos($kuva, "#") !== FALSE) {
       list($kuva, $jarjestys) = explode("#", $kuva);
+      $jarjestys = str_replace(".{$ext}", "", $jarjestys);
       $kuva = "$kuva.$ext";
     }
 
@@ -454,16 +455,30 @@ if ($tee == 'GO') {
         continue;
       }
 
+      $kayttotarkoitus_custom = '';
+
       if (!isset($apuresult)) {
         $mihin   = strpos($kuva, ".$ext");
         $tuoteno = substr($kuva, 0, "$mihin");
 
+        if (strpos($tuoteno, "=") !== false) {
+          list($tuoteno, $kayttotarkoitus_custom) = explode("=", $tuoteno);
+        }
+
+        $tuotenolisa = "AND tuoteno = '{$tuoteno}'";
+
         # Tiedostossa voi olla tuotenumeron kääntö
         if (count($filearray) > 0) {
-          if (!empty($filearray[$kuva])) {
-            $tuoteno = $filearray[$kuva];
+          if (isset($filearray[$kuva])) {
+            $tuotenolisa = "AND tuoteno IN ('".implode("','", $filearray[$kuva])."')";
           }
           else {
+            echo " &raquo; ";
+            echo "<font class='error'>";
+            echo t("Ohitetaan kuva, koska ei löytynyt sisäänluettavasta tiedostosta!");
+            echo "</font>";
+            echo "<br>";
+
             continue;
           }
         }
@@ -471,8 +486,7 @@ if ($tee == 'GO') {
         $query = "SELECT tuoteno, tunnus
                   FROM tuote
                   WHERE yhtio = '{$kukarow['yhtio']}'
-                  AND tuoteno = '{$tuoteno}'
-                  LIMIT 1";
+                  {$tuotenolisa}";
         $apuresult = pupe_query($query);
       }
 
@@ -485,7 +499,7 @@ if ($tee == 'GO') {
         // lisätään file
         while ($apurow = mysql_fetch_array($apuresult)) {
 
-          $kuvaselite = "Tuotekuva";
+          $kuvaselite = strtolower($ext) == 'pdf' ? 'Liitetiedosto' : 'Tuotekuva';
           $kayttotarkoitus = "MU";
 
           if ($toiminto == 'thumb' and $apuselite == "") {
@@ -504,6 +518,10 @@ if ($tee == 'GO') {
             $kuvaselite = $apuselite;
           }
 
+          if (trim($kayttotarkoitus_custom) != '') {
+            $kayttotarkoitus = $kayttotarkoitus_custom;
+          }
+
           // poistetaan vanhat kuvat ja ...
           $query = "DELETE FROM liitetiedostot
                     WHERE yhtio         = '{$kukarow['yhtio']}'
@@ -513,7 +531,7 @@ if ($tee == 'GO') {
                     AND filename        = '{$apukuva}'";
           $delresult = pupe_query($query);
 
-          tallenna_liite("{$dirri}/{$polku}", $taulu, $apurow['tunnus'], $kuvaselite, $kayttotarkoitus, 0, 0, $mikakieli);
+          tallenna_liite("{$dirri}/{$polku}", $taulu, $apurow['tunnus'], $kuvaselite, $kayttotarkoitus, 0, $jarjestys, $mikakieli);
 
           $query = "UPDATE {$taulu} SET
                     muutospvm   = now(),

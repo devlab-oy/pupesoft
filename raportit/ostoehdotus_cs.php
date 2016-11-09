@@ -863,27 +863,19 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
         echo "<tr><th>".t("Toimitusaika").":</th><td><input type='text' size='10' id = 'toimitusajat_$indeksi' name='toimitusajat[$row[tuoteno]]' value='".(float) $toimirow["toimitusaika"]."'> ".t("pva").".</td></tr>";
         echo "<tr><th>".t("Varastoitava/status").":</th><td><select id = 'varastoitavat_$indeksi' name='varastoitavat[$row[tuoteno]]'>";
 
-        $query = "SELECT selite, selitetark
-                  FROM avainsana
-                  WHERE yhtio = '$kukarow[yhtio]'
-                  AND laji    = 'S'";
-        $status_select_res = pupe_query($query);
+        foreach (product_statuses() as $key => $value) {
+          $sel = $row["status"] == $key ? " selected" : "";
 
-        while ($status_select_row = mysql_fetch_assoc($status_select_res)) {
-          $sel = '';
+          echo "<option value='{$key}'{$sel}>";
 
-          if ($row['status'] == $status_select_row['selite']) $sel = 'SELECTED';
-
-          echo "<option value='$status_select_row[selite]' $sel>";
-
-          if ($status_select_row['selite'] != 'T') {
+          if ($key != "T") {
             echo t("Varastoitava");
           }
           else {
             echo t("Ei varastoitava");
           }
 
-          echo " ", t("Status"), " $status_select_row[selitetark]</option>";
+          echo " ", t("Status"), " {$value}</option>";
         }
 
         echo "</select></td>";

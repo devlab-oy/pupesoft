@@ -73,7 +73,8 @@ if (!function_exists("kopioi_tilaus")) {
         }
       }
 
-      if ($field == "kate_korjattu") {
+      if ($field == "kate_korjattu" or
+        $field == "lahetetty_ulkoiseen_varastoon") {
         $values .= ", NULL";
       }
       elseif ($field == "erpcm" and $meapurow["erapvmkasin"] != '') {

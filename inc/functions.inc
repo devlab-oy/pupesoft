@@ -12018,7 +12018,7 @@ if (!function_exists("t_maanimi")) {
 
 if (!function_exists("jt_toimita")) {
   function jt_toimita($toimittaja, $toimittajaid, $varastosta, $jtrivit, $jtrivit_paikat, $automaaginen, $tee, $automaattinen_poiminta = '', $tuotenumero = '', $huomioi_pvm = '', $mista_tullaan = '') {
-    global $yhtiorow, $kukarow, $oikeurow, $myyntitilaus_jaksotettu, $alkuperainen_varasto;
+    global $yhtiorow, $kukarow, $oikeurow, $myyntitilaus_jaksotettu, $alkuperainen_varasto, $pupe_root_polku, $magento_api_tt_url, $magento_api_tt_usr, $magento_api_tt_pas;
 
     if (!is_array($jtrivit)) $jtrivit = array();
     if (!is_array($jtrivit_paikat)) $jtrivit_paikat = array();
@@ -27018,7 +27018,7 @@ if (!function_exists('laske_siirrettava_maara')) {
 
 if (!function_exists('paivita_rahtikirjat_tulostetuksi_ja_toimitetuksi')) {
   function paivita_rahtikirjat_tulostetuksi_ja_toimitetuksi(array $params) {
-    global $kukarow;
+    global $kukarow, $pupe_root_polku;
 
     $otunnukset = isset($params['otunnukset']) ? $params['otunnukset'] : '';
     $kilotyht = isset($params['kilotyht']) ? $params['kilotyht'] : '';
@@ -27074,6 +27074,80 @@ if (!function_exists('paivita_rahtikirjat_tulostetuksi_ja_toimitetuksi')) {
               AND mapvm   != '0000-00-00'
               AND chn      = '999'";
     $ures  = pupe_query($query);
+
+    // Etukäteen maksettu Magentotilaus laskutetaan, jos ei ole jo laskuttunut
+    laskuta_magentojt($otunnukset);
+  }
+}
+
+if (!function_exists('laskuta_magentojt')) {
+  function laskuta_magentojt($tilausnumerot, $laskutus = true) {
+    global $kukarow, $yhtiorow, $pupe_root_polku, $magento_api_tt_url, $magento_api_tt_usr, $magento_api_tt_pas;
+
+    // Etukäteen maksettu Magentotilaus laskutetaan, jos ei ole jo laskuttunut
+    // Haetaan ennen sitä verkkokaupan kassalipas
+    $query = "SELECT *
+              FROM lasku
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND tunnus   IN ({$tilausnumerot})
+              AND alatila != 'X'
+              AND ohjelma_moduli = 'MAGENTOJT'";
+    $laskurow_result = pupe_query($query);
+
+    if (mysql_num_rows($laskurow_result) == 0) {
+      return "";
+    }
+
+    while ($laskurow = mysql_fetch_assoc($laskurow_result)) {
+      // tarkistetaan että on käteismaksuehto
+      // haetaan kassalipas jotta verkkokaupan tiliöinnit menee nätisti
+      // ja laskutetaan tilaus
+      $query = "SELECT *
+                FROM maksuehto
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND tunnus  = '{$laskurow['maksuehto']}'";
+      $maksuehto_result = pupe_query($query);
+      $maksuehtorow = mysql_fetch_assoc($maksuehto_result);
+
+      if ($maksuehtorow['kateinen'] != '') {
+
+        $query = "SELECT tunnus
+                  FROM kassalipas
+                  WHERE yhtio = '$kukarow[yhtio]'
+                  AND nimi    = 'Verkkokauppa'";
+        $kassalipas_res = pupe_query($query);
+
+        if (mysql_num_rows($kassalipas_res) == 1) {
+          $kassalipas_row = mysql_fetch_assoc($kassalipas_res);
+          $kukarow["kassamyyja"] = $laskurow['kassalipas'] = $kassalipas_row["tunnus"];
+        }
+
+        // Päivitetään ohjelma_moduli takaisin magentoksi
+        $query = "  UPDATE lasku
+                    SET ohjelma_moduli = 'MAGENTO',
+                    kassalipas = '{$laskurow['kassalipas']}'
+                    WHERE yhtio = '{$kukarow['yhtio']}'
+                    AND tunnus  = '{$laskurow['tunnus']}'";
+        $res = pupe_query($query);
+        
+        $laskurow['ohjelma_moduli'] = "MAGENTO";
+      }
+
+      if ($laskutus) {
+
+        $kateisohitus = "";
+        $laskurow['eilahetetta'] = 'o';
+        $mista = "";
+        $tilausvalmiskutsuja = "";
+        $kukarow["kesken"] = $laskurow['tunnus'];
+
+        // Pupeasennuksen root
+        require "{$pupe_root_polku}/tilauskasittely/tilaus-valmis.inc";
+      }
+      else {
+        return array($kukarow["kassamyyja"], $laskurow['kassalipas'], $laskurow['ohjelma_moduli']);
+      }
+    }
   }
 }
 

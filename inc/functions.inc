@@ -8989,6 +8989,12 @@ if (!function_exists('tallenna_liite')) {
   }
 }
 
+if (!function_exists('html_error')) {
+  function html_error($message) {
+    return "<font class='error'>{$message}</font><br><br>";
+  }
+}
+
 if (!function_exists('tarkasta_liite')) {
   function tarkasta_liite($userfile, $sallitut_tiedostot="") {
     global $kukarow, $yhtiorow, $_FILES, $kieli;
@@ -9011,12 +9017,13 @@ if (!function_exists('tarkasta_liite')) {
       }
     }
 
+    $msg = '';
+
     //  Ei saatu erroreita. jatketaan..
     if ($file["size"] == 0) {
-      return "<font class='error'>".t("VIRHE: Tiedosto on tyhjä")."</font><br><br>";
+      $msg = t("VIRHE: Tiedosto on tyhjä");
     }
     elseif ($file["error"] == 0) {
-
       //  Paketti riittävän pieni mysql:lle
       $query = "SHOW variables like 'max_allowed_packet'";
       $result = pupe_query($query);
@@ -9031,35 +9038,39 @@ if (!function_exists('tarkasta_liite')) {
           return true;
         }
         else {
-          if (count($sallitut_tiedostot)>1) {
-            //  Kaunistellaan..
-            return "<font class='error'>".t("VIRHE: Tiedostomuoto $ext ei kelpaa, sallitut tiedostomuodot on %s ja %s", $kieli, implode(", ", array_slice($sallitut_tiedostot, 0, -1)), end($sallitut_tiedostot)).".</font><br><br>";
-
+          if (count($sallitut_tiedostot) > 1) {
+            $msg = t("VIRHE: Tiedostomuoto %s ei kelpaa, sallitut tiedostomuodot on %s ja %s", $kieli, $ext, implode(", ", array_slice($sallitut_tiedostot, 0, -1)), end($sallitut_tiedostot));
           }
           else {
-            return "<font class='error'>".t("VIRHE: Tiedostomuoto $ext ei kelpaa, sallittu tiedostomuoto on %s", $kieli, $sallitut_tiedostot[0]).".</font><br><br>";
+            $msg = t("VIRHE: Tiedostomuoto %s ei kelpaa, sallittu tiedostomuoto on %s", $kieli, $ext, $sallitut_tiedostot[0]);
           }
         }
       }
       else {
-        return "<font class='error'>".t("VIRHE: Ladattu tiedosto oli liian suuri! Suurin sallittu tiedostokoko on %s", $kieli, size_readable($file["size"]))."!</font><br><br>";
+        $msg = t("VIRHE: Ladattu tiedosto oli liian suuri! Suurin sallittu tiedostokoko on %s", $kieli, size_readable($file["size"]));
       }
     }
     elseif ($file["error"] == 1 or $file["error"] == 2) {
-      return "<font class='error'>".t("VIRHE: Tiedosto on liian suuri!")."!</font><br><br>";
+      $msg = t("VIRHE: Tiedosto on liian suuri!");
     }
     elseif ($file["error"] == 3) {
-      return "<font class='error'>".t("VIRHE: Tiedoston lataus epäonnistui!")."!</font><br><br>";
+      $msg = t("VIRHE: Tiedoston lataus epäonnistui!");
     }
     elseif ($file["error"] == 4) {
       return true;
     }
     elseif ($file["error"] == 7) {
-      return "<font class='error'>".t("VIRHE: Palvelinasetuksissa on virhe!")."!</font><br><br>";
+      $msg = t("VIRHE: Palvelinasetuksissa on virhe!");
     }
     else {
-      return "<font class='error'>".t("VIRHE: Tapahtui virhe tallennettaessa tiedostoa!")."!</font><br><br>";
+      $msg = t("VIRHE: Tapahtui virhe tallennettaessa tiedostoa!");
     }
+
+    if (PHP_SAPI != 'cli') {
+      $msg = html_error($msg);
+    }
+
+    return $msg;
   }
 }
 

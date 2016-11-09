@@ -773,8 +773,11 @@ class Unifaun {
     );
 
     if (count($vak_tuotteita) > 0 and in_array($_virallinen_selite, $_sallitut_posti_vak_palvelut)) {
-      $uni_ser_val = $uni_service->addChild('addon');
-      $uni_ser_val->addAttribute('adnid', "DNG");
+      $uni_addon = $uni_service->addChild('addon');
+      $uni_addon->addAttribute('adnid', "DNG");
+      
+      $uni_add_val = $uni_addon->addChild('val', utf8_encode($_yhtio_nimi));
+      $uni_add_val->addAttribute('n', 'declarant');
     }
 
     if (trim($this->toitarow['lajittelupiste']) != "") {

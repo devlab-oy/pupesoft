@@ -423,6 +423,16 @@ class Unifaun {
       $allowed_opay = array(
         'IT09',
         'IT14',
+        'IT16',
+        'IT21',
+        'ITVAK',
+        'ITEXPC',
+        'ITELLALOGKR',
+        'ITKY09',
+        'ITKY14',
+        'ITKY21',
+        'ITKYVAK',
+        'ITKYEXPC',
       );
     }
 
@@ -738,13 +748,8 @@ class Unifaun {
       $uni_add_val = $uni_addon->addChild('val', utf8_encode($rahtisopimusnro));
       $uni_add_val->addAttribute('n', 'custno');
 
-      if ($this->toitarow['virallinen_selite'] == "IT09"
-        or $this->toitarow['virallinen_selite'] == "IT14"
-        or $this->toitarow['virallinen_selite'] == "IT16"
-        or $this->toitarow['virallinen_selite'] == "IT21") {
-        $uni_add_val = $uni_addon->addChild('val', utf8_encode($this->postirow["tunnus"])); // Payment reference. Used with add-on COD.
-        $uni_add_val->addAttribute('n', "reference");
-      }
+      $uni_add_val = $uni_addon->addChild('val', utf8_encode($this->postirow["tunnus"])); // Payment reference. Used with add-on COD.
+      $uni_add_val->addAttribute('n', "reference");
     }
 
     // nämä tukee mps palvelua

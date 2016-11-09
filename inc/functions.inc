@@ -33716,23 +33716,6 @@ if (!function_exists("lisaa_vaihtoehtoinen_rahti_merkkijonoon")) {
   }
 }
 
-if (!function_exists('onko_hyvaksyjia')) {
-  function onko_hyvaksyjia() {
-    global $kukarow;
-
-    $query = "SELECT tunnus
-              FROM kuka
-              WHERE yhtio    = '$kukarow[yhtio]'
-              AND aktiivinen = 1
-              AND extranet   = ''
-              AND hyvaksyja  = 'o'
-              LIMIT 1";
-    $kukares = pupe_query($query);
-
-    return mysql_num_rows($kukares);
-  }
-}
-
 if (!function_exists('humanize_ohjelma_moduli')) {
   function humanize_ohjelma_moduli($ohjelma_moduli) {
     $map = array(

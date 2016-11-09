@@ -1083,7 +1083,7 @@ function piirra_kalenteripaiva($year, $kuu, $paiva, $aikasarake = TRUE) {
         }
       }
       else {
-        $reunavari = "#5F5C5F";
+        $reunavari = "#AAAAAA";
       }
 
       $korkeus = 34 * $kesto;
@@ -1099,7 +1099,7 @@ function piirra_kalenteripaiva($year, $kuu, $paiva, $aikasarake = TRUE) {
       $left = floor(100 / $max) * ($nyklask + $vasenpad[$aikalask]);
       $nyklask++;
 
-      echo "<div style='background-color: #00FF00; border:1px solid $reunavari; -webkit-border-radius: 3px; border-radius: 3px;position: absolute; float: right; top: 0; left: {$left}%; height: {$korkeus}px; width:{$divwidth}%; display: block; overflow: hidden;'>
+      echo "<div style='background-color: #EEEEEE; border:1px solid $reunavari; -webkit-border-radius: 3px; border-radius: 3px;position: absolute; float: right; top: 0; left: {$left}%; height: {$korkeus}px; width:{$divwidth}%; display: block; overflow: hidden;'>
             <div style='padding: 3px;'>";
 
       // Vanhoja kalenteritapahtumia ei saa en‰‰ muuttaa ja Hyv‰ksyttyj‰ lomia ei saa ikin‰ muokata
@@ -1124,7 +1124,7 @@ function piirra_kalenteripaiva($year, $kuu, $paiva, $aikasarake = TRUE) {
         }
       }
 
-      echo " $row[paallekkaiset] $row[kentta01]";
+      echo " $row[kentta01]";
 
       $query = "SELECT *
                 from liitetiedostot
@@ -1144,14 +1144,11 @@ function piirra_kalenteripaiva($year, $kuu, $paiva, $aikasarake = TRUE) {
       echo "</div></div>";
     }
 
-    if ($tyhjaa > 0) {
-      $url = js_openUrlNewWindow("{$palvelin2}crm/kalenteri.php?valitut=".urlencode($valitut)."&kenelle=".urlencode($kenelle)."&tee=SYOTA&kello=$kello_nyt&year=$year&kuu=$kuu&paiva=$paiva&konserni=$konserni&toim=$toim&tyomaarays=$tyomaarays&lopetus=$lopetus", "<div style='height:100%;width:100%'>&nbsp;</div>", "style='text-decoration: none;'", 550, 550);
-      #echo "<td class='kalepad' style='height: 30px;' colspan='$tyhjaa'>$url&nbsp;</td>";
-    }
-
     $aikalask++;
 
-    echo "</td></tr>";
+    $url = js_openUrlNewWindow("{$palvelin2}crm/kalenteri.php?valitut=".urlencode($valitut)."&kenelle=".urlencode($kenelle)."&tee=SYOTA&kello=$kello_nyt&year=$year&kuu=$kuu&paiva=$paiva&konserni=$konserni&toim=$toim&tyomaarays=$tyomaarays&lopetus=$lopetus", "<div style='height:100%;width:100%'>&nbsp;</div>", "style='text-decoration: none;'", 550, 550);
+
+    echo "$url</td></tr>";
   }
 
   //kalenterin table loppuu

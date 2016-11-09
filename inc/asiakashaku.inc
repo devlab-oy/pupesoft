@@ -422,7 +422,8 @@ elseif ($ytunnus != '') {
       $query .= "  UNION
             (SELECT asiakas.*, yhtio.nimi yhtionimi,
               if (asiakas.postitp = '{$ytunnus2}', 1, if(left(asiakas.postitp, length('{$ytunnus2}')) = '{$ytunnus2}', 2, 3)) apujarjestys,
-              '7' apujarjestys2
+              '7' apujarjestys2,
+              '' yhteyshenkilo
               FROM asiakas
               JOIN yhtio on asiakas.yhtio=yhtio.yhtio
               WHERE asiakas.$konsyhtiot

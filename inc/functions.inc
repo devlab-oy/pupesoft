@@ -27134,7 +27134,7 @@ if (!function_exists('laskuta_magentojt')) {
         require "{$pupe_root_polku}/tilauskasittely/tilaus-valmis.inc";
       }
       else {
-        return array($kukarow["kassamyyja"], $laskurow['kassalipas']);
+        return array($kukarow["kassamyyja"], $laskurow['kassalipas'], $laskurow['ohjelma_moduli']);
       }
     }
   }

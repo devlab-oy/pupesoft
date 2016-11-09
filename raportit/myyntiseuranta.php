@@ -1712,6 +1712,10 @@ if ((isset($aja_raportti) or isset($valitse_asiakas)) and count($_REQUEST) > 0) 
           $tuoterajaus .= "'".trim($tuote)."',";
         }
       }
+
+      if ($tuoterajaus != "") {
+        $lisa .= "and tuote.tuoteno in (".substr($tuoterajaus, 0, -1).") ";
+      }
     }
 
     if (isset($status) and $status != '') {

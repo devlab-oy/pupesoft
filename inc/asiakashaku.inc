@@ -309,7 +309,7 @@ elseif ($ytunnus != '') {
     // arvailuhaku
     $query = "";
 
-    if (1 == 1) {
+    if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") !== FALSE) {
       $query .= "(SELECT asiakas.*, yhtio.nimi yhtionimi,
                  if (yht.nimi = '{$ytunnus2}', 1, if(left(yht.nimi, length('{$ytunnus2}')) = '{$ytunnus2}', 2, 3)) apujarjestys,
                  '0' apujarjestys2,
@@ -418,7 +418,7 @@ elseif ($ytunnus != '') {
                 $postinolisa
                 $lajilisa $asiakasrajaus)";
 
-    if (trim($postitplisa) == 'KAAL') {
+    if (trim($postitplisa) == '') {
       $query .= "  UNION
             (SELECT asiakas.*, yhtio.nimi yhtionimi,
               if (asiakas.postitp = '{$ytunnus2}', 1, if(left(asiakas.postitp, length('{$ytunnus2}')) = '{$ytunnus2}', 2, 3)) apujarjestys,

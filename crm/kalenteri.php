@@ -732,7 +732,7 @@ echo "</table>";
 echo "<table width='100%'>";
 
 if (count($tyolista[date("Y-m-d")]) > 0) {
-  echo "<tr><th>T‰n‰‰n</th></tr>";
+  echo "<tr><th>".t("T‰n‰‰n")."</th></tr>";
 
   foreach($tyolista[date("Y-m-d")] as $tyot) {
     echo "<tr><td>$tyot[kentta01]</td></tr>";
@@ -742,7 +742,7 @@ if (count($tyolista[date("Y-m-d")]) > 0) {
 }
 
 if (count($tyolista[date("Y-m-d", strtotime("TOMORROW"))]) > 0) {
-  echo "<tr><th>Huomenna</th></tr>";
+  echo "<tr><th>".t("Huomenna")."</th></tr>";
 
   foreach($tyolista[date("Y-m-d", strtotime("TOMORROW"))] as $tyot) {
     echo "<tr><td>$tyot[kentta01]</td></tr>";

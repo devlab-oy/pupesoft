@@ -863,23 +863,6 @@ if ($from != '' and $rivitunnus != "" and $formista == "kylla") {
         pupe_query($query);
       }
 
-      //if (($rivirow["sarjanumeroseuranta"] == "S") and $tunnuskentta == "myyntirivitunnus") {
-      //  $query = "SELECT nimitys
-      //            FROM tilausrivi
-      //            WHERE yhtio = '$kukarow[yhtio]'
-      //            and tunnus  = '$sarjarow[ostorivitunnus]'";
-      //  $nimires = pupe_query($query);
-      //  $nimirow = mysql_fetch_assoc($nimires);
-      //
-      //  if ($nimirow["nimitys"] != "") {
-      //    $query = "UPDATE tilausrivi
-      //              SET nimitys = '$nimirow[nimitys]'
-      //              WHERE yhtio = '$kukarow[yhtio]'
-      //              and tunnus  = '$sarjarow[rivitunnus]'";
-      //    $nimires = pupe_query($query);
-      //  }
-      //}
-
       if ($tunnuskentta == 'ostorivitunnus' and $from == "kohdista") {
         //Tutkitaan löytyykö JT-rivi joka mäppäytyy tähän ostoriviin
         $query = "SELECT tilausrivi.tunnus

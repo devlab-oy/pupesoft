@@ -1091,24 +1091,24 @@ if ($ytunnus != '' and $tee == '') {
     }
 
     if ($memorow["perheid"] == 0) {
-      echo "<tr><td class='back pnopad' style='height:5px;'></td></tr>";
+      echo "<tr><td class='back pnopad' style='height:10px;'></td></tr>";
       echo "<tr>";
-      echo "<th>$memorow[tyyppi]</th>
-            <th>$memorow[laatija]</th>
-            <th>".tv1dateconv($memorow["paivamaara"])."</th>
-            <th>$memorow[tapa]</th>
-            <th>$memorow[yhteyshenkilo]</th>";
+      echo "<td>".ucfirst($memorow["tyyppi"])."</td>
+            <td>$memorow[laatija]</td>
+            <td>".tv1dateconv($memorow["paivamaara"])."</td>
+            <td>$memorow[tapa]</td>
+            <td>$memorow[yhteyshenkilo]</td>";
 
       if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") !== FALSE and substr($memorow['tyyppi'], 0, 7) != 'DELETED' and empty($memorow["LASKURIVI"])) {
-        echo "<th><a href='{$palvelin2}crm/asiakasmemo.php?tunnus=$memorow[tunnus]&ytunnus=$ytunnus&asiakasid=$asiakasid&yhtunnus=$yhtunnus&tee=POISTAMEMO&liitostyyppi=$memorow[tyyppi]&lopetus=$lopetus'>".t("Poista")."</a></th>";
+        echo "<td><a href='{$palvelin2}crm/asiakasmemo.php?tunnus=$memorow[tunnus]&ytunnus=$ytunnus&asiakasid=$asiakasid&yhtunnus=$yhtunnus&tee=POISTAMEMO&liitostyyppi=$memorow[tyyppi]&lopetus=$lopetus'>".t("Poista")."</a></td>";
       }
       else {
-        echo "<th></th>";
+        echo "<td></td>";
       }
       echo "</tr>";
     }
 
-    echo "<tr><td colspan='6'>".str_replace("\n", "<br>", trim($memorow["viesti"]));
+    echo "<tr><td colspan='6'><strong style='font-weight:bold'>".str_replace("\n", "<br>", trim($memorow["viesti"]))."</strong>";
 
     if ($memorow["laskutunnus"] > 0 and in_array($memorow["laskutila"], array('N', 'L', 'T'))) {
 

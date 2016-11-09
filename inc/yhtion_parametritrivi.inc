@@ -4564,6 +4564,23 @@ if ($fieldname == 'matkalaskun_tarkastus') {
   $jatko = 0;
 }
 
+if ($fieldname == 'editilaus_suoratoimitus') {
+  $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+  $sel = array();
+  $sel = $trow[$i] == 'K' ? 'selected' : '';
+
+  $ulos .= "<option value = ''>";
+  $ulos .= t("EDI-tilauksen sis‰‰nluvussa ei yritet‰ luoda suoratoimitusrivi‰ jos tuotteella ei riit‰ saldo");
+  $ulos .= "</option>";
+  $ulos .= "<option value = 'K' {$sel}>";
+  $ulos .= t("EDI-tilauksen sis‰‰nluvussa yritet‰‰n luoda suoratoimitusrivej‰ jos tuotteella ei riit‰ saldo ja se on tuotteen ja p‰‰toimittajan takana sallittu");
+  $ulos .= "</option>";
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
 if ($fieldname == "ostotilauksen_kasittely") {
 
   $myynnista_osto_avainsanat = t_avainsana("MYYNNISTA_OSTO");

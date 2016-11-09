@@ -29,7 +29,7 @@ if (!function_exists("toimitarkista")) {
         $t[$i] = $tmp_nimi;
       }
 
-      if (trim($t[$i]) == '' and ($yhtiorow['jalkilaskenta_kuluperuste'] != 'VS' or $alias_set == "KAYTTAJA")) {
+      if (trim($t[$i]) == '' and ($yhtiorow['jalkilaskenta_kuluperuste'] != 'VS' or $alias_set == "KAYTTAJA") and laskun_hyvaksyjia()) {
         $virhe[$i] = t("Tieto puuttuu");
       }
     }
@@ -127,7 +127,10 @@ if (!function_exists("toimitarkista")) {
         include "inc/pankkitiedot.inc";
         $vastaus = pankkitiedot($tmp_iban, '');
 
-        if ($t[$i] != $vastaus['swift']) {
+        if ($t[$i] != $vastaus['swift'] and $vastaus['swift'] != '' and $vastaus['rahalaitos'] != '') {
+          $swift_virhe = TRUE;
+        }
+        elseif ($t[$i] != '' and $vastaus['swift'] == '' and $vastaus['rahalaitos'] == '') {
           $swift_virhe = TRUE;
         }
       }
@@ -146,8 +149,7 @@ if (!function_exists("toimitarkista")) {
 
       if ($tmp_maakoodi == 'FI' and ($yhtiorow["ytunnus_tarkistukset"] == "" or $yhtiorow["ytunnus_tarkistukset"] == "T")) {
 
-
-        if (strlen($ytunnus) == 11) {
+        if ($t["tyyppi"] == "K") {
           $hetu = $ytunnus;
 
           // katotaan oliko kyseessä hetu

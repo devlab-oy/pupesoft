@@ -368,11 +368,11 @@ $hinta  = str_replace(',', '.', $hinta);
 
 // lis‰t‰‰n alvit (jos hintamuunnos p‰‰ll‰)
 if ($trow['alv'] < 500 and isset($tilausrivi_alvillisuus) and $tilausrivi_alvillisuus == "E" and $yhtiorow["alv_kasittely"] == '' and $yhtiorow["alv_kasittely_hintamuunnos"] == 'o' and !is_array($hyvityssaanto_hinta_array)) {
-  $hinta = round($hinta * (1+$trow['alv']/100), $yhtiorow['hintapyoristys']);
+  $hinta = round($hinta * (1+$trow['alv']/100), 6);
 }
 // poistetaan alvit (jos hintamuunnos p‰‰ll‰)
 if ($trow['alv'] < 500 and isset($tilausrivi_alvillisuus) and $tilausrivi_alvillisuus == "K" and $yhtiorow["alv_kasittely"] == 'o' and $yhtiorow["alv_kasittely_hintamuunnos"] == 'o' and !is_array($hyvityssaanto_hinta_array)) {
-  $hinta = round($hinta / (1+$trow['alv']/100), $yhtiorow['hintapyoristys']);
+  $hinta = round($hinta / (1+$trow['alv']/100), 6);
 }
 
 if ($laskurow['tila'] == 'O' or $laskurow['tila'] == 'K') {

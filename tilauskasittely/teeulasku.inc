@@ -187,6 +187,11 @@ if ($mehtorow['kateinen'] != '' or (float) $summa == 0) {
     $maksupaiva = "'$laskvv-$laskkk-$laskpp'";
   }
 }
+elseif ($yhtiorow["verkkolasku_lah"] == "talenom") {
+  // Talenom hoitaa myyntireskontraa, joten ei jätetä laskuja auki Pupen reskontraan
+  $maksaja    = "$kukarow[kuka]";
+  $maksupaiva = "'$lasrow[erpcm]'";
+}
 
 ///* Lasketaan Kassa-alennus *///
 $kassaale         = round($summa*$mehtorow['kassa_alepros']/100, 2);
@@ -329,14 +334,14 @@ if ($lisa_viestit != "") {
 $mainosteksti = $lasrow['mainosteksti'];
 
 //Siivotaan kommenteista kaikki kummalliset merkit pois
-$comments         = preg_replace("/[^A-Za-z0-9ÖöÄäÅåÜüÕõ ".preg_quote(".,-/!|+()%#§@:_", "/")."\r\n]/", "", $comments);
-$viestit          = preg_replace("/[^A-Za-z0-9ÖöÄäÅåÜüÕõ ".preg_quote(".,-/!|+()%#§@:_", "/")."\r\n]/", "", $viestit);
-$sisviestit1      = preg_replace("/[^A-Za-z0-9ÖöÄäÅåÜüÕõ ".preg_quote(".,-/!|+()%#§@:_", "/")."\r\n]/", "", $sisviestit1);
-$sisviestit2      = preg_replace("/[^A-Za-z0-9ÖöÄäÅåÜüÕõ ".preg_quote(".,-/!|+()%#§@:_", "/")."\r\n]/", "", $sisviestit2);
-$tilausyhteyshenkilo  = preg_replace("/[^A-Za-z0-9ÖöÄäÅåÜüÕõ ".preg_quote(".,-/!|+()%#§@:_", "/")."\r\n]/", "", $tilausyhteyshenkilo);
-$asiakkaan_tilausnumero  = preg_replace("/[^A-Za-z0-9ÖöÄäÅåÜüÕõ ".preg_quote(".,-/!|+()%#§@:_", "/")."\r\n]/", "", $asiakkaan_tilausnumero);
-$kohde          = preg_replace("/[^A-Za-z0-9ÖöÄäÅåÜüÕõ ".preg_quote(".,-/!|+()%#§@:_", "/")."\r\n]/", "", $kohde);
-$mainosteksti = preg_replace("/[^A-Za-z0-9ÖöÄäÅåÜüÕõ ".preg_quote(".,-/!|+()%#§@:_", "/")."\r\n]/", "", $mainosteksti);
+$comments = pupesoft_invoicestring($comments, "\r\n");
+$viestit = pupesoft_invoicestring($viestit, "\r\n");
+$sisviestit1 = pupesoft_invoicestring($sisviestit1, "\r\n");
+$sisviestit2 = pupesoft_invoicestring($sisviestit2, "\r\n");
+$tilausyhteyshenkilo = pupesoft_invoicestring($tilausyhteyshenkilo, "\r\n");
+$asiakkaan_tilausnumero = pupesoft_invoicestring($asiakkaan_tilausnumero, "\r\n");
+$kohde = pupesoft_invoicestring($kohde, "\r\n");
+$mainosteksti = pupesoft_invoicestring($mainosteksti, "\r\n");
 
 $fields = "yhtio";
 $values = "'$kukarow[yhtio]'";
@@ -383,6 +388,7 @@ for ($teeulasku_i=1; $teeulasku_i < mysql_num_fields($laskusplitres)-1; $teeulas
     $values .= ", '$kate'";
     break;
   case 'kate_korjattu':
+  case 'lahetetty_ulkoiseen_varastoon':
     $values .= ", NULL";
     break;
   case 'kohde':

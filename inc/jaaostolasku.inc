@@ -108,6 +108,7 @@ function jaalasku($jaettavalasku, $vahennettavasumma_valuutassa) {
       $values .= "'$kasumma_uusi',";
       break;
     case "kate_korjattu":
+    case "lahetetty_ulkoiseen_varastoon":
       $values .= "NULL,";
       break;
     default:

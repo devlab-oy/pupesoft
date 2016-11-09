@@ -863,11 +863,41 @@ if ($tee == 'UV') { //Tehdään tuotteet!
 
         $varastosta = array(kuuluukovarastoon($tilrivirow["hyllyalue"], $tilrivirow["hyllynro"]));
 
-        // Toimitetaan vain valmistettua isätuotetta, ei KAIKKIA firman jälkitoimitusrivejä
-        jt_toimita("", "", $varastosta, $jtrivit, $jtrivit_paikat, "tosi_automaaginen", "JATKA", "", $isatuoteno, '', "TULLAAN_VALMISTUKSESTA");
+        // parametri: automaattinen_jt_toimitus_valmistus
+        // ''  = Valmistusrivejä ei toimiteta eikä kohdisteta automaattisesti
+        // 'K' = Jälkitoimitusrivit kohdistetaan automaattisesti valmistuksen yhteydessä
+        // 'J' = Jälkitoimitusrivit kohdistetaan ja toimitetaan automaattisesti valmistuksen yhteydessä
+        // 'T' = Jälkitoimitusrivit kohdistetaan ja toimitetaan automaattisesti valmistuksen yhteydessä, jos käyttäjällä on päivitysoikeus JT-selaukseen
+        // 'S' = Ainoastaan asiakkaalle valmistetut jälkitoimitusrivit kohdistetaan ja siirretään tulostusjonoon automaattisesti valmistuksen yhteydessä
+        // 'V' = Asiakkaalle sekä myyntitilaukselta varastoon valmistetut jälkitoimitusrivit kohdistetaan asiakkaalle ja toimitetaan automaattisesti valmistuksen yhteydessä
+        $param        = $yhtiorow["automaattinen_jt_toimitus_valmistus"];
+        $kohdistetaan = in_array($param, array('K', 'J'));
+        $toimitetaan  = ($param == 'J');
 
-        //  Laitetaan tavarat liikkeelle jos sallitaan!
-        if (($jtoikeudetrow["paivitys"] == 1 and ($yhtiorow["automaattinen_jt_toimitus_valmistus"] == "T" or $yhtiorow["automaattinen_jt_toimitus_valmistus"] == "S" or $yhtiorow["automaattinen_jt_toimitus_valmistus"] == "V")) or $yhtiorow["automaattinen_jt_toimitus_valmistus"] == "J") {
+        // T parametrin poikkeukset
+        if ($param == 'T') {
+          $kayttajalla_oikeus = ($jtoikeudetrow["paivitys"] == 1);
+
+          $kohdistetaan = $kayttajalla_oikeus;
+          $toimitetaan  = $kayttajalla_oikeus;
+        }
+
+        // S ja V parametrin poikkeukset, oikeantyyppiset rivitlinkit katsotaan parametrin mukaan ylempänä
+        if (in_array($param, array('S', 'V'))) {
+          $riveja_linkattu = (count($jtrivit) > 0);
+
+          $kohdistetaan = $riveja_linkattu;
+          $toimitetaan  = $riveja_linkattu;
+        }
+
+        // Kohdistetaan JT rivit
+        if ($kohdistetaan) {
+          // Toimitetaan vain valmistettua isätuotetta, ei KAIKKIA firman jälkitoimitusrivejä
+          jt_toimita("", "", $varastosta, $jtrivit, $jtrivit_paikat, "tosi_automaaginen", "JATKA", "", $isatuoteno, '', "TULLAAN_VALMISTUKSESTA");
+        }
+
+        // Toimitetaan JT rivit
+        if ($toimitetaan) {
           jt_toimita("", "", "", "", "", "dummy", "TOIMITA");
         }
       }

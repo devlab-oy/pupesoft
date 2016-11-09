@@ -36,6 +36,8 @@ if ($fieldname == "verkkolasku_lah") {
   $sel7 = "";
   $sel8 = "";
   $sel9 = "";
+  $selA = "";
+  $selB = "";
 
   if ($trow[$i] == 'iPost') {
     $sel3 = "selected";
@@ -61,6 +63,12 @@ if ($fieldname == "verkkolasku_lah") {
   elseif ($trow[$i] == 'sepa') {
     $sel9 = "selected";
   }
+  elseif ($trow[$i] == 'talenom') {
+    $selA = "selected";
+  }
+  elseif ($trow[$i] == 'arvato') {
+    $selB = "selected";
+  }
   else {
     $sel1 = "selected";
   }
@@ -74,6 +82,8 @@ if ($fieldname == "verkkolasku_lah") {
   $ulos .= "<option value = 'trustpoint' $sel7>".t("Trustpoint-verkkolaskut");
   $ulos .= "<option value = 'ppg' $sel8>".t("PPG Laskutuspalvelu");
   $ulos .= "<option value = 'sepa' $sel9>".t("SEPA-pankkiyhteys");
+  $ulos .= "<option value = 'talenom' $selA>".t("Talenom Myyntilaskutuspalvelu");
+  $ulos .= "<option value = 'arvato' $selB>".t("Arvato Laskutuspalvelu");
   $ulos .= "</select></td>";
 
   $jatko = 0;
@@ -4091,12 +4101,13 @@ if ($fieldname == 'tuotteiden_jarjestys_raportoinnissa') {
 }
 
 if ($fieldname == 'ennakkotilausten_toimitus') {
-  $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+  $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
 
-  $sel = $trow[$i] == 'M' ? ' selected' : '';
+  $sel = array($trow[$i] => 'selected') + array('K' => '', 'M' => '');
 
-  $ulos .= "<option value = ''>".t("Ennakkotilaukset toimitetaan Ennakko-selaus ohjelmalla");
-  $ulos .= "<option value = 'M' $sel>".t("Ennakkotilaukset toimitetaan tilauskittain ja/tai Ennakko-selaus ohjelmalla");
+  $ulos .= "<option value = ''>".t("Ennakkotilaukset toimitetaan Ennakko-selaus ohjelmalla")."</option>";
+  $ulos .= "<option value = 'K' {$sel['K']}>".t("Ennakkotilauksista luodut myyntitilaukset j‰tet‰‰n kesken-tilaan")."</option>";
+  $ulos .= "<option value = 'M' {$sel['M']}>".t("Ennakkotilaukset toimitetaan tilauksittain ja/tai Ennakko-selaus ohjelmalla")."</option>";
   $ulos .= "</select></td>";
 
   $jatko = 0;

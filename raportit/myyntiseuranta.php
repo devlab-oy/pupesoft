@@ -49,6 +49,8 @@ echo "<script type='text/javascript'>
 
 echo "<font class='head'>", t("Myynninseuranta"), "</font><hr>";
 
+$status = isset($status) ? $status : '';
+
 // tehd‰‰n kaikista raportin parametreist‰ yksi muuttuja serialisoimista varten
 $kaikki_muuttujat_array = array();
 
@@ -619,19 +621,10 @@ if ($lopetus == "") {
     <tr>
     <th>", t("N‰yt‰ tuotteet statuksella"), "</th>";
 
-  $status_result = t_avainsana("S");
-
-  echo "<td colspan='3'><select name='status'><option value=''>", t("Kaikki"), "</option>";
-
-  while ($statusrow = mysql_fetch_assoc($status_result)) {
-
-    $sel = '';
-
-    if (isset($status) and $status == $statusrow['selite']) $sel = ' SELECTED';
-
-    echo "<option value='{$statusrow['selite']}'{$sel}>{$statusrow['selite']} - {$statusrow['selitetark']}</option>";
-  }
-
+  echo "<td colspan='3'>";
+  echo "<select name='status'>";
+  echo "<option value=''>", t("Kaikki"), "</option>";
+  echo product_status_options($status);
   echo "</select></td></tr>";
 
   $vsel[$verkkokaupat] = "SELECTED";

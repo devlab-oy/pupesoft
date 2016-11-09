@@ -337,6 +337,7 @@ else {
             }
             break;
           case 'kate_korjattu':
+          case 'lahetetty_ulkoiseen_varastoon':
             $values .= ", NULL";
             break;
           default:

@@ -60,6 +60,8 @@ if (!function_exists("tuotteen_toimittajattarkista")) {
           if (mysql_num_rows($sresult) == 1) {
             $srow = mysql_fetch_assoc($sresult);
             $liitostunnus_static = $srow["tunnus"];
+            $maa_static = $srow['maa'];
+            $valuutta_static = $srow['oletus_valkoodi'];
           }
         }
 

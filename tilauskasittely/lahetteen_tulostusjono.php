@@ -31,9 +31,6 @@ if ($show_ohjelma_moduli) {
   setcookie('show_ohjelma_moduli', true, strtotime('+1 year'));
 }
 
-
-ob_end_flush();
-
 $show_ohjelma_moduli = $show_ohjelma_moduli || isset($_COOKIE['show_ohjelma_moduli']) && $_COOKIE['show_ohjelma_moduli'] == true;
 
 $valmistuslinjat = hae_valmistuslinjat();

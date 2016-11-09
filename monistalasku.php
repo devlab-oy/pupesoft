@@ -1269,6 +1269,7 @@ if ($tee == 'MONISTA') {
           $values .= ", ''";
           break;
         case 'kate_korjattu':
+        case 'lahetetty_ulkoiseen_varastoon':
           $values .= ", NULL";
           break;
         case 'toimitustavan_lahto':
@@ -1423,9 +1424,6 @@ if ($tee == 'MONISTA') {
             $values .= ", '{$valrow['kurssi']}'";
           }
           break;
-        case 'lahetetty_ulkoiseen_varastoon':
-          $values .= ", NULL";
-          break;
         default:
           $values .= ", '".$monistarow[$fieldname]."'";
         }
@@ -1459,10 +1457,10 @@ if ($tee == 'MONISTA') {
       $tulos_ulos[] = $utunnus;
 
       if ($toim == 'SOPIMUS') {
-        echo t("Uusi sopimusnumero on")." {$utunnus}<br><br>";
+        echo t("Uusi sopimusnumero on")." <a href='{$palvelin2}tilauskasittely/tilaus_myynti.php?toim=YLLAPITO&tilausnumero=$utunnus'>{$utunnus}</a><br><br>";
       }
       else {
-        echo t("Uusi tilausnumero on")." {$utunnus}<br><br>";
+        echo t("Uusi tilausnumero on")." <a href='{$palvelin2}tilauskasittely/tilaus_myynti.php?toim=PIKATILAUS&tilausnumero=$utunnus'>{$utunnus}</a><br><br>";
       }
 
       //  Päivitetään myös tunnusnippu jotta tätä voidaan versioida..

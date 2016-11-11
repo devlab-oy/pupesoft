@@ -20,6 +20,7 @@ class Unifaun {
   private $mehto;
   private $xml;
   private $kirjoitin;
+  private $onkovak;
 
   public function __construct($hostname, $username, $password, $ftppath, $ftpport, $ftpfail, $ftpsucc) {
     $this->hostname = $hostname;
@@ -57,6 +58,10 @@ class Unifaun {
 
   public function setMehto($mehto) {
     $this->mehto = $mehto;
+  }
+
+  public function setVak($vak) {
+    $this->onkovak = $vak;
   }
 
   private function setAsiakasRow() {
@@ -225,7 +230,7 @@ class Unifaun {
 
   }
 
-  public function _getXML($vak_tuotteita = array()) {
+  public function _getXML() {
 
     $xmlstr  = '<?xml version="1.0" encoding="UTF-8"?><printserver></printserver>';
 
@@ -753,7 +758,7 @@ class Unifaun {
       $uni_ser_val = $uni_service->addChild('addon');
       $uni_ser_val->addAttribute('adnid', "DLV09");
     }
-    
+
     if (in_array($this->toitarow['virallinen_selite'], $_DLV21)) {
       $uni_ser_val = $uni_service->addChild('addon');
       $uni_ser_val->addAttribute('adnid', "DLV21");
@@ -772,10 +777,10 @@ class Unifaun {
       'PO2104',
     );
 
-    if (count($vak_tuotteita) > 0 and in_array($_virallinen_selite, $_sallitut_posti_vak_palvelut)) {
+    if (!empty($this->onkovak) and in_array($_virallinen_selite, $_sallitut_posti_vak_palvelut)) {
       $uni_addon = $uni_service->addChild('addon');
       $uni_addon->addAttribute('adnid', "DNG");
-      
+
       $uni_add_val = $uni_addon->addChild('val', utf8_encode($_yhtio_nimi));
       $uni_add_val->addAttribute('n', 'declarant');
     }

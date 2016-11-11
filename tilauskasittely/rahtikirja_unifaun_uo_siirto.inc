@@ -66,6 +66,7 @@ if ($yhtiorow['kerayserat'] != 'K' and $kollityht > 0) {
     $unifaun->setMehto($mehto);
     $unifaun->setRahtikirjaRow($rakir_row);
     $unifaun->setYhteensa($laskurow['summa']);
+    $unifaun->setVak(count($vak_tiedot));
 
     if ($rakir_row["jv"] != '' or $mehto['jv'] != '') {
       $unifaun->setViite($laskurow['viite']);
@@ -75,7 +76,7 @@ if ($yhtiorow['kerayserat'] != 'K' and $kollityht > 0) {
     }
 
     $unifaun->setKirjoitin($kirjoitin_row['unifaun_nimi']);
-    $unifaun->_getXML($vak_tiedot);
+    $unifaun->_getXML();
 
     foreach ($pakkaus as $indeksi => $pakkaus_selite) {
 

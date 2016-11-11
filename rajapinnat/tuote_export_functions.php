@@ -437,6 +437,23 @@ function tuote_export_hae_saldot($params) {
               AND tuote.nakyvyys      != ''
               $muutoslisa3)
 
+              UNION
+
+              (SELECT tuote.tuoteno,
+              tuote.eankoodi
+              FROM tuote
+              JOIN tuotteen_toimittajat AS tt ON (
+                tt.yhtio = tuote.yhtio AND
+                tt.tuoteno = tuote.tuoteno
+              )
+              JOIN toimi on (toimi.yhtio = tt.yhtio and toimi.tunnus = tt.liitostunnus)
+              WHERE tuote.yhtio        = '{$kukarow["yhtio"]}'
+              AND tuote.status        != 'P'
+              AND tuote.tuotetyyppi    NOT in ('A','B')
+              AND tuote.tuoteno       != ''
+              AND tuote.nakyvyys      != ''
+              AND tt.tehdas_saldo_paivitetty >= '{$datetime_checkpoint}')
+
               ORDER BY 1";
   $result = pupe_query($query);
 

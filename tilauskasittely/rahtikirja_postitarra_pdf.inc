@@ -215,13 +215,13 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
   // viivakoodin alapuolella vasen laita
   $pdf->draw_text(18, 250, "SAAPUMISILMOITUS ANKOMSTAVI", $firstpage, $pienibold);
 
-  if (count($vakit) > 0 or $toitarow['kuljyksikko'] != '') {
-    $pdf->draw_text(18, 242, "Lisätietoja 0200 77000, www.itella.com * Mera information 0200 75000, www.itella.com.", $firstpage, $pieni);
+  if (count($vakit) > 0) {
+    $pdf->draw_text(18, 242, "Lisätietoja 0200 77000, www.posti.fi * Mera information 0200 75000, www.posti.fi.", $firstpage, $pieni);
     $pdf->draw_text(18, 234, "Säilytysaika on yksi (1) täysi kalenteriviikko * Kvarligger en (1) hel kalendervecka.", $firstpage, $pieni);
   }
   else {
-    $pdf->draw_text(18, 242, "Lähetys on noudettavissa Postistanne. Lisätietoja: 0200 77000, www.itella.com Säilytysaika on 2 täyttä kalenteriviikkoa.", $firstpage, $pieni);
-    $pdf->draw_text(18, 234, "Ni kan hämta försändelsen på Ert postkontor. Mera information: 0200 75000, www.itella.com Kvarligger 2 hela kalenderveckor.", $firstpage, $pieni);
+    $pdf->draw_text(18, 242, "Lähetys on noudettavissa Postistanne. Lisätietoja: 0200 77000, www.posti.fi Säilytysaika on 2 täyttä kalenteriviikkoa.", $firstpage, $pieni);
+    $pdf->draw_text(18, 234, "Ni kan hämta försändelsen på Ert postkontor. Mera information: 0200 75000, www.posti.fi Kvarligger 2 hela kalenderveckor.", $firstpage, $pieni);
   }
 
   $pdf->draw_text(18, 215, "Lähettäjä Avsändare From", $firstpage, $pieni);
@@ -237,8 +237,8 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
   $pdf->draw_text(18, 130, strtoupper($rakir_row['toim_maa']).'-'.$rakir_row["toim_postino"]." ".$rakir_row["toim_postitp"], $firstpage, $isobold);
 
   // viivakoodin alapuolella vasen laita
-  $oikpos = $pdf->strlen("$keltainen $kuljetus $keku", $pienibold);
-  $pdf->draw_text(400-$oikpos, 250, "$keltainen $kuljetus $keku", $firstpage, $pienibold);
+  $oikpos = $pdf->strlen("$keltainen $kuljetus", $pienibold);
+  $pdf->draw_text(400-$oikpos, 250, "$keltainen $kuljetus", $firstpage, $pienibold);
   $pdf->draw_text(250, 225, "Lisätiedot Tilläggsuppgifter", $firstpage, $pieni);
 
   $apkal = 216;
@@ -298,7 +298,7 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
   $pdf->draw_text(18, 110, "Kuittaus ja nimen selvennys Kvittering och namnförtydligande", $firstpage, $pieni);
   $pdf->draw_text(40, 80, ".               .                        klo kl.", $firstpage, $pieni);
   $pdf->draw_text(18, 70, "Lisätiedot Tilläggsuppgifter", $firstpage, $pieni);
-  $pdf->draw_text(18, 10, t("Itella Green - ilmastoystävällinen kuljetus"), $firstpage, $iso);
+  $pdf->draw_text(18, 10, t("Posti Green - ilmastoystävällinen kuljetus"), $firstpage, $iso);
 
   $komm = "";
 

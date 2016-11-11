@@ -1871,7 +1871,6 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
     }
 
     if (tarkista_oikeus("crm/kuittaamattomat.php")) {
-
       $mkk = date("Y-m-d", mktime(0, 0, 0, date("m"), date("d")+14, date("Y")));
       $mhh = " 10:00:00";
 
@@ -3925,7 +3924,7 @@ if ($tee == '') {
         echo "<tr>$jarjlisa<th>".t("Liitetiedostot").":</th><td colspan='3'>";
 
         while ($liiterow = mysql_fetch_array($liiteres)) {
-          echo "<a href='{$palvelin2}view.php?id=$liiterow[tunnus]' target='Attachment'>".t("Liite")." $liitemaara $liiterow[selite]</a> ";
+          echo js_openUrlNewWindow("{$palvelin2}view.php?id=$liiterow[tunnus]", t('Liite')." $liitemaara", NULL, 1000, 800)." $liiterow[selite]</a> ";
           $liitemaara++;
         }
         echo "</td></tr>";
@@ -9630,7 +9629,14 @@ if ($tee == '') {
           }
 
           if ($naytetaan_tilausvahvistusnappi or $toim == "TARJOUS" or $toim == "EXTTARJOUS" or $laskurow["tilaustyyppi"] == "T" or $toim == "PROJEKTI") {
-            echo "<td colspan='4' style='text-align: center;' nowrap>
+
+            $tulcspani = "3";
+
+            if ((($toim != "TARJOUS" and $toim != "EXTTARJOUS") or $yhtiorow['tarjouksen_tuotepaikat'] == "") and (($kukarow['extranet'] == '' or ($kukarow['extranet'] != '' and $yhtiorow['tuoteperhe_suoratoimitus'] == 'E')) or $yhtiorow['varastopaikan_lippu'] != '')) {
+              $tulcspani = "4";
+            }
+
+            echo "<td colspan='$tulcspani' style='text-align: center;' nowrap>
                 <form action='tulostakopio.php' method='post' name='tulostaform_tmyynti' id='tulostaform_tmyynti' class='multisubmit'>
                 <input type='hidden' name='otunnus' value='$tilausnumero'>
                 <input type='hidden' name='projektilla' value='$projektilla'>
@@ -10141,7 +10147,7 @@ if ($tee == '') {
 
         if ($laskurow["tunnusnippu"] > 0 and (tarkista_oikeus("tilaus_myynti.php", "PROJEKTI") or tarkista_oikeus("tilaus_myynti.php", "TYOMAARAYS"))) {
 
-          $tarjouslisa = "<select name='perusta_tilaustyyppi'>";
+          $tarjouslisa = " & <select name='perusta_tilaustyyppi'>";
 
           $tarjouslisa_normi = $tarjouslisa_projekti = $tarjouslisa_tyomaarays = "";
 
@@ -10182,7 +10188,7 @@ if ($tee == '') {
               <input type='hidden' name='mista' value = '$mista'>
               <input type='hidden' name='orig_tila' value='$orig_tila'>
               <input type='hidden' name='orig_alatila' value='$orig_alatila'>
-              <input type='submit' value='".t("Hyväksy tarjous")."'> & $tarjouslisa
+              <input type='submit' value='".t("Hyväksy tarjous")."'>$tarjouslisa
               </form>";
         }
       }

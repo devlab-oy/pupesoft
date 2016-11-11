@@ -202,7 +202,7 @@ if ($tee == 'hae') {
             }
 
             if (substr($era_row['sscc_ulkoinen'], 0, 4) == "JJFI") {
-              echo " / <a class='linkki' target=newikkuna href='http://www.verkkoposti.com/e3/TrackinternetServlet?lang=fi&LOTUS_hae=Hae&LOTUS_side=1&LOTUS_trackId={$era_row['sscc_ulkoinen']}&LOTUS_hae=Hae'>Itella</a>";
+              echo " / <a class='linkki' target=newikkuna href='http://www.posti.fi/henkiloasiakkaat/seuranta/#/lahetys/{$era_row['sscc_ulkoinen']'>Posti</a>";
             }
 
             if (substr($era_row['sscc_ulkoinen'], 0, 2) == "MA") {

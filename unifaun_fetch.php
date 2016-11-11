@@ -395,18 +395,19 @@ if ($handle = opendir($ftpget_dest[$operaattori])) {
         $_magento_kaytossa = (!empty($magento_api_tt_url) and !empty($magento_api_tt_usr) and !empty($magento_api_tt_pas));
 
         if ($_magento_kaytossa) {
-          $query = "SELECT asiakkaan_tilausnumero
+          $query = "SELECT asiakkaan_tilausnumero, tunnus
                     FROM lasku
                     WHERE yhtio                 = '{$kukarow['yhtio']}'
                     AND tunnus                  IN ({$otunnukset})
-                    AND laatija                 = 'Magento'
-                    AND asiakkaan_tilausnumero != ''";
+                    AND ohjelma_moduli          = 'MAGENTO'
+                    AND asiakkaan_tilausnumero  != ''";
           $mageres = pupe_query($query);
 
           while ($magerow = mysql_fetch_assoc($mageres)) {
             $magento_api_met = $toimitustapa_row['virallinen_selite'] != '' ? $toimitustapa_row['virallinen_selite'] : $toimitustapa_row['selite'];
             $magento_api_rak = $sscc_ulkoinen;
             $magento_api_ord = $magerow["asiakkaan_tilausnumero"];
+            $magento_api_laskutunnus = $magerow["tunnus"];
 
             require "magento_toimita_tilaus.php";
           }

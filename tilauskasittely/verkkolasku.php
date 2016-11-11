@@ -2303,6 +2303,9 @@ else {
               $toimaikarow["maxt"] = date("Y-m-d");
             }
 
+            // Laskun kaikki tilaukset
+            $lasrow['tilausnumerot'] = $tunnukset;
+
             //Kirjoitetaan failiin laskun otsikkotiedot
             if ($lasrow["chn"] == "111") {
               elmaedi_otsik($tootedi, $lasrow, $masrow, $tyyppi, $timestamppi, $toimaikarow);
@@ -2669,7 +2672,7 @@ else {
               $tilrow["rivihinta_verollinen"] = hintapyoristys($tilrow["rivihinta_verollinen"]);
               $vatamount = hintapyoristys($vatamount);
 
-              $tilrow['kommentti'] = pupesoft_invoicestring($tilrow['kommentti']);
+              $tilrow['kommentti'] = pupesoft_invoicestring(str_replace("\n", "|", $tilrow['kommentti']));
               $tilrow['nimitys']   = pupesoft_invoicestring($tilrow['nimitys']);
 
               // Otetaan seuraavan rivin otunnus

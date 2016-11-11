@@ -29,7 +29,7 @@ if (!function_exists("toimitarkista")) {
         $t[$i] = $tmp_nimi;
       }
 
-      if (trim($t[$i]) == '' and ($yhtiorow['jalkilaskenta_kuluperuste'] != 'VS' or $alias_set == "KAYTTAJA")) {
+      if (trim($t[$i]) == '' and ($yhtiorow['jalkilaskenta_kuluperuste'] != 'VS' or $alias_set == "KAYTTAJA") and laskun_hyvaksyjia()) {
         $virhe[$i] = t("Tieto puuttuu");
       }
     }
@@ -149,7 +149,7 @@ if (!function_exists("toimitarkista")) {
 
       if ($tmp_maakoodi == 'FI' and ($yhtiorow["ytunnus_tarkistukset"] == "" or $yhtiorow["ytunnus_tarkistukset"] == "T")) {
 
-        if ($t["tyyppi"] == "K") {
+        if ($t["tyyppi"] == "K" or strlen($ytunnus) == 11) {
           $hetu = $ytunnus;
 
           // katotaan oliko kyseessä hetu

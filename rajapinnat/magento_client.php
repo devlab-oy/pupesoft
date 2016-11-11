@@ -297,16 +297,18 @@ class MagentoClient {
       foreach ($tuote['asiakashinnat'] as $asiakashintarivi) {
         $asiakasryhma_nimi = $asiakashintarivi['asiakasryhma'];
         $asiakashinta = $asiakashintarivi['hinta'];
-        $asiakasryhma_tunnus = $this->findCustomerGroup(utf8_encode($asiakasryhma_nimi));
+        $asiakasryhma_tunnus = $this->findCustomerGroup($asiakasryhma_nimi);
 
-        if ($asiakasryhma_tunnus != 0) {
-          $tuote_ryhmahinta_data[] = array(
-            'customer_group_id' => $asiakasryhma_tunnus,
-            'price'             => $asiakashinta,
-            'qty'               => 1,
-            'websites'          => explode(" ", $tuote['nakyvyys']),
-          );
+        if ($asiakasryhma_tunnus == 0) {
+          continue;
         }
+
+        $tuote_ryhmahinta_data[] = array(
+          'customer_group_id' => $asiakasryhma_tunnus,
+          'price'             => $asiakashinta,
+          'qty'               => 1,
+          'websites'          => explode(" ", $tuote['nakyvyys']),
+        );
       }
 
       $multi_data = array();
@@ -1038,7 +1040,7 @@ class MagentoClient {
       $count++;
       $this->log('magento_asiakkaat', "[{$count}/{$total_count}] Asiakas '{$asiakas['nimi']}'");
 
-      $asiakasryhma_id = $this->findCustomerGroup(utf8_encode($asiakas['asiakasryhma']));
+      $asiakasryhma_id = $this->findCustomerGroup($asiakas['asiakasryhma']);
 
       $asiakas_data = array(
         'email'       => utf8_encode($asiakas['yhenk_email']),
@@ -1461,7 +1463,7 @@ class MagentoClient {
         $reply = $this->_proxy->call(
           $this->_session,
           'price_per_customer.setPriceForCustomersPerProduct',
-          array($magento_tuotenumero, $hintadata)
+          array($magento_tuotenumero, array($hintadata))
         );
 
         $this->log('magento_tuotteet', "({$current}/{$total}): Tuotteen {$magento_tuotenumero} asiakaskohtaiset ({$hintadata['customerEmail']}) hinnat lisätty");
@@ -1567,7 +1569,7 @@ class MagentoClient {
           $this->_proxy->call(
             $this->_session,
             'price_per_customer.setPriceForCustomersPerProduct',
-            array($magento_tuotenumero, $asiakashinnat)
+            array($magento_tuotenumero, array($asiakashinnat))
           );
 
           $this->log('magento_tuotteet', "({$current}/{$total}): Tuotteen {$magento_tuotenumero} asiakaskohtaiset hinnat poistettu ({$asiakas['asiakas_email']})");
@@ -2028,21 +2030,28 @@ class MagentoClient {
 
   // Etsii asiakasryhmää nimen perusteella Magentosta, palauttaa id:n
   private function findCustomerGroup($name) {
+    $name = utf8_encode($name);
+
+    $this->log('magento_tuotteet', "Etsitään asiakasryhmä nimellä '{$name}'");
+
     $customer_groups = $this->_proxy->call(
       $this->_session,
       'customer_group.list'
     );
 
-    $id = 0;
-
     foreach ($customer_groups as $asryhma) {
       if (strcasecmp($asryhma['customer_group_code'], $name) == 0) {
         $id = $asryhma['customer_group_id'];
-        break;
+
+        $this->log('magento_tuotteet', "Löydettiin asiakasryhmä '{$id}'");
+
+        return $id;
       }
     }
 
-    return $id;
+    $this->log('magento_tuotteet', "Asiakasryhmää ei löytynyt!");
+
+    return 0;
   }
 
   // Palauttaa attribuutin option id:n annetulle atribuutille ja arvolle

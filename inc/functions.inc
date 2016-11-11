@@ -34095,7 +34095,7 @@ if (!function_exists("laskun_hyvaksyjia")) {
 
 if (!function_exists('hae_yhteyshenkiloiden_liitostunnukset')) {
   function hae_yhteyshenkiloiden_liitostunnukset($ytunnus, $liitostunnus) {
-    global $kukarow;
+    global $kukarow, $yhtiorow;
 
     if ($yhtiorow['yhteyshenkiloiden_sidos'] == 'Y') {
       $query = "SELECT GROUP_CONCAT(tunnus) AS tunnukset

@@ -501,7 +501,6 @@ if ($tila == 'toimitustapa') {
                 vak_kielto                       = '$row[vak_kielto]',
                 nouto                            = '$row[nouto]',
                 lauantai                         = '$row[lauantai]',
-                kuljyksikko                      = '$row[kuljyksikko]',
                 merahti                          = '$row[merahti]',
                 extranet                         = '$row[extranet]',
                 ei_pakkaamoa                     = '$row[ei_pakkaamoa]',

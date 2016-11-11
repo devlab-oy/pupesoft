@@ -27132,7 +27132,7 @@ if (!function_exists('laskuta_magentojt')) {
                     WHERE yhtio = '{$kukarow['yhtio']}'
                     AND tunnus  = '{$laskurow['tunnus']}'";
         $res = pupe_query($query);
-        
+
         $laskurow['ohjelma_moduli'] = "MAGENTO";
       }
 
@@ -34093,6 +34093,25 @@ if (!function_exists("laskun_hyvaksyjia")) {
   }
 }
 
+if (!function_exists('hae_yhteyshenkiloiden_liitostunnukset')) {
+  function hae_yhteyshenkiloiden_liitostunnukset($ytunnus, $liitostunnus) {
+    global $kukarow;
+
+    if ($yhtiorow['yhteyshenkiloiden_sidos'] == 'Y') {
+      $query = "SELECT GROUP_CONCAT(tunnus) AS tunnukset
+                FROM asiakas
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND ytunnus = '{$ytunnus}'";
+      $result = pupe_query($query);
+      $asiakasrow = mysql_fetch_assoc($result);
+
+      return $asiakasrow['tunnukset'];
+    }
+
+    return $liitostunnus;
+  }
+}
+
 if (!function_exists("laske_korko")) {
   function laske_korko(Array $params) {
     global $kukarow, $yhtiorow;
@@ -34197,7 +34216,7 @@ if (!function_exists("lisaa_tai_paivita_yhteyshenkilo")) {
         }
         elseif (mysql_field_name($yhenkresult, $i) == 'liitostunnus') {
           $query .= ", ". mysql_field_name($yhenkresult, $i)." = '".trim($asiakasrow['tunnus'])."' ";
-        } 
+        }
         else {
           $query .= ", ". mysql_field_name($yhenkresult, $i)." = '".trim($yhenkrow[$i])."' ";
         }

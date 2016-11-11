@@ -66,8 +66,9 @@ if (!function_exists('finvoice_otsik')) {
       $tulostuspalvelu  = "TULOSTUSPALVELU";
       break;
     default:
-      $tulostuspalvelu  = "";
-      break;
+      // Katsotaan löytyykö avainsanoista sopivaa, muuten laitetaan tyhjäksi
+      $avainsana       = t_avainsana("FINV_TULPALVELU", '', "AND selite = '{$senderintermediator}'", '', '', "selitetark");
+      $tulostuspalvelu = $avainsana ? $avainsana : "";
     }
 
     //  Aloitellaan aineiston luontia. Kaikki tiedot pitää olla kunnossa, tai chn 112 "Pupesoft-Finvoice: Verkkolasku Pupesoftista-Pupesoftiin"
@@ -80,6 +81,12 @@ if (!function_exists('finvoice_otsik')) {
       }
       elseif (strpos($lasrow["verkkotunnus"], "@") !== FALSE) {
         list($receiverpartyid, $receiverintermediator) = explode("@", $lasrow["verkkotunnus"]);
+
+        // Verkkotunnus voi olla sähköpostiosoite:
+        if ($yhtiorow["verkkolasku_lah"] == "ppg" and strpos($receiverintermediator, ".") !== FALSE) {
+          $receiverpartyid = $lasrow["verkkotunnus"];
+          $receiverintermediator = "EMAIL";
+        }
       }
       else {
         $receiverpartyid = $lasrow["verkkotunnus"];
@@ -108,7 +115,7 @@ if (!function_exists('finvoice_otsik')) {
       if ($receiverintermediator == '' and $yhtiorow["verkkolasku_lah"] == "maventa")  {
         $receiverintermediator = 'n/a';
       }
-      
+
       // Talenomiin lähetetään kaikki laskut, joten tägätään itse läheteyt sähköpostilaskut ja sisäiset laskut näin
       if ($yhtiorow["verkkolasku_lah"] == "talenom" and ($lasrow["chn_orig"] == "666" or $lasrow["chn_orig"] == "667")) {
         $receiverpartyid = "Email";
@@ -258,7 +265,11 @@ if (!function_exists('finvoice_otsik')) {
       fputs($tootfinvoice, "</MessageSenderDetails>\r\n");
 
       fputs($tootfinvoice, "<MessageReceiverDetails>\r\n");
-      xml_add("ToIdentifier", $receiverpartyid, $tootfinvoice, 35, 2);
+
+      // PPG:llä tässä voi olla sähköpostiosite, siksi pitempi.
+      $toid_len = ($yhtiorow["verkkolasku_lah"] == "ppg") ? 76 : 35;
+
+      xml_add("ToIdentifier", $receiverpartyid, $tootfinvoice, $toid_len, 2);
       xml_add("ToIntermediator", $receiverintermediator, $tootfinvoice, 35, 2);
       fputs($tootfinvoice, "</MessageReceiverDetails>\r\n");
 
@@ -502,7 +513,7 @@ if (!function_exists('finvoice_otsik')) {
       xml_add("OriginCode", "Original", $tootfinvoice);
       xml_add("InvoiceNumber", $lasrow['laskunro'], $tootfinvoice, 20, 1);
       xml_add("InvoiceDate Format=\"CCYYMMDD\"", vlas_dateconv($lasrow['tapvm']), $tootfinvoice);
-      xml_add("SellerReferenceIdentifier", $lasrow['tunnus'], $tootfinvoice);
+      xml_add("SellerReferenceIdentifier", $lasrow['tilausnumerot'], $tootfinvoice);
 
       if ($yhtiorow["verkkolasku_lah"] == "talenom") {
         xml_add("SellersBuyerIdentifier", substr($asiakasrow["asiakasnro"], 0, 35), $tootfinvoice, 35);
@@ -705,11 +716,6 @@ if (!function_exists('finvoice_row_freetext')) {
 
     if ($tilrow['tuoteno'] != $yhtiorow["kuljetusvakuutus_tuotenumero"] and $tilrow['tuoteno'] != $yhtiorow["laskutuslisa_tuotenumero"] and $tilrow['seuraava_otunnus'] != $tilrow["otunnus"]) {
 
-      // Laitetaan tilausviite tähän
-      if ($tilrow["laskuviesti"] != "") {
-        $lisakomm .= $tilrow["laskuviesti"];
-      }
-
       // Tämä on tilauksen vika rivi, laitetaan työmäärystiedot tähän
       $query = "SELECT tyomaarays.*
                 FROM lasku
@@ -766,9 +772,19 @@ if (!function_exists('finvoice_row_freetext')) {
       }
     }
 
-    // Lisätään asiakkaan tilausnumero kommenttikenttään
-    if ($tilrow['asiakkaan_tilausnumero'] != "") {
-      $tilrow["kommentti"] .= "|"."Asiakkaan tilausnumero: ".$tilrow['asiakkaan_tilausnumero'];
+    // Laitetaan tilausnumero tähän
+    if ($yhtiorow["verkkolasku_lah"] == "talenom") {
+      $lisakomm .= "|".t("Tilaus", $kieli).": ".$tilrow["otunnus"];
+    }
+
+    // Laitetaan tilausviite tähän
+    if (!empty($tilrow["laskuviesti"])) {
+      $lisakomm .= "|".t("Viitteenne").": ".$tilrow["laskuviesti"];
+    }
+
+    // Laitetaan asiakkaan tilausnumero tähän
+    if (!empty($tilrow['asiakkaan_tilausnumero'])) {
+      $lisakomm .= "|".t("Tilauksenne", $kieli).": ".$tilrow['asiakkaan_tilausnumero'];
     }
 
     if (!empty($tullinimike_ja_alkuperamaa) and $tullinimike_ja_alkuperamaa != "") {

@@ -28,7 +28,7 @@ if ($php_cli and count(debug_backtrace()) <= 1) {
   require "inc/functions.inc";
 
   // Pupeasennuksen root polku, toimitusvahvistuksia varten
-  $pupe_root_polku = dirname(dirname(__FILE__));
+  $pupe_root_polku = dirname(__FILE__);
 
   $kukarow['yhtio'] = (string) $argv[1];
   $kukarow['kuka']  = 'admin';
@@ -372,7 +372,7 @@ if ($handle = opendir($ftpget_dest[$operaattori])) {
             $desadv_version = "";
           }
 
-          if (file_exists("tilauskasittely/{$laskurow['toimitusvahvistus']}")) {
+          if (file_exists("{$pupe_root_polku}/tilauskasittely/{$laskurow['toimitusvahvistus']}")) {
 
             $rakir_row = $laskurow;
 
@@ -395,18 +395,19 @@ if ($handle = opendir($ftpget_dest[$operaattori])) {
         $_magento_kaytossa = (!empty($magento_api_tt_url) and !empty($magento_api_tt_usr) and !empty($magento_api_tt_pas));
 
         if ($_magento_kaytossa) {
-          $query = "SELECT asiakkaan_tilausnumero
+          $query = "SELECT asiakkaan_tilausnumero, tunnus
                     FROM lasku
                     WHERE yhtio                 = '{$kukarow['yhtio']}'
                     AND tunnus                  IN ({$otunnukset})
-                    AND laatija                 = 'Magento'
-                    AND asiakkaan_tilausnumero != ''";
+                    AND ohjelma_moduli          = 'MAGENTO'
+                    AND asiakkaan_tilausnumero  != ''";
           $mageres = pupe_query($query);
 
           while ($magerow = mysql_fetch_assoc($mageres)) {
             $magento_api_met = $toimitustapa_row['virallinen_selite'] != '' ? $toimitustapa_row['virallinen_selite'] : $toimitustapa_row['selite'];
             $magento_api_rak = $sscc_ulkoinen;
             $magento_api_ord = $magerow["asiakkaan_tilausnumero"];
+            $magento_api_laskutunnus = $magerow["tunnus"];
 
             require "magento_toimita_tilaus.php";
           }

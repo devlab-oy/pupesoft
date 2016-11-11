@@ -175,7 +175,7 @@ if ($oikeusostohintapaiv !== FALSE and (float) $prow["hinta"] != (float) $trow['
   }
 }
 
-if (!isset($rivienmaara) or $rivienmaara < 100) {
+if (!empty($prow["tuoteno"]) and (!isset($rivienmaara) or $rivienmaara < 100)) {
 
   // Haetaan vastaavuusketjut korvaavat ketjun päätuotteella
   require_once 'vastaavat.class.php';

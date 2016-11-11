@@ -207,30 +207,14 @@ class PrestaSalesOrders extends PrestaClient {
     $invoice_country  = $params["invoice_country"];
     $order            = $params["order"];
 
-    $pupesoft_customer = presta_hae_yhteyshenkilon_asiakas_ulkoisella_asiakasnumerolla($order['id_customer']);
+    $customer_params = array(
+      "id_customer" => $order['id_customer'],
+      "id_delivery" => $delivery_address['dni'],
+      "id_invoice"  => $invoice_address['dni'],
+    );
 
-    if (empty($pupesoft_customer)) {
-      $msg = "Asiakasta {$order['id_customer']} ei löytynyt Pupesoftista! ";
-
-      $id = $this->verkkokauppa_customer;
-
-      if (empty($id)) {
-        $msg .= "Oletus verkkokauppa-asiakasta ei ole asetettu! Tilausta ei voida hakea!";
-
-        throw new Exception($msg);
-      }
-
-      $msg .= "Käytetään oletusasiakasta {$id}.";
-      $this->logger->log($msg);
-
-      $pupesoft_customer = hae_asiakas($id);
-    }
-
-    if (empty($pupesoft_customer)) {
-      $msg = "Oletusasiakasta {$id} ei löytynyt Pupesoftista!";
-
-      throw new Exception($msg);
-    }
+    // find pupsoft customer id
+    $pupesoft_customer = $this->fetch_pupesoft_customer($customer_params);
 
     // choose pupesoft customer number
     if (!empty($pupesoft_customer['asiakasnro'])) {
@@ -270,8 +254,8 @@ class PrestaSalesOrders extends PrestaClient {
       }
     }
 
-    $invoice_name = $this->clean_name($invoice_address['firstname'], $invoice_address['lastname']);
-    $delivery_name = $this->clean_name($delivery_address['firstname'], $delivery_address['lastname']);
+    $invoice_name = $this->cleanup_name($invoice_address['firstname'], $invoice_address['lastname']);
+    $delivery_name = $this->cleanup_name($delivery_address['firstname'], $delivery_address['lastname']);
 
     // fetch order messages, implode into one string, and remove newlines.
     $order_messages = $this->presta_customer_messages->messages_by_order($order['id']);
@@ -462,7 +446,7 @@ class PrestaSalesOrders extends PrestaClient {
     return "{$this->edi_filepath_base}/liitetiedostot";
   }
 
-  private function clean_name($firstname, $lastname) {
+  private function cleanup_name($firstname, $lastname) {
     $firstname = trim($firstname);
     $lastname = trim($lastname);
 
@@ -471,5 +455,61 @@ class PrestaSalesOrders extends PrestaClient {
     }
 
     return "${lastname} ${firstname}";
+  }
+
+  private function fetch_pupesoft_customer($params) {
+    $id_customer = $params['id_customer'];
+    $id_delivery = $params['id_delivery'];
+    $id_invoice  = $params['id_invoice'];
+
+    // if we have pupesoft customer id in delivery address
+    $pupesoft_customer = presta_hae_asiakas_tunnuksella($id_delivery);
+
+    if (!empty($pupesoft_customer)) {
+      $this->logger->log("Asiakkaan toimitusosoitteen Pupesoft asiakastunnus {$id_delivery}");
+
+      return $pupesoft_customer;
+    }
+
+    // if we have pupesoft customer id in invoice address
+    $pupesoft_customer = presta_hae_asiakas_tunnuksella($id_invoice);
+
+    if (!empty($pupesoft_customer)) {
+      $this->logger->log("Asiakkaan laskutusosoitteen Pupesoft asiakastunnus {$id_invoice}");
+
+      return $pupesoft_customer;
+    }
+
+    // find customer with ulkoinen asiakasnumero
+    $pupesoft_customer = presta_hae_yhteyshenkilon_asiakas_ulkoisella_asiakasnumerolla($id_customer);
+
+    if (!empty($pupesoft_customer)) {
+      $this->logger->log("PrestaShop asiakkaan {$id_customer} Pupesoft asiakastunnus {$pupesoft_customer['tunnus']}");
+
+      return $pupesoft_customer;
+    }
+
+    $msg = "Asiakasta {$id_customer} ei löytynyt Pupesoftista! ";
+
+    $id = $this->verkkokauppa_customer;
+
+    if (empty($id)) {
+      $msg .= "Oletus verkkokauppa-asiakasta ei ole asetettu! Tilausta ei voida hakea!";
+
+      throw new Exception($msg);
+    }
+
+    $msg .= "Käytetään oletusasiakasta {$id}.";
+    $this->logger->log($msg);
+
+    $pupesoft_customer = hae_asiakas($id);
+
+    if (empty($pupesoft_customer)) {
+      $msg = "Oletusasiakasta {$id} ei löytynyt Pupesoftista!";
+
+      throw new Exception($msg);
+    }
+
+    return $pupesoft_customer;
   }
 }

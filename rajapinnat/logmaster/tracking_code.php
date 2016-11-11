@@ -155,18 +155,19 @@ while (false !== ($file = readdir($handle))) {
         $toitares = pupe_query($query);
         $toitarow = mysql_fetch_assoc($toitares);
 
-        $query = "SELECT asiakkaan_tilausnumero
+        $query = "SELECT asiakkaan_tilausnumero, tunnus
                   FROM lasku
                   WHERE yhtio                 = '{$kukarow['yhtio']}'
                   AND tunnus                  = '{$tilausnumero}'
-                  AND laatija                 = 'Magento'
-                  AND asiakkaan_tilausnumero != ''";
+                  AND ohjelma_moduli          = 'MAGENTO'
+                  AND asiakkaan_tilausnumero  != ''";
         $mageres = pupe_query($query);
 
         while ($magerow = mysql_fetch_assoc($mageres)) {
           $magento_api_met = $toitarow['virallinen_selite'] != '' ? $toitarow['virallinen_selite'] : $toitarow['selite'];
           $magento_api_rak = $seurantakoodi;
           $magento_api_ord = $magerow["asiakkaan_tilausnumero"];
+          $magento_api_laskutunnus = $magerow["tunnus"];
 
           require "magento_toimita_tilaus.php";
         }

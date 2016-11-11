@@ -2,6 +2,11 @@
 
 require '../inc/parametrit.inc';
 
+if ($tee == "NAYTATILAUS") {
+  readfile($pupe_root_polku."/dataout/".$filenimi);
+  exit;
+}
+
 echo "<font class='head'>".t("Käteismyynnit")."</font><hr>";
 
 // Tarkistetaan oikeus
@@ -1299,12 +1304,19 @@ elseif ($tee != '') {
       $fh = fopen($filenimi, "w+");
 
       $ots  = t("Käteismyynnin päiväkirja")." $yhtiorow[nimi] $ppa.$kka.$vva-$ppl.$kkl.$vvl\n\n";
-      $ots .= sprintf('%-20.20s', t("Kassa"));
-      $ots .= sprintf('%-25.25s', t("Asiakas"));
-      $ots .= sprintf('%-10.10s', t("Y-tunnus"));
-      $ots .= sprintf('%-12.12s', t("Laskunumero"));
-      $ots .= sprintf('%-20.20s', t("Pvm"));
-      $ots .= sprintf('%-13.13s', "$yhtiorow[valkoodi]");
+
+      if (empty($vainyhteensa)) {
+        $ots .= sprintf('%-20.20s', t("Kassa"));
+        $ots .= sprintf('%-25.25s', t("Asiakas"));
+        $ots .= sprintf('%-10.10s', t("Y-tunnus"));
+        $ots .= sprintf('%-12.12s', t("Laskunumero"));
+        $ots .= sprintf('%-20.20s', t("Pvm"));
+        $ots .= sprintf('%-13.13s', "$yhtiorow[valkoodi]");
+      }
+      else {
+        $ots .= sprintf('%93.93s', "$yhtiorow[valkoodi]");
+      }
+
       $ots .= "\n";
       $ots .= "----------------------------------------------------------------------------------------------\n";
       fwrite($fh, $ots);
@@ -2044,7 +2056,13 @@ elseif ($tee != '') {
           }
 
           if ($vaiht == 1) {
-            $prn = "\n";
+
+            $prn = "";
+
+            if (empty($vainyhteensa)) {
+              $prn = "\n";
+            }
+
             $prn .= sprintf("%-'.84s", $kateismaksuekotus." ".t("yhteensä")." ");
             $prn .= sprintf("%'.10s", " ".sprintf('%.2f', $kateismaksuyhteensa));
             $prn .= "\n\n";
@@ -2110,7 +2128,7 @@ elseif ($tee != '') {
         $kateismaksu = $row['tyyppi'];
         $kateismaksuekotus = t(str_replace("kateinen", "Käteinen", $kateismaksu));
 
-        if ($vaiht == 1) {
+        if ($vaiht == 1 and empty($vainyhteensa)) {
           if ($rivit >= 60) {
             fwrite($fh, $ots);
             $rivit = 1;
@@ -2166,7 +2184,12 @@ elseif ($tee != '') {
         }
 
         if ($vaiht == 1) {
-          $prn = "\n";
+          $prn = "";
+
+          if (empty($vainyhteensa)) {
+            $prn = "\n";
+          }
+
           $prn .= sprintf("%-'.84s", $kateismaksuekotus." ".t("yhteensä")." ");
           $prn .= sprintf("%'.10s", " ".sprintf('%.2f', $kateismaksuyhteensa));
           $prn .= "\n\n";
@@ -2353,8 +2376,6 @@ elseif ($tee != '') {
     fwrite($fh, $prn);
     fclose($fh);
 
-    fclose($fh);
-
     echo "<br><table><tr><td>";
     echo "<pre>", file_get_contents($filenimi), "</pre>";
     echo "</td></tr></table>";
@@ -2378,6 +2399,15 @@ elseif ($tee != '') {
 
       // Tulostusdialogi
       echo js_openPrintDialog($pdfnimi);
+
+      js_openFormInNewWindow();
+
+      echo "<form id='pdf_formi' name='pdf_formi' method='post' autocomplete='off'>
+            <input type='hidden' name='toim' value='$toim'>
+            <input type='hidden' name='tee' value='NAYTATILAUS'>
+            <input type='hidden' name='filenimi' value='".basename($filenimi.".pdf")."'>
+            <input type='hidden' name='nayta_pdf' value='1'>
+            <input type='submit' value='".t("Näytä pdf")."' onClick=\"js_openFormInNewWindow('pdf_formi', 'pdf_formi'); return false;\"></form><br><br>";
     }
 
     if (!empty($printteri)) {
@@ -2577,6 +2607,20 @@ if ($toim == "") {
 else {
   echo "<input type='hidden' name='koti' value='KOTI'>";
   echo "<input type='hidden' name='ulko' value='ULKO'>";
+}
+
+if ($toim == "VAINRAPORTTI") {
+  $chky = "";
+
+  if (!empty($vainyhteensa)) {
+    $chky = "CHECKED";
+  }
+
+  echo "<tr>";
+  echo "<th>".t("Näytä vain yhteensäsummat").":</th>";
+  echo "<td colspan='3'><input type='checkbox' name='vainyhteensa'  $chky>";
+  echo "</td>";
+  echo "</tr>";
 }
 
 $query = "SELECT *

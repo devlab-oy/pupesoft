@@ -187,10 +187,12 @@ unset($crossdock911);
 unset($laskpp, $laskkk, $laskvv);
 
 $asiakkaan_tilausnumero       = "";
+$edi_kommentti                = "";
 $editilaus_alatila            = "";
-$editilaus_hyvaksyttava       = "";
 $editilaus_eilahetetta        = "";
+$editilaus_hyvaksyttava       = "";
 $editilaus_kassalipas         = "";
+$editilaus_liitetiedosto      = "";
 $editilaus_loppuhinta         = "";
 $editilaus_maksuehto          = "";
 $editilaus_maksuteksti        = "";
@@ -199,14 +201,13 @@ $editilaus_otsikko_ok         = "";
 $editilaus_rahtivapaa         = "";
 $editilaus_sisainen           = "";
 $editilaus_tila               = "N"; // laskun tila
+$editilaus_tilausaika         = "";
 $editilaus_tilaustyyppi       = "";
-$editilaus_valuuttakoodi      = "";
 $editilaus_toimitustapa       = "";
 $editilaus_tyyppi             = "L"; // tilausrivi tyyppi
-$editilaus_liitetiedosto      = "";
+$editilaus_valuuttakoodi      = "";
 $editilaus_ytunnus            = "";
-$editilaus_tilausaika         = "";
-$edi_kommentti                = "";
+$ei_esteta_laskutusta         = true;
 $id                           = "";
 $ketjutus                     = "";
 $kieltolisa                   = "";
@@ -225,14 +226,17 @@ $ltoim_maa                    = "";
 $ltoim_puh                    = "";
 $maksaja                      = "";
 $merkkitieto                  = "";
+$noutopisteen_tunnus          = "";
 $ohjausmerkki                 = "";
 $OT_ASIAKASNRO                = "";
 $ot_verkkokauppa_asiakasnro   = "";
 $ot_verkkokauppa_kohde        = "";
 $ot_verkkokauppa_tilausviesti = "";
+$ovt_tunnus                   = "";
+$ovt_tunnuswhere              = "";
 $suunnistus                   = "";
-$tilausyhteyshenkilo          = "";
 $til_vienti                   = "";
+$tilausyhteyshenkilo          = "";
 $tnimi                        = "";
 $tnimitark                    = "";
 $toimpvm                      = date("Y-m-d");
@@ -243,13 +247,10 @@ $vastaustapa                  = "";
 $verkkokauppa                 = "";
 $verkkokauppavarasto          = "";
 $verkkokauppavarasto_li       = "";
-$veromaara                    = "";
 $verokanta                    = "";
+$veromaara                    = "";
 $viite                        = "";
 $yhteyshenkilon_puhelin       = "";
-$ovt_tunnus                   = "";
-$ovt_tunnuswhere              = "";
-$noutopisteen_tunnus          = "";
 
 // nollataan kaikki rivin muuttujat (n‰m‰ samat pit‰‰ tehd‰ tuote insertin j‰lkeen)
 $tuoteerror        = 1; // oletetaan aina ettei  tuotetta lˆydy
@@ -2277,7 +2278,6 @@ while ($tietue = fgets($fd)) {
             }
           }
 
-
           // Magento-tilauksessa katsotaan onko tilattavalla tuotteella saldoa.
           // Jos tilattu kpl-m‰‰r‰ on suurempi kuin myyt‰viss‰ oleva kpl-m‰‰r‰, niin pakotetaan rivi hyv‰ksytyksi tai j‰lkk‰riksi
           if ($edi_tyyppi == "magento" and $tuoteno != '' and $kpl > 0 and $trow["ei_saldoa"] == "") {
@@ -2287,51 +2287,93 @@ while ($tietue = fgets($fd)) {
             // jos saldo ei riit‰ normivarastoista, pit‰‰ katsoa miss‰ varastossa riitt‰‰ ja myyd‰‰n sielt‰ (koska jossain riitt‰‰, muuten tilaus ei olisi edes tullu t‰nne asti)
             if ($chk_myytavissa < $kpl) {
 
-              $query = "SELECT distinct varastopaikat.tunnus varasto, varastopaikat.prioriteetti
-                        FROM tuotepaikat
-                        JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
-                          AND varastopaikat.tyyppi       != ''
-                          AND varastopaikat.prioriteetti  > 0
-                          AND varastopaikat.tunnus        = tuotepaikat.varasto
-                          $verkkokauppavarasto_li)
-                        WHERE tuotepaikat.yhtio           = '$kukarow[yhtio]'
-                        AND tuotepaikat.tuoteno           = '$tuoteno'
-                        ORDER BY prioriteetti";
-              $sres = pupe_query($query);
+              $suoratoimitus_varastoon = (
+                in_array($yhtiorow["tee_osto_myyntitilaukselta"], array('V', 'W', 'I', 'J')) and
+                in_array($trow['suoratoimitus'], array('S', 'X'))
+              );
 
-              $erikoisvarastojen_saldot = array();
-              $erikois_i = 0;
+              $suoratoimitus_asiakkaalle = (
+                in_array($yhtiorow["tee_osto_myyntitilaukselta"], array('W', 'J')) and
+                in_array($trow['suoratoimitus'], array('S', 'U'))
+              );
 
-              while ($erikoisasaldo_row = mysql_fetch_assoc($sres)) {
-                list($chk_saldo, $chk_hyllyssa, $chk_myytavissa, $chk_true) = saldo_myytavissa($tuoteno, '', $erikoisasaldo_row["varasto"]);
+              // Suoratoimitukset sallitaan jos k‰ytˆss‰ vain Magento
+              $salllitaanko_suoratoimitus = ($suoratoimitus_varastoon or $suoratoimitus_asiakkaalle);
+              $salllitaanko_suoratoimitus &= ($edi_laatija == "Magento");
 
-                if ($chk_myytavissa >= $kpl) {
-                  $erikoisvarastojen_saldot[$erikois_i]["varasto"] = (int) $erikoisasaldo_row["varasto"];
-                  $erikoisvarastojen_saldot[$erikois_i]["myytavissa"] = (float) $chk_myytavissa;
-                  $erikoisvarastojen_saldot[$erikois_i]["prioriteetti"] = (int) $erikoisasaldo_row["prioriteetti"];
-                  $erikois_i++;
+              // jos parametri on p‰‰ll‰ ett‰ halutaan tehd‰ suoratoimitusrivi kun saldo ei riit‰
+              if (!empty($yhtiorow['editilaus_suoratoimitus']) and $salllitaanko_suoratoimitus) {
+                // haetaan p‰‰toimittaja
+                $query = "SELECT tt.liitostunnus, toimi.suoratoimitus
+                          FROM tuotteen_toimittajat AS tt USE INDEX (yhtio_tuoteno)
+                          JOIN toimi ON (toimi.yhtio = tt.yhtio and toimi.tunnus = tt.liitostunnus)
+                          WHERE tt.yhtio = '{$kukarow['yhtio']}'
+                          and tt.tuoteno = '{$tuoteno}'
+                          ORDER BY if (tt.jarjestys = 0, 9999, tt.jarjestys)";
+                $ttres = pupe_query($query);
+                $ttrow = mysql_fetch_assoc($ttres);
+
+                if ($suoratoimitus_varastoon and in_array($ttrow["suoratoimitus"], array('', 'X')) and
+                    !empty($ttrow['liitostunnus'])) {
+                  $sallitaanjt = '';
+                  $paikka = "°°°{$ttrow['liitostunnus']}";
+                  $ei_esteta_laskutusta = false;
                 }
-              }
 
-              if (count($erikoisvarastojen_saldot) > 0) {
-                // Sortataan 2 dimensoinen array. pit‰‰ ensiksi tehd‰ sortattavista keyst‰ omat arrayt
-                $apusort_jarj0 = $apusort_jarj1 = array();
-                foreach ($erikoisvarastojen_saldot as $apusort_key => $apusort_row) {
-                  $apusort_jarj0[$apusort_key] = $apusort_row['prioriteetti'];
-                  $apusort_jarj1[$apusort_key] = $apusort_row['myytavissa'];
+                if ($suoratoimitus_asiakkaalle and in_array($ttrow["suoratoimitus"], array('', 'U')) and
+                  !empty($ttrow['liitostunnus'])) {
+                  $sallitaanjt = '';
+                  $paikka = "!!!{$ttrow['liitostunnus']}";
+                  $ei_esteta_laskutusta = false;
                 }
-
-                // sortataan by myytavissa, sorttauskentt‰
-                array_multisort($apusort_jarj0, SORT_ASC, $apusort_jarj1, SORT_DESC, $erikoisvarastojen_saldot);
-
-                $varasto = $erikoisvarastojen_saldot[0]["varasto"]; // ekassa varastossa on pienin prioriteetti
-                $laskurow["varasto"] = $varasto; // joudutaan spooffaamaan laskurow varasto
-
-                // Tilausrivin systeemikommentti
-                $kommentti .= t("HUOM: Tuote toimitetaan erikoisvarastosta!", $arow["kieli"]);
               }
               else {
-                $var = $verkkokauppa_oletus_loppuneet;
+                $query = "SELECT distinct varastopaikat.tunnus varasto, varastopaikat.prioriteetti
+                          FROM tuotepaikat
+                          JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
+                            AND varastopaikat.tyyppi       != ''
+                            AND varastopaikat.prioriteetti  > 0
+                            AND varastopaikat.tunnus        = tuotepaikat.varasto
+                            $verkkokauppavarasto_li)
+                          WHERE tuotepaikat.yhtio           = '$kukarow[yhtio]'
+                          AND tuotepaikat.tuoteno           = '$tuoteno'
+                          ORDER BY prioriteetti";
+                $sres = pupe_query($query);
+
+                $erikoisvarastojen_saldot = array();
+                $erikois_i = 0;
+
+                while ($erikoisasaldo_row = mysql_fetch_assoc($sres)) {
+                  list($chk_saldo, $chk_hyllyssa, $chk_myytavissa, $chk_true) = saldo_myytavissa($tuoteno, '', $erikoisasaldo_row["varasto"]);
+
+                  if ($chk_myytavissa >= $kpl) {
+                    $erikoisvarastojen_saldot[$erikois_i]["varasto"] = (int) $erikoisasaldo_row["varasto"];
+                    $erikoisvarastojen_saldot[$erikois_i]["myytavissa"] = (float) $chk_myytavissa;
+                    $erikoisvarastojen_saldot[$erikois_i]["prioriteetti"] = (int) $erikoisasaldo_row["prioriteetti"];
+                    $erikois_i++;
+                  }
+                }
+
+                if (count($erikoisvarastojen_saldot) > 0) {
+                  // Sortataan 2 dimensoinen array. pit‰‰ ensiksi tehd‰ sortattavista keyst‰ omat arrayt
+                  $apusort_jarj0 = $apusort_jarj1 = array();
+                  foreach ($erikoisvarastojen_saldot as $apusort_key => $apusort_row) {
+                    $apusort_jarj0[$apusort_key] = $apusort_row['prioriteetti'];
+                    $apusort_jarj1[$apusort_key] = $apusort_row['myytavissa'];
+                  }
+
+                  // sortataan by myytavissa, sorttauskentt‰
+                  array_multisort($apusort_jarj0, SORT_ASC, $apusort_jarj1, SORT_DESC, $erikoisvarastojen_saldot);
+
+                  $varasto = $erikoisvarastojen_saldot[0]["varasto"]; // ekassa varastossa on pienin prioriteetti
+                  $laskurow["varasto"] = $varasto; // joudutaan spooffaamaan laskurow varasto
+
+                  // Tilausrivin systeemikommentti
+                  $kommentti .= t("HUOM: Tuote toimitetaan erikoisvarastosta!", $arow["kieli"]);
+                }
+                else {
+                  $var = $verkkokauppa_oletus_loppuneet;
+                }
               }
             }
           }
@@ -2515,13 +2557,25 @@ while ($tietue = fgets($fd)) {
 
         // magentotilaus on laskutettu, jos meill‰ on kassalipas
         $laskutettu_magento_tilaus = ($edi_tyyppi == "magento" and $editilaus_kassalipas != "");
+        
+        // jos etuk‰teen maksettu mutta ei haluta laskuttaa, p‰ivitet‰‰n tilaukselle tunnistustiedot
+        if (!$ei_esteta_laskutusta and $laskutettu_magento_tilaus) {
+          $query = "UPDATE lasku SET
+                    ohjelma_moduli = 'MAGENTOJT'
+                    WHERE yhtio = '$kukarow[yhtio]'
+                    AND tunnus  = '$editilaus_lasku_tunnus'";
+          pupe_query($query);
+        }
 
         // jos magentosta tullut tilaus on jo maksettu, p‰ivitet‰‰n se takaisin ker‰ysjonoon
         // paitsi tilaustyyppi 9, jossa halutaan ohittaa varastoprosessi
-        $paivita_takaisin_keraysjonoon = ($laskutettu_magento_tilaus and $editilaus_tilaustyyppi != "9");
+        $paivita_takaisin_keraysjonoon = ($laskutettu_magento_tilaus and $editilaus_tilaustyyppi != "9" and $ei_esteta_laskutusta);
+
+        $kateisohitus = $ei_esteta_laskutusta ? "" : "X";
 
         // jos meill‰ on maksettu magento tilaus
-        if ($laskutettu_magento_tilaus) {
+        if ($laskutettu_magento_tilaus and $ei_esteta_laskutusta) {
+
           // jos on annettu toimitusaika, asetetaan se laskun tapahtumap‰iv‰ksi
           if (!empty($editilaus_tilausaika)) {
             $_temp_date = strtotime($editilaus_tilausaika);
@@ -2582,9 +2636,11 @@ while ($tietue = fgets($fd)) {
     unset($laskpp, $laskkk, $laskvv);
 
     $asiakkaan_tilausnumero       = "";
+    $edi_kommentti                = "";
     $editilaus_alatila            = "";
     $editilaus_eilahetetta        = "";
     $editilaus_kassalipas         = "";
+    $editilaus_liitetiedosto      = "";
     $editilaus_loppuhinta         = "";
     $editilaus_maksuehto          = "";
     $editilaus_maksuteksti        = "";
@@ -2593,14 +2649,13 @@ while ($tietue = fgets($fd)) {
     $editilaus_rahtivapaa         = "";
     $editilaus_sisainen           = "";
     $editilaus_tila               = "N"; // laskun tila
+    $editilaus_tilausaika         = "";
     $editilaus_tilaustyyppi       = "";
-    $editilaus_valuuttakoodi      = "";
     $editilaus_toimitustapa       = "";
     $editilaus_tyyppi             = "L"; // tilausrivi tyyppi
-    $editilaus_liitetiedosto      = "";
+    $editilaus_valuuttakoodi      = "";
     $editilaus_ytunnus            = "";
-    $editilaus_tilausaika         = "";
-    $edi_kommentti                = "";
+    $ei_esteta_laskutusta         = true;
     $id                           = "";
     $ketjutus                     = "";
     $kieltolisa                   = "";
@@ -2619,14 +2674,17 @@ while ($tietue = fgets($fd)) {
     $ltoim_puh                    = "";
     $maksaja                      = "";
     $merkkitieto                  = "";
+    $noutopisteen_tunnus          = "";
     $ohjausmerkki                 = "";
     $OT_ASIAKASNRO                = "";
     $ot_verkkokauppa_asiakasnro   = "";
     $ot_verkkokauppa_kohde        = "";
     $ot_verkkokauppa_tilausviesti = "";
+    $ovt_tunnus                   = "";
+    $ovt_tunnuswhere              = "";
     $suunnistus                   = "";
-    $tilausyhteyshenkilo          = "";
     $til_vienti                   = "";
+    $tilausyhteyshenkilo          = "";
     $tnimi                        = "";
     $tnimitark                    = "";
     $toimpvm                      = date("Y-m-d");
@@ -2637,13 +2695,10 @@ while ($tietue = fgets($fd)) {
     $verkkokauppa                 = "";
     $verkkokauppavarasto          = "";
     $verkkokauppavarasto_li       = "";
-    $veromaara                    = "";
     $verokanta                    = "";
+    $veromaara                    = "";
     $viite                        = "";
     $yhteyshenkilon_puhelin       = "";
-    $ovt_tunnus                   = "";
-    $ovt_tunnuswhere              = "";
-    $noutopisteen_tunnus          = "";
     break;
   }
 }

@@ -1895,9 +1895,10 @@ if (!function_exists('rivi_perhe')) {
         $query = "SELECT
                   $lisa
                   round(sum(tilausrivi.hinta * if ('$yhtiorow[alv_kasittely]' != '' AND tilausrivi.alv < 500, (1 + tilausrivi.alv / 100), 1) * (tilausrivi.varattu + tilausrivi.kpl) * {$query_ale_lisa}), $yhtiorow[hintapyoristys]) rivihinta_verollinen,
-                  sum((tilausrivi.hinta / {$laskurow["vienti_kurssi"]}) / if ('$yhtiorow[alv_kasittely]'  = '' AND tilausrivi.alv < 500, (1 + tilausrivi.alv / 100), 1) * (tilausrivi.varattu + tilausrivi.kpl) * {$query_ale_lisa}) rivihinta_valuutassa,
-                  sum((tilausrivi.hinta / {$laskurow["vienti_kurssi"]}) * if ('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1 + tilausrivi.alv / 100), 1) * (tilausrivi.varattu + tilausrivi.kpl) * {$query_ale_lisa}) rivihinta_valuutassa_verollinen
+                  sum((tilausrivi.hinta / lasku.vienti_kurssi) / if ('$yhtiorow[alv_kasittely]'  = '' AND tilausrivi.alv < 500, (1 + tilausrivi.alv / 100), 1) * (tilausrivi.varattu + tilausrivi.kpl) * {$query_ale_lisa}) rivihinta_valuutassa,
+                  sum((tilausrivi.hinta / lasku.vienti_kurssi) * if ('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1 + tilausrivi.alv / 100), 1) * (tilausrivi.varattu + tilausrivi.kpl) * {$query_ale_lisa}) rivihinta_valuutassa_verollinen
                   FROM tilausrivi
+                  JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus)
                   WHERE tilausrivi.yhtio     = '$kukarow[yhtio]'
                   AND tilausrivi.uusiotunnus = '$row[uusiotunnus]'
                   AND tilausrivi.perheid     IN ($row[perheideet])

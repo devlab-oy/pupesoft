@@ -197,7 +197,11 @@ class PrestaSpecificPrices extends PrestaClient {
    * @throws Exception
    */
   private function find_presta_product_id($tuoteno) {
-    $presta_product_id = array_search($tuoteno, $this->product_ids);
+    // lowercase all Presta SKU:s and the search term
+    $all_products = array_map('strtolower', $this->product_ids);
+    $search = strtolower($tuoteno);
+
+    $presta_product_id = array_search($search, $all_products);
 
     if ($presta_product_id === false) {
       $msg = "Tuotetta {$tuoteno} ei löytynyt";

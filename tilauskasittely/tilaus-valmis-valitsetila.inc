@@ -435,7 +435,7 @@ if ($asirow['toimitusvahvistus'] != '') {
 
   // Jos Magento on käytössä, halutaan toimitusvahvistus, tämä on noutotilaus ja tullut Magentosta
   $_magento_tv       = ($asirow['toimitusvahvistus'] == 'Magento' and $toitarow['nouto'] != '');
-  $_magento_tilaus   = ($laskurow['laatija'] == 'Magento');
+  $_magento_tilaus   = ($laskurow['ohjelma_moduli'] == 'MAGENTO' OR $laskurow['ohjelma_moduli'] == 'MAGENTOJT');
   $_magento_kaytossa = (!empty($magento_api_tt_url) and !empty($magento_api_tt_usr) and !empty($magento_api_tt_pas));
 
   if ($_magento_kaytossa and $_magento_tilaus and $_magento_tv and $kutsuja == 'keraa.php') {
@@ -443,6 +443,7 @@ if ($asirow['toimitusvahvistus'] != '') {
     $magento_api_rak = '';
     $magento_api_ord = $laskurow["asiakkaan_tilausnumero"];
     $magento_api_noutokuittaus = "JOO";
+    $magento_api_laskutunnus = $laskurow["tunnus"];
 
     require "magento_toimita_tilaus.php";
   }

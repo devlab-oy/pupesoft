@@ -86,7 +86,7 @@ if ($Xtunnukset2 != "") {
 
   $Xquery = "SELECT
              {$select}
-             sum(tilausrivi.rivihinta) summa,
+             sum(round(tilausrivi.rivihinta / if ($laskurow[vienti_kurssi] > 0, $laskurow[vienti_kurssi], 1),2)) summa,
              sum(tilausrivi.kpl) kpl,
              round(sum((tilausrivi.rivihinta/$laskurow[summa])*$Xkilot),0) paino
              FROM tilausrivi
@@ -170,8 +170,12 @@ if ($Xtunnukset2 != "") {
       $Xpdf->draw_text(310, 719, t_tunnus_avainsanat($laskurow['toimitustapa'], "selite", "TOIMTAPAKV", $kieli),   $Xfirstpage, $Xnorm);
 
       $Xpdf->draw_rectangle(716, 300, 695, 580,         $Xfirstpage, $Xrectparam);
-      $Xpdf->draw_text(310, 708, t("Kommentti", $kieli),     $Xfirstpage, $Xpieni);
-      $Xpdf->draw_text(310, 698, $laskurow["viesti"],     $Xfirstpage, $Xnorm);
+      $Xpdf->draw_text(310, 708, t("Valuutta", $kieli),     $Xfirstpage, $Xpieni);
+      $Xpdf->draw_text(310, 698, $laskurow["valkoodi"],     $Xfirstpage, $Xnorm);
+
+      $Xpdf->draw_rectangle(695, 300, 674, 580,         $Xfirstpage, $Xrectparam);
+      $Xpdf->draw_text(310, 687, t("Kommentti", $kieli),     $Xfirstpage, $Xpieni);
+      $Xpdf->draw_text(310, 677, $laskurow["viesti"],     $Xfirstpage, $Xnorm);
 
       //rivien otsikkotiedot
       $Xpdf->draw_text(30,  572, t("Nimike", $kieli),      $Xfirstpage, $Xpieni);

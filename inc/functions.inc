@@ -2792,10 +2792,11 @@ if (!function_exists("synkronoi")) {
 
           //  P‰ivitet‰‰n vai tehd‰‰n uutta?
           $query = "SELECT tunnus
-                    FROM $table
-                    WHERE yhtio ='$kohderow[yhtio]'
-                    $where";
+                    FROM {$table}
+                    WHERE yhtio = '{$kohderow['yhtio']}'
+                    {$where}";
           $abures = pupe_query($query);
+          $aburow = mysql_fetch_assoc($abures);
 
           $update_insert = "";
 
@@ -2810,7 +2811,6 @@ if (!function_exists("synkronoi")) {
             $update_insert = "INSERT";
           }
           elseif (mysql_num_rows($abures) == 1) {
-            $aburow = mysql_fetch_assoc($abures);
             $vanhatunnus = $aburow["tunnus"];
 
             $syncquery = "UPDATE $table
@@ -2903,23 +2903,23 @@ if (!function_exists("synkronoi")) {
               //  koitetaan hakea oikean maksuehdon tunnus..
               $query = "SELECT * from maksuehto where yhtio='$yhtio' and tunnus='$masterrow[maksuehto]'";
               $abures = pupe_query($query);
-              $aburow = mysql_fetch_assoc($abures);
+              $maksuehtorow = mysql_fetch_assoc($abures);
 
               //  Melkein kaikki tiedot pit‰‰ stemmata!
               $query = "SELECT tunnus
                         from maksuehto
                         where yhtio       = '$kohderow[yhtio]'
-                        and abs_pvm       = '$aburow[abs_pvm]'
-                        and erapvmkasin   = '$aburow[erapvmkasin]'
-                        and factoring_id  = '$aburow[factoring_id]'
-                        and jaksotettu    = '$aburow[jaksotettu]'
-                        and jv            = '$aburow[jv]'
-                        and kassa_abspvm  = '$aburow[kassa_abspvm]'
-                        and kassa_alepros = '$aburow[kassa_alepros]'
-                        and kassa_relpvm  = '$aburow[kassa_relpvm]'
-                        and kateinen      = '$aburow[kateinen]'
-                        and rel_pvm       = '$aburow[rel_pvm]'
-                        and sallitut_maat = '$aburow[sallitut_maat]'
+                        and abs_pvm       = '$maksuehtorow[abs_pvm]'
+                        and erapvmkasin   = '$maksuehtorow[erapvmkasin]'
+                        and factoring_id  = '$maksuehtorow[factoring_id]'
+                        and jaksotettu    = '$maksuehtorow[jaksotettu]'
+                        and jv            = '$maksuehtorow[jv]'
+                        and kassa_abspvm  = '$maksuehtorow[kassa_abspvm]'
+                        and kassa_alepros = '$maksuehtorow[kassa_alepros]'
+                        and kassa_relpvm  = '$maksuehtorow[kassa_relpvm]'
+                        and kateinen      = '$maksuehtorow[kateinen]'
+                        and rel_pvm       = '$maksuehtorow[rel_pvm]'
+                        and sallitut_maat = '$maksuehtorow[sallitut_maat]'
                         LIMIT 1";
               $tarkres = pupe_query($query);
 
@@ -2934,17 +2934,17 @@ if (!function_exists("synkronoi")) {
               //  koitetaan hakea oikean toimitustavan tunnus..
               $query = "SELECT * from toimitustapa where yhtio='$yhtio' and tunnus='$masterrow[toimitustapa]'";
               $abures = pupe_query($query);
-              $aburow = mysql_fetch_assoc($abures);
+              $toimitustaparow = mysql_fetch_assoc($abures);
 
               //  Melkein kaikki tiedot pit‰‰ stemmata!
               $query = "SELECT tunnus from toimitustapa where yhtio='$kohderow[yhtio]'
-                        and selite        = '$aburow[selite]'
-                        and jvkulu        = '$aburow[jvkulu]'
-                        and lauantai      = '$aburow[lauantai]'
-                        and maa_maara     = '$aburow[maa_maara]'
-                        and merahti       = '$aburow[merahti]'
-                        and nouto         = '$aburow[nouto]'
-                        and sallitut_maat = '$aburow[sallitut_maat]'";
+                        and selite        = '$toimitustaparow[selite]'
+                        and jvkulu        = '$toimitustaparow[jvkulu]'
+                        and lauantai      = '$toimitustaparow[lauantai]'
+                        and maa_maara     = '$toimitustaparow[maa_maara]'
+                        and merahti       = '$toimitustaparow[merahti]'
+                        and nouto         = '$toimitustaparow[nouto]'
+                        and sallitut_maat = '$toimitustaparow[sallitut_maat]'";
               $tarkres=pupe_query($query);
 
               if (mysql_num_rows($tarkres) == 1) {
@@ -2967,7 +2967,22 @@ if (!function_exists("synkronoi")) {
 
               // Ohitetaan t‰m‰ koska se on synkronoi kielloissa
               if (isset($synkronoi_kiellot[$table]) and in_array($kennimi, $synkronoi_kiellot[$table])) {
-                continue;
+                if ($update_insert == "INSERT" or empty($aburow[$kennimi])) {
+                  // Jos kent‰lle on m‰‰ritelty oletusarvo avainsanoihin niin haetaan se
+                  $query = "SELECT *
+                            FROM avainsana
+                            WHERE yhtio = '{$kohderow['yhtio']}'
+                            and laji    = 'MYSQLALIAS'
+                            and selite  = '{$table}.{$kennimi}'
+                            and selitetark_2 = 'Default'
+                            and selitetark_4 != ''";
+                  $mysqlalias_default_res = pupe_query($query);
+                  $mysqlalias_default_row = mysql_fetch_assoc($mysqlalias_default_res);
+                  $override[$kennimi] = $mysqlalias_default_row['selitetark_4'];
+                }
+                else {
+                  continue;
+                }
               }
 
               // Ohitetaan tyhj‰ "override"-muuttuja
@@ -27132,7 +27147,7 @@ if (!function_exists('laskuta_magentojt')) {
                     WHERE yhtio = '{$kukarow['yhtio']}'
                     AND tunnus  = '{$laskurow['tunnus']}'";
         $res = pupe_query($query);
-        
+
         $laskurow['ohjelma_moduli'] = "MAGENTO";
       }
 

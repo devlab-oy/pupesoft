@@ -496,7 +496,8 @@ if ((int) $chk_row["ok"] == (int) $chk_row["kaikki"] and (int) $chk_row["ok"] !=
         $laskurow['varasto'],
         $laskurow['yhtio_toimipaikka'],
         $tilausnumeroita,
-        $valittu_tulostin
+        $valittu_tulostin,
+        "0"
       );
     }
   }

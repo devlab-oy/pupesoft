@@ -194,8 +194,10 @@ if (empty($magento_asiakas_aktivointi)) {
 }
 
 // Aktivoidaanko asiakaskohtaiset tuotehinnat
+// Tähän tulee antaa Magenton 'websiteCode', johon asiakashinnat liitetään
 // HUOM! Vaatii Magenton customointia
 if (empty($magento_asiakaskohtaiset_tuotehinnat)) {
+  // $magento_asiakaskohtaiset_tuotehinnat = 'pro_shop';
   $magento_asiakaskohtaiset_tuotehinnat = false;
 }
 
@@ -296,6 +298,10 @@ if (empty($magento_tuote_aina_varastossa)) {
   $magento_tuote_aina_varastossa = false;
 }
 
+if (empty($magento_tehdas_saldot)) {
+  $magento_tehdas_saldot = false;
+}
+
 // Tehdään lukkofile riippuen siitä, mitä ajetaan. Tilauksien haulla pitää olla oma lukko.
 if (count($magento_ajolista) == 1 and $magento_ajolista[0] == 'tilaukset') {
   $lockfile = 'tuote_export-tilaukset-flock.lock';
@@ -382,6 +388,7 @@ if (in_array('saldot', $magento_ajolista)) {
     "ajetaanko_kaikki"           => $ajetaanko_kaikki,
     "verkkokauppa_saldo_varasto" => $verkkokauppa_saldo_varasto,
     "vaihtoehtoiset_saldot"      => $magento_saldot_tuotekenttaan,
+    "tehdas_saldot"              => $magento_tehdas_saldot,
   );
 
   $dnstock = tuote_export_hae_saldot($params);

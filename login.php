@@ -138,7 +138,7 @@ else {
   echo "<table class='login'>
       <form name='login' target='_top' action='index.php' method='post'>
 
-      <tr><td><font class='menu'>", t("Käyttäjätunnus", $browkieli), ":</font></td><td><input type='text' value='' name='user' size='15' maxlength='30'></td></tr>
+      <tr><td><font class='menu'>", t("Käyttäjätunnus", $browkieli), ":</font></td><td><input type='text' value='' name='user' size='15' maxlength='50'></td></tr>
       <tr><td><font class='menu'>", t("Salasana", $browkieli), ":</font></td><td><input type='password' name='salasana' size='15' maxlength='30'></td></tr>
 
       <tr><td colspan='2'><font class='menu'>", t("Jos haluat vaihtaa salasanasi", $browkieli), ",<br>", t("anna se kahteen kertaan alla olevin kenttiin", $browkieli), "</font></td></tr>

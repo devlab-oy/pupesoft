@@ -611,7 +611,11 @@ class PrestaProducts extends PrestaClient {
   }
 
   public function product_id_by_sku($sku) {
-    $product_id = array_search($sku, $this->all_skus());
+    // lowercase all Presta SKU:s and the search term
+    $all_products = array_map('strtolower', $this->all_skus());
+    $search = strtolower($sku);
+
+    $product_id = array_search($search, $all_products);
 
     return $product_id;
   }

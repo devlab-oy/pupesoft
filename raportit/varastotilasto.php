@@ -52,13 +52,14 @@ if ($toim == "KASSA" and !isset($painoinnappia)) {
   $listaustyyppi = "eimyyntia";
 }
 
-$sel = array_fill_keys(array($listaustyyppi), " SELECTED") + array_fill_keys(array('kappaleet', 'hinnat', 'kappaleet2', 'eimyyntia', 'osto', 'ostoryhma'), '');
+$sel = array_fill_keys(array($listaustyyppi), " SELECTED") + array_fill_keys(array('kappaleet', 'hinnat', 'kappaleet2', 'kappaleet3', 'eimyyntia', 'osto', 'ostoryhma'), '');
 
 echo "<tr>";
 echo "<th>".t("Listaustyyppi")."</th>";
 echo "<td>";
 echo "<select name='listaustyyppi' onchange='submit();'>";
 echo "<option value = 'kappaleet'{$sel['kappaleet']}>".t("Listauksessa n‰ytet‰‰n myynti kappaleina")."</option>";
+echo "<option value = 'kappaleet3'{$sel['kappaleet3']}>".t("Listauksessa n‰ytet‰‰n myynti kappaleina, rajattu")."</option>";
 echo "<option value = 'hinnat'{$sel['hinnat']}>".t("Listauksessa n‰ytet‰‰n myynti euroina")."</option>";
 echo "<option value = 'kappaleet2'{$sel['kappaleet2']}>".t("Listauksessa n‰ytet‰‰n myynti ja kulutus kappaleina")."</option>";
 echo "<option value = 'eimyyntia'{$sel['eimyyntia']}>".t("Listauksessa ei n‰ytet‰ myyntej‰ eik‰ kulutuksia")."</option>";
@@ -172,7 +173,12 @@ echo "<th>";
 echo t("N‰yt‰ vapaa saldo");
 echo "</th>";
 
+if ($listaustyyppi == "kappaleet3" and !isset($painoinnappia)) {
+  $nayta_vapaa_saldo = "on";
+}
+
 $checked = (isset($nayta_vapaa_saldo) and $nayta_vapaa_saldo == "on") ? "checked" : "";
+
 echo "<td><input type='checkbox' name='nayta_vapaa_saldo' {$checked}/></td>";
 echo "</tr>";
 
@@ -199,6 +205,8 @@ if (($listaustyyppi == "osto" or $listaustyyppi == "ostoryhma") and (
 }
 
 if ($tee != "" and isset($painoinnappia)) {
+
+  $left = $listaustyyppi == "kappaleet3" ? "LEFT" : "";
 
   if ($nollapiilo == "vainsaldo") {
     $saldolisa = " AND tuotepaikat.saldo != 0 ";
@@ -270,7 +278,7 @@ if ($tee != "" and isset($painoinnappia)) {
             tuote.eankoodi,
             sum(saldo) saldo
             FROM tuote
-            JOIN tuotepaikat ON (tuote.tuoteno = tuotepaikat.tuoteno AND tuote.yhtio = tuotepaikat.yhtio)
+            {$left} JOIN tuotepaikat ON (tuote.tuoteno = tuotepaikat.tuoteno AND tuote.yhtio = tuotepaikat.yhtio)
             {$toimittaja_join}
             WHERE tuote.yhtio = '{$kukarow["yhtio"]}'
             {$lisa}
@@ -291,14 +299,19 @@ if ($tee != "" and isset($painoinnappia)) {
     $excelrivi    = 0;
 
     $excelsarake = 0;
-    $worksheet->writeString($excelrivi, $excelsarake++, t("Osasto"), $format_bold);
-    $worksheet->writeString($excelrivi, $excelsarake++, t("Tuoteryhm‰"), $format_bold);
-    $worksheet->writeString($excelrivi, $excelsarake++, t("Malli"), $format_bold);
+
+    if ($listaustyyppi != "kappaleet3") {
+      $worksheet->writeString($excelrivi, $excelsarake++, t("Osasto"), $format_bold);
+      $worksheet->writeString($excelrivi, $excelsarake++, t("Tuoteryhm‰"), $format_bold);
+      $worksheet->writeString($excelrivi, $excelsarake++, t("Malli"), $format_bold);
+    }
     $worksheet->writeString($excelrivi, $excelsarake++, t("Tuoteno"), $format_bold);
     $worksheet->writeString($excelrivi, $excelsarake++, t("Nimitys"), $format_bold);
-    $worksheet->writeString($excelrivi, $excelsarake++, t("EAN-koodi"), $format_bold);
+    if ($listaustyyppi != "kappaleet3") {
+      $worksheet->writeString($excelrivi, $excelsarake++, t("EAN-koodi"), $format_bold);
+    }
     $worksheet->writeString($excelrivi, $excelsarake++, t("Myyntihinta"), $format_bold);
-    $worksheet->writeString($excelrivi, $excelsarake++, t("Varastosaldo"), $format_bold);
+    $worksheet->writeString($excelrivi, $excelsarake++, t("Saldo"), $format_bold);
 
     if ($nayta_vapaa_saldo == "on") {
       $worksheet->writeString($excelrivi, $excelsarake++, t("Vapaa saldo"), $format_bold);
@@ -313,7 +326,9 @@ if ($tee != "" and isset($painoinnappia)) {
       $worksheet->writeString($excelrivi, $excelsarake++, t("Varastonarvo"), $format_bold);
 
       if ($listaustyyppi != "osto" and $listaustyyppi != "ostoryhma") {
-        $worksheet->writeString($excelrivi, $excelsarake++, t("Varmuusvarasto"), $format_bold);
+        if ($listaustyyppi != "kappaleet3") {
+          $worksheet->writeString($excelrivi, $excelsarake++, t("Varmuusvarasto"), $format_bold);
+        }
         $worksheet->writeString($excelrivi, $excelsarake++, t("Tilattu m‰‰r‰"), $format_bold);
         $worksheet->writeString($excelrivi, $excelsarake++, t("Toimitus aika"), $format_bold);
       }
@@ -322,8 +337,10 @@ if ($tee != "" and isset($painoinnappia)) {
     if ($listaustyyppi == "osto" or $listaustyyppi == "ostoryhma") {
       $worksheet->writeString($excelrivi, $excelsarake++, t("Ostot"), $format_bold);
       $worksheet->writeString($excelrivi, $excelsarake++, t("Myynti"), $format_bold);
+      $worksheet->writeString($excelrivi, $excelsarake++, t("Ostot")." ".$yhtiorow['valkoodi'], $format_bold);
       $worksheet->writeString($excelrivi, $excelsarake++, t("Myynti")." ".$yhtiorow['valkoodi'], $format_bold);
       $worksheet->writeString($excelrivi, $excelsarake++, t("Kate")." ".$yhtiorow['valkoodi'], $format_bold);
+      $worksheet->writeString($excelrivi, $excelsarake++, t("Siirrot")." ".$yhtiorow['valkoodi'], $format_bold);
     }
     elseif ($listaustyyppi != "eimyyntia") {
       $worksheet->writeString($excelrivi, $excelsarake++, t("Myynti")." $vvl", $format_bold);
@@ -381,9 +398,9 @@ if ($tee != "" and isset($painoinnappia)) {
       if ($listaustyyppi == "osto" or $listaustyyppi == "ostoryhma") {
         // myyntipuoli
         $query = "SELECT
-                  round(sum(if(laskutettuaika >= '{$vvl}-01-01', rivihinta, 0))) myyntiVA,
-                  round(sum(if(laskutettuaika >= '{$vvl}-01-01', kpl, 0))) myyntikplVA,
-                  round(sum(if(laskutettuaika >= '{$vvl}-01-01', kate, 0))) myyntikateVA
+                  round(sum(rivihinta)) myyntiVA,
+                  round(sum(kpl)) myyntikplVA,
+                  round(sum(kate)) myyntikateVA
                   FROM tilausrivi
                   WHERE yhtio         = '{$kukarow["yhtio"]}'
                   AND tuoteno         = '{$row["tuoteno"]}'
@@ -395,19 +412,20 @@ if ($tee != "" and isset($painoinnappia)) {
         $myyntiresult = pupe_query($query);
         $myyntirivi = mysql_fetch_assoc($myyntiresult);
 
-        // tuloutukset
+        // tuloutukset ja siirrot
         $query = "SELECT
-                  round(sum(if(laadittu >= '{$vvl}-01-01 00:00:00', kpl, 0))) tulotVA
+                  round(sum(if(laji = 'tulo', kpl*kplhinta, 0))) tulotVA,
+                  round(sum(if(laji = 'tulo', kpl, 0))) tulotkplVA,
+                  round(sum(if(laji = 'siirto', kpl*hinta, 0))) siirrotVA
                   FROM tapahtuma
                   WHERE yhtio  = '{$kukarow["yhtio"]}'
                   AND tuoteno  = '{$row["tuoteno"]}'
                   AND laji in ('tulo', 'siirto')
                   AND laadittu >= '{$vva}-{$kka}-{$ppa} 00:00:00'
                   AND laadittu <= '{$vvl}-{$kkl}-{$ppl} 23:59:59'
-                  AND kpl > 0
                   {$varasto_tapahtuma_filter}";
         $tuloresult = pupe_query($query);
-        $tulorivi = mysql_fetch_assoc($tuloresult);
+        $tapahtumarivi = mysql_fetch_assoc($tuloresult);
       }
       elseif ($listaustyyppi != "eimyyntia") {
         // ostopuoli
@@ -422,7 +440,7 @@ if ($tee != "" and isset($painoinnappia)) {
         $ostoresult = pupe_query($query);
         $ostorivi = mysql_fetch_assoc($ostoresult);
 
-        $tyyppi_lisa = ($listaustyyppi == "kappaleet" or $listaustyyppi == "kappaleet2") ? "kpl" : "rivihinta";
+        $tyyppi_lisa = ($listaustyyppi == "kappaleet" or $listaustyyppi == "kappaleet2" or $listaustyyppi == "kappaleet3") ? "kpl" : "rivihinta";
 
         // myyntipuoli
         $query = "SELECT
@@ -509,7 +527,9 @@ if ($tee != "" and isset($painoinnappia)) {
       $kulutusrivi["kulutus6kk"]  = empty($kulutusrivi["kulutus6kk"]) ? "" : $kulutusrivi["kulutus6kk"];
       $kulutusrivi["kulutus3kk"]  = empty($kulutusrivi["kulutus3kk"]) ? "" : $kulutusrivi["kulutus3kk"];
 
-      $tulorivi["tulotVA"] = empty($tulorivi["tulotVA"]) ? "" : $tulorivi["tulotVA"];
+      $tapahtumarivi["tulotVA"] = empty($tapahtumarivi["tulotVA"]) ? "" : $tapahtumarivi["tulotVA"];
+      $tapahtumarivi["tulotkplVA"] = empty($tapahtumarivi["tulotkplVA"]) ? "" : $tapahtumarivi["tulotkplVA"];
+      $tapahtumarivi["siirrotVA"] = empty($tapahtumarivi["siirrotVA"]) ? "" : $tapahtumarivi["siirrotVA"];
 
       $varattu = empty($varattu) ? "" : (float) $varattu;
       $vapaa_saldo = empty($myytavissa) ? "" : (float) $myytavissa;
@@ -545,6 +565,8 @@ if ($tee != "" and isset($painoinnappia)) {
         $worksheet->writeFormula($excelrivi, $excelsarake++, "=SUM(K$mallisummarivi:K$excelrivi)", $format_bold);
         $worksheet->writeFormula($excelrivi, $excelsarake++, "=SUM(L$mallisummarivi:L$excelrivi)", $format_bold);
         $worksheet->writeFormula($excelrivi, $excelsarake++, "=SUM(M$mallisummarivi:M$excelrivi)", $format_bold);
+        $worksheet->writeFormula($excelrivi, $excelsarake++, "=SUM(N$mallisummarivi:N$excelrivi)", $format_bold);
+        $worksheet->writeFormula($excelrivi, $excelsarake++, "=SUM(O$mallisummarivi:O$excelrivi)", $format_bold);
         $excelrivi++;
         $excelrivi++;
 
@@ -565,6 +587,8 @@ if ($tee != "" and isset($painoinnappia)) {
         $worksheet->writeFormula($excelrivi, $excelsarake++, "=SUM(K".implode(", K", $mallisummat).")", $format_bold);
         $worksheet->writeFormula($excelrivi, $excelsarake++, "=SUM(L".implode(", L", $mallisummat).")", $format_bold);
         $worksheet->writeFormula($excelrivi, $excelsarake++, "=SUM(M".implode(", M", $mallisummat).")", $format_bold);
+        $worksheet->writeFormula($excelrivi, $excelsarake++, "=SUM(N".implode(", N", $mallisummat).")", $format_bold);
+        $worksheet->writeFormula($excelrivi, $excelsarake++, "=SUM(O".implode(", O", $mallisummat).")", $format_bold);
 
         $excelrivi++;
         $excelrivi++;
@@ -586,6 +610,8 @@ if ($tee != "" and isset($painoinnappia)) {
         $worksheet->writeFormula($excelrivi, $excelsarake++, "=SUM(K".implode(", K", $trysummat).")", $format_bold);
         $worksheet->writeFormula($excelrivi, $excelsarake++, "=SUM(L".implode(", L", $trysummat).")", $format_bold);
         $worksheet->writeFormula($excelrivi, $excelsarake++, "=SUM(M".implode(", M", $trysummat).")", $format_bold);
+        $worksheet->writeFormula($excelrivi, $excelsarake++, "=SUM(N".implode(", N", $trysummat).")", $format_bold);
+        $worksheet->writeFormula($excelrivi, $excelsarake++, "=SUM(O".implode(", O", $trysummat).")", $format_bold);
 
         $excelrivi++;
         $excelrivi++;
@@ -604,7 +630,9 @@ if ($tee != "" and isset($painoinnappia)) {
         and (float) $varattu == 0
         and (float) $myyntirivi["myynti12kk"] == 0
         and (float) $kulutusrivi["kulutus12kk"] == 0
-        and (float) $tulorivi["tulotVA"] == 0)
+        and (float) $tapahtumarivi["tulotVA"] == 0
+        and (float) $tapahtumarivi["tulotkplVA"] == 0
+        and (float) $tapahtumarivi["siirrotVA"] == 0)
         or (
           $listaustyyppi == "ostoryhma"
           and $row["osasto"] == "XXX"
@@ -617,9 +645,13 @@ if ($tee != "" and isset($painoinnappia)) {
 
       if ($total_rows <= 1000) {
         $varastotilasto_table .= "<tr class='aktiivi'>";
-        $varastotilasto_table .= "<td nowrap>$row[osasto]</td>";
-        $varastotilasto_table .= "<td nowrap>$row[try]</td>";
-        $varastotilasto_table .= "<td nowrap>$row[malli]</td>";
+
+        if ($listaustyyppi != "kappaleet3") {
+          $varastotilasto_table .= "<td nowrap>$row[osasto]</td>";
+          $varastotilasto_table .= "<td nowrap>$row[try]</td>";
+          $varastotilasto_table .= "<td nowrap>$row[malli]</td>";
+        }
+
         $varastotilasto_table .= "<td><a href='{$palvelin2}tuote.php?tee=Z&tuoteno=".urlencode($row["tuoteno"])."'>$row[tuoteno]</a></td>";
         $varastotilasto_table .= "<td>$row[nimitys]</td>";
         $varastotilasto_table .= "<td align='right'>".hintapyoristys($row['myyntihinta'])."</td>";
@@ -637,17 +669,22 @@ if ($tee != "" and isset($painoinnappia)) {
           $varastotilasto_table .= "<td align='right'>$varastonarvo</td>";
 
           if ($listaustyyppi != "osto" and $listaustyyppi != "ostoryhma") {
-            $varastotilasto_table .= "<td align='right'>$row[varmuus_varasto]</td>";
+            if ($listaustyyppi != "kappaleet3") {
+              $varastotilasto_table .= "<td align='right'>$row[varmuus_varasto]</td>";
+            }
+
             $varastotilasto_table .= "<td align='right'>$ostorivi[tulossa]</td>";
             $varastotilasto_table .= "<td align='right'>".tv1dateconv($ostorivi['toimaika'])."</td>";
           }
         }
 
         if ($listaustyyppi == "osto" or $listaustyyppi == "ostoryhma") {
-          $varastotilasto_table .= "<td align='right'>$tulorivi[tulotVA]</td>";
+          $varastotilasto_table .= "<td align='right'>$tapahtumarivi[tulotkplVA]</td>";
           $varastotilasto_table .= "<td align='right'>$myyntirivi[myyntikplVA]</td>";
+          $varastotilasto_table .= "<td align='right'>$tapahtumarivi[tulotVA]</td>";
           $varastotilasto_table .= "<td align='right'>$myyntirivi[myyntiVA]</td>";
           $varastotilasto_table .= "<td align='right'>$myyntirivi[myyntikateVA]</td>";
+          $varastotilasto_table .= "<td align='right'>$tapahtumarivi[siirrotVA]</td>";
         }
         elseif ($listaustyyppi != "eimyyntia") {
           $varastotilasto_table .= "<td align='right'>$myyntirivi[myyntiVA]</td>";
@@ -667,12 +704,16 @@ if ($tee != "" and isset($painoinnappia)) {
       }
 
       $excelsarake = 0;
-      $worksheet->writeString($excelrivi, $excelsarake++, $row["osasto"]);
-      $worksheet->writeString($excelrivi, $excelsarake++, $row["try"]);
-      $worksheet->writeString($excelrivi, $excelsarake++, $row["malli"]);
+      if ($listaustyyppi != "kappaleet3") {
+        $worksheet->writeString($excelrivi, $excelsarake++, $row["osasto"]);
+        $worksheet->writeString($excelrivi, $excelsarake++, $row["try"]);
+        $worksheet->writeString($excelrivi, $excelsarake++, $row["malli"]);
+      }
       $worksheet->writeString($excelrivi, $excelsarake++, $row["tuoteno"]);
       $worksheet->writeString($excelrivi, $excelsarake++, $row["nimitys"]);
-      $worksheet->writeString($excelrivi, $excelsarake++, $row["eankoodi"]);
+      if ($listaustyyppi != "kappaleet3") {
+        $worksheet->writeString($excelrivi, $excelsarake++, $row["eankoodi"]);
+      }
       $worksheet->writeNumber($excelrivi, $excelsarake++, $row["myyntihinta"]);
       $worksheet->writeNumber($excelrivi, $excelsarake++, $saldo);
 
@@ -688,17 +729,21 @@ if ($tee != "" and isset($painoinnappia)) {
         $worksheet->writeNumber($excelrivi, $excelsarake++, $varastonarvo);
 
         if ($listaustyyppi != "osto" and $listaustyyppi != "ostoryhma") {
-          $worksheet->writeNumber($excelrivi, $excelsarake++, $row["varmuus_varasto"]);
+          if ($listaustyyppi != "kappaleet3") {
+            $worksheet->writeNumber($excelrivi, $excelsarake++, $row["varmuus_varasto"]);
+          }
           $worksheet->writeNumber($excelrivi, $excelsarake++, $ostorivi["tulossa"]);
           $worksheet->writeString($excelrivi, $excelsarake++, $ostorivi["toimaika"]);
         }
       }
 
       if ($listaustyyppi == "osto" or $listaustyyppi == "ostoryhma") {
-        $worksheet->writeNumber($excelrivi, $excelsarake++, $tulorivi["tulotVA"]);
+        $worksheet->writeNumber($excelrivi, $excelsarake++, $tapahtumarivi["tulotkplVA"]);
         $worksheet->writeNumber($excelrivi, $excelsarake++, $myyntirivi["myyntikplVA"]);
+        $worksheet->writeNumber($excelrivi, $excelsarake++, $tapahtumarivi["tulotVA"]);
         $worksheet->writeNumber($excelrivi, $excelsarake++, $myyntirivi["myyntiVA"]);
         $worksheet->writeNumber($excelrivi, $excelsarake++, $myyntirivi["myyntikateVA"]);
+        $worksheet->writeNumber($excelrivi, $excelsarake++, $tapahtumarivi["siirrotVA"]);
       }
       elseif ($listaustyyppi != "eimyyntia") {
         $worksheet->writeNumber($excelrivi, $excelsarake++, $myyntirivi["myyntiVA"]);
@@ -728,6 +773,8 @@ if ($tee != "" and isset($painoinnappia)) {
       $worksheet->writeFormula($excelrivi, $excelsarake++, "=SUM(K".implode(", K", $osastosummat).")", $format_bold);
       $worksheet->writeFormula($excelrivi, $excelsarake++, "=SUM(L".implode(", L", $osastosummat).")", $format_bold);
       $worksheet->writeFormula($excelrivi, $excelsarake++, "=SUM(M".implode(", M", $osastosummat).")", $format_bold);
+      $worksheet->writeFormula($excelrivi, $excelsarake++, "=SUM(N".implode(", N", $osastosummat).")", $format_bold);
+      $worksheet->writeFormula($excelrivi, $excelsarake++, "=SUM(O".implode(", O", $osastosummat).")", $format_bold);
     }
 
     echo "<br>";
@@ -752,14 +799,19 @@ if ($tee != "" and isset($painoinnappia)) {
       echo "<table class='display dataTable' id='$pupe_DataTables'>";
       echo "<thead>";
       echo "<tr>";
-      echo "<th>".t("Osasto")."</th>";
-      echo "<th>".t("Tuoteryhm‰")."</th>";
-      echo "<th>".t("Malli")."</th>";
+
+      if ($listaustyyppi != "kappaleet3") {
+        echo "<th>".t("Osasto")."</th>";
+        echo "<th>".t("Tuoteryhm‰")."</th>";
+        echo "<th>".t("Malli")."</th>";
+        $sarakkeet += 3;
+      }
+
       echo "<th>".t("Tuoteno")."</th>";
       echo "<th>".t("Nimitys")."</th>";
       echo "<th>".t("Myyntihinta")."</th>";
-      echo "<th>".t("Varastosaldo")."</th>";
-      $sarakkeet += 7;
+      echo "<th>".t("Saldo")."</th>";
+      $sarakkeet += 4;
 
       if ($nayta_vapaa_saldo == "on") {
         echo "<th>".t("Vapaa saldo")."</th>";
@@ -776,19 +828,24 @@ if ($tee != "" and isset($painoinnappia)) {
         $sarakkeet++;
 
         if ($listaustyyppi != "osto" and $listaustyyppi != "ostoryhma") {
-          echo "<th>".t("Varmuusvarasto")."</th>";
+          if ($listaustyyppi != "kappaleet3") {
+            echo "<th>".t("Varmuusvarasto")."</th>";
+            $sarakkeet++;
+          }
           echo "<th>".t("Tilattu m‰‰r‰")."</th>";
           echo "<th>".t("Toimitus aika")."</th>";
-          $sarakkeet += 3;
+          $sarakkeet += 2;
         }
       }
 
       if ($listaustyyppi == "osto" or $listaustyyppi == "ostoryhma") {
         echo "<th>".t("Ostot")."</th>";
         echo "<th>".t("Myynti")."</th>";
+        echo "<th>".t("Ostot")." $yhtiorow[valkoodi]</th>";
         echo "<th>".t("Myynti")." $yhtiorow[valkoodi]</th>";
         echo "<th>".t("Kate")." $yhtiorow[valkoodi]</th>";
-        $sarakkeet += 4;
+        echo "<th>".t("Siirrot")."$yhtiorow[valkoodi]</th>";
+        $sarakkeet += 6;
       }
       elseif ($listaustyyppi != "eimyyntia") {
         echo "<th>".t("Myynti")."<br>$vvl</th>";
@@ -809,9 +866,11 @@ if ($tee != "" and isset($painoinnappia)) {
       echo "</tr>";
 
       echo "<tr>";
-      echo "<td><input type='text' class='search_field' name='search_Osasto'></td>";
-      echo "<td><input type='text' class='search_field' name='search_Tuoteryh'></td>";
-      echo "<td><input type='text' class='search_field' name='search_Tuotemalli'></td>";
+      if ($listaustyyppi != "kappaleet3") {
+        echo "<td><input type='text' class='search_field' name='search_Osasto'></td>";
+        echo "<td><input type='text' class='search_field' name='search_Tuoteryh'></td>";
+        echo "<td><input type='text' class='search_field' name='search_Tuotemalli'></td>";
+      }
       echo "<td><input type='text' class='search_field' name='search_Tuoteno'></td>";
       echo "<td><input type='text' class='search_field' name='search_Nimitys'></td>";
       echo "<td><input type='text' class='search_field' name='search_Myyntihinta'></td>";
@@ -829,17 +888,21 @@ if ($tee != "" and isset($painoinnappia)) {
         echo "<td><input type='text' class='search_field' name='search_Varastonarvo'></td>";
 
         if ($listaustyyppi != "osto" and $listaustyyppi != "ostoryhma") {
-          echo "<td><input type='text' class='search_field' name='search_Varmuusvarasto'></td>";
+          if ($listaustyyppi != "kappaleet3") {
+            echo "<td><input type='text' class='search_field' name='search_Varmuusvarasto'></td>";
+          }
           echo "<td><input type='text' class='search_field' name='search_Tilattumaa'></td>";
           echo "<td><input type='text' class='search_field' name='search_Toimaika'></td>";
         }
       }
 
       if ($listaustyyppi == "osto" or $listaustyyppi == "ostoryhma") {
-        echo "<td><input type='text' class='search_field' name='search_Ostot'></td>";
+        echo "<td><input type='text' class='search_field' name='search_Ostotkpl'></td>";
         echo "<td><input type='text' class='search_field' name='search_Myyntikpl'></td>";
+        echo "<td><input type='text' class='search_field' name='search_Ostot'></td>";
         echo "<td><input type='text' class='search_field' name='search_Myynti'></td>";
         echo "<td><input type='text' class='search_field' name='search_Kate'></td>";
+        echo "<td><input type='text' class='search_field' name='search_Siirrot'></td>";
       }
       elseif ($listaustyyppi != "eimyyntia") {
         echo "<td><input type='text' class='search_field' name='search_Myyntivv'></td>";

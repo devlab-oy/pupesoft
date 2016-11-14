@@ -286,6 +286,34 @@ if ($jtselaus_paivitys_oikeus and $kukarow["extranet"] == "" and $tilaus_on_jo =
 
     // Kaikki rivit toimitettu:
     if (mysql_num_rows($apure) == 0) {
+
+      // Magento etukätee maksetut suoratoimitustilaukset tulee asettaa kassalippaaseen
+      // laskutus tapahtuu kuitenkin alempana tilaus.valmis.incissä
+      if ($laskurow['ohjelma_moduli'] == 'MAGENTOJT') {
+
+        // Katsotaan onko Magento käytössä, merkataan tilaus toimitetuksi
+        $_magento_kaytossa = (!empty($magento_api_tt_url) and !empty($magento_api_tt_usr) and !empty($magento_api_tt_pas));
+
+        if ($_magento_kaytossa) {
+
+          $query = "SELECT virallinen_selite, selite
+                    FROM toimitustapa
+                    WHERE yhtio     = '$kukarow[yhtio]'
+                    AND selite      = '$laskurow[toimitustapa]'";
+          $toimitustapa_re = pupe_query($query);
+          $toimitustapa_row = mysql_fetch_assoc($toimitustapa_re);
+
+          $magento_api_met = $toimitustapa_row['virallinen_selite'] != '' ? $toimitustapa_row['virallinen_selite'] : $toimitustapa_row['selite'];
+          $magento_api_rak = "";
+          $magento_api_ord = $laskurow["asiakkaan_tilausnumero"];
+          $magento_api_laskutunnus = $laskurow["tunnus"];
+
+          require "{$pupe_root_polku}/magento_toimita_tilaus.php";
+        }
+
+        list($kukarow["kassamyyja"], $laskurow['kassalipas'], $laskurow['ohjelma_moduli']) = laskuta_magentojt($laskurow['tunnus'], false);
+      }
+
       $kateisohitus = "";
       $laskurow['eilahetetta'] = 'o';
     }

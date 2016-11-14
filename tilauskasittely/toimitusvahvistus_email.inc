@@ -11,17 +11,40 @@ if ($kieli == '') {
   $kieli = strtolower($kielrow['kieli']);
 }
 
+pupesoft_log('toimitusvahvistus_email', "Valmistellaan tilauksien {$otunnukset} toimitusvahvistuksien lähettämistä sähköpostiin");
+
 $toimitusvahvistus_email_lahetys = true;
 
 if (!isset($rakir_row) or !isset($rakir_row['toimitusvahvistus']) or !isset($rakir_row['asiakas_email']) or !isset($tunnukset) or !isset($otunnukset)) {
   $toimitusvahvistus_email_lahetys = false;
+
+  $msg = "Vaadittavia muuttujia puuttui!";
+
+  if (!isset($rakir_row)) $msg .= " Rahtikirjan riviä ei löytynyt (rakir_row).";
+  if (!isset($rakir_row['toimitusvahvistus'])) $msg .= " Toimitusvahvistusta ei ole asetettu (rakir_row[toimitusvahvistus]).";
+  if (!isset($rakir_row['asiakas_email'])) $msg .= " Asiakkaan sähköpostia ei ole asetettu (rakir_row[asiakas_email]).";
+  if (!isset($tunnukset)) $msg .= " Tunnukset-muuttujaa ei ole asetettu.";
+  if (!isset($otunnukset)) $msg .= " Otunnukset-muuttujaa ei ole asetettu.";
+
+  pupesoft_log('toimitusvahvistus_email', $msg);
 }
 
 if ($rakir_row['toimitusvahvistus'] != 'toimitusvahvistus_email.inc' or $rakir_row['asiakas_email'] == '' or $tunnukset == '' or $otunnukset == '') {
   $toimitusvahvistus_email_lahetys = false;
+
+  $msg = "Vaadittavia muuttujia puuttui!";
+
+  if ($rakir_row['toimitusvahvistus'] != 'toimitusvahvistus_email.inc') $msg .= " Toimitusvahvistus ei ole toimitusvahvistus_email.inc ({$rakir_row['toimitusvahvistus']}).";
+  if ($rakir_row['asiakas_email'] == '') $msg .= " Asiakkaan sähköposti on tyhjä.";
+  if ($tunnukset == '') $msg .= " Tunnukset-muuttuja on tyhjä.";
+  if ($otunnukset == '') $msg .= " Otunnukset-muuttuja on tyhjä.";
+
+  pupesoft_log('toimitusvahvistus_email', $msg);
 }
 
 if ($toimitusvahvistus_email_lahetys) {
+  pupesoft_log('toimitusvahvistus_email', "Tarvittavat muuttujat löytyy ja tarkistukset tehty! Aloitetaan sähköpostin generointi ja lähettäminen.");
+
   $_toimvahvistus = mysql_fetch_assoc(t_avainsana("TOIMVAHVISTUS", $kieli, " and selite = 'toimitusvahvistus_email.inc' "));
 
   if ($_toimvahvistus['selitetark_2'] == "eihintaa") {
@@ -78,7 +101,7 @@ if ($toimitusvahvistus_email_lahetys) {
 
   while ($rivi_loop_row = mysql_fetch_assoc($rivi_loop_res)) {
 
-    if ($_toimvahvistus == "eihintaa") {
+    if ($_toimvahvistus['selitetark_2'] == "eihintaa") {
       $_hinta = "";
     }
     else {
@@ -125,6 +148,13 @@ if ($toimitusvahvistus_email_lahetys) {
 
     if (pupesoft_sahkoposti($parametri)) {
       echo t("Sähköpostin lähetys onnistui").": {$email_kuka}<br />";
+      pupesoft_log('toimitusvahvistus_email', "Sähköpostin lähetys onnistui osoitteeseen {$email_kuka}.");
+    }
+    else {
+      pupesoft_log('toimitusvahvistus_email', "Sähköpostin lähetys epäonnistui osoitteeseen {$email_kuka}.");
     }
   }
+}
+else {
+  pupesoft_log('toimitusvahvistus_email', "Toimitusvahvistus-sähköpostia ei lähetetä virheiden vuoksi.");
 }

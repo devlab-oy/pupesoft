@@ -531,6 +531,8 @@ if ($toiminto == 'LISAA' and (trim($sarjanumero) != '' or is_uploaded_file($_FIL
   $era_kpl    = (float) str_replace(",", ".", $era_kpl);
   $insok      = "OK";
 
+  echo "<pre>",var_dump($sarjanumero_array),"</pre>";
+
   foreach ($sarjanumero_array as $sarjanumero) {
     echo "sarjanumero: $sarjanumero<br>";
   }

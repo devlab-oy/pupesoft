@@ -114,7 +114,7 @@ if ($toimitusvahvistus_email_lahetys) {
   $body .= "\n";
 
   // Jos Unifaun Track & Trace sekä XML Posting, laitetaan pelkkä seurantaosoite
-  $unifaun_xmlposting = ($unifaun_xp_devi != "" and $unifaun_xp_user != "" and $unifaun_xp_pass != "");
+  $unifaun_xmlposting = ($unifaun_xp_developerid != "" and $unifaun_xp_user != "" and $unifaun_xp_pin != "");
 
   if (!empty($unifaun_url_key) and $unifaun_xmlposting) {
     $query = "SELECT distinct rahtikirjanro

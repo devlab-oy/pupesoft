@@ -307,7 +307,7 @@ if ($laskurow["tila"] != "O" and $laskurow["tila"] != "K") {
 
         foreach ($match[0] as $nro) {
           $nro = str_replace(" ", "", $nro);
-          $linkurl .= "<a target=newikkuna href='http://www.itella.fi/itemtracking/itella/search_by_shipment_id?ShipmentId={$nro}'>{$nro}</a><br>";
+          $linkurl .= "<a target=newikkuna href='http://www.posti.fi/henkiloasiakkaat/seuranta/#/lahetys/{$nro}'>{$nro}</a><br>";
         }
 
         $linkurl = substr($linkurl, 0, -4);

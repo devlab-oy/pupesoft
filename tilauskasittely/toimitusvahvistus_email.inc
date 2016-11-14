@@ -113,16 +113,34 @@ if ($toimitusvahvistus_email_lahetys) {
 
   $body .= "\n";
 
-  $query = "SELECT if(sscc_ulkoinen != '', sscc_ulkoinen, rahtikirjanro) rahtikirjanro
-            FROM rahtikirjat
-            WHERE tunnus IN ({$tunnukset})
-            AND yhtio    = '{$kukarow['yhtio']}'";
-  $seurantakoodit_res = pupe_query($query);
+  // Jos Unifaun Track & Trace sekä XML Posting, laitetaan pelkkä seurantaosoite
+  $unifaun_xmlposting = ($unifaun_xp_devi != "" and $unifaun_xp_user != "" and $unifaun_xp_pass != "");
 
-  $body .= t("Seurantakoodit", $kieli).":\n\n";
+  if (!empty($unifaun_url_key) and $unifaun_xmlposting) {
+    $query = "SELECT distinct rahtikirjanro
+              FROM rahtikirjat
+              WHERE tunnus IN ({$tunnukset})
+              AND yhtio    = '{$kukarow['yhtio']}'";
+    $seurantakoodit_res = pupe_query($query);
 
-  while ($seurantakoodit_row = mysql_fetch_assoc($seurantakoodit_res)) {
-    $body .= "{$seurantakoodit_row['rahtikirjanro']}\n\n";
+    $body .= t("Seurantalinkit", $kieli).":\n\n";
+
+    while ($seurantakoodit_row = mysql_fetch_assoc($seurantakoodit_res)) {
+      $body .= "https://www.unifaunonline.com/ext.uo.fi.track?key={$unifaun_url_key}&order={$seurantakoodit_row['rahtikirjanro']}\n\n";
+    }
+  }
+  else {
+    $query = "SELECT if(sscc_ulkoinen != '', sscc_ulkoinen, rahtikirjanro) rahtikirjanro
+              FROM rahtikirjat
+              WHERE tunnus IN ({$tunnukset})
+              AND yhtio    = '{$kukarow['yhtio']}'";
+    $seurantakoodit_res = pupe_query($query);
+
+    $body .= t("Seurantakoodit", $kieli).":\n\n";
+
+    while ($seurantakoodit_row = mysql_fetch_assoc($seurantakoodit_res)) {
+      $body .= "{$seurantakoodit_row['rahtikirjanro']}\n\n";
+    }
   }
 
   $body .= "\n";

@@ -521,7 +521,11 @@ if ($toiminto == 'LISAA' and (trim($sarjanumero) != '' or is_uploaded_file($_FIL
     $path_parts = pathinfo($_FILES['userfile']['name']);
     $ext = strtoupper($path_parts['extension']);
 
-    $sarjanumero_array = pupeFileReader($kasiteltava_tiedoto_path, $ext);
+    $excelrivit = pupeFileReader($kasiteltava_tiedoto_path, $ext);
+
+    foreach($excelrivit as $rivi) {
+      $sarjanumero_array[] = $rivi[0];
+    }
   }
   else {
     $sarjanumero = trim($sarjanumero);

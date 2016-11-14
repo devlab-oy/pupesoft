@@ -1134,7 +1134,7 @@ if ($tee == 'tulosta') {
       // Katsotaan onko Magento käytössä, silloin merkataan tilaus toimitetuksi Magentoon kun rahtikirja tulostetaan
       $_magento_kaytossa = (!empty($magento_api_tt_url) and !empty($magento_api_tt_usr) and !empty($magento_api_tt_pas));
 
-      if ($_magento_kaytossa and (!$_onko_unifaun or $_onko_unifaun_xp) {
+      if ($_magento_kaytossa and (!$_onko_unifaun or $_onko_unifaun_xp)) {
         $query = "SELECT asiakkaan_tilausnumero
                   FROM lasku
                   WHERE yhtio                 = '$kukarow[yhtio]'

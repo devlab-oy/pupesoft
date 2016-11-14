@@ -207,6 +207,9 @@ if ($tee == 'tulosta') {
 }
 
 $_onko_unifaun = preg_match("/rahtikirja_unifaun_(ps|uo|xp)_siirto\.inc/", $toitarow["rahtikirja"]);
+// katsotaan vielä erikseen onko XML Posting käytössä, koska
+// silloin tehdään toimitusvahvistukset ja Magento-kuittaukset
+$_onko_unifaun_xp = preg_match("/rahtikirja_unifaun_(xp)_siirto\.inc/", $toitarow["rahtikirja"]);
 
 // Tulostetaan rahtikirja tai kutsutaan unifaunin _closeWithPrinter-metodia
 if ($tee == 'tulosta' or $tee == 'close_with_printer') {
@@ -1087,7 +1090,7 @@ if ($tee == 'tulosta') {
 
       $_desadv = (strpos($rakir_row['toimitusvahvistus'], 'desadv') !== false);
 
-      if ($rakir_row['toimitusvahvistus'] != '' and (!$_onko_unifaun or $_desadv)) {
+      if ($rakir_row['toimitusvahvistus'] != '' and (!$_onko_unifaun or $_onko_unifaun_xp or $_desadv)) {
 
         if ($rakir_row["toimitusvahvistus"] == "toimitusvahvistus_desadv_una.inc") {
           $desadv_version = "una";
@@ -1131,7 +1134,7 @@ if ($tee == 'tulosta') {
       // Katsotaan onko Magento käytössä, silloin merkataan tilaus toimitetuksi Magentoon kun rahtikirja tulostetaan
       $_magento_kaytossa = (!empty($magento_api_tt_url) and !empty($magento_api_tt_usr) and !empty($magento_api_tt_pas));
 
-      if ($_magento_kaytossa and !$_onko_unifaun) {
+      if ($_magento_kaytossa and (!$_onko_unifaun or $_onko_unifaun_xp) {
         $query = "SELECT asiakkaan_tilausnumero
                   FROM lasku
                   WHERE yhtio                 = '$kukarow[yhtio]'

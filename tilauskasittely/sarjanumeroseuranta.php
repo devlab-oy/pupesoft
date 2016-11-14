@@ -509,8 +509,6 @@ if ($toiminto == 'MUOKKAA') {
   }
 }
 
-echo "<pre>",var_dump($_FILES['userfile']),"</pre>";
-
 // Ollaan syötetty uusi
 if ($toiminto == 'LISAA' and (trim($sarjanumero) != '' or is_uploaded_file($_FILES['userfile']['tmp_name']) === true)) {
   $sarjanumero_array = array();

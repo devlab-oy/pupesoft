@@ -2303,6 +2303,9 @@ else {
               $toimaikarow["maxt"] = date("Y-m-d");
             }
 
+            // Laskun kaikki tilaukset
+            $lasrow['tilausnumerot'] = $tunnukset;
+
             //Kirjoitetaan failiin laskun otsikkotiedot
             if ($lasrow["chn"] == "111") {
               elmaedi_otsik($tootedi, $lasrow, $masrow, $tyyppi, $timestamppi, $toimaikarow);
@@ -2310,7 +2313,7 @@ else {
             elseif ($lasrow["chn"] == "112") {
               finvoice_otsik($tootsisainenfinvoice, $lasrow, $kieli, $pankkitiedot, $masrow, $myyrow, $tyyppi, $toimaikarow, $tulos_ulos, $silent);
             }
-            elseif (in_array($yhtiorow["verkkolasku_lah"], array("iPost", "finvoice", "maventa", "trustpoint", "ppg", "apix", "sepa", "talenom"))) {
+            elseif (in_array($yhtiorow["verkkolasku_lah"], array("iPost", "finvoice", "maventa", "trustpoint", "ppg", "apix", "sepa", "talenom", "arvato"))) {
               finvoice_otsik($tootfinvoice, $lasrow, $kieli, $pankkitiedot, $masrow, $myyrow, $tyyppi, $toimaikarow, $tulos_ulos, $silent);
             }
             else {
@@ -2365,7 +2368,7 @@ else {
               elseif ($lasrow["chn"] == "112") {
                 finvoice_alvierittely($tootsisainenfinvoice, $lasrow, $alvrow);
               }
-              elseif (in_array($yhtiorow["verkkolasku_lah"], array("iPost", "finvoice", "maventa", "trustpoint", "ppg", "apix", "sepa", "talenom"))) {
+              elseif (in_array($yhtiorow["verkkolasku_lah"], array("iPost", "finvoice", "maventa", "trustpoint", "ppg", "apix", "sepa", "talenom", "arvato"))) {
                 finvoice_alvierittely($tootfinvoice, $lasrow, $alvrow);
               }
               else {
@@ -2380,7 +2383,7 @@ else {
             elseif ($lasrow["chn"] == "112") {
               finvoice_otsikko_loput($tootsisainenfinvoice, $lasrow, $masrow, $pankkitiedot);
             }
-            elseif (in_array($yhtiorow["verkkolasku_lah"], array("iPost", "finvoice", "maventa", "trustpoint", "ppg", "apix", "sepa", "talenom"))) {
+            elseif (in_array($yhtiorow["verkkolasku_lah"], array("iPost", "finvoice", "maventa", "trustpoint", "ppg", "apix", "sepa", "talenom", "arvato"))) {
               finvoice_otsikko_loput($tootfinvoice, $lasrow, $masrow, $pankkitiedot);
             }
 
@@ -2669,7 +2672,7 @@ else {
               $tilrow["rivihinta_verollinen"] = hintapyoristys($tilrow["rivihinta_verollinen"]);
               $vatamount = hintapyoristys($vatamount);
 
-              $tilrow['kommentti'] = pupesoft_invoicestring($tilrow['kommentti']);
+              $tilrow['kommentti'] = pupesoft_invoicestring(str_replace("\n", "|", $tilrow['kommentti']));
               $tilrow['nimitys']   = pupesoft_invoicestring($tilrow['nimitys']);
 
               // Otetaan seuraavan rivin otunnus
@@ -2702,7 +2705,7 @@ else {
               elseif ($lasrow["chn"] == "112") {
                 finvoice_rivi($tootsisainenfinvoice, $tilrow, $lasrow, $vatamount, $laskutyyppi);
               }
-              elseif (in_array($yhtiorow["verkkolasku_lah"], array("iPost", "finvoice", "maventa", "trustpoint", "ppg", "apix", "sepa", "talenom"))) {
+              elseif (in_array($yhtiorow["verkkolasku_lah"], array("iPost", "finvoice", "maventa", "trustpoint", "ppg", "apix", "sepa", "talenom", "arvato"))) {
                 finvoice_rivi($tootfinvoice, $tilrow, $lasrow, $vatamount, $laskutyyppi);
               }
               else {
@@ -2727,7 +2730,7 @@ else {
               //N‰m‰ menee verkkolaskuputkeen
               $verkkolaskuputkeen_suora[$lasrow["laskunro"]] = $lasrow["nimi"];
             }
-            elseif (in_array($yhtiorow["verkkolasku_lah"], array("iPost", "finvoice", "maventa", "trustpoint", "ppg", "apix", "sepa", "talenom"))) {
+            elseif (in_array($yhtiorow["verkkolasku_lah"], array("iPost", "finvoice", "maventa", "trustpoint", "ppg", "apix", "sepa", "talenom", "arvato"))) {
               $liitteet  = hae_liitteet_verkkolaskuun($yhtiorow["verkkolasku_lah"], $laskutettavat);
               $liitteita = !empty($liitteet);
 
@@ -2966,6 +2969,23 @@ else {
             $status = ppg_queue($invoice_number[1], "<SOAP-ENV:Envelope".$ppg_laskuarray[$a], $kieli);
 
             $tulos_ulos .= "PPG-lasku $invoice_number[1]: $status<br>\n";
+          }
+        }
+      }
+      elseif ($yhtiorow["verkkolasku_lah"] == "arvato" and file_exists(realpath($nimifinvoice))) {
+        // Splitataan file ja l‰hetet‰‰n YKSI lasku kerrallaan
+        $arvato_laskuarray = explode("<SOAP-ENV:Envelope", file_get_contents($nimifinvoice));
+        $arvato_laskumaara = count($arvato_laskuarray);
+
+        if ($arvato_laskumaara > 0) {
+          require_once "tilauskasittely/tulosta_lasku.inc";
+
+          for ($a = 1; $a < $arvato_laskumaara; $a++) {
+            preg_match("/\<InvoiceNumber\>(.*?)\<\/InvoiceNumber\>/i", $arvato_laskuarray[$a], $invoice_number);
+
+            $status = arvato_queue($invoice_number[1], "<SOAP-ENV:Envelope".$arvato_laskuarray[$a], $kieli);
+
+            $tulos_ulos .= "Arvato-lasku $invoice_number[1]: $status<br>\n";
           }
         }
       }
@@ -3226,7 +3246,7 @@ else {
                 $komento = "";
               }
 
-              $kutsu = t("Lasku", $kieli)." $lasku ".t("Vientierittely", $kieli);
+              $kutsu = t("Lasku", $kieli)." $laskurow[laskunro] ".t("Vientierittely", $kieli);
 
               if ($yhtiorow["liitetiedostojen_nimeaminen"] == "N") {
                 $kutsu .= ", ".trim($laskurow["nimi"]);
@@ -3255,7 +3275,7 @@ else {
 
         require_once "tilauskasittely/tulosta_lasku.inc";
 
-        if ($silent == "") $tulos_ulos .= "<br>\n".t("Tulostetaan s‰hkˆpostilaskuja").":<br>\n";
+        if ($silent == "" or $silent == "VIENTI") $tulos_ulos .= "<br>\n".t("Tulostetaan s‰hkˆpostilaskuja").":<br>\n";
 
         foreach ($tulostettavat_email as $lasku) {
 
@@ -3271,7 +3291,7 @@ else {
           $laresult = pupe_query($query);
           $laskurow = mysql_fetch_assoc($laresult);
 
-          if ($silent == "") $tulos_ulos .= t("L‰hetet‰‰n lasku").": $laskurow[laskunro]<br>\n";
+          if ($silent == "" or $silent == "VIENTI") $tulos_ulos .= t("L‰hetet‰‰n lasku").": $laskurow[laskunro]<br>\n";
 
           if (($laskurow["vienti"] == "E" or $laskurow["vienti"] == "K") and $yhtiorow["vienti_erittelyn_tulostus"] != "E") {
             $uusiotunnus = $laskurow["tunnus"];
@@ -3297,7 +3317,7 @@ else {
                 $komento = "";
               }
 
-              $kutsu = t("Lasku", $kieli)." $lasku ".t("Vientierittely", $kieli);
+              $kutsu = t("Lasku", $kieli)." $laskurow[laskunro] ".t("Vientierittely", $kieli);
 
               if ($yhtiorow["liitetiedostojen_nimeaminen"] == "N") {
                 $kutsu .= ", ".trim($laskurow["nimi"]);
@@ -3310,7 +3330,7 @@ else {
               include "inc/sahkoposti.inc"; // sanotaan include eik‰ require niin ei kuolla
             }
 
-            if ($silent == "") $tulos_ulos .= t("Vientierittely l‰hetet‰‰n")."...<br>\n";
+            if ($silent == "" or $silent == "VIENTI") $tulos_ulos .= t("Vientierittely l‰hetet‰‰n")."...<br>\n";
 
             unset($Xpdf);
           }

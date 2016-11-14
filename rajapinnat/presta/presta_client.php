@@ -530,12 +530,30 @@ abstract class PrestaClient {
     foreach ($parameters as $parameter) {
       $key       = $parameter['arvo'];
       $attribute = $parameter['nimi'];
-      $value     = $this->xml_value($value_array[$key]);
 
+      if (empty($value_array[$key])) {
+        $this->logger->log("VIRHE! Kenttää {$key} ei ole asetettu. Ei voida asettaa arvoa {$attribute} -kenttään.");
+        continue;
+      }
+
+      $value = $this->xml_value($value_array[$key]);
       $xml_node->$attribute = $value;
 
       $this->logger->log("Poikkeava arvo {$attribute} -kenttään. Asetetaan {$key} kentän arvo {$value}");
     }
+  }
+
+  protected function clean_field($value) {
+    $field = empty($value) ? "-" : trim($value);
+
+    return $this->xml_value($field);
+  }
+
+  protected function clean_name($value) {
+    // max 32, numbers and special characters not allowed
+    $name = preg_replace("/[^a-zA-ZäöåÄÖÅ ]+/", "", substr($value, 0, 32));
+
+    return $this->clean_field($name);
   }
 
   public function set_dynamic_fields($fields) {

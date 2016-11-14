@@ -203,6 +203,13 @@ if (!isset($tee) or $tee == '') {
     echo "</table><br>";
   }
 
+  if ($kukarow['kieli'] != '') {
+    $kieli = $kukarow['kieli'];
+  }
+  else {
+    $kieli = $yhtiorow['kieli'];
+  }
+  
   // Näytetään käyttäjäkohtaiset työmääräykset
   $tyojonosql = "SELECT lasku.tunnus,
                  lasku.nimi,
@@ -212,8 +219,8 @@ if (!isset($tee) or $tee == '') {
                  a5.selitetark tyom_prioriteetti
                  FROM lasku
                  JOIN tyomaarays ON (tyomaarays.yhtio = lasku.yhtio AND tyomaarays.otunnus = lasku.tunnus AND tyomaarays.tyojono != '' AND tyomaarays.suorittaja = '{$kukarow["kuka"]}')
-                 LEFT JOIN avainsana a2 ON (a2.yhtio=tyomaarays.yhtio and a2.laji='TYOM_TYOSTATUS' and a2.selite=tyomaarays.tyostatus)
-                 LEFT JOIN avainsana a5 ON (a5.yhtio=tyomaarays.yhtio and a5.laji='TYOM_PRIORIT' and a5.selite=tyomaarays.prioriteetti)
+                 LEFT JOIN avainsana a2 ON (a2.yhtio=tyomaarays.yhtio and a2.laji='TYOM_TYOSTATUS' and a2.selite=tyomaarays.tyostatus and a2.kieli = '$kieli')
+                 LEFT JOIN avainsana a5 ON (a5.yhtio=tyomaarays.yhtio and a5.laji='TYOM_PRIORIT' and a5.selite=tyomaarays.prioriteetti and a5.kieli = '$kieli')
                  WHERE lasku.yhtio  = '{$kukarow["yhtio"]}'
                  AND lasku.tila     in ('A','L','N','S','C')
                  AND lasku.alatila != 'X'
@@ -270,8 +277,8 @@ if (!isset($tee) or $tee == '') {
                   a5.selitetark tyom_prioriteetti
                   FROM lasku
                   JOIN tyomaarays ON (tyomaarays.yhtio = lasku.yhtio AND tyomaarays.otunnus = lasku.tunnus AND tyomaarays.tyojono != '' AND tyomaarays.vastuuhenkilo = '{$kukarow["kuka"]}')
-                  LEFT JOIN avainsana a2 ON (a2.yhtio=tyomaarays.yhtio and a2.laji='TYOM_TYOSTATUS' and a2.selite=tyomaarays.tyostatus)
-                  LEFT JOIN avainsana a5 ON (a5.yhtio=tyomaarays.yhtio and a5.laji='TYOM_PRIORIT' and a5.selite=tyomaarays.prioriteetti)
+                  LEFT JOIN avainsana a2 ON (a2.yhtio=tyomaarays.yhtio and a2.laji='TYOM_TYOSTATUS' and a2.selite=tyomaarays.tyostatus and a2.kieli = '$kieli')
+                  LEFT JOIN avainsana a5 ON (a5.yhtio=tyomaarays.yhtio and a5.laji='TYOM_PRIORIT' and a5.selite=tyomaarays.prioriteetti and a5.kieli = '$kieli')
                   WHERE lasku.yhtio  = '{$kukarow["yhtio"]}'
                   AND lasku.tila     in ('A','L','N','S','C')
                   AND lasku.alatila != 'X'

@@ -303,6 +303,8 @@ if (!function_exists("tee_jt_tilaus")) {
         // tehd‰‰n vanhasta laskusta 1:1 kopio...
         $query = "INSERT into lasku set ";
 
+        $_magentojt = ($otsikkorivi['ohjelma_moduli'] == 'MAGENTOJT' OR $otsikkorivi['ohjelma_moduli'] == 'MAGENTO');
+
         for ($i=0; $i<mysql_num_fields($stresult); $i++) {
 
           $fieldname = mysql_field_name($stresult, $i);
@@ -454,7 +456,7 @@ if (!function_exists("tee_jt_tilaus")) {
 
             // Ei nollata asiakkaan tilausnumeroa, jos se pit‰‰ huomioida otsikon etsinn‰ss‰
             $_asiakkaan_tilno = ($fieldname == 'asiakkaan_tilausnumero');
-            $_asiakkaan_tilno &= ($yhtiorow['jt_asiakkaan_tilausnumero'] == "K");
+            $_asiakkaan_tilno &= ($yhtiorow['jt_asiakkaan_tilausnumero'] == "K" or $_magentojt);
 
             if ($toim == "ENNAKKO" or $otsikkorivi['jtkielto'] == "Y" or $_asiakkaan_tilno) {
               $query .= $fieldname."='".$otsikkorivi[$fieldname]."',";
@@ -564,6 +566,16 @@ if (!function_exists("tee_jt_tilaus")) {
             }
 
             $query .= $fieldname."='$_maksuehto',";
+          }
+          elseif ($fieldname == 'ohjelma_moduli') {
+
+            if ($_magentojt) {
+              $query .= $fieldname."='MAGENTOJT',";
+            }
+            else {
+              $query .= $fieldname."='".$otsikkorivi[$fieldname]."',";
+            }
+
           }
           // ja kaikki muut paitsi tunnus sellaisenaan
           elseif ($fieldname != 'tunnus') {

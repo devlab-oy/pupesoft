@@ -86,6 +86,24 @@ if (isset($tee) and $tee == "talenom_siirto") {
   }
 }
 
+if (isset($tee) and $tee == "arvato_siirto") {
+  // Splitataan file ja l‰hetet‰‰n YKSI lasku kerrallaan
+  $arvato_laskuarray = explode("<SOAP-ENV:Envelope", file_get_contents("{$pupe_root_polku}/dataout/".basename($filenimi)));
+  $arvato_laskumaara = count($arvato_laskuarray);
+
+  if ($arvato_laskumaara > 0) {
+    require_once "tilauskasittely/tulosta_lasku.inc";
+
+    for ($a = 1; $a < $arvato_laskumaara; $a++) {
+      preg_match("/\<InvoiceNumber\>(.*?)\<\/InvoiceNumber\>/i", $arvato_laskuarray[$a], $invoice_number);
+
+      $status = arvato_queue($invoice_number[1], "<SOAP-ENV:Envelope".$arvato_laskuarray[$a], $kieli);
+
+      echo "Arvato-lasku $invoice_number[1]: $status<br>\n";
+    }
+  }
+}
+
 if (finvoice_pankki() && isset($tee) && $tee == 'sepa_siirto') {
   $file = "{$pupe_root_polku}/dataout/".basename($filenimi);
 
@@ -121,8 +139,8 @@ if (isset($tee) and $tee == "apix_siirto") {
 
       $apix_finvoice = "<SOAP-ENV:Envelope".$apix_laskuarray[$a];
 
-      $tilausnumero = hae_tilausnumero($invoice_number[1]);
-      $liitteet     = hae_liitteet_verkkolaskuun($yhtiorow["verkkolasku_lah"], $tilausnumero);
+      $tilausnumerot = hae_tilausnumero($invoice_number[1]);
+      $liitteet      = hae_liitteet_verkkolaskuun($yhtiorow["verkkolasku_lah"], $tilausnumerot);
 
       // Laitetaan lasku l‰hetysjonoon
       echo apix_queue($apix_finvoice, $invoice_number[1], $kieli, $liitteet);
@@ -447,7 +465,8 @@ if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumer
         $komm .= "\n".t("Tilaaja", $laskun_kieli).": ".$lasrow['tilausyhteyshenkilo'];
       }
 
-      if (trim($lasrow['asiakkaan_tilausnumero']) != '') {
+      // Talenomilla t‰m‰ visualisoidaan muutenkin, eli ei tarvtse ‰nke‰ t‰h‰n kommenttiin.
+      if ($yhtiorow["verkkolasku_lah"] != "talenom" and trim($lasrow['asiakkaan_tilausnumero']) != '') {
         $komm .= "\n".t("Tilauksenne", $laskun_kieli).": ".$lasrow['asiakkaan_tilausnumero'];
       }
 
@@ -492,6 +511,9 @@ if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumer
       if ($toimaikarow["maxt"] == "0000-00-00") {
         $toimaikarow["maxt"] = date("Y-m-d");
       }
+
+      // Laskun kaikki tilaukset
+      $lasrow['tilausnumerot'] = hae_tilausnumero($lasrow["laskunro"]);
 
       //Kirjoitetaan failiin laskun otsikkotiedot
       if ($lasrow["chn"] == "111") {
@@ -546,7 +568,7 @@ if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumer
         elseif ($lasrow["chn"] == "112") {
           finvoice_alvierittely($tootsisainenfinvoice, $lasrow, $alvrow);
         }
-        elseif (in_array($yhtiorow["verkkolasku_lah"], array("iPost", "finvoice", "maventa", "trustpoint", "ppg", "apix", "sepa", "talenom"))) {
+        elseif (in_array($yhtiorow["verkkolasku_lah"], array("iPost", "finvoice", "maventa", "trustpoint", "ppg", "apix", "sepa", "talenom", "arvato"))) {
           finvoice_alvierittely($tootfinvoice, $lasrow, $alvrow);
         }
         else {
@@ -561,7 +583,7 @@ if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumer
       elseif ($lasrow["chn"] == "112") {
         finvoice_otsikko_loput($tootsisainenfinvoice, $lasrow, $masrow, $pankkitiedot);
       }
-      elseif (in_array($yhtiorow["verkkolasku_lah"], array("iPost", "finvoice", "maventa", "trustpoint", "ppg", "apix", "sepa", "talenom"))) {
+      elseif (in_array($yhtiorow["verkkolasku_lah"], array("iPost", "finvoice", "maventa", "trustpoint", "ppg", "apix", "sepa", "talenom", "arvato"))) {
         finvoice_otsikko_loput($tootfinvoice, $lasrow, $masrow, $pankkitiedot);
       }
 
@@ -850,7 +872,7 @@ if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumer
         $tilrow["rivihinta_verollinen"] = hintapyoristys($tilrow["rivihinta_verollinen"]);
         $vatamount = hintapyoristys($vatamount);
 
-        $tilrow['kommentti'] = pupesoft_invoicestring($tilrow['kommentti']);
+        $tilrow['kommentti'] = pupesoft_invoicestring(str_replace("\n", "|", $tilrow['kommentti']));
         $tilrow['nimitys'] = pupesoft_invoicestring($tilrow['nimitys']);
 
         // Otetaan seuraavan rivin otunnus
@@ -883,7 +905,7 @@ if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumer
         elseif ($lasrow["chn"] == "112") {
           finvoice_rivi($tootsisainenfinvoice, $tilrow, $lasrow, $vatamount, $laskutyyppi);
         }
-        elseif (in_array($yhtiorow["verkkolasku_lah"], array("iPost", "finvoice", "maventa", "trustpoint", "ppg", "apix", "sepa", "talenom"))) {
+        elseif (in_array($yhtiorow["verkkolasku_lah"], array("iPost", "finvoice", "maventa", "trustpoint", "ppg", "apix", "sepa", "talenom", "arvato"))) {
           finvoice_rivi($tootfinvoice, $tilrow, $lasrow, $vatamount, $laskutyyppi);
         }
         else {
@@ -902,9 +924,9 @@ if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumer
       elseif ($lasrow["chn"] == "112") {
         finvoice_lasku_loppu($tootsisainenfinvoice, $lasrow, $pankkitiedot, $masrow);
       }
-      elseif (in_array($yhtiorow["verkkolasku_lah"], array("iPost", "finvoice", "maventa", "trustpoint", "ppg", "apix", "sepa", "talenom"))) {
-        $tilausnumero                  = hae_tilausnumero($lasrow["laskunro"]);
-        $liitteet[$lasrow["laskunro"]] = hae_liitteet_verkkolaskuun($yhtiorow["verkkolasku_lah"], $tilausnumero);
+      elseif (in_array($yhtiorow["verkkolasku_lah"], array("iPost", "finvoice", "maventa", "trustpoint", "ppg", "apix", "sepa", "talenom", "arvato"))) {
+        $tilausnumerot                 = hae_tilausnumero($lasrow["laskunro"]);
+        $liitteet[$lasrow["laskunro"]] = hae_liitteet_verkkolaskuun($yhtiorow["verkkolasku_lah"], $tilausnumerot);
         $liitteita                     = !empty($liitteet[$lasrow["laskunro"]]);
 
         finvoice_lasku_loppu($tootfinvoice, $lasrow, $pankkitiedot, $masrow, $liitteita);
@@ -1230,7 +1252,25 @@ if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumer
       echo "<td class='back'><input type='submit' value='".t("L‰het‰")."'></td></tr>";
       echo "</table></form>";
     }
-    elseif (in_array($yhtiorow["verkkolasku_lah"], array("trustpoint", "ppg", "sepa", "talenom")) and !file_exists(realpath($nimifinvoice))) {
+    elseif ($yhtiorow["verkkolasku_lah"] == "arvato" and file_exists(realpath($nimifinvoice))) {
+      echo "<table>";
+      echo "<tr><th>".t("Tallenna finvoice-aineisto").":</th>";
+      echo "<form method='post' class='multisubmit'>";
+      echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
+      echo "<input type='hidden' name='kaunisnimi' value='".basename($nimifinvoice)."'>";
+      echo "<input type='hidden' name='filenimi' value='".basename($nimifinvoice)."'>";
+      echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
+      echo "</table><br><br>";
+
+      echo "<table>";
+      echo "<tr><th>".t("L‰het‰ aineisto uudestaan Arvato Laskutuspalveluun").":</th>";
+      echo "<form method='post'>";
+      echo "<input type='hidden' name='tee' value='arvato_siirto'>";
+      echo "<input type='hidden' name='filenimi' value='".basename($nimifinvoice)."'>";
+      echo "<td class='back'><input type='submit' value='".t("L‰het‰")."'></td></tr></form>";
+      echo "</table>";
+    }
+    elseif (in_array($yhtiorow["verkkolasku_lah"], array("trustpoint", "ppg", "sepa", "talenom", "arvato")) and !file_exists(realpath($nimifinvoice))) {
       echo "<br>".t("Tallenna finvoice-aineisto").":<br>";
 
       js_openFormInNewWindow();
@@ -1319,16 +1359,15 @@ if (!isset($tee) or $tee != "NAYTATILAUS") require "inc/footer.inc";
 function hae_tilausnumero($laskunro) {
   global $kukarow;
 
-  $query = "SELECT tunnus
+  $query = "SELECT group_concat(tunnus) tunnukset
             FROM lasku
             WHERE laskunro = {$laskunro}
             AND yhtio      = '{$kukarow["yhtio"]}'
             AND tila       = 'L'
             AND alatila    = 'X'";
+  $tilausnumerot = pupe_query($query);
+  $tilausnumerot = mysql_fetch_assoc($tilausnumerot);
+  $tilausnumerot = $tilausnumerot["tunnukset"];
 
-  $tilausnumero = pupe_query($query);
-  $tilausnumero = mysql_fetch_assoc($tilausnumero);
-  $tilausnumero = $tilausnumero["tunnus"];
-
-  return $tilausnumero;
+  return $tilausnumerot;
 }

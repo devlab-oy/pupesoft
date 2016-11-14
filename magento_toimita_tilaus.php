@@ -61,7 +61,16 @@ try {
     $magLinkurl .= "<a target=newikkuna href='http://www.postnordlogistics.fi/en/Online-services/Pages/Track-and-Trace.aspx?search={$magento_api_rak}'>{$magento_api_rak}</a><br>";
   }
   else {
-    $magLinkurl .= "$magento_api_met / $magento_api_rak<br>";
+    
+    // Jos Unifaun Track & Trace sekä XML Posting, laitetaan seurantaosoite
+    $unifaun_xmlposting = ($unifaun_xp_devi != "" and $unifaun_xp_user != "" and $unifaun_xp_pass != "");
+
+    if (!empty($unifaun_url_key) and $unifaun_xmlposting) {
+      $magLinkurl .= "https://www.unifaunonline.com/ext.uo.fi.track?key={$unifaun_url_key}&order={$magento_api_rak}<br>";
+    }
+    else {
+      $magLinkurl .= "$magento_api_met / $magento_api_rak<br>";
+    }
   }
 
   // Shipment comment joka lisätään Magentosta asiakkaalle lähtevään sähköpostiin

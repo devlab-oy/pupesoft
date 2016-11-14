@@ -94,6 +94,7 @@ echo "<font class='head'>".t("Sarjanumeroseuranta")."</font><hr>";
 $tunnuskentta = "";
 $rivitunnus = "";
 $hyvitysrivi = "";
+$is_uploaded_file = is_uploaded_file($_FILES['userfile']['tmp_name']);
 
 if ($myyntirivitunnus != "") {
   $tunnuskentta = "myyntirivitunnus";
@@ -510,10 +511,10 @@ if ($toiminto == 'MUOKKAA') {
 }
 
 // Ollaan syötetty uusi
-if ($toiminto == 'LISAA' and (trim($sarjanumero) != '' or is_uploaded_file($_FILES['userfile']['tmp_name']) === true)) {
+if ($toiminto == 'LISAA' and (trim($sarjanumero) != '' or $is_uploaded_file === true)) {
   $sarjanumero_array = array();
 
-  if (is_uploaded_file($_FILES['userfile']['tmp_name']) === true) {
+  if ($is_uploaded_file === true) {
 
     $kasiteltava_tiedoto_path = $_FILES['userfile']['tmp_name'];
     $path_parts = pathinfo($_FILES['userfile']['name']);

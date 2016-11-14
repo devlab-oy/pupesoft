@@ -170,7 +170,6 @@ if ($tee == "raportti") {
       $rivi  = pupesoft_csvstring($row['tilino']).";";
       $rivi .= pupesoft_csvstring($row['nimi']);
       $rivi .= "\n";
-
       fwrite($fh, $rivi);
     }
 
@@ -226,7 +225,6 @@ if ($tee == "raportti") {
       $rivi .= $row['tunnus'].";";
       $rivi .= pupesoft_csvstring($row['nimi']);
       $rivi .= "\n";
-
       fwrite($fh, $rivi);
     }
 
@@ -237,11 +235,13 @@ if ($tee == "raportti") {
   if (!empty($tilioinnit_mukaan)) {
     // keksitään uudelle failille joku varmasti uniikki nimi:
     $file1 = "tilioinnit.csv";
+    $file11 = "muistiotositteet.csv";
 
     // avataan faili
     $fh = fopen($tmpdirnimi.$file1, "w");
+    $fhr = fopen($tmpdirnimi.$file11, "w");
 
-    $rivi  = "Tositetunnus;";
+    $rivi  = "Lasku_tunnus;";
     $rivi .= "Pvm;";
     $rivi .= "Tili;";
     $rivi .= "Kustp;";
@@ -263,12 +263,21 @@ if ($tee == "raportti") {
     $rivi .= "\n";
     fwrite($fh, $rivi);
 
+    $rivi  = "Lasku_tunnus;";
+    $rivi .= "Pvm;";
+    $rivi .= "Tyyppi;";
+    $rivi .= "Selite;";
+    $rivi .= "Kommentti";
+    $rivi .= "\n";
+    fwrite($fhr, $rivi);
+
     // haetaan kaikki vuoden tapahtumat...
     $query  = "SELECT tiliointi.ltunnus, tiliointi.tapvm, tiliointi.tilino, tiliointi.kustp, tiliointi.kohde, tiliointi.projekti,
-               tiliointi.summa, tiliointi.vero, tiliointi.selite, tiliointi.laatija,
+               tiliointi.summa, tiliointi.vero, tiliointi.selite, tiliointi.laatija, lasku.comments, kuka.nimi kukanimi,
                tiliointi.laadittu, lasku.ytunnus, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.osoitetark, lasku.postino, lasku.postitp, lasku.alatila, lasku.tila
                FROM tiliointi
-               JOIN lasku ON lasku.yhtio=tiliointi.yhtio and lasku.tunnus=tiliointi.ltunnus
+               JOIN lasku ON (lasku.yhtio=tiliointi.yhtio and lasku.tunnus=tiliointi.ltunnus)
+               LEFT JOIN kuka ON (tiliointi.yhtio=kuka.yhtio and tiliointi.laatija=kuka.kuka)
                where tiliointi.yhtio  = '$kukarow[yhtio]'
                and tiliointi.tapvm    >= '$alku'
                and tiliointi.tapvm    <= '$loppu'
@@ -276,15 +285,18 @@ if ($tee == "raportti") {
                ORDER BY tiliointi.ltunnus, tiliointi.tapvm";
     $result = pupe_query($query);
 
-
     echo "<br>Haetaan tiliöinnit....<br>";
     $bar = new ProgressBar();
     $elements = mysql_num_rows($result); // total number of elements to process
     $bar->initialize($elements); // print the empty bar
 
+    $haetut_muikkarit = array();
+
     while ($row = mysql_fetch_assoc($result)) {
 
       $bar->increase();
+
+      $laatija = empty($row['kukanimi']) ? $row['laatija'] : $row['kukanimi'];
 
       $rivi  = pupesoft_csvstring($row['ltunnus']).";";
       $rivi .= pupesoft_csvstring($row['tapvm']).";";
@@ -295,7 +307,7 @@ if ($tee == "raportti") {
       $rivi .= pupesoft_csvstring($row['summa']).";";
       $rivi .= pupesoft_csvstring($row['vero']).";";
       $rivi .= pupesoft_csvstring($row['selite']).";";
-      $rivi .= pupesoft_csvstring($row['laatija']).";";
+      $rivi .= pupesoft_csvstring($laatija).";";
       $rivi .= pupesoft_csvstring($row['laadittu']).";";
       $rivi .= pupesoft_csvstring($row['ytunnus']).";";
       $rivi .= pupesoft_csvstring($row['nimi']).";";
@@ -305,51 +317,66 @@ if ($tee == "raportti") {
       $rivi .= pupesoft_csvstring($row['postino']).";";
       $rivi .= pupesoft_csvstring($row['postitp']).";";
 
+      $tyyppi = "";
+
       // Laitetaan tositetyyppi mukaan selkokielisenä
       if ($row["tila"] == "U") {
-        $rivi .= pupesoft_csvstring("Myynti");
+        $tyyppi = "Myynti";
       }
       elseif (in_array($row["tila"], array("H", "Y", "M", "P", "Q"))) {
-        $rivi .= pupesoft_csvstring("Osto");
+        $tyyppi = "Osto";
       }
       elseif ($row["tila"] == "X") {
         switch ($row["alatila"]) {
         case "E":
-          $rivi .= pupesoft_csvstring("Epäkurantointi");
+          $tyyppi = "Epäkurantointi";
           break;
         case "I":
-          $rivi .= pupesoft_csvstring("Inventointi");
+          $tyyppi = "Inventointi";
           break;
         case "G":
-          $rivi .= pupesoft_csvstring("Varastosiirto");
+          $tyyppi = "Varastosiirto";
           break;
         case "K":
-          $rivi .= pupesoft_csvstring("Kassalippaan täsmäytys");
+          $tyyppi = "Kassalippaan täsmäytys";
           break;
         case "O":
-          $rivi .= pupesoft_csvstring("Käteisotto");
+          $tyyppi = "Käteisotto";
           break;
         case "T":
-          $rivi .= pupesoft_csvstring("Tilikauden tulos");
+          $tyyppi = "Tilikauden tulos";
           break;
         case "A":
-          $rivi .= pupesoft_csvstring("Avaava tase");
+          $tyyppi = "Avaava tase";
           break;
         default :
-          $rivi .= pupesoft_csvstring("Muistiotosite");
+          $tyyppi = "Muistiotosite";
         }
       }
       else {
-        $rivi .= pupesoft_csvstring($row["tila"]);
+        $tyyppi = $row["tila"];
       }
 
+      $rivi .= pupesoft_csvstring($tyyppi);
       $rivi .= "\n";
-
       fwrite($fh, $rivi);
+
+      if (empty($haetut_muikkarit[$row['ltunnus']]) and strtoupper($row['tila']) == "X") {
+        $haetut_muikkarit[$row['ltunnus']] = TRUE;
+
+        $rivi  = pupesoft_csvstring($row['ltunnus']).";";
+        $rivi .= pupesoft_csvstring($row['tapvm']).";";
+        $rivi .= pupesoft_csvstring($tyyppi).";";
+        $rivi .= pupesoft_csvstring($row['nimi']).";";
+        $rivi .= pupesoft_csvstring($row['comments']);
+        $rivi .= "\n";
+        fwrite($fhr, $rivi);
+      }
     }
 
     // suljetaan tiedosto
     fclose($fh);
+    fclose($fhr);
   }
 
   // Myyntitilaukset
@@ -362,8 +389,33 @@ if ($tee == "raportti") {
     $fh = fopen($tmpdirnimi.$file4, "w");
     $fhr = fopen($tmpdirnimi.$file5, "w");
 
-    fwrite($fh, "toimitus_tunnus|laskunro|luontiaika|pvm|verollinen_summa|veroton_summa|verollinen_summa_valuutassa|veroton_summa_valuutassa|valuutta|toimitusehto|asiakasnumero|hyvitysviesti\n");
-    fwrite($fhr, "lasku_tunnus|toimitus_tunnus|tuoteno|nimitys|kpl|verollinen_rivihinta|veroton_rivihinta|vero|toimitettu\n");
+    $rivi  = "toimitus_tunnus;";
+    $rivi .= "laskunro;";
+    $rivi .= "luontiaika;";
+    $rivi .= "pvm;";
+    $rivi .= "verollinen_summa;";
+    $rivi .= "veroton_summa;";
+    $rivi .= "verollinen_summa_valuutassa;";
+    $rivi .= "veroton_summa_valuutassa;";
+    $rivi .= "valuutta;";
+    $rivi .= "toimitusehto;";
+    $rivi .= "asiakasnumero;";
+    $rivi .= "hyvitysviesti";
+    $rivi .= "\n";
+    fwrite($fh, $rivi);
+
+    $rivi  = "lasku_tunnus;";
+    $rivi .= "toimitus_tunnus;";
+    $rivi .= "tuoteno;";
+    $rivi .= "nimitys;";
+    $rivi .= "kpl;";
+    $rivi .= "verollinen_rivihinta;";
+    $rivi .= "veroton_rivihinta;";
+    $rivi .= "vero;";
+    $rivi .= "toimitettu";
+    $rivi .= "\n";
+    fwrite($fhr, $rivi);
+
 
     $query = "SELECT lasku.tunnus, lasku.laskunro, lasku.luontiaika, lasku.tapvm, lasku.summa, asiakas.asiakasnro,
               concat_ws(' ', lasku.nimi, lasku.nimitark) nimi, if(lasku.clearing = 'HYVITYS', lasku.viesti,'') viesti,
@@ -389,7 +441,20 @@ if ($tee == "raportti") {
 
       $bar->increase();
 
-      fwrite($fh, "{$row['tunnus']}|{$row['laskunro']}|{$row['luontiaika']}|{$row['tapvm']}|{$row['summa']}|{$row['arvo']}|{$row['summa_valuutassa']}|{$row['arvo_valuutassa']}|{$row['valkoodi']}|{$row['toimitusehto']}|{$row['asiakasnro']}|{$row['viesti']}\n");
+      $rivi  = pupesoft_csvstring($row['tunnus']).";";
+      $rivi .= pupesoft_csvstring($row['laskunro']).";";
+      $rivi .= pupesoft_csvstring($row['luontiaika']).";";
+      $rivi .= pupesoft_csvstring($row['tapvm']).";";
+      $rivi .= pupesoft_csvstring($row['summa']).";";
+      $rivi .= pupesoft_csvstring($row['arvo']).";";
+      $rivi .= pupesoft_csvstring($row['summa_valuutassa']).";";
+      $rivi .= pupesoft_csvstring($row['arvo_valuutassa']).";";
+      $rivi .= pupesoft_csvstring($row['valkoodi']).";";
+      $rivi .= pupesoft_csvstring($row['toimitusehto']).";";
+      $rivi .= pupesoft_csvstring($row['asiakasnro']).";";
+      $rivi .= pupesoft_csvstring($row['viesti']);
+      $rivi .= "\n";
+      fwrite($fh, $rivi);
 
       $query = "SELECT tilausrivi.uusiotunnus, tilausrivi.otunnus, tilausrivi.tuoteno, tilausrivi.nimitys, tilausrivi.kpl, tilausrivi.rivihinta, tilausrivi.alv, tilausrivi.toimitettuaika
                 FROM tilausrivi
@@ -401,7 +466,17 @@ if ($tee == "raportti") {
       while ($rivirow = mysql_fetch_assoc($rivires)) {
         $verollinen_rivihinta = sprintf('%.2f', round($rivirow['rivihinta'] * (1+($rivirow['alv']/100)), 2));
 
-        fwrite($fhr, "{$rivirow['uusiotunnus']}|{$rivirow['otunnus']}|{$rivirow['tuoteno']}|{$rivirow['nimitys']}|{$rivirow['kpl']}|{$verollinen_rivihinta}|{$rivirow['rivihinta']}|{$rivirow['alv']}|{$rivirow['toimitettuaika']}\n");
+        $rivi  = pupesoft_csvstring($rivirow['uusiotunnus']).";";
+        $rivi .= pupesoft_csvstring($rivirow['otunnus']).";";
+        $rivi .= pupesoft_csvstring($rivirow['tuoteno']).";";
+        $rivi .= pupesoft_csvstring($rivirow['nimitys']).";";
+        $rivi .= pupesoft_csvstring($rivirow['kpl']).";";
+        $rivi .= pupesoft_csvstring($verollinen_rivihinta).";";
+        $rivi .= pupesoft_csvstring($rivirow['rivihinta']).";";
+        $rivi .= pupesoft_csvstring($rivirow['alv']).";";
+        $rivi .= pupesoft_csvstring($rivirow['toimitettuaika']);
+        $rivi .= "\n";
+        fwrite($fhr, $rivi);
       }
     }
 
@@ -430,6 +505,8 @@ if ($tee == "raportti") {
     $rivi .= "valuutta;";
     $rivi .= "toimitusehto;";
     $rivi .= "asiakasnumero;";
+    $rivi .= "eräpäivä;";
+    $rivi .= "viitenumero;";
     $rivi .= "hyvitysviesti";
     $rivi .= "\n";
     fwrite($fh, $rivi);
@@ -448,7 +525,7 @@ if ($tee == "raportti") {
 
     $query = "SELECT lasku.tunnus, lasku.laskunro, lasku.luontiaika, lasku.tapvm, lasku.summa, asiakas.asiakasnro,
               concat_ws(' ', lasku.nimi, lasku.nimitark) nimi, if(lasku.clearing = 'HYVITYS', lasku.viesti,'') viesti,
-              lasku.summa_valuutassa, lasku.valkoodi, lasku.toimitusehto, lasku.arvo, lasku.arvo_valuutassa
+              lasku.summa_valuutassa, lasku.valkoodi, lasku.toimitusehto, lasku.arvo, lasku.arvo_valuutassa, lasku.erpcm, lasku.viite
               FROM lasku
               LEFT JOIN asiakas ON (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus)
               WHERE lasku.yhtio = '{$kukarow['yhtio']}'
@@ -479,6 +556,8 @@ if ($tee == "raportti") {
       $rivi .= pupesoft_csvstring($row['valkoodi']).";";
       $rivi .= pupesoft_csvstring($row['toimitusehto']).";";
       $rivi .= pupesoft_csvstring($row['asiakasnro']).";";
+      $rivi .= pupesoft_csvstring($row['erpcm']).";";
+      $rivi .= pupesoft_csvstring($row['viite']).";";
       $rivi .= pupesoft_csvstring($row['viesti']);
       $rivi .= "\n";
       fwrite($fh, $rivi);
@@ -532,8 +611,11 @@ if ($tee == "raportti") {
     $rivi .= "toimittajanro;";
     $rivi .= "nimi;";
     $rivi .= "toimittajatyyppi;";
+    $rivi .= "eräpäivä;";
     $rivi .= "laskun_tyyppi;";
-    $rivi .= "laskun_tila";
+    $rivi .= "laskun_tila;";
+    $rivi .= "viite;";
+    $rivi .= "viesti";
     $rivi .= "\n";
     fwrite($fh, $rivi);
 
@@ -550,7 +632,7 @@ if ($tee == "raportti") {
     $query = "SELECT lasku.tunnus, lasku.laskunro, lasku.luontiaika, lasku.tapvm,
               lasku.summa, round(lasku.summa * if(lasku.maksu_kurssi = 0, lasku.vienti_kurssi, lasku.maksu_kurssi), 2) kotisumma,
               toimi.toimittajanro, concat_ws(' ', lasku.nimi, lasku.nimitark) nimi, lasku.viesti,
-              lasku.valkoodi, toimi.tyyppi, lasku.vienti, lasku.tila
+              lasku.valkoodi, toimi.tyyppi, lasku.vienti, lasku.tila, lasku.erpcm, lasku.viite, lasku.viesti
               FROM lasku
               LEFT JOIN toimi ON (toimi.yhtio = lasku.yhtio and toimi.tunnus = lasku.liitostunnus)
               WHERE lasku.yhtio = '{$kukarow['yhtio']}'
@@ -571,8 +653,68 @@ if ($tee == "raportti") {
     $haetut_saapumiset = array();
 
     while ($row = mysql_fetch_assoc($result)) {
-
       $bar->increase();
+
+      switch ($row["vienti"]) {
+      case "A":
+        $vienti = "Kotimaa kulu";
+        break;
+      case "B":
+        $vienti = "Kotimaa huolinta/rahti";
+        break;
+      case "C":
+        $vienti = "Kotimaa vaihto-omaisuus";
+        break;
+      case "J":
+        $vienti = "Kotimaa Raaka-aine";
+        break;
+      case "D":
+        $vienti = "EU kulu";
+        break;
+      case "E":
+        $vienti = "EU huolinta/rahti";
+        break;
+      case "F":
+        $vienti = "EU vaihto-omaisuus";
+        break;
+      case "K":
+        $vienti = "EU Raaka-aine";
+        break;
+      case "G":
+        $vienti = "ei-EU kulu";
+        break;
+      case "H":
+        $vienti = "ei-EU huolinta/rahti";
+        break;
+      case "I":
+        $vienti = "ei-EU vaihto-omaisuus";
+        break;
+      case "L":
+        $vienti = "ei-EU Raaka-aine";
+        break;
+      default :
+        $vienti = "";
+      }
+
+      switch ($row["tila"]) {
+      case "H":
+        $tila = "Hyväksyttävänä";
+        break;
+      case "Y":
+        $tila = "Maksettu";
+        break;
+      case "M":
+        $tila = "Valmis maksatukseen";
+        break;
+      case "P":
+        $tila = "Lähdössä pankkiin";
+        break;
+      case "Q":
+        $tila = "Odottaa suoritusta";
+        break;
+      default :
+        $tila = "";
+      }
 
       $rivi  = pupesoft_csvstring($row['tunnus']).";";
       $rivi .= pupesoft_csvstring($row['laskunro']).";";
@@ -584,8 +726,11 @@ if ($tee == "raportti") {
       $rivi .= pupesoft_csvstring($row['toimittajanro']).";";
       $rivi .= pupesoft_csvstring($row['nimi']).";";
       $rivi .= pupesoft_csvstring($row['tyyppi']).";";
-      $rivi .= pupesoft_csvstring($row['vienti']).";";
-      $rivi .= pupesoft_csvstring($row['tila']);
+      $rivi .= pupesoft_csvstring($row['erpcm']).";";
+      $rivi .= pupesoft_csvstring($vienti).";";
+      $rivi .= pupesoft_csvstring($tila).";";
+      $rivi .= pupesoft_csvstring($row['viite']).";";
+      $rivi .= pupesoft_csvstring($row['viesti']);
       $rivi .= "\n";
       fwrite($fh, $rivi);
 
@@ -647,6 +792,18 @@ if ($tee == "raportti") {
     chdir($tmpdirnimi);
     exec("zip -r Liitteet.zip {$liitedir};");
 
+    $file10 = "liitteet.csv";
+
+    // avataan faili
+    $fh = fopen($tmpdirnimi.$file10, "w");
+
+    $rivi  = "lasku_tunnus;";
+    $rivi .= "tiedostonimi;";
+    $rivi .= "alkuperäinen nimi;";
+    $rivi .= "selite";
+    $rivi .= "\n";
+    fwrite($fh, $rivi);
+
     $query = "SELECT lasku.tunnus laskutunnus, liitetiedostot.*
               FROM lasku
               JOIN liitetiedostot ON (liitetiedostot.yhtio = lasku.yhtio and liitetiedostot.liitos = 'lasku' AND liitetiedostot.liitostunnus = lasku.tunnus)
@@ -677,7 +834,16 @@ if ($tee == "raportti") {
       file_put_contents($tmpdirnimi.$kokonimi, $row["data"]);
       exec("zip -g Liitteet.zip $kokonimi;");
       unlink($kokonimi);
+
+      $rivi  = pupesoft_csvstring($row['laskutunnus']).";";
+      $rivi .= pupesoft_csvstring($row['laskutunnus']."_".$row['tunnus'].".".$path_parts['extension']).";";
+      $rivi .= pupesoft_csvstring($row['filename']).";";
+      $rivi .= pupesoft_csvstring($row['selite']);
+      $rivi .= "\n";
+      fwrite($fh, $rivi);
     }
+
+    fclose($fh);
   }
 
   $zipfile = "Tilintarkastus-{$kukarow["yhtio"]}.zip";
@@ -688,6 +854,7 @@ if ($tee == "raportti") {
   $komento  = "/usr/bin/zip $zipfile ";
 
   if (!empty($tilioinnit_mukaan)) $komento .= escapeshellarg($file1)." ";
+  if (!empty($tilioinnit_mukaan)) $komento .= escapeshellarg($file11)." ";
   if (!empty($tilikartta_mukaan)) $komento .= escapeshellarg($file2)." ";
   if (!empty($tarkenteet_mukaan)) $komento .= escapeshellarg($file3)." ";
   if (!empty($myntitilaukset_mukaan)) $komento .= escapeshellarg($file4)." ";
@@ -697,18 +864,20 @@ if ($tee == "raportti") {
   if (!empty($ostolaskut_mukaan)) $komento .= escapeshellarg($file8)." ";
   if (!empty($ostolaskut_mukaan)) $komento .= escapeshellarg($file9)." ";
 
-  exec($komento);
-
   if (!empty($liitteet_mukaan)) {
+    $komento .= escapeshellarg($file10)." ";
+
     rename($tmpdirnimi."Liitteet.zip", "/tmp/Liitteet-{$kukarow["yhtio"]}.zip");
   }
+
+  exec($komento);
 
   rename($tmpdirnimi.$zipfile, "/tmp/".$zipfile);
 
   exec("rm -rf $tmpdirnimi");
 
   echo "<br><br><table>";
-  echo "<tr><th>".t("Tallenna tulos").":</th>";
+  echo "<tr><th>".t("Tallenna aineisto").":</th>";
   echo "<form method='post' class='multisubmit'>";
   echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
   echo "<input type='hidden' name='kaunisnimi' value='Tilintarkastus-$kukarow[yhtio].zip'>";

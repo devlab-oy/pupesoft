@@ -509,12 +509,33 @@ if ($toiminto == 'MUOKKAA') {
   }
 }
 
-// Ollaan syötetty uusi
-if ($toiminto == 'LISAA' and trim($sarjanumero) != '') {
+echo "<pre>",var_dump($_FILES['userfile']),"</pre>";
 
-  $sarjanumero = trim($sarjanumero);
+// Ollaan syötetty uusi
+if ($toiminto == 'LISAA' and (trim($sarjanumero) != '' or is_uploaded_file($_FILES['userfile']['tmp_name']) === true)) {
+  $sarjanumero_array = array();
+
+  if (is_uploaded_file($_FILES['userfile']['tmp_name']) === true) {
+
+    $kasiteltava_tiedoto_path = $_FILES['userfile']['tmp_name'];
+    $path_parts = pathinfo($_FILES['userfile']['name']);
+    $ext = strtoupper($path_parts['extension']);
+
+    $sarjanumero_array = pupeFileReader($kasiteltava_tiedoto_path, $ext);
+  }
+  else {
+    $sarjanumero = trim($sarjanumero);
+    $sarjanumero_array[] = $sarjanumero;
+  }
+
   $era_kpl    = (float) str_replace(",", ".", $era_kpl);
   $insok      = "OK";
+
+  foreach ($sarjanumero_array as $sarjanumero) {
+    echo "sarjanumero: $sarjanumero<br>";
+  }
+
+  exit;
 
   if ($rivirow["sarjanumeroseuranta"] == "S" or $rivirow["sarjanumeroseuranta"] == "T" or $rivirow["sarjanumeroseuranta"] == "V") {
     $query = "SELECT *
@@ -1685,6 +1706,25 @@ if ($rivirow["tyyppi"] != 'V') {
     echo "<td class='back'><input type='submit' value='".t("Lisää")."'></td>";
     echo "</form>";
     echo "</tr></table>";
+
+    echo "<br>";
+    echo "<form method='post' action='sarjanumeroseuranta.php' enctype='multipart/form-data' autocomplete='off'>";
+    echo "<input type='hidden' name='$tunnuskentta' value='$rivitunnus'>";
+    echo "<input type='hidden' name='from' value='$from'>";
+    echo "<input type='hidden' name='lopetus' value='$lopetus'>";
+    echo "<input type='hidden' name='aputoim' value='$aputoim'>";
+    echo "<input type='hidden' name='otunnus' value='$otunnus'>";
+    echo "<input type='hidden' name='muut_siirrettavat' value='$muut_siirrettavat'>";
+    echo "<input type='hidden' name='toiminto' value='LISAA'>";
+    echo "<input type='hidden' name='valitut_sarjat' value='".implode(",", $valitut_sarjat)."'>";
+    echo "<table>";
+    echo "<tr>";
+    echo "<th>".t("Lisää excelistä")."</th>";
+    echo "<td><input type='file' name='userfile'></td>";
+    echo "<td class='back' colspan='2'><input type='submit' value='".t("Lisää")."'></td>";
+    echo "</tr>";
+    echo "</table>";
+    echo "</form>";
   }
 }
 

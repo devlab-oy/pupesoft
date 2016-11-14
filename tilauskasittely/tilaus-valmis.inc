@@ -6,6 +6,7 @@ $ohjausmerkkilisa       = "";
 $luottorajavirhe        = "";
 $ylivito                = 0;
 $jtkielto               = "";
+$osatoimituskielto      = "";
 $myy_varastosta_varasto = $laskurow['varasto'];
 
 ///* Reload ja back-nappulatsekki *///
@@ -49,6 +50,26 @@ if ($laskurow['jaksotettu'] > 0) {
   $laskurow["jtkielto"] = "Y";
 }
 
+# Maksusopimus jossa ei ole osatoimituskieltoa p‰‰ll‰
+# Jos kaikki tilauksen rivit ovat j‰lkitoimituksia
+# Laitetaan osatoimituskielto p‰‰lle
+if ($laskurow['jaksotettu'] <> 0 and $laskurow['osatoimitus'] == '') {
+  $query = "SELECT IF(var = 'J', 1, 0) jt, COUNT(*) kaikki
+            FROM tilausrivi
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND otunnus = '{$laskurow['tunnus']}'
+            AND tyyppi != 'D'
+            AND tyyppi IN ('L','G')
+            AND jt + varattu > 0";
+  $chk_jt_res = pupe_query($query);
+  $chk_jt_row = mysql_fetch_assoc($chk_jt_res);
+
+  if ($chk_jt_row['jt'] == $chk_jt_row['kaikki']) {
+    $osatoimituskielto = ", osatoimitus = 'o'";
+    $laskurow['osatoimitus'] = 'o';
+  }
+}
+
 // Luodaan sadanprossan ennakkolasku
 if (!empty($tee_100_ennakkolasku) or !empty($tee_sis_100_ennakkolasku)) {
 
@@ -64,14 +85,18 @@ if (!empty($tee_100_ennakkolasku) or !empty($tee_sis_100_ennakkolasku)) {
     $laskurow['maksuehto'] = $maksuehto;
   }
 
-  $lopetus="";
+  $lopetus = "";
 }
 
 // p‰ivitet‰‰n vanhatunnus ja v‰h‰n muutakin laskulle
-$query  = "UPDATE lasku SET vanhatunnus=tunnus $ohjausmerkkilisa $jtkielto
-           WHERE yhtio     = '$kukarow[yhtio]'
-           AND tunnus      = '$laskurow[tunnus]'
-           AND vanhatunnus = 0";
+$query  = "UPDATE lasku SET
+          vanhatunnus = tunnus
+          {$ohjausmerkkilisa}
+          {$jtkielto}
+          {$osatoimituskielto}
+          WHERE yhtio     = '{$kukarow['yhtio']}'
+          AND tunnus      = '{$laskurow['tunnus']}'
+          AND vanhatunnus = 0";
 $oldtur = pupe_query($query);
 
 $laskurow['ohjausmerkki'] = paivita_ohjausmerkki($laskurow);

@@ -2448,6 +2448,8 @@ if ($kasitellaan_tiedosto) {
 
             $tpupque = "";
 
+            query_dump($query);
+
             // Itse lue_datan päivitysquery
             $iresult = pupe_query($query);
 

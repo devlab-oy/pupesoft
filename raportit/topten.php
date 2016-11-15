@@ -378,5 +378,5 @@ function hae_kokonaismyynti() {
     $summayhteensa += $row['myyntinyt'];
   }
 
-  return $summayhteensa;
+  return round($summayhteensa, 2);
 }

@@ -54,7 +54,7 @@ if ($laskurow['jaksotettu'] > 0) {
 # Jos kaikki tilauksen rivit ovat j‰lkitoimituksia
 # Laitetaan osatoimituskielto p‰‰lle
 if ($laskurow['jaksotettu'] <> 0 and $laskurow['osatoimitus'] == '') {
-  $query = "SELECT IF(var = 'J', 1, 0) jt, COUNT(*) kaikki
+  $query = "SELECT SUM(IF(var = 'J', 1, 0)) jt, COUNT(*) kaikki
             FROM tilausrivi
             WHERE yhtio = '{$kukarow['yhtio']}'
             AND otunnus = '{$laskurow['tunnus']}'

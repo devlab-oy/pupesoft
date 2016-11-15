@@ -61,6 +61,7 @@ if ($laskurow['jaksotettu'] <> 0 and $laskurow['osatoimitus'] == '') {
             AND tyyppi != 'D'
             AND tyyppi IN ('L','G')
             AND jt + varattu > 0";
+  query_dump($query);
   $chk_jt_res = pupe_query($query);
   $chk_jt_row = mysql_fetch_assoc($chk_jt_res);
 
@@ -98,6 +99,8 @@ $query  = "UPDATE lasku SET
           AND tunnus      = '{$laskurow['tunnus']}'
           AND vanhatunnus = 0";
 $oldtur = pupe_query($query);
+
+query_dump($query);
 
 $laskurow['ohjausmerkki'] = paivita_ohjausmerkki($laskurow);
 

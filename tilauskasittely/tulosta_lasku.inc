@@ -75,7 +75,7 @@ if (!function_exists('alku')) {
           $pdf_lasku->draw_text(310, 815, t("Maksutosite", $kieli), $page_lasku[$sivu], $iso);
         }
         elseif ($laskurow["kateistyyppi"] != '') {
-          $pdf_lasku->draw_text(310, 815, t("Käteiskuitti", $kieli), $page_lasku[$sivu], $iso);
+          $pdf_lasku->draw_text(310, 815, t("KUITTI", $kieli), $page_lasku[$sivu], $iso);
         }
         else {
           $pdf_lasku->draw_text(310, 815, t("Lasku", $kieli), $page_lasku[$sivu], $iso);
@@ -96,7 +96,7 @@ if (!function_exists('alku')) {
         $pdf_lasku->draw_text(310, 815, t("Maksutosite", $kieli), $page_lasku[$sivu], $iso);
       }
       elseif ($laskurow["kateistyyppi"] != '') {
-        $pdf_lasku->draw_text(310, 815, t("Käteiskuitti", $kieli), $page_lasku[$sivu], $iso);
+        $pdf_lasku->draw_text(310, 815, t("KUITTI", $kieli), $page_lasku[$sivu], $iso);
       }
       elseif ($laskurow["maa"] == "IN") {
         // Jos lasku menee Intiaan, niin laiitetaan hieman eri otsikko
@@ -716,7 +716,7 @@ if (!function_exists('uusi_sivu')) {
           $pdf_lasku->draw_text(310, 815, t("Maksutosite", $kieli), $thispage, $iso);
         }
         elseif ($laskurow["kateistyyppi"] != '') {
-          $pdf_lasku->draw_text(310, 815, t("Käteiskuitti", $kieli), $thispage, $iso);
+          $pdf_lasku->draw_text(310, 815, t("KUITTI", $kieli), $thispage, $iso);
         }
         else {
           $pdf_lasku->draw_text(310, 815, t("Lasku", $kieli), $thispage);
@@ -737,7 +737,7 @@ if (!function_exists('uusi_sivu')) {
         $pdf_lasku->draw_text(310, 815, t("Maksutosite", $kieli), $thispage);
       }
       elseif ($laskurow["kateistyyppi"] != '') {
-        $pdf_lasku->draw_text(310, 815, t("Käteiskuitti", $kieli), $thispage);
+        $pdf_lasku->draw_text(310, 815, t("KUITTI", $kieli), $thispage);
       }
       elseif ($laskurow["summa"] >= 0) {
         $pdf_lasku->draw_text(310, 815, t("Vientilasku", $kieli), $thispage);

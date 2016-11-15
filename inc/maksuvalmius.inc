@@ -313,8 +313,8 @@ if ($aika != '') {
     }
 
     if ($aika == 'pv' and !empty($trow["Aika"])) {
-      echo "<td class='text-right{$class}'><a href = '${palvelin2}myyntires/myyntilaskuhaku.php?tee=M&pvm=$trow[Aika]&laskuntyyppi=A&lopetus=$PHP_SELF////tee=$tee//toim=$toim//aika=$aika//konserni=$konserni//eilahetettyja=$eilahetettyja//pankkisaldo=$pankkisaldo'>$trow[Myyntires]</a></td>";
-      echo "<td class='text-right{$class}'><a href = 'raportit.php?toim=laskuhaku&tee=M&pvm=$trow[Aika]&lopetus=$PHP_SELF////tee=$tee//toim=$toim//aika=$aika//konserni=$konserni//eilahetettyja=$eilahetettyja//pankkisaldo=$pankkisaldo'>$trow[Ostores]</a></td>";
+      echo "<td class='text-right{$class}'><a href = '${palvelin2}myyntires/myyntilaskuhaku.php?tee=M&pvm=$trow[Aika]&laskuntyyppi=A&lopetus=$PHP_SELF////tee=$tee//toim=$toim//aika=$aika//konserni=$konserni//eilahetettyja=$eilahetettyja//pankkisaldo=$pankkisaldo//saamisrajaus=$saamisrajaus'>$trow[Myyntires]</a></td>";
+      echo "<td class='text-right{$class}'><a href = 'raportit.php?toim=laskuhaku&tee=M&pvm=$trow[Aika]&lopetus=$PHP_SELF////tee=$tee//toim=$toim//aika=$aika//konserni=$konserni//eilahetettyja=$eilahetettyja//pankkisaldo=$pankkisaldo//saamisrajaus=$saamisrajaus'>$trow[Ostores]</a></td>";
     }
     else {
       echo "<td class='text-right{$class}'>$trow[Myyntires]</td>";

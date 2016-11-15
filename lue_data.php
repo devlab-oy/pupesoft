@@ -887,6 +887,7 @@ if ($kasitellaan_tiedosto) {
     }
 
     $lisatyt_indeksit = array();
+    $lisatyt_rivimaarat = false;
 
     for ($eriviindex = 0; $eriviindex < ($rivimaara + $puun_alkio_index_plus); $eriviindex++) {
 
@@ -1403,6 +1404,11 @@ if ($kasitellaan_tiedosto) {
                 echo "<pre>",var_dump($taulunrivit[$taulu]),"</pre>";
 
                 if ($yhtiorow['yhteyshenkiloiden_sidos'] == 'Y' and count($tunnukset) > 0) {
+                  if ($lisatyt_rivimaarat === false) {
+                    $rivimaara += count($tunnukset);
+                    $lisatyt_rivimaarat = true;
+                  }
+
                   $valinta .= " and liitostunnus IN (".implode(',', $tunnukset).") ";
                 }
                 else {

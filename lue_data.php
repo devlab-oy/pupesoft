@@ -1400,6 +1400,8 @@ if ($kasitellaan_tiedosto) {
                   $pushlask++;
                 }
 
+                echo "<pre>",var_dump($taulunrivit[$taulu]),"</pre>";
+
                 if ($yhtiorow['yhteyshenkiloiden_sidos'] == 'Y' and count($tunnukset) > 0) {
                   $valinta .= " and liitostunnus IN (".implode(',', $tunnukset).") ";
                 }

@@ -1386,6 +1386,7 @@ if ($kasitellaan_tiedosto) {
                 }
 
                 $pushlask = 1;
+                $tunnukset = array();
 
                 while ($tpttrow = mysql_fetch_array($tpres)) {
 
@@ -1393,12 +1394,18 @@ if ($kasitellaan_tiedosto) {
 
                   if ($pushlask < mysql_num_rows($tpres)) {
                     $taulunrivit[$taulu][] = $taulunrivit[$taulu][$eriviindex];
+                    $tunnukset[] = $tpttrow["tunnus"];
                   }
 
                   $pushlask++;
                 }
 
-                $valinta .= " and liitostunnus = '{$taulunrivit[$taulu][$eriviindex][$lasind]}' ";
+                if ($yhtiorow['yhteyshenkiloiden_sidos'] == 'Y' and count($tunnukset) > 0) {
+                  $valinta .= " and liitostunnus IN (".implode(',', $tunnukset).") ";
+                }
+                else {
+                  $valinta .= " and liitostunnus = '{$taulunrivit[$taulu][$eriviindex][$lasind]}' ";
+                }
               }
               else {
                 if ($taulunrivit[$taulu][$eriviindex][array_search("TYYPPI", $taulunotsikot[$taulu])] == "T" and $table_mysql == "yhteyshenkilo") {

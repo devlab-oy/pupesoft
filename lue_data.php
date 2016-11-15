@@ -1401,8 +1401,6 @@ if ($kasitellaan_tiedosto) {
                   $pushlask++;
                 }
 
-                echo "<pre>",var_dump($taulunrivit[$taulu]),"</pre>";
-
                 if ($yhtiorow['yhteyshenkiloiden_sidos'] == 'Y' and count($tunnukset) > 0) {
                   if ($lisatyt_rivimaarat === false) {
                     $rivimaara += count($tunnukset);
@@ -1469,8 +1467,6 @@ if ($kasitellaan_tiedosto) {
                   FROM $table_mysql
                   WHERE $valinta";
         $fresult = pupe_query($query);
-
-        query_dump($query);
 
         $valinta_orig = $valinta;
 
@@ -2453,8 +2449,6 @@ if ($kasitellaan_tiedosto) {
             }
 
             $tpupque = "";
-
-            query_dump($query);
 
             // Itse lue_datan päivitysquery
             $iresult = pupe_query($query);

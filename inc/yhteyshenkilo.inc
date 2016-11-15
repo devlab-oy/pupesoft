@@ -60,3 +60,7 @@ else {
 }
 
 $jarjestys = 'nimi';
+
+if ($yhtiorow['yhteyshenkiloiden_sidos'] == 'Y' and $from == "") {
+  $ryhma = 'GROUP BY 2,3';
+}

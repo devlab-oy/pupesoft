@@ -1273,8 +1273,8 @@ if (!function_exists("apix_edi_put_file")) {
     // siirret‰‰n laskutiedosto operaattorille
     // $url           = "https://test-api.apix.fi/invoices";
     $url             = "https://api.apix.fi/invoices";
-    $transferkey     = $yhtiorow['apix_avain'];
-    $transferid      = $yhtiorow['apix_tunnus'];
+    $transferkey     = $yhtiorow['apix_edi_avain'];
+    $transferid      = $yhtiorow['apix_edi_tunnus'];
     $software        = "PupesoftEDI";
     $version         = "1.0";
 

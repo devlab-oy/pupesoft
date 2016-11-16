@@ -1175,8 +1175,8 @@ if (!function_exists("apix_invoice_put_file")) {
     global $kukarow, $yhtiorow, $pupe_root_polku;
 
     // siirret‰‰n laskutiedosto operaattorille
-    $url           = "https://test-api.apix.fi/invoices";
-    // $url             = "https://api.apix.fi/invoices";
+    //$url           = "https://test-api.apix.fi/invoices";
+    $url             = "https://api.apix.fi/invoices";
     $transferkey     = $yhtiorow['apix_avain'];
     $transferid      = $yhtiorow['apix_tunnus'];
     $software        = "Pupesoft";

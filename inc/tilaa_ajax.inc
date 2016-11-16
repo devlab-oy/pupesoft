@@ -86,13 +86,15 @@ if ($maara > 0) {
 
   $jatka = "jatka";
 
-  $query = "SELECT max(tunnus) tunnus
+  $query = "SELECT tunnus, toimaika
             FROM lasku
             WHERE yhtio      = '$kukarow[yhtio]'
             AND tila         = 'O'
             AND alatila      = ''
             AND liitostunnus = '$toimittaja'
-            AND myyja        = '$kukarow[tunnus]'";
+            AND myyja        = '$kukarow[tunnus]'
+            ORDER BY tunnus DESC
+            LIMIT 1";
   $lasres = pupe_query($query);
   $lasrow = mysql_fetch_array($lasres);
 
@@ -102,6 +104,7 @@ if ($maara > 0) {
   }
   else {
     $tilausnumero = $lasrow['tunnus'];
+    $otstoimaika  = $lasrow['toimaika'];
 
     $query = "SELECT max(tilaajanrivinro) tilaajanrivinro
               FROM tilausrivi
@@ -190,7 +193,7 @@ if ($maara > 0) {
   }
 
   if ($toimaika == "" or $toimaika == "0000-00-00") {
-    $toimaika = $laskurow["toimaika"];
+    $toimaika = $otstoimaika;
   }
 
   // lis‰t‰‰n ostotilausrivi

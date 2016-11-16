@@ -1,25 +1,50 @@
 <?php
 
-if (!empty($laskurow['asiakas_email'])) {
+if ($kieli == '') {
+  $querykiel = "SELECT kieli
+                FROM asiakas
+                WHERE yhtio = '$kukarow[yhtio]'
+                and tunnus = '$laskurow[liitostunnus]'";
+  $kielresult = pupe_query($querykiel);
+  $kielrow = mysql_fetch_assoc($kielresult);
 
-  if ($kieli == '') {
-    $querykiel = "SELECT kieli
-                  FROM asiakas
-                  WHERE yhtio = '$kukarow[yhtio]'
-                  and tunnus = '$laskurow[liitostunnus]'";
-    $kielresult = pupe_query($querykiel);
-    $kielrow = mysql_fetch_assoc($kielresult);
+  $kieli = strtolower($kielrow['kieli']);
+}
 
-    $kieli = strtolower($kielrow['kieli']);
-  }
+pupesoft_log('toimitusvahvistus_email', "Valmistellaan tilauksien {$otunnukset} toimitusvahvistuksien lähettämistä sähköpostiin");
 
-  $_toimvahvistus = t_avainsana("TOIMVAHVISTUS", "", " and avainsana.selite = '{$laskurow['toimitusvahvistus']}'", "", "", "selitetark_2");
+$toimitusvahvistus_email_lahetys = true;
+
+if (!isset($rakir_row) or !isset($rakir_row['toimitusvahvistus']) or !isset($rakir_row['asiakas_email']) or !isset($tunnukset) or !isset($otunnukset)) {
+  $toimitusvahvistus_email_lahetys = false;
+
+  $msg = "Vaadittavia muuttujia puuttui!";
+
+  if (!isset($rakir_row)) $msg .= " Rahtikirjan riviä ei löytynyt (rakir_row).";
+  if (!isset($rakir_row['toimitusvahvistus'])) $msg .= " Toimitusvahvistusta ei ole asetettu (rakir_row[toimitusvahvistus]).";
+  if (!isset($rakir_row['asiakas_email'])) $msg .= " Asiakkaan sähköpostia ei ole asetettu (rakir_row[asiakas_email]).";
+  if (!isset($tunnukset)) $msg .= " Tunnukset-muuttujaa ei ole asetettu.";
+  if (!isset($otunnukset)) $msg .= " Otunnukset-muuttujaa ei ole asetettu.";
+
+  pupesoft_log('toimitusvahvistus_email', $msg);
+}
 
 if ($rakir_row['toimitusvahvistus'] != 'toimitusvahvistus_email.inc' or $rakir_row['asiakas_email'] == '' or $tunnukset == '' or $otunnukset == '') {
   $toimitusvahvistus_email_lahetys = false;
+
+  $msg = "Vaadittavia muuttujia puuttui!";
+
+  if ($rakir_row['toimitusvahvistus'] != 'toimitusvahvistus_email.inc') $msg .= " Toimitusvahvistus ei ole toimitusvahvistus_email.inc ({$rakir_row['toimitusvahvistus']}).";
+  if ($rakir_row['asiakas_email'] == '') $msg .= " Asiakkaan sähköposti on tyhjä.";
+  if ($tunnukset == '') $msg .= " Tunnukset-muuttuja on tyhjä.";
+  if ($otunnukset == '') $msg .= " Otunnukset-muuttuja on tyhjä.";
+
+  pupesoft_log('toimitusvahvistus_email', $msg);
 }
 
 if ($toimitusvahvistus_email_lahetys) {
+  pupesoft_log('toimitusvahvistus_email', "Tarvittavat muuttujat löytyy ja tarkistukset tehty! Aloitetaan sähköpostin generointi ja lähettäminen.");
+
   $_toimvahvistus = mysql_fetch_assoc(t_avainsana("TOIMVAHVISTUS", $kieli, " and selite = 'toimitusvahvistus_email.inc' "));
 
   if ($_toimvahvistus['selitetark_2'] == "eihintaa") {
@@ -76,7 +101,7 @@ if ($toimitusvahvistus_email_lahetys) {
 
   while ($rivi_loop_row = mysql_fetch_assoc($rivi_loop_res)) {
 
-    if ($_toimvahvistus == "eihintaa") {
+    if ($_toimvahvistus['selitetark_2'] == "eihintaa") {
       $_hinta = "";
     }
     else {
@@ -97,7 +122,25 @@ if ($toimitusvahvistus_email_lahetys) {
   $body .= t("Seurantakoodit", $kieli).":\n\n";
 
   while ($seurantakoodit_row = mysql_fetch_assoc($seurantakoodit_res)) {
-    $body .= "{$seurantakoodit_row['rahtikirjanro']}\n\n";
+    if (stripos($seurantakoodit_row['rahtikirjanro'], "JJFI") !== FALSE or stripos($seurantakoodit_row['sscc_ulkoinen'], "JJFI") !== FALSE) {
+      $linkurl = "";
+      preg_match_all("/JJFI ?[0-9]{6} ?[0-9]{11}/", $seurantakoodit_row['rahtikirjanro']." ".$seurantakoodit_row['sscc_ulkoinen'], $match);
+
+      foreach ($match[0] as $nro) {
+        $nro = str_replace(" ", "", $nro);
+        $linkurl .= "http://www.posti.fi/henkiloasiakkaat/seuranta/#/lahetys/{$nro}";
+      }
+      $body .= "{$linkurl}\n\n";
+    }
+    elseif (stripos(strtolower($laskurow["toimitustapa"]), "mypack") !== FALSE and !empty($seurantakoodit_row['rahtikirjanro'])) {
+      foreach (explode(" ", $seurantakoodit_row['rahtikirjanro']) as $mypnro) {
+        $linkurl .= "http://www.postnord.fi/fi/yritysasiakkaat/asiakaspalvelu/sahkoinen-asiointi/Sivut/Lahetysten-seuranta.aspx?view=item&itemid={$mypnro}";
+      }
+      $body .= "{$linkurl}\n\n";
+    }
+    else {
+      $body .= "{$seurantakoodit_row['rahtikirjanro']}\n\n";
+    }
   }
 
   $body .= "\n";
@@ -123,6 +166,13 @@ if ($toimitusvahvistus_email_lahetys) {
 
     if (pupesoft_sahkoposti($parametri)) {
       echo t("Sähköpostin lähetys onnistui").": {$email_kuka}<br />";
+      pupesoft_log('toimitusvahvistus_email', "Sähköpostin lähetys onnistui osoitteeseen {$email_kuka}.");
+    }
+    else {
+      pupesoft_log('toimitusvahvistus_email', "Sähköpostin lähetys epäonnistui osoitteeseen {$email_kuka}.");
     }
   }
+}
+else {
+  pupesoft_log('toimitusvahvistus_email', "Toimitusvahvistus-sähköpostia ei lähetetä virheiden vuoksi.");
 }

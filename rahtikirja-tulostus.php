@@ -386,9 +386,9 @@ if ($tee == 'close_with_printer') {
     $res = pupe_query($query);
   }
 
-  $query = "SELECT lasku.tunnus, lasku.toimitustavan_lahto, lasku.toimitustapa, lasku.ytunnus, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp, asiakas.toimitusvahvistus, group_concat(DISTINCT rahtikirjat.tunnus) ratunnarit, sum(rahtikirjat.kilot) kilot
+  $query = "SELECT lasku.tunnus, lasku.toimitustavan_lahto, lasku.toimitustapa, lasku.ytunnus, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp, asiakas.toimitusvahvistus, lasku.ohjelma_moduli, group_concat(DISTINCT rahtikirjat.tunnus) ratunnarit, sum(rahtikirjat.kilot) kilot
             FROM rahtikirjat
-            JOIN lasku USE INDEX (PRIMARY) on (lasku.tunnus=rahtikirjat.otsikkonro and lasku.yhtio=rahtikirjat.yhtio and lasku.tila in ('L','G') $ltun_querylisa)
+            JOIN lasku USE INDEX (PRIMARY) on (lasku.tunnus=rahtikirjat.otsikkonro and lasku.yhtio=rahtikirjat.yhtio and lasku.tila in ('L','G') AND lasku.alatila IN ('B', 'E') $ltun_querylisa)
             $vainvakilliset
             LEFT JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus)
             LEFT JOIN maksuehto ON (lasku.yhtio = maksuehto.yhtio and lasku.maksuehto = maksuehto.tunnus)
@@ -398,7 +398,7 @@ if ($tee == 'close_with_printer') {
             AND rahtikirjat.toimitustapa   = '$toimitustapa'
             AND rahtikirjat.tulostuspaikka = '$varasto'
             $jvehto
-            GROUP BY 1,2,3,4,5,6,7,8
+            GROUP BY 1,2,3,4,5,6,7,8,9
             ORDER BY lasku.toim_nimi, lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp, lasku.toim_maa, rahtikirjat.merahti, rahtikirjat.rahtisopimus, lasku.tunnus";
   $rakir_res = pupe_query($query);
 
@@ -462,6 +462,11 @@ if ($tee == 'close_with_printer') {
                 AND mapvm   != '0000-00-00'
                 AND chn      = '999'";
       $ures  = pupe_query($query);
+
+      // Etuk‰teen maksettu Magentotilaus laskutetaan, jos ei ole jo laskuttunut
+      if ($row['ohjelma_moduli'] == 'MAGENTOJT') {
+        laskuta_magentojt($row['tunnus']);
+      }
 
       // Jos laaja toimipaikkak‰sittely on p‰‰ll‰, niin p‰ivitet‰‰n siirtolistan toimipaikka
       // kohdevaraston toimipaikaksi
@@ -1133,18 +1138,19 @@ if ($tee == 'tulosta') {
       $_magento_kaytossa = (!empty($magento_api_tt_url) and !empty($magento_api_tt_usr) and !empty($magento_api_tt_pas));
 
       if ($_magento_kaytossa and !$_onko_unifaun) {
-        $query = "SELECT asiakkaan_tilausnumero
+        $query = "SELECT asiakkaan_tilausnumero, tunnus
                   FROM lasku
                   WHERE yhtio                 = '$kukarow[yhtio]'
                   AND tunnus                  IN ($otunnukset)
-                  AND laatija                 = 'Magento'
-                  AND asiakkaan_tilausnumero != ''";
+                  AND ohjelma_moduli          = 'MAGENTO'
+                  AND asiakkaan_tilausnumero  != ''";
         $mageres = pupe_query($query);
 
         while ($magerow = mysql_fetch_assoc($mageres)) {
           $magento_api_met = $toitarow['virallinen_selite'] != '' ? $toitarow['virallinen_selite'] : $toitarow['selite'];
           $magento_api_rak = $rahtikirjanro;
           $magento_api_ord = $magerow["asiakkaan_tilausnumero"];
+          $magento_api_laskutunnus = $magerow["tunnus"];
 
           require "magento_toimita_tilaus.php";
         }
@@ -1439,7 +1445,7 @@ if ($tee == '') {
   // haetaan kaikki distinct toimitustavat joille meill‰ on rahtikirjoja tulostettavana..
   $query = "SELECT lasku.yhtio yhtio, lasku.toimitustapa, varastopaikat.tunnus, varastopaikat.nimitys, varastopaikat.printteri7, group_concat(distinct lasku.tunnus ORDER BY lasku.tunnus ASC) ltunnus
             FROM rahtikirjat
-            JOIN lasku USE INDEX (PRIMARY) on (lasku.tunnus=rahtikirjat.otsikkonro and lasku.yhtio=rahtikirjat.yhtio and lasku.tila in ('L','G') and lasku.alatila = 'B')
+            JOIN lasku USE INDEX (PRIMARY) on (lasku.tunnus=rahtikirjat.otsikkonro and lasku.yhtio=rahtikirjat.yhtio and lasku.tila in ('L','G') and lasku.alatila IN ('B', 'E'))
             JOIN toimitustapa on lasku.yhtio = toimitustapa.yhtio
             AND lasku.toimitustapa        = toimitustapa.selite
             AND toimitustapa.tulostustapa in ('E','L')

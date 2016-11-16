@@ -52,6 +52,7 @@ $request = array(
   'tee'       => $tee,
   'sarjanumero'   => $sarjanumero,
   'asiakas'     => $asiakas,
+  'asiakastunnus' => $asiakastunnus,
   'toimittaja'   => $toimittaja,
   'tuote'       => $tuote,
   'ppa'       => $ppa,
@@ -93,6 +94,7 @@ else {
     $validations = array(
       'sarjanro'   => 'mitavaan',
       'asiakas'   => 'mitavaan',
+      'asiakastunnus'   => 'mitavaan',
       'toimittaja' => 'mitavaan',
       'tuote'     => 'mitavaan',
       'alku_pvm'   => 'paiva',
@@ -123,22 +125,26 @@ function hae_tilaukset($request) {
 
   $sarjanumero_where = "";
   if (!empty($request['sarjanumero'])) {
-    $sarjanumero_where = " AND sarjanumeroseuranta.sarjanumero LIKE '%{$request['sarjanumero']}%'";
+    $sarjanumero_where = " AND sarjanumeroseuranta.sarjanumero LIKE '%{$request['sarjanumero']}%' ";
   }
 
   $asiakas_where = "";
   if (!empty($request['asiakas'])) {
-    $asiakas_where = " AND asiakas.nimi LIKE '%{$request['asiakas']}%'";
+    $asiakas_where .= " AND asiakas.nimi LIKE '%{$request['asiakas']}%' ";
+  }
+
+  if (!empty($request['asiakastunnus'])) {
+    $asiakas_where .= " AND asiakas.tunnus = '{$request['asiakastunnus']}' ";
   }
 
   $toimittaja_where = "";
   if (!empty($request['toimittaja'])) {
-    $toimittaja_where = " AND toimi.nimi LIKE '%{$request['toimittaja']}%'";
+    $toimittaja_where = " AND toimi.nimi LIKE '%{$request['toimittaja']}%' ";
   }
 
   $tuoteno_where = "";
   if (!empty($request['tuote'])) {
-    $tuoteno_where = " AND tilausrivi.nimitys LIKE '%{$request['tuote']}%'";
+    $tuoteno_where = " AND tilausrivi.nimitys LIKE '%{$request['tuote']}%' ";
   }
 
   $lasku_where = "";
@@ -149,7 +155,7 @@ function hae_tilaukset($request) {
 
   $queryt = array();
   //jos haetaan asiakkaita haetaan vain myyntitilauksia ja työmääräyksiä koska ostotilauksilla ei ole asiakasta
-  if (!empty($request['asiakas'])) {
+  if (!empty($request['asiakas']) or !empty($request['asiakastunnus'])) {
     $queryt[] = "  (
             SELECT lasku.tunnus,
             toimi.nimi as nimi,
@@ -332,7 +338,7 @@ function hae_tilaukset($request) {
 function echo_tilaukset_raportti($tilaukset, $request = array()) {
   global $kukarow, $yhtiorow, $palvelin2;
 
-  $lopetus = "{$_SERVER['PHP_SELF']}////tee=hae_tilaukset//sarjanumero={$request['sarjanumero']}//asiakas={$request['asiakas']}//toimittaja={$request['toimittaja']}//tuote={$request['tuote']}//ppa={$request['ppa']}//kka={$request['kka']}//vva={$request['vva']}//ppl={$request['ppl']}//kkl={$request['kkl']}//vvl={$request['vvl']}";
+  $lopetus = "{$_SERVER['PHP_SELF']}////tee=hae_tilaukset//sarjanumero={$request['sarjanumero']}//asiakas={$request['asiakas']}//asiakastunnus={$request['asiakastunnus']}//toimittaja={$request['toimittaja']}//tuote={$request['tuote']}//ppa={$request['ppa']}//kka={$request['kka']}//vva={$request['vva']}//ppl={$request['ppl']}//kkl={$request['kkl']}//vvl={$request['vvl']}";
 
   echo "<table>";
   echo "<thead>";
@@ -406,7 +412,6 @@ function echo_kayttoliittyma($request) {
   echo " ";
   echo "<input type='text' class='date_year_input' name='vva' value='{$request['vva']}' />";
 
-  //echo "<input type='text' name='alku_pvm' value='".(!empty($request['alku_pvm']) ? $request['alku_pvm'] : date('d.m.Y', strtotime('now - 30 day')))."' />";
   echo " - ";
 
   echo "<input type='text' class='date_input' name='ppl' value='{$request['ppl']}' />";
@@ -415,13 +420,13 @@ function echo_kayttoliittyma($request) {
   echo " ";
   echo "<input type='text' class='date_year_input' name='vvl' value='{$request['vvl']}' />";
 
-  //echo "<input type='text' name='loppu_pvm' value='".(!empty($request['loppu_pvm']) ? $request['loppu_pvm'] : date('d.m.Y', strtotime('now')))."' />";
   echo "</td>";
   echo "</tr>";
 
   echo "</table>";
   echo "<br/>";
   echo "<input type='submit' value='".t('Hae')."' />";
-  echo "</form>";
+  echo "</form><br><br>";
 }
+
 require 'inc/footer.inc';

@@ -149,7 +149,7 @@ if (!function_exists("toimitarkista")) {
 
       if ($tmp_maakoodi == 'FI' and ($yhtiorow["ytunnus_tarkistukset"] == "" or $yhtiorow["ytunnus_tarkistukset"] == "T")) {
 
-        if ($t["tyyppi"] == "K") {
+        if ($t["tyyppi"] == "K" or strlen($ytunnus) == 11) {
           $hetu = $ytunnus;
 
           // katotaan oliko kyseessä hetu

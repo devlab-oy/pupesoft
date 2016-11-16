@@ -239,7 +239,7 @@ else {
         <form name='login' target='_top' action='$target' method='post'>
         <input type='hidden' name='go' value='$go'>
         <input type='hidden' name='location' value='$location'>
-        <tr><td><font class='menu'>".t("Käyttäjätunnus", $browkieli).":</font></td><td><input type='text' value='' name='user' size='15' maxlength='30'></td></tr>
+        <tr><td><font class='menu'>".t("Käyttäjätunnus", $browkieli).":</font></td><td><input type='text' value='' name='user' size='15' maxlength='50'></td></tr>
         <tr><td><font class='menu'>".t("Salasana", $browkieli).":</font></td><td><input type='password' name='salasana' size='15' maxlength='30'></td></tr>
       </table>
       $errormsg

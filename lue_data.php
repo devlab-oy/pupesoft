@@ -887,6 +887,7 @@ if ($kasitellaan_tiedosto) {
     }
 
     $lisatyt_indeksit = array();
+    $lisatyt_rivimaarat = false;
 
     for ($eriviindex = 0; $eriviindex < ($rivimaara + $puun_alkio_index_plus); $eriviindex++) {
 
@@ -1386,6 +1387,7 @@ if ($kasitellaan_tiedosto) {
                 }
 
                 $pushlask = 1;
+                $tunnukset = array();
 
                 while ($tpttrow = mysql_fetch_array($tpres)) {
 
@@ -1393,12 +1395,23 @@ if ($kasitellaan_tiedosto) {
 
                   if ($pushlask < mysql_num_rows($tpres)) {
                     $taulunrivit[$taulu][] = $taulunrivit[$taulu][$eriviindex];
+                    $tunnukset[] = $tpttrow["tunnus"];
                   }
 
                   $pushlask++;
                 }
 
-                $valinta .= " and liitostunnus = '{$taulunrivit[$taulu][$eriviindex][$lasind]}' ";
+                if ($yhtiorow['yhteyshenkiloiden_sidos'] == 'Y' and count($tunnukset) > 0) {
+                  if ($lisatyt_rivimaarat === false) {
+                    $rivimaara += count($tunnukset);
+                    $lisatyt_rivimaarat = true;
+                  }
+
+                  $valinta .= " and liitostunnus IN (".implode(',', $tunnukset).") ";
+                }
+                else {
+                  $valinta .= " and liitostunnus = '{$taulunrivit[$taulu][$eriviindex][$lasind]}' ";
+                }
               }
               else {
                 if ($taulunrivit[$taulu][$eriviindex][array_search("TYYPPI", $taulunotsikot[$taulu])] == "T" and $table_mysql == "yhteyshenkilo") {

@@ -581,12 +581,16 @@ if ($desadv_host != '' and $desadv_user != '' and $desadv_pass != '' and $desadv
       $desadv_rakir_row["viesti"] = "";
     }
 
+    $ytunnus = $desadv_laskurow['ytunnus'];
+    $liitostunnus = $desadv_laskurow['liitostunnus'];
+
+    $yhteysliitos = hae_yhteyshenkiloiden_liitostunnukset($ytunnus, $liitostunnus);
+
     // CTA - contact information
     $query = "SELECT *
               FROM yhteyshenkilo
-              WHERE yhtio      = '$kukarow[yhtio]'
-              AND liitostunnus = '$desadv_laskurow[liitostunnus]'
-              AND nimi         = '$desadv_laskurow[tilausyhteyshenkilo]'
+              WHERE yhtio      = '{$kukarow['yhtio']}'
+              AND liitostunnus IN ({$yhteysliitos})
               and tyyppi       = 'A'";
     $yhteyshenkiloresult = pupe_query($query);
     $yhteyshenkiloasiakas = mysql_fetch_assoc($yhteyshenkiloresult);

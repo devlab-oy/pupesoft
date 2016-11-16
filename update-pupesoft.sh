@@ -385,12 +385,13 @@ if [[ ${bundle} = true ]]; then
     gem install bundler -v ${bundled_with}
   fi
 
-  # Bundlataan Pupenext, kirjoitetaan CSS ja käännetään assetsit
+  # Bundlataan Pupenext, kirjoitetaan CSS, käännetään ja putsatan assetsit
   cd "${pupenextdir}" &&
   (bundle check || bundle install) &&
   bundle clean &&
   bundle exec rake css:write &&
   bundle exec rake assets:precompile &&
+  bundle exec rake assets:clean &&
 
   # Restart rails App
   touch "${pupenextdir}/tmp/restart.txt" &&

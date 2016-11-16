@@ -112,7 +112,7 @@ else {
   echo "<table class='login'>
       <form name='login' target='_top' action='' method='post'>
 
-      <tr><th>", t("Käyttäjätunnus", $browkieli), ":</th><td><input type='text' value='' name='user' size='15' maxlength='30'></td></tr>
+      <tr><th>", t("Käyttäjätunnus", $browkieli), ":</th><td><input type='text' value='' name='user' size='15' maxlength='50'></td></tr>
       <tr><th>", t("Salasana", $browkieli), ":</th><td><input type='password' name='salasana' size='15' maxlength='30'></td></tr>
     </table>";
 

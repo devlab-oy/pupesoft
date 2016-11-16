@@ -268,13 +268,19 @@ if ($tee == 'M' or ($onko_eka_hyvaksyja === TRUE and $tee != 'H' and $tee != 'D'
 
 // Jaaha poistamme laskun!
 if ($tee == 'D' and $oikeurow['paivitys'] == '1') {
+  if ($kutsuja = "MATKALASKU" and $tee == 'D') {
+    $hyvaklisa = "(hyvaksyja_nyt = '$kukarow[kuka]' or laatija = '$kukarow[kuka]')";
+  }
+  else {
+    $hyvaklisa = "hyvaksyja_nyt = '$kukarow[kuka]'";
+  }
 
-  $query = "SELECT *
-            FROM lasku
-            WHERE hyvaksyja_nyt = '$kukarow[kuka]' and
-            yhtio               = '$kukarow[yhtio]' and
-            tunnus              = '$tunnus'";
-  $result = pupe_query($query);
+    $query = "SELECT *
+              FROM lasku
+              WHERE $hyvaklisa
+              and yhtio            = '$kukarow[yhtio]'
+              and tunnus           = '$tunnus'";
+    $result = pupe_query($query);
 
   if (mysql_num_rows($result) != 1) {
     echo "<font class = 'error'>".t('Lasku kateissa') . "$tunnus</font>";
@@ -1505,7 +1511,7 @@ if (strlen($tunnus) != 0) {
   echo "<table><tr>";
 
   //  Onko kuva tietokannassa?
-  $liitteet = ebid($laskurow["tunnus"], true);
+  $liitteet = ebid($laskurow["tunnus"], true, true);
 
   if (is_array($liitteet) and count($liitteet) > 0) {
     echo "<form method='post'>

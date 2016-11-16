@@ -349,6 +349,7 @@ if ($tee == 'GO') {
     // pit‰‰ kattoo onko nimess‰ h‰shsi‰
     if (strpos($kuva, "#") !== FALSE) {
       list($kuva, $jarjestys) = explode("#", $kuva);
+      $jarjestys = str_replace(".{$ext}", "", $jarjestys);
       $kuva = "$kuva.$ext";
     }
 
@@ -530,7 +531,7 @@ if ($tee == 'GO') {
                     AND filename        = '{$apukuva}'";
           $delresult = pupe_query($query);
 
-          tallenna_liite("{$dirri}/{$polku}", $taulu, $apurow['tunnus'], $kuvaselite, $kayttotarkoitus, 0, 0, $mikakieli);
+          tallenna_liite("{$dirri}/{$polku}", $taulu, $apurow['tunnus'], $kuvaselite, $kayttotarkoitus, 0, $jarjestys, $mikakieli);
 
           $query = "UPDATE {$taulu} SET
                     muutospvm   = now(),

@@ -784,8 +784,10 @@ else {
     // jos on myyntitilaus ja ei haluttu tulostaa lähetettä, merkataan rivit kerätyksi
     // ja toimitetuksi ja laitetaan alatila D
     if ($laskurow['eilahetetta'] != '' or $laskurow['sisainen'] != '') {
+
       if ($laskurow['sisainen'] == '' and ($kateinen == 'X' or $itsetulostus == "X"
           or $laskurow["vienti"] != '')) {
+
         // Jos kyseessä on käteismyyntiä tai maksuehdolla on itsetulostustäppä tai vientiä,
         // merkataan tilaukset kerätyksi mutta ei toimitetuksi ja alatila C/B
         // tai toimitettu tilaus muutetaan maksuehdosta käteiseksi, tila pysyy D
@@ -1190,7 +1192,10 @@ else {
         }
       }
 
-      if ($kukarow["kirjoitin"] != 0 and $valittu_tulostin == 0) {
+      if ($laskurow['ohjelma_moduli'] == 'MAGENTO') {
+        $valittu_tulostin = "";
+      }
+      elseif ($kukarow["kirjoitin"] != 0 and $valittu_tulostin == 0) {
         $valittu_tulostin = $kukarow["kirjoitin"];
       }
       elseif ($valittu_tulostin == 0) {

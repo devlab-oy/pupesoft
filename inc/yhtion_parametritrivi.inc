@@ -36,6 +36,8 @@ if ($fieldname == "verkkolasku_lah") {
   $sel7 = "";
   $sel8 = "";
   $sel9 = "";
+  $selA = "";
+  $selB = "";
 
   if ($trow[$i] == 'iPost') {
     $sel3 = "selected";
@@ -61,6 +63,12 @@ if ($fieldname == "verkkolasku_lah") {
   elseif ($trow[$i] == 'sepa') {
     $sel9 = "selected";
   }
+  elseif ($trow[$i] == 'talenom') {
+    $selA = "selected";
+  }
+  elseif ($trow[$i] == 'arvato') {
+    $selB = "selected";
+  }
   else {
     $sel1 = "selected";
   }
@@ -74,6 +82,8 @@ if ($fieldname == "verkkolasku_lah") {
   $ulos .= "<option value = 'trustpoint' $sel7>".t("Trustpoint-verkkolaskut");
   $ulos .= "<option value = 'ppg' $sel8>".t("PPG Laskutuspalvelu");
   $ulos .= "<option value = 'sepa' $sel9>".t("SEPA-pankkiyhteys");
+  $ulos .= "<option value = 'talenom' $selA>".t("Talenom Myyntilaskutuspalvelu");
+  $ulos .= "<option value = 'arvato' $selB>".t("Arvato Laskutuspalvelu");
   $ulos .= "</select></td>";
 
   $jatko = 0;
@@ -4549,6 +4559,23 @@ if ($fieldname == 'matkalaskun_tarkastus') {
 
   $ulos .= "<option value = ''>".t("Matkalaskun tarkastaja ei voi muokata matkalaskua")."</option>";
   $ulos .= "<option value = 'Z' {$sel["Z"]}>".t("Matkalaskun tarkastaja voi muokata matkalaskua")."</option>";
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
+if ($fieldname == 'editilaus_suoratoimitus') {
+  $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+  $sel = array();
+  $sel = $trow[$i] == 'K' ? 'selected' : '';
+
+  $ulos .= "<option value = ''>";
+  $ulos .= t("EDI-tilauksen sis‰‰nluvussa ei yritet‰ luoda suoratoimitusrivi‰ jos tuotteella ei riit‰ saldo");
+  $ulos .= "</option>";
+  $ulos .= "<option value = 'K' {$sel}>";
+  $ulos .= t("EDI-tilauksen sis‰‰nluvussa yritet‰‰n luoda suoratoimitusrivej‰ jos tuotteella ei riit‰ saldo ja se on tuotteen ja p‰‰toimittajan takana sallittu");
+  $ulos .= "</option>";
   $ulos .= "</select></td>";
 
   $jatko = 0;

@@ -255,6 +255,7 @@ unset($alv_laskelman_sallittu_erotus);
 unset($e3_params);
 unset($tee_keraysera_debugdir);
 
+unset($default_login_language);
 unset($loginkieli);
 
 unset($magento_api_tt_url);
@@ -429,7 +430,10 @@ elseif ($session == '' and $login != 'yes' and (!isset($verkkokauppa) or $verkko
       //haetaan browserin oletuskieli
       $browkieli = substr($_SERVER["HTTP_ACCEPT_LANGUAGE"], 0, 2);
 
-      if ($browkieli == 'sv') {
+      if (isset($default_login_language) and $browkieli != 'fi') {
+        $browkieli = $default_login_language;
+      }
+      elseif ($browkieli == 'sv') {
         $browkieli = 'se';
       }
       elseif ($browkieli == 'ee') {
@@ -558,8 +562,17 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
       }
     }
 
-    if ($phpnimi == 'raportit.php') {
-      setcookie('karhutieto', $karhutieto, time()+60*60*24*90, "/");
+    if ($phpnimi == 'raportit.php' and $toim == 'avoimet') {
+      if (isset($tallenna_keksiin)) {
+        if (!empty($_POST['karhutieto'])) {
+          setcookie('karhutieto', $karhutieto, time()+60*60*24*90, "/");
+          $_COOKIE["karhutieto"] = $karhutieto;
+        }
+        else {
+          setcookie('karhutieto', '', 1, "/");
+          $_COOKIE["karhutieto"] = '';
+        }
+      }
     }
 
     if ($phpnimi == 'generoi_siirtolista.php') {

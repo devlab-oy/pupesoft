@@ -41,9 +41,9 @@ function apix_edi_receive($apix_keys) {
   $timestamp  = gmdate("YmdHis");
 
   // Muodostetaan apixin vaatima salaus ja url
-  $digest_src = "{$software}+{$version}+{$apix_keys['apix_tunnus']}+{$timestamp}+{$apix_keys['apix_avain']}";
+  $digest_src = "{$software}+{$version}+{$apix_keys['apix_edi_tunnus']}+{$timestamp}+{$apix_keys['apix_edi_avain']}";
   $dt  = substr(hash("sha256", $digest_src), 0, 64);
-  $real_url = "{$url}?TraID={$apix_keys['apix_tunnus']}&t={$timestamp}&soft={$software}&ver={$version}&d=SHA-256:{$dt}";
+  $real_url = "{$url}?TraID={$apix_keys['apix_edi_tunnus']}&t={$timestamp}&soft={$software}&ver={$version}&d=SHA-256:{$dt}";
 
   $ch = curl_init();
   curl_setopt($ch, CURLOPT_URL, $real_url);
@@ -56,11 +56,11 @@ function apix_edi_receive($apix_keys) {
 }
 
 // Haetaan api_keyt yhtion_parametreistä
-$sql_query = "SELECT yhtion_parametrit.apix_tunnus, yhtion_parametrit.apix_avain, yhtio.nimi
+$sql_query = "SELECT yhtion_parametrit.apix_edi_tunnus, yhtion_parametrit.apix_edi_avain, yhtio.nimi
               FROM yhtio
               JOIN yhtion_parametrit USING (yhtio)
-              WHERE yhtion_parametrit.apix_tunnus != ''
-              AND yhtion_parametrit.apix_avain    != ''";
+              WHERE yhtion_parametrit.apix_edi_tunnus != ''
+              AND yhtion_parametrit.apix_edi_avain    != ''";
 $apix_result = pupe_query($sql_query);
 
 while ($apix_keys = mysql_fetch_assoc($apix_result)) {

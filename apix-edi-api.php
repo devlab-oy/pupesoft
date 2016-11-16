@@ -35,8 +35,8 @@ function apix_edi_receive($apix_keys) {
   $software = "PupesoftEDI";
   $version  = "1.0";
 
-  $url = "https://test-terminal.apix.fi/receive";
-  // $url = "https://terminal.apix.fi/receive";
+  // $url = "https://test-terminal.apix.fi/receive";
+  $url = "https://terminal.apix.fi/receive";
 
   $timestamp  = gmdate("YmdHis");
 

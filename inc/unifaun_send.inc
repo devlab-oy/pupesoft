@@ -20,6 +20,7 @@ class Unifaun {
   private $mehto;
   private $xml;
   private $kirjoitin;
+  private $onkovak;
 
   public function __construct($hostname, $username, $password, $ftppath, $ftpport, $ftpfail, $ftpsucc) {
     $this->hostname = $hostname;
@@ -57,6 +58,10 @@ class Unifaun {
 
   public function setMehto($mehto) {
     $this->mehto = $mehto;
+  }
+
+  public function setVak($vak) {
+    $this->onkovak = $vak;
   }
 
   private function setAsiakasRow() {
@@ -368,10 +373,10 @@ class Unifaun {
 
         if ($this->toitarow['virallinen_selite'] == "KKSTD") $rahtisopimusnro = 999999;
         elseif ($this->toitarow['virallinen_selite'] == "TPSTD"
-          or $this->toitarow['virallinen_selite'] == "IT09"
-          or $this->toitarow['virallinen_selite'] == "IT14"
-          or $this->toitarow['virallinen_selite'] == "IT16"
-          or $this->toitarow['virallinen_selite'] == "IT21") $rahtisopimusnro = 123456;
+          or $this->toitarow['virallinen_selite'] == "PO2102_09"
+          or $this->toitarow['virallinen_selite'] == "PO2102"
+          or $this->toitarow['virallinen_selite'] == "PO2103"
+          or $this->toitarow['virallinen_selite'] == "PO2104") $rahtisopimusnro = 123456;
         elseif ($this->toitarow['virallinen_selite'] == "KLGRP") $rahtisopimusnro = 1234567;
         elseif ($this->toitarow['virallinen_selite'] == "MH10" or $this->toitarow['virallinen_selite'] == "MH30") $rahtisopimusnro = 12345678;
         else $rahtisopimusnro = 123;
@@ -380,10 +385,10 @@ class Unifaun {
       // Jos sopparinumero on, mutta se on virheellinen
       if ((is_numeric($rahtisopimusnro) and (int) $rahtisopimusnro > 0) or (!is_numeric($rahtisopimusnro) and (string) $rahtisopimusnro != "")) {
 
-        if (($this->toitarow['virallinen_selite'] == "IT09"
-            or $this->toitarow['virallinen_selite'] == "IT14"
-            or $this->toitarow['virallinen_selite'] == "IT16"
-            or $this->toitarow['virallinen_selite'] == "IT21") and strlen($rahtisopimusnro) != 6) {
+        if (($this->toitarow['virallinen_selite'] == "PO2102_09"
+            or $this->toitarow['virallinen_selite'] == "PO2102"
+            or $this->toitarow['virallinen_selite'] == "PO2103"
+            or $this->toitarow['virallinen_selite'] == "PO2104") and strlen($rahtisopimusnro) != 6) {
           $rahtisopimusnro = 999999;
         }
 
@@ -398,8 +403,8 @@ class Unifaun {
       // Nämä ovat nyt käytössä:
       //FREEG     --> OPAY tai RPAY, numeric, minlength(1), maxlength(15)
       //H48     --> RPAY
-      //IT09     --> OPAY
-      //IT14     --> OPAY
+      //PO2102_09     --> OPAY
+      //PO2102     --> OPAY
       //KKSTD     --> OPAY tai RPAY, 6 numeroa
       //TPSTD     --> RPAY, 6 numeroa
       //KLGRP     --> OPAY tai RPAY, min 7 max 8
@@ -421,18 +426,18 @@ class Unifaun {
       );
 
       $allowed_opay = array(
-        'IT09',
-        'IT14',
-        'IT16',
-        'IT21',
-        'ITVAK',
-        'ITEXPC',
-        'ITELLALOGKR',
-        'ITKY09',
-        'ITKY14',
-        'ITKY21',
-        'ITKYVAK',
-        'ITKYEXPC',
+        'PO2102',
+        'PO2102_09',
+        'PO2102_00',
+        'PO2103',
+        'PO2104',
+        'POF1',
+        'PO2144',
+        'PO2144_09',
+        'PO2144_21',
+        'PO2144_00',
+        'ITKY14I',
+        'IT14I',
       );
     }
 
@@ -712,7 +717,61 @@ class Unifaun {
     }
     else {
       $uni_service = $uni_shipment->addChild('service'); // Corresponds to carrier's service. See SUP-112-Services-en.xls for valid services.
-      $uni_service->addAttribute('srvid', utf8_encode($this->toitarow['virallinen_selite']));
+
+      if (strpos($this->toitarow['virallinen_selite'], "PO2102") !== FALSE) {
+        $_virallinen_selite = "PO2102";
+    }
+      elseif (strpos($this->toitarow['virallinen_selite'], "PO2144") !== FALSE) {
+        $_virallinen_selite = "PO2144";
+      }
+      else {
+        $_virallinen_selite = $this->toitarow['virallinen_selite'];
+      }
+
+      $uni_service->addAttribute('srvid', utf8_encode($_virallinen_selite));
+    }
+
+    $_DLV09 = array(
+      'PO2102_09',
+      'PO2144_09',
+    );
+    $_DLV21 = array(
+      'PO2144_21',
+    );
+    $_DLV00 = array(
+      'PO2102_00',
+      'PO2144_00',
+    );
+
+    if (in_array($this->toitarow['virallinen_selite'], $_DLV09)) {
+      $uni_ser_val = $uni_service->addChild('addon');
+      $uni_ser_val->addAttribute('adnid', "DLV09");
+    }
+
+    if (in_array($this->toitarow['virallinen_selite'], $_DLV21)) {
+      $uni_ser_val = $uni_service->addChild('addon');
+      $uni_ser_val->addAttribute('adnid', "DLV21");
+    }
+
+    if (in_array($this->toitarow['virallinen_selite'], $_DLV00)) {
+      $uni_ser_val = $uni_service->addChild('addon');
+      $uni_ser_val->addAttribute('adnid', "DLV00");
+    }
+
+    // Postin peruspalvelukoodit jotka tukee lisäpalvelua "Vaarallisten aineiden kuljetus (VAK) / LQ Kuljetus"
+    $_sallitut_posti_vak_palvelut = array(
+      'POF1',
+      'PO2144',
+      'PO2102',
+      'PO2104',
+    );
+
+    if (!empty($this->onkovak) and in_array($_virallinen_selite, $_sallitut_posti_vak_palvelut)) {
+      $uni_addon = $uni_service->addChild('addon');
+      $uni_addon->addAttribute('adnid', "DNG");
+
+      $uni_add_val = $uni_addon->addChild('val', utf8_encode($_yhtio_nimi));
+      $uni_add_val->addAttribute('n', 'declarant');
     }
 
     if (trim($this->toitarow['lajittelupiste']) != "") {
@@ -754,18 +813,16 @@ class Unifaun {
 
     // nämä tukee mps palvelua
     $posti_mps = array(
-      'IT09',
-      'ITKY09',
-      'IT14',
-      'ITKY14',
+      'PO2102_09',
+      'PO2144_09',
+      'PO2102',
+      'PO2144',
       'ITKY14I',
       'IT14I',
-      'ITEXPC',
-      'ITKYEXPC',
-      'IT21',
-      'ITKY21',
-      'ITVAK',
-      'ITKYVAK',
+      'PO2102_00',
+      'PO2144_00',
+      'PO2104',
+      'PO2144_21',
     );
 
     $_mps = $this->toitarow["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc' ? true : false;
@@ -787,7 +844,7 @@ class Unifaun {
       $uni_add_val = $uni_addon->addChild('val', "PHONE"); // Used to define notification mode for add-on NOT. Valid values: PHONE = Phone, FAX = Fax.
       $uni_add_val->addAttribute('n', "misctype");
     }
-    elseif ($this->toitarow['virallinen_selite'] == "IT16" and ($this->postirow["toim_puh"] != "" or $this->asiakasrow["email"] != "")) {
+    elseif ($this->toitarow['virallinen_selite'] == "PO2103" and ($this->postirow["toim_puh"] != "" or $this->asiakasrow["email"] != "")) {
       $uni_addon = $uni_service->addChild('addon'); // Corresponds to add-on service. See SUP-112-Services-en.xls for valid add-on services.
       $uni_addon->addAttribute('adnid', "NOT");
 

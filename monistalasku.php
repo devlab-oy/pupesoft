@@ -1457,10 +1457,10 @@ if ($tee == 'MONISTA') {
       $tulos_ulos[] = $utunnus;
 
       if ($toim == 'SOPIMUS') {
-        echo t("Uusi sopimusnumero on")." {$utunnus}<br><br>";
+        echo t("Uusi sopimusnumero on")." <a href='{$palvelin2}tilauskasittely/tilaus_myynti.php?toim=YLLAPITO&tilausnumero=$utunnus'>{$utunnus}</a><br><br>";
       }
       else {
-        echo t("Uusi tilausnumero on")." {$utunnus}<br><br>";
+        echo t("Uusi tilausnumero on")." <a href='{$palvelin2}tilauskasittely/tilaus_myynti.php?toim=PIKATILAUS&tilausnumero=$utunnus'>{$utunnus}</a><br><br>";
       }
 
       //  Päivitetään myös tunnusnippu jotta tätä voidaan versioida..

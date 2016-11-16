@@ -143,8 +143,13 @@ if ($tee=='P') {
               AND chn      = '999'";
     $ures  = pupe_query($query);
 
-    // jos kyseessä on käteiskauppaa ja EI vientiä, laskutetaan ja tulostetaan tilaus..
-    if ($tilrow['kateinen']!='' and $tilrow["vienti"]=='') {
+    // Etukäteen maksettu Magentotilaus laskutetaan, jos ei ole jo laskuttunut
+    if ($tilrow['ohjelma_moduli'] == 'MAGENTOJT') {
+      laskuta_magentojt($otunnus);
+    }
+    elseif ($tilrow['kateinen']!='' and $tilrow["vienti"]=='') {
+      
+      // jos kyseessä on käteiskauppaa ja EI vientiä, laskutetaan ja tulostetaan tilaus..
 
       //tulostetaan käteislasku...
       $laskutettavat  = $otunnus;

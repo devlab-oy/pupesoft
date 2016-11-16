@@ -134,24 +134,24 @@ $(document).ready(function() {
     });
 
     $("input[name='ale1']").on('keyup', function() {
-      $("input[name='kpl']").trigger('keyup');
+      setTimeout(() => { $("input[name='kpl']").trigger('keyup') }, 500)
     });
 
     $("input[name='ale2']").on('keyup', function() {
-      $("input[name='kpl']").trigger('keyup');
+      setTimeout(() => { $("input[name='kpl']").trigger('keyup') }, 500)
     });
 
     $("input[name='ale3']").on('keyup', function() {
-      $("input[name='kpl']").trigger('keyup');
+      setTimeout(() => { $("input[name='kpl']").trigger('keyup') }, 500)
     });
 
     $("select[name='alv']").on('change', function() {
-      $("input[name='kpl']").trigger('keyup');
+      setTimeout(() => { $("input[name='kpl']").trigger('keyup') }, 500)
     });
 
     $("input[name='hinta']").on('keyup', function() {
       if ($("input[name='hinta']").val() != '') {
-        $("input[name='kpl']").trigger('keyup');
+        setTimeout(() => { $("input[name='kpl']").trigger('keyup') }, 500)
       }
       else {
         $('#kate_rivi_laskenta').html('');
@@ -161,7 +161,7 @@ $(document).ready(function() {
     });
 
     if (rivitunnus_chk.length != 0 && rivitunnus_chk.val() != '') {
-      $("input[name='kpl']").trigger('keyup');
+      setTimeout(() => { $("input[name='kpl']").trigger('keyup') })
     }
   }
 

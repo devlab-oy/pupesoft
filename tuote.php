@@ -482,6 +482,7 @@ if (isset($ajax)) {
 
     $query = "SELECT tapahtuma.tuoteno,
               ifnull(kuka.nimi, tapahtuma.laatija) laatija,
+              kuka_myyja.nimi AS tilauksen_myyja,
               tapahtuma.laadittu,
               tapahtuma.laji,
               tapahtuma.kpl,
@@ -510,6 +511,7 @@ if (isset($ajax)) {
               LEFT JOIN lasku use index (primary) ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus)
               LEFT JOIN lasku AS lasku2 use index (primary) ON (lasku2.yhtio = tilausrivi.yhtio AND lasku2.tunnus = tilausrivi.uusiotunnus)
               LEFT JOIN kuka ON (kuka.yhtio = tapahtuma.yhtio AND kuka.kuka = tapahtuma.laatija)
+              LEFT JOIN kuka AS kuka_myyja ON (kuka_myyja.yhtio = lasku.yhtio AND kuka_myyja.tunnus = lasku.myyja)
               WHERE tapahtuma.yhtio = '$kukarow[yhtio]'
               and tapahtuma.tuoteno = '$tuoteno'
               {$toimipaikkarajaus}
@@ -602,8 +604,14 @@ if (isset($ajax)) {
       }
 
       if ($tapahtumalaji == "" or strtoupper($tapahtumalaji) == strtoupper($prow["laji"])) {
+        $laatija = $prow['laatija'];
+
+        if ($prow["laji"] == "laskutus" and !empty($prow['tilauksen_myyja']) and $prow['laatija'] != $prow['tilauksen_myyja']) {
+          $laatija .= "<br>{$prow['tilauksen_myyja']}";
+        }
+
         $_return .= "<tr class='aktiivi'>";
-        $_return .= "<td nowrap valign='top'>" . $prow['laatija'] . "</td>";
+        $_return .= "<td nowrap valign='top'>{$laatija}</td>";
         $_return .= "<td nowrap valign='top'>" . tv1dateconv($prow["laadittu"], "pitka") . "</td>";
         $_return .= "<td nowrap valign='top'>";
 
@@ -3199,7 +3207,7 @@ if ($tee == 'Z') {
       echo "</tr>";
 
       echo "<tr id='tapahtumat_header'>";
-      echo "<th>".t("Laatija")."</th>";
+      echo "<th>".t("Laatija")."<br>".t("Myyj‰")."</th>";
       echo "<th>".t("Pvm")."</th>";
       echo "<th>".t("Tyyppi")."</th>";
       echo "<th>".t("M‰‰r‰")."</th>";

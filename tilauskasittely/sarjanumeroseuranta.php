@@ -94,6 +94,7 @@ echo "<font class='head'>".t("Sarjanumeroseuranta")."</font><hr>";
 $tunnuskentta = "";
 $rivitunnus = "";
 $hyvitysrivi = "";
+$is_uploaded_file = is_uploaded_file($_FILES['userfile']['tmp_name']);
 
 if ($myyntirivitunnus != "") {
   $tunnuskentta = "myyntirivitunnus";
@@ -510,154 +511,173 @@ if ($toiminto == 'MUOKKAA') {
 }
 
 // Ollaan syötetty uusi
-if ($toiminto == 'LISAA' and trim($sarjanumero) != '') {
+if ($toiminto == 'LISAA' and (trim($sarjanumero) != '' or $is_uploaded_file === true)) {
+  $sarjanumero_array = array();
 
-  $sarjanumero = trim($sarjanumero);
+  if ($is_uploaded_file === true) {
+
+    $kasiteltava_tiedoto_path = $_FILES['userfile']['tmp_name'];
+    $path_parts = pathinfo($_FILES['userfile']['name']);
+    $ext = strtoupper($path_parts['extension']);
+
+    $excelrivit = pupeFileReader($kasiteltava_tiedoto_path, $ext);
+
+    foreach($excelrivit as $rivi) {
+      $sarjanumero_array[] = $rivi[0];
+    }
+  }
+  else {
+    $sarjanumero = trim($sarjanumero);
+    $sarjanumero_array[] = $sarjanumero;
+  }
+
   $era_kpl    = (float) str_replace(",", ".", $era_kpl);
   $insok      = "OK";
 
-  if ($rivirow["sarjanumeroseuranta"] == "S" or $rivirow["sarjanumeroseuranta"] == "T" or $rivirow["sarjanumeroseuranta"] == "V") {
-    $query = "SELECT *
-              FROM sarjanumeroseuranta use index (yhtio_sarjanumero)
-              WHERE yhtio     = '$kukarow[yhtio]'
-              and sarjanumero = '$sarjanumero'
-              and tuoteno     = '$rivirow[tuoteno]'
-              and (ostorivitunnus = 0 or myyntirivitunnus = 0)";
-  }
-  else {
-    if ($era_kpl <= 0) {
-      $insok = "EI";
-      echo "<font class='error'>".t("Erälle on syötettävä kappalemäärä")." $rivirow[tuoteno]/$sarjanumero.</font><br><br>";
-    }
-
-    if ((float) $era_kpl > $rivirow["varattu"]) {
-      $insok = "EI";
-      echo "<font class='error'>".t("Erän koko on liian suuri")." $rivirow[varattu]/$era_kpl.</font><br><br>";
-    }
-
-    if ($from == "KERAA" and (float) $era_kpl != $rivirow["varattu"]) {
-      $insok = "EI";
-      echo "<font class='error'>".t("Erän koko on oltava sama kuin rivin määrä")." $rivirow[varattu]/$era_kpl.</font><br><br>";
-    }
-
-    if ($from == "KERAA" and $rivirow["hyllyalue"] == "") {
-      // Haetaan oletuspaikka
-      $query = "SELECT *
-                FROM tuotepaikat
-                WHERE yhtio  = '$kukarow[yhtio]'
-                and tuoteno  = '$rivirow[tuoteno]'
-                and oletus  != ''";
-      $result = pupe_query($query);
-      $saldorow = mysql_fetch_assoc($result);
-
-      $rivirow["hyllyalue"] = $saldorow["hyllyalue"];
-      $rivirow["hyllynro"]  = $saldorow["hyllynro"];
-      $rivirow["hyllyvali"] = $saldorow["hyllyvali"];
-      $rivirow["hyllytaso"] = $saldorow["hyllytaso"];
-    }
-
-    if ($from == "KERAA" and $tunnuskentta == "myyntirivitunnus") {
-      $tunnuskentta = "ostorivitunnus";
-    }
-
-    // Samaan ostoriviin ei voida liittää samaa eränumeroa useaan kertaan, mutta muuten eränumerot eivät ole uniikkeja.
-    $query = "SELECT *
-              FROM sarjanumeroseuranta use index (yhtio_sarjanumero)
-              WHERE yhtio          = '$kukarow[yhtio]'
-              and sarjanumero      = '$sarjanumero'
-              and tuoteno          = '$rivirow[tuoteno]'
-              and $tunnuskentta   = '$rivitunnus'
-              and myyntirivitunnus = 0";
-  }
-
-  $sarjares = pupe_query($query);
-
-  if ($insok == "OK" and mysql_num_rows($sarjares) == 0) {
-
-    if ($rivirow["sarjanumeroseuranta"] == "E") {
-      $sarjanumero = strtoupper($sarjanumero);
-    }
-
-    //jos ollaan syötetty kokonaan uusi sarjanuero
-    $query = "INSERT into sarjanumeroseuranta
-              (yhtio, tuoteno, sarjanumero, lisatieto, $tunnuskentta, kaytetty, era_kpl, laatija, luontiaika, takuu_alku, takuu_loppu, hyllyalue, hyllynro, hyllyvali, hyllytaso, parasta_ennen)
-              VALUES ('$kukarow[yhtio]','$rivirow[tuoteno]','$sarjanumero','$lisatieto','','$kaytetty','$era_kpl','$kukarow[kuka]',now(),'$tvva-$tkka-$tppa','$tvvl-$tkkl-$tppl', '$rivirow[hyllyalue]', '$rivirow[hyllynro]', '$rivirow[hyllyvali]', '$rivirow[hyllytaso]', '$pevva-$pekka-$peppa')";
-    $sarjares = pupe_query($query);
-    $tun = mysql_insert_id($GLOBALS["masterlink"]);
-
-    if ($sarjanumeronLisatiedot and $oletussarja == "JOO" and ($rivirow["sarjanumeroseuranta"] == "S" or $rivirow["sarjanumeroseuranta"] == "T" or $rivirow["sarjanumeroseuranta"] == "V")) {
-      $query = "SELECT *
-                FROM tuote
-                WHERE yhtio = '$kukarow[yhtio]'
-                and tuoteno = '$rivirow[tuoteno]'";
-      $tuoteres = pupe_query($query);
-      $tuoterow = mysql_fetch_assoc($tuoteres);
-
-      $query = "SELECT selitetark
-                FROM avainsana
-                WHERE yhtio      = '$kukarow[yhtio]'
-                and laji         = 'SARJANUMERON_LI'
-                and selite       = 'MERKKI'
-                and selitetark_2 = '$tuoterow[tuotemerkki]'
-                ORDER BY jarjestys, selitetark_2";
-      $vresult = pupe_query($query);
-      $vrow = mysql_fetch_assoc($vresult);
-
-      $query = "INSERT INTO sarjanumeron_lisatiedot
-                SET yhtio      = '$kukarow[yhtio]',
-                liitostunnus       = '$tun',
-                laatija            = '$kukarow[kuka]',
-                luontiaika         = now(),
-                Leveys             = '$tuoterow[tuoteleveys]',
-                Pituus             = '$tuoterow[tuotepituus]',
-                Varirunko          = '$tuoterow[vari]',
-                Suurin_henkiloluku = '$tuoterow[suurin_henkiloluku]',
-                Runkotyyppi        = '$tuoterow[runkotyyppi]',
-                Materiaali         = '$tuoterow[materiaali]',
-                Koneistus          = '$tuoterow[koneistus]',
-                Tyyppi             = '$tuoterow[laitetyyppi]',
-                Kilpi              = '$tuoterow[kilpi]',
-                Sprinkleri         = '$tuoterow[sprinkleri]',
-                Teho_kw            = '$tuoterow[teho_kw]',
-                Malli              = '$tuoterow[nimitys]',
-                Merkki             = '$vrow[selitetark]'";
-      $lisatietores_apu = pupe_query($query);
-    }
-
+  foreach ($sarjanumero_array as $sarjanumero) {
     if ($rivirow["sarjanumeroseuranta"] == "S" or $rivirow["sarjanumeroseuranta"] == "T" or $rivirow["sarjanumeroseuranta"] == "V") {
-      echo "<font class='message'>".t("Lisättiin sarjanumero")." $sarjanumero.</font><br><br>";
+      $query = "SELECT *
+                FROM sarjanumeroseuranta use index (yhtio_sarjanumero)
+                WHERE yhtio     = '$kukarow[yhtio]'
+                and sarjanumero = '$sarjanumero'
+                and tuoteno     = '$rivirow[tuoteno]'
+                and (ostorivitunnus = 0 or myyntirivitunnus = 0)";
     }
     else {
-      echo "<font class='message'>".t("Lisättiin eränumero")." $sarjanumero.</font><br><br>";
+      if ($era_kpl <= 0) {
+        $insok = "EI";
+        echo "<font class='error'>".t("Erälle on syötettävä kappalemäärä")." $rivirow[tuoteno]/$sarjanumero.</font><br><br>";
+      }
+
+      if ((float) $era_kpl > $rivirow["varattu"]) {
+        $insok = "EI";
+        echo "<font class='error'>".t("Erän koko on liian suuri")." $rivirow[varattu]/$era_kpl.</font><br><br>";
+      }
+
+      if ($from == "KERAA" and (float) $era_kpl != $rivirow["varattu"]) {
+        $insok = "EI";
+        echo "<font class='error'>".t("Erän koko on oltava sama kuin rivin määrä")." $rivirow[varattu]/$era_kpl.</font><br><br>";
+      }
+
+      if ($from == "KERAA" and $rivirow["hyllyalue"] == "") {
+        // Haetaan oletuspaikka
+        $query = "SELECT *
+                  FROM tuotepaikat
+                  WHERE yhtio  = '$kukarow[yhtio]'
+                  and tuoteno  = '$rivirow[tuoteno]'
+                  and oletus  != ''";
+        $result = pupe_query($query);
+        $saldorow = mysql_fetch_assoc($result);
+
+        $rivirow["hyllyalue"] = $saldorow["hyllyalue"];
+        $rivirow["hyllynro"]  = $saldorow["hyllynro"];
+        $rivirow["hyllyvali"] = $saldorow["hyllyvali"];
+        $rivirow["hyllytaso"] = $saldorow["hyllytaso"];
+      }
+
+      if ($from == "KERAA" and $tunnuskentta == "myyntirivitunnus") {
+        $tunnuskentta = "ostorivitunnus";
+      }
+
+      // Samaan ostoriviin ei voida liittää samaa eränumeroa useaan kertaan, mutta muuten eränumerot eivät ole uniikkeja.
+      $query = "SELECT *
+                FROM sarjanumeroseuranta use index (yhtio_sarjanumero)
+                WHERE yhtio          = '$kukarow[yhtio]'
+                and sarjanumero      = '$sarjanumero'
+                and tuoteno          = '$rivirow[tuoteno]'
+                and $tunnuskentta   = '$rivitunnus'
+                and myyntirivitunnus = 0";
     }
 
-    // Yritetään liittää luotu sarjanumero tähän riviin
-    if ($rivitunnus > 0) {
+    $sarjares = pupe_query($query);
 
-      if ($valitut_sarjat != "") {
-        $valitut_sarjat = $valitut_sarjat.",".$tun;
+    if ($insok == "OK" and mysql_num_rows($sarjares) == 0) {
+
+      if ($rivirow["sarjanumeroseuranta"] == "E") {
+        $sarjanumero = strtoupper($sarjanumero);
+      }
+
+      //jos ollaan syötetty kokonaan uusi sarjanuero
+      $query = "INSERT into sarjanumeroseuranta
+                (yhtio, tuoteno, sarjanumero, lisatieto, $tunnuskentta, kaytetty, era_kpl, laatija, luontiaika, takuu_alku, takuu_loppu, hyllyalue, hyllynro, hyllyvali, hyllytaso, parasta_ennen)
+                VALUES ('$kukarow[yhtio]','$rivirow[tuoteno]','$sarjanumero','$lisatieto','','$kaytetty','$era_kpl','$kukarow[kuka]',now(),'$tvva-$tkka-$tppa','$tvvl-$tkkl-$tppl', '$rivirow[hyllyalue]', '$rivirow[hyllynro]', '$rivirow[hyllyvali]', '$rivirow[hyllytaso]', '$pevva-$pekka-$peppa')";
+      $sarjares = pupe_query($query);
+      $tun = mysql_insert_id($GLOBALS["masterlink"]);
+
+      if ($sarjanumeronLisatiedot and $oletussarja == "JOO" and ($rivirow["sarjanumeroseuranta"] == "S" or $rivirow["sarjanumeroseuranta"] == "T" or $rivirow["sarjanumeroseuranta"] == "V")) {
+        $query = "SELECT *
+                  FROM tuote
+                  WHERE yhtio = '$kukarow[yhtio]'
+                  and tuoteno = '$rivirow[tuoteno]'";
+        $tuoteres = pupe_query($query);
+        $tuoterow = mysql_fetch_assoc($tuoteres);
+
+        $query = "SELECT selitetark
+                  FROM avainsana
+                  WHERE yhtio      = '$kukarow[yhtio]'
+                  and laji         = 'SARJANUMERON_LI'
+                  and selite       = 'MERKKI'
+                  and selitetark_2 = '$tuoterow[tuotemerkki]'
+                  ORDER BY jarjestys, selitetark_2";
+        $vresult = pupe_query($query);
+        $vrow = mysql_fetch_assoc($vresult);
+
+        $query = "INSERT INTO sarjanumeron_lisatiedot
+                  SET yhtio      = '$kukarow[yhtio]',
+                  liitostunnus       = '$tun',
+                  laatija            = '$kukarow[kuka]',
+                  luontiaika         = now(),
+                  Leveys             = '$tuoterow[tuoteleveys]',
+                  Pituus             = '$tuoterow[tuotepituus]',
+                  Varirunko          = '$tuoterow[vari]',
+                  Suurin_henkiloluku = '$tuoterow[suurin_henkiloluku]',
+                  Runkotyyppi        = '$tuoterow[runkotyyppi]',
+                  Materiaali         = '$tuoterow[materiaali]',
+                  Koneistus          = '$tuoterow[koneistus]',
+                  Tyyppi             = '$tuoterow[laitetyyppi]',
+                  Kilpi              = '$tuoterow[kilpi]',
+                  Sprinkleri         = '$tuoterow[sprinkleri]',
+                  Teho_kw            = '$tuoterow[teho_kw]',
+                  Malli              = '$tuoterow[nimitys]',
+                  Merkki             = '$vrow[selitetark]'";
+        $lisatietores_apu = pupe_query($query);
+      }
+
+      if ($rivirow["sarjanumeroseuranta"] == "S" or $rivirow["sarjanumeroseuranta"] == "T" or $rivirow["sarjanumeroseuranta"] == "V") {
+        echo "<font class='message'>".t("Lisättiin sarjanumero")." $sarjanumero.</font><br><br>";
       }
       else {
-        $valitut_sarjat = $tun;
+        echo "<font class='message'>".t("Lisättiin eränumero")." $sarjanumero.</font><br><br>";
       }
 
-      $sarjataan   = explode(",", $valitut_sarjat);
-      $sarjat    = explode(",", $valitut_sarjat);
-      $formista  = "kylla";
+      // Yritetään liittää luotu sarjanumero tähän riviin
+      if ($rivitunnus > 0) {
+
+        if ($valitut_sarjat != "") {
+          $valitut_sarjat = $valitut_sarjat.",".$tun;
+        }
+        else {
+          $valitut_sarjat = $tun;
+        }
+
+        $sarjataan   = explode(",", $valitut_sarjat);
+        $sarjat    = explode(",", $valitut_sarjat);
+        $formista  = "kylla";
+      }
+
+      $sarjanumero  = "";
+      $lisatieto    = "";
+      $kaytetty    = "";
+      $era_kpl    = "";
     }
+    elseif ($insok != "EI") {
+      $sarjarow = mysql_fetch_assoc($sarjares);
 
-    $sarjanumero  = "";
-    $lisatieto    = "";
-    $kaytetty    = "";
-    $era_kpl    = "";
-  }
-  elseif ($insok != "EI") {
-    $sarjarow = mysql_fetch_assoc($sarjares);
+      $sarjanumero_haku = $sarjanumero;
 
-    $sarjanumero_haku = $sarjanumero;
-
-    echo "<font class='error'>".t("Sarjanumero löytyy jo tuotteelta")." $sarjarow[tuoteno]/$sarjanumero.</font><br><br>";
-    $sarjanumero = "";
+      echo "<font class='error'>".t("Sarjanumero löytyy jo tuotteelta")." $sarjarow[tuoteno]/$sarjanumero.</font><br><br>";
+      $sarjanumero = "";
+    }
   }
 }
 
@@ -1685,6 +1705,25 @@ if ($rivirow["tyyppi"] != 'V') {
     echo "<td class='back'><input type='submit' value='".t("Lisää")."'></td>";
     echo "</form>";
     echo "</tr></table>";
+
+    echo "<br>";
+    echo "<form method='post' action='sarjanumeroseuranta.php' enctype='multipart/form-data' autocomplete='off'>";
+    echo "<input type='hidden' name='$tunnuskentta' value='$rivitunnus'>";
+    echo "<input type='hidden' name='from' value='$from'>";
+    echo "<input type='hidden' name='lopetus' value='$lopetus'>";
+    echo "<input type='hidden' name='aputoim' value='$aputoim'>";
+    echo "<input type='hidden' name='otunnus' value='$otunnus'>";
+    echo "<input type='hidden' name='muut_siirrettavat' value='$muut_siirrettavat'>";
+    echo "<input type='hidden' name='toiminto' value='LISAA'>";
+    echo "<input type='hidden' name='valitut_sarjat' value='".implode(",", $valitut_sarjat)."'>";
+    echo "<table>";
+    echo "<tr>";
+    echo "<th>".t("Lisää excelistä")."</th>";
+    echo "<td><input type='file' name='userfile'></td>";
+    echo "<td class='back' colspan='2'><input type='submit' value='".t("Lisää")."'></td>";
+    echo "</tr>";
+    echo "</table>";
+    echo "</form>";
   }
 }
 

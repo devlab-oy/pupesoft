@@ -356,8 +356,12 @@ if ($handle = opendir($ftpget_dest[$operaattori])) {
         // sscc_ulkoinen magentoa varten
         $sscc_ulkoinen = $sscc_ulk_arr[$key];
 
-        // Lähetetään toimitusvahvistus
-        pupesoft_toimitusvahvistus($otunnukset, $tunnukset);
+        $_desadv = (strpos($laskurow['toimitusvahvistus'], 'desadv') !== false);
+
+        if ($laskurow['toimitusvahvistus'] != '' and !$_desadv) {
+          // Lähetetään toimitusvahvistus
+          pupesoft_toimitusvahvistus($otunnukset, $tunnukset);
+        }
 
         // Katsotaan onko Magento käytössä, merkataan tilaus toimitetuksi
         $_magento_kaytossa = (!empty($magento_api_tt_url) and !empty($magento_api_tt_usr) and !empty($magento_api_tt_pas));

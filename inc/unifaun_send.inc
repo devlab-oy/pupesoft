@@ -248,7 +248,7 @@ class Unifaun {
     $uni_meta = $xml->addChild('meta');
 
     // siivotaan puhelinnumerosta välilyönnit ja muut erikoismerkit veke
-    $this->postirow["toim_puh"] = preg_replace("/[^0-9]/", "", $this->postirow["toim_puh"]);
+    $this->postirow["toim_puh"] = preg_replace("/[^0-9\+]/", "", $this->postirow["toim_puh"]);
 
     // $uni_meta_val = $uni_meta->addChild('val', '|LASER1|'); # Sends the print job to defined printer/ID. The value must be enclosed in pipe characters, |.
     $uni_meta_val = $uni_meta->addChild('val', "{$this->kirjoitin}"); // Sends the print job to defined printer/ID. The value must be enclosed in pipe characters, |.

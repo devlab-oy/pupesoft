@@ -371,6 +371,7 @@ function tuote_export_hae_saldot($params) {
   $datetime_checkpoint        = tuote_export_checkpoint('TEX_SALDOT');
   $vaihtoehtoiset_saldot      = $params['vaihtoehtoiset_saldot'];
   $verkkokauppa_saldo_varasto = $params['verkkokauppa_saldo_varasto'];
+  $tehdas_saldot              = $params['tehdas_saldot'];
 
   $dnstock = array();
 
@@ -436,6 +437,23 @@ function tuote_export_hae_saldot($params) {
               AND tuote.nakyvyys      != ''
               $muutoslisa3)
 
+              UNION
+
+              (SELECT tuote.tuoteno,
+              tuote.eankoodi
+              FROM tuote
+              JOIN tuotteen_toimittajat AS tt ON (
+                tt.yhtio = tuote.yhtio AND
+                tt.tuoteno = tuote.tuoteno
+              )
+              JOIN toimi on (toimi.yhtio = tt.yhtio and toimi.tunnus = tt.liitostunnus)
+              WHERE tuote.yhtio        = '{$kukarow["yhtio"]}'
+              AND tuote.status        != 'P'
+              AND tuote.tuotetyyppi    NOT in ('A','B')
+              AND tuote.tuoteno       != ''
+              AND tuote.nakyvyys      != ''
+              AND tt.tehdas_saldo_paivitetty >= '{$datetime_checkpoint}')
+
               ORDER BY 1";
   $result = pupe_query($query);
 
@@ -450,6 +468,12 @@ function tuote_export_hae_saldot($params) {
     }
 
     $myytavissa = tuote_export_saldo_myytavissa($row["tuoteno"], $verkkokauppa_saldo_varasto);
+
+    if ($tehdas_saldot) {
+      $tehdas_saldo = magento_tuote_export_tehdas_saldot($row['tuoteno']);
+
+      $myytavissa += $tehdas_saldo;
+    }
 
     $dnstock[] = array(
       'ean'                   => $row["eankoodi"],
@@ -471,6 +495,25 @@ function tuote_export_saldo_myytavissa($tuoteno, Array $varastot) {
   $saldo = ($myytavissa === false) ? 0 : $myytavissa;
 
   return $saldo;
+}
+
+function magento_tuote_export_tehdas_saldot($tuoteno) {
+  global $kukarow, $yhtiorow;
+
+  $query = "SELECT tt.tehdas_saldo
+            FROM tuotteen_toimittajat AS tt
+            JOIN toimi on (toimi.yhtio = tt.yhtio and toimi.tunnus = tt.liitostunnus)
+            WHERE tt.yhtio = '{$kukarow['yhtio']}'
+            and tt.tuoteno = '{$tuoteno}'
+            ORDER BY IF(tt.jarjestys = 0, 9999, tt.jarjestys), tt.tunnus
+            LIMIT 1";
+  $ttres = pupe_query($query);
+
+  if (mysql_num_rows($ttres) == 0) return 0;
+
+  $ttrow = mysql_fetch_assoc($ttres);
+
+  return $ttrow['tehdas_saldo'];
 }
 
 function tuote_export_hae_tuoteryhmat($params) {

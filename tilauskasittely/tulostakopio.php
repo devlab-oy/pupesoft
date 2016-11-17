@@ -1455,7 +1455,6 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
     if ($toim == "OSTO") {
       $otunnus = $laskurow["tunnus"];
       $mista = 'tulostakopio';
-
       require 'tulosta_ostotilaus.inc';
       $tee = '';
     }

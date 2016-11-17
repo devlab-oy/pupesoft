@@ -558,6 +558,10 @@ else {
       // Luodaan muuttujat
       extract($params);
 
+      // Tehd‰‰n t‰m‰, jotta saadaan toimipaikan tiedot oikein tilaukselle
+      $kukarow['toimipaikka'] = $laskurow['vanhatunnus'];
+      $yhtiorow               = hae_yhtion_parametrit($kukarow["yhtio"]);
+
       if ($yhtiorow['lomakkeiden_allekirjoitus'] == 'X') {
         $allekirjoitus_query = "SELECT nimi,
                                 asema

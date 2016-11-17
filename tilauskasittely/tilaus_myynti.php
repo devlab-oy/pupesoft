@@ -6772,7 +6772,7 @@ if ($tee == '') {
       # Tehdään "Toimita kaikki"-nappula
       $toimita_kaikki = array();
 
-      if (!$_luottoraja_ylivito) {
+      if (!$_luottoraja_ylivito and $laskurow['tila'] == 'N' and in_array($laskurow['alatila'], array('T','U'))) {
         while ($row = mysql_fetch_assoc($result)) {
           // voidaan lukita tämä tilausrivi
           if ($row["uusiotunnus"] > 0 or $laskurow["tunnus"] != $row["otunnus"] or ($laskurow["tila"] == "V" and $row["kpl"] != 0)) {

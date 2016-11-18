@@ -34041,6 +34041,7 @@ if (!function_exists('tilausrivin_esisyotto')) {
       }
     }
 
+    $ale_arr = $ale;
     $ale_arr['netto'] = $netto;
     $ale_arr['erikoisale'] = 0;
     $ale_arr['erikoisale_saapuminen'] = 0;

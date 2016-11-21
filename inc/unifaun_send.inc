@@ -227,7 +227,6 @@ class Unifaun {
         exit(1);
       }
       else {
-        echo "<pre>",var_dump($result),"</pre>";
 
         $basefile = basename($filenimi);
 

@@ -211,7 +211,7 @@ class Unifaun {
       $f = fopen($filenimi, "r");
 
       $ch = curl_init();
-      curl_setopt($ch, CURLOPT_URL, "{$url}?session=ufo_SE&user={$user}&pin={$pass}&developerid={$pass}&type=xml");
+      curl_setopt($ch, CURLOPT_URL, "{$url}?session=ufo_SE&user={$user}&pin={$pass}&developerid={$devi}&type=xml");
       curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
       curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, FALSE);
       curl_setopt($ch, CURLOPT_POST, TRUE);

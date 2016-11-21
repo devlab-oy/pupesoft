@@ -33151,7 +33151,7 @@ if (!function_exists('pupesoft_toimitusvahvistus')) {
   // Tarvitaan $otunnukset jossa on tilauksien tunnukset
   // Tarvitaan $tunnukset jossa on rahtikirjojen tunnukset
 
-  function pupesoft_toimitusvahvistus($otunnukset, $tunnukset=0) {
+  function pupesoft_toimitusvahvistus($otunnukset, $tunnukset = 0, $rahtikirjanro = 0) {
     global $kukarow, $yhtiorow, $toim, $desadv_host, $desadv_user, $desadv_pass, $desadv_path, $pupe_root_polku;
 
     if (empty($otunnukset)) {

@@ -1094,7 +1094,7 @@ if ($tee == 'tulosta') {
 
       // L‰hetet‰‰n toimitusvahvistus
       if ($rakir_row['toimitusvahvistus'] != '' and (!$_onko_unifaun or $_desadv)) {
-        pupesoft_toimitusvahvistus($otunnukset, $tunnukset);
+        pupesoft_toimitusvahvistus($otunnukset, $tunnukset, $rahtikirjanro);
       }
 
       // jos ei JV merkataan rahtikirjat tulostetuksi otsikollekkin E-tyyppiset Unifaunit merkataan toimitetuiksi close_with_printer-haarassa..

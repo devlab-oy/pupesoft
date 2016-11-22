@@ -162,6 +162,10 @@ if (!isset($jo_syotetty_rekisterinumero)) {
   $jo_syotetty_rekisterinumero = "";
 }
 
+if (!isset($keratty)) {
+  $keratty = "";
+}
+
 // Haetaan asiakkaan kieli erilaisten systeemikommenttien kääntämistä varten
 $query = "SELECT kieli
           FROM asiakas
@@ -1175,6 +1179,11 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
         if ($perheid2 > 0 and $perheid2 != $rivitunnus and strtoupper($zrow["hyllyalue"]."#!¡!#".$zrow["hyllynro"]."#!¡!#".$zrow["hyllyvali"]."#!¡!#".$zrow["hyllytaso"]) == strtoupper($paikka)) {
           $myytavissa = $toimittamatta;
         }
+        
+        // Jos tilaus on kerätty saldo riittää aina
+        if ($keratty != '') {
+          $myytavissa = $toimittamatta;
+        }
 
         // hoidetaan pois problematiikka jos meillä on orpoja (tuotepaikattomia) tuotteita varaamassa saldoa
         if ($orvot > 0) {
@@ -2007,6 +2016,10 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
                         netto           = '$lis_netto',
                         hinta           = '$lis_hinta',
                         kerayspvm       = '$kerayspvm',
+                        keratty         = '$keratty',
+                        kerattyaika     = '$kerattyaika',
+                        toimitettu      = '$toimitettu',
+                        toimitettuaika  = '$toimitettuaika',
                         otunnus         = '$kukarow[kesken]',
                         tyyppi          = '$rivityyppi',
                         toimaika        = '$toimaika',
@@ -3341,6 +3354,10 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
               hinta           = '$lis_hinta',
               {$query_insert_hinta_alkuperainen_lisa}
               kerayspvm       = '$kerayspvm',
+              keratty         = '$keratty',
+              kerattyaika     = '$kerattyaika',
+              toimitettu      = '$toimitettu',
+              toimitettuaika  = '$toimitettuaika',
               otunnus         = '$kukarow[kesken]',
               tyyppi          = '$rivityyppi',
               toimaika        = '$toimaika',

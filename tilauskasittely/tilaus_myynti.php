@@ -78,6 +78,10 @@ if ($tila == "KORVAMERKITSE" or $tila == "KORVAMERKITSE_AJAX") {
 
   $tila = '';
   $rivitunnus = '';
+  $keratty = '';
+  $kerattyaika = 0;
+  $toimitettu = '';
+  $toimitettuaika = 0;
 }
 
 if ($yhtiorow['tilausrivin_esisyotto'] == 'K' and isset($ajax_toiminto) and trim($ajax_toiminto) == 'esisyotto') {
@@ -745,6 +749,10 @@ if ((int) $valitsetoimitus_vaihdarivi > 0 and $tilausnumero == $kukarow["kesken"
   }
 
   $rivitunnus = "";
+  $keratty = "";
+  $kerattyaika = 0;
+  $toimitettu = '';
+  $toimitettuaika = 0;
 }
 
 //jos jostain tullaan ilman $toim-muuttujaa
@@ -1449,6 +1457,10 @@ if (isset($tyhjenna)) {
   $omalle_tilaukselle = "";
   $valmistuslinja     = "";
   $rekisterinumero    = "";
+  $keratty = "";
+  $kerattyaika = 0;
+  $toimitettu = '';
+  $toimitettuaika = 0;
 }
 
 if (!empty($valitse_tuotteetasiakashinnastoon)) {
@@ -4385,6 +4397,10 @@ if ($tee == '') {
 
     $tapa     = "";
     $rivitunnus = "";
+    $keratty = "";
+    $kerattyaika = 0;
+    $toimitettu = '';
+    $toimitettuaika = 0;
   }
 
   if ($kukarow["extranet"] == "" and $tila == "LISATIETOJA_RIVILLE_OSTO_VAI_HYVITYS") {
@@ -4398,7 +4414,10 @@ if ($tee == '') {
 
     $tila     = "";
     $rivitunnus = "";
-    $rivitunnus = "";
+    $keratty = "";
+    $kerattyaika = 0;
+    $toimitettu = '';
+    $toimitettuaika = 0;
   }
 
   //Muokataan tilausrivin lisätietoa
@@ -4440,6 +4459,10 @@ if ($tee == '') {
     $positio        = "";
     $asiakkaan_positio = "";
     $lisaalisa        = "";
+    $keratty = "";
+    $kerattyaika = 0;
+    $toimitettu = '';
+    $toimitettuaika = 0;
   }
 
   if ($kukarow["extranet"] == "" and $tila == "LISLISAV") {
@@ -4461,6 +4484,10 @@ if ($tee == '') {
     $tila     = "";
     $tapa     = "";
     $rivitunnus = "";
+    $keratty = "";
+    $kerattyaika = 0;
+    $toimitettu = '';
+    $toimitettuaika = 0;
   }
 
   if ($kukarow["extranet"] == "" and $tila == "MYYNTITILIRIVI") {
@@ -4834,6 +4861,10 @@ if ($tee == '') {
         $tilausrivilinkki     = '';
         $toimittajan_tunnus     = '';
         $valmistuslinja        = '';
+        $keratty = "";
+        $kerattyaika = 0;
+        $toimitettu = '';
+        $toimitettuaika = 0;
       }
     }
   }
@@ -5332,6 +5363,10 @@ if ($tee == '') {
     $valmistuslinja     = "";
     $avaa_rekursiiviset = "";
     $tila = "";
+    $keratty = "";
+    $kerattyaika = 0;
+    $toimitettu = '';
+    $toimitettuaika = 0;
   }
   elseif ($tila == "VARMUUTOS" and ($tapa == "POISJTSTA" or $tapa == "PUUTE" or $tapa == "JT")) {
     //otetaan varattukpl ja jtkpl muuttuja käyttöön
@@ -5431,6 +5466,10 @@ if ($tee == '') {
     $toimaika       = "";
     $tuoteno       = "";
     $var = "";
+    $keratty = "";
+    $kerattyaika = 0;
+    $toimitettu = '';
+    $toimitettuaika = 0;
   }
 
   $logmaster_errors = logmaster_verify_order($laskurow['tunnus'], $toim);
@@ -8330,6 +8369,10 @@ if ($tee == '') {
                   <input type='hidden' name='tilausnumero' value = '$tilausnumero'>
                   <input type='hidden' name='mista'        value = '$mista'>
                   <input type='hidden' name='rivitunnus'   value = '$row[tunnus]'>
+                  <input type='hidden' name='keratty'      value = '$row[keratty]'>
+                  <input type='hidden' name='kerattyaika'  value = '$row[kerattyaika]'>
+                  <input type='hidden' name='toimitettu'   value = '$row[toimitettu]'>
+                  <input type='hidden' name='toimitettuaika' value = '$row[toimitettuaika]'>
                   <input type='hidden' name='ale_peruste'  value = '$row[ale_peruste]'>
                   <input type='hidden' name='rivilaadittu' value = '$row[laadittu]'>
                   <input type='hidden' name='menutila'     value = '$menutila'>

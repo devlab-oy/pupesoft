@@ -34026,6 +34026,24 @@ if (!function_exists('tilausrivin_esisyotto')) {
       }
     }
 
+    // Rakennetaan syötetyistä aleista array,
+    // jotta saadaan syötetyt alet talteen
+    // ja osataan laskea niistä yksikköhinta ja rivihinta oikein
+    $_ale = array();
+
+    if ($ale1 != "") {
+      $_ale["ale1"] = $ale1;
+    }
+
+    if ($ale2 != "") {
+      $_ale["ale2"] = $ale2;
+    }
+
+    if ($ale3 != "") {
+      $_ale["ale3"] = $ale3;
+    }
+
+    $ale_arr = !empty($_ale) ? $_ale : $ale;
     $ale_arr['netto'] = $netto;
     $ale_arr['erikoisale'] = 0;
     $ale_arr['erikoisale_saapuminen'] = 0;

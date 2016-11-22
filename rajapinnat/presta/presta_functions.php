@@ -36,8 +36,10 @@ function presta_hae_asiakkaat_asiakkaittain() {
   }
 
   $query = "SELECT
-            asiakas.tunnus as asiakas_tunnus,
             asiakas.kuljetusohje,
+            asiakas.nimi as asiakas_nimi,
+            asiakas.tunnus as asiakas_tunnus,
+            asiakas.ytunnus,
             avainsana.selitetark_5,
             yhteyshenkilo.email,
             yhteyshenkilo.gsm,
@@ -68,14 +70,16 @@ function presta_hae_asiakkaat_asiakkaittain() {
   while ($asiakas = mysql_fetch_assoc($result)) {
     $osoitteet = array();
     $osoitteet[] = array(
-      "asiakas_id" => $asiakas['asiakas_tunnus'],
-      "gsm"        => $asiakas['gsm'],
-      "maa"        => $asiakas['maa'],
-      "nimi"       => $asiakas['nimi'],
-      "osoite"     => $asiakas['osoite'],
-      "postino"    => $asiakas['postino'],
-      "postitp"    => $asiakas['postitp'],
-      "puh"        => $asiakas['puh'],
+      "asiakas_id"   => $asiakas['asiakas_tunnus'],
+      "asiakas_nimi" => $asiakas['asiakas_nimi'],
+      "gsm"          => $asiakas['gsm'],
+      "maa"          => $asiakas['maa'],
+      "nimi"         => $asiakas['nimi'],
+      "osoite"       => $asiakas['osoite'],
+      "postino"      => $asiakas['postino'],
+      "postitp"      => $asiakas['postitp'],
+      "puh"          => $asiakas['puh'],
+      "ytunnus"      => $asiakas['ytunnus'],
     );
 
     $asiakkaat[] = array(
@@ -133,6 +137,8 @@ function presta_hae_asiakkaat_yhteyshenkiloittain() {
     // haetaan kaikki osoitteet asiakkailta
     $query = "SELECT distinct
               asiakas.tunnus,
+              asiakas.ytunnus,
+              asiakas.nimi,
               asiakas.osoite,
               asiakas.postino,
               asiakas.postitp,
@@ -145,20 +151,24 @@ function presta_hae_asiakkaat_yhteyshenkiloittain() {
 
     while ($osoite = mysql_fetch_assoc($osoite_result)) {
       $osoitteet[] = array(
-        "asiakas_id" => $osoite['tunnus'],
-        "gsm"        => $yhteyshenkilo['gsm'],
-        "maa"        => $osoite['maa'],
-        "nimi"       => $yhteyshenkilo['nimi'],
-        "osoite"     => $osoite['osoite'],
-        "postino"    => $osoite['postino'],
-        "postitp"    => $osoite['postitp'],
-        "puh"        => $yhteyshenkilo['puh'],
+        "asiakas_id"   => $osoite['tunnus'],
+        "asiakas_nimi" => $osoite['nimi'],
+        "gsm"          => $yhteyshenkilo['gsm'],
+        "maa"          => $osoite['maa'],
+        "nimi"         => $yhteyshenkilo['nimi'],
+        "osoite"       => $osoite['osoite'],
+        "postino"      => $osoite['postino'],
+        "postitp"      => $osoite['postitp'],
+        "puh"          => $yhteyshenkilo['puh'],
+        "ytunnus"      => $osoite['ytunnus'],
       );
     }
 
     // haetaan kaikki toimitusosoitteet asiakkailta
     $query = "SELECT distinct
               asiakas.tunnus,
+              asiakas.ytunnus,
+              asiakas.nimi,
               asiakas.toim_osoite,
               asiakas.toim_postino,
               asiakas.toim_postitp,
@@ -171,14 +181,16 @@ function presta_hae_asiakkaat_yhteyshenkiloittain() {
 
     while ($osoite = mysql_fetch_assoc($osoite_result)) {
       $osoitteet[] = array(
-        "asiakas_id" => $osoite['tunnus'],
-        "gsm"        => $yhteyshenkilo['gsm'],
-        "maa"        => $osoite['toim_maa'],
-        "nimi"       => $yhteyshenkilo['nimi'],
-        "osoite"     => $osoite['toim_osoite'],
-        "postino"    => $osoite['toim_postino'],
-        "postitp"    => $osoite['toim_postitp'],
-        "puh"        => $yhteyshenkilo['puh'],
+        "asiakas_id"   => $osoite['tunnus'],
+        "asiakas_nimi" => $osoite['nimi'],
+        "gsm"          => $yhteyshenkilo['gsm'],
+        "maa"          => $osoite['toim_maa'],
+        "nimi"         => $yhteyshenkilo['nimi'],
+        "osoite"       => $osoite['toim_osoite'],
+        "postino"      => $osoite['toim_postino'],
+        "postitp"      => $osoite['toim_postitp'],
+        "puh"          => $yhteyshenkilo['puh'],
+        "ytunnus"      => $osoite['ytunnus'],
       );
     }
 

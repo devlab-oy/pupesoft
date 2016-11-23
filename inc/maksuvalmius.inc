@@ -35,9 +35,9 @@ echo "<form action = 'raportit.php' method='post'>
     <input type = 'hidden' name = 'toim' value = 'maksuvalmius'>
     ".t("Maksuvalmius")."</td><td>
     <select name='aika'>
-                   <option value = 'pv' $sel1>".t("Päivä")."
-                   <option value = 'vi' $sel2>".t("Viikko")."
-                   <option value = 'kk' $sel3>".t("Kuukausi")."
+      <option value = 'pv' $sel1>".t("Päivä")."
+      <option value = 'vi' $sel2>".t("Viikko")."
+      <option value = 'kk' $sel3>".t("Kuukausi")."
     </select></td>";
 
 if ($yhtiorow["konserni"] != "") {
@@ -50,6 +50,17 @@ echo "<tr><td>".t("Älä näytä lähetettyjä")."</td>
 
 echo "<tr><td>".t("Kätyä pankkitilin maksulimittiä alkusaldona")."</td>
        <td><input type = 'checkbox' name = 'pankkisaldo' $sel6></td></tr>";
+
+$chk = array_fill_keys(array($saamisrajaus), " selected") + array_fill_keys(array('1', '2', '3'), '');
+
+echo "<tr><td>".t("Älä huomioi rajausta vanhempia myntisaamisia")." </td>
+      <td><select name='saamisrajaus'>
+            <option value = ''>".t("Ei rajausta")."</option>
+            <option value = '1' $chk[1]>1 ".t("kuukausi")."</option>
+            <option value = '2' $chk[2]>2 ".t("kuukautta")."</option>
+            <option value = '3' $chk[3]>3 ".t("kuukautta")."</option>
+      </select>
+      </td></tr>";
 
 echo "</table><br><input type = 'submit' value = '".t("Näytä")."'></form><br>";
 
@@ -67,6 +78,13 @@ if ($aika != '') {
   else {
     echo t("Yhtiöitä löytyi monta tai ei lainkaan! Virhe!");
     exit;
+  }
+
+  $saamislisa = "";
+
+  if (!empty($saamisrajaus)) {
+    $saamisrajaus = (int) $saamisrajaus;
+    $saamislisa = " AND lasku.erpcm >= date_sub(current_date, INTERVAL $saamisrajaus MONTH)";
   }
 
   // Poistetaan vanhat tapahtumat
@@ -102,12 +120,13 @@ if ($aika != '') {
     }
 
     while ($yrow = mysql_fetch_assoc($result)) {
-      //Myyntireskontra
+      // Myyntireskontra
       $query = "SELECT if(kapvm > now(), kapvm,erpcm) olmapvm, sum(summa-saldo_maksettu) summa, count(*)
                 FROM lasku
                 WHERE yhtio    = '$yrow[yhtio]'
                 and lasku.tila = 'U'
                 and mapvm      = '0000-00-00'
+                {$saamislisa}
                 GROUP BY 1";
       $yresult = pupe_query($query);
 
@@ -168,6 +187,7 @@ if ($aika != '') {
               WHERE lasku.yhtio = '$kukarow[yhtio]'
               AND lasku.tila    = 'U'
               AND mapvm         = '0000-00-00'
+              {$saamislisa}
               GROUP BY 1";
     $result = pupe_query($query);
 
@@ -293,8 +313,8 @@ if ($aika != '') {
     }
 
     if ($aika == 'pv' and !empty($trow["Aika"])) {
-      echo "<td class='text-right{$class}'><a href = '${palvelin2}myyntires/myyntilaskuhaku.php?tee=M&pvm=$trow[Aika]&laskuntyyppi=A&lopetus=$PHP_SELF////tee=$tee//toim=$toim//aika=$aika//konserni=$konserni//eilahetettyja=$eilahetettyja//pankkisaldo=$pankkisaldo'>$trow[Myyntires]</a></td>";
-      echo "<td class='text-right{$class}'><a href = 'raportit.php?toim=laskuhaku&tee=M&pvm=$trow[Aika]&lopetus=$PHP_SELF////tee=$tee//toim=$toim//aika=$aika//konserni=$konserni//eilahetettyja=$eilahetettyja//pankkisaldo=$pankkisaldo'>$trow[Ostores]</a></td>";
+      echo "<td class='text-right{$class}'><a href = '${palvelin2}myyntires/myyntilaskuhaku.php?tee=M&pvm=$trow[Aika]&laskuntyyppi=A&lopetus=$PHP_SELF////tee=$tee//toim=$toim//aika=$aika//konserni=$konserni//eilahetettyja=$eilahetettyja//pankkisaldo=$pankkisaldo//saamisrajaus=$saamisrajaus'>$trow[Myyntires]</a></td>";
+      echo "<td class='text-right{$class}'><a href = 'raportit.php?toim=laskuhaku&tee=M&pvm=$trow[Aika]&lopetus=$PHP_SELF////tee=$tee//toim=$toim//aika=$aika//konserni=$konserni//eilahetettyja=$eilahetettyja//pankkisaldo=$pankkisaldo//saamisrajaus=$saamisrajaus'>$trow[Ostores]</a></td>";
     }
     else {
       echo "<td class='text-right{$class}'>$trow[Myyntires]</td>";

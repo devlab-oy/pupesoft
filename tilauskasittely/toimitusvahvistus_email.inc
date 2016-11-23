@@ -130,15 +130,32 @@ if ($toimitusvahvistus_email_lahetys) {
     }
   }
   else {
-    $query = "SELECT if(sscc_ulkoinen != '', sscc_ulkoinen, rahtikirjanro) rahtikirjanro
-              FROM rahtikirjat
-              WHERE tunnus IN ({$tunnukset})
-              AND yhtio    = '{$kukarow['yhtio']}'";
-    $seurantakoodit_res = pupe_query($query);
+  $query = "SELECT if(sscc_ulkoinen != '', sscc_ulkoinen, rahtikirjanro) rahtikirjanro
+            FROM rahtikirjat
+            WHERE tunnus IN ({$tunnukset})
+            AND yhtio    = '{$kukarow['yhtio']}'";
+  $seurantakoodit_res = pupe_query($query);
 
-    $body .= t("Seurantakoodit", $kieli).":\n\n";
+  $body .= t("Seurantakoodit", $kieli).":\n\n";
 
-    while ($seurantakoodit_row = mysql_fetch_assoc($seurantakoodit_res)) {
+  while ($seurantakoodit_row = mysql_fetch_assoc($seurantakoodit_res)) {
+    if (stripos($seurantakoodit_row['rahtikirjanro'], "JJFI") !== FALSE or stripos($seurantakoodit_row['sscc_ulkoinen'], "JJFI") !== FALSE) {
+      $linkurl = "";
+      preg_match_all("/JJFI ?[0-9]{6} ?[0-9]{11}/", $seurantakoodit_row['rahtikirjanro']." ".$seurantakoodit_row['sscc_ulkoinen'], $match);
+
+      foreach ($match[0] as $nro) {
+        $nro = str_replace(" ", "", $nro);
+        $linkurl .= "http://www.posti.fi/henkiloasiakkaat/seuranta/#/lahetys/{$nro}";
+      }
+      $body .= "{$linkurl}\n\n";
+    }
+    elseif (stripos(strtolower($laskurow["toimitustapa"]), "mypack") !== FALSE and !empty($seurantakoodit_row['rahtikirjanro'])) {
+      foreach (explode(" ", $seurantakoodit_row['rahtikirjanro']) as $mypnro) {
+        $linkurl .= "http://www.postnord.fi/fi/yritysasiakkaat/asiakaspalvelu/sahkoinen-asiointi/Sivut/Lahetysten-seuranta.aspx?view=item&itemid={$mypnro}";
+      }
+      $body .= "{$linkurl}\n\n";
+    }
+    else {
       $body .= "{$seurantakoodit_row['rahtikirjanro']}\n\n";
     }
   }

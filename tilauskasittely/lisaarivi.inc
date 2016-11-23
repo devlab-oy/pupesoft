@@ -514,19 +514,39 @@ else {
 
 if ((!isset($from_tee_jt_tilaus) or !$from_tee_jt_tilaus) and
   $kpl > 0 and
-  (($trow['myynti_era'] > 0 and in_array($yhtiorow['myyntiera_pyoristys'], array('K', 'S'))) or $trow['minimi_era'] > 0) and
-  (((in_array($rivityyppi, array('L', 'E')) and in_array($yhtiorow['myyntiera_pyoristys'], array('K', 'S'))) or ($rivityyppi == 'G' and $yhtiorow['myyntiera_pyoristys'] == 'S')) and (!isset($varastosiirtotyyppi) or !in_array($varastosiirtotyyppi, array('P', 'K')))) and
   $rivitunnus == 0 and
   (in_array($toim, array('RIVISYOTTO', 'PIKATILAUS', 'ENNAKKO', 'EXTRANET', 'SIIRTOLISTA')) or ($kutsuja == "EDITILAUS" and $edi_tyyppi != "magento"))
 ) {
 
   $org_kpl = $kpl;
 
-  if ($kpl < $trow['minimi_era']) {
+  // Halutaan pyöristää minimimäärään, jos
+  // kyseessä on myyntitilausrivi
+  // tuotteella on minimimäärä asetettu
+  // syötetty määrä on alle minimimäärän
+  // minimimaara_pyoristys K = pyöristetään aina
+  //  tai minimimaara_pyoristys E = pyöristetään vain extranetissä
+  $minimimaara_pyoristys = true;
+  $minimimaara_pyoristys &= ($rivityyppi == 'L');
+  $minimimaara_pyoristys &= ($trow['minimi_era'] > 0);
+  $minimimaara_pyoristys &= ($kpl < $trow['minimi_era']);
+  $minimimaara_pyoristys &= ($yhtiorow['minimimaara_pyoristys'] == 'K' or ($yhtiorow['minimimaara_pyoristys'] == 'E' and !empty($kukarow['extranet'])));
+
+  if ($minimimaara_pyoristys) {
     $kpl = $trow['minimi_era'];
   }
 
-  if (in_array($yhtiorow['myyntiera_pyoristys'], array('K', 'S'))) {
+  // Halutaan pyöristää lähimpään myyntierään, jos
+  // myyntierä on asetettu
+  // kyseessä on myynti- tai ennakkotilausrivi ja parametrit on kunnossa
+  //   tai kyseessä on siirtolista ja parametrit on kunnossa
+  // varastosiirtotyyppi ei ole asetettu tai se ei ole P, K
+  $myyntieran_pyoristys = true;
+  $myyntieran_pyoristys &= ($trow['myynti_era'] > 0);
+  $myyntieran_pyoristys &= ((in_array($rivityyppi, array('L', 'E')) and in_array($yhtiorow['myyntiera_pyoristys'], array('K', 'S'))) or ($rivityyppi == 'G' and $yhtiorow['myyntiera_pyoristys'] == 'S'));
+  $myyntieran_pyoristys &= (!isset($varastosiirtotyyppi) or !in_array($varastosiirtotyyppi, array('P', 'K')));
+
+  if ($myyntieran_pyoristys) {
     if ($kpl <= $trow['myynti_era']) {
       $kpl = $trow['myynti_era'];
     }

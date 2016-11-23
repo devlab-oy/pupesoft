@@ -21997,7 +21997,6 @@ if (!function_exists("pupesoft_sahkoposti")) {
       $content .= "Content-Transfer-Encoding: quoted-printable\n\n";
 
       if ($email_ctype == "HTML") {
-
         if ($yhtiorow["kayttoliittyma"] == "U") {
           $css = $yhtiorow['css'];
         }
@@ -22005,12 +22004,14 @@ if (!function_exists("pupesoft_sahkoposti")) {
           $css = $yhtiorow['css_classic'];
         }
 
-        $content .= "\n<head>\n";
-        $content .= "<style type='text/css'>{$css}</style>\n";
-        $content .= "</head>\n";
+        $html_email_body  = "\n<head>\n";
+        $html_email_body .= "<style type='text/css'>{$css}</style>\n";
+        $html_email_body .= "</head>\n";
+
+        $email_body = $html_email_body.$email_body;
       }
 
-      $content .= $email_body."\n\n";
+      $content .= quoted_printable_encode($email_body)."\n\n";
     }
 
     $content .= "--$bound";

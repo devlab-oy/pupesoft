@@ -3797,6 +3797,18 @@ if ($fieldname == "myyntiera_pyoristys" ) {
   $jatko = 0;
 }
 
+if ($fieldname == "minimimaara_pyoristys" ) {
+  $sel = array($trow[$i] => 'selected') + array('', 'K', 'E');
+
+  $ulos  = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+  $ulos .= "<option value=''>".t("Myyntirivin määrää ei pyöristetä minimimäärään")."</option>";
+  $ulos .= "<option value='K' {$sel['K']}>".t("Myyntirivin määrä pyöristetään minimimäärään, jos tilataan alle minimimärän")."</option>";
+  $ulos .= "<option value='E' {$sel['E']}>".t("Myyntirivin määrä pyöristetään minimimäärään ainoastaan Extranetissä, jos tilataan alle minimimärän")."</option>";
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
 if ($fieldname == "ostoera_pyoristys" ) {
 
   $sela = $selb = "";

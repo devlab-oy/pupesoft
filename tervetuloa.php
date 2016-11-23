@@ -209,7 +209,7 @@ if (!isset($tee) or $tee == '') {
   else {
     $kieli = $yhtiorow['kieli'];
   }
-  
+
   // Näytetään käyttäjäkohtaiset työmääräykset
   $tyojonosql = "SELECT lasku.tunnus,
                  lasku.nimi,

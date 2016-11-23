@@ -9,12 +9,6 @@ require "inc/parametrit.inc";
 
 echo "<font class='head'>".t("Tervetuloa pupesoft-j‰rjestelm‰‰n")."</font><hr><br>";
 
-
-require_once "inc/unifaun_send.inc";
-
-$unifaun = Unifaun::xmlposting(1, 1, 1, 1, 1);
-
-
 if (!isset($tee) or $tee == '') {
 
   if (file_exists("tervetuloa_".$kukarow["yhtio"].".inc")) {
@@ -215,7 +209,7 @@ if (!isset($tee) or $tee == '') {
   else {
     $kieli = $yhtiorow['kieli'];
   }
-  
+
   // N‰ytet‰‰n k‰ytt‰j‰kohtaiset tyˆm‰‰r‰ykset
   $tyojonosql = "SELECT lasku.tunnus,
                  lasku.nimi,

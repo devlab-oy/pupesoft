@@ -1990,7 +1990,7 @@ if ($tee == 'P') {
             $tulostettulisa = "";
 
             // Merkataan tieto tulostetuksi jos tulostustapa on hetitulostus ja lappu on jo tullut Unifaunista
-            if ($laskurow['tulostustapa'] == 'H' and ($laskurow["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc' or $laskurow["rahtikirja"] == 'rahtikirja_unifaun_uo_siirto.inc')) {
+            if ($laskurow['tulostustapa'] == 'H' and preg_match("/rahtikirja_unifaun_(ps|uo|xp)_siirto\.inc/", $laskurow["rahtikirja"])) {
               $tulostettulisa = " , tulostettu = now() ";
             }
 
@@ -4003,8 +4003,7 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
         // jos unifaun + hetitulostus tai erätulostus
         // --> ei tulosteta osoitelappuja Pupessa
         $_ei_koonti = ($otsik_row['tulostustapa'] == 'H' or $otsik_row['tulostustapa'] == 'E');
-        $_onko_unifaun = ($otsik_row["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc');
-        $_onko_unifaun = ($_onko_unifaun or $otsik_row["rahtikirja"] == 'rahtikirja_unifaun_uo_siirto.inc');
+        $_onko_unifaun = preg_match("/rahtikirja_unifaun_(ps|uo|xp)_siirto\.inc/", $otsik_row["rahtikirja"]);
 
         if (!empty($oslappkpl) and $_onko_unifaun and $_ei_koonti) {
           $yhtiorow["oletus_oslappkpl"] = 0;

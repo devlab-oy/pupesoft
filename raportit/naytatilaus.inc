@@ -284,6 +284,10 @@ if ($laskurow["tila"] != "O" and $laskurow["tila"] != "K") {
       // Unifaunilla on oma seuranta
       if ($yhtiorow['kerayserat'] != 'K' and !empty($unifaun_url_key) and stripos($rakirrow["rahtikirja"], "unifaun") !== FALSE) {
         foreach (explode("\n", $rakirrow['sscc_ulkoinen']) as $rakirno) {
+          if (empty($rakirno)) {
+            $rakirno = "Unifaun Track & Trace";
+          }
+
           $linkurl .= "<a class='linkki' href='https://www.unifaunonline.com/ext.uo.fi.track?key={$unifaun_url_key}&order={$laskurow['tunnus']}' target='_blank'>{$rakirno}</a><br>";
         }
       }

@@ -193,7 +193,7 @@ if ($tee == 'tulosta') {
 
     // Ollaan tässä skriptissä tulostamassa erärahtikirjoja
     // Unifaun keississä tämä tarkoittaa, että kutsutaan _closeWithPrinter() metodia
-    if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE and isset($tulosta_rahtikirjat_nappulatsukka) and ($toitarow["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc' or $toitarow["rahtikirja"] == 'rahtikirja_unifaun_uo_siirto.inc')) {
+    if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE and isset($tulosta_rahtikirjat_nappulatsukka) and preg_match("/rahtikirja_unifaun_(ps|uo)_siirto\.inc/", $toitarow["rahtikirja"])) {
       $tee = "close_with_printer";
     }
   }
@@ -206,8 +206,10 @@ if ($tee == 'tulosta') {
   }
 }
 
-$_onko_unifaun = ($toitarow["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc');
-$_onko_unifaun = ($_onko_unifaun or $toitarow["rahtikirja"] == 'rahtikirja_unifaun_uo_siirto.inc');
+$_onko_unifaun = preg_match("/rahtikirja_unifaun_(ps|uo|xp)_siirto\.inc/", $toitarow["rahtikirja"]);
+// katsotaan vielä erikseen onko XML Posting käytössä, koska
+// silloin tehdään toimitusvahvistukset ja Magento-kuittaukset
+$_onko_unifaun_xp = preg_match("/rahtikirja_unifaun_(xp)_siirto\.inc/", $toitarow["rahtikirja"]);
 
 // Tulostetaan rahtikirja tai kutsutaan unifaunin _closeWithPrinter-metodia
 if ($tee == 'tulosta' or $tee == 'close_with_printer') {
@@ -724,7 +726,7 @@ if ($tee == 'tulosta') {
 
       // Katsotaan onko tämä koontikuljetus
       if ($toitarow["tulostustapa"] == "L" or $toitarow["tulostustapa"] == "K") {
-        // Toimitusosoitteeksi halutaan tässä tapauksessa toimitustavan takaa löytyvät
+        //Toimitusosoitteeksi halutaan tässä tapauksessa toimitustavan takaa löytyvät
         $rakir_row["toim_maa"]    = $toitarow["toim_maa"];
         $rakir_row["toim_nimi"]    = $toitarow["toim_nimi"];
         $rakir_row["toim_nimitark"]  = $toitarow["toim_nimitark"];
@@ -963,10 +965,10 @@ if ($tee == 'tulosta') {
 
       // jos kyseessä on jälkivaatimus
       if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE and $rakir_row['jv'] != '') {
-        $tee = "TARKISTA";
-        $laskutakaikki = "KYLLA";
-        $silent = "KYLLA";
-        $laskutettavat = $otunnukset;
+        $tee       = "TARKISTA";
+        $laskutakaikki   = "KYLLA";
+        $silent       = "KYLLA";
+        $laskutettavat   = $otunnukset;
 
         if ($rakirsyotto_laskutulostin != '') {
           $valittu_tulostin = $rakirsyotto_laskutulostin;
@@ -1044,7 +1046,7 @@ if ($tee == 'tulosta') {
       if (!isset($nayta_pdf)) echo "$rahinta $jvtext<br>";
 
       // Kopsutulostus toistaiseksi vain A4-paperille unifaun keississä
-      if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") !== FALSE and ($toitarow["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc' or $toitarow["rahtikirja"] == 'rahtikirja_unifaun_uo_siirto.inc')) {
+      if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") !== FALSE and preg_match("/rahtikirja_unifaun_(ps|uo|xp)_siirto\.inc/", $toitarow["rahtikirja"])) {
         $toitarow["rahtikirja"] = "rahtikirja_pdf.inc";
       }
 
@@ -1093,7 +1095,7 @@ if ($tee == 'tulosta') {
       $_desadv = (strpos($rakir_row['toimitusvahvistus'], 'desadv') !== false);
 
       // Lähetetään toimitusvahvistus
-      if ($rakir_row['toimitusvahvistus'] != '' and (!$_onko_unifaun or $_desadv)) {
+      if ($rakir_row['toimitusvahvistus'] != '' and (!$_onko_unifaun or $_onko_unifaun_xp or $_desadv)) {
         pupesoft_toimitusvahvistus($otunnukset, $tunnukset, $rahtikirjanro);
       }
 
@@ -1105,7 +1107,7 @@ if ($tee == 'tulosta') {
       // Katsotaan onko Magento käytössä, silloin merkataan tilaus toimitetuksi Magentoon kun rahtikirja tulostetaan
       $_magento_kaytossa = (!empty($magento_api_tt_url) and !empty($magento_api_tt_usr) and !empty($magento_api_tt_pas));
 
-      if ($_magento_kaytossa and !$_onko_unifaun) {
+      if ($_magento_kaytossa and (!$_onko_unifaun or $_onko_unifaun_xp)) {
         $query = "SELECT asiakkaan_tilausnumero, tunnus
                   FROM lasku
                   WHERE yhtio                 = '$kukarow[yhtio]'
@@ -1276,7 +1278,7 @@ if ($tee == 'tulosta') {
       if ($_onko_unifaun and $_tulostustapa and $_paktiedot) {
         $tee = '';
       }
-      elseif ($toitarow['tulostustapa'] == 'H' or $toitarow['tulostustapa'] == 'K' or $toitarow["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc' or $toitarow["rahtikirja"] == 'rahtikirja_unifaun_uo_siirto.inc') {
+      elseif ($toitarow['tulostustapa'] == 'H' or $toitarow['tulostustapa'] == 'K' or preg_match("/rahtikirja_unifaun_(ps|uo|xp)_siirto\.inc/", $toitarow["rahtikirja"])) {
         $tee = 'XXX';
       }
       else {

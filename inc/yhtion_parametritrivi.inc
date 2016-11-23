@@ -3723,6 +3723,7 @@ if ($fieldname == "pakollinen_varasto") {
 
   $ulos .= "<option value = ''>".t("Varaston valinta ei pakollinen. Tilaukselle voidaan lis‰t‰ rivej‰ useasta varastosta")."</option>";
   $ulos .= "<option value = 'K'{$sel}>".t("Varaston valinta on pakollinen. Tilaukselle voidaan lis‰t‰ rivej‰ vain yhdest‰ varastosta: myyntitilauksella, ostotilauksella, tarjouksella ja reklamaatiolla")."</option>";
+  $ulos .= "</select></td>";
 
   $jatko = 0;
 }
@@ -3736,6 +3737,18 @@ if ($fieldname == "ulkoinen_jarjestelma") {
   $ulos .= "<option value = ''>".t("Varaston ulkoinen j‰rjestelm‰ toimii ker‰yksen ja saapumisen yhteydess‰")."</option>";
   $ulos .= "<option value = 'K'{$sel['K']}>".t("Varaston ulkoinen j‰rjestelm‰ toimii vain ker‰yksen yhteydess‰")."</option>";
   $ulos .= "<option value = 'S'{$sel['S']}>".t("Varaston ulkoinen j‰rjestelm‰ toimii vain saapumisen yhteydess‰")."</option>";
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
+if ($fieldname == "ulkoinen_jarjestelma_lukko") {
+  $sel = array($trow[$i] => 'selected') + array('K' => '');
+
+  $ulos  = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+  $ulos .= "<option value = ''>".t("Ulkoinen j‰rjestelm‰‰n l‰hetettyj‰ tilauksia ei saa muokata")."</option>";
+  $ulos .= "<option value = 'K'{$sel['K']}>".t("Ulkoinen j‰rjestelm‰‰n l‰hetettyj‰ tilauksia saa muokata")."</option>";
+  $ulos .= "</select></td>";
 
   $jatko = 0;
 }

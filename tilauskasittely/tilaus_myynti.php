@@ -1027,7 +1027,8 @@ $check &= ($laskurow['tila'] == 'N' or
           ($laskurow['tila'] == 'L' and in_array($laskurow['alatila'], array('A','B','BD','C'))) or
           ($laskurow['tila'] == 'G' and in_array($laskurow['alatila'], array('','J','KJ','A','B'))));
 
-if ($check) {
+// Tilaukset ei saa mennä ikinä lukkoon, jos parametri ulkoinen_jarjestelma_lukko = K
+if ($check and $yhtiorow['ulkoinen_jarjestelma_lukko'] != 'K') {
   $muokkauslukko = 'LUKOSSA';
 }
 

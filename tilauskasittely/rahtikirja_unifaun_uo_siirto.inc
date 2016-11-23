@@ -62,7 +62,7 @@ if ($yhtiorow['kerayserat'] != 'K' and $kollityht > 0) {
     else {
       $unifaun = Unifaun::xmlposting($unifaun_xp_devi, $unifaun_xp_user, $unifaun_xp_pass, $unifaun_xp_fail, $unifaun_xp_succ);
     }
-    echo "FAIL";
+
     $postirow['shipment_unique_id'] = $postirow['tunnus'];
     $postirow['kuljetusohjeet']   = $kuljetusohjeet;
 

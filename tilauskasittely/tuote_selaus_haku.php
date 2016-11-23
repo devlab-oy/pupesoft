@@ -2084,15 +2084,10 @@ function tarkista_tilausrivi() {
 
             $mimyhuom = "HUOM: Rivin m‰‰r‰ on pyˆristetty";
 
-            if ($trow["minimi_era"] > 0) {
+            if ($trow["minimi_era"] == $kpl_st and in_array($yhtiorow['minimimaara_pyoristys'], array('K', 'E'))) {
               $mimyhuom .= " minimier‰‰n";
             }
-
-            if ($trow['myynti_era'] > 0 and $yhtiorow['myyntiera_pyoristys'] == 'K') {
-              if ($trow["minimi_era"] > 0) {
-                $mimyhuom .= " tai";
-              }
-
+            elseif ($trow['myynti_era'] > 0 and in_array($yhtiorow['myyntiera_pyoristys'], array('K', 'S'))) {
               $mimyhuom .= " t‰yteen myyntier‰‰n";
             }
 

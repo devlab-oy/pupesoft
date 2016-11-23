@@ -14,7 +14,7 @@ $kieli = strtolower($tilvahasiakas['kieli']);
 
 $virexx = 0;
 $komento = array();
-echo "17: $laskurow[tilausvahvistus] <br><br>";
+
 // asiakkaan sähköpostiin
 if (strpos($laskurow['tilausvahvistus'], 'S') !== FALSE) {
 
@@ -61,7 +61,7 @@ if (strpos($laskurow['tilausvahvistus'], 'O') !== FALSE) {
     $komento["Tilausvahvistus"] = "email";
   }
 }
-echo "64: $laskurow[tilausvahvistus], $virexx, $toim  <br><br>";
+
 // lähetetään PDF vahvistus jos meillä on P kirjain vahvistuksessa
 if ($virexx == 0 and strpos($laskurow['tilausvahvistus'], 'P') !== FALSE) {
   $toim_save = $toim;
@@ -402,7 +402,7 @@ if ($virexx == 0 and strpos($laskurow['tilausvahvistus'], 'P') === FALSE) {
       "body"         => $ulos,
       "attachements" => $_attachments
     );
-    
+
     pupesoft_sahkoposti($parametri);
   }
 

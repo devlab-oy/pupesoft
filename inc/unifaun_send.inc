@@ -222,24 +222,35 @@ class Unifaun {
       $result = curl_exec($ch);
 
       if ($result === FALSE) {
-        echo "<font class='error'>VIRHE:</font><br>\n";
+        echo "<font class='error'>VIRHE: \n";
         echo curl_errno($ch) . " - " . curl_error($ch) . "</font><br>";
         exit(1);
       }
       else {
-
         $basefile = basename($filenimi);
 
-        // PSEUDO-COODIA
-        $KAIKKIOK = TRUE;
+        $xml = simplexml_load_string($result);
 
-        if ($KAIKKIOK and !empty($ftpsucc)) {
+        foreach ($xml->val as $val) {
+          if ($val->attributes()->n == "status") {
+            $xmlstatus = $val;
+          }
+          if ($val->attributes()->n == "message") {
+            $xmlmessage = $val;
+          }
+        }
+
+        if ($xmlstatus == "201" and !empty($ftpsucc)) {
           // Siirret‰‰n faili talteen jos siirto onnasi ja ok failit halutaan tallentaa
           rename($filenimi, $ftpsucc."/".$basefile);
         }
         elseif (!empty($ftpfail)) {
           // Siirret‰‰n faili outboxiin odottamaan uutta yrityst‰ jos siirto feilasi
           rename($filenimi, $ftpfail."/".$basefile);
+
+          echo "<font class='error'>VIRHE: \n";
+          echo "$xmlstatus, $xmlmessage</font><br>";
+          exit(1);
         }
       }
 

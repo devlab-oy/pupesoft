@@ -113,33 +113,51 @@ if ($toimitusvahvistus_email_lahetys) {
 
   $body .= "\n";
 
-  $query = "SELECT if(sscc_ulkoinen != '', sscc_ulkoinen, rahtikirjanro) rahtikirjanro
-            FROM rahtikirjat
-            WHERE tunnus IN ({$tunnukset})
-            AND yhtio    = '{$kukarow['yhtio']}'";
-  $seurantakoodit_res = pupe_query($query);
+  // Jos Unifaun Track & Trace sekä XML Posting, laitetaan pelkkä seurantaosoite
+  $unifaun_xmlposting = ($unifaun_xp_developerid != "" and $unifaun_xp_user != "" and $unifaun_xp_pin != "");
 
-  $body .= t("Seurantakoodit", $kieli).":\n\n";
+  if (!empty($unifaun_url_key)) {
+    $query = "SELECT distinct rahtikirjanro
+              FROM rahtikirjat
+              WHERE tunnus IN ({$tunnukset})
+              AND yhtio    = '{$kukarow['yhtio']}'";
+    $seurantakoodit_res = pupe_query($query);
 
-  while ($seurantakoodit_row = mysql_fetch_assoc($seurantakoodit_res)) {
-    if (stripos($seurantakoodit_row['rahtikirjanro'], "JJFI") !== FALSE or stripos($seurantakoodit_row['sscc_ulkoinen'], "JJFI") !== FALSE) {
-      $linkurl = "";
-      preg_match_all("/JJFI ?[0-9]{6} ?[0-9]{11}/", $seurantakoodit_row['rahtikirjanro']." ".$seurantakoodit_row['sscc_ulkoinen'], $match);
+    $body .= t("Seurantalinkit", $kieli).":\n\n";
 
-      foreach ($match[0] as $nro) {
-        $nro = str_replace(" ", "", $nro);
-        $linkurl .= "http://www.posti.fi/henkiloasiakkaat/seuranta/#/lahetys/{$nro}";
-      }
-      $body .= "{$linkurl}\n\n";
+    while ($seurantakoodit_row = mysql_fetch_assoc($seurantakoodit_res)) {
+      $body .= "https://www.unifaunonline.com/ext.uo.fi.track?key={$unifaun_url_key}&order={$seurantakoodit_row['rahtikirjanro']}\n\n";
     }
-    elseif (stripos(strtolower($laskurow["toimitustapa"]), "mypack") !== FALSE and !empty($seurantakoodit_row['rahtikirjanro'])) {
-      foreach (explode(" ", $seurantakoodit_row['rahtikirjanro']) as $mypnro) {
-        $linkurl .= "http://www.postnord.fi/fi/yritysasiakkaat/asiakaspalvelu/sahkoinen-asiointi/Sivut/Lahetysten-seuranta.aspx?view=item&itemid={$mypnro}";
+  }
+  else {
+    $query = "SELECT if(sscc_ulkoinen != '', sscc_ulkoinen, rahtikirjanro) rahtikirjanro
+              FROM rahtikirjat
+              WHERE tunnus IN ({$tunnukset})
+              AND yhtio    = '{$kukarow['yhtio']}'";
+    $seurantakoodit_res = pupe_query($query);
+
+    $body .= t("Seurantakoodit", $kieli).":\n\n";
+
+    while ($seurantakoodit_row = mysql_fetch_assoc($seurantakoodit_res)) {
+      if (stripos($seurantakoodit_row['rahtikirjanro'], "JJFI") !== FALSE or stripos($seurantakoodit_row['sscc_ulkoinen'], "JJFI") !== FALSE) {
+        $linkurl = "";
+        preg_match_all("/JJFI ?[0-9]{6} ?[0-9]{11}/", $seurantakoodit_row['rahtikirjanro']." ".$seurantakoodit_row['sscc_ulkoinen'], $match);
+
+        foreach ($match[0] as $nro) {
+          $nro = str_replace(" ", "", $nro);
+          $linkurl .= "http://www.posti.fi/henkiloasiakkaat/seuranta/#/lahetys/{$nro}";
+        }
+        $body .= "{$linkurl}\n\n";
       }
-      $body .= "{$linkurl}\n\n";
-    }
-    else {
-      $body .= "{$seurantakoodit_row['rahtikirjanro']}\n\n";
+      elseif (stripos(strtolower($laskurow["toimitustapa"]), "mypack") !== FALSE and !empty($seurantakoodit_row['rahtikirjanro'])) {
+        foreach (explode(" ", $seurantakoodit_row['rahtikirjanro']) as $mypnro) {
+          $linkurl .= "http://www.postnord.fi/fi/yritysasiakkaat/asiakaspalvelu/sahkoinen-asiointi/Sivut/Lahetysten-seuranta.aspx?view=item&itemid={$mypnro}";
+        }
+        $body .= "{$linkurl}\n\n";
+      }
+      else {
+        $body .= "{$seurantakoodit_row['rahtikirjanro']}\n\n";
+      }
     }
   }
 

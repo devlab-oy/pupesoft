@@ -1393,8 +1393,6 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
     //"ei_erikoisale" koska rivillä ei haluta vähentää erikoisalea hinnasta, vaan se näytetään erikseen yhteenvedossa
     $query_ale_lisa = generoi_alekentta("O", '', 'ei_erikoisale');
 
-    $ale_query_select_lisa = generoi_alekentta_select('erikseen', 'O');
-
     //Listataan tilauksessa olevat tuotteet
     $query = "SELECT
               tilausrivi.nimitys,
@@ -1403,22 +1401,7 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
                 tilausrivi.hyllyvali,
                 tilausrivi.hyllytaso) paikka,
               tilausrivi.tuoteno,
-              tuotteen_toimittajat.toim_tuoteno,
-              tuotteen_toimittajat.toim_nimitys,
-              tuotteen_toimittajat.valuutta,
               tilausrivi.tilkpl tilattu,
-              round(tilausrivi.tilkpl
-                * if (tuotteen_toimittajat.tuotekerroin = 0
-                  OR tuotteen_toimittajat.tuotekerroin is NULL,
-                    1, tuotteen_toimittajat.tuotekerroin),
-                    4) tilattu_ulk,
-              round((tilausrivi.varattu + tilausrivi.jt)
-                * tilausrivi.hinta
-                * if (tuotteen_toimittajat.tuotekerroin = 0
-                  OR tuotteen_toimittajat.tuotekerroin IS NULL,
-                    1,
-                    tuotteen_toimittajat.tuotekerroin)
-                * {$query_ale_lisa}, '$yhtiorow[hintapyoristys]') rivihinta,
               tilausrivi.alv,
               tilausrivi.toimaika,
               tilausrivi.kerayspvm,
@@ -1427,7 +1410,6 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
               tilausrivi.perheid,
               tilausrivi.perheid2,
               tilausrivi.hinta,
-              {$ale_query_select_lisa}
               tilausrivi.varattu varattukpl,
               tilausrivi.kommentti,
               $sorttauskentta,
@@ -1435,34 +1417,21 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
               tilausrivi.var2,
               tilausrivi.jaksotettu,
               tilausrivi.yksikko,
-              if(tuotteen_toimittajat.toim_yksikko!='', tuotteen_toimittajat.toim_yksikko, tuote.yksikko) toim_yksikko,
               tuote.tuotemassa,
               (tuote.tuoteleveys * tuote.tuotekorkeus * tuote.tuotesyvyys) AS tuotetilavuus,
               tuote.kehahin keskihinta,
               tuote.sarjanumeroseuranta,
-              tuotteen_toimittajat.ostohinta,
-              if(tuotteen_toimittajat.osto_era = 0, 1, tuotteen_toimittajat.osto_era) AS osto_era,
-              tuotteen_toimittajat.valuutta,
-              tuotteen_toimittajat.tunnus as tt_tunnus,
               tilausrivi.erikoisale,
               tilausrivi.ale1,
               tilausrivi.ale2,
               tilausrivi.ale3,
-              tilausrivin_lisatiedot.tilausrivitunnus,
-              tilausrivin_lisatiedot.tilausrivilinkki,
               tilausrivi.vahvistettu_maara,
               tilausrivi.vahvistettu_kommentti,
               tilausrivi.hinta_alkuperainen,
               tilausrivi.laadittu
               FROM tilausrivi
-              LEFT JOIN tuote ON tilausrivi.yhtio = tuote.yhtio
-                AND tilausrivi.tuoteno                      = tuote.tuoteno
-              LEFT JOIN tuotteen_toimittajat ON tuote.yhtio = tuotteen_toimittajat.yhtio
-                AND tuote.tuoteno                           = tuotteen_toimittajat.tuoteno
-                AND tuotteen_toimittajat.liitostunnus       = '$laskurow[liitostunnus]'
-              LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
-                AND tilausrivin_lisatiedot.tilausrivilinkki > 0
-                AND tilausrivin_lisatiedot.tilausrivilinkki = tilausrivi.tunnus)
+              JOIN tuote ON (tilausrivi.yhtio = tuote.yhtio
+                AND tilausrivi.tuoteno                      = tuote.tuoteno)
               WHERE tilausrivi.otunnus                      = '$kukarow[kesken]'
               and tilausrivi.yhtio                          = '$kukarow[yhtio]'
               and tilausrivi.tyyppi                         = 'O'
@@ -1583,7 +1552,94 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
 
       mysql_data_seek($presult, 0);
 
-      while ($prow = mysql_fetch_assoc($presult)) {
+      while ($_row = mysql_fetch_assoc($presult)) {
+
+        // Tuotteen toimittajan tiedot
+        $query = "SELECT
+                  tuotteen_toimittajat.toim_tuoteno,
+                  tuotteen_toimittajat.toim_nimitys,
+                  round(tilausrivi.tilkpl
+                    * if (tuotteen_toimittajat.tuotekerroin = 0
+                    OR tuotteen_toimittajat.tuotekerroin is NULL,
+                    1, tuotteen_toimittajat.tuotekerroin),
+                    4) tilattu_ulk,
+                  round((tilausrivi.varattu + tilausrivi.jt)
+                    * tilausrivi.hinta
+                    * if (tuotteen_toimittajat.tuotekerroin = 0
+                    OR tuotteen_toimittajat.tuotekerroin IS NULL,
+                    1,
+                    tuotteen_toimittajat.tuotekerroin)
+                    * {$query_ale_lisa}, '$yhtiorow[hintapyoristys]') rivihinta,
+                  if(tuotteen_toimittajat.toim_yksikko!='', tuotteen_toimittajat.toim_yksikko, tuote.yksikko) toim_yksikko,
+                  tuotteen_toimittajat.ostohinta,
+                  if(tuotteen_toimittajat.osto_era = 0, 1, tuotteen_toimittajat.osto_era) AS osto_era,
+                  tuotteen_toimittajat.valuutta,
+                  tuotteen_toimittajat.tunnus as tt_tunnus
+                  FROM tuotteen_toimittajat
+                    JOIN tilausrivi ON (tilausrivi.yhtio = tuotteen_toimittajat.yhtio
+                      AND tilausrivi.tuoteno = tuotteen_toimittajat.tuoteno)
+                    JOIN tuote ON (tuote.yhtio = tuotteen_toimittajat.yhtio
+                      AND tuote.tuoteno = tuotteen_toimittajat.tuoteno)
+                  WHERE tuotteen_toimittajat.yhtio      = '{$kukarow["yhtio"]}'
+                  AND tuotteen_toimittajat.tuoteno      = '{$prow["tuoteno"]}'
+                  AND tuotteen_toimittajat.liitostunnus = '{$laskurow["liitostunnus"]}'";
+        $tt_rivit = mysql_fetch_assoc(pupe_query($query));
+
+        // Myynnin puolen tiedot, jos niitä on
+        $query = "SELECT
+                  tilausrivin_lisatiedot.tilausrivitunnus,
+                  tilausrivin_lisatiedot.tilausrivilinkki
+                  FROM tilausrivin_lisatiedot
+                  WHERE tilausrivin_lisatiedot.yhtio = '{$kukarow["yhtio"]}'
+                  AND tilausrivin_lisatiedot.tilausrivilinkki > 0
+                  AND tilausrivin_lisatiedot.tilausrivilinkki = '{$prow["tunnus"]}'";
+        $tl_rivit = mysql_fetch_assoc(pupe_query($query));
+
+        $prow = array(
+          "nimitys" => "{$_row['nimitys']}",
+          "paikka" => "{$_row['paikka']}",
+          "tuoteno" => "{$_row['tuoteno']}",
+          "toim_tuoteno" => "{$tt_rivit['toim_tuoteno']}",
+          "toim_nimitys" => "{$tt_rivit['toim_nimitys']}",
+          "tilattu" => "{$_row['tilattu']}",
+          "tilattu_ulk" => "{$tt_rivit['tilattu_ulk']}",
+          "rivihinta" => "{$tt_rivit['rivihinta']}",
+          "alv" => "{$_row['alv']}",
+          "toimaika" => "{$_row['toimaika']}",
+          "kerayspvm" => "{$_row['kerayspvm']}",
+          "uusiotunnus" => "{$_row['uusiotunnus']}",
+          "tunnus" => "{$_row['tunnus']}",
+          "perheid" => "{$_row['perheid']}",
+          "perheid2" => "{$_row['perheid2']}",
+          "hinta" => "{$_row['hinta']}",
+          "varattukpl" => "{$_row['varattukpl']}",
+          "kommentti" => "{$_row['kommentti']}",
+          "sorttauskentta" => "{$_row['sorttauskentta']}",
+          "var" => "{$_row['var']}",
+          "var2" => "{$_row['var2']}",
+          "jaksotettu" => "{$_row['jaksotettu']}",
+          "yksikko" => "{$_row['yksikko']}",
+          "toim_yksikko" => "{$tt_rivit['toim_yksikko']}",
+          "tuotemassa" => "{$_row['tuotemassa']}",
+          "tuotetilavuus" => "{$_row['tuotetilavuus']}",
+          "keskihinta" => "{$_row['keskihinta']}",
+          "sarjanumeroseuranta" => "{$_row['sarjanumeroseuranta']}",
+          "ostohinta" => "{$tt_rivit['ostohinta']}",
+          "osto_era" => "{$tt_rivit['osto_era']}",
+          "valuutta" => "{$tt_rivit['valuutta']}",
+          "tt_tunnus" => "{$tt_rivit['tt_tunnus']}",
+          "erikoisale" => "{$_row['erikoisale']}",
+          "ale1" => "{$_row['ale1']}",
+          "ale2" => "{$_row['ale2']}",
+        "ale3" => "{$_row['ale3']}",
+        "tilausrivitunnus" => "{$tl_rivit['tilausrivitunnus']}",
+        "tilausrivilinkki" => "{$tl_rivit['tilausrivilinkki']}",
+        "vahvistettu_maara" => "{$_row['vahvistettu_maara']}",
+        "vahvistettu_kommentti" => "{$_row['vahvistettu_kommentti']}",
+        "hinta_alkuperainen" => "{$_row['hinta_alkuperainen']}",
+        "laadittu" => "{$_row['laadittu']}"
+      );
+
         $divnolla++;
         $erikoisale_summa += (($prow['rivihinta'] * ($laskurow['erikoisale'] / 100)) * -1);
         $yhteensa += $prow["rivihinta"];

@@ -1430,7 +1430,7 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
               tilausrivi.hinta_alkuperainen,
               tilausrivi.laadittu
               FROM tilausrivi
-              JOIN tuote ON (tilausrivi.yhtio = tuote.yhtio
+              LEFT JOIN tuote ON (tilausrivi.yhtio = tuote.yhtio
                 AND tilausrivi.tuoteno                      = tuote.tuoteno)
               WHERE tilausrivi.otunnus                      = '$kukarow[kesken]'
               and tilausrivi.yhtio                          = '$kukarow[yhtio]'
@@ -1631,14 +1631,14 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
           "erikoisale" => "{$_row['erikoisale']}",
           "ale1" => "{$_row['ale1']}",
           "ale2" => "{$_row['ale2']}",
-        "ale3" => "{$_row['ale3']}",
-        "tilausrivitunnus" => "{$tl_rivit['tilausrivitunnus']}",
-        "tilausrivilinkki" => "{$tl_rivit['tilausrivilinkki']}",
-        "vahvistettu_maara" => "{$_row['vahvistettu_maara']}",
-        "vahvistettu_kommentti" => "{$_row['vahvistettu_kommentti']}",
-        "hinta_alkuperainen" => "{$_row['hinta_alkuperainen']}",
-        "laadittu" => "{$_row['laadittu']}"
-      );
+          "ale3" => "{$_row['ale3']}",
+          "tilausrivitunnus" => "{$tl_rivit['tilausrivitunnus']}",
+          "tilausrivilinkki" => "{$tl_rivit['tilausrivilinkki']}",
+          "vahvistettu_maara" => "{$_row['vahvistettu_maara']}",
+          "vahvistettu_kommentti" => "{$_row['vahvistettu_kommentti']}",
+          "hinta_alkuperainen" => "{$_row['hinta_alkuperainen']}",
+          "laadittu" => "{$_row['laadittu']}"
+        );
 
         $divnolla++;
         $erikoisale_summa += (($prow['rivihinta'] * ($laskurow['erikoisale'] / 100)) * -1);

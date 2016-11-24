@@ -33136,6 +33136,7 @@ if (!function_exists("hae_tuoteperhe")) {
 if (!function_exists('pupesoft_toimitusvahvistus')) {
   // Tarvitaan $otunnukset jossa on tilauksien tunnukset
   // Tarvitaan $tunnukset jossa on rahtikirjojen tunnukset
+  // Tarvitaan $rahtikirjanro jossa on rahtikirjan rahtikirjanro (desadvia varten)
 
   function pupesoft_toimitusvahvistus($otunnukset, $tunnukset = 0, $rahtikirjanro = 0) {
     global $kukarow, $yhtiorow, $toim, $desadv_host, $desadv_user, $desadv_pass, $desadv_path, $pupe_root_polku;

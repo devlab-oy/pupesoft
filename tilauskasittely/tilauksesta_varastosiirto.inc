@@ -252,6 +252,12 @@ if (!function_exists('luo_varastosiirtorivi')) {
 
     $trow = hae_tuote($tilausrivi['tuoteno']);
 
+    // varastosiirtotyyppi:
+    // N = normaali
+    // K = kirjanpidollinen
+    // G = relex transfer
+    // P = palautus
+
     $tuoteno_echo     = $trow['tuoteno'];
     $yksikko_echo     = $trow['yksikko'];
     $toimaika         = $laskurow["toimaika"];

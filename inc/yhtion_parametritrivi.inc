@@ -3783,13 +3783,10 @@ if ($fieldname == "kerayserat") {
 }
 
 if ($fieldname == "myyntiera_pyoristys" ) {
-
-  $sela = $selb = "";
-
   $sel = array($trow[$i] => 'selected') + array('', 'K', 'S');
 
   $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">
-        <option value = ' '>".t("Myyntirivin määrää ei pyöristetä seuraavaan täyteen myyntierään")."</option>
+        <option value = ''>".t("Määrää ei pyöristetä myyntierään")."</option>
         <option value = 'K' {$sel['K']}>".t("Myyntirivin ja ennakkotilausrivin määrä pyöristetään seuraavaan täyteen myyntierään")."</option>
         <option value = 'S' {$sel['S']}>".t("Myyntirivin, ennakkotilausrivin ja siirtorivin määrä pyöristetään seuraavaan täyteen myyntierään")."</option>
       </select></td>";
@@ -3801,7 +3798,7 @@ if ($fieldname == "minimimaara_pyoristys" ) {
   $sel = array($trow[$i] => 'selected') + array('', 'K', 'S', 'E');
 
   $ulos  = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
-  $ulos .= "<option value=''>".t("Myyntirivin määrää ei pyöristetä minimimäärään")."</option>";
+  $ulos .= "<option value=''>".t("Määrää ei pyöristetä minimimäärään")."</option>";
   $ulos .= "<option value='K' {$sel['K']}>".t("Myyntirivin ja ennakkotilausrivin määrä pyöristetään minimimäärään, jos tilataan alle minimimärän")."</option>";
   $ulos .= "<option value='S' {$sel['S']}>".t("Myyntirivin, ennakkotilausrivin ja siirtorivin määrä pyöristetään minimimäärään, jos tilataan alle minimimärän")."</option>";
   $ulos .= "<option value='E' {$sel['E']}>".t("Myyntirivin määrä pyöristetään minimimäärään ainoastaan Extranetissä, jos tilataan alle minimimärän")."</option>";

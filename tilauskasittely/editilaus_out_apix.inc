@@ -1,6 +1,6 @@
 <?php
 
-# Tilauksien tunnukset tulevat $kaikki_lotsikot muuttujassa
+# Tilauksien tunnukset tulevat $otunnukset muuttujassa
 $query = "SELECT *
           FROM lasku
           WHERE yhtio = '{$kukarow['yhtio']}'

@@ -512,9 +512,11 @@ else {
   unset($varasto);
 }
 
+// varastosiirtotyyppi ei saa olla K kirjanpidollinen eikä P palautus
 if ((!isset($from_tee_jt_tilaus) or !$from_tee_jt_tilaus) and
   $kpl > 0 and
   $rivitunnus == 0 and
+  (!isset($varastosiirtotyyppi) or !in_array($varastosiirtotyyppi, array('P', 'K'))) and
   (in_array($toim, array('RIVISYOTTO', 'PIKATILAUS', 'ENNAKKO', 'EXTRANET', 'SIIRTOLISTA')) or ($kutsuja == "EDITILAUS" and $edi_tyyppi != "magento"))
 ) {
 
@@ -531,12 +533,10 @@ if ((!isset($from_tee_jt_tilaus) or !$from_tee_jt_tilaus) and
   // tuotteella on minimimäärä asetettu
   // syötetty määrä on alle minimimäärän
   // yhtiön parametrit vastaa rivityyppiä
-  // varastosiirtotyyppi ei ole asetettu tai se ei ole P, K
   $minimimaara_pyoristys = true;
   $minimimaara_pyoristys &= ($trow['minimi_era'] > 0);
   $minimimaara_pyoristys &= ($kpl < $trow['minimi_era']);
   $minimimaara_pyoristys &= ($pyoristys_k or $pyoristys_e or $pyoristys_s);
-  $minimimaara_pyoristys &= (!isset($varastosiirtotyyppi) or !in_array($varastosiirtotyyppi, array('P', 'K')));
 
   if ($minimimaara_pyoristys) {
     $kpl = $trow['minimi_era'];
@@ -550,11 +550,9 @@ if ((!isset($from_tee_jt_tilaus) or !$from_tee_jt_tilaus) and
   // Halutaan pyöristää lähimpään myyntierään, jos
   // myyntierä on asetettu
   // yhtiön parametrit vastaa rivityyppiä
-  // varastosiirtotyyppi ei ole asetettu tai se ei ole P, K
   $myyntieran_pyoristys = true;
   $myyntieran_pyoristys &= ($trow['myynti_era'] > 0);
   $myyntieran_pyoristys &= ($pyoristys_k or $pyoristys_s);
-  $myyntieran_pyoristys &= (!isset($varastosiirtotyyppi) or !in_array($varastosiirtotyyppi, array('P', 'K')));
 
   if ($myyntieran_pyoristys) {
     if ($kpl <= $trow['myynti_era']) {

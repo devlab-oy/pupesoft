@@ -766,8 +766,8 @@ if ($tee == "file") {
               $var = '';
             }
 
-            if ($netto != '' and $netto != 'N') {
-              echo t("V‰‰r‰ arvo kent‰ss‰ netto! Sallitut arvot ovat: tyhj‰ tai N").". ".t("Rivill‰").": $rivilask1. $netto<br>";
+            if (!in_array($netto, array('','E','N'))) {
+              echo t("V‰‰r‰ arvo kent‰ss‰ netto! Sallitut arvot ovat: tyhj‰, E tai N").". ".t("Rivill‰").": $rivilask1. $netto<br>";
               $netto = '';
             }
           }

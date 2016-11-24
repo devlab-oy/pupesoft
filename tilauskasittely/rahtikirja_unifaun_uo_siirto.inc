@@ -7,8 +7,10 @@ require_once 'rajapinnat/unifaun/unifaun-functions.php';
 // jos on laitettu kollikenttään 0 niin ei yritetä luoda siirtotiedostoa
 if ($yhtiorow['kerayserat'] != 'K' and $kollityht > 0) {
 
-  if ($unifaun_uo_host != "" and $unifaun_uo_user != "" and $unifaun_uo_pass != "" and $unifaun_uo_path != "") {
+  $unifaun_online = ($unifaun_uo_host != "" and $unifaun_uo_user != "" and $unifaun_uo_pass != "" and $unifaun_uo_path != "");
+  $unifaun_xmlposting = ($unifaun_xp_devi != "" and $unifaun_xp_user != "" and $unifaun_xp_pass != "");
 
+  if ($unifaun_online or $unifaun_xmlposting) {
     require_once "inc/unifaun_send.inc";
 
     if ($phpnimi == "rahtikirja_custom.php") {
@@ -54,7 +56,12 @@ if ($yhtiorow['kerayserat'] != 'K' and $kollityht > 0) {
 
     $vak_tiedot = unifaun_tilauksen_vak_koodit($postirow['tunnus']);
 
-    $unifaun = new Unifaun($unifaun_uo_host, $unifaun_uo_user, $unifaun_uo_pass, $unifaun_uo_path, $unifaun_uo_port, $unifaun_uo_fail, $unifaun_uo_succ);
+    if ($unifaun_online) {
+      $unifaun = Unifaun::online($unifaun_uo_host, $unifaun_uo_user, $unifaun_uo_pass, $unifaun_uo_path, $unifaun_uo_port, $unifaun_uo_fail, $unifaun_uo_succ);
+    }
+    else {
+      $unifaun = Unifaun::xmlposting($unifaun_xp_devi, $unifaun_xp_user, $unifaun_xp_pass, $unifaun_xp_fail, $unifaun_xp_succ);
+    }
 
     $postirow['shipment_unique_id'] = $postirow['tunnus'];
     $postirow['kuljetusohjeet']   = $kuljetusohjeet;
@@ -116,7 +123,12 @@ if ($yhtiorow['kerayserat'] != 'K' and $kollityht > 0) {
       $unifaun->setContainerRow($kollitiedot);
     }
 
-    $unifaun->ftpSend();
+    if ($unifaun_online) {
+      $unifaun->ftpSend();
+    }
+    else {
+      $unifaun->xmlPost();
+    }
   }
   else {
     echo "<br><font class='error'>".t("UNIFAUN-aineiston luontiin tarvittavia parametreja puuttuu!")."</font><br>";

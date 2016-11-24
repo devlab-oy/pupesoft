@@ -3723,6 +3723,7 @@ if ($fieldname == "pakollinen_varasto") {
 
   $ulos .= "<option value = ''>".t("Varaston valinta ei pakollinen. Tilaukselle voidaan lisätä rivejä useasta varastosta")."</option>";
   $ulos .= "<option value = 'K'{$sel}>".t("Varaston valinta on pakollinen. Tilaukselle voidaan lisätä rivejä vain yhdestä varastosta: myyntitilauksella, ostotilauksella, tarjouksella ja reklamaatiolla")."</option>";
+  $ulos .= "</select></td>";
 
   $jatko = 0;
 }
@@ -3736,6 +3737,18 @@ if ($fieldname == "ulkoinen_jarjestelma") {
   $ulos .= "<option value = ''>".t("Varaston ulkoinen järjestelmä toimii keräyksen ja saapumisen yhteydessä")."</option>";
   $ulos .= "<option value = 'K'{$sel['K']}>".t("Varaston ulkoinen järjestelmä toimii vain keräyksen yhteydessä")."</option>";
   $ulos .= "<option value = 'S'{$sel['S']}>".t("Varaston ulkoinen järjestelmä toimii vain saapumisen yhteydessä")."</option>";
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
+if ($fieldname == "ulkoinen_jarjestelma_lukko") {
+  $sel = array($trow[$i] => 'selected') + array('K' => '');
+
+  $ulos  = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+  $ulos .= "<option value = ''>".t("Ulkoinen järjestelmään lähetettyjä tilauksia ei saa muokata")."</option>";
+  $ulos .= "<option value = 'K'{$sel['K']}>".t("Ulkoinen järjestelmään lähetettyjä tilauksia saa muokata")."</option>";
+  $ulos .= "</select></td>";
 
   $jatko = 0;
 }
@@ -3770,16 +3783,26 @@ if ($fieldname == "kerayserat") {
 }
 
 if ($fieldname == "myyntiera_pyoristys" ) {
-
-  $sela = $selb = "";
-
   $sel = array($trow[$i] => 'selected') + array('', 'K', 'S');
 
   $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">
-        <option value = ' '>".t("Myyntirivin määrää ei pyöristetä seuraavaan täyteen myyntierään")."</option>
-        <option value = 'K' {$sel['K']}>".t("Myyntirivin määrä pyöristetään seuraavaan täyteen myyntierään")."</option>
-        <option value = 'S' {$sel['S']}>".t("Myyntirivin ja siirtorivin määrä pyöristetään seuraavaan täyteen myyntierään")."</option>
+        <option value = ''>".t("Määrää ei pyöristetä myyntierään")."</option>
+        <option value = 'K' {$sel['K']}>".t("Myyntirivin ja ennakkotilausrivin määrä pyöristetään seuraavaan täyteen myyntierään")."</option>
+        <option value = 'S' {$sel['S']}>".t("Myyntirivin, ennakkotilausrivin ja siirtorivin määrä pyöristetään seuraavaan täyteen myyntierään")."</option>
       </select></td>";
+
+  $jatko = 0;
+}
+
+if ($fieldname == "minimimaara_pyoristys" ) {
+  $sel = array($trow[$i] => 'selected') + array('', 'K', 'S', 'E');
+
+  $ulos  = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+  $ulos .= "<option value=''>".t("Määrää ei pyöristetä minimimäärään")."</option>";
+  $ulos .= "<option value='K' {$sel['K']}>".t("Myyntirivin ja ennakkotilausrivin määrä pyöristetään minimimäärään, jos tilataan alle minimimärän")."</option>";
+  $ulos .= "<option value='S' {$sel['S']}>".t("Myyntirivin, ennakkotilausrivin ja siirtorivin määrä pyöristetään minimimäärään, jos tilataan alle minimimärän")."</option>";
+  $ulos .= "<option value='E' {$sel['E']}>".t("Myyntirivin määrä pyöristetään minimimäärään ainoastaan Extranetissä, jos tilataan alle minimimärän")."</option>";
+  $ulos .= "</select></td>";
 
   $jatko = 0;
 }

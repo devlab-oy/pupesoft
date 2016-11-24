@@ -512,21 +512,49 @@ else {
   unset($varasto);
 }
 
+// varastosiirtotyyppi ei saa olla K kirjanpidollinen eikä P palautus
 if ((!isset($from_tee_jt_tilaus) or !$from_tee_jt_tilaus) and
   $kpl > 0 and
-  (($trow['myynti_era'] > 0 and in_array($yhtiorow['myyntiera_pyoristys'], array('K', 'S'))) or $trow['minimi_era'] > 0) and
-  (((in_array($rivityyppi, array('L', 'E')) and in_array($yhtiorow['myyntiera_pyoristys'], array('K', 'S'))) or ($rivityyppi == 'G' and $yhtiorow['myyntiera_pyoristys'] == 'S')) and (!isset($varastosiirtotyyppi) or !in_array($varastosiirtotyyppi, array('P', 'K')))) and
   $rivitunnus == 0 and
+  (!isset($varastosiirtotyyppi) or !in_array($varastosiirtotyyppi, array('P', 'K'))) and
   (in_array($toim, array('RIVISYOTTO', 'PIKATILAUS', 'ENNAKKO', 'EXTRANET', 'SIIRTOLISTA')) or ($kutsuja == "EDITILAUS" and $edi_tyyppi != "magento"))
 ) {
 
   $org_kpl = $kpl;
 
-  if ($kpl < $trow['minimi_era']) {
+  // minimimaara_pyoristys K = myyntirivin ja ennakkotilausrivin määrä pyöristetään
+  $pyoristys_k = ($yhtiorow['minimimaara_pyoristys'] == 'K' and in_array($rivityyppi, array('L','E')));
+  // minimimaara_pyoristys S = myyntirivin, ennakkotilausrivin ja siirtorivin määrä pyöristetään
+  $pyoristys_s = ($yhtiorow['minimimaara_pyoristys'] == 'S' and in_array($rivityyppi, array('L','E','G')));
+  // minimimaara_pyoristys E = myyntirivin määrä pyöristetään ainoastaa extranetissä
+  $pyoristys_e = ($yhtiorow['minimimaara_pyoristys'] == 'E' and $rivityyppi == 'L' and !empty($kukarow['extranet']));
+
+  // Halutaan pyöristää minimimäärään, jos
+  // tuotteella on minimimäärä asetettu
+  // syötetty määrä on alle minimimäärän
+  // yhtiön parametrit vastaa rivityyppiä
+  $minimimaara_pyoristys = true;
+  $minimimaara_pyoristys &= ($trow['minimi_era'] > 0);
+  $minimimaara_pyoristys &= ($kpl < $trow['minimi_era']);
+  $minimimaara_pyoristys &= ($pyoristys_k or $pyoristys_e or $pyoristys_s);
+
+  if ($minimimaara_pyoristys) {
     $kpl = $trow['minimi_era'];
   }
 
-  if (in_array($yhtiorow['myyntiera_pyoristys'], array('K', 'S'))) {
+  // myyntiera_pyoristys K = myyntirivin ja ennakkotilausrivin määrä pyöristetään
+  $pyoristys_k = ($yhtiorow['myyntiera_pyoristys'] == 'K' and in_array($rivityyppi, array('L','E')));
+  // myyntiera_pyoristys S = myyntirivin, ennakkotilausrivin ja siirtorivin määrä pyöristetään
+  $pyoristys_s = ($yhtiorow['myyntiera_pyoristys'] == 'S' and in_array($rivityyppi, array('L','E','G')));
+
+  // Halutaan pyöristää lähimpään myyntierään, jos
+  // tuotteella on myyntierä asetettu
+  // yhtiön parametrit vastaa rivityyppiä
+  $myyntieran_pyoristys = true;
+  $myyntieran_pyoristys &= ($trow['myynti_era'] > 0);
+  $myyntieran_pyoristys &= ($pyoristys_k or $pyoristys_s);
+
+  if ($myyntieran_pyoristys) {
     if ($kpl <= $trow['myynti_era']) {
       $kpl = $trow['myynti_era'];
     }

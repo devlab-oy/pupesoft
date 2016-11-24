@@ -371,7 +371,7 @@ class Unifaun {
     $varastopaikat_res   = pupe_query($query);
     $varastopaikat_row = mysql_fetch_assoc($varastopaikat_res);
     
-    if ($varastopaikat_row['pikahakuarvo'] != 0) {
+    if (!empty($varastopaikat_row['pikahakuarvo'])) {
       $pikahakuarvo = $varastopaikat_row['pikahakuarvo'];
     }
     else {

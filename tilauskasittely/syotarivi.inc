@@ -662,6 +662,10 @@ elseif (!$variaaritorivi and $kukarow["extranet"] == '' and ($toim == "RIVISYOTT
   // jos meill‰ on rivi muuttuja t‰‰ll‰, niin ollaan muokkaamassa rivej‰..
   if ($rivitunnus!='') {
     echo "<input type='hidden' name='rivitunnus' value='$rivitunnus'>";
+    echo "<input type='hidden' name='keratty'      value = '$keratty'>";
+    echo "<input type='hidden' name='kerattyaika'  value = '$kerattyaika'>";
+    echo "<input type='hidden' name='toimitettu'   value = '$toimitettu'>";
+    echo "<input type='hidden' name='toimitettuaika' value = '$toimitettuaika'>";
     echo "<input type='hidden' name='ale_peruste' value='$ale_peruste'>";
     echo "<input type='hidden' name='rivilaadittu' value='$rivilaadittu'>";
     echo "<input type='hidden' name='menutila' value='$menutila'>";

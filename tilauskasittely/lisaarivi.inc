@@ -548,7 +548,7 @@ if ((!isset($from_tee_jt_tilaus) or !$from_tee_jt_tilaus) and
   $pyoristys_s = ($yhtiorow['myyntiera_pyoristys'] == 'S' and in_array($rivityyppi, array('L','E','G')));
 
   // Halutaan pyöristää lähimpään myyntierään, jos
-  // myyntierä on asetettu
+  // tuotteella on myyntierä asetettu
   // yhtiön parametrit vastaa rivityyppiä
   $myyntieran_pyoristys = true;
   $myyntieran_pyoristys &= ($trow['myynti_era'] > 0);

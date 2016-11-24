@@ -435,15 +435,10 @@ if (isset($myyntierahuom) and is_array($myyntierahuom) and in_array($row['tunnus
 
   $mimyhuom = "HUOM: Rivin määrä on pyöristetty";
 
-  if ($trow["minimi_era"] > 0) {
+  if ($trow["minimi_era"] == $kpl_st and in_array($yhtiorow['minimimaara_pyoristys'], array('K', 'E'))) {
     $mimyhuom .= " minimierään";
   }
-
-  if ($trow['myynti_era'] > 0 and in_array($yhtiorow['myyntiera_pyoristys'], array('K', 'S'))) {
-    if ($trow["minimi_era"] > 0) {
-      $mimyhuom .= " tai";
-    }
-
+  elseif ($trow['myynti_era'] > 0 and in_array($yhtiorow['myyntiera_pyoristys'], array('K', 'S'))) {
     $mimyhuom .= " täyteen myyntierään";
   }
 
@@ -451,11 +446,11 @@ if (isset($myyntierahuom) and is_array($myyntierahuom) and in_array($row['tunnus
   $mimyhuom = t($mimyhuom)."!";
 
   if ($trow['myynti_era'] > 0) {
-    $mimyhuom .= " ".t("Myyntierä on").": $trow[myynti_era]";
+    $mimyhuom .= "<br>".t("Myyntierä on").": $trow[myynti_era]";
   }
 
   if ($trow["minimi_era"] > 0) {
-    $mimyhuom .= " ".t("Minimierä on").": $trow[minimi_era]";
+    $mimyhuom .= "<br>".t("Minimierä on").": $trow[minimi_era]";
   }
 
   $varaosavirhe .= $mimyhuom."<br>";

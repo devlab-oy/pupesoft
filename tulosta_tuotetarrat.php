@@ -216,6 +216,7 @@ if (($tee == 'Z' or $tee == 'H') and $ulos == '') {
         "kpl"           => $tulostakappale,
         "koko"          => $koko,
         "barcode_field" => $barcode_field,
+        "tax_field"     => $tax_field,
       );
 
       require "tilauskasittely/tulosta_hintalaput.inc";
@@ -248,7 +249,7 @@ if (!isset($nayta_pdf)) {
 
   $tarrat = $toim == "HINTA" ? "hintalaput" : "tuotetarrat";
 
-  $colspan = $toim == 'HINTA' ? "4" : "5";
+  $colspan = $toim == 'HINTA' ? "5" : "5";
 
   echo
   "<tr><th colspan='{$colspan}'><center>" .
@@ -261,6 +262,7 @@ if (!isset($nayta_pdf)) {
   if ($toim == 'HINTA') {
     echo "<th><label for='koko'>" . t('Koko') . "</label></th>";
     echo "<th><label for='barcode_field'>" . t('Viivakoodikenttä') . "</label></th>";
+    echo "<th><label for='tax_field'>" . t('Hinta') . "</label></th>";
   }
   else {
     echo "<th>" . t("Kirjoitin") . "</th>";
@@ -286,8 +288,17 @@ if (!isset($nayta_pdf)) {
 
     echo "<td>";
     echo "<select id='barcode_field' name='barcode_field'>";
-    echo "<option value='tuoteno'>Tuoteno</option>";
-    echo "<option value='eankoodi'>Eankoodi</option>";
+    echo "<option value='tuoteno'>".t("Tuoteno")."</option>";
+    echo "<option value='eankoodi'>".t("Eankoodi")."</option>";
+    echo "</select>";
+    echo "</td>";
+
+    $sel = empty($yhtiorow['alv_kasittely']) ? 'selected' : '';
+
+    echo "<td>";
+    echo "<select id='tax_field' name='tax_field'>";
+    echo "<option value='veroton'>".t("Veroton")."</option>";
+    echo "<option value='verollinen' {$sel}>".t("Verollinen")."</option>";
     echo "</select>";
     echo "</td>";
   }

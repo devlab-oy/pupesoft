@@ -367,7 +367,7 @@ class Unifaun {
     $query = "SELECT pikahakuarvo
               FROM varastopaikat
               WHERE yhtio   = '{$this->kukarow['yhtio']}'
-              AND tunnus    = '{$this->toitarow['varasto']}'";
+              AND tunnus    = '{$this->postirow['varasto']}'";
     $varastopaikat_res   = pupe_query($query);
     $varastopaikat_row = mysql_fetch_assoc($varastopaikat_res);
     

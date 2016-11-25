@@ -5,6 +5,10 @@ $useslave = 1;
 
 require "inc/parametrit.inc";
 
+if (!empty($_COOKIE["myyntilaskun_myyja"])) {
+  $myyntilaskun_myyja = "X";
+}
+
 if (!isset($tee))            $tee = "";
 if (!isset($toim))           $toim = "";
 if (!isset($lopetus))        $lopetus = "";
@@ -13,6 +17,7 @@ if (!isset($ulos))           $ulos = "";
 if (!isset($livesearch_tee)) $livesearch_tee = "";
 if (!isset($tapahtumalaji))  $tapahtumalaji = "";
 if (!isset($tilalehinta))    $tilalehinta = "";
+if (!isset($myyntilaskun_myyja)) $myyntilaskun_myyja = "";
 if (!isset($historia))       $historia = "";
 if (!isset($raportti))       $raportti = "";
 if (!isset($toimipaikka))    $toimipaikka = $kukarow['toimipaikka'] != 0 ? $kukarow['toimipaikka'] : 0;
@@ -482,6 +487,7 @@ if (isset($ajax)) {
 
     $query = "SELECT tapahtuma.tuoteno,
               ifnull(kuka.nimi, tapahtuma.laatija) laatija,
+              kuka_myyja.nimi AS tilauksen_myyja,
               tapahtuma.laadittu,
               tapahtuma.laji,
               tapahtuma.kpl,
@@ -510,6 +516,7 @@ if (isset($ajax)) {
               LEFT JOIN lasku use index (primary) ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus)
               LEFT JOIN lasku AS lasku2 use index (primary) ON (lasku2.yhtio = tilausrivi.yhtio AND lasku2.tunnus = tilausrivi.uusiotunnus)
               LEFT JOIN kuka ON (kuka.yhtio = tapahtuma.yhtio AND kuka.kuka = tapahtuma.laatija)
+              LEFT JOIN kuka AS kuka_myyja ON (kuka_myyja.yhtio = lasku.yhtio AND kuka_myyja.tunnus = lasku.myyja)
               WHERE tapahtuma.yhtio = '$kukarow[yhtio]'
               and tapahtuma.tuoteno = '$tuoteno'
               {$toimipaikkarajaus}
@@ -555,8 +562,14 @@ if (isset($ajax)) {
     $saldo_nyt = $kokonaissaldo_tapahtumalle;
 
     if ($ei_saldoa == "") {
+      $colspan = 5;
+
+      if ($myyntilaskun_myyja != '') {
+        $colspan++;
+      }
+
       $_return .= "<tr class='aktiivi'>";
-      $_return .= "<td colspan='5'>".t("Varastonarvo nyt").":</td>";
+      $_return .= "<td colspan='{$colspan}' id='varastonarvo_nyt_header'>".t("Varastonarvo nyt").":</td>";
       $_return .= "<td align='right' id='ajax_kehahin'>{$kehahin}</td>";
       $_return .= "<td align='right'></td>";
       $_return .= "<td align='right'>$vararvo_nyt</td>";
@@ -603,7 +616,12 @@ if (isset($ajax)) {
 
       if ($tapahtumalaji == "" or strtoupper($tapahtumalaji) == strtoupper($prow["laji"])) {
         $_return .= "<tr class='aktiivi'>";
-        $_return .= "<td nowrap valign='top'>" . $prow['laatija'] . "</td>";
+        $_return .= "<td nowrap valign='top'>{$prow['laatija']}</td>";
+
+        if ($myyntilaskun_myyja != '') {
+          $_return .= "<td nowrap valign='top'>{$prow['tilauksen_myyja']}</td>";
+        }
+
         $_return .= "<td nowrap valign='top'>" . tv1dateconv($prow["laadittu"], "pitka") . "</td>";
         $_return .= "<td nowrap valign='top'>";
 
@@ -801,7 +819,10 @@ if (isset($ajax)) {
         $_return .= "</td>";
         $_return .= "</tr>";
 
-        $_colspanni = $tilalehinta != '' ? 12 : 11;
+        $_colspanni = 11;
+
+        if ($tilalehinta != '') $_colspanni++;
+        if ($myyntilaskun_myyja != '') $_colspanni++;
 
         $_return .= "<tr><td colspan='{$_colspanni}' class='back' style='width:100%; padding:0; margin:0;'><div id = 'ifd_{$prow['laskutunnus']}' style='width:100%; border:1px solid; display:none'></div></td></tr>";
         $_return .= "<tr><td colspan='{$_colspanni}' class='back' style='width:100%; padding:0; margin:0;'><div id = 'ifd_{$prow['lasku2tunnus']}' style='width:100%; border:1px solid; display:none'></div></td></tr>";
@@ -1732,6 +1753,7 @@ echo"       $('#raportointi_container').html('<img src=\"'+_src+'\" /><br />');
                 kehahin = $('#kehahin').val(),
                 tapahtumalaji = $('#tapahtumalaji option:selected').val(),
                 tilalehinta = $('#tilalehinta:checked').val(),
+                myyntilaskun_myyja = $('#myyntilaskun_myyja:checked').val(),
                 kokonaissaldo_tapahtumalle = $('#kokonaissaldo_tapahtumalle').val(),
                 toimipaikka = $('#toimipaikka option:selected').val(),
                 sarjanumero_kpl = $('#sarjanumero_kpl').val();";
@@ -1743,15 +1765,7 @@ else {
   echo "    $(this).val('".t("P‰ivit‰")."');";
 }
 
-echo"       if (tilalehinta) {
-              $('#tapahtumalaji_header').attr('colspan', 6);
-              $('#tilalehinta_hearder').show();
-            }
-            else {
-              $('#tapahtumalaji_header').attr('colspan', 5);
-              $('#tilalehinta_hearder').hide();
-            }
-
+echo"
             $('#tapahtumat_container').html('<img src=\"'+_src+'\" /><br />');
 
             $.ajax({
@@ -1769,6 +1783,7 @@ echo"       if (tilalehinta) {
                 kehahin: kehahin,
                 tapahtumalaji: tapahtumalaji,
                 tilalehinta: tilalehinta,
+                myyntilaskun_myyja: myyntilaskun_myyja,
                 kokonaissaldo_tapahtumalle: kokonaissaldo_tapahtumalle,
                 toimipaikka: toimipaikka,
                 sarjanumero_kpl: sarjanumero_kpl
@@ -1842,7 +1857,59 @@ echo"       $('#varastopaikat_container').html('<img src=\"'+_src+'\" /><br />')
             }
           });
 
-          $('#historia, #tapahtumalaji, #tilalehinta').on('change', function() {
+          $('#historia, #tapahtumalaji').on('change', function() {
+            $('#tapahtumat').trigger('click');
+          });
+
+          $('#tilalehinta').on('change', function() {
+            var tilalehinta = $('#tilalehinta:checked').val();
+            var colspan = $('#tapahtumalaji_header').attr('colspan');
+
+            colspan = parseInt(colspan);
+
+            if (tilalehinta) {
+              colspan = colspan + 1;
+              $('#tapahtumalaji_header').attr('colspan', colspan);
+              $('#tilalehinta_hearder').show();
+            }
+            else {
+              colspan = colspan - 1;
+              $('#tapahtumalaji_header').attr('colspan', colspan);
+              $('#tilalehinta_hearder').hide();
+            }
+
+            $('#tapahtumat').trigger('click');
+          });
+
+          $('#myyntilaskun_myyja').on('change', function() {
+            var myyntilaskun_myyja = $('#myyntilaskun_myyja:checked').val();
+            var colspan = $('#tapahtumalaji_header').attr('colspan');
+            var colspan_var = $('#varastonarvo_nyt_header').attr('colspan');
+
+            colspan = parseInt(colspan);
+            colspan_var = parseInt(colspan_var);
+
+            if (myyntilaskun_myyja) {
+              colspan = colspan + 1;
+              colspan_var = colspan_var + 1;
+
+              $('#tapahtumalaji_header').attr('colspan', colspan);
+              $('#varastonarvo_nyt_header').attr('colspan', colspan_var);
+
+              $('#myyntilaskun_myyja_header').show();
+              document.cookie = \"myyntilaskun_myyja=show;30\";
+            }
+            else {
+              colspan = colspan - 1;
+              colspan_var = colspan_var + 1;
+
+              $('#tapahtumalaji_header').attr('colspan', colspan);
+              $('#varastonarvo_nyt_header').attr('colspan', colspan_var);
+
+              $('#myyntilaskun_myyja_header').hide();
+              document.cookie = \"myyntilaskun_myyja=;30\";
+            }
+
             $('#tapahtumat').trigger('click');
           });
 
@@ -3161,23 +3228,16 @@ if ($tee == 'Z') {
       if ($tapahtumalaji == "poistettupaikka") $sel8="SELECTED";
       if ($tapahtumalaji == "uusipaikka")      $sel9="SELECTED";
 
-      if ($tilalehinta != '') {
-        $check = "CHECKED";
-      }
-      else {
-        $check = "";
-      }
-
-      echo "</th><th id='tapahtumalaji_header' colspan='";
+      $colspan = 5;
 
       if ($tilalehinta != '') {
-        echo 6;
+        $colspan++;
       }
-      else {
-        echo 5;
+      if ($myyntilaskun_myyja != '') {
+        $colspan++;
       }
 
-      echo "'>".t("Tapahtumalaji").": ";
+      echo "</th><th id='tapahtumalaji_header' colspan='{$colspan}'>".t("Tapahtumalaji").": ";
       echo "<select id='tapahtumalaji' name='tapahtumalaji'>'";
       echo "<option value=''>".t("N‰yt‰ kaikki")."</option>";
       echo "<option value='laskutus' $sel1>".t("Laskutukset")."</option>";
@@ -3192,14 +3252,27 @@ if ($tee == 'Z') {
       echo "</select>";
       echo "</th>";
 
+      $check_hinta = $tilalehinta != '' ? "checked" : '';
+      $check_myyja = $myyntilaskun_myyja != '' ? 'checked' : '';
+
       echo "<th>";
-      echo t("N‰yt‰ tilausrivin hinta ja ale").": <input type='checkbox' name='tilalehinta' id='tilalehinta' $check />";
+      echo t("N‰yt‰ tilausrivin hinta ja ale").": <input type='checkbox' name='tilalehinta' id='tilalehinta' {$check_hinta} />";
+      echo "<br />";
+      echo t("N‰yt‰ myyntilaskun myyj‰").": <input type='checkbox' name='myyntilaskun_myyja' id='myyntilaskun_myyja' {$check_myyja} />";
       echo "</th>";
 
       echo "</tr>";
 
       echo "<tr id='tapahtumat_header'>";
       echo "<th>".t("Laatija")."</th>";
+
+      $dsp = "display: none;";
+
+      if ($myyntilaskun_myyja != '') {
+        $dsp = "";
+      }
+
+      echo "<th id='myyntilaskun_myyja_header' style='{$dsp}'>".t("Myyj‰")."</th>";
       echo "<th>".t("Pvm")."</th>";
       echo "<th>".t("Tyyppi")."</th>";
       echo "<th>".t("M‰‰r‰")."</th>";

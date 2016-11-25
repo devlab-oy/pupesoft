@@ -1448,21 +1448,16 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
               tilausrivi.ale1,
               tilausrivi.ale2,
               tilausrivi.ale3,
-              tilausrivin_lisatiedot.tilausrivitunnus,
-              tilausrivin_lisatiedot.tilausrivilinkki,
               tilausrivi.vahvistettu_maara,
               tilausrivi.vahvistettu_kommentti,
               tilausrivi.hinta_alkuperainen,
               tilausrivi.laadittu
               FROM tilausrivi
               LEFT JOIN tuote ON tilausrivi.yhtio = tuote.yhtio
-                AND tilausrivi.tuoteno                      = tuote.tuoteno
+                AND tilausrivi.tuoteno = tuote.tuoteno
               LEFT JOIN tuotteen_toimittajat ON tuote.yhtio = tuotteen_toimittajat.yhtio
                 AND tuote.tuoteno                           = tuotteen_toimittajat.tuoteno
                 AND tuotteen_toimittajat.liitostunnus       = '$laskurow[liitostunnus]'
-              LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
-                AND tilausrivin_lisatiedot.tilausrivilinkki > 0
-                AND tilausrivin_lisatiedot.tilausrivilinkki = tilausrivi.tunnus)
               WHERE tilausrivi.otunnus                      = '$kukarow[kesken]'
               and tilausrivi.yhtio                          = '$kukarow[yhtio]'
               and tilausrivi.tyyppi                         = 'O'
@@ -2005,12 +2000,19 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
             }
           }
 
-          if (!empty($prow['tilausrivilinkki'])) {
+          $query = "SELECT tilausrivilinkki, tilausrivitunnus
+                    FROM tilausrivin_lisatiedot
+                    WHERE yhtio          = '{$kukarow['yhtio']}'
+                    AND tilausrivilinkki = '{$prow['tunnus']}'";
+          $tlres = pupe_query($query);
+          $tlrow = mysql_fetch_assoc($tlres);
+
+          if (!empty($tlrow['tilausrivilinkki'])) {
             $query = "SELECT tilausrivi.otunnus as otunnus, lasku.nimi as nimi
                       FROM tilausrivi
                       JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio AND lasku.tunnus = tilausrivi.otunnus)
                       WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-                      AND tilausrivi.tunnus  = '{$prow['tilausrivitunnus']}'";
+                      AND tilausrivi.tunnus  = '{$tlrow['tilausrivitunnus']}'";
             $linkattu_myyntitilaus_result = pupe_query($query);
             $linkattu_myyntitilaus_row = mysql_fetch_assoc($linkattu_myyntitilaus_result);
 
@@ -2019,7 +2021,7 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
           }
 
           if (isset($vastaavat_html) and $vastaavat_html != "") {
-            if (trim($prow["kommentti"]) != "" or !empty($prow['tilausrivilinkki'])) echo "<br>";
+            if (trim($prow["kommentti"]) != "" or !empty($tlrow['tilausrivilinkki'])) echo "<br>";
             echo "<a href=\"javascript:return false;\" class='toggle_korvaavat_vastaavat' rivitunnus='{$prow['tunnus']}'>".t("Näytä korvaavat & vastaavat")."</a>";
           }
 
@@ -2030,7 +2032,7 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
             echo "<tr class='vastaavat_korvaavat_hidden {$prow['tunnus']}'>";
             echo "<td></td>";
             echo "<td colspan='$alespan' $kommclass1>";
-            if (!empty($prow['tilausrivilinkki'])) {
+            if (!empty($tlrow['tilausrivilinkki'])) {
               echo '<font class="message">'.t("Huom: vaihtamalla tuotteen vaihdetaan myös myyntitilauksen %s %s tilausrivi", '', $linkattu_myyntitilaus_row['otunnus'], $linkattu_myyntitilaus_row['nimi']).'</font>';
               echo "<br/>";
               echo "<br/>";

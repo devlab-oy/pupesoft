@@ -5,6 +5,10 @@ $useslave = 1;
 
 require "inc/parametrit.inc";
 
+if (!empty($_COOKIE["myyntilaskun_myyja"])) {
+  $myyntilaskun_myyja = "X";
+}
+
 if (!isset($tee))            $tee = "";
 if (!isset($toim))           $toim = "";
 if (!isset($lopetus))        $lopetus = "";
@@ -1893,6 +1897,7 @@ echo"       $('#varastopaikat_container').html('<img src=\"'+_src+'\" /><br />')
               $('#varastonarvo_nyt_header').attr('colspan', colspan_var);
 
               $('#myyntilaskun_myyja_header').show();
+              document.cookie = \"myyntilaskun_myyja=show;30\";
             }
             else {
               colspan = colspan - 1;
@@ -1902,6 +1907,7 @@ echo"       $('#varastopaikat_container').html('<img src=\"'+_src+'\" /><br />')
               $('#varastonarvo_nyt_header').attr('colspan', colspan_var);
 
               $('#myyntilaskun_myyja_header').hide();
+              document.cookie = \"myyntilaskun_myyja=;30\";
             }
 
             $('#tapahtumat').trigger('click');
@@ -3227,6 +3233,9 @@ if ($tee == 'Z') {
       if ($tilalehinta != '') {
         $colspan++;
       }
+      if ($myyntilaskun_myyja != '') {
+        $colspan++;
+      }
 
       echo "</th><th id='tapahtumalaji_header' colspan='{$colspan}'>".t("Tapahtumalaji").": ";
       echo "<select id='tapahtumalaji' name='tapahtumalaji'>'";
@@ -3256,7 +3265,14 @@ if ($tee == 'Z') {
 
       echo "<tr id='tapahtumat_header'>";
       echo "<th>".t("Laatija")."</th>";
-      echo "<th id='myyntilaskun_myyja_header' style='display: none;'>".t("Myyj‰")."</th>";
+
+      $dsp = "display: none;";
+
+      if ($myyntilaskun_myyja != '') {
+        $dsp = "";
+      }
+
+      echo "<th id='myyntilaskun_myyja_header' style='{$dsp}'>".t("Myyj‰")."</th>";
       echo "<th>".t("Pvm")."</th>";
       echo "<th>".t("Tyyppi")."</th>";
       echo "<th>".t("M‰‰r‰")."</th>";

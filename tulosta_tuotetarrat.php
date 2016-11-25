@@ -288,8 +288,8 @@ if (!isset($nayta_pdf)) {
 
     echo "<td>";
     echo "<select id='barcode_field' name='barcode_field'>";
-    echo "<option value='tuoteno'>Tuoteno</option>";
-    echo "<option value='eankoodi'>Eankoodi</option>";
+    echo "<option value='tuoteno'>".t("Tuoteno")."</option>";
+    echo "<option value='eankoodi'>".t("Eankoodi")."</option>";
     echo "</select>";
     echo "</td>";
 
@@ -297,8 +297,8 @@ if (!isset($nayta_pdf)) {
 
     echo "<td>";
     echo "<select id='tax_field' name='tax_field'>";
-    echo "<option value='veroton'>Veroton</option>";
-    echo "<option value='verollinen' {$sel}>Verollinen</option>";
+    echo "<option value='veroton'>".t("Veroton")."</option>";
+    echo "<option value='verollinen' {$sel}>".t("Verollinen")."</option>";
     echo "</select>";
     echo "</td>";
   }

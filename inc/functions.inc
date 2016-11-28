@@ -2969,7 +2969,7 @@ if (!function_exists("synkronoi")) {
 
               // Ohitetaan t‰m‰ koska se on synkronoi kielloissa
               if (isset($synkronoi_kiellot[$table]) and in_array($kennimi, $synkronoi_kiellot[$table])) {
-                if ($update_insert == "INSERT" or empty($aburow[$kennimi])) {
+                if ($update_insert == "INSERT" and empty($aburow[$kennimi])) {
                    // Jos kent‰lle on m‰‰ritelty oletusarvo avainsanoihin niin haetaan se
                    $query = "SELECT *
                              FROM avainsana

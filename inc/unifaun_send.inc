@@ -44,7 +44,7 @@ class Unifaun {
   }
 
   // XML-posting
-  public static function xmlposting($developerid, $username, $password, $ftpfail, $ftpsucc) {
+  public static function xmlposting($developerid, $username, $password, $ftpfail, $unifaun_packsoft) {
     $instance = new self();
 
     $instance->unifauntype = "XMLPOSTING";
@@ -53,6 +53,7 @@ class Unifaun {
     $instance->password    = $password;
     $instance->ftpfail     = $ftpfail;
     $instance->ftpsucc     = $ftpsucc;
+    $instance->packsoft    = $unifaun_packsoft;
 
     return $instance;
   }
@@ -201,17 +202,26 @@ class Unifaun {
       echo "<br><font class='error'>".t("VIRHE: tiedoston kirjoitus epäonnistui")."!</font><br>";
     }
     else {
-      $url     = "https://www.unifaunonline.com/ufoweb/order";
-      $user    = $this->username;
-      $pass    = $this->password;
-      $devi    = $this->developerid;
-      $ftpfail = $this->ftpfail;
-      $ftpsucc = $this->ftpsucc;
+
+      $url      = "https://www.unifaunonline.com/ufoweb/order";
+      $user     = $this->username;
+      $pass     = $this->password;
+      $devi     = $this->developerid;
+      $ftpfail  = $this->ftpfail;
+      $ftpsucc  = $this->ftpsucc;
+      $packsoft = $this->packsoft;
+
+      if ($packsoft) {
+        $session = "po_SE";
+      }
+      else {
+        $session = "ufo_SE";
+      }
 
       $f = fopen($filenimi, "r");
 
       $ch = curl_init();
-      curl_setopt($ch, CURLOPT_URL, "{$url}?session=ufo_SE&user={$user}&pin={$pass}&developerid={$devi}&type=xml");
+      curl_setopt($ch, CURLOPT_URL, "{$url}?session={$session}&user={$user}&pin={$pass}&developerid={$devi}&type=xml");
       curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
       curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, FALSE);
       curl_setopt($ch, CURLOPT_POST, TRUE);

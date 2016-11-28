@@ -2443,6 +2443,25 @@ if (!function_exists('alvierittely')) {
                  ORDER BY alv";
     $alvresult = pupe_query($alvquery);
 
+    // Haluataanko näytätä yhteensäsumma ilman alennuksia
+    // 23 = "Normaali laskupohja (Näytetään myös yhteensä ilman alennuksia)",
+    if ($laskutyyppi == '23') {
+      $alequery = "SELECT sum(kpl * hinta) as hinta_ilman_alennuksia
+                   FROM tilausrivi
+                   WHERE {$where}
+                   and yhtio = '{$kukarow['yhtio']}'";
+      $ilman_ale_result = pupe_query($alequery);
+      $ilman_ale_row = mysql_fetch_assoc($ilman_ale_result);
+      $yhteensa_ilman_aleja = $ilman_ale_row['hinta_ilman_alennuksia'];
+
+      $pdf_lasku->draw_text(360, $kala, t("Yhteensä ilman alennuksia", $kieli).":", $thispage, $norm);
+      $oikpos = $pdf_lasku->strlen(sprintf('%.2f', $yhteensa_ilman_aleja), $norm);
+      $pdf_lasku->draw_text(535-$oikpos, $kala, sprintf('%.2f', $yhteensa_ilman_aleja), $thispage, $norm);
+      $pdf_lasku->draw_text(550, $kala, $laskurow["valkoodi"], $thispage, $norm);
+
+      $kala -= 10;
+    }
+
     if (!(($laskutyyppi == 21 or $laskutyyppi == 22) and $laskurow['vienti'] != "")) {
       $pdf_lasku->draw_text(360, $kala, t("Veroton arvo yhteensä", $kieli).":", $thispage, $norm);
 

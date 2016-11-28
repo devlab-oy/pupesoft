@@ -2967,11 +2967,8 @@ if (!function_exists("synkronoi")) {
                 continue;
               }
 
-              echo "synkronoi_kiellot[table]:<br>";
-              echo "<pre>".var_dump($synkronoi_kiellot[$table])."</pre>";
               // Ohitetaan t‰m‰ koska se on synkronoi kielloissa
               if (isset($synkronoi_kiellot[$table]) and in_array($kennimi, $synkronoi_kiellot[$table])) {
-                echo "kennimi: $kennimi<br>";
                 if ($update_insert == "INSERT") {
                   // Jos kent‰lle on m‰‰ritelty oletusarvo avainsanoihin niin haetaan se
                   $query = "SELECT *
@@ -2981,7 +2978,6 @@ if (!function_exists("synkronoi")) {
                            and selite  = '{$table}.{$kennimi}'
                            and selitetark_2 = 'Default'
                            and selitetark_4 != ''";
-                  query_dump($query);
                   $mysqlalias_default_res = pupe_query($query);
                   $mysqlalias_default_row = mysql_fetch_assoc($mysqlalias_default_res);
                   $override[$kennimi] = $mysqlalias_default_row['selitetark_4'];
@@ -3006,8 +3002,6 @@ if (!function_exists("synkronoi")) {
 
               $syncquery .= ", ". $kennimi." = '$updvalue' \n";
             }
-
-            query_dump($syncquery." ".$syncquery2);
 
             $updres = pupe_query($syncquery." ".$syncquery2);
 

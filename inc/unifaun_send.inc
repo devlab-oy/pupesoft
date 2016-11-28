@@ -44,7 +44,7 @@ class Unifaun {
   }
 
   // XML-posting
-  public static function xmlposting($developerid, $username, $password, $ftpfail, $unifaun_packsoft) {
+  public static function xmlposting($developerid, $username, $password, $ftpfail, $ftpsucc, $unifaun_packsoft) {
     $instance = new self();
 
     $instance->unifauntype = "XMLPOSTING";

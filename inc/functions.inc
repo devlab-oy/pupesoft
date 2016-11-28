@@ -2791,7 +2791,7 @@ if (!function_exists("synkronoi")) {
         else {
 
           //  P‰ivitet‰‰n vai tehd‰‰n uutta?
-          $query = "SELECT tunnus
+          $query = "SELECT *
                     FROM {$table}
                     WHERE yhtio ='{$kohderow['yhtio']}'
                     {$where}";

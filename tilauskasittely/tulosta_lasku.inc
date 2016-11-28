@@ -2428,6 +2428,21 @@ if (!function_exists('alvierittely')) {
 
     //loppusummat vain vikalle sivulle
 
+    if ($toim == 'PROFORMA') {
+      $where = " tilausrivi.otunnus='$laskurow[tunnus]' and tilausrivi.tyyppi in ('L','W','E') and ((tilausrivi.varattu+tilausrivi.jt != 0 and tilausrivi.laskutettuaika = '0000-00-00') or (tilausrivi.kpl != 0 and tilausrivi.laskutettuaika != '0000-00-00'))";
+    }
+    else {
+      $where = " tilausrivi.uusiotunnus = '$laskurow[tunnus]' and tilausrivi.tyyppi='L' ";
+    }
+
+    //Haetaan kaikki alvikannat riveiltä
+    $alvquery = "SELECT distinct alv
+                 FROM tilausrivi
+                 WHERE $where
+                 and yhtio = '$kukarow[yhtio]'
+                 ORDER BY alv";
+    $alvresult = pupe_query($alvquery);
+
     if (!(($laskutyyppi == 21 or $laskutyyppi == 22) and $laskurow['vienti'] != "")) {
       $pdf_lasku->draw_text(360, $kala, t("Veroton arvo yhteensä", $kieli).":", $thispage, $norm);
 
@@ -2452,20 +2467,6 @@ if (!function_exists('alvierittely')) {
 
       $pdf_lasku->draw_text(550, $kala, $laskurow["valkoodi"], $thispage, $norm);
 
-      if ($toim == 'PROFORMA') {
-        $where = " tilausrivi.otunnus='$laskurow[tunnus]' and tilausrivi.tyyppi in ('L','W','E') and ((tilausrivi.varattu+tilausrivi.jt != 0 and tilausrivi.laskutettuaika = '0000-00-00') or (tilausrivi.kpl != 0 and tilausrivi.laskutettuaika != '0000-00-00'))";
-      }
-      else {
-        $where = " tilausrivi.uusiotunnus = '$laskurow[tunnus]' and tilausrivi.tyyppi='L' ";
-      }
-
-      //Haetaan kaikki alvikannat riveiltä
-      $alvquery = "SELECT distinct alv
-                   FROM tilausrivi
-                   WHERE $where
-                   and yhtio = '$kukarow[yhtio]'
-                   ORDER BY alv";
-      $alvresult = pupe_query($alvquery);
       $kala -= 10;
 
       $query_ale_lisa = generoi_alekentta('M');

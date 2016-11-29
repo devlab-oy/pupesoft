@@ -12,7 +12,7 @@ if ($yhtiorow['kerayserat'] != 'K' and $kollityht > 0) {
     $unifaun_xp_pass  = $unifaun_xp_pin;
     $unifaun_xp_fail  = $unifaun_xp_fail;
     $unifaun_xp_succ  = $unifaun_xp_succ;
-    $unifaun_packsoft = $unifaun_packsoft;
+    $unifaun_packsoft = !empty($unifaun_packsoft);
 
     require "rahtikirja_unifaun_uo_siirto.inc";
   }

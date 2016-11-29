@@ -4344,9 +4344,7 @@ if (isset($jatka)) {
     else {
       $sisainen = "";
     }
-
   }
-
 
   if (!isset($campaign_id)) {
     $campaign_id = 'NULL';

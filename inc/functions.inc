@@ -2979,8 +2979,14 @@ if (!function_exists("synkronoi")) {
                            and selitetark_2 = 'Default'
                            and selitetark_4 != ''";
                   $mysqlalias_default_res = pupe_query($query);
-                  $mysqlalias_default_row = mysql_fetch_assoc($mysqlalias_default_res);
-                  $override[$kennimi] = $mysqlalias_default_row['selitetark_4'];
+
+                  if (mysql_num_rows($mysqlalias_default_res) === 0) {
+                    continue;
+                  }
+                  else {
+                    $mysqlalias_default_row = mysql_fetch_assoc($mysqlalias_default_res);
+                    $override[$kennimi] = $mysqlalias_default_row['selitetark_4'];
+                  }
                 }
                 else {
                   continue;

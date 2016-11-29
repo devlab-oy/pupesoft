@@ -49,7 +49,7 @@ class PrestaAddresses extends PrestaClient {
     $xml->address->address1     = $this->clean_field($address['osoite']);
     $xml->address->alias        = 'Home';
     $xml->address->city         = $this->clean_field($address['postitp']);
-    $xml->address->company      = $this->clean_name($address['asiakas_nimi'], 64);
+    $xml->address->company      = $this->clean_alphanumeric($address['asiakas_nimi'], 64);
     $xml->address->dni          = $address['asiakas_id'];
     $xml->address->firstname    = '-';
     $xml->address->id_country   = $country;

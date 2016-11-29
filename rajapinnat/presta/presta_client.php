@@ -549,8 +549,15 @@ abstract class PrestaClient {
     return $this->xml_value($field);
   }
 
+  protected function clean_alphanumeric($value, $length = 32) {
+    // max $length, special characters not allowed
+    $name = preg_replace("/[^0-9a-zA-ZäöåÄÖÅ ]+/", "", substr($value, 0, $length));
+
+    return $this->clean_field($name);
+  }
+
   protected function clean_name($value, $length = 32) {
-    // max 32, numbers and special characters not allowed
+    // max $length, numbers and special characters not allowed
     $name = preg_replace("/[^a-zA-ZäöåÄÖÅ ]+/", "", substr($value, 0, $length));
 
     return $this->clean_field($name);

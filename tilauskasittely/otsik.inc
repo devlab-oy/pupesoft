@@ -4330,7 +4330,9 @@ if (isset($jatka)) {
 
   // Käsinsyötetyt verkkokauppatilaukset-toiminnallisuus
   // Tilaus laskutetaan heti ja laitetaan sitten sen jälkeen takaisin keräsyjonoon
-  if ($tilaustyyppi == "W" and mysql_num_rows($vk_kassalipas_res)) {
+  // Siäsinen täppä tulee laittaa vain jos tilaus on vielä kesken,
+  // muuten se saa tilauksen menemään toimitettu tilaan
+  if ($tilaustyyppi == "W" and mysql_num_rows($vk_kassalipas_res) and $alatila == "") {
     $kassalipas_row = mysql_fetch_assoc($vk_kassalipas_res);
 
     $kassalipas = $kassalipas_row['kassalipas'];

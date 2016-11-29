@@ -818,7 +818,7 @@ if ($tee == 'I') {
         $trow["swift"] = $vastaus['swift'];
       }
 
-      if ($trow["swift"] != $vastaus['swift']) {
+      if ($trow["swift"] != $vastaus['swift'] and $vastaus['swift'] != '' and $vastaus['rahalaitos'] != '') {
         $swift_ok = FALSE;
       }
     }

@@ -358,11 +358,28 @@ class Unifaun {
     /**
      * tehdään yhtiön parametri "unifaun pikahakuarvo"
      * voidaan silloin jättää nimitiedot tyhjiksi
+     * lisäksi pikahakuarvo löytyy hiukan alempaa shipment kohdan alta (from)
+     *
+     * Tarkistetaan tässä kohtaa otetaanko pikahakuarvo yhtiorow tunnuksesta, 
+     * vaiko varastopaikat.pikahakuarvo -kentästä (eli varastokohtaisesti)
      */
 
+    $query = "SELECT pikahakuarvo
+              FROM varastopaikat
+              WHERE yhtio   = '{$this->kukarow['yhtio']}'
+              AND tunnus    = '{$this->postirow['varasto']}'";
+    $varastopaikat_res   = pupe_query($query);
+    $varastopaikat_row = mysql_fetch_assoc($varastopaikat_res);
+    
+    if (!empty($varastopaikat_row['pikahakuarvo'])) {
+      $pikahakuarvo = $varastopaikat_row['pikahakuarvo'];
+    }
+    else {
+      $pikahakuarvo = $this->yhtiorow['tunnus'];
+    }
 
     $uni_sender = $xml->addChild('sender');  // Attribute sndid corresponds to sender ID/quick ID. Any contents. Mandatory
-    $uni_sender->addAttribute('sndid', utf8_encode("{$this->yhtiorow["tunnus"]}"));
+    $uni_sender->addAttribute('sndid', $pikahakuarvo);
 
     // $uni_snd_val = $uni_sender->addChild('val', str_replace($search, $replace, $this->postirow["yhtio_nimi"])); # Sender's name
     $_yhtio_nimi = htmlspecialchars($this->postirow["yhtio_nimi"]);
@@ -665,7 +682,7 @@ class Unifaun {
       $uni_shipment->addAttribute('mergeid', utf8_encode($mergeid));
     }
 
-    $uni_shi_val = $uni_shipment->addChild('val', utf8_encode($this->yhtiorow["tunnus"])); // Defines the sender. Refers to the sndid value for sender.
+    $uni_shi_val = $uni_shipment->addChild('val', $pikahakuarvo); // Defines the sender. Refers to the sndid value for sender.
     $uni_shi_val->addAttribute('n', "from");
 
     //$uni_shi_val = $uni_shipment->addChild('val', ""); # Defines the legal sender (not printed on shipping documents).

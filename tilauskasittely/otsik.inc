@@ -4330,15 +4330,23 @@ if (isset($jatka)) {
 
   // Käsinsyötetyt verkkokauppatilaukset-toiminnallisuus
   // Tilaus laskutetaan heti ja laitetaan sitten sen jälkeen takaisin keräsyjonoon
-  // Siäsinen täppä tulee laittaa vain jos tilaus on vielä kesken,
-  // muuten se saa tilauksen menemään toimitettu tilaan
-  if ($tilaustyyppi == "W" and mysql_num_rows($vk_kassalipas_res) and $alatila == "") {
+  if ($tilaustyyppi == "W" and mysql_num_rows($vk_kassalipas_res)) {
     $kassalipas_row = mysql_fetch_assoc($vk_kassalipas_res);
 
     $kassalipas = $kassalipas_row['kassalipas'];
     $maksuehto  = $kassalipas_row['maksuehto'];
-    $sisainen   = "o";
+
+    // Siäsinen täppä tulee laittaa vain jos tilaus on vielä kesken,
+    // muuten se saa tilauksen menemään toimitettu tilaan
+    if ($alatila == "") {
+      $sisainen = "o";
+    }
+    else {
+      $sisainen = "";
+    }
+
   }
+
 
   if (!isset($campaign_id)) {
     $campaign_id = 'NULL';

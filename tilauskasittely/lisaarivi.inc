@@ -1207,7 +1207,7 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
         if ($perheid2 > 0 and $perheid2 != $rivitunnus and strtoupper($zrow["hyllyalue"]."#!¡!#".$zrow["hyllynro"]."#!¡!#".$zrow["hyllyvali"]."#!¡!#".$zrow["hyllytaso"]) == strtoupper($paikka)) {
           $myytavissa = $toimittamatta;
         }
-        
+
         // Jos tilaus on kerätty saldo riittää aina
         if ($keratty != '') {
           $myytavissa = $toimittamatta;
@@ -2044,8 +2044,6 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
                         netto           = '$lis_netto',
                         hinta           = '$lis_hinta',
                         kerayspvm       = '$kerayspvm',
-                        keratty         = '$keratty',
-                        kerattyaika     = '$kerattyaika',
                         toimitettu      = '$toimitettu',
                         toimitettuaika  = '$toimitettuaika',
                         otunnus         = '$kukarow[kesken]',
@@ -2066,6 +2064,9 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
 
               if ($trow['ei_saldoa'] != '' and $yhtiorow["kerataanko_saldottomat"] == '') {
                 $query .= ", keratty = 'saldoton', kerattyaika = now()";
+              }
+              else {
+                $query .= ", keratty = '{$keratty}', kerattyaika = '{$kerattyaika}'";
               }
 
               $result = pupe_query($query);
@@ -3382,8 +3383,6 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
               hinta           = '$lis_hinta',
               {$query_insert_hinta_alkuperainen_lisa}
               kerayspvm       = '$kerayspvm',
-              keratty         = '$keratty',
-              kerattyaika     = '$kerattyaika',
               toimitettu      = '$toimitettu',
               toimitettuaika  = '$toimitettuaika',
               otunnus         = '$kukarow[kesken]',
@@ -3404,6 +3403,9 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
 
     if ($trow['ei_saldoa'] != '' and $yhtiorow["kerataanko_saldottomat"] == '') {
       $query .= ", keratty = 'saldoton', kerattyaika = now()";
+    }
+    else {
+      $query .= ", keratty = '{$keratty}', kerattyaika = '{$kerattyaika}'";
     }
 
     $result = pupe_query($query);

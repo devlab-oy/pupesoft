@@ -268,7 +268,7 @@ if ($tee == 'M' or ($onko_eka_hyvaksyja === TRUE and $tee != 'H' and $tee != 'D'
 
 // Jaaha poistamme laskun!
 if ($tee == 'D' and $oikeurow['paivitys'] == '1') {
-  if ($kutsuja = "MATKALASKU" and $tee == 'D') {
+  if ($kutsuja == "MATKALASKU" and $tee == 'D') {
     $hyvaklisa = "(hyvaksyja_nyt = '$kukarow[kuka]' or laatija = '$kukarow[kuka]')";
   }
   else {

@@ -1449,8 +1449,7 @@ if (!isset($from_kaikkikorj)) {
                   and otunnus        = '$prow[otunnus]'
                   and perheid        = '$prow[perheid]'
                   and tuoteno        = '$prow[tuoteno]'
-                  and tyyppi         in ('D','O')
-                  and toimitettuaika = '0000-00-00 00:00:00'";
+                  and tyyppi         in ('D','O')";
         $sumres = pupe_query($query);
         $sumrow = mysql_fetch_assoc($sumres);
 

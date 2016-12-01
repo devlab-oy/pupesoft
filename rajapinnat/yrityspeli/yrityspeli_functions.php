@@ -250,7 +250,7 @@ function yrityspeli_generoi_ostotilaus(Array $params) {
       $query = "UPDATE lasku
                 SET vanhatunnus   = {$toimipaikkarow["tunnus"]},
                     toim_nimi     = '{$toimipaikkarow["nimi"]}',
-                    toim_nimitark = '{$toimipaikkarow["nimitark"]}',
+                    toim_nimitark = '{$yhtiorow["ovttunnus"]}-{$toimipaikkarow["ovtlisa"]}',
                     toim_osoite   = '{$toimipaikkarow["osoite"]}',
                     toim_postino  = '{$toimipaikkarow["postino"]}',
                     toim_postitp  = '{$toimipaikkarow["postitp"]}',

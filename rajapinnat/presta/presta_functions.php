@@ -394,17 +394,14 @@ function presta_specific_prices(array $ajolista) {
                   hinnasto.maa,
                   if(hinnasto.laji = 'K', 'informatiivinen_hinta', 'hinnastohinta') AS tyyppi
                   FROM hinnasto
-                  WHERE hinnasto.yhtio  = '$kukarow[yhtio]'
-                  AND hinnasto.tuoteno  = '$hintavalrow[tuoteno]'
+                  WHERE hinnasto.yhtio  = '{$kukarow['yhtio']}'
                   AND hinnasto.tuoteno  = '{$hintavalrow['tuoteno']}'
-                  AND hinnasto.valkoodi = '$hintavalrow[valkoodi]'
-                  AND hinnasto.maa      = '$hintavalrow[maa]'
+                  AND hinnasto.hinta    > 0
+                  AND hinnasto.valkoodi = '{$hintavalrow['valkoodi']}'
+                  AND hinnasto.maa      = '{$hintavalrow['maa']}'
                   AND hinnasto.laji     in ('', 'N', 'E', 'K')
                   AND if(hinnasto.alkupvm  = '0000-00-00', '0001-01-01', hinnasto.alkupvm)  <= current_date
-                  AND if(hinnasto.loppupvm = '0000-00-00', '9999-12-31', hinnasto.loppupvm) >= current_date
-                  AND hinnasto.hinta    > 0
-                  ORDER BY IFNULL(TO_DAYS(current_date) - TO_DAYS(hinnasto.alkupvm), 9999999999999), tunnus DESC
-                  LIMIT 1";
+                  AND if(hinnasto.loppupvm = '0000-00-00', '9999-12-31', hinnasto.loppupvm) >= current_date";
         $hinnastoresult = pupe_query($query);
 
         while ($hinnasto = mysql_fetch_assoc($hinnastoresult)) {

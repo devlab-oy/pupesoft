@@ -33094,6 +33094,10 @@ if (!function_exists('generoi_hinnastot')) {
 
     $tuote = mysql_fetch_assoc($tuote);
 
+    if ($tuote["myyntihinta"] == 0) {
+      return false;
+    }
+
     $query = "SELECT hinnastokurssi, nimi
               FROM valuu
               WHERE yhtio        = '{$kukarow["yhtio"]}'

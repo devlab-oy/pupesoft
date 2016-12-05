@@ -370,7 +370,8 @@ class Unifaun {
      * voidaan silloin jättää nimitiedot tyhjiksi
      * lisäksi pikahakuarvo löytyy hiukan alempaa shipment kohdan alta (from)
      *
-     * Tarkistetaan tässä kohtaa otetaanko pikahakuarvo yhtiorow tunnuksesta, 
+     * Tarkistetaan tässä kohtaa otetaanko pikahakuarvo yhtiorow tunnuksesta,
+     * vaiko yhtion_toimipaikat.pikahakuarvo -kentästä (eli toimipaikkakohtaisesti),
      * vaiko varastopaikat.pikahakuarvo -kentästä (eli varastokohtaisesti)
      */
 
@@ -380,9 +381,26 @@ class Unifaun {
               AND tunnus    = '{$this->postirow['varasto']}'";
     $varastopaikat_res   = pupe_query($query);
     $varastopaikat_row = mysql_fetch_assoc($varastopaikat_res);
-    
+
     if (!empty($varastopaikat_row['pikahakuarvo'])) {
       $pikahakuarvo = $varastopaikat_row['pikahakuarvo'];
+    }
+    elseif (!empty($this->postirow['yhtio_toimipaikka'])) {
+
+      $query = "SELECT pikahakuarvo
+                FROM yhtion_toimipaikat
+                WHERE yhtio   = '{$this->kukarow['yhtio']}'
+                AND tunnus    = '{$this->postirow['yhtio_toimipaikka']}'";
+                $result = pupe_query($query);
+      $toimipaikka_res   = pupe_query($query);
+      $toimipaikka_row = mysql_fetch_assoc($toimipaikka_res);
+      
+      if (!empty($toimipaikka_row['pikahakuarvo'])) {
+        $pikahakuarvo = $toimipaikka_row['pikahakuarvo'];
+      }
+      else {
+        $pikahakuarvo = $this->yhtiorow['tunnus'];
+      }
     }
     else {
       $pikahakuarvo = $this->yhtiorow['tunnus'];

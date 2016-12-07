@@ -1006,4 +1006,15 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
   $_logmaster_rajapinta &= ($yhtiorow['siirtolistan_tulostustapa'] == 'K');
 
   define('LOGMASTER_RAJAPINTA', $_logmaster_rajapinta == 1 ? true : false);
+
+
+  # Katsotaan onko Pupesoftissa Devoca TalknPick-rajapinta asetettuna
+  $_talknpick_rajapinta = true;
+  $_talknpick_rajapinta &= (!empty($talknpick['host']));
+  $_talknpick_rajapinta &= (!empty($talknpick['user']));
+  $_talknpick_rajapinta &= (!empty($talknpick['pass']));
+  $_talknpick_rajapinta &= ($yhtiorow['lahetteen_tulostustapa'] == 'K');
+  $_talknpick_rajapinta &= ($yhtiorow['siirtolistan_tulostustapa'] == 'K');
+
+  define('TALKNPICK_RAJAPINTA', $_talknpick_rajapinta == 1 ? true : false);
 }

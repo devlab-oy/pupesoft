@@ -7,6 +7,7 @@ require 'validation/Validation.php';
 require 'valmistuslinjat.inc';
 
 $onkologmaster = (LOGMASTER_RAJAPINTA and in_array($yhtiorow['ulkoinen_jarjestelma'], array('', 'K')));
+$onkotalknpick = (TALKNPICK_RAJAPINTA and $yhtiorow['ulkoinen_jarjestelma'] == "K");
 
 if (isset($tee) and $tee == "TILAA_AJAX") {
   require_once "inc/tilaa_ajax.inc";
@@ -600,6 +601,9 @@ if ($tee2 == 'VALITSE') {
 
       if ($onkologmaster and in_array($prirow['ulkoinen_jarjestelma'], array('L','P'))) {
         echo t("Ulkoisen varaston tilaus");
+      }
+      elseif ($onkotalknpick and $prirow['ulkoinen_jarjestelma'] == "D") {
+        echo t("TalknPick-tilaus");
       }
       else {
         echo "<input type='submit' name='tila' value='".t("Tulosta")."'>";
@@ -1227,6 +1231,7 @@ if ($tee2 == '') {
       $prirow = mysql_fetch_array($prires);
 
       $onkologmaster_varasto = ($onkologmaster and in_array($prirow['ulkoinen_jarjestelma'], array('L','P')));
+      $onkotalknpick_varasto = ($onkotalknpick and $prirow['ulkoinen_jarjestelma'] == "D");
 
       if ($tilrow["tilauksia"] > 1) {
         echo "<$ero valign='top'></$ero>";
@@ -1364,6 +1369,20 @@ if ($tee2 == '') {
             echo "</font>";
           }
         }
+        elseif ($onkotalknpick_varasto) {
+          echo t("TalknPick-tilaus");
+
+          $keskenres = tilaus_aktiivinen_kayttajalla($tilrow['otunnus']);
+
+          if (mysql_num_rows($keskenres) != 0) {
+            $keskenrow = mysql_fetch_assoc($keskenres);
+
+            echo "<br>";
+            echo "<font class='error'>";
+            echo t("Tilaus on kesken k‰ytt‰j‰ll‰ %s (%s)", "", $keskenrow['nimi'], $keskenrow['kuka']);
+            echo "</font>";
+          }
+        }
         else {
           echo "<input type='submit' value='".t("Tulosta")."'>";
         }
@@ -1395,7 +1414,7 @@ if ($tee2 == '') {
       }
 
       // Ker‰t‰‰n tunnukset tulosta kaikki-toimintoa varten
-      if (!$onkologmaster_varasto) {
+      if (!$onkologmaster_varasto and !$onkotalknpick_varasto) {
         $tulostakaikki_tun[$tilrow['otunnus']] = $tilrow["yhtio"];
       }
 

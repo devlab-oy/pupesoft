@@ -423,13 +423,12 @@ if ($tee == "") {
 
   echo "<tr><td class='back'><br>".t("Ostotilausten erikoisalennukset").":</td></tr>";
 
-  $query  = "SELECT otunnus, erikoisale
+  $query  = "SELECT otunnus, MAX(erikoisale) erikoisale
              FROM tilausrivi
              WHERE tilausrivi.yhtio      = '$kukarow[yhtio]'
              AND tilausrivi.uusiotunnus  = '$laskurow[tunnus]'
              AND tilausrivi.tyyppi      != 'D'
-             GROUP BY 1
-             ORDER BY 1";
+             GROUP BY 1";
   $painoresult = pupe_query($query);
 
   while ($painorow = mysql_fetch_array($painoresult)) {

@@ -149,9 +149,7 @@ class Unifaun {
     }
 
     // jos varastolle on annettu joku osoite, käytetään sitä
-    if ($postirow_varasto["nimi"] != "") {
-      $this->postirow["yhtio_nimi"]     = $postirow_varasto["nimi"];
-      $this->postirow['yhtio_nimitark'] = $postirow_varasto["nimitark"];
+    if ($postirow_varasto["osoite"] != "" or $postirow_varasto["postino"] != "") {
       $this->postirow["yhtio_osoite"]   = $postirow_varasto["osoite"];
       $this->postirow["yhtio_postino"]  = $postirow_varasto["postino"];
       $this->postirow["yhtio_postitp"]  = $postirow_varasto["postitp"];

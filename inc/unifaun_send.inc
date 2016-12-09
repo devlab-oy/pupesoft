@@ -127,14 +127,25 @@ class Unifaun {
     $this->postirow = $postirow;
 
     // haetaan varaston osoitetiedot, käytetään niitä lähetystietoina
-    $query = "SELECT nimi, nimitark, osoite, postino, postitp, maa
+    $query = "SELECT osoite, postino, postitp, maa
               FROM varastopaikat
               WHERE yhtio  = '{$this->kukarow['yhtio']}'
               AND tunnus   = '{$this->postirow['varasto']}'
-              AND nimi    != ''
-              AND osoite  != ''";
+              AND osoite  != ''
+              AND postino != ''
+              AND postitp != ''
+              AND maa     != ''";
     $tempr = pupe_query($query);
-    $postirow_varasto = mysql_fetch_assoc($tempr);
+
+    // jos varastolle on annettu osoite, käytetään sitä
+    if (mysql_num_rows($tempr) == 1) {
+      $postirow_varasto = mysql_fetch_assoc($tempr);
+
+      $this->postirow["yhtio_osoite"]  = $postirow_varasto["osoite"];
+      $this->postirow["yhtio_postino"] = $postirow_varasto["postino"];
+      $this->postirow["yhtio_postitp"] = $postirow_varasto["postitp"];
+      $this->postirow["yhtio_maa"]     = $postirow_varasto["maa"];
+    }
 
     // haetaan laskun_lisatiedot, käytetään noutopisteen_tunnus jos se on != ''
     $ll_query = "SELECT noutopisteen_tunnus
@@ -146,14 +157,6 @@ class Unifaun {
 
     if ($ll_row = mysql_fetch_assoc($ll_res)) {
       $this->postirow["noutopisteen_tunnus"] = $ll_row['noutopisteen_tunnus'];
-    }
-
-    // jos varastolle on annettu joku osoite, käytetään sitä
-    if ($postirow_varasto["osoite"] != "" or $postirow_varasto["postino"] != "") {
-      $this->postirow["yhtio_osoite"]   = $postirow_varasto["osoite"];
-      $this->postirow["yhtio_postino"]  = $postirow_varasto["postino"];
-      $this->postirow["yhtio_postitp"]  = $postirow_varasto["postitp"];
-      $this->postirow["yhtio_maa"]      = $postirow_varasto["maa"];
     }
 
     $this->setAsiakasRow();

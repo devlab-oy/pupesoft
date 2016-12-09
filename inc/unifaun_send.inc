@@ -23,6 +23,7 @@ class Unifaun {
   private $developerid;
   private $unifauntype;
   private $onkovak;
+  private $pikahaku_tunnus = null;
 
   public function __construct() {
   }
@@ -126,14 +127,25 @@ class Unifaun {
     $this->postirow = $postirow;
 
     // haetaan varaston osoitetiedot, käytetään niitä lähetystietoina
-    $query = "SELECT nimi, nimitark, osoite, postino, postitp, maa
+    $query = "SELECT osoite, postino, postitp, maa
               FROM varastopaikat
               WHERE yhtio  = '{$this->kukarow['yhtio']}'
               AND tunnus   = '{$this->postirow['varasto']}'
-              AND nimi    != ''
-              AND osoite  != ''";
+              AND osoite  != ''
+              AND postino != ''
+              AND postitp != ''
+              AND maa     != ''";
     $tempr = pupe_query($query);
-    $postirow_varasto = mysql_fetch_assoc($tempr);
+
+    // jos varastolle on annettu osoite, käytetään sitä
+    if (mysql_num_rows($tempr) == 1) {
+      $postirow_varasto = mysql_fetch_assoc($tempr);
+
+      $this->postirow["yhtio_osoite"]  = $postirow_varasto["osoite"];
+      $this->postirow["yhtio_postino"] = $postirow_varasto["postino"];
+      $this->postirow["yhtio_postitp"] = $postirow_varasto["postitp"];
+      $this->postirow["yhtio_maa"]     = $postirow_varasto["maa"];
+    }
 
     // haetaan laskun_lisatiedot, käytetään noutopisteen_tunnus jos se on != ''
     $ll_query = "SELECT noutopisteen_tunnus
@@ -145,16 +157,6 @@ class Unifaun {
 
     if ($ll_row = mysql_fetch_assoc($ll_res)) {
       $this->postirow["noutopisteen_tunnus"] = $ll_row['noutopisteen_tunnus'];
-    }
-
-    // jos varastolle on annettu joku osoite, käytetään sitä
-    if ($postirow_varasto["nimi"] != "") {
-      $this->postirow["yhtio_nimi"]     = $postirow_varasto["nimi"];
-      $this->postirow['yhtio_nimitark'] = $postirow_varasto["nimitark"];
-      $this->postirow["yhtio_osoite"]   = $postirow_varasto["osoite"];
-      $this->postirow["yhtio_postino"]  = $postirow_varasto["postino"];
-      $this->postirow["yhtio_postitp"]  = $postirow_varasto["postitp"];
-      $this->postirow["yhtio_maa"]      = $postirow_varasto["maa"];
     }
 
     $this->setAsiakasRow();
@@ -365,31 +367,8 @@ class Unifaun {
     //$uni_meta_val->addAttribute('n', 'partition');
 
     // Lähettäjän tiedot
-    /**
-     * tehdään yhtiön parametri "unifaun pikahakuarvo"
-     * voidaan silloin jättää nimitiedot tyhjiksi
-     * lisäksi pikahakuarvo löytyy hiukan alempaa shipment kohdan alta (from)
-     *
-     * Tarkistetaan tässä kohtaa otetaanko pikahakuarvo yhtiorow tunnuksesta, 
-     * vaiko varastopaikat.pikahakuarvo -kentästä (eli varastokohtaisesti)
-     */
-
-    $query = "SELECT pikahakuarvo
-              FROM varastopaikat
-              WHERE yhtio   = '{$this->kukarow['yhtio']}'
-              AND tunnus    = '{$this->postirow['varasto']}'";
-    $varastopaikat_res   = pupe_query($query);
-    $varastopaikat_row = mysql_fetch_assoc($varastopaikat_res);
-    
-    if (!empty($varastopaikat_row['pikahakuarvo'])) {
-      $pikahakuarvo = $varastopaikat_row['pikahakuarvo'];
-    }
-    else {
-      $pikahakuarvo = $this->yhtiorow['tunnus'];
-    }
-
     $uni_sender = $xml->addChild('sender');  // Attribute sndid corresponds to sender ID/quick ID. Any contents. Mandatory
-    $uni_sender->addAttribute('sndid', $pikahakuarvo);
+    $uni_sender->addAttribute('sndid', $this->pikahakuarvo());
 
     // $uni_snd_val = $uni_sender->addChild('val', str_replace($search, $replace, $this->postirow["yhtio_nimi"])); # Sender's name
     $_yhtio_nimi = htmlspecialchars($this->postirow["yhtio_nimi"]);
@@ -692,7 +671,7 @@ class Unifaun {
       $uni_shipment->addAttribute('mergeid', utf8_encode($mergeid));
     }
 
-    $uni_shi_val = $uni_shipment->addChild('val', $pikahakuarvo); // Defines the sender. Refers to the sndid value for sender.
+    $uni_shi_val = $uni_shipment->addChild('val', $this->pikahakuarvo()); // Defines the sender. Refers to the sndid value for sender.
     $uni_shi_val->addAttribute('n', "from");
 
     //$uni_shi_val = $uni_shipment->addChild('val', ""); # Defines the legal sender (not printed on shipping documents).
@@ -1214,5 +1193,63 @@ class Unifaun {
         }
       }
     }
+  }
+
+  private function pikahakuarvo() {
+    /**
+     * tehdään yhtiön parametri "unifaun pikahakuarvo"
+     * voidaan silloin jättää nimitiedot tyhjiksi
+     * lisäksi pikahakuarvo löytyy hiukan alempaa shipment kohdan alta (from)
+     *
+     * Tarkistetaan tässä kohtaa otetaanko pikahakuarvo yhtiorow tunnuksesta,
+     * vaiko yhtion_toimipaikat.pikahakuarvo -kentästä (eli toimipaikkakohtaisesti),
+     * vaiko varastopaikat.pikahakuarvo -kentästä (eli varastokohtaisesti)
+     */
+
+    // memoization, ei tehdä turhaa toista kertaa
+    if (!is_null($this->pikahaku_tunnus)) {
+      return $this->pikahaku_tunnus;
+    }
+
+    // oletus on yhtiön tunnus
+    $this->pikahaku_tunnus = $this->yhtiorow['tunnus'];
+
+    // tarkistetaan onko meillä pikahakuarvo varaston takana
+    $query = "SELECT pikahakuarvo
+              FROM varastopaikat
+              WHERE yhtio = '{$this->kukarow['yhtio']}'
+              AND tunnus = '{$this->postirow['varasto']}'";
+    $varastopaikat_res = pupe_query($query);
+    $varastopaikat_row = mysql_fetch_assoc($varastopaikat_res);
+
+    // käytetään varaston pikahakuarvoa
+    if (!empty($varastopaikat_row['pikahakuarvo'])) {
+      $this->pikahaku_tunnus = $varastopaikat_row['pikahakuarvo'];
+
+      return $this->pikahaku_tunnus;
+    }
+
+    // palautetaan oletus (yhtiö tunnus), jos ei ole toimipaikkaa
+    if (empty($this->postirow['yhtio_toimipaikka'])) {
+      return $this->pikahaku_tunnus;
+    }
+
+    // tarkistetaan onko meillä pikahakuarvo toimipaikan takana
+    $query = "SELECT pikahakuarvo
+              FROM yhtion_toimipaikat
+              WHERE yhtio = '{$this->kukarow['yhtio']}'
+              AND tunnus = '{$this->postirow['yhtio_toimipaikka']}'";
+    $toimipaikka_res = pupe_query($query);
+    $toimipaikka_row = mysql_fetch_assoc($toimipaikka_res);
+
+    // käytetään toimipaikan pikahakuarvoa
+    if (!empty($toimipaikka_row['pikahakuarvo'])) {
+      $this->pikahaku_tunnus = $toimipaikka_row['pikahakuarvo'];
+
+      return $this->pikahaku_tunnus;
+    }
+
+    // palautetaan oletus (yhtiö tunnus)
+    return $this->pikahaku_tunnus;
   }
 }

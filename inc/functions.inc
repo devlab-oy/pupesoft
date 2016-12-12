@@ -2791,9 +2791,9 @@ if (!function_exists("synkronoi")) {
         else {
 
           //  Päivitetään vai tehdään uutta?
-          $query = "SELECT tunnus
+          $query = "SELECT *
                     FROM {$table}
-                    WHERE yhtio = '{$kohderow['yhtio']}'
+                    WHERE yhtio ='{$kohderow['yhtio']}'
                     {$where}";
           $abures = pupe_query($query);
           $aburow = mysql_fetch_assoc($abures);
@@ -2901,25 +2901,25 @@ if (!function_exists("synkronoi")) {
               }
 
               //  koitetaan hakea oikean maksuehdon tunnus..
-              $query = "SELECT * from maksuehto where yhtio='$yhtio' and tunnus='$masterrow[maksuehto]'";
-              $abures = pupe_query($query);
-              $maksuehtorow = mysql_fetch_assoc($abures);
+              $query = "SELECT * from maksuehto where yhtio='{$yhtio}' and tunnus='{$masterrow['maksuehto']}'";
+              $maksuehtores = pupe_query($query);
+              $maksuehtorow = mysql_fetch_assoc($maksuehtores);
 
               //  Melkein kaikki tiedot pitää stemmata!
               $query = "SELECT tunnus
                         from maksuehto
-                        where yhtio       = '$kohderow[yhtio]'
-                        and abs_pvm       = '$maksuehtorow[abs_pvm]'
-                        and erapvmkasin   = '$maksuehtorow[erapvmkasin]'
-                        and factoring_id  = '$maksuehtorow[factoring_id]'
-                        and jaksotettu    = '$maksuehtorow[jaksotettu]'
-                        and jv            = '$maksuehtorow[jv]'
-                        and kassa_abspvm  = '$maksuehtorow[kassa_abspvm]'
-                        and kassa_alepros = '$maksuehtorow[kassa_alepros]'
-                        and kassa_relpvm  = '$maksuehtorow[kassa_relpvm]'
-                        and kateinen      = '$maksuehtorow[kateinen]'
-                        and rel_pvm       = '$maksuehtorow[rel_pvm]'
-                        and sallitut_maat = '$maksuehtorow[sallitut_maat]'
+                        where yhtio       = '{$kohderow['yhtio']}'
+                        and abs_pvm       = '{$maksuehtorow['abs_pvm']}'
+                        and erapvmkasin   = '{$maksuehtorow['erapvmkasin']}'
+                        and factoring_id  = '{$maksuehtorow['factoring_id']}'
+                        and jaksotettu    = '{$maksuehtorow['jaksotettu']}'
+                        and jv            = '{$maksuehtorow['jv']}'
+                        and kassa_abspvm  = '{$maksuehtorow['kassa_abspvm']}'
+                        and kassa_alepros = '{$maksuehtorow['kassa_alepros']}'
+                        and kassa_relpvm  = '{$maksuehtorow['kassa_relpvm']}'
+                        and kateinen      = '{$maksuehtorow['kateinen']}'
+                        and rel_pvm       = '{$maksuehtorow['rel_pvm']}'
+                        and sallitut_maat = '{$maksuehtorow['sallitut_maat']}'
                         LIMIT 1";
               $tarkres = pupe_query($query);
 
@@ -2932,19 +2932,21 @@ if (!function_exists("synkronoi")) {
               }
 
               //  koitetaan hakea oikean toimitustavan tunnus..
-              $query = "SELECT * from toimitustapa where yhtio='$yhtio' and tunnus='$masterrow[toimitustapa]'";
-              $abures = pupe_query($query);
-              $toimitustaparow = mysql_fetch_assoc($abures);
+              $query = "SELECT * from toimitustapa where yhtio='{$yhtio}' and tunnus='{$masterrow['toimitustapa']}'";
+              $toimitustapares = pupe_query($query);
+              $toimitustaparow = mysql_fetch_assoc($toimitustapares);
 
               //  Melkein kaikki tiedot pitää stemmata!
-              $query = "SELECT tunnus from toimitustapa where yhtio='$kohderow[yhtio]'
-                        and selite        = '$toimitustaparow[selite]'
-                        and jvkulu        = '$toimitustaparow[jvkulu]'
-                        and lauantai      = '$toimitustaparow[lauantai]'
-                        and maa_maara     = '$toimitustaparow[maa_maara]'
-                        and merahti       = '$toimitustaparow[merahti]'
-                        and nouto         = '$toimitustaparow[nouto]'
-                        and sallitut_maat = '$toimitustaparow[sallitut_maat]'";
+              $query = "SELECT tunnus
+                        FROM toimitustapa
+                        WHERE yhtio       = '{$kohderow['yhtio']}'
+                        and selite        = '{$toimitustaparow['selite']}'
+                        and jvkulu        = '{$toimitustaparow['jvkulu']}'
+                        and lauantai      = '{$toimitustaparow['lauantai']}'
+                        and maa_maara     = '{$toimitustaparow['maa_maara']}'
+                        and merahti       = '{$toimitustaparow['merahti']}'
+                        and nouto         = '{$toimitustaparow['nouto']}'
+                        and sallitut_maat = '{$toimitustaparow['sallitut_maat']}'";
               $tarkres=pupe_query($query);
 
               if (mysql_num_rows($tarkres) == 1) {
@@ -2967,18 +2969,24 @@ if (!function_exists("synkronoi")) {
 
               // Ohitetaan tämä koska se on synkronoi kielloissa
               if (isset($synkronoi_kiellot[$table]) and in_array($kennimi, $synkronoi_kiellot[$table])) {
-                if ($update_insert == "INSERT" or empty($aburow[$kennimi])) {
+                if ($update_insert == "INSERT") {
                   // Jos kentälle on määritelty oletusarvo avainsanoihin niin haetaan se
                   $query = "SELECT *
-                            FROM avainsana
-                            WHERE yhtio = '{$kohderow['yhtio']}'
-                            and laji    = 'MYSQLALIAS'
-                            and selite  = '{$table}.{$kennimi}'
-                            and selitetark_2 = 'Default'
-                            and selitetark_4 != ''";
+                           FROM avainsana
+                           WHERE yhtio = '{$kohderow['yhtio']}'
+                           and laji    = 'MYSQLALIAS'
+                           and selite  = '{$table}.{$kennimi}'
+                           and selitetark_2 = 'Default'
+                           and selitetark_4 != ''";
                   $mysqlalias_default_res = pupe_query($query);
-                  $mysqlalias_default_row = mysql_fetch_assoc($mysqlalias_default_res);
-                  $override[$kennimi] = $mysqlalias_default_row['selitetark_4'];
+
+                  if (mysql_num_rows($mysqlalias_default_res) === 0) {
+                    continue;
+                  }
+                  else {
+                    $mysqlalias_default_row = mysql_fetch_assoc($mysqlalias_default_res);
+                    $override[$kennimi] = $mysqlalias_default_row['selitetark_4'];
+                  }
                 }
                 else {
                   continue;
@@ -20562,6 +20570,7 @@ if (!function_exists("pupesoft_laskutyypit")) {
       5  => "Normaali laskupohja (Ei näytetä verollista rivihintaa)",
       6  => "Normaali laskupohja (Ei näytetä tilausnumeroa/toimitusaikaa)",
       7  => "Normaali laskupohja (Näytetään tuotteen EAN koodi ja asiakaskommentti)",
+      23 => "Normaali laskupohja (Näytetään myös yhteensä ilman alennuksia)",
       1  => "Pelkistetty laskupohja 1",
       3  => "Pelkistetty laskupohja 2 (Tuoteperheet yhdistetty)",
       4  => "Pelkistetty laskupohja 3",
@@ -21997,7 +22006,6 @@ if (!function_exists("pupesoft_sahkoposti")) {
       $content .= "Content-Transfer-Encoding: quoted-printable\n\n";
 
       if ($email_ctype == "HTML") {
-
         if ($yhtiorow["kayttoliittyma"] == "U") {
           $css = $yhtiorow['css'];
         }
@@ -22005,12 +22013,14 @@ if (!function_exists("pupesoft_sahkoposti")) {
           $css = $yhtiorow['css_classic'];
         }
 
-        $content .= "\n<head>\n";
-        $content .= "<style type='text/css'>{$css}</style>\n";
-        $content .= "</head>\n";
+        $html_email_body  = "\n<head>\n";
+        $html_email_body .= "<style type='text/css'>{$css}</style>\n";
+        $html_email_body .= "</head>\n";
+
+        $email_body = $html_email_body.$email_body;
       }
 
-      $content .= $email_body."\n\n";
+      $content .= quoted_printable_encode($email_body)."\n\n";
     }
 
     $content .= "--$bound";
@@ -33084,6 +33094,10 @@ if (!function_exists('generoi_hinnastot')) {
 
     $tuote = mysql_fetch_assoc($tuote);
 
+    if ($tuote["myyntihinta"] == 0) {
+      return false;
+    }
+
     $query = "SELECT hinnastokurssi, nimi
               FROM valuu
               WHERE yhtio        = '{$kukarow["yhtio"]}'
@@ -34041,6 +34055,24 @@ if (!function_exists('tilausrivin_esisyotto')) {
       }
     }
 
+    // Rakennetaan syötetyistä aleista array,
+    // jotta saadaan syötetyt alet talteen
+    // ja osataan laskea niistä yksikköhinta ja rivihinta oikein
+    $_ale = array();
+
+    if ($ale1 != "") {
+      $_ale["ale1"] = $ale1;
+    }
+
+    if ($ale2 != "") {
+      $_ale["ale2"] = $ale2;
+    }
+
+    if ($ale3 != "") {
+      $_ale["ale3"] = $ale3;
+    }
+
+    $ale_arr = !empty($_ale) ? $_ale : $ale;
     $ale_arr['netto'] = $netto;
     $ale_arr['erikoisale'] = 0;
     $ale_arr['erikoisale_saapuminen'] = 0;

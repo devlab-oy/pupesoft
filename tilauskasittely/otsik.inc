@@ -4335,7 +4335,15 @@ if (isset($jatka)) {
 
     $kassalipas = $kassalipas_row['kassalipas'];
     $maksuehto  = $kassalipas_row['maksuehto'];
-    $sisainen   = "o";
+
+    // Si‰sinen t‰pp‰ tulee laittaa vain jos tilaus on viel‰ kesken,
+    // muuten se saa tilauksen menem‰‰n toimitettu tilaan
+    if ($alatila == "") {
+      $sisainen = "o";
+    }
+    else {
+      $sisainen = "";
+    }
   }
 
   if (!isset($campaign_id)) {

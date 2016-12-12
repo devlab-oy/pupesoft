@@ -105,7 +105,7 @@ if (isset($synkronoi) and count($syncyhtiot) > 1) {
   }
 }
 
-if ((isset($synkronoireferenssi) or isset($synkronoireferenssialapaivita)) and count($syncyhtiot) > 0) {
+if ($kukarow['kuka'] == 'admin' and (isset($synkronoireferenssi) or isset($synkronoireferenssialapaivita)) and count($syncyhtiot) > 0) {
 
   $ch  = curl_init();
   curl_setopt($ch, CURLOPT_URL, "http://api.devlab.fi/referenssivalikot.sql");
@@ -613,8 +613,10 @@ if ($tee == "") {
     echo "<tr><th>".t("Synkronoi").":</th><td><input type='submit' name='synkronoi' value='".t("Synkronoi")."'></td></tr>";
   }
 
-  echo "<tr><th>".t("Synkronoi referenssiin").":</th><td><input type='submit' name='synkronoireferenssi' value='".t("Synkronoi")."'></td></tr>";
-  echo "<tr><th>".t("Synkronoi referenssiin")." ".t("älä päivitä järjestyksiä").":</th><td><input type='submit' name='synkronoireferenssialapaivita' value='".t("Synkronoi")."'></td></tr>";
+  if ($kukarow['kuka'] == 'admin') {
+    echo "<tr><th>".t("Synkronoi referenssiin").":</th><td><input type='submit' name='synkronoireferenssi' value='".t("Synkronoi")."'></td></tr>";
+    echo "<tr><th>".t("Synkronoi referenssiin")." ".t("älä päivitä järjestyksiä").":</th><td><input type='submit' name='synkronoireferenssialapaivita' value='".t("Synkronoi")."'></td></tr>";
+  }
 
   echo "</form>";
 

@@ -3723,6 +3723,7 @@ if ($fieldname == "pakollinen_varasto") {
 
   $ulos .= "<option value = ''>".t("Varaston valinta ei pakollinen. Tilaukselle voidaan lis‰t‰ rivej‰ useasta varastosta")."</option>";
   $ulos .= "<option value = 'K'{$sel}>".t("Varaston valinta on pakollinen. Tilaukselle voidaan lis‰t‰ rivej‰ vain yhdest‰ varastosta: myyntitilauksella, ostotilauksella, tarjouksella ja reklamaatiolla")."</option>";
+  $ulos .= "</select></td>";
 
   $jatko = 0;
 }
@@ -3736,6 +3737,18 @@ if ($fieldname == "ulkoinen_jarjestelma") {
   $ulos .= "<option value = ''>".t("Varaston ulkoinen j‰rjestelm‰ toimii ker‰yksen ja saapumisen yhteydess‰")."</option>";
   $ulos .= "<option value = 'K'{$sel['K']}>".t("Varaston ulkoinen j‰rjestelm‰ toimii vain ker‰yksen yhteydess‰")."</option>";
   $ulos .= "<option value = 'S'{$sel['S']}>".t("Varaston ulkoinen j‰rjestelm‰ toimii vain saapumisen yhteydess‰")."</option>";
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
+if ($fieldname == "ulkoinen_jarjestelma_lukko") {
+  $sel = array($trow[$i] => 'selected') + array('K' => '');
+
+  $ulos  = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+  $ulos .= "<option value = ''>".t("Ulkoinen j‰rjestelm‰‰n l‰hetettyj‰ tilauksia ei saa muokata")."</option>";
+  $ulos .= "<option value = 'K'{$sel['K']}>".t("Ulkoinen j‰rjestelm‰‰n l‰hetettyj‰ tilauksia saa muokata")."</option>";
+  $ulos .= "</select></td>";
 
   $jatko = 0;
 }
@@ -3770,16 +3783,26 @@ if ($fieldname == "kerayserat") {
 }
 
 if ($fieldname == "myyntiera_pyoristys" ) {
-
-  $sela = $selb = "";
-
   $sel = array($trow[$i] => 'selected') + array('', 'K', 'S');
 
   $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">
-        <option value = ' '>".t("Myyntirivin m‰‰r‰‰ ei pyˆristet‰ seuraavaan t‰yteen myyntier‰‰n")."</option>
-        <option value = 'K' {$sel['K']}>".t("Myyntirivin m‰‰r‰ pyˆristet‰‰n seuraavaan t‰yteen myyntier‰‰n")."</option>
-        <option value = 'S' {$sel['S']}>".t("Myyntirivin ja siirtorivin m‰‰r‰ pyˆristet‰‰n seuraavaan t‰yteen myyntier‰‰n")."</option>
+        <option value = ''>".t("M‰‰r‰‰ ei pyˆristet‰ myyntier‰‰n")."</option>
+        <option value = 'K' {$sel['K']}>".t("Myyntirivin ja ennakkotilausrivin m‰‰r‰ pyˆristet‰‰n seuraavaan t‰yteen myyntier‰‰n")."</option>
+        <option value = 'S' {$sel['S']}>".t("Myyntirivin, ennakkotilausrivin ja siirtorivin m‰‰r‰ pyˆristet‰‰n seuraavaan t‰yteen myyntier‰‰n")."</option>
       </select></td>";
+
+  $jatko = 0;
+}
+
+if ($fieldname == "minimimaara_pyoristys" ) {
+  $sel = array($trow[$i] => 'selected') + array('', 'K', 'S', 'E');
+
+  $ulos  = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+  $ulos .= "<option value=''>".t("M‰‰r‰‰ ei pyˆristet‰ minimim‰‰r‰‰n")."</option>";
+  $ulos .= "<option value='K' {$sel['K']}>".t("Myyntirivin ja ennakkotilausrivin m‰‰r‰ pyˆristet‰‰n minimim‰‰r‰‰n, jos tilataan alle minimim‰r‰n")."</option>";
+  $ulos .= "<option value='S' {$sel['S']}>".t("Myyntirivin, ennakkotilausrivin ja siirtorivin m‰‰r‰ pyˆristet‰‰n minimim‰‰r‰‰n, jos tilataan alle minimim‰r‰n")."</option>";
+  $ulos .= "<option value='E' {$sel['E']}>".t("Myyntirivin m‰‰r‰ pyˆristet‰‰n minimim‰‰r‰‰n ainoastaan Extranetiss‰, jos tilataan alle minimim‰r‰n")."</option>";
+  $ulos .= "</select></td>";
 
   $jatko = 0;
 }
@@ -3992,16 +4015,13 @@ if ($fieldname == "intrastat_pvm") {
 }
 
 if ($fieldname == "myynti_asiakhin_tallenna") {
+  $sel = array($trow[$i] => 'selected') + array('', 'K', 'V');
 
-  $apu = $trow[$i];
-  $sel = array($apu => "selected");
-
-  $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">
-        <option value = ''>".t("Myyntitilauksella ei voi tallentaa asiakashintoja")."</option>
-        <option value = 'K' {$sel["K"]}>".t("Myyntitilauksen hinnat voi tallentaa asiakkaalle asiakashinnoiksi")."</option>
-        <option value='V' {$sel["V"]}>" . t("Myyntitilauksen hinnat voi tallentaa asiakkaalle " .
-    "asiakashinnoiksi valitulla tavalla") . "</option>
-      </select></td>";
+  $ulos  = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+  $ulos .= "<option value=''>".t("Myyntitilauksella ei voi tallentaa asiakashintoja/-alennuksia")."</option>";
+  $ulos .= "<option value='K' {$sel["K"]}>".t("Myyntitilauksen hinnat voi tallentaa asiakkaalle asiakashinnoiksi/-alennuksiksi")."</option>";
+  $ulos .= "<option value='V' {$sel["V"]}>" . t("Myyntitilauksen hinnat voi tallentaa asiakkaalle asiakashinnoiksi/-alennuksiksi valitulla tavalla") . "</option>";
+  $ulos .= "</select></td>";
 
   $jatko = 0;
 }

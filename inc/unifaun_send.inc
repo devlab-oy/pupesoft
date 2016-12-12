@@ -20,16 +20,43 @@ class Unifaun {
   private $mehto;
   private $xml;
   private $kirjoitin;
+  private $developerid;
+  private $unifauntype;
   private $onkovak;
+  private $pikahaku_tunnus = null;
 
-  public function __construct($hostname, $username, $password, $ftppath, $ftpport, $ftpfail, $ftpsucc) {
-    $this->hostname = $hostname;
-    $this->username = $username;
-    $this->password = $password;
-    $this->ftppath   = $ftppath;
-    $this->ftpport   = $ftpport;
-    $this->ftpfail   = $ftpfail;
-    $this->ftpsucc   = $ftpsucc;
+  public function __construct() {
+  }
+
+  // FTP-siirto
+  public static function online($hostname, $username, $password, $ftppath, $ftpport, $ftpfail, $ftpsucc) {
+    $instance = new self();
+
+    $instance->unifauntype = "ONLINE";
+    $instance->hostname    = $hostname;
+    $instance->username    = $username;
+    $instance->password    = $password;
+    $instance->ftppath     = $ftppath;
+    $instance->ftpport     = $ftpport;
+    $instance->ftpfail     = $ftpfail;
+    $instance->ftpsucc     = $ftpsucc;
+
+    return $instance;
+  }
+
+  // XML-posting
+  public static function xmlposting($developerid, $username, $password, $ftpfail, $ftpsucc, $unifaun_packsoft) {
+    $instance = new self();
+
+    $instance->unifauntype = "XMLPOSTING";
+    $instance->developerid = $developerid;
+    $instance->username    = $username;
+    $instance->password    = $password;
+    $instance->ftpfail     = $ftpfail;
+    $instance->ftpsucc     = $ftpsucc;
+    $instance->packsoft    = $unifaun_packsoft;
+
+    return $instance;
   }
 
   public function setYhtioRow($yhtiorow) {
@@ -100,14 +127,25 @@ class Unifaun {
     $this->postirow = $postirow;
 
     // haetaan varaston osoitetiedot, k‰ytet‰‰n niit‰ l‰hetystietoina
-    $query = "SELECT nimi, nimitark, osoite, postino, postitp, maa
+    $query = "SELECT osoite, postino, postitp, maa
               FROM varastopaikat
               WHERE yhtio  = '{$this->kukarow['yhtio']}'
               AND tunnus   = '{$this->postirow['varasto']}'
-              AND nimi    != ''
-              AND osoite  != ''";
+              AND osoite  != ''
+              AND postino != ''
+              AND postitp != ''
+              AND maa     != ''";
     $tempr = pupe_query($query);
-    $postirow_varasto = mysql_fetch_assoc($tempr);
+
+    // jos varastolle on annettu osoite, k‰ytet‰‰n sit‰
+    if (mysql_num_rows($tempr) == 1) {
+      $postirow_varasto = mysql_fetch_assoc($tempr);
+
+      $this->postirow["yhtio_osoite"]  = $postirow_varasto["osoite"];
+      $this->postirow["yhtio_postino"] = $postirow_varasto["postino"];
+      $this->postirow["yhtio_postitp"] = $postirow_varasto["postitp"];
+      $this->postirow["yhtio_maa"]     = $postirow_varasto["maa"];
+    }
 
     // haetaan laskun_lisatiedot, k‰ytet‰‰n noutopisteen_tunnus jos se on != ''
     $ll_query = "SELECT noutopisteen_tunnus
@@ -119,16 +157,6 @@ class Unifaun {
 
     if ($ll_row = mysql_fetch_assoc($ll_res)) {
       $this->postirow["noutopisteen_tunnus"] = $ll_row['noutopisteen_tunnus'];
-    }
-
-    // jos varastolle on annettu joku osoite, k‰ytet‰‰n sit‰
-    if ($postirow_varasto["nimi"] != "") {
-      $this->postirow["yhtio_nimi"]     = $postirow_varasto["nimi"];
-      $this->postirow['yhtio_nimitark'] = $postirow_varasto["nimitark"];
-      $this->postirow["yhtio_osoite"]   = $postirow_varasto["osoite"];
-      $this->postirow["yhtio_postino"]  = $postirow_varasto["postino"];
-      $this->postirow["yhtio_postitp"]  = $postirow_varasto["postitp"];
-      $this->postirow["yhtio_maa"]      = $postirow_varasto["maa"];
     }
 
     $this->setAsiakasRow();
@@ -168,8 +196,81 @@ class Unifaun {
     }
   }
 
+  public function xmlPost() {
+    $filenimi = "/tmp/unifaun-".md5(uniqid(rand(), true)).".txt";
+
+    //kirjoitetaan faili levylle..
+    if (file_put_contents($filenimi, $this->xml->asXML()) === FALSE) {
+      echo "<br><font class='error'>".t("VIRHE: tiedoston kirjoitus ep‰onnistui")."!</font><br>";
+    }
+    else {
+
+      $url      = "https://www.unifaunonline.com/ufoweb/order";
+      $user     = $this->username;
+      $pass     = $this->password;
+      $devi     = $this->developerid;
+      $ftpfail  = $this->ftpfail;
+      $ftpsucc  = $this->ftpsucc;
+      $packsoft = $this->packsoft;
+
+      if ($packsoft) {
+        $session = "po_SE";
+      }
+      else {
+        $session = "ufo_SE";
+      }
+
+      $f = fopen($filenimi, "r");
+
+      $ch = curl_init();
+      curl_setopt($ch, CURLOPT_URL, "{$url}?session={$session}&user={$user}&pin={$pass}&developerid={$devi}&type=xml");
+      curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
+      curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, FALSE);
+      curl_setopt($ch, CURLOPT_POST, TRUE);
+      curl_setopt($ch, CURLOPT_HTTPHEADER, array("Content-Type: text/xml"));
+      curl_setopt($ch, CURLOPT_POSTFIELDS, fread($f, filesize($filenimi)));
+      curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+
+      $result = curl_exec($ch);
+
+      if ($result === FALSE) {
+        echo "<font class='error'>VIRHE: \n";
+        echo curl_errno($ch) . " - " . curl_error($ch) . "</font><br>";
+        exit(1);
+      }
+      else {
+        $basefile = basename($filenimi);
+
+        $xml = simplexml_load_string($result);
+
+        foreach ($xml->val as $val) {
+          if ($val->attributes()->n == "status") {
+            $xmlstatus = $val;
+          }
+          if ($val->attributes()->n == "message") {
+            $xmlmessage = $val;
+          }
+        }
+
+        if ($xmlstatus == "201" and !empty($ftpsucc)) {
+          // Siirret‰‰n faili talteen jos siirto onnasi ja ok failit halutaan tallentaa
+          rename($filenimi, $ftpsucc."/".$basefile);
+        }
+        elseif (!empty($ftpfail)) {
+          // Siirret‰‰n faili outboxiin odottamaan uutta yrityst‰ jos siirto feilasi
+          rename($filenimi, $ftpfail."/".$basefile);
+
+          echo "<font class='error'>VIRHE: \n";
+          echo "$xmlstatus, $xmlmessage</font><br>";
+          exit(1);
+        }
+      }
+
+      curl_close($ch);
+    }
+  }
+
   public function _saveForDebug($postfix = "") {
-    //$filenimi = "/Users/sami/Sites/pupesoft/dataout/unifaun-{$postfix}-{$this->toitarow['selite']}-".md5(uniqid(rand(),true)).".txt";
     $filenimi = "/tmp/unifaun-{$postfix}-{$this->toitarow['selite']}-".md5(uniqid(rand(), true)).".txt";
 
     //kirjoitetaan faili levylle..
@@ -227,12 +328,16 @@ class Unifaun {
     $uni_discard_val->addAttribute('n', 'parcelno');
 
     $this->xml = $xml;
-
   }
 
   public function _getXML() {
 
+    if ($this->unifauntype == "ONLINE") {
     $xmlstr  = '<?xml version="1.0" encoding="UTF-8"?><printserver></printserver>';
+    }
+    else {
+      $xmlstr  = '<?xml version="1.0" encoding="UTF-8"?><unifaunonline></unifaunonline>';
+    }
 
     $query = "SELECT *
               FROM rahdinkuljettajat
@@ -247,6 +352,9 @@ class Unifaun {
     // Metatiedot
     $uni_meta = $xml->addChild('meta');
 
+    // siivotaan puhelinnumerosta v‰lilyˆnnit ja muut erikoismerkit veke
+    $this->postirow["toim_puh"] = preg_replace("/[^0-9\+]/", "", $this->postirow["toim_puh"]);
+
     // $uni_meta_val = $uni_meta->addChild('val', '|LASER1|'); # Sends the print job to defined printer/ID. The value must be enclosed in pipe characters, |.
     $uni_meta_val = $uni_meta->addChild('val', "{$this->kirjoitin}"); // Sends the print job to defined printer/ID. The value must be enclosed in pipe characters, |.
     $uni_meta_val->addAttribute('n', 'printer');
@@ -259,14 +367,8 @@ class Unifaun {
     //$uni_meta_val->addAttribute('n', 'partition');
 
     // L‰hett‰j‰n tiedot
-    /**
-     * tehd‰‰n yhtiˆn parametri "unifaun pikahakuarvo"
-     * voidaan silloin j‰tt‰‰ nimitiedot tyhjiksi
-     */
-
-
     $uni_sender = $xml->addChild('sender');  // Attribute sndid corresponds to sender ID/quick ID. Any contents. Mandatory
-    $uni_sender->addAttribute('sndid', utf8_encode("{$this->yhtiorow["tunnus"]}"));
+    $uni_sender->addAttribute('sndid', $this->pikahakuarvo());
 
     // $uni_snd_val = $uni_sender->addChild('val', str_replace($search, $replace, $this->postirow["yhtio_nimi"])); # Sender's name
     $_yhtio_nimi = htmlspecialchars($this->postirow["yhtio_nimi"]);
@@ -569,7 +671,7 @@ class Unifaun {
       $uni_shipment->addAttribute('mergeid', utf8_encode($mergeid));
     }
 
-    $uni_shi_val = $uni_shipment->addChild('val', utf8_encode($this->yhtiorow["tunnus"])); // Defines the sender. Refers to the sndid value for sender.
+    $uni_shi_val = $uni_shipment->addChild('val', $this->pikahakuarvo()); // Defines the sender. Refers to the sndid value for sender.
     $uni_shi_val->addAttribute('n', "from");
 
     //$uni_shi_val = $uni_shipment->addChild('val', ""); # Defines the legal sender (not printed on shipping documents).
@@ -1091,5 +1193,63 @@ class Unifaun {
         }
       }
     }
+  }
+
+  private function pikahakuarvo() {
+    /**
+     * tehd‰‰n yhtiˆn parametri "unifaun pikahakuarvo"
+     * voidaan silloin j‰tt‰‰ nimitiedot tyhjiksi
+     * lis‰ksi pikahakuarvo lˆytyy hiukan alempaa shipment kohdan alta (from)
+     *
+     * Tarkistetaan t‰ss‰ kohtaa otetaanko pikahakuarvo yhtiorow tunnuksesta,
+     * vaiko yhtion_toimipaikat.pikahakuarvo -kent‰st‰ (eli toimipaikkakohtaisesti),
+     * vaiko varastopaikat.pikahakuarvo -kent‰st‰ (eli varastokohtaisesti)
+     */
+
+    // memoization, ei tehd‰ turhaa toista kertaa
+    if (!is_null($this->pikahaku_tunnus)) {
+      return $this->pikahaku_tunnus;
+    }
+
+    // oletus on yhtiˆn tunnus
+    $this->pikahaku_tunnus = $this->yhtiorow['tunnus'];
+
+    // tarkistetaan onko meill‰ pikahakuarvo varaston takana
+    $query = "SELECT pikahakuarvo
+              FROM varastopaikat
+              WHERE yhtio = '{$this->kukarow['yhtio']}'
+              AND tunnus = '{$this->postirow['varasto']}'";
+    $varastopaikat_res = pupe_query($query);
+    $varastopaikat_row = mysql_fetch_assoc($varastopaikat_res);
+
+    // k‰ytet‰‰n varaston pikahakuarvoa
+    if (!empty($varastopaikat_row['pikahakuarvo'])) {
+      $this->pikahaku_tunnus = $varastopaikat_row['pikahakuarvo'];
+
+      return $this->pikahaku_tunnus;
+    }
+
+    // palautetaan oletus (yhtiˆ tunnus), jos ei ole toimipaikkaa
+    if (empty($this->postirow['yhtio_toimipaikka'])) {
+      return $this->pikahaku_tunnus;
+    }
+
+    // tarkistetaan onko meill‰ pikahakuarvo toimipaikan takana
+    $query = "SELECT pikahakuarvo
+              FROM yhtion_toimipaikat
+              WHERE yhtio = '{$this->kukarow['yhtio']}'
+              AND tunnus = '{$this->postirow['yhtio_toimipaikka']}'";
+    $toimipaikka_res = pupe_query($query);
+    $toimipaikka_row = mysql_fetch_assoc($toimipaikka_res);
+
+    // k‰ytet‰‰n toimipaikan pikahakuarvoa
+    if (!empty($toimipaikka_row['pikahakuarvo'])) {
+      $this->pikahaku_tunnus = $toimipaikka_row['pikahakuarvo'];
+
+      return $this->pikahaku_tunnus;
+    }
+
+    // palautetaan oletus (yhtiˆ tunnus)
+    return $this->pikahaku_tunnus;
   }
 }

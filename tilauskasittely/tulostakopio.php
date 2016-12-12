@@ -1455,6 +1455,11 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
     if ($toim == "OSTO") {
       $otunnus = $laskurow["tunnus"];
       $mista = 'tulostakopio';
+
+      // Tehd‰‰n t‰m‰, jotta saadaan toimipaikan tiedot oikein tilaukselle
+      $kukarow['toimipaikka'] = $laskurow['vanhatunnus'];
+      $yhtiorow               = hae_yhtion_parametrit($kukarow["yhtio"]);
+
       require 'tulosta_ostotilaus.inc';
       $tee = '';
     }

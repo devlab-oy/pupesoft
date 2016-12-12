@@ -272,6 +272,7 @@ unset($magento_api_ht_pas);
 unset($magento_api_ht_edi);
 
 unset($logmaster);
+unset($woo_config);
 
 unset($pupesoft_commandlinelog);
 

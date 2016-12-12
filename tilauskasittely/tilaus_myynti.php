@@ -6875,12 +6875,17 @@ if ($tee == '') {
         echo "</select></form>";
       }
 
-      # Tehdään "Toimita kaikki"-nappula
       $toimita_kaikki = array();
 
+      # tehdään "Toimita kaikki"-nappula
+      # tarkistetaan että tilauksella ei ole luottorajat ylittynyt ja
+      # tilaus on tilassa "myyntitilaus odottaa jt-tuotteita"
       if (!$_luottoraja_ylivito and $laskurow['tila'] == 'N' and in_array($laskurow['alatila'], array('T','U'))) {
         while ($row = mysql_fetch_assoc($result)) {
-          // voidaan lukita tämä tilausrivi
+          # tilausrivi on lukossa jos
+          # se on laskutettu
+          # tilausrivi ei kuulu kyseiseen tilaukseen
+          # tilaus on valmistus ja rivi on valmistettu / käytetty valmistukseen
           if ($row["uusiotunnus"] > 0 or $laskurow["tunnus"] != $row["otunnus"] or ($laskurow["tila"] == "V" and $row["kpl"] != 0)) {
             $muokkauslukko_rivi = "LUKOSSA";
           }
@@ -6888,15 +6893,14 @@ if ($tee == '') {
             $muokkauslukko_rivi = "";
           }
 
-          // Rivin tarkistukset
+          # tehdään loput tarkistukset riville jos
+          # tilauksen muokkauslukko tai rivin muokkauslukko ei ole päällä
           if ($muokkauslukko == "" and $muokkauslukko_rivi == "") {
             require 'tarkistarivi.inc';
 
-            //tarkistarivi.inc:stä saadaan $trow jossa on select * from tuote
-
             $kpl_ruudulle = kpl_ruudulle($row, $laskurow, $asiakasrow);
 
-            // Jos JT-rivit varaa saldoa, niin ei anneta tän kysisen rivin syödä omaa saldoaan.
+            // Jos JT-rivit varaa saldoa, niin ei anneta tän kyseisen rivin syödä omaa saldoaan.
             if ($yhtiorow["varaako_jt_saldoa"] != "") {
               $_jt_tm_lisavarattu = $kpl_ruudulle;
             }
@@ -6904,6 +6908,11 @@ if ($tee == '') {
               $_jt_tm_lisavarattu = 0;
             }
 
+            # laitetaan tilausrivin tunnus talteen "toimita kaikki"-nappia varten jos
+            # tilausrivi on jälkitoimitus
+            # tuote on saldoton
+            # käyttäjä ei ole extranet-käyttäjä
+            # tuotepaikan myytävissämäärä + "varaako jt-rivi saldoa" >= tilausrivin varattumäärä
             if ($row["var"] == "J" and (($row["ei_saldoa"] != "" or ($selpaikkamyytavissa+$_jt_tm_lisavarattu) >= $kpl_ruudulle) and $kukarow['extranet'] == '')) {
               $toimita_kaikki[] = $row['tunnus'];
             }

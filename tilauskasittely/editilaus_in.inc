@@ -42,6 +42,11 @@ if ($php_cli) {
     $edi_tyyppi = 'presta';
   }
 
+  // tunnistetaan woo commerce -tyyppinen k‰sittely tiedostonimest‰
+  if ($edi_tyyppi == 'futursoft' and preg_match("/^woo\-order/", $verkkokauppa_filename) === 1) {
+    $edi_tyyppi = 'woo';
+  }
+
   // Pupeasennuksen root
   $pupe_root_polku = dirname(dirname(__FILE__));
 }
@@ -315,6 +320,11 @@ elseif ($edi_tyyppi == "presta") {
   $edi_subj = "Sis‰‰ntuleva Verkkokauppa-tilaus";
   $edi_laatija = "Presta";
   $edi_tyyppi = "magento"; // presta toimii t‰‰ll‰ samaan tapaan kuin magento
+}
+elseif ($edi_tyyppi == "woo") {
+  $edi_subj = "Sis‰‰ntuleva Verkkokauppa-tilaus";
+  $edi_laatija = "WooCommerce";
+  $edi_tyyppi = "magento"; // woocommerce toimii t‰‰ll‰ samaan tapaan kuin magento
 }
 elseif ($edi_tyyppi == "edifact911") {
 
@@ -2557,7 +2567,7 @@ while ($tietue = fgets($fd)) {
 
         // magentotilaus on laskutettu, jos meill‰ on kassalipas
         $laskutettu_magento_tilaus = ($edi_tyyppi == "magento" and $editilaus_kassalipas != "");
-        
+
         // jos etuk‰teen maksettu mutta ei haluta laskuttaa, p‰ivitet‰‰n tilaukselle tunnistustiedot
         if (!$ei_esteta_laskutusta and $laskutettu_magento_tilaus) {
           $query = "UPDATE lasku SET

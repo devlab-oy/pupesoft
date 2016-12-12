@@ -70,7 +70,7 @@ if (move_uploaded_file($_FILES['userfile']['tmp_name'], $filename)) {
     echo "</pre>";
   }
 
-  if ($tyyppi == 'magento' or $tyyppi == 'presta' or $tyyppi == 'ahkio') {
+  if ($tyyppi == 'magento' or $tyyppi == 'presta' or $tyyppi == 'ahkio' or $tyyppi = 'woo') {
     // tarvitaan $filename
     echo "<pre>";
     $edi_tyyppi = $tyyppi;
@@ -121,6 +121,7 @@ else {
          <option value='futursoft'>Futursoft</option>
          <option value='magento'>Magento</option>
          <option value='presta'>PrestaShop</option>
+         <option value='woo'>WooCommerce</option>
          <option value='pos'>".t("Kassap‰‰te")."</option>
          <option value='yct'>Yamaha Center</option>
          <option value='edifact911'>Orders 91.1</option>

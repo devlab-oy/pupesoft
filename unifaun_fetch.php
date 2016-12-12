@@ -38,6 +38,8 @@ if ($php_cli and count(debug_backtrace()) <= 1) {
   $yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
 }
 
+require 'rajapinnat/woo/woo-functions.php';
+
 // Sallitaan vain yksi instanssi tästä skriptistä kerrallaan
 pupesoft_flock();
 
@@ -390,6 +392,14 @@ if ($handle = opendir($ftpget_dest[$operaattori])) {
             }
           }
         }
+
+        // Merkaatan woo-commerce tilaukset toimitetuiksi kauppaan
+        $woo_params = array(
+          "pupesoft_tunnukset" => explode(",", $otunnukset),
+          "tracking_code" => $sscc_ulkoinen,
+        );
+
+        woo_commerce_toimita_tilaus($woo_params);
 
         // Katsotaan onko Magento käytössä, merkataan tilaus toimitetuksi
         $_magento_kaytossa = (!empty($magento_api_tt_url) and !empty($magento_api_tt_usr) and !empty($magento_api_tt_pas));

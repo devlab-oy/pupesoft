@@ -25,6 +25,7 @@ error_reporting(E_ALL);
 require "inc/connect.inc";
 require "inc/functions.inc";
 require "rajapinnat/logmaster/logmaster-functions.php";
+require 'rajapinnat/woo/woo-functions.php';
 
 // Logitetaan ajo
 cron_log();
@@ -134,6 +135,14 @@ while (false !== ($file = readdir($handle))) {
     paivita_rahtikirjat_tulostetuksi_ja_toimitetuksi($params);
 
     pupesoft_log('logmaster_tracking_code', "Tilauksen {$tilausnumero} seurantakoodisanoma käsitelty");
+
+    // Merkaatan woo-commerce tilaukset toimitetuiksi kauppaan
+    $woo_params = array(
+      "pupesoft_tunnukset" => array($tilausnumero),
+      "tracking_code" => $seurantakoodi,
+    );
+
+    woo_commerce_toimita_tilaus($woo_params);
 
     // Jos Magento on käytössä, merkataan tilaus toimitetuksi Magentoon kun rahtikirja tulostetaan
     if ($_magento_kaytossa) {

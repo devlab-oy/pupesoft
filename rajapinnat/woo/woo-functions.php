@@ -44,11 +44,11 @@ function woo_commerce_toimita_tilaus($params) {
 function woo_commerce_hae_woo_tilausnumerot($pupesoft_tunnukset) {
   global $kukarow, $yhtiorow;
 
-  $result = array();
+  $response = array();
 
   // jos meill‰ ei ole yht‰‰n tilausnumeroita
   if (empty($pupesoft_tunnukset) or !is_array($pupesoft_tunnukset)) {
-    return $result;
+    return $response;
   }
 
   // tehd‰‰n tunnuksista stringi
@@ -65,8 +65,8 @@ function woo_commerce_hae_woo_tilausnumerot($pupesoft_tunnukset) {
   $result = pupe_query($query);
 
   while ($row = mysql_fetch_assoc($result)) {
-    $result[] = $row['asiakkaan_tilausnumero'];
+    $response[] = $row['asiakkaan_tilausnumero'];
   }
 
-  return $result;
+  return $response;
 }

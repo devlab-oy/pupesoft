@@ -35,9 +35,7 @@ function woo_commerce_toimita_tilaus($params) {
     );
 
     // tehd‰‰n request
-    $response = pupenext_rest($woo_parameters, "woo/complete_order");
-
-    pupesoft_log("woocommerce_order", $response);
+    pupenext_rest($woo_parameters, "woo_complete_order");
   }
 }
 
@@ -53,6 +51,8 @@ function woo_commerce_hae_woo_tilausnumerot($pupesoft_tunnukset) {
 
   // tehd‰‰n tunnuksista stringi
   $tunnukset = implode(",", $pupesoft_tunnukset);
+
+  pupesoft_log("woocommerce_orders", "P‰ivitet‰‰n tilaukset $tunnukset toimitetuiksi.");
 
   // tehd‰‰n request tilaus kerrallaan
   // ainoastaan jos moduli on magento ja asiakkaan tilausnumero lˆytyy

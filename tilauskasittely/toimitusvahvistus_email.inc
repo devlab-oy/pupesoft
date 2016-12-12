@@ -149,7 +149,7 @@ if ($toimitusvahvistus_email_lahetys) {
         }
         $body .= "{$linkurl}\n\n";
       }
-      elseif (stripos(strtolower($laskurow["toimitustapa"]), "postnord") !== FALSE and !empty($seurantakoodit_row['rahtikirjanro'])) {
+      elseif ((stripos(strtolower($laskurow["toimitustapa"]), "mypack") or (stripos(strtolower($laskurow["toimitustapa"]), "postnord") !== FALSE) and !empty($seurantakoodit_row['rahtikirjanro']))) {
         foreach (explode(" ", $seurantakoodit_row['rahtikirjanro']) as $mypnro) {
           $linkurl .= "http://www.postnord.fi/asiakaspalvelu/sahkoinen-asiointi/lahetysten-seuranta#dynamicloading=true&shipmentid={$mypnro}";
         }

@@ -4,6 +4,8 @@ if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-tulostus.php") !== FALSE) {
   require "inc/parametrit.inc";
 }
 
+require_once 'rajapinnat/woo/woo-functions.php';
+
 $logistiikka_yhtio = '';
 $logistiikka_yhtiolisa = '';
 if (!isset($unifaun_era_vainkollitarra)) $unifaun_era_vainkollitarra = FALSE;
@@ -1135,6 +1137,14 @@ if ($tee == 'tulosta') {
       if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE and $rakir_row['jv'] == '' and !$unifaun_era_vainkollitarra) {
         paivita_rahtikirjat_tulostetuksi_ja_toimitetuksi(array('otunnukset' => $otunnukset, 'kilotyht' => $kilotyht));
       }
+
+      // Merkaatan woo-commerce tilaukset toimitetuiksi kauppaan
+      $woo_params = array(
+        "pupesoft_tunnukset" => explode(",", $otunnukset),
+        "tracking_code" => $rahtikirjanro,
+      );
+
+      woo_commerce_toimita_tilaus($woo_params);
 
       // Katsotaan onko Magento käytössä, silloin merkataan tilaus toimitetuksi Magentoon kun rahtikirja tulostetaan
       $_magento_kaytossa = (!empty($magento_api_tt_url) and !empty($magento_api_tt_usr) and !empty($magento_api_tt_pas));

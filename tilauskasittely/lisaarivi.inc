@@ -42,7 +42,7 @@ if ($kukarow['toimipaikka'] != $laskurow['yhtio_toimipaikka'] and $yhtiorow['myy
 }
 
 // debuggia varten, laita 1 jos haluut messuja
-$lisaarivi_debug = 0;
+$lisaarivi_debug = 1;
 
 // haluttaessa ei varata saldoa extranet-tilauksissa
 if ($laskurow['tilaustyyppi'] == 'H') {
@@ -52,7 +52,8 @@ if ($laskurow['tilaustyyppi'] == 'H') {
 if (!isset($rivitunnus)) $rivitunnus = 0;
 else $rivitunnus = (int) $rivitunnus;
 
-if ($laskurow["tila"] == 'G' and !isset($kohde_alue) and isset($tuoteno)) {
+if (($laskurow["tila"] == 'G' and !isset($kohde_alue) and isset($tuoteno))
+    or ($laskurow["tila"] == 'V' and isset($kohde_alue) and isset($tuoteno))) {
 
   //Laitetaan tuote oletusvaraston tuotepaikalle
   $tuotteen_oletuspaikka = hae_tuotteen_tuotepaikat($tuoteno, $laskurow['clearing']);
@@ -2116,7 +2117,8 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
 
               $tlisatied_lisa2 .= in_array($toim, array('RIVISYOTTO', 'PIKATILAUS')) ? ", omalle_tilaukselle = '".mysql_real_escape_string($omalle_tilaukselle)."'" : '';
 
-              if ($laskurow["tila"] == 'G' and isset($kohde_alue) and $kohde_alue != "") {
+              if (($laskurow["tila"] == 'G' and isset($kohde_alue) and $kohde_alue != "")
+                  or ($laskurow["tila"] == 'V' and isset($kohde_alue) and $kohde_alue != "")) {
                 $tlisatied_lisa2 .= ", kohde_hyllyalue='".mysql_real_escape_string($kohde_alue)."' , kohde_hyllynro='".mysql_real_escape_string($kohde_nro)."' , kohde_hyllyvali='".mysql_real_escape_string($kohde_vali)."' , kohde_hyllytaso='".mysql_real_escape_string($kohde_taso)."'";
               }
 
@@ -3469,7 +3471,8 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
 
     $tlisatied_lisa2 .= in_array($toim, array('RIVISYOTTO', 'PIKATILAUS')) ? ", omalle_tilaukselle = '".mysql_real_escape_string($omalle_tilaukselle)."'" : '';
 
-    if ($laskurow["tila"] == 'G' and isset($kohde_alue) and $kohde_alue != "") {
+    if (($laskurow["tila"] == 'G' and isset($kohde_alue) and $kohde_alue != "")
+        or ($laskurow["tila"] == 'V' and isset($kohde_alue) and $kohde_alue != "")) {
       $tlisatied_lisa2 .= ", kohde_hyllyalue='$kohde_alue' , kohde_hyllynro='$kohde_nro' , kohde_hyllyvali='$kohde_vali' , kohde_hyllytaso='$kohde_taso'";
     }
 

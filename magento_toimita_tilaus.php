@@ -107,7 +107,7 @@ if ($_kuittaus_tekematta) {
 
       $magLinkurl = substr($magLinkurl, 0, -4); // vika br pois
     }
-    elseif (stripos($magento_api_met, "mypack") !== FALSE) {
+    elseif (preg_match("/(mypack|postnord)/i", $magento_api_met)) {
       $magLinkurl .= "<a target=newikkuna href='http://www.postnord.fi/asiakaspalvelu/sahkoinen-asiointi/lahetysten-seuranta#dynamicloading=true&shipmentid={$magento_api_rak}'>{$magento_api_rak}</a><br>";
     }
     else {

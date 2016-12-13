@@ -364,7 +364,7 @@ if ($laskurow["tila"] != "O" and $laskurow["tila"] != "K") {
 
         $linkurl = substr($linkurl, 0, -4); // vika br pois
       }
-      elseif (stripos(strtolower($laskurow["toimitustapa"]), "mypack") !== FALSE and !empty($rakirrow['rahtikirjanro'])) {
+      elseif (preg_match("/(mypack|postnord)/i", $laskurow["toimitustapa"]) and !empty($rakirrow['rahtikirjanro'])) {
         foreach (explode(" ", $rakirrow['rahtikirjanro']) as $mypnro) {
           $linkurl .= "<a target=newikkuna href='http://www.postnord.fi/asiakaspalvelu/sahkoinen-asiointi/lahetysten-seuranta#dynamicloading=true&shipmentid={$mypnro}'>{$mypnro}</a> ";
         }

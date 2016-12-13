@@ -209,7 +209,7 @@ if (!function_exists("onkokaikkivalmistettu")) {
     }
 
     // Laitetaan valmistus valmis tilaan vain,
-    // jos kaikki on jo valmsitettu
+    // jos kaikki on jo valmistettu
     if ($valmistettu and isset($tilrivirow["otunnus"])) {
       //Jos kyseessä on varastovalmistus
       $query = "UPDATE lasku
@@ -237,7 +237,7 @@ if (!function_exists("onkokaikkivalmistettu")) {
     }
     else {
       if (!$tilrivirow["otunnus"]) {
-        echo "<font class='error'>".t("VIRHE: Tarkista tilauksen rivit")."! </font><br>";
+        echo "<font class='error'>".t("VIRHE: Tarkista valmistuksen rivit")."! </font><br>";
       }
 
       $tee = "VALMISTA";

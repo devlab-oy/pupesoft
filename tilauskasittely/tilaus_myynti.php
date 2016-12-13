@@ -5124,8 +5124,13 @@ if ($tee == '') {
           $kerayspvm = substr($laskurow["kerayspvm"], 0, 10);
         }
       }
-
-      $varasto = $laskurow["varasto"];
+      
+      if ($laskurow["tila"] = 'V' and $laskurow["varasto"] > 0) {
+          $varasto = 0;
+      }
+      else  {
+          $varasto = $laskurow["varasto"];
+      }
 
       // Ennakkotilaukset,
       // Tarjoukset,

@@ -52,8 +52,8 @@ if ($laskurow['tilaustyyppi'] == 'H') {
 if (!isset($rivitunnus)) $rivitunnus = 0;
 else $rivitunnus = (int) $rivitunnus;
 
-if (($laskurow["tila"] == 'G' and !isset($kohde_alue) and isset($tuoteno))
-    or ($laskurow["tila"] == 'V' and isset($kohde_alue) and isset($tuoteno))) {
+if (($laskurow["tila"] == 'G' or $laskurow["tila"] == 'V') 
+    and !isset($kohde_alue) and isset($tuoteno)) {
 
   //Laitetaan tuote oletusvaraston tuotepaikalle
   $tuotteen_oletuspaikka = hae_tuotteen_tuotepaikat($tuoteno, $laskurow['clearing']);
@@ -492,7 +492,8 @@ else {
 $sallitaanko_rivikommentti_osto   = ($rivityyppi == 'O' and in_array($yhtiorow['tuotekommentti_tilausriville'], array('', 'O')));
 $sallitaanko_rivikommentti_myynti = ($rivityyppi != 'O' and in_array($yhtiorow['tuotekommentti_tilausriville'], array('', 'M')));
 $sallitaanko_rivikommentti = ($sallitaanko_rivikommentti_osto or $sallitaanko_rivikommentti_myynti);
-
+if ($lisaarivi_debug == 1) echo "varasto_oletukset: $laskurow[varasto], $laskurow[clearing]<br>";
+var_dump($varasto);
 // Onko päässätty varasto josta myydään
 if (isset($varasto) and is_array($varasto) and count($varasto) > 0) {
   $varasto = $varasto;
@@ -2018,7 +2019,7 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
                 $myy_hyllytaso[$indeksi] = $myy_hyllytaso_temp;
                 $myy_hyllyvali[$indeksi] = $myy_hyllyvali_temp;
               }
-
+var_dump($myy_hyllyalue);
               $kampanjatunnus = 'NULL';
               if (isset($GLOBALS['kampanjahinnoitteluntunnus'])) {
                 $kampanjatunnus = $GLOBALS['kampanjahinnoitteluntunnus'];
@@ -2069,7 +2070,7 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
               else {
                 $query .= ", keratty = '{$keratty}', kerattyaika = '{$kerattyaika}'";
               }
-
+query_dump($query);
               $result = pupe_query($query);
               $lisatty_tun = mysql_insert_id($GLOBALS["masterlink"]);
 
@@ -3471,8 +3472,7 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
 
     $tlisatied_lisa2 .= in_array($toim, array('RIVISYOTTO', 'PIKATILAUS')) ? ", omalle_tilaukselle = '".mysql_real_escape_string($omalle_tilaukselle)."'" : '';
 
-    if (($laskurow["tila"] == 'G' and isset($kohde_alue) and $kohde_alue != "")
-        or ($laskurow["tila"] == 'V' and isset($kohde_alue) and $kohde_alue != "")) {
+    if (($laskurow["tila"] == 'G' and isset($kohde_alue) and $kohde_alue != "")) {
       $tlisatied_lisa2 .= ", kohde_hyllyalue='$kohde_alue' , kohde_hyllynro='$kohde_nro' , kohde_hyllyvali='$kohde_vali' , kohde_hyllytaso='$kohde_taso'";
     }
 

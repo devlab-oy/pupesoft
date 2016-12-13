@@ -1,5 +1,4 @@
 <?php
-
 // Tarvitsemme
 // $laskurow jossa on laskun tiedot
 // $kutsuja jossa on skripti josta kutsutaan
@@ -35,6 +34,7 @@ $query = "SELECT count(*) riveja,
           sum(if (tilausrivi.var not in ('P','J','O','S') and tilausrivi.varattu $lis_plus_kpl < 0, 1, 0)) hyvitykset,
           sum(if (tilausrivi.var not in ('P','J','O','S') and (('$yhtiorow[kerataanko_saldottomat]' = '' and tuote.ei_saldoa = '') or '$yhtiorow[kerataanko_saldottomat]' = 'S') and tilausrivi.varattu $lis_plus_kpl > 0, 1, 0)) normaalit_kerataan,
           sum(if (tilausrivi.var not in ('P','J','O','S') and '$yhtiorow[kerataanko_saldottomat]' = '' and tuote.ei_saldoa != '' and tilausrivi.varattu $lis_plus_kpl > 0, 1, 0)) saldottomat,
+          sum(if (tilausrivi.var not in ('P','J','O','S') and '{$yhtiorow['saldottomat_rahtikirjansyottoon']}' != '' and tuote.ei_saldoa != '' and tuote.tuotetyyppi = '' and tilausrivi.varattu {$lis_plus_kpl} > 0, 1, 0)) saldottomat_rahtikirjansyottoon,
           sum(if (tilausrivi.toimitettu != '' and tuote.ei_saldoa = '' and (tilausrivi.varattu $lis_plus_kpl > 0 and tilausrivi.var not in ('P','J','O','S')), 1, 0)) toimitetut
           FROM tilausrivi
           LEFT JOIN tuote ON tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno
@@ -232,6 +232,29 @@ elseif ($kerattavia == 0 or $tilaus_toimitetuksi) {
     $result = pupe_query($query);
 
     $tilaus_valmis_message .= "<font class='message'>".sprintf(t("Tilauksella %s oli pelkästään JT-rivejä ja Puuterivejä ja se jätettiin odottamaan JT-tuotteita."), $laskurow["tunnus"])."</font><br><br>\n";
+  }
+  elseif ($rivirow["riveja"] == $rivirow["saldottomat_rahtikirjansyottoon"]) {
+    // merkataan rivit kerätyiksi, mutta ei toimitetuiksi ja tilaukselle alatila "kerätty"
+    $query  = "UPDATE tilausrivi SET
+               kerattyaika = now(),
+               keratty = '{$kukarow['kuka']}'
+               WHERE otunnus   = '{$laskurow['tunnus']}'
+               and yhtio       = '{$kukarow['yhtio']}'
+               and var         NOT IN ('P','J','O','S')
+               and keratty     = ''
+               and toimitettu  = ''
+               and tyyppi     != 'D'";
+    $result = pupe_query($query);
+
+    $query  = "UPDATE lasku SET
+               tila         = 'L',
+               alatila      = 'C',
+               lahetepvm    = now()
+               WHERE tunnus = '{$laskurow['tunnus']}'
+               AND yhtio    = '{$kukarow['yhtio']}'";
+    $result = pupe_query($query);
+
+    $tilaus_valmis_message .= "<font class='message'>".sprintf(t("Tilauksella %s ei ollut yhtään kerättävää riviä. Tilaus siirretty rahtikirjansyöttöön."), $laskurow["tunnus"])."</font><br><br>\n";
   }
   elseif ($tilaus_toimitetuksi or $ei_kerattavia > 0) {
     if ($kateinen == 'X' or $itsetulostus == "X" or $laskurow["vienti"] != '') {

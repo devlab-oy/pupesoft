@@ -237,7 +237,7 @@ if (!function_exists("onkokaikkivalmistettu")) {
     }
     else {
       if (!$tilrivirow["otunnus"]) {
-        echo "<font class='error'>".t("VIRHE: Tarkista valmistuksen rivit")."! </font><br>";
+        echo "<font class='error'>".t("VIRHE: Valmistukselta puuttuu valmisterivi. Tarkista valmistuksen rivit")."! </font><br>";
       }
 
       $tee = "VALMISTA";

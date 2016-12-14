@@ -107,14 +107,14 @@ if ($_kuittaus_tekematta) {
 
       $magLinkurl = substr($magLinkurl, 0, -4); // vika br pois
     }
-    elseif (stripos($magento_api_met, "mypack") !== FALSE) {
-      $magLinkurl .= "<a target=newikkuna href='http://www.postnord.fi/fi/yritysasiakkaat/asiakaspalvelu/sahkoinen-asiointi/Sivut/Lahetysten-seuranta.aspx?view=item&itemid={$magento_api_rak}'>{$magento_api_rak}</a><br>";
+    elseif (preg_match("/(mypack|postnord)/i", $magento_api_met)) {
+      $magLinkurl .= "<a target=newikkuna href='http://www.postnord.fi/asiakaspalvelu/sahkoinen-asiointi/lahetysten-seuranta#dynamicloading=true&shipmentid={$magento_api_rak}'>{$magento_api_rak}</a><br>";
     }
     else {
 
       // Jos Unifaun Track & Trace sekä XML Posting, laitetaan seurantaosoite
       $unifaun_xmlposting = ($unifaun_xp_developerid != "" and $unifaun_xp_user != "" and $unifaun_xp_pin != "");
-    
+
       if (!empty($unifaun_url_key) and $unifaun_xmlposting) {
         $magLinkurl .= "https://www.unifaunonline.com/ext.uo.fi.track?key={$unifaun_url_key}&order={$magento_api_rak}<br>";
       }

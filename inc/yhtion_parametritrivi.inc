@@ -1033,6 +1033,23 @@ if ($fieldname == "rahtikirjojen_esisyotto") {
   $jatko = 0;
 }
 
+if ($fieldname == "saldottomat_rahtikirjansyottoon") {
+
+  $sel = $trow[$i] == 'K' ? 'selected' : '';
+
+  $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+  $ulos .= "<option value=''>".t("Rahtikirjansyötössä ei näytetä saldottomia tuotteita")."</option>";
+
+  $ulos .= "<option value='K' {$sel}>";
+  $ulos .= t("Rahtikirjansyötössä näytetään myös tilauksia jotka sisältävät vain saldottomia tuotteita");
+  $ulos .= "</option>";
+
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
 if ($fieldname == "rahtikirjan_kollit_ja_lajit") {
 
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";

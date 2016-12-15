@@ -2488,7 +2488,6 @@ if ($tee == 'Z') {
       );
 
       list($_hinta, $_netto, $_ale, $_valuutta) = alehinta_osto($_laskurow, $tuoterow, 1, '', '', array());
-
       echo "<span style='font-weight:bold;'>", hintapyoristys(hinta_kuluineen($tuoterow['tuoteno'], $_hinta)), " {$_valuutta}</span> / ";
 
       foreach ($_ale as $key => $val) {

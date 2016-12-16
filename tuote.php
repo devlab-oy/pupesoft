@@ -2474,7 +2474,7 @@ if ($tee == 'Z') {
       $query = "SELECT *
                 FROM valuu
                 WHERE yhtio = '{$kukarow['yhtio']}'
-                AND nimi    = '{$tt_rivi['oletus_valkoodi']}'
+                AND nimi    = '{$tt_rivi['valuutta']}'
                 ORDER BY tunnus DESC
                 LIMIT 1";
       $kurssi_chk_res = pupe_query($query);
@@ -2482,7 +2482,7 @@ if ($tee == 'Z') {
 
       $_laskurow = array(
         'liitostunnus'   => $tt_rivi['liitostunnus'],
-        'valkoodi'     => $tt_rivi['oletus_valkoodi'],
+        'valkoodi'     => $tt_rivi['valuutta'],
         'ytunnus'     => $tt_rivi['ytunnus'],
         'vienti_kurssi' => $kurssi_chk_row['kurssi']
       );

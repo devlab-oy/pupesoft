@@ -5,17 +5,17 @@ if (isset($_REQUEST["tee"])) {
     $lataa_tiedosto = 1;
   }
 
-  if ($_REQUEST["kaunisnimi"] != '') {
+  if (!empty($_REQUEST["kaunisnimi"])) {
     $_REQUEST["kaunisnimi"] = str_replace("/", "", $_REQUEST["kaunisnimi"]);
   }
 }
 
 if (isset($_REQUEST["tee"]) and $_REQUEST["tee"] == "NAYTATILAUS") {
   $no_head = "yes";
-}
 
-if ($_REQUEST["tee"] == 'NAYTATILAUS' and !empty($_REQUEST["nayta_ja_tallenna"])) {
-  $compression = FALSE;
+  if (!empty($_REQUEST["nayta_ja_tallenna"])) {
+    $compression = FALSE;
+  }
 }
 
 require "../inc/parametrit.inc";
@@ -27,6 +27,20 @@ ini_set("max_execution_time", 18000);
 if (isset($tee) and $tee == "lataa_tiedosto") {
   readfile("$pupe_root_polku/dataout/".basename($filenimi));
   exit;
+}
+
+// siirretaan lasku toiseen pupesoftiin
+if (isset($tee) and $tee == "kasittele_pupesoft_finvoice" and !empty($sisainenfoinvoice_ftphost)) {
+  $ftphost = $sisainenfoinvoice_ftphost;
+  $ftpuser = $sisainenfoinvoice_ftpuser;
+  $ftppass = $sisainenfoinvoice_ftppass;
+  $ftppath = $sisainenfoinvoice_ftppath;
+  $ftpfile = "{$pupe_root_polku}/dataout/" . basename($filenimi);
+  $ftpfail = "{$pupe_root_polku}/dataout/sisainenfinvoice_error/";
+
+  require 'inc/ftp-send.inc';
+
+  $tee = '';
 }
 
 if (!isset($tee) or $tee != "NAYTATILAUS") echo "<font class='head'>".t("Luo laskutusaineisto")."</font><hr>\n";
@@ -1342,6 +1356,16 @@ if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumer
       echo "<input type='hidden' name='filenimi' value='".basename($nimisisainenfinvoice)."'>";
       echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
       echo "</table>";
+
+      if (!empty($sisainenfoinvoice_ftphost)) {
+        echo "<table>";
+        echo "<tr><th>".t("Siirrä laskut uudelleenkäsittelyyn Pupesoftiin").":</th>";
+        echo "<form method='post' class='multisubmit'>";
+        echo "<input type='hidden' name='tee' value='kasittele_pupesoft_finvoice'>";
+        echo "<input type='hidden' name='filenimi' value='".basename($nimisisainenfinvoice)."'>";
+        echo "<td class='back'><input type='submit' value='".t("Käsittele")."'></td></tr></form>";
+        echo "</table>";
+      }
     }
   }
 }

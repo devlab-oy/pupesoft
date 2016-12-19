@@ -34140,6 +34140,36 @@ if (!function_exists("laskun_hyvaksyjia")) {
   }
 }
 
+if (!function_exists('kpl_ruudulle')) {
+  function kpl_ruudulle($row, $laskurow, $asiakasrow) {
+    global $kukarow, $yhtiorow;
+
+    // $row = tilausrivi
+    if (in_array($row["var"], array('S', 'U', 'T', 'R', 'J'))) {
+      if ($yhtiorow["varaako_jt_saldoa"] == "") {
+        $kpl_ruudulle = $row['jt'] * 1;
+      }
+      else {
+        $kpl_ruudulle = ($row['jt']+$row['varattu']) * 1;
+      }
+    }
+    elseif ($row["var"] == 'P' or
+      ($kukarow['extranet'] != '' and $row['positio'] == 'Ei varaa saldoa') or
+      ((($asiakasrow['extranet_tilaus_varaa_saldoa'] == "" and
+            $yhtiorow["extranet_tilaus_varaa_saldoa"] == "E") or
+          $asiakasrow["extranet_tilaus_varaa_saldoa"] == "E") and
+        ($laskurow["tilaustyyppi"] == "H"))
+    ) {
+      $kpl_ruudulle = $row['tilkpl'] * 1;
+    }
+    else {
+      $kpl_ruudulle = $row['varattu'] * 1;
+    }
+
+    return $kpl_ruudulle;
+  }
+}
+
 if (!function_exists("laske_korko")) {
   function laske_korko(Array $params) {
     global $kukarow, $yhtiorow;

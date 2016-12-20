@@ -33627,6 +33627,20 @@ if (!function_exists('laskutettu_myyntitilaus_tulostusjonoon')) {
       $kukarow['yhtio']
     );
 
+    // haetaan mahdollinen sis. viesti
+    $query = "SELECT sisviesti2
+              FROM lasku
+              WHERE tunnus = '$tilausnumero'
+              AND yhtio = '$kukarow[yhtio]'";
+    $result = pupe_query($query);
+    $laskurow = mysql_fetch_assoc($result);
+    
+    if ($laskurow["sisviesti2"] != '') {
+      $sisviesti2 = "Verkkokauppatilaus! Tilauksen tietoja ei saa muuttaa."."\n".$laskurow["sisviesti2"];
+    }
+    else {
+      $sisviesti2 = "Verkkokauppatilaus! Tilauksen tietoja ei saa muuttaa.";
+    }
     // Palautetaan tilaus takaisin "myyntitilaus ker‰ysjonossa"-tilaan,
     // lis‰t‰‰n p‰‰lle laskutuskielto varmuuden vuoksi
     $query = "UPDATE lasku SET
@@ -33635,7 +33649,7 @@ if (!function_exists('laskutettu_myyntitilaus_tulostusjonoon')) {
               alatila      = 'A',
               chn          = '999',
               varasto      = '$varasto_row[tunnus]',
-              sisviesti2   = 'Verkkokauppatilaus! Tilauksen tietoja ei saa muuttaa.',
+              sisviesti2   = '$sisviesti2',
               tulostusalue = '$tulostusalue'
               WHERE yhtio  = '$kukarow[yhtio]'
               AND tunnus   = '$tilausnumero'";

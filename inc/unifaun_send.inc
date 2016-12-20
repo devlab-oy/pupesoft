@@ -1156,12 +1156,21 @@ class Unifaun {
           $uni_par_val->addAttribute('n', "dnghzcode");
         }
 
-        if (isset($vak['pakkausryhma']) and (int) $vak['pakkausryhma'] > 0) {
-          $vak['pakkausryhma'] = (int) $vak['pakkausryhma'];
-          $vak['pakkausryhma'] = $vak['pakkausryhma'] > 3 ? 3 : $vak['pakkausryhma'];
+        if (!empty($vak['pakkausryhma'])) {
+          $_pakkausryhma = strtoupper(trim($vak['pakkausryhma']));
 
-          $uni_par_val = $uni_article->addChild('val', utf8_encode(str_repeat("I", $vak['pakkausryhma']))); // Packaging group/ADR-class. Supplied as I, II or III.
-          $uni_par_val->addAttribute('n', "dngpkcode");
+          // Voidaan antaa numeerinen arvo, joka k‰‰nnet‰‰n roomalaisiksi
+          if (is_numeric($_pakkausryhma)) {
+            $_pakkausryhma = (int) $_pakkausryhma;
+            $_pakkausryhma = ($_pakkausryhma < 1 or $_pakkausryhma > 3) ? 0 : $_pakkausryhma;
+            $_pakkausryhma = str_repeat("I", $_pakkausryhma);
+          }
+
+          // Packaging group/ADR-class. Supplied as I, II or III.
+          if (in_array($_pakkausryhma, array('I', 'II', 'III'))) {
+            $uni_par_val = $uni_article->addChild('val', $_pakkausryhma);
+            $uni_par_val->addAttribute('n', "dngpkcode");
+          }
         }
 
         if (isset($vak['luokka']) and $vak['luokka'] != '') {

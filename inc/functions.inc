@@ -33635,7 +33635,7 @@ if (!function_exists('laskutettu_myyntitilaus_tulostusjonoon')) {
               alatila      = 'A',
               chn          = '999',
               varasto      = '$varasto_row[tunnus]',
-              sisviesti2   = 'Verkkokauppatilaus! Tilauksen tietoja ei saa muuttaa.',
+              sisviesti2   = trim(concat_ws('\n', 'Verkkokauppatilaus! Tilauksen tietoja ei saa muuttaa.', sisviesti2)),
               tulostusalue = '$tulostusalue'
               WHERE yhtio  = '$kukarow[yhtio]'
               AND tunnus   = '$tilausnumero'";

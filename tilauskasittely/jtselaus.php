@@ -1369,8 +1369,8 @@ if ($tee == "JATKA") {
                   else {
                     $lapsitoimittamatta -= $myytavissa;
                   }
-                }
 
+                }
               }
               else {
                 $lapsitoimittamatta  = 0;

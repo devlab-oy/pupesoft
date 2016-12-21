@@ -1255,6 +1255,7 @@ if ($tee == "JATKA") {
           if ($toim == "ENNAKKO" and ($jtrow["perheid"] > 0 or $jtrow["perheid2"] > 0)) {
             $query = "SELECT tilausrivi.tuoteno,
                       tilausrivi.nimitys,
+                      tilausrivi.varasto,
                       tilausrivi.varattu jt,
                       tilausrivi.tilkpl,
                       tilausrivi.hinta,
@@ -1288,6 +1289,7 @@ if ($tee == "JATKA") {
           elseif ($jtrow["perheid"] > 0 or $jtrow["perheid2"] > 0) {
             $query = "SELECT tilausrivi.tuoteno,
                       tilausrivi.nimitys,
+                      tilausrivi.varasto,
                       tilausrivi.jt $lisavarattu jt,
                       tilausrivi.tilkpl,
                       tilausrivi.hinta,
@@ -1360,8 +1362,8 @@ if ($tee == "JATKA") {
                   $jt_saldopvm = $jtrow['ttoimaika'];
                 }
 
-                foreach ($varastosta as $vara) {
-                  list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($perherow["tuoteno"], $jtspec, $vara, "", "", "", "", "", $asiakasmaa, $jt_saldopvm);
+                if ($yhtiorow['jt_toimitus_varastorajaus'] == "K") {
+                  list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($perherow["tuoteno"], $jtspec, $perherow["varasto"], "", "", "", "", "", $asiakasmaa, $jt_saldopvm);
 
                   if ($saldolaskenta == "hyllysaldo") {
                     $lapsitoimittamatta -= $hyllyssa;
@@ -1369,7 +1371,18 @@ if ($tee == "JATKA") {
                   else {
                     $lapsitoimittamatta -= $myytavissa;
                   }
+                }
+                else {
+                  foreach ($varastosta as $vara) {
+                    list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($perherow["tuoteno"], $jtspec, $vara, "", "", "", "", "", $asiakasmaa, $jt_saldopvm);
 
+                    if ($saldolaskenta == "hyllysaldo") {
+                      $lapsitoimittamatta -= $hyllyssa;
+                    }
+                    else {
+                      $lapsitoimittamatta -= $myytavissa;
+                    }
+                  }
                 }
               }
               else {
@@ -1400,14 +1413,26 @@ if ($tee == "JATKA") {
               $jt_saldopvm = $jtrow['ttoimaika'];
             }
 
-            foreach ($varastosta as $vara) {
-              list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($jtrow["tuoteno"], $jtspec, $vara, "", "", "", "", "", $asiakasmaa, $jt_saldopvm);
+            if ($yhtiorow['jt_toimitus_varastorajaus'] == "K") {
+              list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($jtrow["tuoteno"], $jtspec, $jtrow["varasto"], "", "", "", "", "", $asiakasmaa, $jt_saldopvm);
 
               if ($saldolaskenta == "hyllysaldo") {
                 $kokonaismyytavissa += $hyllyssa;
               }
               else {
                 $kokonaismyytavissa += $myytavissa;
+              }
+            }
+            else {
+              foreach ($varastosta as $vara) {
+                list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($jtrow["tuoteno"], $jtspec, $vara, "", "", "", "", "", $asiakasmaa, $jt_saldopvm);
+
+                if ($saldolaskenta == "hyllysaldo") {
+                  $kokonaismyytavissa += $hyllyssa;
+                }
+                else {
+                  $kokonaismyytavissa += $myytavissa;
+                }
               }
             }
 
@@ -1445,7 +1470,7 @@ if ($tee == "JATKA") {
                                            OR (tilausrivi.perheid = 0 AND tilausrivi.perheid2 = 0))
                                          ORDER BY lasku.luontiaika";
               $jt_muiden_mukana_result = pupe_query($jt_muiden_mukana_query);
-
+echo "1448 jt_muiden_mukana_query $jt_muiden_mukana_query <br><br>";
               while ($jt_muiden_mukana_row = mysql_fetch_assoc($jt_muiden_mukana_result)) {
 
                 // Jos ennen tätä käsittelyssä olevaa riviä (jtrow) löytyy tilauksia, joissa on jt rivejä nämä varaavat saldoa

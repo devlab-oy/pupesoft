@@ -20619,6 +20619,7 @@ if (!function_exists("pupesoft_tulosta_lahete")) {
     $asrow = mysql_fetch_assoc($result);
 
     $lahetetyyppi = "";
+    if ($asrow['kieli'] != '') $kieli = $asrow['kieli'];
 
     if (isset($sellahetetyyppi) and $sellahetetyyppi != '') {
       $lahetetyyppi = $sellahetetyyppi;

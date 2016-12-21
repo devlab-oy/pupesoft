@@ -33627,14 +33627,6 @@ if (!function_exists('laskutettu_myyntitilaus_tulostusjonoon')) {
       $kukarow['yhtio']
     );
 
-    // haetaan mahdollinen sis. viesti
-    $query = "SELECT sisviesti2
-              FROM lasku
-              WHERE tunnus = '$tilausnumero'
-              AND yhtio = '$kukarow[yhtio]'";
-    $result = pupe_query($query);
-    $laskurow = mysql_fetch_assoc($result);
-
     // Palautetaan tilaus takaisin "myyntitilaus ker‰ysjonossa"-tilaan,
     // lis‰t‰‰n p‰‰lle laskutuskielto varmuuden vuoksi
     $query = "UPDATE lasku SET

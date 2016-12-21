@@ -286,7 +286,7 @@ if ($profiili != '') {
             order by sovellus";
   $result = pupe_query($query);
 
-  if (mysql_num_rows($result) > 1) {
+  if (mysql_num_rows($result) >= 1) {
 
     $sel = $sovellus == "kaikki_sovellukset" ? " selected" : "";
 

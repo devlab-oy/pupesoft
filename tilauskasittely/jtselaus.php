@@ -1255,7 +1255,6 @@ if ($tee == "JATKA") {
           if ($toim == "ENNAKKO" and ($jtrow["perheid"] > 0 or $jtrow["perheid2"] > 0)) {
             $query = "SELECT tilausrivi.tuoteno,
                       tilausrivi.nimitys,
-                      tilausrivi.varasto,
                       tilausrivi.varattu jt,
                       tilausrivi.tilkpl,
                       tilausrivi.hinta,
@@ -1289,7 +1288,6 @@ if ($tee == "JATKA") {
           elseif ($jtrow["perheid"] > 0 or $jtrow["perheid2"] > 0) {
             $query = "SELECT tilausrivi.tuoteno,
                       tilausrivi.nimitys,
-                      tilausrivi.varasto,
                       tilausrivi.jt $lisavarattu jt,
                       tilausrivi.tilkpl,
                       tilausrivi.hinta,
@@ -1372,6 +1370,7 @@ if ($tee == "JATKA") {
                     $lapsitoimittamatta -= $myytavissa;
                   }
                 }
+
               }
               else {
                 $lapsitoimittamatta  = 0;

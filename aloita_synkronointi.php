@@ -83,6 +83,11 @@ if ($tee == "SYNK") {
     exit;
   }
 
+  if (synkronoi_tarkista_pakolliset($table) === false) {
+    echo "VIRHE: synkronoi_ainoastaan virheellinen. Pakolliset kentät on pakko synkronoida!";
+    exit;
+  }
+
   // rakennetaaan kysely, jolla haetaan pakolliset tiedot molemmista yrityksistä
   // ja groupataan niiden mukaan. tällä haetaan "duplikaatit", eli tieto on jo synkronissa
   // valittujen yhtiöiden välillä.

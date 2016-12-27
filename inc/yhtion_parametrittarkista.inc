@@ -178,6 +178,10 @@ if (!function_exists("yhtion_parametrittarkista")) {
               }
               $virhe[$i] .= t("Taulu ei kelpaa")." '$taulu' ".t("sallitut taulut ovat")." ".implode(", ", $sallitut);
             }
+
+            if (synkronoi_tarkista_pakolliset($taulu) === false) {
+              $virhe[$i] .= "VIRHE: '$taulu' -taulun synkronoi_ainoastaan virheellinen. Pakolliset kentät on pakko synkronoida!";
+            }
           }
         }
       }

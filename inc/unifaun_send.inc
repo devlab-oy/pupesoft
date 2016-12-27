@@ -478,7 +478,8 @@ class Unifaun {
           or $this->toitarow['virallinen_selite'] == "PO2102_09"
           or $this->toitarow['virallinen_selite'] == "PO2102"
           or $this->toitarow['virallinen_selite'] == "PO2103"
-          or $this->toitarow['virallinen_selite'] == "PO2104") $rahtisopimusnro = 123456;
+          or $this->toitarow['virallinen_selite'] == "PO2104"
+          or $this->toitarow['virallinen_selite'] == "PO2711") $rahtisopimusnro = 123456;
         elseif ($this->toitarow['virallinen_selite'] == "KLGRP") $rahtisopimusnro = 1234567;
         elseif ($this->toitarow['virallinen_selite'] == "MH10" or $this->toitarow['virallinen_selite'] == "MH30") $rahtisopimusnro = 12345678;
         else $rahtisopimusnro = 123;
@@ -490,7 +491,8 @@ class Unifaun {
         if (($this->toitarow['virallinen_selite'] == "PO2102_09"
             or $this->toitarow['virallinen_selite'] == "PO2102"
             or $this->toitarow['virallinen_selite'] == "PO2103"
-            or $this->toitarow['virallinen_selite'] == "PO2104") and strlen($rahtisopimusnro) != 6) {
+            or $this->toitarow['virallinen_selite'] == "PO2104"
+            or $this->toitarow['virallinen_selite'] == "PO2711") and strlen($rahtisopimusnro) != 6) {
           $rahtisopimusnro = 999999;
         }
 
@@ -540,6 +542,7 @@ class Unifaun {
         'PO2144_00',
         'ITKY14I',
         'IT14I',
+        'PO2711',
       );
     }
 
@@ -674,12 +677,17 @@ class Unifaun {
     $uni_shi_val = $uni_shipment->addChild('val', $this->pikahakuarvo()); // Defines the sender. Refers to the sndid value for sender.
     $uni_shi_val->addAttribute('n', "from");
 
-    //$uni_shi_val = $uni_shipment->addChild('val', ""); # Defines the legal sender (not printed on shipping documents).
-    //$uni_shi_val->addAttribute('n', "legalfrom");
-
     $uni_shi_val = $uni_shipment->addChild('val', utf8_encode($this->asiakasrow["tunnus"])); // Defines the receiver. Refers to rcvid value for receiver.
-
     $uni_shi_val->addAttribute('n', "to");
+
+    if ($this->toitarow['virallinen_selite'] == 'PO2711') {
+
+      $uni_shi_val = $uni_shipment->addChild('val', $this->pikahakuarvo()); # Juridisen lähettäjän tunnus (sndid). Ei tulostu rahtiasiakirjaan. 
+      $uni_shi_val->addAttribute('n', "legalfrom");
+
+      $uni_shi_val = $uni_shipment->addChild('val', utf8_encode($this->asiakasrow["tunnus"])); # Palautusvastaanottajan tunnus (rcvid). 
+      $uni_shi_val->addAttribute('n', "returnto");
+    }
 
     //$uni_shi_val = $uni_shipment->addChild('val', ""); # Defines the legal receiver (not printed on shipping documents).
     //$uni_shi_val->addAttribute('n', "legalto");

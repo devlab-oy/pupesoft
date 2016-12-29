@@ -320,7 +320,13 @@ class MagentoClient {
       // Simple tuotteiden parametrit kuten koko ja väri
       foreach ($tuote['tuotteen_parametrit'] as $parametri) {
         $key = $parametri['option_name'];
-        $multi_data[$key] = $this->get_option_id($key, $parametri['arvo'], $attribute_set_id);
+        $option_id = $this->get_option_id($key, $parametri['arvo'], $attribute_set_id);
+
+        if ($option_id == 0) {
+          continue;
+        }
+
+        $multi_data[$key] = $option_id;
 
         $this->log('magento_tuotteet', "Tuotteen parametri {$key}: {$parametri['arvo']} ({$multi_data[$key]})");
 
@@ -350,8 +356,13 @@ class MagentoClient {
         }
 
         if (isset($tuote[$erikoisparametri['arvo']])) {
-          $multi_data[$key] = $this->get_option_id($key, $tuote[$erikoisparametri['arvo']], $attribute_set_id);
+          $option_id = $this->get_option_id($key, $tuote[$erikoisparametri['arvo']], $attribute_set_id);
 
+          if ($option_id == 0) {
+            continue;
+          }
+
+          $multi_data[$key] = $option_id;
           $this->log('magento_tuotteet', "Erikoisparametri {$key}: {$tuote[$erikoisparametri['arvo']]}");
         }
       }
@@ -571,11 +582,19 @@ class MagentoClient {
     $count = 0;
     $total_count = count($dnslajitelma);
 
-    // Haetaan storessa olevat tuotenumerot
-    $skus_in_store = $this->getProductList(true);
+    try {
+      // Tarvitaan kategoriat
+      $category_tree = $this->getCategories();
 
-    // Tarvitaan kategoriat
-    $category_tree = $this->getCategories();
+      // Haetaan storessa olevat tuotenumerot
+      $skus_in_store = $this->getProductList(true);
+    }
+    catch (Exception $e) {
+      $this->_error_count++;
+      $this->log('magento_tuotteet', "Virhe! Tuotteiden lisäyksessä (config)", $e);
+
+      return;
+    }
 
     $hintakentta = $this->_hintakentta;
 
@@ -652,7 +671,13 @@ class MagentoClient {
 
       foreach ($lapsituotteen_tiedot['parametrit'] as $parametri) {
         $key = $parametri['option_name'];
-        $configurable_multi_data[$key] = $this->get_option_id($key, $parametri['arvo'], $attribute_set_id);
+        $option_id = $this->get_option_id($key, $parametri['arvo'], $attribute_set_id);
+
+        if ($option_id == 0) {
+          continue;
+        }
+
+        $configurable_multi_data[$key] = $option_id;
 
         $this->log('magento_tuotteet', "Tuotteen parametri {$key}: {$parametri['arvo']} ({$configurable_multi_data[$key]})");
       }
@@ -675,8 +700,13 @@ class MagentoClient {
         }
 
         if (isset($lapsituotteen_tiedot[$erikoisparametri['arvo']])) {
-          $configurable_multi_data[$key] = $this->get_option_id($key, $lapsituotteen_tiedot[$erikoisparametri['arvo']], $attribute_set_id);
+          $option_id = $this->get_option_id($key, $lapsituotteen_tiedot[$erikoisparametri['arvo']], $attribute_set_id);
 
+          if ($option_id == 0) {
+            continue;
+          }
+
+          $configurable_multi_data[$key] = $option_id;
           $this->log('magento_tuotteet', "Erikoisparametri {$key}: {$lapsituotteen_tiedot[$erikoisparametri['arvo']]}");
         }
       }
@@ -733,8 +763,13 @@ class MagentoClient {
           // Simple tuotteiden parametrit kuten koko ja väri
           foreach ($tuote['parametrit'] as $parametri) {
             $key = $parametri['option_name'];
-            $multi_data[$key] = $this->get_option_id($key, $parametri['arvo'], $attribute_set_id);
+            $option_id = $this->get_option_id($key, $parametri['arvo'], $attribute_set_id);
 
+            if ($option_id == 0) {
+              continue;
+            }
+
+            $multi_data[$key] = $option_id;
             $this->log('magento_tuotteet', "Tuotteen parametri {$key}: {$parametri['arvo']} ({$multi_data[$key]})");
           }
 
@@ -1892,6 +1927,12 @@ class MagentoClient {
     $magento_tree = $this->getCategories();
     $results = $this->getParentArray($magento_tree, "$parent_cat_id");
 
+    if (empty($results)) {
+     $this->log('magento_tuotteet', 'Virhe! Kategoria-array on tyhjä.');
+
+     return 0;
+    }
+
     // Etsitään kategoriaa
     foreach ($results[0]['children'] as $k => $v) {
       if (strcasecmp($name, $v['name']) == 0) {
@@ -1916,9 +1957,19 @@ class MagentoClient {
     }
 
     // Kutsutaan soap rajapintaa
-    $category_id = $this->_proxy->call($this->_session, 'catalog_category.create',
-      array($parent_cat_id, $category_data)
-    );
+    try {
+      $category_id = $this->_proxy->call(
+        $this->_session,
+        'catalog_category.create',
+        array($parent_cat_id, $category_data)
+      );
+    }
+    catch (Exception $e) {
+      $this->_error_count++;
+      $this->log('magento_tuotteet', "Virhe! Kategorian perustus epäonnistui", $e);
+
+      return 0;
+    }
 
     $this->log('magento_tuotteet', "Lisättiin tuotepuun kategoria:$name tunnuksella: $category_id");
 

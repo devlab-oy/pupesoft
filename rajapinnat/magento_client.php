@@ -40,7 +40,7 @@ class MagentoClient {
   private $_attributeSet;
 
   // Magenton attribuurit
-  private $magento_attribute_list = array();
+  private $magento_attribute_list = null;
 
   // Tuotekategoriat
   private $_category_tree;
@@ -436,6 +436,8 @@ class MagentoClient {
           $this->_error_count++;
           $this->log('magento_tuotteet', "Virhe! Tuotteen lisäys epäonnistui", $e);
           $this->debug('magento_tuotteet', $tuote_data);
+
+          continue;
         }
       }
       // Tuote on jo olemassa, päivitetään
@@ -479,6 +481,8 @@ class MagentoClient {
           $this->_error_count++;
           $this->log('magento_tuotteet', "Virhe! Tuotteen päivitys epäonnistui", $e);
           $this->debug('magento_tuotteet', $tuote_data);
+
+          continue;
         }
       }
 
@@ -1805,6 +1809,8 @@ class MagentoClient {
 
   // Hakee verkkokaupan tuotteet
   private function getProductList($only_skus = false, $exclude_giftcards = false) {
+    $this->log('magento_tuotteet', "Haetaan tuotenumerot Magentosta");
+
     try {
       $result = $this->_proxy->call($this->_session, 'catalog_product.list');
 
@@ -1815,6 +1821,8 @@ class MagentoClient {
           }
         }
       }
+
+      $this->log('magento_tuotteet', "Haettiin ".count($result)." tuotetta");
 
       if ($only_skus == true) {
         $skus = array();
@@ -1967,18 +1975,42 @@ class MagentoClient {
 
   // Hakee kaikki attribuutit magentosta
   private function getAttributeList($attribute_set_id) {
-    // array jo haetuista attribuuteista
-    $attr_list = $this->magento_attribute_list;
-
-    if (empty($attr_list[$attribute_set_id])) {
-      $this->magento_attribute_list[$attribute_set_id] = $this->_proxy->call(
-        $this->_session,
-        "product_attribute.list",
-        array($attribute_set_id)
-      );
+    // memoization
+    if (!is_null($this->magento_attribute_list)) {
+      // palautetaan kysytyn setin attribuutit
+      return $this->magento_attribute_list[$attribute_set_id];
     }
 
-    return $this->magento_attribute_list[$attribute_set_id];
+    // array attribuuteista
+    $attr_list = array();
+    $this->log('magento_tuotteet', "Haetaan tuotteiden atribuuttiryhmät");
+
+    try {
+      // Haetaan kaikki attribute setit magentosta
+      $attribute_sets = $this->_proxy->call($this->_session, 'product_attribute_set.list');
+
+      // Haetaan kaikkien settien atribuutit
+      foreach ($attribute_sets as $set) {
+        $id   = $set['set_id'];
+        $name = $set['name'];
+        $list = $this->_proxy->call($this->_session, 'product_attribute.list', array($id));
+
+        $this->log('magento_tuotteet', "Haettiin atribuuttiryhma {$id} {$name} (".count($list)." atribuuttia)");
+
+        $attr_list[$id] = $list;
+      }
+    }
+    catch (Exception $e) {
+      $this->_error_count++;
+      $this->log('magento_tuotteet', "Virhe! Attribuuttien haussa", $e);
+    }
+
+    $this->magento_attribute_list = $attr_list;
+
+    $this->log('magento_tuotteet', "Haettiin ". count($attr_list) . " atribuuttiryhmää");
+
+    // palautetaan kysytyn setin attribuutit
+    return $attr_list[$attribute_set_id];
   }
 
   // Hakee kaikki kategoriat

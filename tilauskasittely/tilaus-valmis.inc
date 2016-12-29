@@ -158,7 +158,7 @@ if ($luottoraja_chk or $erapaiva_chk) {
 
   ob_start();
 
-  if ($toim != "EXTRANET") {
+  if ($toim != "EXTRANET" and $toim != "EXTENNAKKO") {
     require "raportit/saatanat.php";
   }
   else {

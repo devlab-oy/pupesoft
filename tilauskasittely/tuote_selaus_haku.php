@@ -143,7 +143,8 @@ if ($kukarow["kesken"] > 0) {
              if (toim_maa != '', toim_maa, maa) maa,
              tila,
              liitostunnus,
-             tilaustyyppi
+             tilaustyyppi,
+             clearing
              FROM lasku
              WHERE yhtio = '$kukarow[yhtio]'
              and tunnus  = '$kukarow[kesken]'";
@@ -190,6 +191,9 @@ if (isset($vierow)) {
   }
   elseif ($vierow["tila"] == "C") {
     $toim_kutsu = "REKLAMAATIO";
+  }
+  elseif ($vierow["tilaustyyppi"] == "E" and $vierow["clearing"]  == 'EXTENNAKKO') {
+      $toim_kutsu = "EXTENNAKKO";
   }
   elseif ($vierow["tilaustyyppi"] == "E") {
     $toim_kutsu = "ENNAKKO";

@@ -40,7 +40,7 @@ class MagentoClient {
   private $_attributeSet;
 
   // Magenton attribuurit
-  private $magento_attribute_list = array();
+  private $magento_attribute_list = null;
 
   // Tuotekategoriat
   private $_category_tree;
@@ -320,7 +320,13 @@ class MagentoClient {
       // Simple tuotteiden parametrit kuten koko ja väri
       foreach ($tuote['tuotteen_parametrit'] as $parametri) {
         $key = $parametri['option_name'];
-        $multi_data[$key] = $this->get_option_id($key, $parametri['arvo'], $attribute_set_id);
+        $option_id = $this->get_option_id($key, $parametri['arvo'], $attribute_set_id);
+
+        if ($option_id == 0) {
+          continue;
+        }
+
+        $multi_data[$key] = $option_id;
 
         $this->log('magento_tuotteet', "Tuotteen parametri {$key}: {$parametri['arvo']} ({$multi_data[$key]})");
 
@@ -350,8 +356,13 @@ class MagentoClient {
         }
 
         if (isset($tuote[$erikoisparametri['arvo']])) {
-          $multi_data[$key] = $this->get_option_id($key, $tuote[$erikoisparametri['arvo']], $attribute_set_id);
+          $option_id = $this->get_option_id($key, $tuote[$erikoisparametri['arvo']], $attribute_set_id);
 
+          if ($option_id == 0) {
+            continue;
+          }
+
+          $multi_data[$key] = $option_id;
           $this->log('magento_tuotteet', "Erikoisparametri {$key}: {$tuote[$erikoisparametri['arvo']]}");
         }
       }
@@ -436,6 +447,8 @@ class MagentoClient {
           $this->_error_count++;
           $this->log('magento_tuotteet', "Virhe! Tuotteen lisäys epäonnistui", $e);
           $this->debug('magento_tuotteet', $tuote_data);
+
+          continue;
         }
       }
       // Tuote on jo olemassa, päivitetään
@@ -479,6 +492,8 @@ class MagentoClient {
           $this->_error_count++;
           $this->log('magento_tuotteet', "Virhe! Tuotteen päivitys epäonnistui", $e);
           $this->debug('magento_tuotteet', $tuote_data);
+
+          continue;
         }
       }
 
@@ -567,11 +582,19 @@ class MagentoClient {
     $count = 0;
     $total_count = count($dnslajitelma);
 
-    // Haetaan storessa olevat tuotenumerot
-    $skus_in_store = $this->getProductList(true);
+    try {
+      // Tarvitaan kategoriat
+      $category_tree = $this->getCategories();
 
-    // Tarvitaan kategoriat
-    $category_tree = $this->getCategories();
+      // Haetaan storessa olevat tuotenumerot
+      $skus_in_store = $this->getProductList(true);
+    }
+    catch (Exception $e) {
+      $this->_error_count++;
+      $this->log('magento_tuotteet', "Virhe! Tuotteiden lisäyksessä (config)", $e);
+
+      return;
+    }
 
     $hintakentta = $this->_hintakentta;
 
@@ -648,7 +671,13 @@ class MagentoClient {
 
       foreach ($lapsituotteen_tiedot['parametrit'] as $parametri) {
         $key = $parametri['option_name'];
-        $configurable_multi_data[$key] = $this->get_option_id($key, $parametri['arvo'], $attribute_set_id);
+        $option_id = $this->get_option_id($key, $parametri['arvo'], $attribute_set_id);
+
+        if ($option_id == 0) {
+          continue;
+        }
+
+        $configurable_multi_data[$key] = $option_id;
 
         $this->log('magento_tuotteet', "Tuotteen parametri {$key}: {$parametri['arvo']} ({$configurable_multi_data[$key]})");
       }
@@ -671,8 +700,13 @@ class MagentoClient {
         }
 
         if (isset($lapsituotteen_tiedot[$erikoisparametri['arvo']])) {
-          $configurable_multi_data[$key] = $this->get_option_id($key, $lapsituotteen_tiedot[$erikoisparametri['arvo']], $attribute_set_id);
+          $option_id = $this->get_option_id($key, $lapsituotteen_tiedot[$erikoisparametri['arvo']], $attribute_set_id);
 
+          if ($option_id == 0) {
+            continue;
+          }
+
+          $configurable_multi_data[$key] = $option_id;
           $this->log('magento_tuotteet', "Erikoisparametri {$key}: {$lapsituotteen_tiedot[$erikoisparametri['arvo']]}");
         }
       }
@@ -729,8 +763,13 @@ class MagentoClient {
           // Simple tuotteiden parametrit kuten koko ja väri
           foreach ($tuote['parametrit'] as $parametri) {
             $key = $parametri['option_name'];
-            $multi_data[$key] = $this->get_option_id($key, $parametri['arvo'], $attribute_set_id);
+            $option_id = $this->get_option_id($key, $parametri['arvo'], $attribute_set_id);
 
+            if ($option_id == 0) {
+              continue;
+            }
+
+            $multi_data[$key] = $option_id;
             $this->log('magento_tuotteet', "Tuotteen parametri {$key}: {$parametri['arvo']} ({$multi_data[$key]})");
           }
 
@@ -1805,6 +1844,8 @@ class MagentoClient {
 
   // Hakee verkkokaupan tuotteet
   private function getProductList($only_skus = false, $exclude_giftcards = false) {
+    $this->log('magento_tuotteet', "Haetaan tuotenumerot Magentosta");
+
     try {
       $result = $this->_proxy->call($this->_session, 'catalog_product.list');
 
@@ -1815,6 +1856,8 @@ class MagentoClient {
           }
         }
       }
+
+      $this->log('magento_tuotteet', "Haettiin ".count($result)." tuotetta");
 
       if ($only_skus == true) {
         $skus = array();
@@ -1884,6 +1927,12 @@ class MagentoClient {
     $magento_tree = $this->getCategories();
     $results = $this->getParentArray($magento_tree, "$parent_cat_id");
 
+    if (empty($results)) {
+     $this->log('magento_tuotteet', 'Virhe! Kategoria-array on tyhjä.');
+
+     return 0;
+    }
+
     // Etsitään kategoriaa
     foreach ($results[0]['children'] as $k => $v) {
       if (strcasecmp($name, $v['name']) == 0) {
@@ -1908,9 +1957,19 @@ class MagentoClient {
     }
 
     // Kutsutaan soap rajapintaa
-    $category_id = $this->_proxy->call($this->_session, 'catalog_category.create',
-      array($parent_cat_id, $category_data)
-    );
+    try {
+      $category_id = $this->_proxy->call(
+        $this->_session,
+        'catalog_category.create',
+        array($parent_cat_id, $category_data)
+      );
+    }
+    catch (Exception $e) {
+      $this->_error_count++;
+      $this->log('magento_tuotteet', "Virhe! Kategorian perustus epäonnistui", $e);
+
+      return 0;
+    }
 
     $this->log('magento_tuotteet', "Lisättiin tuotepuun kategoria:$name tunnuksella: $category_id");
 
@@ -1967,18 +2026,42 @@ class MagentoClient {
 
   // Hakee kaikki attribuutit magentosta
   private function getAttributeList($attribute_set_id) {
-    // array jo haetuista attribuuteista
-    $attr_list = $this->magento_attribute_list;
-
-    if (empty($attr_list[$attribute_set_id])) {
-      $this->magento_attribute_list[$attribute_set_id] = $this->_proxy->call(
-        $this->_session,
-        "product_attribute.list",
-        array($attribute_set_id)
-      );
+    // memoization
+    if (!is_null($this->magento_attribute_list)) {
+      // palautetaan kysytyn setin attribuutit
+      return $this->magento_attribute_list[$attribute_set_id];
     }
 
-    return $this->magento_attribute_list[$attribute_set_id];
+    // array attribuuteista
+    $attr_list = array();
+    $this->log('magento_tuotteet', "Haetaan tuotteiden atribuuttiryhmät");
+
+    try {
+      // Haetaan kaikki attribute setit magentosta
+      $attribute_sets = $this->_proxy->call($this->_session, 'product_attribute_set.list');
+
+      // Haetaan kaikkien settien atribuutit
+      foreach ($attribute_sets as $set) {
+        $id   = $set['set_id'];
+        $name = $set['name'];
+        $list = $this->_proxy->call($this->_session, 'product_attribute.list', array($id));
+
+        $this->log('magento_tuotteet', "Haettiin atribuuttiryhma {$id} {$name} (".count($list)." atribuuttia)");
+
+        $attr_list[$id] = $list;
+      }
+    }
+    catch (Exception $e) {
+      $this->_error_count++;
+      $this->log('magento_tuotteet', "Virhe! Attribuuttien haussa", $e);
+    }
+
+    $this->magento_attribute_list = $attr_list;
+
+    $this->log('magento_tuotteet', "Haettiin ". count($attr_list) . " atribuuttiryhmää");
+
+    // palautetaan kysytyn setin attribuutit
+    return $attr_list[$attribute_set_id];
   }
 
   // Hakee kaikki kategoriat

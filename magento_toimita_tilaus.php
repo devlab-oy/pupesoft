@@ -14,6 +14,9 @@ if (!function_exists("log_message")) {
   }
 }
 
+$magento_api_ord   = (int) $magento_api_ord;
+$_magento_kaytossa = (!empty($magento_api_tt_url) and !empty($magento_api_tt_usr) and !empty($magento_api_tt_pas));
+
 if (!empty($yhtiorow['editilaus_suoratoimitus'])) {
 
   // Tarkistetaan onko kuittaus jo tehty aikaisemmista tämän Magento-tilauksen Pupe-tilauksista
@@ -61,7 +64,7 @@ else {
   $_kuittaus_tekematta = true;
 }
 
-if ($_kuittaus_tekematta) {
+if ($_kuittaus_tekematta and $_magento_kaytossa and $magento_api_ord > 0) {
 
   if (empty($magento_api_toimituskuittaus_viestit)) {
     $magento_api_toimituskuittaus_viestit = array();
@@ -73,13 +76,6 @@ if ($_kuittaus_tekematta) {
   );
 
   $kuittaukset = array_merge($default_kuittaukset, $magento_api_toimituskuittaus_viestit);
-
-  $magento_api_ord   = (int) $magento_api_ord;
-  $_magento_kaytossa = (!empty($magento_api_tt_url) and !empty($magento_api_tt_usr) and !empty($magento_api_tt_pas));
-
-  if (!$_magento_kaytossa or $magento_api_ord <= 0) {
-    exit;
-  }
 
   $proxy = new SoapClient($magento_api_tt_url);
   $sessionId = $proxy->login($magento_api_tt_usr, $magento_api_tt_pas);

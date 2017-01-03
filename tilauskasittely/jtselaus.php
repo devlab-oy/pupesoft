@@ -1976,7 +1976,12 @@ if ($tee == "JATKA") {
                   $tunnusarray     = explode(',', $tunnukset);
 
                   // Toimitetaan jtrivit
-                  tee_jt_tilaus($tunnukset, $tunnusarray, $kpl, $loput, $suoratoimitus_paikat, $tilaus_on_jo, $varastosta, $jt_huomioi_pvm, $mista_tullaan);
+                  if ($yhtiorow['jt_toimitus_varastorajaus'] == "K") {
+                    tee_jt_tilaus($tunnukset, $tunnusarray, $kpl, $loput, $suoratoimitus_paikat, $tilaus_on_jo, $jtrow["varasto"], $jt_huomioi_pvm, $mista_tullaan);
+                  }
+                  else {
+                    tee_jt_tilaus($tunnukset, $tunnusarray, $kpl, $loput, $suoratoimitus_paikat, $tilaus_on_jo, $varastosta, $jt_huomioi_pvm, $mista_tullaan);
+                  }
 
                   $jt_rivilaskuri++;
                 }
@@ -2074,7 +2079,12 @@ if ($tee == "JATKA") {
                   $tunnusarray     = explode(',', $tunnukset);
 
                   // Toimitetaan jtrivit
-                  tee_jt_tilaus($tunnukset, $tunnusarray, $kpl, $loput, $suoratoimitus_paikat, $tilaus_on_jo, $varastosta, $jt_huomioi_pvm, $mista_tullaan);
+                  if ($yhtiorow['jt_toimitus_varastorajaus'] == "K") {
+                    tee_jt_tilaus($tunnukset, $tunnusarray, $kpl, $loput, $suoratoimitus_paikat, $tilaus_on_jo, $jtrow["varasto"], $jt_huomioi_pvm, $mista_tullaan);
+                  }
+                  else {
+                    tee_jt_tilaus($tunnukset, $tunnusarray, $kpl, $loput, $suoratoimitus_paikat, $tilaus_on_jo, $varastosta, $jt_huomioi_pvm, $mista_tullaan);
+                  }
 
                   $jt_rivilaskuri++;
                 }

@@ -5339,7 +5339,7 @@ if (!function_exists("alehinta")) {
       // 10. asiakas.tunnus/asiakas.ytunnus tuote.aleryhmä/tuote.tuoteno negatiivinen-aleprosentti (asiakkaan katemyyntihinta netto)
       if ($hinta == 0) {
 
-        $query = "(SELECT '1' prio, alennus, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, minkpl, tunnus, campaign_id
+        $query = "(SELECT '2' prio, alennus, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, minkpl, tunnus, campaign_id
                    FROM asiakasalennus asale1 USE INDEX (yhtio_asiakas_ryhma)
                    WHERE yhtio        = '$kukarow[yhtio]'
                    and asiakas        = '$laskurow[liitostunnus]'
@@ -5351,7 +5351,7 @@ if (!function_exists("alehinta")) {
                    and ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'){$kampanjarajaus})
                    and (alennus < 0 or left(alennus,1) = '-'))
                    UNION
-                   (SELECT '2' prio, alennus, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, minkpl, tunnus, campaign_id
+                   (SELECT '3' prio, alennus, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, minkpl, tunnus, campaign_id
                    FROM asiakasalennus asale2 USE INDEX (yhtio_ytunnus_ryhma)
                    WHERE yhtio        = '$kukarow[yhtio]'
                    and ytunnus        = '$laskurow[ytunnus]'
@@ -5364,6 +5364,18 @@ if (!function_exists("alehinta")) {
                    and (alennus < 0 or left(alennus,1) = '-'))
                    UNION
                    (SELECT '0' prio, alennus, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, minkpl, tunnus, campaign_id
+                   FROM asiakasalennus asale2 USE INDEX (yhtio_ytunnus_ryhma)
+                   WHERE yhtio        = '$kukarow[yhtio]'
+                   and asiakas        = '$laskurow[liitostunnus]'
+                   and asiakas        > 0
+                   and asiakas_ryhma  = ''
+                   and tuoteno        = '$trow[tuoteno]'
+                   and tuoteno       != ''
+                   and (minkpl <= $kpl or minkpl = 0)
+                   and ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'){$kampanjarajaus})
+                   and (alennus < 0 or left(alennus,1) = '-'))
+                   UNION
+                   (SELECT '1' prio, alennus, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, minkpl, tunnus, campaign_id
                    FROM asiakasalennus asale2 USE INDEX (yhtio_ytunnus_ryhma)
                    WHERE yhtio        = '$kukarow[yhtio]'
                    and ytunnus        = '$laskurow[ytunnus]'

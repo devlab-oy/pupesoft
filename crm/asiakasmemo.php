@@ -598,6 +598,15 @@ if ($ytunnus != '' and $tee == '') {
       echo "<li><a href='{$palvelin2}budjetinyllapito_tat.php?toim=ASIAKAS&ytunnus=$ytunnus&asiakasid={$asiakasrow["tunnus"]}&submit_button=joo&alkuvv=".date("Y")."&alkukk=01&loppuvv=".date("Y")."&loppukk=12&lopetus=$asmemo_lopetus'>".t("Asiakkaan myyntitavoitteet")."</a></li>";
     }
 
+    if (tarkista_oikeus("raportit/asiakkaantilaukset.php", "TARJOUS")) {
+      $tkka = date("m", mktime(0, 0, 0, date("m")-6, date("d"), date("Y")));
+      $tvva = date("Y", mktime(0, 0, 0, date("m")-6, date("d"), date("Y")));
+      $tppa = date("d", mktime(0, 0, 0, date("m")-6, date("d"), date("Y")));
+
+      $out = js_openUrlNewWindow("{$palvelin2}raportit/asiakkaantilaukset.php?toim=TARJOUS&kka=$tkka&vva=$tvva&ppa=$tppa&ytunnus=$ytunnus&asiakasid={$asiakasrow["tunnus"]}", t('Asiakkaan tarjoukset'), NULL, 1000, 800);
+      echo "<li>$out</li>";
+    }
+
     if (tarkista_oikeus("raportit/sarjanumerohistoria.php")) {
       $out = js_openUrlNewWindow("{$palvelin2}raportit/sarjanumerohistoria.php?tee=hae_tilaukset&indexvas=1&asiakastunnus={$asiakasrow["tunnus"]}", t('Asiakkaan laitteet'), NULL, 1000, 800);
       echo "<li>$out</li>";

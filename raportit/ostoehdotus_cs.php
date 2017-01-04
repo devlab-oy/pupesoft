@@ -31,6 +31,8 @@ if ($tee == "PAIVITA_AJAX") {
   $query = "UPDATE tuote SET
             varmuus_varasto = '$varmuusvarastot',
             status          = '$varastoitavat',
+            nakyvyys        = '$nakyvyydet',
+            halytysraja     = '$halytysrajat',
             muuttaja        = '$kukarow[kuka]',
             muutospvm       = now()
             WHERE yhtio     = '$kukarow[yhtio]'
@@ -370,11 +372,11 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
 
     var tilaatuote = function() {
       if ($(this).attr(\"disabled\") == undefined) {
-        var submitid     = $(this).attr(\"id\");
-        var osat        = submitid.split(\"_\");
-        var tuoteno     = $(\"#tuoteno_\"+osat[1]).html();
-        var toimittaja     = $(\"#toimittaja_\"+osat[1]).html();
-        var maara       = $(\"#ostettavat_\"+osat[1]).val();
+        var submitid        = $(this).attr(\"id\");
+        var osat            = submitid.split(\"_\");
+        var tuoteno         = $(\"#tuoteno_\"+osat[1]).html();
+        var toimittaja      = $(\"#toimittaja_\"+osat[1]).html();
+        var maara           = $(\"#ostettavat_\"+osat[1]).val();
         var valittuvarasto  = 0;
 
         if (\"$toim\" == \"KK\") {
@@ -382,14 +384,16 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
         }
 
         $.post('{$_SERVER['SCRIPT_NAME']}',
-          {   tee: 'TILAA_AJAX',
+          {
+            tee: 'TILAA_AJAX',
             async: false,
             tuoteno: tuoteno,
             toimittaja: toimittaja,
             maara: maara,
             valittuvarasto: valittuvarasto,
             no_head: 'yes',
-            ohje: 'off' },
+            ohje: 'off'
+          },
           function(json) {
             var message = JSON && JSON.parse(json) || $.parseJSON(json);
 
@@ -404,26 +408,23 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
 
     var paivitatuote = function() {
       var submitid = $(this).attr(\"id\");
-      var osat    = submitid.split(\"_\");
+      var osat = submitid.split(\"_\");
+      var data = {
+        tee:             'PAIVITA_AJAX',
+        async:           false,
+        no_head:         'yes',
+        ohje:            'off',
+        tuoteno:         $(\"#tuoteno_\"+osat[1]).html(),
+        toimittaja:      $(\"#toimittaja_\"+osat[1]).html(),
+        varmuusvarastot: $(\"#varmuusvarastot_\"+osat[1]).val(),
+        pakkauskoot:     $(\"#pakkauskoot_\"+osat[1]).val(),
+        toimitusajat:    $(\"#toimitusajat_\"+osat[1]).val(),
+        varastoitavat:   $(\"#varastoitavat_\"+osat[1]).val(),
+        halytysrajat:    $(\"#halytysrajat_\"+osat[1]).val(),
+        nakyvyydet:      $(\"#nakyvyydet_\"+osat[1]).val(),
+      }
 
-      var tuoteno     = $(\"#tuoteno_\"+osat[1]).html();
-      var toimittaja     = $(\"#toimittaja_\"+osat[1]).html();
-      var varmuusvarastot  = $(\"#varmuusvarastot_\"+osat[1]).val();
-      var pakkauskoot   = $(\"#pakkauskoot_\"+osat[1]).val();
-      var toimitusajat   = $(\"#toimitusajat_\"+osat[1]).val();
-      var varastoitavat   = $(\"#varastoitavat_\"+osat[1]).val();
-
-      $.post('{$_SERVER['SCRIPT_NAME']}',
-        {   tee: 'PAIVITA_AJAX',
-          tuoteno: tuoteno,
-          async: false,
-          toimittaja: toimittaja,
-          varmuusvarastot: varmuusvarastot,
-          pakkauskoot: pakkauskoot,
-          toimitusajat: toimitusajat,
-          varastoitavat: varastoitavat,
-          no_head: 'yes',
-          ohje: 'off' },
+      $.post('{$_SERVER['SCRIPT_NAME']}', data,
         function(json) {
           var message = JSON && JSON.parse(json) || $.parseJSON(json);
 
@@ -573,6 +574,7 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
             tuote.aleryhma,
             tuote.kehahin,
             tuote.varmuus_varasto,
+            tuote.nakyvyys,
             if(tuote.status != 'T', '".t("Varastoitava")."','".t("Ei varastoida")."') ei_varastoida,
             abc_aputaulu.luokka abcluokka,
             tuote.luontiaika ";
@@ -861,6 +863,8 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
         echo "<tr><th>".t("Varmuusvarasto").":</th><td><input type='text' size='10' id = 'varmuusvarastot_$indeksi' name='varmuus_varastot[$row[tuoteno]]' value='".$row["varmuus_varasto"]."'></td></tr>";
         echo "<tr><th>".t("Pakkauskoko").":</th><td><input type='text' size='10' id = 'pakkauskoot_$indeksi' name='pakkauskoot[$row[tuoteno]]' value='".(float) $toimirow["pakkauskoko"]."'></td></tr>";
         echo "<tr><th>".t("Toimitusaika").":</th><td><input type='text' size='10' id = 'toimitusajat_$indeksi' name='toimitusajat[$row[tuoteno]]' value='".(float) $toimirow["toimitusaika"]."'> ".t("pva").".</td></tr>";
+        echo "<tr><th>".t("Hälytysraja").":</th><td><input type='text' size='10' id = 'halytysrajat_$indeksi' name='halytysrajat[$row[tuoteno]]' value='".(float) $row["halytysraja"]."'></td></tr>";
+        echo "<tr><th>".t("Verkkokauppanäkyvyys").":</th><td><input type='text' size='10' id = 'nakyvyydet_$indeksi' name='nakyvyydet[$row[tuoteno]]' value='{$row["nakyvyys"]}'></td></tr>";
         echo "<tr><th>".t("Varastoitava/status").":</th><td><select id = 'varastoitavat_$indeksi' name='varastoitavat[$row[tuoteno]]'>";
 
         foreach (product_statuses() as $key => $value) {

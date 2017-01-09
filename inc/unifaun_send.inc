@@ -22,7 +22,7 @@ class Unifaun {
   private $kirjoitin;
   private $developerid;
   private $unifauntype;
-  private $onkovak;
+  private $vak_tiedot = array();
   private $pikahaku_tunnus = null;
 
   public function __construct() {
@@ -87,8 +87,23 @@ class Unifaun {
     $this->mehto = $mehto;
   }
 
-  public function setVak($vak) {
-    $this->onkovak = $vak;
+  public function setVak(Array $vak) {
+    $this->vak_tiedot = $vak;
+  }
+
+  public function onko_vak() {
+    // jos on vak tietoja, on vak tuotteita
+    return (count($this->vak_tiedot) > 0);
+  }
+
+  public function onko_lq() {
+    // valitaan vaan elementit, jossa on limited_qty
+    $lq = array_filter(function($vak) {
+      return !empty($vak['limited_qty']);
+    }, $this->vak_tiedot);
+
+    // jos on lq tietoja, on lq tuotteita
+    return (count($lq) > 0);
   }
 
   private function setAsiakasRow() {
@@ -682,10 +697,10 @@ class Unifaun {
 
     if ($this->toitarow['virallinen_selite'] == 'PO2711') {
 
-      $uni_shi_val = $uni_shipment->addChild('val', $this->pikahakuarvo()); # Juridisen lähettäjän tunnus (sndid). Ei tulostu rahtiasiakirjaan. 
+      $uni_shi_val = $uni_shipment->addChild('val', $this->pikahakuarvo()); # Juridisen lähettäjän tunnus (sndid). Ei tulostu rahtiasiakirjaan.
       $uni_shi_val->addAttribute('n', "legalfrom");
 
-      $uni_shi_val = $uni_shipment->addChild('val', utf8_encode($this->asiakasrow["tunnus"])); # Palautusvastaanottajan tunnus (rcvid). 
+      $uni_shi_val = $uni_shipment->addChild('val', utf8_encode($this->asiakasrow["tunnus"])); # Palautusvastaanottajan tunnus (rcvid).
       $uni_shi_val->addAttribute('n', "returnto");
     }
 
@@ -830,7 +845,7 @@ class Unifaun {
 
       if (strpos($this->toitarow['virallinen_selite'], "PO2102") !== FALSE) {
         $_virallinen_selite = "PO2102";
-    }
+      }
       elseif (strpos($this->toitarow['virallinen_selite'], "PO2144") !== FALSE) {
         $_virallinen_selite = "PO2144";
       }
@@ -868,17 +883,35 @@ class Unifaun {
       $uni_ser_val->addAttribute('adnid', "DLV00");
     }
 
-    // Postin peruspalvelukoodit jotka tukee lisäpalvelua "Vaarallisten aineiden kuljetus (VAK) / LQ Kuljetus"
+    // Postin palvelukoodit, jotka tukevat lisäpalvelua DNG: "Vaarallisten aineiden kuljetus (VAK) / LQ Kuljetus"
     $_sallitut_posti_vak_palvelut = array(
-      'POF1',
-      'PO2144',
-      'PO2102',
-      'PO2104',
+      'PO2102', // Express-paketti
+      'PO2104', // Kotipaketti
+      'PO2144', // Express-rahti
+      'POF1',   // Rahti
     );
 
-    if (!empty($this->onkovak) and in_array($_virallinen_selite, $_sallitut_posti_vak_palvelut)) {
+    // Jos meillä on VAK tuotteita tilauksella ja sopiva palvelukoodi, lisätään DNG lisäpalvelu
+    if ($this->onko_vak() and in_array($_virallinen_selite, $_sallitut_posti_vak_palvelut)) {
       $uni_addon = $uni_service->addChild('addon');
       $uni_addon->addAttribute('adnid', "DNG");
+
+      $uni_add_val = $uni_addon->addChild('val', utf8_encode($_yhtio_nimi));
+      $uni_add_val->addAttribute('n', 'declarant');
+    }
+
+    // Postin palvelukoodit, jotka tukevat lisäpalvelua FDNGPP: "LQ Prosessilupa"
+    $_sallitut_posti_lq_palvelut = array(
+      'PO2102', // Express-paketti
+      'PO2103', // Postipaketti
+      'PO2104', // Kotipaketti
+      'PO2108', // Palautus
+    );
+
+    // Jos meillä on LQ tuotteita tilauksella ja sopiva palvelukoodi, lisätään FDNGPP lisäpalvelu
+    if ($this->onko_lq() and in_array($_virallinen_selite, $_sallitut_posti_lq_palvelut)) {
+      $uni_addon = $uni_service->addChild('addon');
+      $uni_addon->addAttribute('adnid', "FDNGPP");
 
       $uni_add_val = $uni_addon->addChild('val', utf8_encode($_yhtio_nimi));
       $uni_add_val->addAttribute('n', 'declarant');
@@ -1198,6 +1231,10 @@ class Unifaun {
         if (isset($vak['limited_qty']) and $vak['limited_qty'] != '') {
           $uni_par_val = $uni_article->addChild('val', $vak['limited_qty']); // Note for ADR goods
           $uni_par_val->addAttribute('n', "dngnote");
+
+          // Defines if the parcel row contains Limited Quantities of dangerous goods. Valid values: YES/NO.
+          $uni_par_val = $uni_article->addChild('val', 'YES');
+          $uni_par_val->addAttribute('n', "dnglimitedquantities");
         }
 
         if (isset($vak['paino']) and $vak['paino'] != '') {

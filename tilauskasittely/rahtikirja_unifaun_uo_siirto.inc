@@ -73,7 +73,7 @@ if ($yhtiorow['kerayserat'] != 'K' and $kollityht > 0) {
     $unifaun->setMehto($mehto);
     $unifaun->setRahtikirjaRow($rakir_row);
     $unifaun->setYhteensa($laskurow['summa']);
-    $unifaun->setVak(count($vak_tiedot));
+    $unifaun->setVak($vak_tiedot);
 
     if ($rakir_row["jv"] != '' or $mehto['jv'] != '') {
       $unifaun->setViite($laskurow['viite']);

@@ -98,9 +98,9 @@ class Unifaun {
 
   public function onko_lq() {
     // valitaan vaan elementit, jossa on limited_qty
-    $lq = array_filter(function($vak) {
+    $lq = array_filter($this->vak_tiedot, function($vak) {
       return !empty($vak['limited_qty']);
-    }, $this->vak_tiedot);
+    });
 
     // jos on lq tietoja, on lq tuotteita
     return (count($lq) > 0);

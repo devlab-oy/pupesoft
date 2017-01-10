@@ -496,7 +496,7 @@ while ($row = mysql_fetch_assoc($suorires)) {
     }
 
     // Jos meill‰ on oletus selvittelytili niin pistet‰‰n aina sinne tilille
-    if ($row["oletus_selvittelytili"] != "") {
+     if (!empty($row["oletus_selvittelytili"]) and $row["oletus_selvittelytili"] != $row["selvittelytili"]) {
       $row["myyntisaamiset"] = $row["oletus_selvittelytili"];
     }
 

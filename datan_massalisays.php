@@ -570,10 +570,11 @@ if ($tee == 'DUMPPAA' and $mitkadumpataan != '') {
     exit;
   }
 
-  $query = "SELECT *
+  $query = "SELECT liitetiedostot.*, tuote.tuoteno
             FROM liitetiedostot
-            WHERE yhtio = '{$kukarow['yhtio']}'
-            and liitos  = '{$mitkadumpataan}'";
+            LEFT JOIN tuote ON tuote.yhtio = liitetiedostot.yhtio and tuote.tunnus = liitetiedostot.liitostunnus
+            WHERE liitetiedostot.yhtio = '{$kukarow['yhtio']}'
+            and liitetiedostot.liitos  = '{$mitkadumpataan}'";
   $result = pupe_query($query);
 
   $dumpattuja = 0;
@@ -616,9 +617,14 @@ if ($tee == 'DUMPPAA' and $mitkadumpataan != '') {
       continue;
     }
 
-    $kokonimi .= "/".$row["filename"];
+    if (strpos($row['filename'], '#') > 0) {
+      $kokonimi .= "/".$row["tuoteno"]."#".substr($row['filename'], (strpos($row['filename'], '#')) + 1);
+    }
+    else  {
+      $kokonimi .= "/".$row["tuoteno"].".".substr($row['filename'], (strpos($row['filename'], '.')) + 1);
+    }
 
-    if (!file_exists($kokonimi)) {
+    if (!file_exists($kokonimi) and isset($row["tuoteno"]) and $row["tuoteno"] != '') {
 
       $handle = fopen("$kokonimi", "x");
 

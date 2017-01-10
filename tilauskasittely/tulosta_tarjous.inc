@@ -1047,7 +1047,7 @@ if (!function_exists('tarjous_rivi_hinta_ale')) {
                 JOIN liitetiedostot ON (liitetiedostot.yhtio = tuote.yhtio
                   AND liitetiedostot.liitostunnus    = tuote.tunnus
                   AND liitetiedostot.liitos          = 'tuote'
-                  AND liitetiedostot.kayttotarkoitus = 'TK')
+                  AND liitetiedostot.kayttotarkoitus = 'TH')
                 WHERE tuote.yhtio                    = '{$kukarow['yhtio']}'
                 AND tuote.tuoteno                    = '{$row['tuoteno']}'";
       $kuva_res = pupe_query($query);

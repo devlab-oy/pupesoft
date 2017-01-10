@@ -102,8 +102,8 @@ class Unifaun {
       return !empty($vak['limited_qty']);
     });
 
-    // jos on lq tietoja, on lq tuotteita
-    return (count($lq) > 0);
+    // on LQ jos tilauksella on vak tietoja, ja kaikki niistä on LQ tietoja
+    return ($this->onko_vak() and count($lq) == count($this->vak_tiedot));
   }
 
   private function setAsiakasRow() {
@@ -883,23 +883,6 @@ class Unifaun {
       $uni_ser_val->addAttribute('adnid', "DLV00");
     }
 
-    // Postin palvelukoodit, jotka tukevat lisäpalvelua DNG: "Vaarallisten aineiden kuljetus (VAK) / LQ Kuljetus"
-    $_sallitut_posti_vak_palvelut = array(
-      'PO2102', // Express-paketti
-      'PO2104', // Kotipaketti
-      'PO2144', // Express-rahti
-      'POF1',   // Rahti
-    );
-
-    // Jos meillä on VAK tuotteita tilauksella ja sopiva palvelukoodi, lisätään DNG lisäpalvelu
-    if ($this->onko_vak() and in_array($_virallinen_selite, $_sallitut_posti_vak_palvelut)) {
-      $uni_addon = $uni_service->addChild('addon');
-      $uni_addon->addAttribute('adnid', "DNG");
-
-      $uni_add_val = $uni_addon->addChild('val', utf8_encode($_yhtio_nimi));
-      $uni_add_val->addAttribute('n', 'declarant');
-    }
-
     // Postin palvelukoodit, jotka tukevat lisäpalvelua FDNGPP: "LQ Prosessilupa"
     $_sallitut_posti_lq_palvelut = array(
       'PO2102', // Express-paketti
@@ -908,10 +891,26 @@ class Unifaun {
       'PO2108', // Palautus
     );
 
-    // Jos meillä on LQ tuotteita tilauksella ja sopiva palvelukoodi, lisätään FDNGPP lisäpalvelu
+    // Postin palvelukoodit, jotka tukevat lisäpalvelua DNG: "Vaarallisten aineiden kuljetus (VAK) / LQ Kuljetus"
+    $_sallitut_posti_vak_palvelut = array(
+      'PO2102', // Express-paketti
+      'PO2104', // Kotipaketti
+      'PO2144', // Express-rahti
+      'POF1',   // Rahti
+    );
+
+    // Jos meillä on vain LQ tuotteita tilauksella ja sopiva palvelukoodi, lisätään FDNGPP lisäpalvelu
     if ($this->onko_lq() and in_array($_virallinen_selite, $_sallitut_posti_lq_palvelut)) {
       $uni_addon = $uni_service->addChild('addon');
       $uni_addon->addAttribute('adnid', "FDNGPP");
+
+      $uni_add_val = $uni_addon->addChild('val', utf8_encode($_yhtio_nimi));
+      $uni_add_val->addAttribute('n', 'declarant');
+    }
+    // Jos meillä on VAK tuotteita tilauksella ja sopiva palvelukoodi, lisätään DNG lisäpalvelu
+    elseif ($this->onko_vak() and in_array($_virallinen_selite, $_sallitut_posti_vak_palvelut)) {
+      $uni_addon = $uni_service->addChild('addon');
+      $uni_addon->addAttribute('adnid', "DNG");
 
       $uni_add_val = $uni_addon->addChild('val', utf8_encode($_yhtio_nimi));
       $uni_add_val->addAttribute('n', 'declarant');

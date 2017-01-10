@@ -36,7 +36,7 @@ function unifaun_tilauksen_vak_koodit($tilausnumero) {
     $vak_tiedot = unifaun_vak_tiedot($vak_chk_row['vakkoodi'], $vak_chk_row['vakmaara']);
 
     $vak_koodit[] = array(
-      'kpl'            => $vak_chk_row['kpl'],
+      'kpl'            => round($vak_chk_row['kpl']),
       'kpl_paino'      => $vak_chk_row['kpl_paino'],
       'limited_qty'    => $vak_tiedot['limited_qty'],
       'lipukkeet'      => $vak_tiedot['lipukkeet'],
@@ -158,16 +158,12 @@ function unifaun_vak_tiedot($tuote_vak, $tuote_vakmaara, $type = 'vak') {
   // eikä meillä ole muuta tietoa
   if ($yhtiorow["vak_kasittely"] == "") {
     $vak_tiedot = array(
-      'kpl'            => '',
-      'kpl_paino'      => '',
       'limited_qty'    => '',
       'lipukkeet'      => '',
       'luokituskoodi'  => '',
       'luokka'         => '',
       'nimi_ja_kuvaus' => '',
       'pakkausryhma'   => '',
-      'tuotenimitys'   => '',
-      'tuoteno'        => '',
       'yk_nro'         => $tuote_vak,
     );
 

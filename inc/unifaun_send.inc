@@ -97,6 +97,11 @@ class Unifaun {
   }
 
   public function onko_lq() {
+    // ohitetaan toitaiseksi aina LQ, pitää testata unifaunin kanssa tarkemmin
+    // tämän funktion logiikka on kuitenkin oikein. xml tiedostoon tulee todennäköisesti
+    // muutoksia, mikäli LQ on päällä, joita ei ole vielä tehty
+    return false;
+
     // valitaan vaan elementit, jossa on limited_qty
     $lq = array_filter($this->vak_tiedot, function($vak) {
       return !empty($vak['limited_qty']);

@@ -144,6 +144,7 @@ if (!function_exists("yhtion_parametrittarkista")) {
           'ASAVAINSANA',
           'OSASTO',
           'TRY',
+          'Y',
         );
 
         if (count($taulut)>0) {

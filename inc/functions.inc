@@ -2521,7 +2521,7 @@ if (!function_exists("synclog")) {
 // Konserniyhtiˆiden tietueiden synkronointi
 if (!function_exists("synkronoi")) {
   function synkronoi($yhtio, $table, $tunnus, $orig = "", $force = "") {
-    global $yhtiorow, $kukarow, $synkronoi_kiellot;
+    global $yhtiorow, $kukarow, $synkronoi_kiellot, $synkronoi_ainoastaan;
 
     //  Onko mahdollista synkronoida?
     if (stripos($yhtiorow["synkronoi"], $table) === false) {
@@ -2543,6 +2543,13 @@ if (!function_exists("synkronoi")) {
 
     if (!is_numeric($tunnus)) {
       $synclog .= "VIRHE: Syˆtetty tunnus ei kelpaa!\n";
+
+      synclog($yhtio, $table, $synclog, $tunnus);
+      return false;
+    }
+
+    if (synkronoi_tarkista_pakolliset($table) === false) {
+      $synclog .= "VIRHE: synkronoi_ainoastaan virheellinen. Pakolliset kent‰t on pakko synkronoida!";
 
       synclog($yhtio, $table, $synclog, $tunnus);
       return false;
@@ -2584,14 +2591,22 @@ if (!function_exists("synkronoi")) {
           if (count($diff) > 0) {
 
             foreach ($diff as $key => $value) {
-              if (is_string($key) and !in_array($key, array("tunnus", "muuttaja", "muutospvm", "laatija", "luontiaika"))) {
-                if (isset($synkronoi_kiellot[$table]) and in_array($key, $synkronoi_kiellot[$table])) {
-                  // Ohitetaan t‰m‰ koska se on synkronoi kielloissa
-                }
-                else {
-                  $muutokset[$key] .= $value;
-                }
+              // ohitetaan aina vakiokent‰t
+              if (in_array($key, array("tunnus", "muuttaja", "muutospvm", "laatija", "luontiaika"))) {
+                continue;
               }
+
+              // Ohitetaan t‰m‰ koska se on synkronoi kielloissa
+              if (isset($synkronoi_kiellot[$table]) and in_array($key, $synkronoi_kiellot[$table])) {
+                continue;
+              }
+
+              // Ohitetaan jos meill‰ on asetettuna synkronoi_ainoastaan array, ja kentt‰ ei lˆydy sielt‰
+              if (!empty($synkronoi_ainoastaan) and !in_array($key, $synkronoi_ainoastaan[$table])) {
+                continue;
+              }
+
+              $muutokset[$key] .= $value;
             }
           }
 
@@ -3051,6 +3066,36 @@ if (!function_exists("synkronoi")) {
 
     $synclog .= "\nsynkronointi valmis!!";
     synclog($yhtio, $table, $synclog, $tunnus);
+    return true;
+  }
+}
+
+if (!function_exists("synkronoi_tarkista_pakolliset")) {
+  function synkronoi_tarkista_pakolliset($table) {
+    global $synkronoi_ainoastaan;
+
+    // jos synkronoi_ainoastaan on tyhj‰‰, homma ok
+    if (empty($synkronoi_ainoastaan)) {
+      return true;
+    }
+
+    require_once "inc/pakolliset_sarakkeet.inc";
+
+    list($pakolliset, $kielletyt, $wherelliset, $eiyhtiota, $joinattavat, $saakopoistaa, $oletukset, $eisaaollatyhja) = pakolliset_sarakkeet($table);
+
+    // hetaan pakolliset ja wherelliset, merget‰‰n ne arrayt
+    // pakollisten kenttien nimet pienill‰ kirjaimilla
+    $indeksi = array_merge($wherelliset, $pakolliset);
+    $indeksi = array_unique($indeksi);
+    $indeksi = array_map('strtolower', $indeksi);
+
+    // synkronoi_ainoastaan, tulee sis‰lt‰‰ ainakin kaikki taulun pakolliset sarakkeet
+    foreach ($indeksi as $key) {
+      if (!in_array($key, $synkronoi_ainoastaan[$table])) {
+        return false;
+      }
+    }
+
     return true;
   }
 }

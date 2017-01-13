@@ -15,8 +15,14 @@
 //   ),
 // );
 
+$pupe_root_polku = dirname(dirname(__FILE__));
+
 date_default_timezone_set('Europe/Helsinki');
-ini_set("max_execution_time", 0); // unlimited execution time
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+ini_set('include_path', ini_get('include_path').PATH_SEPARATOR.$pupe_root_polku);
+ini_set('max_execution_time', 0); // unlimited execution time
+ini_set('memory_limit', '5G');
 
 // Kutsutaanko CLI:stä
 if (php_sapi_name() != 'cli') {
@@ -26,8 +32,6 @@ if (php_sapi_name() != 'cli') {
 if (empty($argv[1])) {
   die("Et antanut yhtiötä\n");
 }
-
-$pupe_root_polku = dirname(dirname(__FILE__));
 
 require "{$pupe_root_polku}/inc/connect.inc";
 require "{$pupe_root_polku}/inc/functions.inc";
@@ -74,7 +78,7 @@ if (!is_dir($ok_directory) or !is_writeable($ok_directory)) {
 pupesoft_log("logisticar_paluuarvo", "Haetaan tiedostoja");
 
 // Haetaan kaikki tiedostot
-require 'ftp-get.php';
+#require 'ftp-get.php';
 
 // Loopataan hakemisto, tuliko tiedostoja
 while (($file = readdir($handle)) !== false) {

@@ -38,7 +38,10 @@ function tulosta_asiakkaan_kuitti($laskunro, $tulostimen_tunnus, $params = array
 
   list($maksupaatetapahtumat, $maksupaatesumma) = hae_maksupaatetapahtumat($laskunro);
   list($tilausrivit, $tilausnumerot, $verot) = hae_tilausrivit($laskunro);
+
   $lasku = hae_myyntilasku($laskunro);
+  $maksuehto = hae_maksuehto($lasku);
+  
   list($yhteensa, $pyoristys, $loppusumma) = summat($lasku);
   $yhteensa_num        = $yhteensa;
   $maksupaatesumma_num = $maksupaatesumma;
@@ -419,6 +422,18 @@ function hae_myyntilasku($laskunro) {
             AND lasku.alatila    = 'X'
             AND lasku.laskunro   = '{$laskunro}'";
 
+  $result = pupe_query($query);
+
+  return mysql_fetch_assoc($result);
+}
+
+function hae_maksuehto($lasku) {
+  global $kukarow;
+
+  $query = "SELECT *
+            FROM maksuehto
+            WHERE yhtio          = '{$kukarow['yhtio']}'
+            AND tunnus           = {$lasku['maksuehto']}";
   $result = pupe_query($query);
 
   return mysql_fetch_assoc($result);

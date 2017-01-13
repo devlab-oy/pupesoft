@@ -78,7 +78,7 @@ if (!is_dir($ok_directory) or !is_writeable($ok_directory)) {
 pupesoft_log("logisticar_paluuarvo", "Haetaan tiedostoja");
 
 // Haetaan kaikki tiedostot
-#require 'ftp-get.php';
+require 'ftp-get.php';
 
 // Loopataan hakemisto, tuliko tiedostoja
 while (($file = readdir($handle)) !== false) {

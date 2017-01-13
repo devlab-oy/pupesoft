@@ -58,8 +58,8 @@ $key = 'logisticar_paluuarvot';
 $argv[1] = $key;
 $ftpget_dest = array($key => $logisticar[$yhtio]['paluuarvot']['dest_dir']);
 $ftpget_host = array($key => $logisticar[$yhtio]['paluuarvot']['ftp_host']);
-$ftpget_user = array($key => $logisticar[$yhtio]['paluuarvot']['ftp_pass']);
-$ftpget_pass = array($key => $logisticar[$yhtio]['paluuarvot']['ftp_user']);
+$ftpget_user = array($key => $logisticar[$yhtio]['paluuarvot']['ftp_user']);
+$ftpget_pass = array($key => $logisticar[$yhtio]['paluuarvot']['ftp_pass']);
 $ftpget_path = array($key => $logisticar[$yhtio]['paluuarvot']['src_dir']);
 
 // Katostaan, että dirikat löytyy
@@ -79,6 +79,10 @@ pupesoft_log("logisticar_paluuarvo", "Haetaan tiedostoja");
 
 // Haetaan kaikki tiedostot
 require 'ftp-get.php';
+
+if (!empty($syy)) {
+  pupesoft_log("logisticar_paluuarvo", $syy);
+}
 
 // Loopataan hakemisto, tuliko tiedostoja
 while (($file = readdir($handle)) !== false) {

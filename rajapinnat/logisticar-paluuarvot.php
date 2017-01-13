@@ -3,11 +3,17 @@
 // Päivitetään Logisticar paluuarvot Pupesoftiin.
 // Tarvitaan asetukset salasanat.php -tiedostoon:
 //
-// $ftpget_dest = array('logisticar_paluuarvot' => '/tmp/paluuarvot');
-// $ftpget_host = array('logisticar_paluuarvot' => '10.0.1.2');
-// $ftpget_user = array('logisticar_paluuarvot' => 'foo');
-// $ftpget_pass = array('logisticar_paluuarvot' => 'bar');
-// $ftpget_path = array('logisticar_paluuarvot' => 'paluuarvot');
+// $logisticar = array(
+//   'yhtiokoodi' => array(
+//     'paluuarvot' => array(
+//       'dest_dir' => '/tmp/paluuarvot',
+//       'ftp_host' => '10.0.1.2',
+//       'ftp_pass' => 'foo',
+//       'ftp_user' => 'bar',
+//       'src_dir'  => 'paluuarvot',
+//     ),
+//   ),
+// );
 
 date_default_timezone_set('Europe/Helsinki');
 ini_set("max_execution_time", 0); // unlimited execution time
@@ -37,13 +43,20 @@ if ($kukarow === null) {
   die("Admin käyttäjää ei löydy\n");
 }
 
-// Yliajetaan argv[1], jotta ftp-get toimii
+if (empty($logisticar[$yhtio]['paluuarvot']['dest_dir'])) die("dest_dir ei asetettu\n");
+if (empty($logisticar[$yhtio]['paluuarvot']['ftp_host'])) die("ftp_host ei asetettu\n");
+if (empty($logisticar[$yhtio]['paluuarvot']['ftp_pass'])) die("ftp_pass ei asetettu\n");
+if (empty($logisticar[$yhtio]['paluuarvot']['ftp_user'])) die("ftp_user ei asetettu\n");
+if (empty($logisticar[$yhtio]['paluuarvot']['src_dir']))  die("src_dir ei asetettu\n");
+
+// Yliajetaan argv[1], ja asetataan tarvittavat muuttujat, jotta ftp-get toimii
 $key = 'logisticar_paluuarvot';
 $argv[1] = $key;
-
-if (empty($ftpget_dest[$key]) or empty($ftpget_host[$key]) or empty($ftpget_user[$key]) or empty($ftpget_pass[$key]) or empty($ftpget_path[$key])) {
-  die("logisticar_paluuarvot ftp-get tiedot ei ole asetettu\n");
-}
+$ftpget_dest = array($key => $logisticar[$yhtio]['paluuarvot']['dest_dir']);
+$ftpget_host = array($key => $logisticar[$yhtio]['paluuarvot']['ftp_host']);
+$ftpget_user = array($key => $logisticar[$yhtio]['paluuarvot']['ftp_pass']);
+$ftpget_pass = array($key => $logisticar[$yhtio]['paluuarvot']['ftp_user']);
+$ftpget_path = array($key => $logisticar[$yhtio]['paluuarvot']['src_dir']);
 
 // Katostaan, että dirikat löytyy
 $work_directory = $ftpget_dest[$key];

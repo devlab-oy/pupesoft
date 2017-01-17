@@ -110,14 +110,8 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 
     $edmax = array_pop(explode(" ", trim($ranrow["rahtikirjanro"])));
 
-    if (strpos($edmax, "CE") == 0) {
-      $juokseva = sprintf("%04d", $tulostuskpl + (int) substr($edmax, 6, 4));
-    }
-    else {
-      $_koodipos = strpos($edmax, "CE") + 6;
-      $juokseva = sprintf("%04d", $tulostuskpl + (int) substr($edmax, $_koodipos, 4));
-    }
-
+    $_koodipos = strpos($edmax, "CE") + 6;
+    $juokseva = sprintf("%04d", $tulostuskpl + (int) substr($edmax, $_koodipos, 4));
   }
 
   if (substr($juokseva, 0, 2) != "CE" or substr($juokseva, -2, 2) != "FI") {

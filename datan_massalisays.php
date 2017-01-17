@@ -607,9 +607,12 @@ if ($tee == 'DUMPPAA' and $mitkadumpataan != '') {
       continue;
     }
 
-    $kokonimi = $dirri."/".$row["liitos"]."/".$toiminto;
+    $kokohak = $dirri."/".$row["liitos"]."/".$toiminto;
 
-    if (!is_writable($kokonimi)) {
+    $path_parts = pathinfo($row['filename']);
+    $ext = $path_parts['extension'];
+       
+    if (!is_writable($kokohak)) {
       echo "<font class='error'>";
       echo t("Hakemistolle %s ei ole m‰‰ritelty kirjoitusoikeutta. Ei voida tallentaa kuvaa!", "", $kokonimi);
       echo "</font>";
@@ -617,12 +620,15 @@ if ($tee == 'DUMPPAA' and $mitkadumpataan != '') {
       continue;
     }
 
-    if (strpos($row['filename'], '#') > 0) {
-      $kokonimi .= "/".$row["tuoteno"]."#".substr($row['filename'], (strpos($row['filename'], '#')) + 1);
-    }
-    else  {
-      $kokonimi .= "/".$row["tuoteno"].".".substr($row['filename'], (strpos($row['filename'], '.')) + 1);
-    }
+    $path_parts = pathinfo($row['filename']);
+    $ext = $path_parts['extension'];
+    $kokonimi = $kokohak."/".$row["tuoteno"].".".$ext;
+    $kala = 1;
+
+    while (file_exists($kokonimi)) {
+      $kala++;
+      $kokonimi = $kokohak."/".$row["tuoteno"]."#".$kala.".".$ext;             
+    }  
 
     if (!file_exists($kokonimi) and isset($row["tuoteno"]) and $row["tuoteno"] != '') {
 

@@ -609,9 +609,6 @@ if ($tee == 'DUMPPAA' and $mitkadumpataan != '') {
 
     $kokohak = $dirri."/".$row["liitos"]."/".$toiminto;
 
-    $path_parts = pathinfo($row['filename']);
-    $ext = $path_parts['extension'];
-       
     if (!is_writable($kokohak)) {
       echo "<font class='error'>";
       echo t("Hakemistolle %s ei ole m‰‰ritelty kirjoitusoikeutta. Ei voida tallentaa kuvaa!", "", $kokonimi);

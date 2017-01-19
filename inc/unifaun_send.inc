@@ -1312,7 +1312,8 @@ class Unifaun {
   }
 
   private function sender_reference() {
-    $value = $this->postirow["viesti"];
+    $key = unifaun_sender_reference();
+    $value = $this->postirow[$key];
     $value = trim($value);
     $value = preg_replace("/[^\x20-\xFF]/", "", $value);
     $value = substr($value, 0, 17);

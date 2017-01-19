@@ -10924,7 +10924,7 @@ if ($tee == '') {
           <input type='submit' value='", t("Hyväksy kaikki rivit"), "'>
           </form> ";
     }
-echo "10927 rowLaskutettuaika ",var_dump($row["laskutettuaika"])," <br><br>";
+
     if (($muokkauslukko == "" or $myyntikielto != '') and ($toim != "PROJEKTI" or ($toim == "PROJEKTI" and $projektilask == 0)) and $kukarow["mitatoi_tilauksia"] == "" and ($row["laskutettuaika"] == "0000-00-00" or !isset($row["laskutettuaika"]))) {
       echo "<SCRIPT LANGUAGE=JAVASCRIPT>
             function verify(){

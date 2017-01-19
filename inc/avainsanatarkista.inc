@@ -176,7 +176,7 @@ if (!function_exists("avainsanatarkista")) {
                   AND avainsana.selite = '{$tem_selite}'
                   AND avainsana.tunnus != '{$tunnus}'";
         $result = pupe_query($query);
-        
+
         if (mysql_num_rows($result) > 0) {
           $virhe[$i] = t("Vaihtoehtoisen rahtituotenumeron pitää olla uniikki");
         }
@@ -186,7 +186,7 @@ if (!function_exists("avainsanatarkista")) {
                   WHERE tuote.yhtio = '{$kukarow['yhtio']}'
                   AND tuote.tuoteno = '{$tem_selite}'";
         $result = pupe_query($query);
-        
+
         if (mysql_num_rows($result) == 0) {
           $virhe[$i] = t("Vaihtoehtoisen rahtituotenumeron tulee löytyä järjestelmästä");
         }
@@ -245,7 +245,7 @@ if (!function_exists("avainsanatarkista")) {
         }
       }
 
-      if ($seliteerrori == 1 and trim($t[$i]) == '' and $tem_laji != 'VAKIOVIESTI' and $tem_laji != 'MAINOSTXT_LASKU' and $tem_laji != 'VAKIOVIESTI_TIL' and $tem_laji != 'HINNAT_CRON' and $tem_laji != 'TUOTE_EXP_CRON') {
+      if ($seliteerrori == 1 and trim($t[$i]) == '' and $tem_laji != 'VAKIOVIESTI' and $tem_laji != 'MAINOSTXT_LASKU' and $tem_laji != 'VAKIOVIESTI_TIL' and $tem_laji != 'HINNAT_CRON' and $tem_laji != 'TUOTE_EXP_CRON' and $tem_laji != 'UNIFAUN_REF') {
         $virhe[$i] = t("Selite ja selitetark ei voi olla tyhjiä")."!";
       }
 
@@ -338,7 +338,7 @@ if (!function_exists("avainsanatarkista")) {
                   AND avainsana.laji    = '{$tem_laji}'
                   AND tunnus           != '{$tunnus}'";
         $result = pupe_query($query);
-     
+
         if (mysql_num_rows($result) > 0) {
           $virhe[$i] = t("Sinulla voi olla vain yksi tämän lajinen avainsana");
         }

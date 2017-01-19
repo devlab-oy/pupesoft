@@ -770,12 +770,12 @@ class Unifaun {
     //$uni_shi_val->addAttribute('n', "eurpallets");
 
     // lähettäjän viite
-    $reference = substr(preg_replace("/[^\x20-\xFF]/", "", trim($this->postirow["viesti"])), 0, 17);
+    $reference = $this->sender_reference();
 
-    $uni_shi_val = $uni_shipment->addChild('val', utf8_encode($reference)); // Shipment reference. Any contents. Max. 17 characters.
+    $uni_shi_val = $uni_shipment->addChild('val', $reference); // Shipment reference. Any contents. Max. 17 characters.
     $uni_shi_val->addAttribute('n', "reference");
 
-    if (trim($reference) != "" and is_int($reference)) {
+    if ($reference != "" and is_int($reference)) {
       $uni_shi_val = $uni_shipment->addChild('val', $reference); // Shipment reference as barcode. Max. 17 numeric characters.
       $uni_shi_val->addAttribute('n', "referencebarcode");
     }
@@ -1309,5 +1309,15 @@ class Unifaun {
 
     // palautetaan oletus (yhtiö tunnus)
     return $this->pikahaku_tunnus;
+  }
+
+  private function sender_reference() {
+    $value = $this->postirow["viesti"];
+    $value = trim($value);
+    $value = preg_replace("/[^\x20-\xFF]/", "", $value);
+    $value = substr($value, 0, 17);
+    $value = utf8_encode($value);
+
+    return $value;
   }
 }

@@ -149,6 +149,7 @@ if (empty($verkkokauppatuotteet_erikoisparametrit)) {
   $verkkokauppatuotteet_erikoisparametrit = array(
     // array('nimi' => 'manufacturer', 'arvo' => 'tuotemerkki'),
     // array('nimi' => 'description',  'arvo' => 'lyhytkuvaus'),
+    // array('nimi' => 'kieliversiot', 'arvo' => array('en' => array(4, 13))),
   );
 }
 

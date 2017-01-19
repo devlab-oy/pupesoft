@@ -193,3 +193,31 @@ function unifaun_vak_tiedot($tuote_vak, $tuote_vakmaara, $type = 'vak') {
 
   return $vak_tiedot;
 }
+
+// palauttaa lasku-taulun kent‰n nimen, jota tulee k‰ytt‰‰ unifaun sanomassa l‰hett‰j‰n viitteen‰
+function unifaun_sender_reference() {
+  global $kukarow, $yhtiorow;
+
+  $default_value = 'viesti';
+
+  $query = "SELECT selite
+            FROM avainsana
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND laji = 'UNIFAUN_REF'
+            ORDER BY tunnus
+            LIMIT 1";
+  $result = pupe_query($query);
+
+  if (mysql_num_rows($result) !== 1) {
+    return $default_value;
+  }
+
+  $row = mysql_fetch_assoc($result);
+  $value = $row['selite'];
+
+  if (empty($value)) {
+    return $default_value;
+  }
+
+  return $value;
+}

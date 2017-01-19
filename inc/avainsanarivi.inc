@@ -14,6 +14,7 @@ $_selitetark_2 = (mysql_field_name($result, $i) == "selitetark_2");
 $_selitetark_3 = (mysql_field_name($result, $i) == "selitetark_3");
 $_selitetark_4 = (mysql_field_name($result, $i) == "selitetark_4");
 $_selitetark_5 = (mysql_field_name($result, $i) == "selitetark_5");
+$_jarjestys = (mysql_field_name($result, $i) == "jarjestys");
 
 // Näitä kenttiä ei oletuksena näytetä
 if ($_selitetark_5 or
@@ -325,6 +326,7 @@ if (mysql_field_name($result, $i) == "laji") {
   if ($lukitse_laji== "" or $lukitse_laji == "KORVAMERKKI")   $ulos .= "<option value='KORVAMERKKI' {$avain_sel['KORVAMERKKI']}>".t("Tilausrivin korvamerkinnän vaihtoehdot")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "HUOLTOP_EMAIL") $ulos .= "<option value='HUOLTOP_EMAIL' {$avain_sel['HUOLTOP_EMAIL']}>".t("RMA portaalin huoltopyyntöemail")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "POSTEN_TKOODI")   $ulos .= "<option value='POSTEN_TKOODI' {$avain_sel['POSTEN_TKOODI']}>".t("Logmaster OutboundDelivery ja MaterialMaster sanomien kentät")."</option>";
+  if ($lukitse_laji== "" or $lukitse_laji == "UNIFAUN_REF") $ulos .= "<option value='UNIFAUN_REF' {$avain_sel['UNIFAUN_REF']}>".t("Unifaun lähettäjän viite")."</option>";
   if ($lukitse_laji== "") $ulos .= "</optgroup>";
 
   if ($lukitse_laji== "") $ulos .= "<optgroup label='".t("Verkkokaupan avainsanat")."'>";
@@ -1457,4 +1459,25 @@ if ($avain_sel['PS_ALA_TRY'] == "SELECTED" and $_selitetark_2) {
   $ulos  = "<th>" . t("Nimitys") . "</th>
             <td><input type='text' size='35' value='{$trow[$i]}' name='{$nimi}'></td>";
   $jatko = 0;
+}
+
+// Unifaun lähettäjän viite
+if ($avain_sel['UNIFAUN_REF'] == 'SELECTED') {
+  // ei näytetä selitetarkia tai järjestystä
+  if ($_selitetark or $_jarjestys) {
+    $tyyppi = 0;
+  }
+
+  if ($_selite) {
+    $sel = $trow[$i] == 'tunnus' ? 'selected' : '';
+
+    $ulos = "<td>";
+    $ulos .= "<select name='{$nimi}'>";
+    $ulos .= "<option value='viesti'>" . t('Tilausviite') . "</option>";
+    $ulos .= "<option value='tunnus' {$sel}>" . t('Tilausnumero') . "</option>";
+    $ulos .= "</select>";
+    $ulos .= "</td>";
+
+    $jatko = 0;
+  }
 }

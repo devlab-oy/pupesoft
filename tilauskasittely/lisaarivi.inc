@@ -2304,34 +2304,10 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
                   }
                   else {
                     $valmistetyyppi = "W";
-                    
-                    if ($laskurow["tila"] == 'V' and $laskurow['clearing'] != $laskurow['varasto'] and $laskurow['varasto'] != 0) {
-
-                      //Laitetaan tuote oletusvaraston tuotepaikalle
-                      $tuotteen_oletuskohde = hae_tuotteen_tuotepaikat($tuoteno, $laskurow['clearing']);
-
-                        //Jos tuotteella ei ole tuotepaikkaa kohdevarastossa, luodaan se
-                        if (empty($tuotteen_oletuskohde)) {
-                          $tuotteen_oletuskohde[0] = lisaa_tuotepaikka($tuoteno, "", "", "", $kohde_taso, "", "", "", "", $laskurow['clearing']);
-                        }
-
-                      // otetaan eka löytynyt tuotepaikka kohdetuotepaikaksi
-                      $olkohde_alue   = $tuotteen_oletuskohde[0]['hyllyalue'];
-                      $olkohde_nro    = $tuotteen_oletuskohde[0]['hyllynro'];
-                      $olkohde_vali   = $tuotteen_oletuskohde[0]['hyllyvali'];
-                      $olkohde_taso   = $tuotteen_oletuskohde[0]['hyllytaso'];
-                    }
                   }
 
                   //jos on valmistusprosessi kyseessä niin isän tyyppi vaihdetaan W:ksi koska sen ei pidä varata saldoa!
-                  $query = "UPDATE tilausrivi SET 
-                              perheid       = '$perheid_lisaarivi', 
-                              tyyppi        = '$valmistetyyppi',
-                              hyllyalue     = '$olkohde_alue',
-                              hyllynro      = '$olkohde_nro',
-                              hyllytaso     = '$olkohde_vali',
-                              hyllyvali     = '$olkohde_taso'
-                              where yhtio='$kukarow[yhtio]' and tunnus=$perheid_lisaarivi and tyyppi='V'";
+                  $query = "UPDATE tilausrivi SET perheid='$perheid_lisaarivi', tyyppi='$valmistetyyppi' where yhtio='$kukarow[yhtio]' and tunnus=$perheid_lisaarivi and tyyppi='V'";
                   $result = pupe_query($query);
 
                   $query = "UPDATE tilausrivi SET perheid='$perheid_lisaarivi' where yhtio='$kukarow[yhtio]' and tunnus=$lisatty_tun";

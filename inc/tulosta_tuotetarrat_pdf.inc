@@ -28,7 +28,7 @@ else {
 // A4 pointteina 595x842
 if ($malli == 'PDFBRO') {
   $x = 1;
-  $riville = 30;
+  $riville = 3;
   $leveys = 500;
   $kappalemaara = 10;
   $mm_pt = 300;

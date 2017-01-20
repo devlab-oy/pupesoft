@@ -16,7 +16,7 @@ $norm["font"] = "Helvetica";
 // tehdään pdf:n uusi sivu
 if ($malli == 'PDFBRO') {
   $firstpage = $pdf ->new_page('6.2x2.9cm');
-  $norm["height"] = 8;
+  $norm["height"] = 12;
 }
 elseif ($malli != 'PDF') {
   $firstpage = $pdf->new_page("a4");

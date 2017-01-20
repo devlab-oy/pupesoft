@@ -344,7 +344,7 @@ if ($tee == 'GO') {
 
     $path_parts = pathinfo($kuva);
     $ext = $path_parts['extension'];
-    $jarjestys = 0;
+    $jarjestys = 1;
 
     // pit‰‰ kattoo onko nimess‰ h‰shsi‰, otetaan j‰rjestys vikan hashin j‰lkene
     if (strpos($kuva, "#") !== false) {
@@ -617,7 +617,7 @@ if ($tee == 'DUMPPAA') {
     if (!empty($row["tuoteno"])) {
       $path_parts = pathinfo($row['filename']);
       $ext = $path_parts['extension'];
-      $kokonimi = "{$kokohak}/{$row["tuoteno"]}#1.{$ext}";
+      $kokonimi = "{$kokohak}/{$row["tuoteno"]}.{$ext}";
       $kala = 1;
 
       while (file_exists($kokonimi)) {

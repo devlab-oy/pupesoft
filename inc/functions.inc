@@ -34333,3 +34333,186 @@ if (!function_exists("laske_korko")) {
     return $korkorivit;
   }
 }
+
+if (!function_exists("tilauksen_seurantalinkit")) {
+  function tilauksen_seurantalinkit(Array $lasku_ids) {
+    global $kukarow, $yhtiorow;
+    global $unifaun_url_key, $dpdtun, $dpdss;
+
+    // kaikki arrayn elementit tulee olla numeerisia
+    $tunnukset = array_filter($lasku_ids, 'is_numeric');
+
+    if (count($tunnukset) < 1) {
+      return array();
+    }
+
+    // funktio palauttaa vastaukseksi array of arrays
+    $seurantakoodit = array(
+      // array(
+      //   'id'   => rahtikirjan numero,
+      //   'link' => linkki rahtikirjan seurantaan,
+      // ),
+    );
+
+    $tunnukset = implode(',', $tunnukset);
+
+    // haetaan tilauksien rahtikirjat
+    $query = "SELECT
+              lasku.toimitustapa,
+              lasku.tunnus as tilausnumero,
+              rahtikirjat.rahtikirjanro,
+              rahtikirjat.sscc_ulkoinen,
+              toimitustapa.rahtikirja,
+              toimitustapa.virallinen_selite,
+              sum(rahtikirjat.kollit) as kollit
+              FROM rahtikirjat
+              JOIN lasku on (lasku.tunnus = rahtikirjat.otsikkonro)
+              JOIN toimitustapa on (toimitustapa.yhtio = rahtikirjat.yhtio
+                AND toimitustapa.selite = lasku.toimitustapa)
+              WHERE rahtikirjat.yhtio = '{$kukarow['yhtio']}'
+              AND rahtikirjat.otsikkonro IN ({$tunnukset})
+              GROUP BY 1,2,3,4,5,6";
+    $result = pupe_query($query);
+
+    while ($row = mysql_fetch_assoc($result)) {
+      $kieli             = strtolower($kukarow['kieli']);
+      $kollit            = $row['kollit'];
+      $rahtikirja        = strtolower($row['rahtikirja']);
+      $rahtikirjanro     = empty($row['sscc_ulkoinen']) ? $row['rahtikirjanro'] : $row['sscc_ulkoinen'];
+      $tilausnumero      = $row['tilausnumero'];
+      $toimitustapa      = strtolower($row['toimitustapa']);
+      $virallinen_selite = strtolower($row['virallinen_selite']);
+
+      // ei rahtikirjanumeroa, ei tehd‰ mit‰‰n
+      if (empty($rahtikirjanro)) {
+        continue;
+      }
+
+      // selvitet‰‰n rahtikirjan tyyppi
+      $delisprint = (!empty($dpdtun) and empty($dpdss) and ($rahtikirja == 'rahtikirja_dpd_siirto.inc' or $rahtikirja == 'rahtikirja_dpd.inc'));
+      $dpd        = (stripos($virallinen_selite, "dpd") !== false);
+      $posti      = (stripos($rahtikirjanro, 'jjfi') !== false);
+      $postnord   = (preg_match("/(mypack|postnord)/i", $toimitustapa) === 1);
+      $schenker   = (stripos($virallinen_selite, "klgrp") !== false);
+      $unifaun    = (stripos($rahtikirja, "unifaun") !== false and !empty($unifaun_url_key));
+      $ups        = (stripos($rahtikirjanro, 'ups') !== false);
+
+      // dpd unifaunin kautta
+      if ($dpd and $unifaun) {
+        foreach (explode("\n", $rahtikirjanro) as $rakirno) {
+          if (empty($rakirno)) {
+            continue;
+          }
+
+          if ($kukarow["extranet"] == "" and $dpdtun != '' and $dpdss != '') {
+            $link = "https://{$dpdtun}:{$dpdss}@extranet.dpd.de/cgi-bin/delistrack?typ=2&lang={$kieli}&pknr={$rakirno}";
+          }
+          else {
+            $link = "https://extranet.dpd.de/cgi-bin/delistrack?typ=2&lang={$kieli}&pknr={$rakirno}";
+          }
+
+          $seurantakoodit[] = array(
+            "id" => $rakirno,
+            "link" => $link,
+          );
+        }
+      }
+      // posti
+      elseif ($posti) {
+        preg_match_all("/JJFI ?[0-9]{6} ?[0-9]{11}/", $rahtikirjanro, $match);
+
+        foreach ($match[0] as $nro) {
+          $nro = str_replace(' ', '', $nro);
+          $seurantakoodit[] = array(
+            "id" => $nro,
+            "link" => "http://www.posti.fi/henkiloasiakkaat/seuranta/#/lahetys/{$nro}",
+          );
+        }
+      }
+      // postnord
+      elseif ($postnord) {
+        foreach (explode(' ', $rahtikirjanro) as $nro) {
+          $seurantakoodit[] = array(
+            "id" => $nro,
+            "link" => "http://www.postnord.fi/asiakaspalvelu/sahkoinen-asiointi/lahetysten-seuranta#dynamicloading=true&shipmentid={$nro}",
+          );
+        }
+      }
+      // UPS
+      elseif ($ups) {
+        preg_match_all("/UPS:([0-9A-Z]+)/", $rahtikirjanro, $match);
+
+        foreach ($match[1] as $nro) {
+          $seurantakoodit[] = array(
+            "id" => $nro,
+            "link" => "http://wwwapps.ups.com/etracking/tracking.cgi?InquiryNumber1={$nro}&TypeOfInquiryNumber=T&AcceptUPSLicenseAgreement=yes&submit=Trac&loc={$kieli}_{$kieli}",
+          );
+        }
+      }
+      // delisprint
+      elseif ($delisprint) {
+        for ($dpdi = 1; $dpdi < $kollit + 1; $dpdi++) {
+          $sscc = 1;
+          $sscc .= sprintf("%08.8s", $yhtiorow["ytunnus"]);
+          $sscc .= sprintf('%06.6s', substr($rahtikirjanro, -6));
+          $sscc .= sprintf('%02.2s', $dpdi);
+          $sscc .= sscc_tarkiste($sscc);
+
+          $seurantakoodit[] = array(
+            "id" => $sscc,
+            "link" => "http://{$dpdtun}:{$dpdss}@tracking.dpd.de/cgi-bin/delistrack.acl?typ=4&pknr={$sscc}",
+          );
+        }
+      }
+      // schenker kotimaankuljetukset
+      elseif ($schenker) {
+        foreach (explode("\n", $rahtikirjanro) as $nro) {
+          $seurantakoodit[] = array(
+            "id" => $nro,
+            "link" => "https://was.schenker.nu/ctts-a/com.dcs.servicebroker.http.HttpXSLTServlet?request.service=CTTSTYPEA&request.method=search&clientid=&language={$kieli}&country=FI&reference_type=*PKG&reference_number={$nro}"
+          );
+        }
+      }
+      // unifaun ja mittoihin perustuvat ker‰yser‰t ei ole k‰ytˆss‰
+      elseif ($unifaun and $yhtiorow['kerayserat'] != 'K') {
+        foreach (explode("\n", $rahtikirjanro) as $rakirno) {
+          if (empty($rakirno)) {
+            continue;
+          }
+
+          $seurantakoodit[] = array(
+            "id" => $rakirno,
+            "link" => "https://www.unifaunonline.com/ext.uo.fi.track?key={$unifaun_url_key}&order={$tilausnumero}",
+          );
+        }
+      }
+      // meill‰ ei ole t‰lle rahtikirjalle seurantalinkki‰
+      else {
+        $seurantakoodit[] = array(
+          "id" => $rahtikirjanro,
+          "link" => "",
+        );
+      }
+    }
+
+    // palautetaan seurantakoodit
+    return $seurantakoodit;
+  }
+}
+
+if (!function_exists('sscc_tarkiste')) {
+  function sscc_tarkiste($sscc) {
+    $kerroin = 3; // kerroin aluks 3
+    $summa   = 0; // summa nolla tietty
+
+    // loopataan luvut oikeelta vasemmalle
+    for ($i = 16; $i >= 0; $i--) {
+      $summa += $kerroin * (ord($sscc{$i})-48); // lis‰t‰‰n summaan ko. luku * kerroin (t‰‰ hanskaa kirjaimet )
+      $kerroin = 4 - $kerroin; // kerroin on vuorotellen 3 tai 1
+    }
+
+    $sscc = ceil($summa / 10) * 10 - $summa; // tarkiste on luku mik‰ pit‰‰ lis‰t‰, ett‰ p‰‰st‰‰n seuraavaan tasakymmeneen
+
+    return $sscc;
+  }
+}

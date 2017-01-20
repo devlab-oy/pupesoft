@@ -346,11 +346,12 @@ if ($tee == 'GO') {
     $ext = $path_parts['extension'];
     $jarjestys = 0;
 
-    // pit‰‰ kattoo onko nimess‰ h‰shsi‰
-    if (strpos($kuva, "#") !== FALSE) {
-      list($kuva, $jarjestys) = explode("#", $kuva);
+    // pit‰‰ kattoo onko nimess‰ h‰shsi‰, otetaan j‰rjestys vikan hashin j‰lkene
+    if (strpos($kuva, "#") !== false) {
+      $kuva = explode("#", $kuva);
+      $jarjestys = array_pop($kuva);
       $jarjestys = str_replace(".{$ext}", "", $jarjestys);
-      $kuva = "$kuva.$ext";
+      $kuva = implode('#', $kuva).".$ext";
     }
 
     // katotaan josko nimess‰ olisi alaviiva, katkaistaan siit‰
@@ -602,7 +603,7 @@ if ($tee == 'DUMPPAA') {
       continue;
     }
 
-    $kokohak = $dirri."/".$row["liitos"]."/".$toiminto;
+    $kokohak = "{$dirri}/{$row["liitos"]}/{$toiminto}";
 
     if (!is_writable($kokohak)) {
       echo "<font class='error'>";
@@ -612,32 +613,27 @@ if ($tee == 'DUMPPAA') {
       continue;
     }
 
-    $path_parts = pathinfo($row['filename']);
-    $ext = $path_parts['extension'];
-    $kokonimi = $kokohak."/".$row["tuoteno"].".".$ext;
-    $kala = 1;
+    // jos meill‰ on tuote
+    if (!empty($row["tuoteno"])) {
+      $path_parts = pathinfo($row['filename']);
+      $ext = $path_parts['extension'];
+      $kokonimi = "{$kokohak}/{$row["tuoteno"]}#1.{$ext}";
+      $kala = 1;
 
-    while (file_exists($kokonimi)) {
-      $kala++;
-      $kokonimi = $kokohak."/".$row["tuoteno"]."#".$kala.".".$ext;
-    }
+      while (file_exists($kokonimi)) {
+        $kala++;
+        $kokonimi = "{$kokohak}/{$row["tuoteno"]}#{$kala}.{$ext}";
+      }
 
-    if (!file_exists($kokonimi) and isset($row["tuoteno"]) and $row["tuoteno"] != '') {
-
-      $handle = fopen("$kokonimi", "x");
-
-      if ($handle === FALSE) {
+      if (file_put_contents($kokonimi, $row["data"]) !== false) {
+        $dumpattuja++;
+      }
+      else {
         echo "<font class='error'>";
         echo t("Tiedoston %s kirjoitus ep‰onnistui!", "", $kokonimi);
         echo "</font>";
         echo "<br>";
       }
-      else {
-        file_put_contents($kokonimi, $row["data"]);
-        fclose($handle);
-      }
-
-      $dumpattuja++;
     }
 
     if (isset($dumppaajapoista) and $dumppaajapoista == '1') {

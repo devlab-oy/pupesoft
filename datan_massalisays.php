@@ -344,13 +344,14 @@ if ($tee == 'GO') {
 
     $path_parts = pathinfo($kuva);
     $ext = $path_parts['extension'];
-    $jarjestys = 0;
+    $jarjestys = 1;
 
-    // pit‰‰ kattoo onko nimess‰ h‰shsi‰
-    if (strpos($kuva, "#") !== FALSE) {
-      list($kuva, $jarjestys) = explode("#", $kuva);
+    // pit‰‰ kattoo onko nimess‰ h‰shsi‰, otetaan j‰rjestys vikan hashin j‰lkene
+    if (strpos($kuva, "#") !== false) {
+      $kuva = explode("#", $kuva);
+      $jarjestys = array_pop($kuva);
       $jarjestys = str_replace(".{$ext}", "", $jarjestys);
-      $kuva = "$kuva.$ext";
+      $kuva = implode('#', $kuva).".$ext";
     }
 
     // katotaan josko nimess‰ olisi alaviiva, katkaistaan siit‰
@@ -559,21 +560,17 @@ if ($tee == 'GO') {
   echo "<br>";
 }
 
-if ($tee == 'DUMPPAA' and $mitkadumpataan != '') {
+if ($tee == 'DUMPPAA') {
 
-  if (!is_writable($dirri."/".$mitkadumpataan)) {
-    die(t("Kuvapankkiin/%s ei ole m‰‰ritelty kirjoitusoikeutta. Ei voida jatkaa!", "", $mitkadumpataan)."<br>");
+  if (!is_writable($dirri."/tuote")) {
+    die(t("Kuvapankkiin/%s ei ole m‰‰ritelty kirjoitusoikeutta. Ei voida jatkaa!", "", 'tuote')."<br>");
   }
 
-  if (strtolower($mitkadumpataan) != 'tuote') {
-    echo "<font class='message'>".t("Toistaiseksi voidaan vaan dumpata tuotekuvia!")."</font>";
-    exit;
-  }
-
-  $query = "SELECT *
+  $query = "SELECT liitetiedostot.*, tuote.tuoteno
             FROM liitetiedostot
-            WHERE yhtio = '{$kukarow['yhtio']}'
-            and liitos  = '{$mitkadumpataan}'";
+            LEFT JOIN tuote ON tuote.yhtio = liitetiedostot.yhtio and tuote.tunnus = liitetiedostot.liitostunnus
+            WHERE liitetiedostot.yhtio = '{$kukarow['yhtio']}'
+            and liitetiedostot.liitos  = 'tuote'";
   $result = pupe_query($query);
 
   $dumpattuja = 0;
@@ -606,9 +603,9 @@ if ($tee == 'DUMPPAA' and $mitkadumpataan != '') {
       continue;
     }
 
-    $kokonimi = $dirri."/".$row["liitos"]."/".$toiminto;
+    $kokohak = "{$dirri}/{$row["liitos"]}/{$toiminto}";
 
-    if (!is_writable($kokonimi)) {
+    if (!is_writable($kokohak)) {
       echo "<font class='error'>";
       echo t("Hakemistolle %s ei ole m‰‰ritelty kirjoitusoikeutta. Ei voida tallentaa kuvaa!", "", $kokonimi);
       echo "</font>";
@@ -616,30 +613,33 @@ if ($tee == 'DUMPPAA' and $mitkadumpataan != '') {
       continue;
     }
 
-    $kokonimi .= "/".$row["filename"];
+    // jos meill‰ on tuote
+    if (!empty($row["tuoteno"])) {
+      $path_parts = pathinfo($row['filename']);
+      $ext = $path_parts['extension'];
+      $kokonimi = "{$kokohak}/{$row["tuoteno"]}.{$ext}";
+      $kala = 1;
 
-    if (!file_exists($kokonimi)) {
+      while (file_exists($kokonimi)) {
+        $kala++;
+        $kokonimi = "{$kokohak}/{$row["tuoteno"]}#{$kala}.{$ext}";
+      }
 
-      $handle = fopen("$kokonimi", "x");
-
-      if ($handle === FALSE) {
+      if (file_put_contents($kokonimi, $row["data"]) !== false) {
+        $dumpattuja++;
+      }
+      else {
         echo "<font class='error'>";
         echo t("Tiedoston %s kirjoitus ep‰onnistui!", "", $kokonimi);
         echo "</font>";
         echo "<br>";
       }
-      else {
-        file_put_contents($kokonimi, $row["data"]);
-        fclose($handle);
-      }
-
-      $dumpattuja++;
     }
 
     if (isset($dumppaajapoista) and $dumppaajapoista == '1') {
       $query = "DELETE FROM liitetiedostot
                 WHERE yhtio = '{$kukarow['yhtio']}'
-                AND liitos = '{$mitkadumpataan}'
+                AND liitos = 'tuote'
                 AND tunnus = '{$row['tunnus']}'";
       $delresult = pupe_query($query);
       $dellattuja++;
@@ -748,7 +748,6 @@ if ($lukuthumbit + $lukunormit + $lukupainot + $lukumuut + $lukutconvertit == 0)
 
   echo "<form name='dumppi' method='post'>";
   echo "<input type='hidden' name='tee' value='DUMPPAA'>";
-  echo "<input type='hidden' name='mitkadumpataan' value='tuote'>";
 
   echo "<table>";
   echo "<tr><th colspan='2'>".t("Vie kuvat takaisin kuvapankkiin")."</th></tr>";

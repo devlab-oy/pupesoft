@@ -10925,7 +10925,7 @@ if ($tee == '') {
           </form> ";
     }
 
-    if (($muokkauslukko == "" or $myyntikielto != '') and ($toim != "PROJEKTI" or ($toim == "PROJEKTI" and $projektilask == 0)) and $kukarow["mitatoi_tilauksia"] == "" and $row["laskutettuaika"] == "0000-00-00") {
+    if (($muokkauslukko == "" or $myyntikielto != '') and ($toim != "PROJEKTI" or ($toim == "PROJEKTI" and $projektilask == 0)) and $kukarow["mitatoi_tilauksia"] == "" and ($row["laskutettuaika"] == "0000-00-00" or !isset($row["laskutettuaika"]))) {
       echo "<SCRIPT LANGUAGE=JAVASCRIPT>
             function verify(){
               msg = '".t("Haluatko todella poistaa tämän tietueen?")."';

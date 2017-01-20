@@ -559,22 +559,17 @@ if ($tee == 'GO') {
   echo "<br>";
 }
 
-if ($tee == 'DUMPPAA' and $mitkadumpataan != '') {
+if ($tee == 'DUMPPAA') {
 
-  if (!is_writable($dirri."/".$mitkadumpataan)) {
-    die(t("Kuvapankkiin/%s ei ole m‰‰ritelty kirjoitusoikeutta. Ei voida jatkaa!", "", $mitkadumpataan)."<br>");
-  }
-
-  if (strtolower($mitkadumpataan) != 'tuote') {
-    echo "<font class='message'>".t("Toistaiseksi voidaan vaan dumpata tuotekuvia!")."</font>";
-    exit;
+  if (!is_writable($dirri."/tuote")) {
+    die(t("Kuvapankkiin/%s ei ole m‰‰ritelty kirjoitusoikeutta. Ei voida jatkaa!", "", 'tuote')."<br>");
   }
 
   $query = "SELECT liitetiedostot.*, tuote.tuoteno
             FROM liitetiedostot
             LEFT JOIN tuote ON tuote.yhtio = liitetiedostot.yhtio and tuote.tunnus = liitetiedostot.liitostunnus
             WHERE liitetiedostot.yhtio = '{$kukarow['yhtio']}'
-            and liitetiedostot.liitos  = '{$mitkadumpataan}'";
+            and liitetiedostot.liitos  = 'tuote'";
   $result = pupe_query($query);
 
   $dumpattuja = 0;
@@ -624,8 +619,8 @@ if ($tee == 'DUMPPAA' and $mitkadumpataan != '') {
 
     while (file_exists($kokonimi)) {
       $kala++;
-      $kokonimi = $kokohak."/".$row["tuoteno"]."#".$kala.".".$ext;             
-    }  
+      $kokonimi = $kokohak."/".$row["tuoteno"]."#".$kala.".".$ext;
+    }
 
     if (!file_exists($kokonimi) and isset($row["tuoteno"]) and $row["tuoteno"] != '') {
 
@@ -648,7 +643,7 @@ if ($tee == 'DUMPPAA' and $mitkadumpataan != '') {
     if (isset($dumppaajapoista) and $dumppaajapoista == '1') {
       $query = "DELETE FROM liitetiedostot
                 WHERE yhtio = '{$kukarow['yhtio']}'
-                AND liitos = '{$mitkadumpataan}'
+                AND liitos = 'tuote'
                 AND tunnus = '{$row['tunnus']}'";
       $delresult = pupe_query($query);
       $dellattuja++;
@@ -757,7 +752,6 @@ if ($lukuthumbit + $lukunormit + $lukupainot + $lukumuut + $lukutconvertit == 0)
 
   echo "<form name='dumppi' method='post'>";
   echo "<input type='hidden' name='tee' value='DUMPPAA'>";
-  echo "<input type='hidden' name='mitkadumpataan' value='tuote'>";
 
   echo "<table>";
   echo "<tr><th colspan='2'>".t("Vie kuvat takaisin kuvapankkiin")."</th></tr>";

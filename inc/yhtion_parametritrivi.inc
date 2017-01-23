@@ -2208,6 +2208,21 @@ if ($fieldname == "vienti_erittelyn_tulostus") {
   $jatko = 0;
 }
 
+if ($fieldname == "vientierittelyn_painot") {
+  $value = $trow[$i];
+  $sel_values = array('' => '', 'T' => '');
+  $sel = array($value => 'selected') + $sel_values;
+
+  $ulos  = "<td>";
+  $ulos .= "<select name = '$nimi'>";
+  $ulos .= "<option value = ''>".t("Vientierittelyn painot lasketaan rahtikirjan painosta")."</option>";
+  $ulos .= "<option value = 'T' {$sel['T']}>".t("Vientierittelyn painot lasketaan tuotteiden painoista")."</option>";
+  $ulos .= "</select>";
+  $ulos .= "</td>";
+
+  $jatko = 0;
+}
+
 if ($fieldname == "oletus_lahetekpl") {
 
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";

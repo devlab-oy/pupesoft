@@ -93,29 +93,17 @@ if ($_kuittaus_tekematta and $_magento_kaytossa and $magento_api_ord > 0) {
 
     $magLinkurl = "Tracking number: ";
 
-    if (stripos($magento_api_rak, "JJFI") !== false) {
-      preg_match_all("/JJFI ?[0-9]{6} ?[0-9]{11}/", $magento_api_rak, $match);
+    $linkit = tilauksen_seurantalinkit($magento_api_laskutunnus);
 
-      foreach ($match[0] as $nro) {
-        $nro = str_replace(" ", "", $nro);
-        $magLinkurl .= "<a target=newikkuna href='http://www.posti.fi/henkiloasiakkaat/seuranta/#/lahetys/{$nro}'>{$nro}</a><br>";
-      }
+    foreach ($linkit as $seurantalinkki) {
+      $rakirno = $seurantalinkki['id'];
+      $link    = $seurantalinkki['link'];
 
-      $magLinkurl = substr($magLinkurl, 0, -4); // vika br pois
-    }
-    elseif (preg_match("/(mypack|postnord)/i", $magento_api_met)) {
-      $magLinkurl .= "<a target=newikkuna href='http://www.postnord.fi/asiakaspalvelu/sahkoinen-asiointi/lahetysten-seuranta#dynamicloading=true&shipmentid={$magento_api_rak}'>{$magento_api_rak}</a><br>";
-    }
-    else {
-
-      // Jos Unifaun Track & Trace sekä XML Posting, laitetaan seurantaosoite
-      $unifaun_xmlposting = ($unifaun_xp_developerid != "" and $unifaun_xp_user != "" and $unifaun_xp_pin != "");
-
-      if (!empty($unifaun_url_key) and $unifaun_xmlposting) {
-        $magLinkurl .= "https://www.unifaunonline.com/ext.uo.fi.track?key={$unifaun_url_key}&order={$magento_api_rak}<br>";
+      if (empty($link)) {
+        $magLinkurl .= "$magento_api_met / $rakirno<br>";
       }
       else {
-        $magLinkurl .= "$magento_api_met / $magento_api_rak<br>";
+        $magLinkurl .= "<a target=newikkuna href='{$link}'>{$rakirno}</a><br>";
       }
     }
 

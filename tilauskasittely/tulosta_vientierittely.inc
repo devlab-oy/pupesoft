@@ -20,35 +20,32 @@ $Xkala = 540;
 $Xlask = 1;
 $Xsivu = 1;
 
-
-//hetaan kaikki otunnukset jotka löytyvät tän uusiotunnuksen alta
-$Xquery = "SELECT distinct otunnus
+// hetaan kaikki otunnukset, jotka löytyvät tän uusiotunnuksen alta
+$Xquery = "SELECT group_concat(distinct tilausrivi.otunnus) as tilausnumerot
            FROM tilausrivi
-           WHERE tilausrivi.uusiotunnus = '$uusiotunnus'
-           and tilausrivi.yhtio         = '$kukarow[yhtio]'";
+           WHERE tilausrivi.uusiotunnus = '{$uusiotunnus}'
+           AND tilausrivi.yhtio = '{$kukarow['yhtio']}'";
 $Xuresult = pupe_query($Xquery);
-
-$Xtunnukset2 = '';
-while ($Xurow = mysql_fetch_array($Xuresult)) {
-  $Xtunnukset2  .= "'".$Xurow['otunnus']."',";
-}
-
-$Xtunnukset2 = substr($Xtunnukset2, 0, -1);
+$Xurow = mysql_fetch_array($Xuresult);
+$Xtunnukset2 = $Xurow['tilausnumerot'];
 
 // varmistetaan vielä, että löyty tilauksia
 if ($Xtunnukset2 != "") {
+  $Xkilot = 0;
 
-  $Xkilot  = 0;
+  // Jos vientierittelyn painot perustuu rahtikikirjan painoihin
+  if ($yhtiorow['vientierittelyn_painot'] == '') {
+    // haetaan kollimäärä ja bruttopaino
+    $Xquery = "SELECT sum(kilot) as kilot
+               FROM rahtikirjat
+               WHERE otsikkonro in ({$Xtunnukset2})
+               AND yhtio = '{$kukarow['yhtio']}'";
+    $Xrahtiresult = pupe_query($Xquery);
+    $Xrahtirow = mysql_fetch_array($Xrahtiresult);
 
-  //haetaan kollimäärä ja bruttopaino
-  $Xquery = "SELECT sum(kilot) kilot
-             FROM rahtikirjat
-             WHERE otsikkonro in ($Xtunnukset2) and yhtio='$kukarow[yhtio]'";
-  $Xrahtiresult = pupe_query($Xquery);
-  $Xrahtirow = mysql_fetch_array($Xrahtiresult);
-
-  if ($Xrahtirow["kilot"] > 0) {
-    $Xkilot = $Xrahtirow["kilot"];
+    if ($Xrahtirow["kilot"] > 0) {
+      $Xkilot = $Xrahtirow["kilot"];
+    }
   }
 
   $group = 'tuote.tuoteno,
@@ -88,7 +85,8 @@ if ($Xtunnukset2 != "") {
              {$select}
              sum(round(tilausrivi.rivihinta / if ($laskurow[vienti_kurssi] > 0, $laskurow[vienti_kurssi], 1),2)) summa,
              sum(tilausrivi.kpl) kpl,
-             round(sum((tilausrivi.rivihinta/$laskurow[summa])*$Xkilot),0) paino
+             round(sum((tilausrivi.rivihinta / $laskurow[summa]) * $Xkilot), 0) as rahtikirja_paino,
+             round(sum(tilausrivi.kpl * tuote.tuotemassa), 0) as tuote_paino
              FROM tilausrivi
              JOIN tuote ON tuote.yhtio=tilausrivi.yhtio
                and tuote.tuoteno=tilausrivi.tuoteno
@@ -246,7 +244,15 @@ if ($Xtunnukset2 != "") {
       $oikpos = $Xpdf->strlen($Xrow["summa"], $Xnorm);
       $Xpdf->draw_text(450-$oikpos, $Xkala, $Xrow["summa"],   $Xfirstpage, $Xnorm);
 
-      $Xpdf->draw_text(470, $Xkala, $Xrow["paino"],      $Xfirstpage, $Xnorm);
+      // Vientierittelyn painot tuotteelta
+      if ($yhtiorow['vientierittelyn_painot'] == 'T') {
+        $_paino = $Xrow["tuote_paino"];
+      }
+      else {
+        $_paino = $Xrow["rahtikirja_paino"];
+      }
+
+      $Xpdf->draw_text(470, $Xkala, $_paino, $Xfirstpage, $Xnorm);
 
       if ($yhtiorow["vienti_erittelyn_tulostus"] != "I") {
         $Xpdf->draw_text(520, $Xkala, $Xrow["alkuperamaa"],  $Xfirstpage, $Xnorm);

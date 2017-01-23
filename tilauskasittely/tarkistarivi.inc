@@ -1114,7 +1114,7 @@ elseif (
 }
 
 // tarkastetaan onko tätä tuotetta varattuna siirtolistalla tai ostotilauksella
-if ($kukarow["extranet"] == "" and $trow["ei_saldoa"] == "" and $row["tyyppi"] != "E" and $kpl_st > 0 and in_array($row["var"], array("J", "U", "T", "P", "R"))) {
+if ($kukarow["extranet"] == "" and $trow["ei_saldoa"] == "" and $row["tyyppi"] != "E" and $kpl_st > 0) {
   $query = "SELECT
             kohde.nimitys as kohde,
             lahde.nimitys as lahde,

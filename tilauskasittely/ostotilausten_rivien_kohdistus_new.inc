@@ -1,0 +1,1 @@
+../../mercantile/tilauskasittely/ostotilausten_rivien_kohdistus.inc

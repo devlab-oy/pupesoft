@@ -816,7 +816,7 @@ if ($upd == 1) {
         $query = "SELECT *
                   FROM lasku use index (yhtio_tila_liitostunnus_tapvm)
                   WHERE yhtio       = '$kukarow[yhtio]'
-                  and tila          IN ('H','M')
+                  and tila          IN ('H','M','P')
                   and liitostunnus  = '$otsikrow[tunnus]'
                   and tapvm        != '0000-00-00'";
         $laskuores = pupe_query($query);

@@ -383,6 +383,8 @@ if [[ ${bundle} = true ]]; then
   # Päivitetään bundler oikeaan versioon
   if [[ -n "${bundled_with}" && "${bundler_version}" != "${bundled_with}" ]]; then
     gem install bundler -v ${bundled_with}
+    gem cleanup bundler
+    rbenv rehash
   fi
 
   # Bundlataan Pupenext, kirjoitetaan CSS, käännetään ja putsatan assetsit
@@ -412,6 +414,9 @@ if [[ ${bundle} = true ]]; then
   BUNDLER_STATUS=$?
 
   if [[ ${BUNDLER_STATUS} -eq 0 ]]; then
+    # try loading rails app, head request only, wait 1 sec
+    curl -m 1 -I "https://$(hostname)/pupenext" &> /dev/null
+
     echo "${green}Pupenext päivitetty!${normal}"
   else
     echo "${red}Pupenext päivitys epäonnistui!${normal}"

@@ -6881,43 +6881,7 @@ if ($tee == '') {
       # tarkistetaan että tilauksella ei ole luottorajat ylittynyt ja
       # tilaus on tilassa "myyntitilaus odottaa jt-tuotteita"
       if (!$_luottoraja_ylivito and $laskurow['tila'] == 'N' and in_array($laskurow['alatila'], array('T','U'))) {
-        while ($row = mysql_fetch_assoc($result)) {
-          # tilausrivi on lukossa jos
-          # se on laskutettu
-          # tilausrivi ei kuulu kyseiseen tilaukseen
-          # tilaus on valmistus ja rivi on valmistettu / käytetty valmistukseen
-          if ($row["uusiotunnus"] > 0 or $laskurow["tunnus"] != $row["otunnus"] or ($laskurow["tila"] == "V" and $row["kpl"] != 0)) {
-            $muokkauslukko_rivi = "LUKOSSA";
-          }
-          else {
-            $muokkauslukko_rivi = "";
-          }
-
-          # tehdään loput tarkistukset riville jos
-          # tilauksen muokkauslukko tai rivin muokkauslukko ei ole päällä
-          if ($muokkauslukko == "" and $muokkauslukko_rivi == "") {
-            require 'tarkistarivi.inc';
-
-            $kpl_ruudulle = kpl_ruudulle($row, $laskurow, $asiakasrow);
-
-            // Jos JT-rivit varaa saldoa, niin ei anneta tän kyseisen rivin syödä omaa saldoaan.
-            if ($yhtiorow["varaako_jt_saldoa"] != "") {
-              $_jt_tm_lisavarattu = $kpl_ruudulle;
-            }
-            else {
-              $_jt_tm_lisavarattu = 0;
-            }
-
-            # laitetaan tilausrivin tunnus talteen "toimita kaikki"-nappia varten jos
-            # tilausrivi on jälkitoimitus
-            # tuote on saldoton
-            # käyttäjä ei ole extranet-käyttäjä
-            # tuotepaikan myytävissämäärä + "varaako jt-rivi saldoa" >= tilausrivin varattumäärä
-            if ($row["var"] == "J" and (($row["ei_saldoa"] != "" or ($selpaikkamyytavissa+$_jt_tm_lisavarattu) >= $kpl_ruudulle) and $kukarow['extranet'] == '')) {
-              $toimita_kaikki[] = $row['tunnus'];
-            }
-          }
-        }
+        $toimita_kaikki = toimita_kaikki_tarkistus($toimita_kaikki, $result, $laskurow, $asiakasrow, $muokkauslukko, $muokkauslukko_rivi);
 
         if (count($toimita_kaikki) > 0) {
           echo "<form method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php' name='toimita_kaikki'>";

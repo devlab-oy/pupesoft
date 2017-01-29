@@ -27128,8 +27128,7 @@ if (!function_exists('laskuta_magentojt')) {
 
     while ($laskurow = mysql_fetch_assoc($laskurow_result)) {
       // tarkistetaan että on käteismaksuehto
-      // haetaan 
-      //  jotta verkkokaupan tiliöinnit menee nätisti
+      // haetaan kassalipas jotta verkkokaupan tiliöinnit menee nätisti
       // ja laskutetaan tilaus
       $query = "SELECT *
                 FROM maksuehto

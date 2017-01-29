@@ -195,7 +195,7 @@ function tulosta_asiakkaan_kuitti($laskunro, $tulostimen_tunnus, $params = array
 
     if ($kateinen != 0) {
 
-      // maksupääte ei käytössä, katsotaan tarkat maksutavat tiliöinneistä
+      // maksupääteintegraatio ei käytössä, katsotaan tarkat maksutavat tiliöinneistä
       if ($maksupaatesumma == 0) {
 
           $maksutavat_ja_summat = hae_maksutavat_ja_summat($lasku);

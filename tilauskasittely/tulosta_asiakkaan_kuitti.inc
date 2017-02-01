@@ -462,7 +462,9 @@ function hae_myyntilasku($laskunro) {
 function hae_maksutavat_ja_summat($lasku) {
   global $kukarow;
 
-  if (empty($lasku['kassalipas'])) return "";
+  if (empty($lasku['kassalipas'])) {
+    return array(0,0,0);
+  }
 
   $query = "SELECT kassa, luottokortti, pankkikortti
             FROM kassalipas
@@ -499,8 +501,6 @@ function hae_maksutavat_ja_summat($lasku) {
             AND korjattu = ''";
   $result = pupe_query($query);
   $pankkikortti_row = mysql_fetch_assoc($result);
-
-  echo "kala";
 
   return array($kateis_row['summa'], $luottokortti_row['summa'], $pankkikortti_row['summa']);
 }

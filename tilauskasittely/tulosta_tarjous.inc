@@ -1047,7 +1047,7 @@ if (!function_exists('tarjous_rivi_hinta_ale')) {
                 JOIN liitetiedostot ON (liitetiedostot.yhtio = tuote.yhtio
                   AND liitetiedostot.liitostunnus    = tuote.tunnus
                   AND liitetiedostot.liitos          = 'tuote'
-                  AND liitetiedostot.kayttotarkoitus = 'TK')
+                  AND liitetiedostot.kayttotarkoitus = 'TH')
                 WHERE tuote.yhtio                    = '{$kukarow['yhtio']}'
                 AND tuote.tuoteno                    = '{$row['tuoteno']}'";
       $kuva_res = pupe_query($query);
@@ -2143,7 +2143,7 @@ if (!function_exists('tulosta_tarjous')) {
       list($kala, $devnull_1, $devnull_2) = rivi_tarjous($pdf_tarjous, $laskurow, $kala, $kieli, $devnull, $row, $hinnat, $asiakasrow, $verolliset_verottomat_hinnat, $sivu, $naytetaanko_tuoteno);
 
       // Jos on paljon rivej‰ tehd‰‰n uusi otsikko...
-      if ($kala <= 80) {
+      if ($kala <= 85) {
         list($page_tarjous, $sivu) =
           loppu_tarjous($pdf_tarjous, $laskurow, $kieli, $page_tarjous, $sivu, 0,
           $verolliset_verottomat_hinnat, 0, 0, 0, $naytetaanko_rivihinta,

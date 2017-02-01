@@ -1033,6 +1033,23 @@ if ($fieldname == "rahtikirjojen_esisyotto") {
   $jatko = 0;
 }
 
+if ($fieldname == "saldottomat_rahtikirjansyottoon") {
+
+  $sel = $trow[$i] == 'K' ? 'selected' : '';
+
+  $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+  $ulos .= "<option value=''>".t("Rahtikirjansyötössä ei näytetä saldottomia tuotteita")."</option>";
+
+  $ulos .= "<option value='K' {$sel}>";
+  $ulos .= t("Rahtikirjansyötössä näytetään myös tilauksia jotka sisältävät vain saldottomia tuotteita");
+  $ulos .= "</option>";
+
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
 if ($fieldname == "rahtikirjan_kollit_ja_lajit") {
 
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
@@ -2187,6 +2204,21 @@ if ($fieldname == "vienti_erittelyn_tulostus") {
   $ulos .= "<option value='P' $sel5>".t("Vientierittely tulostetaan ilman alkuperämaatietoja tullinimikkeellä ryhmiteltynä")."</option>";
   $ulos .= "<option value='E' $sel3>".t("Vientierittelyä ei tulosteta")."</option>";
   $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
+if ($fieldname == "vientierittelyn_painot") {
+  $value = $trow[$i];
+  $sel_values = array('' => '', 'T' => '');
+  $sel = array($value => 'selected') + $sel_values;
+
+  $ulos  = "<td>";
+  $ulos .= "<select name = '$nimi'>";
+  $ulos .= "<option value = ''>".t("Vientierittelyn painot lasketaan rahtikirjan painosta")."</option>";
+  $ulos .= "<option value = 'T' {$sel['T']}>".t("Vientierittelyn painot lasketaan tuotteiden painoista")."</option>";
+  $ulos .= "</select>";
+  $ulos .= "</td>";
 
   $jatko = 0;
 }

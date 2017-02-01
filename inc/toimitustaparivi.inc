@@ -76,11 +76,12 @@ if (mysql_field_name($result, $i) == "virallinen_selite") {
   $ulos .= "<option value='PO2144_09' {$sel["PO2144_09"]} >Posti Express-rahti 09</option>";
   $ulos .= "<option value='PO2144_21' {$sel["PO2144_21"]} >Posti Express-rahti 21</option>";
   $ulos .= "<option value='PO2144_00' {$sel["PO2144_00"]} >Posti Express-rahti 00</option>";
+  $ulos .= "<option value='PO2711'    {$sel["PO2711"]}    >Posti Parcel Connect</option>";
   $ulos .= "<option value='ITKY14I'   {$sel["ITKY14I"]}   >Itella Express Business Day pallet (Ulkomaa)</option>";
   $ulos .= "<option value='IT14I'     {$sel["IT14I"]}     >Itella Express Business Day parcel (Ulkomaa)</option>";
   $ulos .= "<option value='ITPR'      {$sel["ITPR"]}      >Itella Priority Parcel</option>";
   $ulos .= "</optgroup>";
-  
+
   $ulos .= "<optgroup label='Unifaun / Posti kappaletavara'>";
   $ulos .= "<option value='TPSTD'     {$sel["TPSTD"]}     >Posti - Logistics Oy, Kappaletavara </option>";
   $ulos .= "</optgroup>";
@@ -135,7 +136,7 @@ if (mysql_field_name($result, $i) == "virallinen_selite") {
   $ulos .= "<optgroup label='Unifaun / DB SCHENKER kotimaankuljetukset'>";
   $ulos .= "<option value='KLGRP' {$sel["KLGRP"]}>DB SCHENKER kotimaankuljetukset</option>";
   $ulos .= "</optgroup>";
-  
+
   $ulos .= "<optgroup label='Unifaun / DB SCHENKER Parcel - kotimaan pakettikuljetukset'>";
   $ulos .= "<option value='SBTLFIEXP' {$sel["SBTLFIEXP"]}>DB SCHENKERparcel (Suomi)</option>";
   $ulos .= "</optgroup>";
@@ -254,6 +255,7 @@ if (mysql_field_name($result, $i) == "virallinen_selite") {
   $ulos .= "</optgroup>";
 
   $ulos .= "<optgroup label='Unifaun / PostNord'>";
+  $ulos .= "<option value='DOMROAD' {$sel["DOMROAD"]}>PostNord Domestic Road</option>";
   $ulos .= "<option value='DPDFI' {$sel["DPDFI"]}>PostNord DPD Classic (Suomi)</option>";
   $ulos .= "<option value='P15' {$sel["P15"]}>PostNord Logistics DPD Företagspaket</option>";
   $ulos .= "<option value='P14' {$sel["P14"]}>PostNord Logistics DPD Företagspaket 12.00</option>";

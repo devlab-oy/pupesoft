@@ -255,123 +255,33 @@ if ($laskurow["tila"] != "O" and $laskurow["tila"] != "K") {
   else $dpdss = "";
 
   if ($laskurow["tila"] == "U") {
-    $query = "SELECT group_concat(lasku.tunnus) tunnukset
+    $query = "SELECT lasku.tunnus
               FROM lasku
               WHERE yhtio  = '$kukarow[yhtio]'
               and tila     = 'L'
               and laskunro = '$laskurow[laskunro]'";
     $otres = pupe_query($query);
-    $otrow = mysql_fetch_assoc($otres);
+    $otsikkonrot = array();
 
-    $otsikkonrot = $otrow["tunnukset"];
+    while ($otrow = mysql_fetch_assoc($otres)) {
+      $otsikkonrot[] = $otrow["tunnus"];
+    }
   }
   else {
-    $otsikkonrot = $laskurow["tunnus"];
+    $otsikkonrot = array($laskurow["tunnus"]);
   }
 
-  if (!empty($otsikkonrot)) {
-    // haetaan eka rahtikirjat tietue, niin saadaan rahtikirjanumerot tietoon
-    $query = "SELECT rahtikirjat.rahtikirjanro, toimitustapa.virallinen_selite, toimitustapa.rahtikirja, rahtikirjat.sscc_ulkoinen,
-             sum(rahtikirjat.kollit) kollit
-              FROM rahtikirjat
-              JOIN toimitustapa ON (toimitustapa.yhtio=rahtikirjat.yhtio and rahtikirjat.toimitustapa=toimitustapa.selite)
-              WHERE rahtikirjat.yhtio    = '$kukarow[yhtio]'
-             AND rahtikirjat.otsikkonro in ($otsikkonrot)
-              GROUP BY 1";
-    $rakre = pupe_query($query);
+  $linkit = tilauksen_seurantalinkit($otsikkonrot);
 
-    while ($rakirrow = mysql_fetch_assoc($rakre)) {
-      // Unifaunilla on oma seuranta
-      if ($yhtiorow['kerayserat'] != 'K' and !empty($unifaun_url_key) and stripos($rakirrow["rahtikirja"], "unifaun") !== FALSE) {
-        foreach (explode("\n", $rakirrow['sscc_ulkoinen']) as $rakirno) {
-          if (empty($rakirno)) {
-            $rakirno = "Unifaun Track & Trace";
-          }
+  foreach ($linkit as $seurantalinkki) {
+    $rakirno = $seurantalinkki['id'];
+    $link    = $seurantalinkki['link'];
 
-          $linkurl .= "<a class='linkki' href='https://www.unifaunonline.com/ext.uo.fi.track?key={$unifaun_url_key}&order={$laskurow['tunnus']}' target='_blank'>{$rakirno}</a><br>";
-        }
-      }
-      elseif (stripos($rakirrow["virallinen_selite"], "dpd") !== FALSE and stripos($rakirrow["rahtikirja"], "unifaun") !== FALSE) {
-        foreach (explode("\n", $rakirrow['sscc_ulkoinen']) as $rakirno) {
-          if ($kukarow["extranet"] == "" and $dpdtun != '' and $dpdss != '') {
-            $linkurl .= "<a href='#' onclick=\"window.open('https://$dpdtun:$dpdss@extranet.dpd.de/cgi-bin/delistrack?typ=2&lang=".strtolower($kukarow["kieli"])."&pknr=$rakirno', '_blank' ,'toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,left=200,top=100,width=1000,height=800'); return false;\">{$rakirno}</a><br>";
-          }
-          else {
-            $linkurl .= "<a href='#' onclick=\"window.open('https://extranet.dpd.de/cgi-bin/delistrack?typ=2&lang=".strtolower($kukarow["kieli"])."&pknr=$rakirno', '_blank' ,'toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,left=200,top=100,width=1000,height=800'); return false;\">{$rakirno}</a><br>";
-          }
-        }
-      }
-      // postin rahtikirjat alkaa JJFI, ja tehd‰‰n niille linkki suoraan postin seurantaan
-      elseif (stripos($rakirrow['rahtikirjanro'], "JJFI") !== FALSE or stripos($rakirrow['sscc_ulkoinen'], "JJFI") !== FALSE) {
-        $linkurl = "";
-        preg_match_all("/JJFI ?[0-9]{6} ?[0-9]{11}/", $rakirrow['rahtikirjanro']." ".$rakirrow['sscc_ulkoinen'], $match);
-
-        foreach ($match[0] as $nro) {
-          $nro = str_replace(" ", "", $nro);
-          $linkurl .= "<a target=newikkuna href='http://www.posti.fi/henkiloasiakkaat/seuranta/#/lahetys/{$nro}'>{$nro}</a><br>";
-        }
-
-        $linkurl = substr($linkurl, 0, -4);
-      }
-      //luodaan ups seurantalinkki
-      elseif (stripos($rakirrow['rahtikirjanro'], 'UPS') !== FALSE) {
-        $linkurl = "";
-
-        preg_match_all("/UPS:([0-9A-Z]+)/", $rakirrow['rahtikirjanro'], $match);
-
-        foreach ($match[1] as $nro) {
-          $linkurl .= "<a target=newikkuna href='http://wwwapps.ups.com/etracking/tracking.cgi?InquiryNumber1={$nro}&TypeOfInquiryNumber=T&AcceptUPSLicenseAgreement=yes&submit=Trac&loc=".strtolower($kukarow["kieli"])."_".strtoupper($kukarow["kieli"])."'>{$nro}</a><br>";
-        }
-
-        $linkurl = substr($linkurl, 0, -4);
-      }
-      elseif ($dpdtun != '' and $dpdss != '' and ($rakirrow["rahtikirja"] == 'rahtikirja_dpd_siirto.inc' or $rakirrow["rahtikirja"] == 'rahtikirja_dpd.inc') and $rakirrow['rahtikirjanro'] != '') {
-        //luodaan dpd seurantalinkki jos k‰ytˆss‰ on Delisprint
-        $linkurl = "";
-
-        for ($dpdi=1; $dpdi<$rakirrow['kollit']+1; $dpdi++) {
-          $sscc = "";
-
-          if (!function_exists('tarkiste')) {
-
-            function tarkiste($sscc) {
-
-              $kerroin = 3; // kerroin aluks 3
-              $summa   = 0; // summa nolla tietty
-
-              // loopataan luvut oikeelta vasemmalle
-              for ($i = 16; $i >= 0; $i--) {
-                $summa += $kerroin * (ord($sscc{$i})-48); // lis‰t‰‰n summaan ko. luku * kerroin (t‰‰ hanskaa kirjaimet )
-                $kerroin = 4 - $kerroin; // kerroin on vuorotellen 3 tai 1
-              }
-
-              $sscc = ceil($summa / 10) * 10 - $summa; // tarkiste on luku mik‰ pit‰‰ lis‰t‰, ett‰ p‰‰st‰‰n seuraavaan tasakymmeneen
-
-              return $sscc;
-            }
-          }
-
-          $sscc = 1;
-          $sscc .= sprintf("%08.8s", $yhtiorow["ytunnus"]);
-          $sscc .= sprintf('%06.6s', substr($rakirrow['rahtikirjanro'], -6));
-          $sscc .= sprintf('%02.2s', $dpdi);
-          $loppu = tarkiste($sscc);
-          $sscc = $sscc.$loppu;
-
-          //$linkurl .= "<a target=newikkuna href='http://extranet.dpd.de/cgi-bin/delistrack.acl?typ=4&model=web_login.gws&username=$dpdtun&password=$dpdss&pknr=$sscc'>$sscc</a><br>";
-          $linkurl .= "<a target=newikkuna href='http://$dpdtun:$dpdss@tracking.dpd.de/cgi-bin/delistrack.acl?typ=4&pknr=$sscc'>$sscc</a><br>";
-        }
-
-        $linkurl = substr($linkurl, 0, -4); // vika br pois
-      }
-      elseif (stripos(strtolower($laskurow["toimitustapa"]), "mypack") !== FALSE and !empty($rakirrow['rahtikirjanro'])) {
-        foreach (explode(" ", $rakirrow['rahtikirjanro']) as $mypnro) {
-          $linkurl .= "<a target=newikkuna href='http://www.postnord.fi/fi/yritysasiakkaat/asiakaspalvelu/sahkoinen-asiointi/Sivut/Lahetysten-seuranta.aspx?view=item&itemid={$mypnro}'>{$mypnro}</a> ";
-        }
-      }
-      else {
-        $linkurl = $rakirrow['rahtikirjanro'];
-      }
+    if (empty($link)) {
+      $linkurl .= "{$rakirno} ";
+    }
+    else {
+      $linkurl .= "<a class='linkki' href='{$link}' target='_blank'>{$rakirno}</a> ";
     }
   }
 

@@ -280,7 +280,7 @@ if ($tee == 'GO' and $error == 0) {
           $tuo = mysql_real_escape_string(trim($rivi[$tuo_sarake]));
           $sal = (float) str_replace(",", ".", trim($rivi[$teh_sarake]));
 
-          if ($tuo != '' and $sal != '') {
+          if ($tuo != '') {
             $tuote[] = $tuo;
             $saldo[] = $sal;
           }

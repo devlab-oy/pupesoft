@@ -1498,6 +1498,15 @@ if (($toim == 'lisaa' or $toim == 'lisaa_siirto') and $id == 0 and (string) $id 
     $jarjx = " ORDER BY laadittu";
   }
 
+  if ($yhtiorow['saldottomat_rahtikirjansyottoon'] != '') {
+    $saldotonwherelisa = "AND (tilausrivi.keratty != 'saldoton' OR (tilausrivi.keratty = 'saldoton' AND tuote.tuotetyyppi = ''))";
+    $jointuote = "JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)";
+  }
+  else {
+    $saldotonwherelisa = "and tilausrivi.keratty != 'saldoton'";
+    $jointuote = "";
+  }
+
   // Haetaan sopivia tilauksia
   $query = "SELECT
             lasku.yhtio yhtio,
@@ -1531,8 +1540,9 @@ if (($toim == 'lisaa' or $toim == 'lisaa_siirto') and $id == 0 and (string) $id 
             sum(rahtikirjat.kollit) kollit,
             count(distinct lasku.tunnus) tunnukset_lkm
             FROM lasku use index (tila_index)
-            JOIN tilausrivi use index (yhtio_otunnus) ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.toimitettu = '' and tilausrivi.keratty != '' and tilausrivi.keratty != 'saldoton' AND tilausrivi.tyyppi != 'D')
+            JOIN tilausrivi use index (yhtio_otunnus) ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.toimitettu = '' and tilausrivi.keratty != '' AND tilausrivi.tyyppi != 'D')
             $joinmaksuehto
+            {$jointuote}
             LEFT JOIN toimitustapa use index (selite_index) ON toimitustapa.yhtio = lasku.yhtio and toimitustapa.selite = lasku.toimitustapa
             LEFT JOIN rahtikirjat use index (otsikko_index) ON rahtikirjat.otsikkonro=lasku.tunnus and rahtikirjat.yhtio=lasku.yhtio
             LEFT JOIN varastopaikat on varastopaikat.yhtio = lasku.yhtio and varastopaikat.tunnus = lasku.varasto
@@ -1543,6 +1553,7 @@ if (($toim == 'lisaa' or $toim == 'lisaa_siirto') and $id == 0 and (string) $id 
             $haku
             $tilaustyyppi
             $lisawhere
+            {$saldotonwherelisa}
             and ((toimitustapa.nouto is null or toimitustapa.nouto = '') or lasku.vienti != '')
             GROUP BY lasku.yhtio, lasku.yhtio_nimi, lasku.toimitustapa, toimitustapa.nouto, $groupmaksuehto kimppakyyti, lasku.vienti, laadittux, toimaika $grouplisa
             $jarjx";

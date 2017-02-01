@@ -165,10 +165,10 @@ function sepa_credittransfer($laskurow, $popvm_nyt, $netotetut_rivit = '') {
   $Amt = $CdtTrfTxInf->addChild('Amt', '');                        // Amount
 
   if ($laskurow['alatila'] != 'K') {
-    $InstdAmt = $Amt->addChild('InstdAmt', round($laskurow['summa'], 2));              // InstructedAmount, Pakollinen kenttä
+    $InstdAmt = $Amt->addChild('InstdAmt', sprintf("%.02f", round($laskurow['summa'], 2)));              // InstructedAmount, Pakollinen kenttä
   }
   else {
-    $InstdAmt = $Amt->addChild('InstdAmt', round($laskurow['summa'] - $laskurow['kasumma'], 2));  // InstructedAmount, Pakollinen kenttä
+    $InstdAmt = $Amt->addChild('InstdAmt', sprintf("%.02f", round($laskurow['summa'] - $laskurow['kasumma'], 2)));  // InstructedAmount, Pakollinen kenttä
   }
   $InstdAmt->addAttribute('Ccy', $laskurow['valkoodi']);                  // Currency, Pakollinen attribute
 
@@ -395,14 +395,14 @@ function sepa_credittransfer($laskurow, $popvm_nyt, $netotetut_rivit = '') {
       $RfrdDocAmt = $Strd->addChild('RfrdDocAmt', '');                         // ReferredDocumentAmount
 
       if ($nettorow["summa"] < 0) {
-        $RmtdAmt = $RfrdDocAmt->addChild('CdtNoteAmt', abs($nettorow["summa"]));      // CreditNoteAmount
+        $RmtdAmt = $RfrdDocAmt->addChild('CdtNoteAmt', sprintf("%.02f", abs($nettorow["summa"])));      // CreditNoteAmount
       }
       else {
         if ($nettorow['alatila'] != 'K') {
-          $RmtdAmt = $RfrdDocAmt->addChild('RmtdAmt', $nettorow["summa"]);             // RemittedAmount
+          $RmtdAmt = $RfrdDocAmt->addChild('RmtdAmt', sprintf("%.02f", round($nettorow["summa"], 2)));             // RemittedAmount
         }
         else {
-          $RmtdAmt = $RfrdDocAmt->addChild('RmtdAmt', round($nettorow["summa"] - $nettorow['kasumma'], 2));             // RemittedAmount
+          $RmtdAmt = $RfrdDocAmt->addChild('RmtdAmt', sprintf("%.02f",round($nettorow["summa"] - $nettorow['kasumma'], 2)));             // RemittedAmount
         }
       }
 

@@ -816,7 +816,7 @@ if ($upd == 1) {
         $query = "SELECT *
                   FROM lasku use index (yhtio_tila_liitostunnus_tapvm)
                   WHERE yhtio       = '$kukarow[yhtio]'
-                  and tila          IN ('H','M')
+                  and tila          IN ('H','M','P')
                   and liitostunnus  = '$otsikrow[tunnus]'
                   and tapvm        != '0000-00-00'";
         $laskuores = pupe_query($query);
@@ -851,8 +851,8 @@ if ($upd == 1) {
 
           $komm = "";
 
-          // Jos lasku on hyväksytty ja muutetaan hyvöksyntään liittyviä tietoja
-          if ($laskuorow["hyvak1"] != "" and $laskuorow["hyvak1"] != "verkkolas" and $laskuorow["h1time"] != "0000-00-00 00:00:00" and (
+          // Jos lasku on hyväksytty ja muutetaan hyväksyntään liittyviä tietoja
+          if ($laskuorow["hyvak1"] != "" and $laskuorow["hyvak1"] != "verkkolas" and laskun_hyvaksyjia() and $laskuorow["h1time"] != "0000-00-00 00:00:00" and (
               ($oletus_erapvm > 0 and $laskuorow["erpcm"] != $oletus_erapvm) or
               ($oletus_erapvm > 0 and $laskuorow["kapvm"] != $oletus_kapvm) or
               ($laskuorow["kasumma"] != $otsikrow["oletus_kasumma"]) or

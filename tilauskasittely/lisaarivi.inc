@@ -162,6 +162,10 @@ if (!isset($jo_syotetty_rekisterinumero)) {
   $jo_syotetty_rekisterinumero = "";
 }
 
+if (!isset($keratty)) {
+  $keratty = "";
+}
+
 // Haetaan asiakkaan kieli erilaisten systeemikommenttien kääntämistä varten
 $query = "SELECT kieli
           FROM asiakas
@@ -1204,6 +1208,11 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
           $myytavissa = $toimittamatta;
         }
 
+        // Jos tilaus on kerätty saldo riittää aina
+        if ($keratty != '') {
+          $myytavissa = $toimittamatta;
+        }
+
         // hoidetaan pois problematiikka jos meillä on orpoja (tuotepaikattomia) tuotteita varaamassa saldoa
         if ($orvot > 0) {
           if ($myytavissa >= $orvot) {
@@ -1782,7 +1791,7 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
                   $myy_ohita_kerays[$j] = $perherow['ohita_kerays'];
 
                   // jos ei olla vielä toimitettu kaikkea, niin lisätään tilausrivi
-                  if ($lapsitoimittamatta > 0 and (($myy_kpl[$j] - $myy_kpl_myyty[$j]) > 0 or $yhtiorow["puute_jt_oletus"] == "O" or $varataan_saldoa == "EI")) {
+                  if ($lapsitoimittamatta != 0 and (($myy_kpl[$j] - $myy_kpl_myyty[$j]) > 0 or $yhtiorow["puute_jt_oletus"] == "O" or $varataan_saldoa == "EI")) {
 
                     if (($myy_kpl[$j] - $myy_kpl_myyty[$j] >= $lapsitoimittamatta) or $yhtiorow["puute_jt_oletus"] == "O" or $varataan_saldoa == "EI") {
                       // jos tällä paikalla on saldoa enemmän kun tarvitaan, otetaan sitten vaan tarvittava määrä
@@ -2035,6 +2044,8 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
                         netto           = '$lis_netto',
                         hinta           = '$lis_hinta',
                         kerayspvm       = '$kerayspvm',
+                        toimitettu      = '$toimitettu',
+                        toimitettuaika  = '$toimitettuaika',
                         otunnus         = '$kukarow[kesken]',
                         tyyppi          = '$rivityyppi',
                         toimaika        = '$toimaika',
@@ -2053,6 +2064,9 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
 
               if ($trow['ei_saldoa'] != '' and $yhtiorow["kerataanko_saldottomat"] == '') {
                 $query .= ", keratty = 'saldoton', kerattyaika = now()";
+              }
+              else {
+                $query .= ", keratty = '{$keratty}', kerattyaika = '{$kerattyaika}'";
               }
 
               $result = pupe_query($query);
@@ -3369,6 +3383,8 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
               hinta           = '$lis_hinta',
               {$query_insert_hinta_alkuperainen_lisa}
               kerayspvm       = '$kerayspvm',
+              toimitettu      = '$toimitettu',
+              toimitettuaika  = '$toimitettuaika',
               otunnus         = '$kukarow[kesken]',
               tyyppi          = '$rivityyppi',
               toimaika        = '$toimaika',
@@ -3387,6 +3403,9 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
 
     if ($trow['ei_saldoa'] != '' and $yhtiorow["kerataanko_saldottomat"] == '') {
       $query .= ", keratty = 'saldoton', kerattyaika = now()";
+    }
+    else {
+      $query .= ", keratty = '{$keratty}', kerattyaika = '{$kerattyaika}'";
     }
 
     $result = pupe_query($query);

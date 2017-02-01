@@ -14,6 +14,9 @@ if (!function_exists("log_message")) {
   }
 }
 
+$magento_api_ord   = (int) $magento_api_ord;
+$_magento_kaytossa = (!empty($magento_api_tt_url) and !empty($magento_api_tt_usr) and !empty($magento_api_tt_pas));
+
 if (!empty($yhtiorow['editilaus_suoratoimitus'])) {
 
   // Tarkistetaan onko kuittaus jo tehty aikaisemmista tämän Magento-tilauksen Pupe-tilauksista
@@ -61,7 +64,7 @@ else {
   $_kuittaus_tekematta = true;
 }
 
-if ($_kuittaus_tekematta) {
+if ($_kuittaus_tekematta and $_magento_kaytossa and $magento_api_ord > 0) {
 
   if (empty($magento_api_toimituskuittaus_viestit)) {
     $magento_api_toimituskuittaus_viestit = array();
@@ -73,13 +76,6 @@ if ($_kuittaus_tekematta) {
   );
 
   $kuittaukset = array_merge($default_kuittaukset, $magento_api_toimituskuittaus_viestit);
-
-  $magento_api_ord   = (int) $magento_api_ord;
-  $_magento_kaytossa = (!empty($magento_api_tt_url) and !empty($magento_api_tt_usr) and !empty($magento_api_tt_pas));
-
-  if (!$_magento_kaytossa or $magento_api_ord <= 0) {
-    exit;
-  }
 
   $proxy = new SoapClient($magento_api_tt_url);
   $sessionId = $proxy->login($magento_api_tt_usr, $magento_api_tt_pas);
@@ -97,29 +93,17 @@ if ($_kuittaus_tekematta) {
 
     $magLinkurl = "Tracking number: ";
 
-    if (stripos($magento_api_rak, "JJFI") !== false) {
-      preg_match_all("/JJFI ?[0-9]{6} ?[0-9]{11}/", $magento_api_rak, $match);
+    $linkit = tilauksen_seurantalinkit($magento_api_laskutunnus);
 
-      foreach ($match[0] as $nro) {
-        $nro = str_replace(" ", "", $nro);
-        $magLinkurl .= "<a target=newikkuna href='http://www.posti.fi/henkiloasiakkaat/seuranta/#/lahetys/{$nro}'>{$nro}</a><br>";
-      }
+    foreach ($linkit as $seurantalinkki) {
+      $rakirno = $seurantalinkki['id'];
+      $link    = $seurantalinkki['link'];
 
-      $magLinkurl = substr($magLinkurl, 0, -4); // vika br pois
-    }
-    elseif (stripos($magento_api_met, "mypack") !== FALSE) {
-      $magLinkurl .= "<a target=newikkuna href='http://www.postnord.fi/fi/yritysasiakkaat/asiakaspalvelu/sahkoinen-asiointi/Sivut/Lahetysten-seuranta.aspx?view=item&itemid={$magento_api_rak}'>{$magento_api_rak}</a><br>";
-    }
-    else {
-
-      // Jos Unifaun Track & Trace sekä XML Posting, laitetaan seurantaosoite
-      $unifaun_xmlposting = ($unifaun_xp_developerid != "" and $unifaun_xp_user != "" and $unifaun_xp_pin != "");
-    
-      if (!empty($unifaun_url_key) and $unifaun_xmlposting) {
-        $magLinkurl .= "https://www.unifaunonline.com/ext.uo.fi.track?key={$unifaun_url_key}&order={$magento_api_rak}<br>";
+      if (empty($link)) {
+        $magLinkurl .= "$magento_api_met / $rakirno<br>";
       }
       else {
-        $magLinkurl .= "$magento_api_met / $magento_api_rak<br>";
+        $magLinkurl .= "<a target=newikkuna href='{$link}'>{$rakirno}</a><br>";
       }
     }
 

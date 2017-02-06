@@ -247,6 +247,9 @@ class MagentoClient {
       return;
     }
 
+    //haetaan tässä vaiheessa jo tarvittavat kielet
+    $tuetut_kieliversiot = $this->_setTuetutKieliversiot;
+
     // Lisätään tuotteet erissä
     foreach ($dnstuote as $tuote) {
       $tuote_clean = $tuote['tuoteno'];
@@ -312,13 +315,12 @@ class MagentoClient {
       }
 
       $multi_data = array();
-      $tuetut_kieliversiot = array();
 
       $_key = $this->magento_simple_tuote_nimityskentta;
       $tuotteen_nimitys = $tuote[$_key];
 
-      // Simple tuotteiden parametrit kuten koko ja väri
-      foreach ($tuote['tuotteen_parametrit'] as $parametri) {
+      // Simple tuotteiden parametrit kuten koko ja väri (oletuskieli on fi)
+      foreach ($tuote['tuotteen_parametrit']['fi'] as $parametri) {
         $key = $parametri['option_name'];
         $option_id = $this->get_option_id($key, $parametri['arvo'], $attribute_set_id);
 
@@ -342,7 +344,6 @@ class MagentoClient {
         // Kieliversiot
         // poimitaan talteen koska niitä käytetään toisaalla
         if ($key == 'kieliversiot') {
-          $tuetut_kieliversiot = $erikoisparametri['arvo'];
           continue;
         }
 
@@ -507,18 +508,61 @@ class MagentoClient {
           // Esim. array("en" => array('4','13'), "se" => array('9'));
           $kieliversio_data = $this->hae_kieliversiot($tuote_clean);
 
+          // katsotaan onko $verkkokauppatuotteet_erikoisparametrit taulukossa määritelty mainostekstiä.
+          $_mainosteksti = array();
+          foreach ($verkkokauppatuotteet_erikoisparametrit as $spessukentat) {
+
+            // spessukentät on määritelty taulukossa niin, että array(nimi => magentonimi, arvo => pupenimi)
+            // katsotaan onko mainostekstille määritelty kenttää Magentossa
+            if (isset($spessukentat['nimi']) and $spessukentat[1] == 'mainosteksti') {
+              $_mainosteksti[] = key($spessukentat[1]);
+            }
+          }
+
           foreach ($tuetut_kieliversiot as $kieli => $kauppatunnukset) {
             if (empty($kieliversio_data[$kieli])) continue;
 
             $kaannokset = $kieliversio_data[$kieli];
+            $tuotteen_kauppakohtainen_data2 = array();
+            $tuotteen_kauppakohtainen_data3 = array();
+
+            if (!empty($_mainosteksti)) {
+              foreach ($_mainosteksti as $_magento_fieldname) {
+                array_push($tuotteen_kauppakohtainen_data2, $_magento_fieldname => $kaannokset['mainosteksti']);
+              }
+            }
+
+            // Simple tuotteiden parametrit kuten koko ja väri
+            foreach ($tuote['tuotteen_parametrit'][$kieli] as $parametri) {
+              $key = $parametri['option_name'];
+              $option_id = $this->get_option_id($key, $parametri['arvo'], $attribute_set_id);
+
+              if ($option_id == 0) {
+                continue;
+              }
+
+              $multi_data[$key] = $option_id;
+
+              $this->log('magento_tuotteet', "Tuotteen parametri {$key}: {$parametri['arvo']} ({$multi_data[$key]})");
+
+              // Lisätään lapsituotteen nimeen variaatioiden arvot
+              if ($this->magento_nimitykseen_parametrien_arvot === true) {
+                $kaannokset['nimitys'] .= " - {$parametri['arvo']}";
+              }
+
+              array_push($tuotteen_kauppakohtainen_data3, 'additional_attributes' => array('multi_data' => $multi_data));
+            }
 
             // Päivitetään jokaiseen kauppatunnukseen haluttu käännös
             foreach ($kauppatunnukset as $kauppatunnus) {
+
               $tuotteen_kauppakohtainen_data = array(
                 'description' => $kaannokset['kuvaus'],
                 'name'        => $kaannokset['nimitys'],
-                'unit'        => $kaannokset['yksikko']
+                'unit'        => $kaannokset['yksikko'],
               );
+
+              array_merge($tuotteen_kauppakohtainen_data, $tuotteen_kauppakohtainen_data2, $tuotteen_kauppakohtainen_data3);
 
               $this->_proxy->call($this->_session, 'catalog_product.update',
                 array(
@@ -543,7 +587,7 @@ class MagentoClient {
       // Päivitetään tuotteen kauppanäkymäkohtaiset hinnat
       $tuotteen_kauppakohtaiset_hinnat = $this->kauppakohtaiset_hinnat($tuote);
 
-      foreach ($tuotteen_kauppakohtaiset_hinnat as $kauppatunnus => $tuotteen_kauppakohtainen_data) {
+      foreach ($tuotteen_kauppakohtaiset_hinnat as $kauppatunnus => $tuotteen_kau ppakohtainen_data) {
         try {
           $this->_proxy->call($this->_session, 'catalog_product.update',
             array(
@@ -669,7 +713,7 @@ class MagentoClient {
       // Configurable-tuotteelle myös ensimmäisen lapsen parametrit
       $configurable_multi_data = array();
 
-      foreach ($lapsituotteen_tiedot['parametrit'] as $parametri) {
+      foreach ($lapsituotteen_tiedot['parametrit']['fi'] as $parametri) {
         $key = $parametri['option_name'];
         $option_id = $this->get_option_id($key, $parametri['arvo'], $attribute_set_id);
 
@@ -761,7 +805,7 @@ class MagentoClient {
           $multi_data = array();
 
           // Simple tuotteiden parametrit kuten koko ja väri
-          foreach ($tuote['parametrit'] as $parametri) {
+          foreach ($tuote['parametrit']['fi'] as $parametri) {
             $key = $parametri['option_name'];
             $option_id = $this->get_option_id($key, $parametri['arvo'], $attribute_set_id);
 
@@ -1302,6 +1346,10 @@ class MagentoClient {
 
   public function setVerkkokauppatuotteetErikoisparametrit($verkkokauppatuotteet_erikoisparametrit) {
     $this->_verkkokauppatuotteet_erikoisparametrit = $verkkokauppatuotteet_erikoisparametrit;
+  }
+
+  public function setTuetutKieliversiot($tuetut_kieliversiot) {
+    $this->_setTuetutKieliversiot = $tuetut_kieliversiot;
   }
 
   public function setAsiakkaatErikoisparametrit($asiakkaat_erikoisparametrit) {
@@ -1884,7 +1932,7 @@ class MagentoClient {
     $url_key = $this->sanitize_link_rewrite($tuotedata['nimi']);
     $parametrit = array();
 
-    foreach ($tuotedata['tuotteen_parametrit'] as $parametri) {
+    foreach ($tuotedata['tuotteen_parametrit']['fi'] as $parametri) {
       $key = $parametri['option_name'];
       $value = $parametri['arvo'];
       $parametrit[$key] = $value;
@@ -2488,7 +2536,7 @@ class MagentoClient {
                 tuotteen_avainsanat
                 WHERE yhtio = '{$kukarow['yhtio']}'
                 AND tuoteno = '{$tuotenumero}'
-                AND laji    IN ('nimitys','kuvaus', 'yksikko')";
+                AND laji    IN ('nimitys','kuvaus', 'yksikko', 'mainosteksti')";
       $result = pupe_query($query);
 
       while ($avainsana = mysql_fetch_assoc($result)) {

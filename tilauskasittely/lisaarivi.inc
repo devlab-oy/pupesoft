@@ -2304,6 +2304,7 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
                   }
                   else {
                     $valmistetyyppi = "W";
+                    $kohdepaikka = '';
                     
                     if ($laskurow["tila"] == 'V' and $laskurow['clearing'] != $laskurow['varasto'] and $laskurow['varasto'] != 0) {
 
@@ -2320,17 +2321,15 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
                       $olkohde_nro    = $tuotteen_oletuskohde[0]['hyllynro'];
                       $olkohde_vali   = $tuotteen_oletuskohde[0]['hyllyvali'];
                       $olkohde_taso   = $tuotteen_oletuskohde[0]['hyllytaso'];
+                      $kohdepaikka = ",hyllyalue = '$olkohde_alue', hyllynro = '$olkohde_nro', hyllytaso = '$olkohde_vali', hyllyvali = '$olkohde_taso'";
                     }
                   }
 
                   //jos on valmistusprosessi kyseessä niin isän tyyppi vaihdetaan W:ksi koska sen ei pidä varata saldoa!
                   $query = "UPDATE tilausrivi SET 
                               perheid       = '$perheid_lisaarivi', 
-                              tyyppi        = '$valmistetyyppi',
-                              hyllyalue     = '$olkohde_alue',
-                              hyllynro      = '$olkohde_nro',
-                              hyllytaso     = '$olkohde_vali',
-                              hyllyvali     = '$olkohde_taso'
+                              tyyppi        = '$valmistetyyppi'
+                              $kohdepaikka
                               where yhtio='$kukarow[yhtio]' and tunnus=$perheid_lisaarivi and tyyppi='V'";
                   $result = pupe_query($query);
 

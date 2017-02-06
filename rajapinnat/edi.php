@@ -54,6 +54,7 @@ class Edi {
     }
 
     $vaihtoehtoinen_ovt = '';
+    $vaihtoehtoinen_asiakasnro = '';
 
     //Tarkistetaan onko t‰m‰n nimiselle verkkokaupalle asetettu erikoisk‰sittelyj‰
     if (isset($verkkokauppa_erikoiskasittely) and count($verkkokauppa_erikoiskasittely) > 0) {
@@ -68,6 +69,7 @@ class Edi {
         // 4 = Vaihtoehtoinen ovttunnus OSTOTIL.OT_TOIMITTAJANRO -kentt‰‰n EDI tiedostossa
         // 5 = Rahtivapaus, jos 'E', niin k‰ytet‰‰n asiakkaan 'rahtivapaa' -oletusta
         // 6 = Tyhjennet‰‰nkˆ OSTOTIL.OT_MAKSETTU EDI tiedostossa (tyhj‰ ei, kaikki muut arvot kyll‰)
+        // 7 = Vaihtoehtoinen asiakasnro
         if (strpos($edi_store, $verkkokauppaparametrit[0]) !== false) {
           $vaihtoehtoinen_ovt = $verkkokauppaparametrit[4];
         }
@@ -75,6 +77,8 @@ class Edi {
     }
 
     $valittu_ovt_tunnus = (!empty($vaihtoehtoinen_ovt)) ? $vaihtoehtoinen_ovt : $ovt_tunnus;
+
+    $order['customer_id'] = (!empty($vaihtoehtoinen_asiakanro)) ? $vaihtoehtoinen_asiakasnro : $asiakasnro;
 
     $maksuehto = strip_tags($order['payment']['method']);
 

@@ -146,6 +146,9 @@ class MagentoClient {
   // Merkataanko tuote tilaan 'varastossa' saldosta riippumatta
   private $tuote_aina_varastossa = null;
 
+  //
+  private $_TuetutKieliversiot = JOTAIN;
+
   function __construct($url, $user, $pass, $client_options = array(), $debug = false) {
     try {
       $this->_proxy = new SoapClient($url, $client_options);
@@ -246,9 +249,6 @@ class MagentoClient {
       $this->log('magento_tuotteet', "Virhe! Tuotteiden lisäyksessä (simple)", $e);
       return;
     }
-
-    //haetaan tässä vaiheessa jo tarvittavat kielet
-    $tuetut_kieliversiot = $this->_setTuetutKieliversiot;
 
     // Lisätään tuotteet erissä
     foreach ($dnstuote as $tuote) {
@@ -500,7 +500,7 @@ class MagentoClient {
 
       // Päivitetään tuotteen kieliversiot kauppanäkymäkohtaisesti
       // jos nämä on asetettu konffissa
-      if (isset($tuetut_kieliversiot) and count($tuetut_kieliversiot) > 0) {
+      if (count($_TuetutKieliversiot) > 0) {
         try {
           // Kieliversiot-magentoerikoisparametrin tulee sisältää array jossa määritellään mikä kieliversio
           // siirretään mihinkin kauppatunnukseen
@@ -519,7 +519,7 @@ class MagentoClient {
             }
           }
 
-          foreach ($tuetut_kieliversiot as $kieli => $kauppatunnukset) {
+          foreach ($_TuetutKieliversiot as $kieli => $kauppatunnukset) {
             if (empty($kieliversio_data[$kieli])) continue;
 
             $kaannokset = $kieliversio_data[$kieli];
@@ -1351,7 +1351,7 @@ class MagentoClient {
   }
 
   public function setTuetutKieliversiot($tuetut_kieliversiot) {
-    $this->_setTuetutKieliversiot = $tuetut_kieliversiot;
+    $this->_TuetutKieliversiot = $tuetut_kieliversiot;
   }
 
   public function setAsiakkaatErikoisparametrit($asiakkaat_erikoisparametrit) {

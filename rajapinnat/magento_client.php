@@ -528,9 +528,11 @@ class MagentoClient {
 
             if (!empty($_mainosteksti)) {
               foreach ($_mainosteksti as $_magento_fieldname) {
-                array_push($tuotteen_kauppakohtainen_data2, $_magento_fieldname => $kaannokset['mainosteksti']);
+                $tuotteen_kauppakohtainen_data2[$_magento_fieldname] = $kaannokset['mainosteksti'];
               }
             }
+
+            $this->log('magento_tuotteet', "Tuotteen_kauppakohtainen_data2 {$tuote['tuoteno']} - {$_magento_fieldname}: {$kaannokset['mainosteksti']}");
 
             // Simple tuotteiden parametrit kuten koko ja väri
             foreach ($tuote['tuotteen_parametrit'][$kieli] as $parametri) {
@@ -543,14 +545,14 @@ class MagentoClient {
 
               $multi_data[$key] = $option_id;
 
-              $this->log('magento_tuotteet', "Tuotteen parametri {$key}: {$parametri['arvo']} ({$multi_data[$key]})");
+              $this->log('magento_tuotteet', "Tuotteen parametri kielikäännös {$tuote['tuoteno']} - {$key}: {$parametri['arvo']} ({$multi_data[$key]})");
 
               // Lisätään lapsituotteen nimeen variaatioiden arvot
               if ($this->magento_nimitykseen_parametrien_arvot === true) {
                 $kaannokset['nimitys'] .= " - {$parametri['arvo']}";
               }
 
-              array_push($tuotteen_kauppakohtainen_data3, 'additional_attributes' => array('multi_data' => $multi_data));
+              $tuotteen_kauppakohtainen_data3['additional_attributes'] = array('multi_data' => $multi_data);
             }
 
             // Päivitetään jokaiseen kauppatunnukseen haluttu käännös
@@ -587,7 +589,7 @@ class MagentoClient {
       // Päivitetään tuotteen kauppanäkymäkohtaiset hinnat
       $tuotteen_kauppakohtaiset_hinnat = $this->kauppakohtaiset_hinnat($tuote);
 
-      foreach ($tuotteen_kauppakohtaiset_hinnat as $kauppatunnus => $tuotteen_kau ppakohtainen_data) {
+      foreach ($tuotteen_kauppakohtaiset_hinnat as $kauppatunnus => $tuotteen_kauppakohtainen_data) {
         try {
           $this->_proxy->call($this->_session, 'catalog_product.update',
             array(

@@ -364,7 +364,7 @@ foreach ($verkkokauppatuotteet_erikoisparametrit as $erikoisparametri) {
   // poimitaan talteen koska niit‰ k‰ytet‰‰n toisaalla
   if ($key == 'kieliversiot') {
     $tuetut_kieliversiot = $erikoisparametri['arvo'];
-    continue;
+    break;
   }
 }
 

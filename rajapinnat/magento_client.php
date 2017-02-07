@@ -146,8 +146,8 @@ class MagentoClient {
   // Merkataanko tuote tilaan 'varastossa' saldosta riippumatta
   private $tuote_aina_varastossa = null;
 
-  //
-  private $_TuetutKieliversiot = JOTAIN;
+  // Default kielen lisäksi muut tuetut kauppakohtaiset kieliversiot, esim array("en" => array('4','13'), "se" => array('9'));
+  private $_TuetutKieliversiot = array();
 
   function __construct($url, $user, $pass, $client_options = array(), $debug = false) {
     try {

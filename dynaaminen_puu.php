@@ -235,7 +235,7 @@ if (isset($_REQUEST["ajax"]) and $_REQUEST["ajax"] == "OK") {
       exit;
     }
 
-    if ($noderow['nimi_en']) {
+    if (!empty($noderow['nimi_en'])) {
       $_nimi_en = "<p><font class='message'>".t("Nimi en").":".$noderow['nimi_en']."<br />";
     }
     else {

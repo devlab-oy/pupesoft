@@ -70,15 +70,20 @@ class Edi {
         // 5 = Rahtivapaus, jos 'E', niin käytetään asiakkaan 'rahtivapaa' -oletusta
         // 6 = Tyhjennetäänkö OSTOTIL.OT_MAKSETTU EDI tiedostossa (tyhjä ei, kaikki muut arvot kyllä)
         // 7 = Vaihtoehtoinen asiakasnro
+
         if (strpos($edi_store, $verkkokauppaparametrit[0]) !== false) {
           $vaihtoehtoinen_ovt = $verkkokauppaparametrit[4];
+        }
+
+        if (strpos($edi_store, $verkkokauppaparametrit[0]) !== false) {
+          $vaihtoehtoinen_asiakasnro = $verkkokauppaparametrit[7];
         }
       }
     }
 
     $valittu_ovt_tunnus = (!empty($vaihtoehtoinen_ovt)) ? $vaihtoehtoinen_ovt : $ovt_tunnus;
 
-    $order['customer_id'] = (!empty($vaihtoehtoinen_asiakanro)) ? $vaihtoehtoinen_asiakasnro : $asiakasnro;
+    $verkkokauppa_asiakasnro = (!empty($vaihtoehtoinen_asiakanro)) ? $vaihtoehtoinen_asiakasnro : $verkkokauppa_asiakasnro;
 
     $maksuehto = strip_tags($order['payment']['method']);
 
@@ -144,7 +149,7 @@ class Edi {
     $edi_order .= "OSTOTIL.OT_TOIMITTAJANRO:{$valittu_ovt_tunnus}\n";
     $edi_order .= "OSTOTIL.OT_TILAUSTYYPPI:{$pupesoft_tilaustyyppi}\n";
     $edi_order .= "OSTOTIL.VERKKOKAUPPA:{$store_name}\n";
-    $edi_order .= "OSTOTIL.OT_VERKKOKAUPPA_ASIAKASNRO:{$order['customer_id']}\n";
+    $edi_order .= "OSTOTIL.OT_VERKKOKAUPPA_ASIAKASNRO:{$order['customer_id']}\n"; //tämä tulee suoraan Magentosta
     $edi_order .= "OSTOTIL.OT_VERKKOKAUPPA_TILAUSVIITE:{$tilausviite}\n";
     $edi_order .= "OSTOTIL.OT_VERKKOKAUPPA_TILAUSNUMERO:{$tilausnumero}\n";
     $edi_order .= "OSTOTIL.OT_VERKKOKAUPPA_KOHDE:{$kohde}\n";

@@ -210,13 +210,13 @@ function tuote_export_hae_tuotetiedot($params) {
                         JOIN avainsana USE INDEX (yhtio_laji_selite) ON (avainsana.yhtio = tuotteen_avainsanat.yhtio
                           AND avainsana.laji = 'PARAMETRI'
                           AND avainsana.selite = SUBSTRING(tuotteen_avainsanat.laji, 11))
-                          AND avainsanat.kieli = tuotteen_avainsanat.kieli
+                          AND avainsana.kieli = tuotteen_avainsanat.kieli
                         WHERE tuotteen_avainsanat.yhtio = '{$kukarow['yhtio']}'
                         AND tuotteen_avainsanat.laji != 'parametri_variaatio'
                         AND tuotteen_avainsanat.laji != 'parametri_variaatio_jako'
                         AND tuotteen_avainsanat.laji like 'parametri_%'
                         AND tuotteen_avainsanat.tuoteno = '{$row['tuoteno']}'
-                        AND tuotteen_avainsanat.kieli in (".implode(",", $kieliversiot).")
+                        AND tuotteen_avainsanat.kieli in ('".implode("','", $kieliversiot)."')
                         ORDER by tuotteen_avainsanat.jarjestys, tuotteen_avainsanat.laji";
     $parametritres = pupe_query($parametritquery);
     $tuotteen_parametrit = array();
@@ -697,6 +697,10 @@ function tuote_export_hae_lajitelmatuotteet($params) {
               AND tuote.tuotetyyppi NOT in ('A','B')
               AND tuote.tuoteno != ''
               AND tuote.nakyvyys != '')
+            LEFT JOIN avainsana as try_fi ON (try_fi.yhtio = tuote.yhtio
+              and try_fi.selite = tuote.try
+              and try_fi.laji = 'try'
+              and try_fi.kieli = 'fi')
             WHERE tuotteen_avainsanat.yhtio = '{$kukarow['yhtio']}'
             AND tuotteen_avainsanat.laji = 'parametri_variaatio'
             {$muutoslisa}
@@ -745,13 +749,13 @@ function tuote_export_hae_lajitelmatuotteet($params) {
                      JOIN avainsana USE INDEX (yhtio_laji_selite) ON (avainsana.yhtio = tuotteen_avainsanat.yhtio
                        AND avainsana.laji = 'PARAMETRI'
                        AND avainsana.selite = SUBSTRING(tuotteen_avainsanat.laji, 11))
-                       AND avainsanat.kieli = tuotteen_avainsanat.kieli
+                       AND avainsana.kieli = tuotteen_avainsanat.kieli
                      WHERE tuotteen_avainsanat.yhtio = '{$kukarow['yhtio']}'
                      AND tuotteen_avainsanat.laji != 'parametri_variaatio'
                      AND tuotteen_avainsanat.laji != 'parametri_variaatio_jako'
                      AND tuotteen_avainsanat.laji like 'parametri_%'
                      AND tuotteen_avainsanat.tuoteno = '{$alirow['tuoteno']}'
-                     AND tuotteen_avainsanat.kieli in (".implode(",", $kieliversiot).")
+                     AND tuotteen_avainsanat.kieli in ('".implode("','", $kieliversiot)."')
                      ORDER by tuotteen_avainsanat.jarjestys, tuotteen_avainsanat.laji";
       $alinres = pupe_query($alinselect);
 

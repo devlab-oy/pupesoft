@@ -500,7 +500,7 @@ class MagentoClient {
 
       // Päivitetään tuotteen kieliversiot kauppanäkymäkohtaisesti
       // jos nämä on asetettu konffissa
-      if (count($_TuetutKieliversiot) > 0) {
+      if (count($this->_TuetutKieliversiot) > 0) {
         try {
           // Kieliversiot-magentoerikoisparametrin tulee sisältää array jossa määritellään mikä kieliversio
           // siirretään mihinkin kauppatunnukseen
@@ -514,12 +514,12 @@ class MagentoClient {
 
             // spessukentät on määritelty taulukossa niin, että array(nimi => magentonimi, arvo => pupenimi)
             // katsotaan onko mainostekstille määritelty kenttää Magentossa
-            if (isset($spessukentat['nimi']) and $spessukentat[1] == 'mainosteksti') {
-              $_mainosteksti[] = key($spessukentat[1]);
+            if (isset($spessukentat['nimi']) and $spessukentat['arvo'] == 'mainosteksti') {
+              $_mainosteksti[] = $spessukentat['nimi'];
             }
           }
 
-          foreach ($_TuetutKieliversiot as $kieli => $kauppatunnukset) {
+          foreach ($this->_TuetutKieliversiot as $kieli => $kauppatunnukset) {
             if (empty($kieliversio_data[$kieli])) continue;
 
             $kaannokset = $kieliversio_data[$kieli];
@@ -530,9 +530,9 @@ class MagentoClient {
               foreach ($_mainosteksti as $_magento_fieldname) {
                 $tuotteen_kauppakohtainen_data2[$_magento_fieldname] = $kaannokset['mainosteksti'];
               }
-            }
 
-            $this->log('magento_tuotteet', "Tuotteen_kauppakohtainen_data2 {$tuote['tuoteno']} - {$_magento_fieldname}: {$kaannokset['mainosteksti']}");
+              $this->log('magento_tuotteet', "Tuotteen mainosteksti kielikäännös {$kieli}: {$tuote['tuoteno']} - {$_magento_fieldname}: {$kaannokset['mainosteksti']}");
+            }
 
             // Simple tuotteiden parametrit kuten koko ja väri
             foreach ($tuote['tuotteen_parametrit'][$kieli] as $parametri) {
@@ -545,7 +545,7 @@ class MagentoClient {
 
               $multi_data[$key] = $option_id;
 
-              $this->log('magento_tuotteet', "Tuotteen parametri kielikäännös {$tuote['tuoteno']} - {$key}: {$parametri['arvo']} ({$multi_data[$key]})");
+              $this->log('magento_tuotteet', "Tuotteen parametri kielikäännös {$kieli} {$tuote['tuoteno']} - {$key}: {$parametri['arvo']} ({$multi_data[$key]})");
 
               // Lisätään lapsituotteen nimeen variaatioiden arvot
               if ($this->magento_nimitykseen_parametrien_arvot === true) {
@@ -564,7 +564,7 @@ class MagentoClient {
                 'unit'        => $kaannokset['yksikko'],
               );
 
-              array_merge($tuotteen_kauppakohtainen_data, $tuotteen_kauppakohtainen_data2, $tuotteen_kauppakohtainen_data3);
+              $tuotteen_kauppakohtainen_data = array_merge($tuotteen_kauppakohtainen_data, $tuotteen_kauppakohtainen_data2, $tuotteen_kauppakohtainen_data3);
 
               $this->_proxy->call($this->_session, 'catalog_product.update',
                 array(

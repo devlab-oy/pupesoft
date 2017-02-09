@@ -319,22 +319,24 @@ class MagentoClient {
       $_key = $this->magento_simple_tuote_nimityskentta;
       $tuotteen_nimitys = $tuote[$_key];
 
-      // Simple tuotteiden parametrit kuten koko ja väri (oletuskieli on fi)
-      foreach ($tuote['tuotteen_parametrit']['fi'] as $parametri) {
-        $key = $parametri['option_name'];
-        $option_id = $this->get_option_id($key, $parametri['arvo'], $attribute_set_id);
+      if (!empty($tuote['tuotteen_parametrit']['fi'])) {
+        // Simple tuotteiden parametrit kuten koko ja väri (oletuskieli on fi)
+        foreach ($tuote['tuotteen_parametrit']['fi'] as $parametri) {
+          $key = $parametri['option_name'];
+          $option_id = $this->get_option_id($key, $parametri['arvo'], $attribute_set_id);
 
-        if ($option_id == 0) {
-          continue;
-        }
+          if ($option_id == 0) {
+            continue;
+          }
 
-        $multi_data[$key] = $option_id;
+          $multi_data[$key] = $option_id;
 
-        $this->log('magento_tuotteet', "Tuotteen parametri {$key}: {$parametri['arvo']} ({$multi_data[$key]})");
+          $this->log('magento_tuotteet', "Tuotteen parametri {$key}: {$parametri['arvo']} ({$multi_data[$key]})");
 
-        // Lisätään lapsituotteen nimeen variaatioiden arvot
-        if ($this->magento_nimitykseen_parametrien_arvot === true) {
-          $tuotteen_nimitys .= " - {$parametri['arvo']}";
+          // Lisätään lapsituotteen nimeen variaatioiden arvot
+          if ($this->magento_nimitykseen_parametrien_arvot === true) {
+            $tuotteen_nimitys .= " - {$parametri['arvo']}";
+          }
         }
       }
 
@@ -715,17 +717,19 @@ class MagentoClient {
       // Configurable-tuotteelle myös ensimmäisen lapsen parametrit
       $configurable_multi_data = array();
 
-      foreach ($lapsituotteen_tiedot['parametrit']['fi'] as $parametri) {
-        $key = $parametri['option_name'];
-        $option_id = $this->get_option_id($key, $parametri['arvo'], $attribute_set_id);
+      if (!empty($lapsituotteen_tiedot['parametrit']['fi'])) {
+        foreach ($lapsituotteen_tiedot['parametrit']['fi'] as $parametri) {
+          $key = $parametri['option_name'];
+          $option_id = $this->get_option_id($key, $parametri['arvo'], $attribute_set_id);
 
-        if ($option_id == 0) {
-          continue;
+          if ($option_id == 0) {
+            continue;
+          }
+
+          $configurable_multi_data[$key] = $option_id;
+
+          $this->log('magento_tuotteet', "Tuotteen parametri {$key}: {$parametri['arvo']} ({$configurable_multi_data[$key]})");
         }
-
-        $configurable_multi_data[$key] = $option_id;
-
-        $this->log('magento_tuotteet', "Tuotteen parametri {$key}: {$parametri['arvo']} ({$configurable_multi_data[$key]})");
       }
 
       // Configurable-tuotteelle myös ensimmäisen lapsen erikoisparametrit
@@ -807,16 +811,18 @@ class MagentoClient {
           $multi_data = array();
 
           // Simple tuotteiden parametrit kuten koko ja väri
-          foreach ($tuote['parametrit']['fi'] as $parametri) {
-            $key = $parametri['option_name'];
-            $option_id = $this->get_option_id($key, $parametri['arvo'], $attribute_set_id);
+          if (!empty($tuote['parametrit']['fi'])) {
+            foreach ($tuote['parametrit']['fi'] as $parametri) {
+              $key = $parametri['option_name'];
+              $option_id = $this->get_option_id($key, $parametri['arvo'], $attribute_set_id);
 
-            if ($option_id == 0) {
-              continue;
+              if ($option_id == 0) {
+                continue;
+              }
+
+              $multi_data[$key] = $option_id;
+              $this->log('magento_tuotteet', "Tuotteen parametri {$key}: {$parametri['arvo']} ({$multi_data[$key]})");
             }
-
-            $multi_data[$key] = $option_id;
-            $this->log('magento_tuotteet', "Tuotteen parametri {$key}: {$parametri['arvo']} ({$multi_data[$key]})");
           }
 
           $simple_tuote_data = array(

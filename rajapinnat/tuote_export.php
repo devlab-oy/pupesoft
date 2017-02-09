@@ -357,11 +357,32 @@ if ($magento_client->getErrorCount() > 0) {
   exit;
 }
 
+foreach ($verkkokauppatuotteet_erikoisparametrit as $erikoisparametri) {
+  $key = $erikoisparametri['nimi'];
+
+  // Kieliversiot
+  // poimitaan talteen koska niitä käytetään toisaalla
+  if ($key == 'kieliversiot') {
+    $tuetut_kieliversiot = $erikoisparametri['arvo'];
+    break;
+  }
+}
+
+$magento_client->setTuetutKieliversiot($tuetut_kieliversiot);
+
+$kieliversiot = array("fi"); //oletuskieli
+
+// tuotteiden hakuun tehdään valmis taulukko kielistä
+foreach ($tuetut_kieliversiot as $kieli => $bar) {
+  $kieliversiot[] = $kieli;
+}
+
 if (in_array('tuotteet', $magento_ajolista)) {
   tuote_export_echo("Haetaan tuotetiedot.");
 
   $params = array(
     "ajetaanko_kaikki"                     => $ajetaanko_kaikki,
+    "kieliversiot"                         => $kieliversiot, //parametrien muut kielikäännökset, oletus fi haetaan aina
     "magento_asiakaskohtaiset_tuotehinnat" => $magento_asiakaskohtaiset_tuotehinnat,
     "tuotteiden_asiakashinnat_magentoon"   => $tuotteiden_asiakashinnat_magentoon,
   );
@@ -431,6 +452,7 @@ if (in_array('lajitelmatuotteet', $magento_ajolista)) {
 
   $params = array(
     "ajetaanko_kaikki" => $ajetaanko_kaikki,
+    "kieliversiot" => $kieliversiot, //parametrien muut kielikäännökset, oletus fi haetaan aina
   );
 
   $dnslajitelma = tuote_export_hae_lajitelmatuotteet($params);

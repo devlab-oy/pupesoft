@@ -82,8 +82,7 @@ class Edi {
     }
 
     $valittu_ovt_tunnus = (!empty($vaihtoehtoinen_ovt)) ? $vaihtoehtoinen_ovt : $ovt_tunnus;
-
-    $verkkokauppa_asiakasnro = (!empty($vaihtoehtoinen_asiakanro)) ? $vaihtoehtoinen_asiakasnro : $verkkokauppa_asiakasnro;
+    $verkkokauppa_asiakasnro = (!empty($vaihtoehtoinen_asiakasnro)) ? $vaihtoehtoinen_asiakasnro : $verkkokauppa_asiakasnro;
 
     $maksuehto = strip_tags($order['payment']['method']);
 

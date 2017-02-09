@@ -14145,7 +14145,7 @@ if (!function_exists("LisaaPaaKat")) {
 }
 
 if (!function_exists("LisaaLapsi")) {
-  function LisaaLapsi($laji, $left, $syvyys, $koodi, $nimi) {
+  function LisaaLapsi($laji, $left, $syvyys, $koodi, $nimi, $nimi_en) {
     global $kukarow;
 
     // laji pit‰‰ olla aina pienell‰, muuten Rails modeli ei toimi
@@ -14207,6 +14207,7 @@ if (!function_exists("LisaaLapsi")) {
     (
       yhtio,
       nimi,
+      nimi_en,
       koodi,
       lft,
       rgt,
@@ -14219,6 +14220,7 @@ if (!function_exists("LisaaLapsi")) {
     (
       '$kukarow[yhtio]',
       '$nimi',
+      '$nimi_en',
       '$koodi',
       $apu2,
       $syvyys + 1,
@@ -14232,7 +14234,7 @@ if (!function_exists("LisaaLapsi")) {
     $re = pupe_query($qu);
 
     // palautetaan juuri luodun rivin tiedot
-    $qu = "SELECT tunnus, nimi, koodi, lft, rgt FROM dynaaminen_puu WHERE yhtio = '$kukarow[yhtio]' AND laji = '$laji' AND koodi = '$koodi' AND nimi = '$nimi'";
+    $qu = "SELECT tunnus, nimi, nimi_en, koodi, lft, rgt FROM dynaaminen_puu WHERE yhtio = '$kukarow[yhtio]' AND laji = '$laji' AND koodi = '$koodi' AND nimi = '$nimi'";
     $re = pupe_query($qu);
     $row = mysql_fetch_assoc($re);
     return $row;
@@ -14342,7 +14344,7 @@ if (!function_exists("lapset")) {
 
 // Funktio joka p‰ivitt‰‰ valitun kategorian valitulle nimelle
 if (!function_exists("paivitakat")) {
-  function paivitakat($laji, $koodi, $nimi, $kategoriaid) {
+  function paivitakat($laji, $koodi, $nimi, $kategoriaid, $nimi_en) {
     global $kukarow;
 
     $qu = "LOCK TABLE dynaaminen_puu WRITE";
@@ -14350,6 +14352,7 @@ if (!function_exists("paivitakat")) {
 
     $qu = "UPDATE dynaaminen_puu set
            nimi='{$nimi}',
+           nimi_en='{$nimi_en}',
            koodi='{$koodi}',
            muutospvm = now(),
            muuttaja = '$kukarow[kuka]'

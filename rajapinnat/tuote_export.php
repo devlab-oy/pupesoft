@@ -242,9 +242,11 @@ if (empty($verkkokauppa_erikoiskasittely)) {
   // 4 = Vaihtoehtoinen ovttunnus OSTOTIL.OT_TOIMITTAJANRO -kentt‰‰n EDI tiedostossa
   // 5 = Rahtivapaus, jos 'E', niin k‰ytet‰‰n asiakkaan 'rahtivapaa' -oletusta
   // 6 = Tyhjennet‰‰nkˆ OSTOTIL.OT_MAKSETTU EDI tiedostossa (tyhj‰ ei, kaikki muut arvot kyll‰)
+  // 7 = Vaihtoehtoinen asiakasnro
   $verkkokauppa_erikoiskasittely = array(
     // array('Suomi',  'K', '2', '100', '',      'E', ''     ),
     // array('Ruotsi', 'E', 'E', '',    'SE123', '',  'kylla'),
+    // array('Norja', '', '', '',    '', '',  '', '123'),
   );
 }
 

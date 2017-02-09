@@ -75,7 +75,7 @@ class Edi {
           $vaihtoehtoinen_ovt = $verkkokauppaparametrit[4];
         }
 
-        if (strpos($edi_store, $verkkokauppaparametrit[0]) !== false) {
+        if (strpos($edi_store, $verkkokauppaparametrit[0]) !== false and !empty($verkkokauppaparametrit[7])) {
           $vaihtoehtoinen_asiakasnro = $verkkokauppaparametrit[7];
         }
       }

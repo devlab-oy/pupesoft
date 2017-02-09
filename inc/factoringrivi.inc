@@ -36,6 +36,10 @@ if (mysql_field_name($result, $i) == "factoringyhtio") {
   if (strtoupper($trow[$i]) == 'COLLECTOR') {
     $sel7 = "SELECTED";
   }
+  if (strtoupper($trow[$i]) == 'AKTIA') {
+    $sel8 = "SELECTED";
+  }
+
 
   $ulos  = "<td><select name='$nimi'>";
   $ulos .= "<option value='NORDEA' $sel2> ".t("Nordea Factoring")."</option>";
@@ -44,6 +48,7 @@ if (mysql_field_name($result, $i) == "factoringyhtio") {
   $ulos .= "<option value='OKO' $sel5> ".t("OKO Factoring")."</option>";
   $ulos .= "<option value='SVEA' $sel6> ".t("SVEA Factoring")."</option>";
   $ulos .= "<option value='COLLECTOR' $sel7> ".t("COLLECTOR Factoring")."</option>";
+  $ulos .= "<option value='AKTIA' $sel8> ".t("Aktia Factoring")."</option>";
   $ulos .= "</select></td>";
 
   $jatko = 0;

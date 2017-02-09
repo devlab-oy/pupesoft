@@ -19,6 +19,10 @@ elseif ($toim == 'SAMPO') {
   echo "<font class='head'>".t("Sampo Factoring siirtotiedosto").":</font><hr><br>";
   $factoringyhtio = "SAMPO";
 }
+elseif ($toim == 'AKTIA') {
+  echo "<font class='head'>".t("Aktia Factoring siirtotiedosto").":</font><hr><br>";
+  $factoringyhtio = "AKTIA";
+}
 else {
   echo "<font class='head'>".t("Nordea Factoring siirtotiedosto").":</font><hr><br>";
   $factoringyhtio = "NORDEA";
@@ -238,6 +242,9 @@ if ($tee == 'TULOSTA') {
   elseif ($toim == "SAMPO") {
     $ulos  = sprintf('%-4.4s', "SAFA"); //sovellustunnus, SAMPO factoring
   }
+  elseif ($toim == "AKTIA") {
+    $ulos  = sprintf('%-4.4s', "AKF1"); //sovellustunnus, AKTIA factoring
+  }
   else {
     $ulos  = sprintf('%-4.4s', "KRFL"); //sovellustunnus
   }
@@ -262,11 +269,14 @@ if ($tee == 'TULOSTA') {
   elseif ($toim == "SAMPO") {
     $ulos .= sprintf('%-2.2s', "PR"); //rahoitusyhtiön tunnus SAMPO
   }
+  elseif ($toim == "AKTIA") {
+    $ulos .= sprintf('%-2.2s', "AF"); //rahoitusyhtiön tunnus AKTIA
+  }
   else {
     $ulos .= sprintf('%-2.2s', "MR"); //rahoitusyhtiön tunnus
   }
 
-  if ($toim == "OKO") {
+  if (in_array($toim, array("OKO", "AKTIA"))) {
     $ulos .= sprintf('%-30.30s', $yhtiorow["nimi"]); //siirtäjän nimi
   }
   else {
@@ -421,6 +431,9 @@ if ($tee == 'TULOSTA') {
       elseif ($toim == 'SAMPO') {
         $ulos .= sprintf('%-4.4s', "SAFA"); //sovellustunnus SAMPO
       }
+      elseif ($toim == 'AKTIA') {
+        $ulos .= sprintf('%-4.4s', "AKF1"); //sovellustunnus AKTIA
+      }
       else {
         $ulos .= sprintf('%-4.4s', "KRFL"); //sovellustunnus
       }
@@ -477,7 +490,7 @@ if ($tee == 'TULOSTA') {
         $ulos .= sprintf('%04.4s', ""); //viivastyskorko (Ei käytössä)
       }
       else {
-        $ulos .= sprintf('%04.4s', $laskurow["viikorkopros"]); //viivastyskorko
+        $ulos .= sprintf('%04.5s', $laskurow["viikorkopros"]); //viivastyskorko kahdella desimaalilla
       }
 
       $ulos .= sprintf('%03.3s', 0);
@@ -509,6 +522,9 @@ if ($tee == 'TULOSTA') {
       }
       elseif ($toim == 'SAMPO') {
         $ulos .= sprintf('%-4.4s', "SAFA"); //sovellustunnus SAMPO
+      }
+      elseif ($toim == 'AKTIA') {
+        $ulos .= sprintf('%-4.4s', "AKF1"); //sovellustunnus AKTIA
       }
       else {
         $ulos .= sprintf('%-4.4s', "KRFL"); //sovellustunnus
@@ -635,9 +651,15 @@ if ($tee == 'TULOSTA') {
             $ulos .= sprintf('%-10.10s', "");
           }
 
-          $ulos .= sprintf('%03.3s', 0);
-          $ulos .= sprintf('%020.20s', $laskurow["viite"]);
-          $ulos .= sprintf('%-8.8s', "");
+          if ($toim == 'AKTIA') {
+            $ulos .= sprintf('%-6.6', 0); // Aktia Yritysrahoituksen ostajanumero (?)
+            $ulos .= sprintf('%025.25s', "");
+          }
+          else {
+            $ulos .= sprintf('%03.3s', 0);
+            $ulos .= sprintf('%020.20s', $laskurow["viite"]);
+            $ulos .= sprintf('%-8.8s', "");
+          }
         }
       }
 
@@ -700,6 +722,9 @@ if ($tee == 'TULOSTA') {
       elseif ($toim == 'SAMPO') {
         $ulos .= sprintf('%-4.4s', "SAFA"); //sovellustunnus
       }
+      elseif ($toim == 'AKTIA') {
+        $ulos .= sprintf('%-4.4s', "AKF1"); //sovellustunnus
+      }
       else {
         $ulos .= sprintf('%-4.4s', "KRFL"); //sovellustunnus
       }
@@ -744,6 +769,9 @@ if ($tee == 'TULOSTA') {
       }
       elseif ($toim == 'SAMPO') {
         $filenimi = "Samposiirto-$factoringsiirtonumero.txt";
+      }
+      elseif ($toim == 'AKTIA') {
+        $filenimi = "Aktiasiirto-$factoringsiirtonumero.txt";
       }
       else {
         $filenimi = "Nordeasiirto-$factoringsiirtonumero.txt";

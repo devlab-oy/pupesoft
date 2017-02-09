@@ -803,6 +803,7 @@ if ($tuoteno != '') {
                     FROM tapahtuma
                     WHERE yhtio    = '{$kukarow['yhtio']}'
                     AND laji       = 'korjaus'
+                    AND tuoteno    = '$tuoteno'
                     AND rivitunnus > 0
                     AND rivitunnus = '{$trow['rivitunnus']}'
                     ORDER BY laadittu DESC, tunnus DESC

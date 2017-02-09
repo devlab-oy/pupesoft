@@ -134,6 +134,10 @@ if (isset($aja_raportti) and !empty($vva) and !empty($kka) and !empty($ppa) and 
 
   echo "<td class='ptop back'>";
   piirra_taulukko(hae_data('asiakasryhmat', $limitit, $rajaukset, $asumvalinta));
+  echo "</td>";
+
+  echo "<tr><td class='ptop back'>";
+  piirra_taulukko(hae_data('asiakasosastot', $limitit, $rajaukset, $asumvalinta));
   echo "</td></tr></table>";
 }
 
@@ -270,7 +274,7 @@ function hae_data($tyyppi, $limitit, $rajaukset, $asumvalinta) {
     break;
   case "asiakasryhmat":
     $haettu_data['otsikko'] = t('Asiakasryhmät');
-    $nimikentta = " ifnull(avainsana.selitetark,'".t("Ei asiakasryhmää")."') ";
+    $nimikentta = " ifnull(ryhma.selitetark,'".t("Ei asiakasryhmää")."') ";
     $grouppauskentta = " asiakas.ryhma ";
     $limitti = in_array('asiakasryhma', $limitit) ? '' : ' LIMIT 10 ';
     break;
@@ -279,6 +283,12 @@ function hae_data($tyyppi, $limitit, $rajaukset, $asumvalinta) {
     $nimikentta = " ifnull(kuka.nimi,'".t("Ei asiakasmyyjää")."') ";
     $grouppauskentta = " asiakas.myyjanro ";
     $limitti = in_array('asiakasmyyja', $limitit) ? '' : ' LIMIT 10 ';
+    break;
+  case "asiakasosastot":
+    $haettu_data['otsikko'] = t('Asiakasosastot');
+    $nimikentta = " ifnull(osasto.selitetark,'".t("Ei asiakasosastoa")."') ";
+    $grouppauskentta = " asiakas.osasto ";
+    $limitti = in_array('asiakasosasto', $limitit) ? '' : ' LIMIT 10 ';
     break;
   }
 
@@ -303,9 +313,12 @@ function hae_data($tyyppi, $limitit, $rajaukset, $asumvalinta) {
             LEFT JOIN kuka ON (kuka.yhtio = asiakas.yhtio
               AND kuka.myyja               = asiakas.myyjanro
               AND kuka.myyja               > 0)
-            LEFT JOIN avainsana ON (avainsana.yhtio = lasku.yhtio
-              AND avainsana.laji           = 'ASIAKASRYHMA'
-              AND avainsana.selite         = asiakas.ryhma)
+            LEFT JOIN avainsana AS ryhma ON (ryhma.yhtio = lasku.yhtio
+              AND ryhma.laji           = 'ASIAKASRYHMA'
+              AND ryhma.selite         = asiakas.ryhma)
+            LEFT JOIN avainsana AS osasto ON (osasto.yhtio = lasku.yhtio
+              AND osasto.laji           = 'ASIAKASOSASTO'
+              AND osasto.selite         = asiakas.osasto)
             WHERE lasku.yhtio              = '{$kukarow['yhtio']}'
             AND lasku.tila                 = 'U'
             AND lasku.alatila              = 'X'

@@ -1361,9 +1361,11 @@ if (is_resource($sarjaresiso) and mysql_num_rows($sarjaresiso) > 0) {
         $lisat_res = pupe_query($query);
         $lisat_row = mysql_fetch_assoc($lisat_res);
 
-        // Lukitaan sarjanumero
-        $sarjarow["osto_laskaika"] = date("Y-m-d");
-        $sarjarow["myyntirivitunnus"] = $lisat_row["tunnus"];
+        if ($lisat_row != "") {
+          // Lukitaan sarjanumero
+          $sarjarow["osto_laskaika"] = date("Y-m-d");
+          $sarjarow["myyntirivitunnus"] = $lisat_row["tunnus"];
+        }
       }
 
       if ($sarjarow["era_kpl"] < 0) {
@@ -1491,7 +1493,8 @@ if (is_resource($sarjaresiso) and mysql_num_rows($sarjaresiso) > 0) {
           (($from == "riviosto" or $from == "kohdista") and $ostonhyvitysrivi != "ON" and $sarjarow["osto_laskaika"] > '0000-00-00' and ($sarjarow["siirtorivitunnus"] > 0 or $sarjarow["myyntirivitunnus"] > 0)) or
           ($valmiste_raakaine == "RAAKA-AINE" and ($sarjarow["myynti_toimitettuaika"] > "0000-00-00 00:00:00" or $sarjarow["myynti_laskaika"] > "0000-00-00")) or
           ($valmiste_raakaine == "VALMISTE" and ($sarjarow["osto_toimitettuaika"] > "0000-00-00 00:00:00" or $sarjarow["osto_laskaika"] > "0000-00-00")) or
-          ($from == "SIIRTOTYOMAARAYS" and $sarjarow["ostorivitunnus"] == 0)) {
+          ($from == "SIIRTOTYOMAARAYS" and $sarjarow["ostorivitunnus"] == 0) or
+          ($from == "kohdista" and $sarjarow["osto_laskaika"] > "0000-00-00")) {
           $dis = "DISABLED";
         }
         else {

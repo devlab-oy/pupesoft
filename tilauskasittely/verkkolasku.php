@@ -1344,8 +1344,8 @@ else {
               }
             }
 
-            $query  = "INSERT INTO tilausrivi (laatija, laadittu, hinta, {$ale_lisa_insert_query_1} netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti)
-                       values ('automaatti', now(), '$rah_hinta', {$ale_lisa_insert_query_2} '$rah_netto', '1', '1', '$otunnus', '$trow[tuoteno]', '$nimitys', '$kukarow[yhtio]', 'L', '$rah_alv', '$kommentti')";
+            $query  = "INSERT INTO tilausrivi (laatija, laadittu, hinta, {$ale_lisa_insert_query_1} netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti, kerattyaika, toimitettuaika)
+                       values ('automaatti', now(), '$rah_hinta', {$ale_lisa_insert_query_2} '$rah_netto', '1', '1', '$otunnus', '$trow[tuoteno]', '$nimitys', '$kukarow[yhtio]', 'L', '$rah_alv', '$kommentti', now(), now())";
             $addtil = pupe_query($query);
 
             if ($silent == "") {
@@ -1559,7 +1559,8 @@ else {
                           perheid2        = '',
                           nimitys         = '$trow[nimitys]',
                           jaksotettu      = '',
-                          kerattyaika     = now()";
+                          kerattyaika     = now(),
+                          toimitettuaika  = now()";
                 $addtil = pupe_query($query);
                 $lisatty_tun = mysql_insert_id($GLOBALS["masterlink"]);
 
@@ -1798,7 +1799,8 @@ else {
                         perheid2        = '',
                         nimitys         = '$trow[nimitys]',
                         jaksotettu      = '',
-                        kerattyaika     = now()";
+                        kerattyaika     = now(),
+                        toimitettuaika  = now()";
               $addtil = pupe_query($query);
               $lisatty_tun = mysql_insert_id($GLOBALS["masterlink"]);
 

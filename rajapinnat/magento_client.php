@@ -319,8 +319,8 @@ class MagentoClient {
       $_key = $this->magento_simple_tuote_nimityskentta;
       $tuotteen_nimitys = $tuote[$_key];
 
+      // Simple tuotteiden parametrit kuten koko ja väri (oletuskieli on fi)
       if (!empty($tuote['tuotteen_parametrit']['fi'])) {
-        // Simple tuotteiden parametrit kuten koko ja väri (oletuskieli on fi)
         foreach ($tuote['tuotteen_parametrit']['fi'] as $parametri) {
           $key = $parametri['option_name'];
           $option_id = $this->get_option_id($key, $parametri['arvo'], $attribute_set_id);
@@ -537,24 +537,26 @@ class MagentoClient {
             }
 
             // Simple tuotteiden parametrit kuten koko ja väri
-            foreach ($tuote['tuotteen_parametrit'][$kieli] as $parametri) {
-              $key = $parametri['option_name'];
-              $option_id = $this->get_option_id($key, $parametri['arvo'], $attribute_set_id);
+            if (!empty($tuote['tuotteen_parametrit'][$kieli])) {
+              foreach ($tuote['tuotteen_parametrit'][$kieli] as $parametri) {
+                $key = $parametri['option_name'];
+                $option_id = $this->get_option_id($key, $parametri['arvo'], $attribute_set_id);
 
-              if ($option_id == 0) {
-                continue;
+                if ($option_id == 0) {
+                  continue;
+                }
+
+                $multi_data[$key] = $option_id;
+
+                $this->log('magento_tuotteet', "Tuotteen parametri kielikäännös {$kieli} {$tuote['tuoteno']} - {$key}: {$parametri['arvo']} ({$multi_data[$key]})");
+
+                // Lisätään lapsituotteen nimeen variaatioiden arvot
+                if ($this->magento_nimitykseen_parametrien_arvot === true) {
+                  $kaannokset['nimitys'] .= " - {$parametri['arvo']}";
+                }
+
+                $tuotteen_kauppakohtainen_data3['additional_attributes'] = array('multi_data' => $multi_data);
               }
-
-              $multi_data[$key] = $option_id;
-
-              $this->log('magento_tuotteet', "Tuotteen parametri kielikäännös {$kieli} {$tuote['tuoteno']} - {$key}: {$parametri['arvo']} ({$multi_data[$key]})");
-
-              // Lisätään lapsituotteen nimeen variaatioiden arvot
-              if ($this->magento_nimitykseen_parametrien_arvot === true) {
-                $kaannokset['nimitys'] .= " - {$parametri['arvo']}";
-              }
-
-              $tuotteen_kauppakohtainen_data3['additional_attributes'] = array('multi_data' => $multi_data);
             }
 
             // Päivitetään jokaiseen kauppatunnukseen haluttu käännös
@@ -1940,10 +1942,12 @@ class MagentoClient {
     $url_key = $this->sanitize_link_rewrite($tuotedata['nimi']);
     $parametrit = array();
 
-    foreach ($tuotedata['tuotteen_parametrit']['fi'] as $parametri) {
-      $key = $parametri['option_name'];
-      $value = $parametri['arvo'];
-      $parametrit[$key] = $value;
+    if (!empty($tuotedata['tuotteen_parametrit']['fi'])) {
+      foreach ($tuotedata['tuotteen_parametrit']['fi'] as $parametri) {
+        $key = $parametri['option_name'];
+        $value = $parametri['arvo'];
+        $parametrit[$key] = $value;
+      }
     }
 
     foreach ($halutut_array as $key => $value) {

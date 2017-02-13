@@ -652,7 +652,7 @@ if ($tee == 'TULOSTA') {
           }
 
           if ($toim == 'AKTIA') {
-            $ulos .= sprintf('%-6.6', 0); // Aktia Yritysrahoituksen ostajanumero (?)
+            $ulos .= sprintf('%06.6s', $frow["sopimusnumero"]); // Aktia Yritysrahoituksen ostajanumero
             $ulos .= sprintf('%025.25s', "");
           }
           else {

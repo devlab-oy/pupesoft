@@ -648,6 +648,7 @@ if (!function_exists('rivi_otsikot_kerayslista')) {
 
       if ($kerayslistatyyppi == 'EXCEL3') {
         $thispage->writeString($kala, 5, "Price", $boldi);
+        $thispage->writeString($kala, 6, "Row price", $boldi);
       }
 
       $kala++;
@@ -721,7 +722,8 @@ if (!function_exists('rivi_kerayslista')) {
 
       if ($kerayslistatyyppi == 'EXCEL3') {
         if ($row["var"] == "" or  $row["var"] == "H") {
-          $thispage->writeString($kala, 5, (float) round($row['rivihinta'], 2));
+          $thispage->writeString($kala, 5, (float) round($row['kplhinta'], 2));
+          $thispage->writeString($kala, 6, (float) round($row['rivihinta'], 2));
         }
       }
 

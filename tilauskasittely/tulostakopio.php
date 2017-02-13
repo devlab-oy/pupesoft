@@ -2311,6 +2311,7 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
         $query = "SELECT tilausrivi.*,
                   $ale_query_select_lisa_y aleyhteensa,
                   round(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * {$query_ale_lisa},'$yhtiorow[hintapyoristys]') rivihinta,
+                  round(tilausrivi.hinta * {$query_ale_lisa},'$yhtiorow[hintapyoristys]') kplhinta,
                   tuote.sarjanumeroseuranta,
                   kerayserat.kpl as tilkpl,
                   kerayserat.kpl as varattu,
@@ -2330,6 +2331,7 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
         $query = "SELECT tilausrivi.*,
                   $ale_query_select_lisa_y aleyhteensa,
                   round(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * {$query_ale_lisa},'$yhtiorow[hintapyoristys]') rivihinta,
+                  round(tilausrivi.hinta * {$query_ale_lisa},'$yhtiorow[hintapyoristys]') kplhinta,
                   $select_lisa
                   $sorttauskentta,
                   if (tuote.tuotetyyppi='K','2 Työt','1 Muut') tuotetyyppi,

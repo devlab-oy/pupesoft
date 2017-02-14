@@ -1,8 +1,13 @@
 <?php
 echo "<font class='head'>".t("Maksuvalmius")."</font><hr>";
 
-$sel1 = $sel2 = $sel3 = $sel4 = $sel5 = $sel6 = "";
+$sel1 = $sel2 = $sel3 = $sel4 = $sel5 = "";
 $kumulat = 0;
+
+if (!empty($pankkisaldo_ser)) {
+  $pankkisaldo = explode(",", $pankkisaldo_ser);
+  $pankkisaldo = array_combine($pankkisaldo, $pankkisaldo);
+}
 
 if ($aika == 'pv') {
   $sel1 = 'SELECTED';
@@ -22,10 +27,6 @@ if ($konserni != '') {
 
 if ($eilahetettyja != '') {
   $sel5 = "CHECKED";
-}
-
-if ($pankkisaldo != '') {
-  $sel6 = "CHECKED";
 }
 
 echo "<form action = 'raportit.php' method='post'>
@@ -337,8 +338,8 @@ if ($aika != '') {
     }
 
     if ($aika == 'pv' and !empty($trow["Aika"])) {
-      echo "<td class='text-right{$class}'><a href = '${palvelin2}myyntires/myyntilaskuhaku.php?tee=M&pvm=$trow[Aika]&laskuntyyppi=A&lopetus=$PHP_SELF////tee=$tee//toim=$toim//aika=$aika//konserni=$konserni//eilahetettyja=$eilahetettyja//pankkisaldo=$pankkisaldo//saamisrajaus=$saamisrajaus'>$trow[Myyntires]</a></td>";
-      echo "<td class='text-right{$class}'><a href = 'raportit.php?toim=laskuhaku&tee=M&pvm=$trow[Aika]&lopetus=$PHP_SELF////tee=$tee//toim=$toim//aika=$aika//konserni=$konserni//eilahetettyja=$eilahetettyja//pankkisaldo=$pankkisaldo//saamisrajaus=$saamisrajaus'>$trow[Ostores]</a></td>";
+      echo "<td class='text-right{$class}'><a href = '${palvelin2}myyntires/myyntilaskuhaku.php?tee=M&pvm=$trow[Aika]&laskuntyyppi=A&lopetus=$PHP_SELF////tee=$tee//toim=$toim//aika=$aika//konserni=$konserni//eilahetettyja=$eilahetettyja//pankkisaldo_ser=".urlencode(implode(",", $pankkisaldo))."//saamisrajaus=$saamisrajaus'>$trow[Myyntires]</a></td>";
+      echo "<td class='text-right{$class}'><a href = 'raportit.php?toim=laskuhaku&tee=M&pvm=$trow[Aika]&lopetus=$PHP_SELF////tee=$tee//toim=$toim//aika=$aika//konserni=$konserni//eilahetettyja=$eilahetettyja//pankkisaldo_ser=".urlencode(implode(",", $pankkisaldo))."//saamisrajaus=$saamisrajaus'>$trow[Ostores]</a></td>";
     }
     else {
       echo "<td class='text-right{$class}'>$trow[Myyntires]</td>";

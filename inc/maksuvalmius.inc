@@ -48,12 +48,35 @@ if ($yhtiorow["konserni"] != "") {
 echo "<tr><td>".t("Älä näytä lähetettyjä")."</td>
     <td><input type = 'checkbox' name = 'eilahetettyja' $sel5></td></tr>";
 
-echo "<tr><td>".t("Kätyä pankkitilin maksulimittiä alkusaldona")."</td>
-       <td><input type = 'checkbox' name = 'pankkisaldo' $sel6></td></tr>";
+echo "<tr><td class='ptop'>".t("Huomioi pankkitilin maksulimitti alkusaldona")."</td>
+       <td><table>";
+
+ $query = "SELECT yriti.*,
+           round(yriti.maksulimitti) maksulimitti,
+           round(yriti.maksulimitti * valuu.kurssi) maksulimitti_kotival
+           FROM yriti
+           JOIN valuu ON (yriti.yhtio = valuu.yhtio and yriti.valkoodi = valuu.nimi)
+           WHERE yriti.yhtio  = '$kukarow[yhtio]'
+           AND yriti.maksulimitti > 0";
+ $yres = pupe_query($query);
+
+ while ($yrow = mysql_fetch_assoc($yres)) {
+
+  $chk = (!empty($pankkisaldo[$yrow[tunnus]])) ? "CHECKED" : "";
+
+  echo "<tr>
+        <td><input type = 'checkbox' name = 'pankkisaldo[$yrow[tunnus]]' value='$yrow[tunnus]' $chk></td>
+        <td>$yrow[nimi]</td>
+        <td align='right'>$yrow[maksulimitti] $yrow[valkoodi]</td>
+        <td align='right'>$yrow[maksulimitti_kotival] $yhtiorow[valkoodi]</td>
+        </tr>";
+ }
+
+echo "</table></td></tr>";
 
 $chk = array_fill_keys(array($saamisrajaus), " selected") + array_fill_keys(array('1', '2', '3'), '');
 
-echo "<tr><td>".t("Älä huomioi rajausta vanhempia myntisaamisia")." </td>
+echo "<tr><td>".t("Älä huomioi rajausta vanhempia myyntisaamisia")." </td>
       <td><select name='saamisrajaus'>
             <option value = ''>".t("Ei rajausta")."</option>
             <option value = '1' $chk[1]>1 ".t("kuukausi")."</option>
@@ -270,10 +293,11 @@ if ($aika != '') {
 
   // Pankkitilien saldo
   if (!empty($pankkisaldo)) {
-    $query = "SELECT sum(maksulimitti) saldo_nyt
+    $query = "SELECT round(sum(yriti.maksulimitti * valuu.kurssi), 2) saldo_nyt
               FROM yriti
-              WHERE yhtio  = '$kukarow[yhtio]'
-              AND valkoodi = '$yhtiorow[valkoodi]'";
+              JOIN valuu ON (yriti.yhtio = valuu.yhtio and yriti.valkoodi = valuu.nimi)
+              WHERE yriti.yhtio  = '$kukarow[yhtio]'
+              AND yriti.tunnus in (".implode(",", $pankkisaldo).")";
     $yres = pupe_query($query);
     $yrow = mysql_fetch_assoc($yres);
 

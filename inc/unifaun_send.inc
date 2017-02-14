@@ -789,6 +789,7 @@ class Unifaun {
     // Vain tietyille palveluille sallitaan goodsdescription
     $_goodsdescription = array(
       'DAME',
+      'DAECX',
     );
 
     if (in_array($this->toitarow['virallinen_selite'], $_goodsdescription)) {

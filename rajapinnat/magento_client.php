@@ -362,11 +362,15 @@ class MagentoClient {
           $option_id = $this->get_option_id($key, $tuote[$erikoisparametri['arvo']], $attribute_set_id);
 
           if ($option_id == 0) {
+            $this->log('magento_tuotteet', "Erikoisparametri {$key}: {$tuote[$erikoisparametri['arvo']]} #option_id == 0, jätetään päivittämättä");
             continue;
           }
 
           $multi_data[$key] = $option_id;
           $this->log('magento_tuotteet', "Erikoisparametri {$key}: {$tuote[$erikoisparametri['arvo']]}");
+        }
+        else {
+          $this->log('magento_tuotteet', "Erikoisparametri {$key}: {$tuote[$erikoisparametri['arvo']]} #!isset, jätetään päivittämättä");
         }
       }
 
@@ -2209,6 +2213,7 @@ class MagentoClient {
       if (strcasecmp($attribute['code'], $name) == 0) {
         $attribute_id = $attribute['attribute_id'];
         $attribute_type = $attribute['type'];
+        $this->log('magento_tuotteet', "Atribuutti '{$name}' ({$value}) löytyi setistä {$attribute_set_id}, attribute_id: {$attribute_id}, attribute_type: {$attribute_type}");
         break;
       }
     }

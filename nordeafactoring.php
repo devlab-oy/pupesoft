@@ -482,7 +482,11 @@ if ($tee == 'TULOSTA') {
       $ulos .= sprintf('%-13.13s', "");
       $ulos .= sprintf('%-30.30s', "");
       $ulos .= sprintf('%-13.13s', "");
-      $ulos .= sprintf('%-13.13s', "");
+
+      if ($toim != "AKTIA") {
+        $ulos .= sprintf('%-13.13s', "");
+      }
+
       $ulos .= sprintf('%-2.2s', "FI"); //kieli
       $ulos .= sprintf('%-3.3s', $laskurow["valkoodi"]); //valuutta
 
@@ -490,7 +494,7 @@ if ($tee == 'TULOSTA') {
         $ulos .= sprintf('%04.4s', ""); //viivastyskorko (Ei käytössä)
       }
       else {
-        $ulos .= sprintf('%04.5s', $laskurow["viikorkopros"]); //viivastyskorko kahdella desimaalilla
+        $ulos .= sprintf('%04.4s', $laskurow["viikorkopros"]);
       }
 
       $ulos .= sprintf('%03.3s', 0);
@@ -653,7 +657,7 @@ if ($tee == 'TULOSTA') {
 
           if ($toim == 'AKTIA') {
             $ulos .= sprintf('%06.6s', $frow["sopimusnumero"]); // Aktia Yritysrahoituksen ostajanumero
-            $ulos .= sprintf('%025.25s', "");
+            $ulos .= sprintf('%-25.25s', "");
           }
           else {
             $ulos .= sprintf('%03.3s', 0);

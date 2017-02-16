@@ -138,6 +138,10 @@ if (isset($aja_raportti) and !empty($vva) and !empty($kka) and !empty($ppa) and 
 
   echo "<tr><td class='ptop back'>";
   piirra_taulukko(hae_data('asiakasosastot', $limitit, $rajaukset, $asumvalinta));
+  echo "</td>";
+
+  echo "<td class='ptop back'>";
+  piirra_taulukko(hae_data('tuotemerkit', $limitit, $rajaukset, $asumvalinta));
   echo "</td></tr></table>";
 }
 
@@ -290,6 +294,12 @@ function hae_data($tyyppi, $limitit, $rajaukset, $asumvalinta) {
     $grouppauskentta = " asiakas.osasto ";
     $limitti = in_array('asiakasosasto', $limitit) ? '' : ' LIMIT 10 ';
     break;
+  case "tuotemerkit":
+    $haettu_data['otsikko'] = t('Tuotemerkit');
+    $nimikentta = " ifnull(avainsana.selite,'".t("Ei tuotemerkkiä")."') ";
+    $grouppauskentta = " tuote.tuotemerkki ";
+    $limitti = in_array('tuotemerkki', $limitit) ? '' : ' LIMIT 10 ';
+    break;
   }
 
   $query = "SELECT {$nimikentta} nimi,
@@ -305,6 +315,9 @@ function hae_data($tyyppi, $limitit, $rajaukset, $asumvalinta) {
               AND tuote.tuoteno            = tilausrivi.tuoteno
               AND tuote.myynninseuranta    = ''
               {$tuoterajaus})
+            LEFT JOIN avainsana  ON (avainsana.yhtio = lasku.yhtio
+              AND avainsana.laji           = 'TUOTEMERKKI'
+              AND avainsana.selite         = tuote.tuotemerkki)
             JOIN asiakas use index (PRIMARY) ON (asiakas.yhtio = lasku.yhtio
               AND asiakas.tunnus           = lasku.liitostunnus
               AND asiakas.myynninseuranta  = ''

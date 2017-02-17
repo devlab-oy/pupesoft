@@ -44,124 +44,126 @@ $(document).ready(function() {
 
     $("input[name='kpl']").on('keyup', function() {
 
-      if (toim == 'PIKATILAUS') {
-        var netto = $("input[name='netto']");
-      }
-      else {
-        var netto = $("select[name='netto']");
-      }
+      var kplkentta = $(this)
 
-      if ($("input[name='tuoteno']").val() != '') {
+      delay_ms(function(){
 
-        if ($(this).val() == '' && (rivitunnus_chk.length == 0 || rivitunnus_chk.val() == '')) {
-          $("input[name='hinta']").val('');
-          $("input[name='ale1']").val('');
-          $("input[name='ale2']").val('');
-          $("input[name='ale3']").val('');
-          $('#kate_rivi_laskenta').html('');
-          $('#ykshinta_rivi_laskenta').html('');
-          $('#rivihinta_rivi_laskenta').html('');
-
-          if (toim == 'PIKATILAUS') {
-            netto.val('');
-          }
-          else {
-            netto.val('');
-          }
+        if (toim == 'PIKATILAUS') {
+          var netto = $("input[name='netto']");
         }
         else {
-          $.ajax({
-            async: false,
-            type: 'POST',
-            data: {
-              tuoteno: $("input[name='tuoteno']").val(),
-              kpl: $("input[name='kpl']").val(),
-              hinta: $("input[name='hinta']").val(),
-              ale1: $("input[name='ale1']").val(),
-              ale2: $("input[name='ale2']").val(),
-              ale3: $("input[name='ale3']").val(),
-              alv: $("select[name='alv']").val(),
-              netto: netto.val(),
-              tilausnumero: $("input[name='tilausnumero']").val(),
-              tilausrivi_alvillisuus: tilausrivi_alvillisuus,
-              toim: toim,
-              ajax_toiminto: 'esisyotto',
-              no_head: 'yes',
-              ohje: 'off'
-            },
-            url: '../tilauskasittely/tilaus_myynti.php'
-          }).done(function(data) {
-
-            var data = jQuery.parseJSON(data);
-
-            if (data.hinta != '' && (rivitunnus_chk.length == 0 || rivitunnus_chk.val() == '' || $("input[name='hinta']").val() == '')) {
-              $("input[name='hinta']").val(data.hinta);
-            }
-
-            if (data.netto != '') {
-
-              if (toim == 'PIKATILAUS') {
-                $("input[name='netto']").val(data.netto);
-              }
-              else {
-                $("select[name='netto']").val(data.netto);
-              }
-            }
-
-            $.each(data['ale'], function(index, value) {
-              if (value != '') {
-                $("input[name='"+index+"']").val(value);
-              }
-            });
-
-            if (data.kate && data.kate != '') {
-              $('#kate_rivi_laskenta').html(data.kate+'%');
-            }
-
-            if (data.ykshinta != '') {
-              $('#ykshinta_rivi_laskenta').html(data.ykshinta);
-            }
-
-            if (data.rivihinta != '') {
-              $('#rivihinta_rivi_laskenta').html(data.rivihinta);
-            }
-
-          }).fail(function(data) {
-            console.log('Esisyotossa virhe');
-          });
+          var netto = $("select[name='netto']");
         }
-      }
+
+        if ($("input[name='tuoteno']").val() != '') {
+          if (kplkentta.val() == '' && (rivitunnus_chk.length == 0 || rivitunnus_chk.val() == '')) {
+            $("input[name='hinta']").val('');
+            $("input[name='ale1']").val('');
+            $("input[name='ale2']").val('');
+            $("input[name='ale3']").val('');
+            $('#kate_rivi_laskenta').html('');
+            $('#ykshinta_rivi_laskenta').html('');
+            $('#rivihinta_rivi_laskenta').html('');
+
+            if (toim == 'PIKATILAUS') {
+              netto.val('');
+            }
+            else {
+              netto.val('');
+            }
+          }
+          else {
+            $.ajax({
+              async: false,
+              type: 'POST',
+              data: {
+                tuoteno: $("input[name='tuoteno']").val(),
+                kpl: $("input[name='kpl']").val(),
+                hinta: $("input[name='hinta']").val(),
+                hinta_esisyotetty: $("input[name='hinta']").attr('class'),
+                ale1: $("input[name='ale1']").val(),
+                ale2: $("input[name='ale2']").val(),
+                ale3: $("input[name='ale3']").val(),
+                alv: $("select[name='alv']").val(),
+                netto: netto.val(),
+                tilausnumero: $("input[name='tilausnumero']").val(),
+                tilausrivi_alvillisuus: tilausrivi_alvillisuus,
+                toim: toim,
+                ajax_toiminto: 'esisyotto',
+                no_head: 'yes',
+                ohje: 'off'
+              },
+              url: '../tilauskasittely/tilaus_myynti.php'
+            }).done(function(data) {
+
+              var data = jQuery.parseJSON(data);
+
+              $("input[name='hinta']").addClass('esisyotetty')
+
+              if (data.hinta != '' && (rivitunnus_chk.length == 0 || rivitunnus_chk.val() == '' || $("input[name='hinta']").val() == '')) {
+                $("input[name='hinta']").val(data.hinta);
+              }
+
+              if (data.netto != '') {
+
+                if (toim == 'PIKATILAUS') {
+                  $("input[name='netto']").val(data.netto);
+                }
+                else {
+                  $("select[name='netto']").val(data.netto);
+                }
+              }
+
+              $.each(data['ale'], function(index, value) {
+                if (value != '') {
+                  $("input[name='"+index+"']").val(value);
+                }
+              });
+
+              if (data.kate && data.kate != '') {
+                $('#kate_rivi_laskenta').html(data.kate+'%');
+              }
+
+              if (data.ykshinta != '') {
+                $('#ykshinta_rivi_laskenta').html(data.ykshinta);
+              }
+
+              if (data.rivihinta != '') {
+                $('#rivihinta_rivi_laskenta').html(data.rivihinta);
+              }
+
+            }).fail(function(data) {
+              console.log('Esisyotossa virhe');
+            });
+          }
+        }
+
+      }, 500 );
+
     });
 
     $("input[name='ale1']").on('keyup', function() {
-      setTimeout(() => { $("input[name='kpl']").trigger('keyup') }, 500)
+      setTimeout(() => { $("input[name='kpl']").trigger('keyup') }, 0)
     });
 
     $("input[name='ale2']").on('keyup', function() {
-      setTimeout(() => { $("input[name='kpl']").trigger('keyup') }, 500)
+      setTimeout(() => { $("input[name='kpl']").trigger('keyup') }, 0)
     });
 
     $("input[name='ale3']").on('keyup', function() {
-      setTimeout(() => { $("input[name='kpl']").trigger('keyup') }, 500)
+      setTimeout(() => { $("input[name='kpl']").trigger('keyup') }, 0)
     });
 
     $("select[name='alv']").on('change', function() {
-      setTimeout(() => { $("input[name='kpl']").trigger('keyup') }, 500)
+      setTimeout(() => { $("input[name='kpl']").trigger('keyup') }, 0)
     });
 
     $("input[name='hinta']").on('keyup', function() {
-      if ($("input[name='hinta']").val() != '') {
-        setTimeout(() => { $("input[name='kpl']").trigger('keyup') }, 500)
-      }
-      else {
-        $('#kate_rivi_laskenta').html('');
-        $('#ykshinta_rivi_laskenta').html('');
-        $('#rivihinta_rivi_laskenta').html('');
-      }
+      setTimeout(() => { $("input[name='kpl']").trigger('keyup') }, 0)
     });
 
     if (rivitunnus_chk.length != 0 && rivitunnus_chk.val() != '') {
-      setTimeout(() => { $("input[name='kpl']").trigger('keyup') })
+      setTimeout(() => { $("input[name='kpl']").trigger('keyup') }, 0)
     }
   }
 

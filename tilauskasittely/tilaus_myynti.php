@@ -4952,7 +4952,7 @@ if ($tee == '') {
           $toimitettuaika = 0;
         }
 
-        if ($tila == "VARMUUTOS" and in_array($tapa, array("POISJTSTA","PUUTE","PUUTE"))) {
+        if ($tila == "VARMUUTOS" and in_array($tapa, array("POISJTSTA","PUUTE","JT"))) {
           //otetaan varattukpl ja jtkpl muuttuja käyttöön
           $varattukpl = 0;
           $jtkpl = 0;

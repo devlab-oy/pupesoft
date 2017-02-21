@@ -28,6 +28,12 @@ if ($yhtiorow['kerayserat'] != 'K' and $kollityht > 0) {
       $postirow = mysql_fetch_assoc($tempr);
     }
 
+    // haetaan toimipaikan avulla uusi yhtiorow,
+    // niin saadaan sanomille toimipaikan tietoja oikein
+    if (!empty($postirow["yhtio_toimipaikka"])) {
+      $yhtiorow = hae_yhtion_parametrit($yhtio, $postirow["yhtio_toimipaikka"]);
+    }
+
     // Maksuehdon tiedot
     $query = "SELECT *
               FROM maksuehto

@@ -426,15 +426,13 @@ foreach ($tulostimet as $tulostin) {
     echo "<option value='asiakasemail$asrow[lasku_email]'>".t("Asiakkaan laskutussähköpostiin").": $asrow[lasku_email]</option>";
   }
 
-  $_excel_lahete_hinnoilla = "<option value='excel_lahete_hinnoilla'>".t("Excel-tilausvahvistus hintatiedoilla")."</option>";
-
   if ($toim == 'TILAUSVAHVISTUS') {
     echo "<option value='excel_lahete_geodis_wilson'>".t("Excel-tilausvahvistus")."</option>";
-    echo $_excel_lahete_hinnoilla;
+    echo "<option value='excel_lahete_hinnoilla'>".t("Excel-tilausvahvistus hintatiedoilla")."</option>";
   }
 
   if ($toim == 'TARJOUS') {
-    echo $_excel_lahete_hinnoilla;
+    echo "<option value='excel_lahete_hinnoilla'>".t("Excel-tarjous hintatiedoilla")."</option>";
   }
 
   if (isset($editoimrow) and $editoimrow["edi_kuvaus"] != '' and

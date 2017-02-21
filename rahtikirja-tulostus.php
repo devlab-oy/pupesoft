@@ -744,7 +744,7 @@ if ($tee == 'tulosta') {
 
       while ($rivi = mysql_fetch_assoc($res)) {
 
-        // rahtikirjat.tunnus rtunnus ja lasku.tunnus otunnus... tarvitaan myöhemmin hauissa
+        // lasku.tunnus otunnus ja rahtikirjat.tunnus rtunnus... tarvitaan myöhemmin hauissa
         $otunnukset   .= "$rivi[otunnus],";
         $tunnukset    .= "$rivi[rtunnus],";
 

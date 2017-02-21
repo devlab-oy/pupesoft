@@ -34481,6 +34481,10 @@ if (!function_exists("tilauksen_seurantalinkit")) {
       // unifaun ja mittoihin perustuvat keräyserät ei ole käytössä
       elseif ($unifaun and $yhtiorow['kerayserat'] != 'K') {
 
+        if (strpos($_SERVER['SCRIPT_NAME'], "asiakkaantilaukset.php") !== FALSE) {
+          $row['kieli'] = $kukarow['kieli'];
+        }
+
         if ($row['kieli'] == 'en') {
           $_kieli = "gb.";
         }

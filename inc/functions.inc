@@ -34373,7 +34373,7 @@ if (!function_exists("tilauksen_seurantalinkit")) {
               JOIN toimitustapa on (toimitustapa.yhtio = rahtikirjat.yhtio
                 AND toimitustapa.selite = lasku.toimitustapa)
               WHERE rahtikirjat.yhtio = '{$kukarow['yhtio']}'
-              AND rahtikirjat.otsikkonro IN ({$tunnukset})
+              AND rahtikirjat.tunnus IN ({$tunnukset})
               GROUP BY 1,2,3,4,5,6";
     $result = pupe_query($query);
 
@@ -34428,7 +34428,7 @@ if (!function_exists("tilauksen_seurantalinkit")) {
           $nro = str_replace(' ', '', $nro);
           $seurantakoodit[] = array(
             "id" => $nro,
-            "link" => "http://www.posti.fi/henkiloasiakkaat/seuranta/#/lahetys/{$nro}",
+            "link" => "http://www.posti.fi/henkiloasiakkaat/seuranta/#/lahetys/{$nro} \n",
           );
         }
       }

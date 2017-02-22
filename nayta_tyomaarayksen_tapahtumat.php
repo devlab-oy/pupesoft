@@ -41,7 +41,8 @@ function hae_tapahtumahistoria($tyomaaraystunnus) {
               AND jonotaulu.selite                         = tyomaarayksen_tapahtumat.tyojono_selite
             WHERE tyomaarayksen_tapahtumat.yhtio           = '{$kukarow['yhtio']}'
             AND tyomaarayksen_tapahtumat.tyomaarays_tunnus = '$tyomaaraystunnus'
-            AND tilataulu.selitetark_5 != ''
+            AND tilataulu.selitetark_5                    != ''
+            AND tilataulu.kieli                            = '{$kukarow['kieli']}'
             ORDER BY tyomaarayksen_tapahtumat.luontiaika desc";
   $historiares = pupe_query($query);
 

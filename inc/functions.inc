@@ -34367,14 +34367,16 @@ if (!function_exists("tilauksen_seurantalinkit")) {
               rahtikirjat.sscc_ulkoinen,
               toimitustapa.rahtikirja,
               toimitustapa.virallinen_selite,
+              asiakas.kieli,
               sum(rahtikirjat.kollit) as kollit
               FROM rahtikirjat
               JOIN lasku on (lasku.tunnus = rahtikirjat.otsikkonro)
+              JOIN asiakas on (asiakas.tunnus = lasku.liitostunnus)
               JOIN toimitustapa on (toimitustapa.yhtio = rahtikirjat.yhtio
                 AND toimitustapa.selite = lasku.toimitustapa)
               WHERE rahtikirjat.yhtio = '{$kukarow['yhtio']}'
               AND rahtikirjat.otsikkonro IN ({$tunnukset})
-              GROUP BY 1,2,3,4,5,6";
+              GROUP BY 1,2,3,4,5,6,7";
     $result = pupe_query($query);
 
     while ($row = mysql_fetch_assoc($result)) {
@@ -34478,6 +34480,21 @@ if (!function_exists("tilauksen_seurantalinkit")) {
       }
       // unifaun ja mittoihin perustuvat keräyserät ei ole käytössä
       elseif ($unifaun and $yhtiorow['kerayserat'] != 'K') {
+
+        if (strpos($_SERVER['SCRIPT_NAME'], "asiakkaantilaukset.php") !== FALSE) {
+          $row['kieli'] = $kukarow['kieli'];
+        }
+
+        if ($row['kieli'] == 'en') {
+          $_kieli = "gb.";
+        }
+        elseif ($row['kieli'] == 'se') {
+          $_kieli = "se.";
+        }
+        else {
+          $_kieli = "fi.";
+        }
+
         foreach (explode("\n", $rahtikirjanro) as $rakirno) {
           if (empty($rakirno)) {
             continue;
@@ -34485,7 +34502,7 @@ if (!function_exists("tilauksen_seurantalinkit")) {
 
           $seurantakoodit[] = array(
             "id" => $rakirno,
-            "link" => "https://www.unifaunonline.com/ext.uo.fi.track?key={$unifaun_url_key}&order={$tilausnumero}",
+            "link" => "https://www.unifaunonline.com/ext.uo.fi.{$_kieli}track?key={$unifaun_url_key}&order={$tilausnumero}",
           );
         }
       }

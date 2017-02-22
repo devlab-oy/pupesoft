@@ -1280,6 +1280,12 @@ while ($tietue = fgets($fd)) {
         $arow['laskutus_postino']  = $lpostino;
         $arow['laskutus_maa']      = $ltoim_maa;
 
+        // jos Magento tilauksella on erillinen tilausyhteyshenkilö, niin
+        // laitetaan se tilauksen yhteyshenkilöksi, mikäli ei ole yritys ($lnimitark)
+        if (empty($lnimitark)) {
+          $tilausyhteyshenkilo = $lnimi;
+        }
+
         if ($arow["maa"] != "" and $arow["maa"] != $yhtiorow["maa"]) {
           // katsotaan mimmosesta viennistä on kysymys
           $maa_eu_query = "SELECT DISTINCT eu
@@ -1534,20 +1540,22 @@ while ($tietue = fgets($fd)) {
 
       $edi_kommentti = trim($edi_kommentti);
 
-      // Onko asiakkaalla oletusyhteyshenkilö?
-      $yhteysquery = "SELECT nimi
-                      FROM yhteyshenkilo
-                      where yhtio              = '$kukarow[yhtio]'
-                      and liitostunnus         = '$arow[tunnus]'
-                      and tyyppi               = 'A'
-                      and tilausyhteyshenkilo != ''
-                      and oletusyhteyshenkilo != ''
-                      ORDER BY nimi
-                      LIMIT 1";
-      $yhteysresult = pupe_query($yhteysquery);
+      if (empty($tilausyhteyshenkilo)) {
+        // Onko asiakkaalla oletusyhteyshenkilö?
+        $yhteysquery = "SELECT nimi
+                        FROM yhteyshenkilo
+                        where yhtio              = '$kukarow[yhtio]'
+                        and liitostunnus         = '$arow[tunnus]'
+                        and tyyppi               = 'A'
+                        and tilausyhteyshenkilo != ''
+                        and oletusyhteyshenkilo != ''
+                        ORDER BY nimi
+                        LIMIT 1";
+        $yhteysresult = pupe_query($yhteysquery);
 
-      if ($yhteysrow = mysql_fetch_assoc($yhteysresult)) {
-        $tilausyhteyshenkilo = $yhteysrow['nimi'];
+        if ($yhteysrow = mysql_fetch_assoc($yhteysresult)) {
+          $tilausyhteyshenkilo = $yhteysrow['nimi'];
+        }
       }
 
       if ($arow['toimipaikka'] != 0) {

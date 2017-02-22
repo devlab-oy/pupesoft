@@ -786,6 +786,17 @@ class Unifaun {
     $uni_shi_val = $uni_shipment->addChild('val', utf8_encode($reference)); // Receiver's reference. Any contents. Max. 17 characters.
     $uni_shi_val->addAttribute('n', "rcvreference");
 
+    // Vain tietyille palveluille sallitaan goodsdescription
+    $_goodsdescription = array(
+      'DAME',
+      'DAECX',
+    );
+
+    if (in_array($this->toitarow['virallinen_selite'], $_goodsdescription)) {
+      $uni_shi_val = $uni_shipment->addChild('val', utf8_encode($this->postirow['kuljetusohjeet'])); // Description of contents, only used for some carriers.
+      $uni_shi_val->addAttribute('n', "goodsdescription");
+    }
+
     //$uni_shi_val = $uni_shipment->addChild('val', "sisfreetext1"); # Free text field with any contents. Can be used for delivery instructions, for example. It is printed on shipping documents. 5 lines available, sisfreetext1-5. Max. 30 characters/line.
     //$uni_shi_val->addAttribute('n', "sisfreetext1");
 

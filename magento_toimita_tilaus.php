@@ -92,8 +92,10 @@ if ($_kuittaus_tekematta and $_magento_kaytossa and $magento_api_ord > 0) {
   try {
 
     $magLinkurl = "Tracking number: ";
+    $magento_laskutunnus = array();
+    $magento_laskutunnus[] = $magento_api_laskutunnus;
 
-    $linkit = tilauksen_seurantalinkit($magento_api_laskutunnus);
+    $linkit = tilauksen_seurantalinkit($magento_laskutunnus);
 
     foreach ($linkit as $seurantalinkki) {
       $rakirno = $seurantalinkki['id'];

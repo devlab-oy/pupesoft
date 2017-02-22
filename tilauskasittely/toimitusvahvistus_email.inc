@@ -114,7 +114,7 @@ if ($toimitusvahvistus_email_lahetys) {
   $body .= "\n";
   $body .= t("Seurantakoodit", $kieli).":\n\n";
 
-  $_tilausnumerot = explode(',', $tunnukset);
+  $_tilausnumerot = explode(',', $otunnukset);
   $linkit = tilauksen_seurantalinkit($_tilausnumerot);
 
   foreach ($linkit as $seurantalinkki) {

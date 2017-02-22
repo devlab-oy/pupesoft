@@ -34112,6 +34112,7 @@ if (!function_exists('tilausrivin_esisyotto')) {
     $tilausnumero
     $tuoteno
     $hinta_ajax
+    $hintaesisyotetty
     $kpl
     $ale1
     $ale2
@@ -34129,6 +34130,7 @@ if (!function_exists('tilausrivin_esisyotto')) {
     $tilausnumero           = $params['tilausnumero'];
     $tuoteno                = $params['tuoteno'];
     $hinta_ajax             = str_replace(",", ".", $params['hinta_ajax']);
+    $hinta_esisyotetty      = $params['hinta_esisyotetty'];
     $kpl                    = $params['kpl'];
     $ale1                   = $params['ale1'];
     $ale2                   = $params['ale2'];
@@ -34152,13 +34154,18 @@ if (!function_exists('tilausrivin_esisyotto')) {
     $tuoterow = mysql_fetch_assoc($aresult);
 
     // Tutkitaan onko tämä myyty ulkomaan alvilla
-    list($hinta, $netto, $ale, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $tuoterow, $kpl);
+    list($hinta_alehinta, $netto, $ale, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $tuoterow, $kpl);
 
     if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"])) and $laskurow["vienti_kurssi"] != 0) {
-      $hinta = hintapyoristys(laskuval($hinta, $laskurow["vienti_kurssi"]));
+      $hinta_alehinta = hintapyoristys(laskuval($hinta_alehinta, $laskurow["vienti_kurssi"]));
     }
 
-    $hinta = trim($hinta_ajax) != '' ? $hinta_ajax : $hinta;
+    if (trim($hinta_ajax) != '') {
+      $hinta = $hinta_ajax;
+    }
+    elseif(trim($hinta_ajax) == '' and strpos($hinta_esisyotetty, "esisyotetty") === FALSE) {
+      $hinta = $hinta_alehinta;
+    }
 
     $ale_arr = array();
 
@@ -34223,7 +34230,7 @@ if (!function_exists('tilausrivin_esisyotto')) {
     $kate = laske_tilausrivin_kate($arr, $kotisumma_kate, $tuoterow['kehahin']);
 
     return array(
-        'hinta' => round($hinta, $yhtiorow['hintapyoristys']),
+        'hinta' => $hinta,
         'netto' => $netto,
         'ale' => $ale_arr,
         'kate' => $kate,

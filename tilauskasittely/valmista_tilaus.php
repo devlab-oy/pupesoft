@@ -150,9 +150,9 @@ if (!function_exists("onkokaikkivalmistettu")) {
       $query = "SELECT tunnus
                 FROM tilausrivi
                 WHERE yhtio        = '$kukarow[yhtio]'
-                and tyyppi         in ('W','M')
-                AND tunnus         = $rivitunnus
-                and toimitettuaika = '0000-00-00 00:00:00'";
+                AND tyyppi         IN ('W','M')
+                AND otunnus         = '{$tilrivirow["otunnus"]}'
+                AND toimitettuaika = '0000-00-00 00:00:00'";
       $chkresult1 = pupe_query($query);
 
       // Eli tilaus ei ole vielä kokonaan valmistettu, jos rivi löytyy
@@ -206,41 +206,40 @@ if (!function_exists("onkokaikkivalmistettu")) {
           $chkresult4 = pupe_query($query);
         }
       }
-    }
 
-    // Laitetaan valmistus valmis tilaan vain,
-    // jos kaikki on jo valmistettu
-    if ($valmistettu and isset($tilrivirow["otunnus"])) {
-      //Jos kyseessä on varastovalmistus
-      $query = "UPDATE lasku
-                SET alatila  = 'V'
-                WHERE yhtio      = '$kukarow[yhtio]'
-                and tunnus       = $tilrivirow[otunnus]
-                and tila         = 'V'
-                and alatila      = 'C'
-                and tilaustyyppi = 'W'";
-      $chkresult2 = pupe_query($query);
+      // Laitetaan valmistus valmis tilaan vain,
+      // jos kaikki on jo valmistettu
+      if ($valmistettu and isset($tilrivirow["otunnus"])) {
+        //Jos kyseessä on varastovalmistus
+        $query = "UPDATE lasku
+                  SET alatila  = 'V'
+                  WHERE yhtio      = '$kukarow[yhtio]'
+                  AND tunnus       = $tilrivirow[otunnus]
+                  AND tila         = 'V'
+                  AND alatila      = 'C'
+                  AND tilaustyyppi = 'W'";
+        $chkresult2 = pupe_query($query);
 
-      //Jos kyseessä on asiakaalle valmistus
-      $query = "UPDATE lasku
-                SET tila  = 'L',
-                alatila          = 'C'
-                WHERE yhtio      = '$kukarow[yhtio]'
-                and tunnus       = $tilrivirow[otunnus]
-                and tila         = 'V'
-                and alatila      = 'C'
-                and tilaustyyppi = 'V'";
-      $chkresult2 = pupe_query($query);
+        //Jos kyseessä on asiakaalle valmistus
+        $query = "UPDATE lasku
+                  SET tila  = 'L',
+                  alatila          = 'C'
+                  WHERE yhtio      = '$kukarow[yhtio]'
+                  and tunnus       = $tilrivirow[otunnus]
+                  and tila         = 'V'
+                  and alatila      = 'C'
+                  and tilaustyyppi = 'V'";
+        $chkresult2 = pupe_query($query);
 
-      $tee       = "";
-      $valmistettavat = "";
-    }
-    else {
-      if (!$tilrivirow["otunnus"]) {
-        echo "<font class='error'>".t("VIRHE: Valmistukselta puuttuu valmisterivi. Tarkista valmistuksen rivit")."! </font><br>";
+        $tee       = "";
+        $valmistettavat = "";
       }
-
-      $tee = "VALMISTA";
+      else {
+        if (!$tilrivirow["otunnus"]) {
+          echo "<font class='error'>".t("VIRHE: Valmistukselta puuttuu valmisterivi. Tarkista valmistuksen rivit")."! </font><br>";
+      }
+        $tee = "VALMISTA";
+      }
     }
   }
 }

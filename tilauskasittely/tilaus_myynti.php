@@ -10892,7 +10892,7 @@ if ($tee == '') {
 
     $ei_laskutettu = ($row["laskutettuaika"] == "0000-00-00" or !isset($row["laskutettuaika"]));
     $ei_valmistettu = TRUE;
-    if ($laskurow["tila"] == "V" and $row["toimitettuaika"] != "0000-00-00" and isset($row["toimitettuaika"])) $ei_valmistettu = FALSE;
+    if ($laskurow["tila"] == "V" and $row["toimitettuaika"] != "0000-00-00 00:00:00" and isset($row["toimitettuaika"])) $ei_valmistettu = FALSE;
 
     if (($muokkauslukko == "" or $myyntikielto != '') and ($toim != "PROJEKTI" or ($toim == "PROJEKTI" and $projektilask == 0)) and $kukarow["mitatoi_tilauksia"] == "" and $ei_laskutettu and $ei_valmistettu) {
       echo "<SCRIPT LANGUAGE=JAVASCRIPT>

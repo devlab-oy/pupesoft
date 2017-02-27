@@ -34437,7 +34437,7 @@ if (!function_exists("tilauksen_seurantalinkit")) {
           $nro = str_replace(' ', '', $nro);
           $seurantakoodit[] = array(
             "id" => $nro,
-            "link" => "http://www.posti.fi/henkiloasiakkaat/seuranta/#/lahetys/{$nro}",
+            "link" => "http://www.posti.fi/henkiloasiakkaat/seuranta/#/lahetys/{$nro} \n",
           );
         }
       }

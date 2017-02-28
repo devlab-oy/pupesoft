@@ -1189,6 +1189,12 @@ if ($toim == 'HYPER') {
 }
 elseif ($toim == 'SUPER' or $toim == 'SUPERTEHDASPALAUTUKSET') {
 
+  $_tyomaaraykset_pois = "";
+
+  if ($yhtiorow["tyomaaraykset_muokkaatilaus_ohjelmassa"] == "E") {
+    $_tyomaaraykset_pois = "AND lasku.tilaustyyppi != 'A'";
+  }
+
   $query = "  SELECT DISTINCT lasku.tunnus tilaus, $asiakasstring asiakas, lasku.luontiaika, if(kuka1.kuka is null, lasku.laatija, if (kuka1.kuka!=kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi)) laatija, lasku.viesti tilausviite, ";
 
   if ($kukarow['hinnat'] == 0) {
@@ -1213,6 +1219,7 @@ elseif ($toim == 'SUPER' or $toim == 'SUPERTEHDASPALAUTUKSET') {
         LEFT JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi != 'D')
         {$tilausrivin_lisatiedot_join}
         WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila in ('L', 'N') and lasku.alatila != 'X' and lasku.clearing != 'EXTENNAKKO'
+        $_tyomaaraykset_pois
         $haku
         $tepalisa
         GROUP BY lasku.tunnus

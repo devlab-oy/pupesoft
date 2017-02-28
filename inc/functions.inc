@@ -28869,10 +28869,14 @@ if (!function_exists('sum_array')) {
 }
 
 if (!function_exists('hae_saldovahvistus_viestit')) {
-  function hae_saldovahvistus_viestit() {
+  function hae_saldovahvistus_viestit($kieli = "") {
     global $kukarow, $yhtiorow;
 
-    $result = t_avainsana('SALDOVAHVISTUS');
+    if ($kieli == "") {
+      $kieli = $yhtiorow["kieli"];
+    }
+
+    $result = t_avainsana('SALDOVAHVISTUS', $kieli);
     $saldovahvistus_viestit = array();
     while ($saldovahvistus_viesti = mysql_fetch_assoc($result)) {
       $saldovahvistus_viestit[] = $saldovahvistus_viesti;

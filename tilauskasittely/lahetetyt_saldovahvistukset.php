@@ -87,22 +87,12 @@ $request['haku_tyypit'] = array(
   'nimi'     => t('Nimi'),
 );
 
-if ($tee == "NAYTATILAUS") {
-  $haku_kentta = "asiakas.{$request['ryhmittely_tyyppi']}";
-
-  $query = "SELECT asiakas.kieli
-            FROM saldovahvistukset
-            JOIN asiakas ON (asiakas.yhtio = saldovahvistukset.yhtio AND asiakas.tunnus = saldovahvistukset.liitostunnus)
-            WHERE saldovahvistukset.yhtio = '{$kukarow['yhtio']}'
-            AND {$haku_kentta} = '{$request['ryhmittely_arvo']}'";
-  $kielirow = mysql_fetch_assoc(pupe_query($query));
-}
-else {
+if (isset($saldovahvistus_tunnus)) {
   $query = "SELECT asiakas.kieli
           FROM saldovahvistukset
           JOIN asiakas ON (asiakas.yhtio = saldovahvistukset.yhtio AND asiakas.tunnus = saldovahvistukset.liitostunnus)
           WHERE saldovahvistukset.yhtio = '{$kukarow['yhtio']}'
-          AND saldovahvistukset.tunnus = '{$request['saldovahvistus']['saldovahvistus_tunnus']}'";
+          AND saldovahvistukset.tunnus = '{$saldovahvistus_tunnus}'";
   $kielirow = mysql_fetch_assoc(pupe_query($query));
 }
 

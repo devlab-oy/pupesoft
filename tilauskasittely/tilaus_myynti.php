@@ -1105,6 +1105,16 @@ if ($kukarow["extranet"] == "" and $tee == "HYLKAATARJOUS" and $muokkauslukko ==
     exit;
   }
 
+  if (isset($crm_tarjouspois)) {
+    $hylkays_kommentti = " Tarjouksen hylk‰yksen syy: $crm_tarjouspois";
+
+    $query = "UPDATE lasku SET comments = '{$hylkays_kommentti}' where yhtio='$kukarow[yhtio]' and tunnus='$kukarow[kesken]'";
+    $result = pupe_query($query);
+
+    // Tehd‰‰n tarjouksen poistosta kommentti asiakasmemoon
+    kalenteritapahtuma("Memo", "Tarjous asiakkaalle", "Tarjouksen hylk‰yksen syy: {$crm_tarjouspois}", $laskurow["liitostunnus"], "", "", $laskurow["tunnus"]);
+  }
+
   $query = "UPDATE lasku SET alatila='X' where yhtio='$kukarow[yhtio]' and tunnus='$kukarow[kesken]'";
   $result = pupe_query($query);
 
@@ -10336,8 +10346,22 @@ if ($tee == '') {
       if ($toim != 'EXTTARJOUS') {
         echo "  <br>
             <br>
-            <form name='hylkaa' method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php' onsubmit=\"return confirm('Oletko varma ett‰ haluat hyl‰t‰ tarjouksen $kukarow[kesken]?')\">
-            <input type='hidden' name='toim' value='$toim'>
+            <form name='hylkaa' method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php' onsubmit=\"return confirm('Oletko varma ett‰ haluat hyl‰t‰ tarjouksen $kukarow[kesken]?')\">";
+
+        $tresult = t_avainsana("CRM_TARJOUSPOIS");
+
+        if (mysql_num_rows($tresult) > 0) {
+          echo t("Hylk‰yksen syy").":";
+
+          echo "<select name='crm_tarjouspois'>";
+
+          while ($itrow = mysql_fetch_assoc($tresult)) {
+            echo "<option value='$itrow[selitetark]' $sel>$itrow[selite]</option>";
+          }
+          echo "</select>";
+        }
+
+        echo "<input type='hidden' name='toim' value='$toim'>
             <input type='hidden' name='lopetus' value='$lopetus'>
             <input type='hidden' name='ruutulimit' value = '$ruutulimit'>
             <input type='hidden' name='projektilla' value='$projektilla'>

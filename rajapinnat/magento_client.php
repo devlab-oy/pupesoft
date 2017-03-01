@@ -2265,7 +2265,7 @@ class MagentoClient {
     // Etitään optionsin value
     foreach ($options as $option) {
       if (strcasecmp($option['label'], $value) == 0) {
-        $this->log('magento_tuotteet', "Palautetaan option-value(2246): {$option[value]}");
+        $this->log('magento_tuotteet', "Palautetaan option-value(2246): {$option['value']}");
         return $option['value'];
       }
     }

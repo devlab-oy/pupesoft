@@ -1336,7 +1336,16 @@ if ($tee == 'POISTA' and $muokkauslukko == "" and $kukarow["mitatoi_tilauksia"] 
   $query = "DELETE from rahtikirjat WHERE yhtio='$kukarow[yhtio]' and otsikkonro='$kukarow[kesken]'";
   $result = pupe_query($query);
 
-  $query = "UPDATE lasku SET alatila = tila, tila = 'D', comments = '$kukarow[nimi] ($kukarow[kuka]) ".t("mitätöi tilauksen ohjelmassa tilaus_myynti.php")." ".date("d.m.y @ G:i:s")."' where yhtio='$kukarow[yhtio]' and tunnus='$kukarow[kesken]'";
+  $poisto_kommentti = "{$kukarow["nimi"]} ({$kukarow["kuka"]})".t("mitätöi tilauksen ohjelmassa tilaus_myynti.php")." ".date("d.m.y @ G:i:s");
+
+  if (isset($crmviesti_tarjo)) {
+    $poisto_kommentti .= " Tarjouksen mitätöinnin syy: $crmviesti_tarjo";
+
+    // Tehdään tarjouksen poistosta kommentti asiakasmemoon
+    kalenteritapahtuma("Memo", "Tarjous asiakkaalle", "Tarjouksen mitätöinnin syy: {$crmviesti_tarjo} ({$laskurow["tunnus"]})", $laskurow["liitostunnus"], "", "", $laskurow["tunnus"]);
+  }
+
+  $query = "UPDATE lasku SET alatila = tila, tila = 'D', comments = '{$poisto_kommentti}' where yhtio='$kukarow[yhtio]' and tunnus='$kukarow[kesken]'";
   $result = pupe_query($query);
 
   $query  = "UPDATE kuka set kesken='0' where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]'";
@@ -10909,9 +10918,23 @@ if ($tee == '') {
             }
         </SCRIPT>";
 
-      echo "<td align='right' class='back ptop'>
-          <form name='mitatoikokonaan' method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php' onSubmit = 'return verify();'>
-          <input type='hidden' name='toim' value='$toim'>
+      echo "<form name='mitatoikokonaan' method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php' onSubmit = 'return verify();'>";
+      echo "<td align='right' class='back ptop'>";
+
+      $tresult = t_avainsana("CRMVIESTI_TARJO");
+
+      if (mysql_num_rows($tresult) > 0) {
+        echo t("Mitätöinnin syy").":";
+
+        echo "<select name='crmviesti_tarjo'>";
+
+        while ($itrow = mysql_fetch_assoc($tresult)) {
+          echo "<option value='$itrow[selitetark]' $sel>$itrow[selite]</option>";
+        }
+        echo "</select>";
+      }
+
+      echo "<input type='hidden' name='toim' value='$toim'>
           <input type='hidden' name='lopetus' value='$lopetus'>
           <input type='hidden' name='ruutulimit' value = '$ruutulimit'>
           <input type='hidden' name='projektilla' value='$projektilla'>

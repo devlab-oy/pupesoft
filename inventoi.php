@@ -2359,7 +2359,7 @@ if ($tee == 'INVENTOI') {
     echo "<td><select id='inven_laji' name='inven_laji'>";
 
     while ($itrow = mysql_fetch_assoc($tresult)) {
-
+echo "2362 itrow $itrow <br><br>";
       if (!isset($inven_laji) and !isset($sel)) {
         $sel = 'selected';
         $lisaselite = $itrow["selitetark_4"];
@@ -2377,7 +2377,7 @@ if ($tee == 'INVENTOI') {
     }
     echo "</select></td></tr>";
   }
-
+echo "2380 {$itrow["selite"]} <br><br>";
   if (substr($toim, 0, 4) != "OSTO") {
     echo "<tr><th>".t("Syötä inventointiselite:")."</th>";
     echo "<td><input type='text' size='50' id='lisaselite' name='lisaselite' value='$lisaselite'></td></tr>";

@@ -104,11 +104,27 @@ if (isset($tee) and $tee == 'MITATOI_TARJOUS') {
     }
     pupemaster_start();
 
+    $poisto_kommentti = "{$kukarow["nimi"]} ({$kukarow["kuka"]})".t("mitätöi tilauksen ohjelmassa tilaus_myynti.php")." ".date("d.m.y @ G:i:s")." (2)";
+
+    if (isset($crmviesti_tarjo)) {
+      $poisto_kommentti .= " Tarjouksen mitätöinnin syy: $crmviesti_tarjo";
+
+      // Haetaan asiakkaan tunnus memomerkintää varten
+      $query = "SELECT liitostunnus
+                FROM lasku
+                WHERE yhtio = '{$kukarow["yhtio"]}'
+                AND tunnus = $tilausnumero";
+      $liitostunnusrow = mysql_fetch_assoc(pupe_query($query));
+
+      // Tehdään tarjouksen poistosta kommentti asiakasmemoon
+      kalenteritapahtuma("Memo", "Tarjous asiakkaalle", "Tarjouksen mitätöinnin syy: {$crmviesti_tarjo} ({$tilausnumero})", $liitostunnusrow["liitostunnus"], "", "", $tilausnumero);
+    }
+
     $query_tarjous = "UPDATE lasku
                       SET alatila = tila,
                       tila        = 'D',
                       muutospvm   = now(),
-                      comments    = CONCAT(comments, ' $kukarow[nimi] ($kukarow[kuka]) ".t("mitätöi tilauksen ohjelmassa muokkaatilaus.php")." 2')
+                      comments    = CONCAT(comments, ' $poisto_kommentti')
                       WHERE yhtio = '$kukarow[yhtio]'
                       {$laskutyyppilisa}
                       AND tunnus  = $tilausnumero";
@@ -132,10 +148,32 @@ if (isset($tee) and $tee == 'MITATOI_TARJOUS') {
 if ($toim == 'TARJOUS' and $tee == 'MITATOI_TARJOUS_KAIKKI' and $tunnukset != "") {
   pupemaster_start();
 
+  $poisto_kommentti = "{$kukarow["nimi"]} ({$kukarow["kuka"]})".t("mitätöi tilauksen ohjelmassa tilaus_myynti.php")." ".date("d.m.y @ G:i:s")." (1)";
+
+  if (isset($crmviesti_tarjo)) {
+    $poisto_kommentti .= " Tarjouksen mitätöinnin syy: $crmviesti_tarjo";
+
+    // Siivotaan tunnukset stringistä sulut ja tehdään siitä array kommentointia varten
+    $siivottu_tunnukset = substr($tunnukset, 1, -1);
+    $tunnukset_array = explode(",", $siivottu_tunnukset);
+
+    foreach ($tunnukset_array as $key => $tunnus) {
+      // Haetaan asiakkaan tunnus memomerkintää varten
+      $query = "SELECT liitostunnus
+                FROM lasku
+                WHERE yhtio = '{$kukarow["yhtio"]}'
+                AND tunnus = $tunnus";
+      $liitostunnusrow = mysql_fetch_assoc(pupe_query($query));
+
+      // Tehdään tarjouksen poistosta kommentti asiakasmemoon
+      kalenteritapahtuma("Memo", "Tarjous asiakkaalle", "Tarjouksen mitätöinnin syy: {$crmviesti_tarjo} ({$tunnus})", $liitostunnusrow["liitostunnus"], "", "", $tunnus);
+    }
+  }
+
   $query = "UPDATE lasku
             SET tila    = 'D',
             alatila     = 'T',
-            comments    = CONCAT(comments, ' $kukarow[nimi] ($kukarow[kuka]) ".t("mitätöi tilauksen ohjelmassa muokkaatilaus.php")." 1')
+            comments    = CONCAT(comments, ' $poisto_kommentti')
             WHERE yhtio = '{$kukarow['yhtio']}'
             AND tila    = 'T'
             AND tunnus  IN {$tunnukset}";
@@ -3007,6 +3045,20 @@ if (mysql_num_rows($result) != 0) {
         echo "<input type='hidden' name='tilausnumero' value='$row[tunnus]'>";
         echo "<input type='hidden' name='kaytiin_otsikolla' value='NOJOO!'>";
         echo "<input type='submit' name='$aputoim1' value='".t("Mitätöi")."'>";
+
+        $tresult = t_avainsana("CRMVIESTI_TARJO");
+
+        if (mysql_num_rows($tresult) > 0) {
+          echo "<th>".t("Mitätöinnin syy").":</th>";
+
+          echo "<td><select name='crmviesti_tarjo'>";
+
+          while ($itrow = mysql_fetch_assoc($tresult)) {
+            echo "<option value='$itrow[selitetark]' $sel>$itrow[selite]</option>";
+          }
+          echo "</select>";
+        }
+
         echo "</form></td>";
       }
 
@@ -3123,6 +3175,24 @@ if (mysql_num_rows($result) != 0) {
       $tunnukset = implode(',', $nakyman_tunnukset);
 
       echo "<form method='POST' name='mitatoi_kaikki_formi' action='muokkaatilaus.php' onSubmit='return tarkista_mitatointi(".count($nakyman_tunnukset).");'>";
+
+      echo "<table>";
+
+      $tresult = t_avainsana("CRMVIESTI_TARJO");
+
+      if (mysql_num_rows($tresult) > 0) {
+        echo "<tr><th>".t("Mitätöinnin syy").":</th>";
+
+        echo "<td><select name='crmviesti_tarjo'>";
+
+        while ($itrow = mysql_fetch_assoc($tresult)) {
+          echo "<option value='$itrow[selitetark]' $sel>$itrow[selite]</option>";
+        }
+        echo "</select></td></tr>";
+      }
+
+      echo "</table>";
+
       echo "<input type='hidden' name='toim' value='$toim' />";
       echo "<input type='hidden' name='tee' value='MITATOI_TARJOUS_KAIKKI' />";
       echo "<input type='hidden' name='tunnukset' value='($tunnukset)' />";

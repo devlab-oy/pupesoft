@@ -277,6 +277,13 @@ if ($del == 2) {
                 WHERE tunnus='$poista_tunnus'";
       $result = pupe_query($query);
 
+      if ($toim == "hinnasto") {
+        $query = "UPDATE tuote
+                  SET muuttaja = '$kukarow[kuka]', muutospvm=now()
+                  WHERE yhtio = '$kukarow[yhtio]'
+                  and tuoteno = '$trow[tuoteno]'";
+        $result = pupe_query($query);
+      }
       synkronoi($kukarow["yhtio"], $toim, $tunnus, $trow, "");
     }
   }

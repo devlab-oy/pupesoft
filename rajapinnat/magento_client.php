@@ -325,7 +325,7 @@ class MagentoClient {
           $key = $parametri['option_name'];
           $option_id = $this->get_option_id($key, $parametri['arvo'], $attribute_set_id);
 
-          if ($option_id == 0) {
+          if ($option_id === false) {
             continue;
           }
 
@@ -361,7 +361,7 @@ class MagentoClient {
         if (isset($tuote[$erikoisparametri['arvo']])) {
           $option_id = $this->get_option_id($key, $tuote[$erikoisparametri['arvo']], $attribute_set_id);
 
-          if ($option_id == 0) {
+          if ($option_id === false) {
             $this->log('magento_tuotteet', "Erikoisparametri {$key}: {$tuote[$erikoisparametri['arvo']]} #option_id == 0, jätetään päivittämättä");
             continue;
           }
@@ -546,7 +546,7 @@ class MagentoClient {
                 $key = $parametri['option_name'];
                 $option_id = $this->get_option_id($key, $parametri['arvo'], $attribute_set_id);
 
-                if ($option_id == 0) {
+                if ($option_id === false) {
                   continue;
                 }
 
@@ -728,7 +728,7 @@ class MagentoClient {
           $key = $parametri['option_name'];
           $option_id = $this->get_option_id($key, $parametri['arvo'], $attribute_set_id);
 
-          if ($option_id == 0) {
+          if ($option_id === false) {
             continue;
           }
 
@@ -758,7 +758,7 @@ class MagentoClient {
         if (isset($lapsituotteen_tiedot[$erikoisparametri['arvo']])) {
           $option_id = $this->get_option_id($key, $lapsituotteen_tiedot[$erikoisparametri['arvo']], $attribute_set_id);
 
-          if ($option_id == 0) {
+          if ($option_id === false) {
             continue;
           }
 
@@ -822,7 +822,7 @@ class MagentoClient {
               $key = $parametri['option_name'];
               $option_id = $this->get_option_id($key, $parametri['arvo'], $attribute_set_id);
 
-              if ($option_id == 0) {
+              if ($option_id === false) {
                 continue;
               }
 
@@ -2244,7 +2244,7 @@ class MagentoClient {
     if (empty($attribute_id)) {
       $this->log('magento_tuotteet', "Atribuuttia '{$name}' ei löydetty setistä {$attribute_set_id}");
 
-      return 0;
+      return false;
     }
 
     // Jos dynaaminen parametri on matkalla teksti- tai hintakenttään niin idtä ei tarvita, palautetaan vaan arvo
@@ -2313,7 +2313,7 @@ class MagentoClient {
     $this->log('magento_tuotteet', "Attribuutin '{$name}' arvon '{$value}' haku setistä {$attribute_set_id} ei onnistunut.");
 
     // Mitään ei löytyny
-    return 0;
+    return false;
   }
 
   // Hakee $status -tilassa olevat tilaukset Magentosta ja merkkaa ne noudetuksi.

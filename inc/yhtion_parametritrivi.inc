@@ -4938,24 +4938,6 @@ if ($fieldname == "muokkaatilaus_pv_rajaus") {
   $jatko = 0;
 }
 
-if ($fieldname == "tyomaaraykset_muokkaatilaus_ohjelmassa") {
-  $sel = array($trow[$i] => 'selected') + array('' => '', 'E' => '');
-
-  $ulos  = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
-
-  $ulos .= "<option value = ''>";
-  $ulos .= t("Näytetään työmääräykset Myynti-valikon Muokkaa tilaus-ohjelmassa");
-  $ulos .= "</option>";
-
-  $ulos .= "<option value = 'E' {$sel['E']}>";
-  $ulos .= t("Ei näytetä työmääräyksiä Myynti-valikon Muokkaa tilaus-ohjelmassa");
-  $ulos .= "</option>";
-
-  $ulos .= "</select></td>";
-
-  $jatko = 0;
-}
-
 if ($fieldname == "tilausrivin_korvamerkinta") {
   $sel = array($trow[$i] => 'selected') + array('' => '', 'K' => '', 'A' => '');
 

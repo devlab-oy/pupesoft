@@ -29097,10 +29097,14 @@ if (!function_exists('sum_array')) {
 }
 
 if (!function_exists('hae_saldovahvistus_viestit')) {
-  function hae_saldovahvistus_viestit() {
+  function hae_saldovahvistus_viestit($kieli = "") {
     global $kukarow, $yhtiorow;
 
-    $result = t_avainsana('SALDOVAHVISTUS');
+    if ($kieli == "") {
+      $kieli = $yhtiorow["kieli"];
+    }
+
+    $result = t_avainsana('SALDOVAHVISTUS', $kieli);
     $saldovahvistus_viestit = array();
     while ($saldovahvistus_viesti = mysql_fetch_assoc($result)) {
       $saldovahvistus_viestit[] = $saldovahvistus_viesti;
@@ -29156,6 +29160,10 @@ if (!function_exists('generoi_saldovahvistus_sahkopostit')) {
       }
       else {
         $saldovahvistus = $request['valitut_laskut'][$valittu_saldovahvistus];
+
+        //Valittu saldovahvistusviesti
+        $saldovahvistus['saldovahvistus_viesti'] = search_array_key_for_value_recursive($request['saldovahvistus_viestit'], 'selite', $request["valitut_laskut"][$valittu_saldovahvistus]["saldovahvistus_viesti"]);
+        $saldovahvistus['saldovahvistus_viesti'] = $saldovahvistus['saldovahvistus_viesti'][0];
       }
 
       if ($saldovahvistus['asiakas']['talhal_email'] != '') {

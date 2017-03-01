@@ -403,8 +403,8 @@ if (in_array('tuotteet', $magento_ajolista)) {
   tuote_export_echo("Päivitetään simple tuotteet");
   $magento_client->lisaa_simple_tuotteet($dnstuote, $individual_tuotteet);
 
-  tuote_export_echo("Poistetaan ylimääräiset tuotteet");
-  $magento_client->poista_poistetut($kaikki_tuotteet, true);
+  #tuote_export_echo("Poistetaan ylimääräiset tuotteet");
+  #$magento_client->poista_poistetut($kaikki_tuotteet, true);
 }
 
 if (in_array('saldot', $magento_ajolista)) {

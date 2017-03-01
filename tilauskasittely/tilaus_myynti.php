@@ -1108,7 +1108,7 @@ if ($kukarow["extranet"] == "" and $tee == "HYLKAATARJOUS" and $muokkauslukko ==
   if (isset($crm_tarjouspois)) {
     $hylkays_kommentti = " Tarjouksen hylk‰yksen syy: $crm_tarjouspois";
 
-    $query = "UPDATE lasku SET comments = '{$hylkays_kommentti}' where yhtio='$kukarow[yhtio]' and tunnus='$kukarow[kesken]'";
+    $query = "UPDATE lasku SET comments = CONCAT(comments, ' {$hylkays_kommentti}') where yhtio='$kukarow[yhtio]' and tunnus='$kukarow[kesken]'";
     $result = pupe_query($query);
 
     // Tehd‰‰n tarjouksen poistosta kommentti asiakasmemoon

@@ -1646,12 +1646,12 @@ class MagentoClient {
     $current = 0;
     $total = count($asiakkaat_per_yhteyshenkilo);
     $asiakashinnat = array();
-    $offset = 0;
-    $poistettu = 0;
 
     if ($kaikki_kerralla) {
       // Poistetaan kaikkien asiakkaiden hinta tältä tuotteelta
 
+      $offset = 0;
+      $poistettu = 0;
       foreach ($asiakkaat_per_yhteyshenkilo as $asiakas) {
         $asiakashinnat[] = array(
           'customerEmail' => $asiakas['asiakas_email'],

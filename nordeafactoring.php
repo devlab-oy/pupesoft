@@ -251,7 +251,7 @@ if ($tee == 'TULOSTA') {
 
   $ulos .= sprintf('%01.1s', 0); //tietuetunnus
 
-  if ($toim == 'SAMPO') {
+  if (in_array($toim, array("SAMPO", "AKTIA"))) {
     $ulos .= sprintf('%017.17s', str_replace('-', '', $yhtiorow["ytunnus"])); //myyjän ytunnus etunollilla SAMPO!
   }
   else {
@@ -735,7 +735,7 @@ if ($tee == 'TULOSTA') {
 
       $ulos .= sprintf('%01.1s', 9);
 
-      if ($toim == 'SAMPO') {
+      if (in_array($toim, array("SAMPO", "AKTIA"))) {
         $ulos .= sprintf('%017.17s', str_replace('-', '', $yhtiorow["ytunnus"]));
       }
       else {

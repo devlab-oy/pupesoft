@@ -1573,15 +1573,16 @@ class MagentoClient {
       }
       catch (Exception $e) {
         $this->_error_count++;
-        $this->log('magento_tuotteet', "Virhe! Tuotteen {$magento_tuotenumero} asiakaskohtaisen ({$hintadata['customerEmail']}) hinnan lisäys epäonnistui", $e);
+        $this->log('magento_tuotteet', "Virhe! Tuotteen {$magento_tuotenumero} asiakaskohtaisen ({$hintadata['customerEmail']}) hinnan lisäys epäonnistui blockina", $e);
         $onnistuiko_lisays = false;
+        continue;
       }
     }
     
     if ($onnistuiko_lisays === false) { 
       for ($i = $offset; $i <= $total; $i++) {
         $hintadata = $asiakaskohtainenhintadata[$i];
-
+        $current++;
         try {
           $reply = $this->_proxy->call(
             $this->_session,
@@ -1647,6 +1648,7 @@ class MagentoClient {
 
     if ($kaikki_kerralla) {
       // Poistetaan kaikkien asiakkaiden hinta tältä tuotteelta
+      $offset = 0;
       foreach ($asiakkaat_per_yhteyshenkilo as $asiakas) {
         $asiakashinnat[] = array(
           'customerEmail' => $asiakas['asiakas_email'],
@@ -1678,10 +1680,11 @@ class MagentoClient {
       return true;
     }
     else {
+      $current = $offset;
       // Poistetaan kaikkien asiakkaiden hinta tältä tuotteelta
       for ($i = $offset; $i <= $total; $i++) {
         $asiakas = $asiakkaat_per_yhteyshenkilo[$i];
-
+        $current++;
         $asiakashinnat = array(
           'customerEmail' => $asiakas['asiakas_email'],
           'websiteCode' => $this->_asiakaskohtaiset_tuotehinnat,
@@ -2265,7 +2268,7 @@ class MagentoClient {
     // Etitään optionsin value
     foreach ($options as $option) {
       if (strcasecmp($option['label'], $value) == 0) {
-        $this->log('magento_tuotteet', "Palautetaan option-value(2246): {$option['value']}");
+        $this->log('magento_tuotteet', "Palautetaan option-value: {$option['value']}");
         return $option['value'];
       }
     }

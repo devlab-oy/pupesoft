@@ -1838,7 +1838,7 @@ if (isset($supertee) and $supertee == "RAPORTOI") {
 
     $cspan = 2;
 
-    if ($summaustaso == 'TRY' or $summaustaso == 'TME') {
+    if ($summaustaso == 'TRY') {
       $cspan = 3;
     }
 

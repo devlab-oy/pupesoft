@@ -1432,7 +1432,7 @@ if (!function_exists('loppu_tarjous')) {
 
       $pdf_tarjous->draw_text(217, 55, t("Puhelin", $kieli).":",      $page_tarjous[$sivu], $pieni);
       $pdf_tarjous->draw_text(257, 55, $y_puhelin,            $page_tarjous[$sivu], $pieni);
-      $pdf_tarjous->draw_text(217, 45, t("Telefax", $kieli).":",      $page_tarjous[$sivu], $pieni);
+      $pdf_tarjous->draw_text(217, 45, t("Fax", $kieli).":",      $page_tarjous[$sivu], $pieni);
       $pdf_tarjous->draw_text(257, 45, $y_fax,              $page_tarjous[$sivu], $pieni);
       $pdf_tarjous->draw_text(217, 35, t("Sähköposti", $kieli).":",    $page_tarjous[$sivu], $pieni);
       $pdf_tarjous->draw_text(257, 35, $y_email,              $page_tarjous[$sivu], $pieni);

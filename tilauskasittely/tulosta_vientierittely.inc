@@ -282,7 +282,7 @@ if ($Xtunnukset2 != "") {
 
       $Xpdf->draw_text(217, 45, t("Puhelin", $kieli).":",        $Xfirstpage, $Xpieni);
       $Xpdf->draw_text(257, 45, $yhtiorow["puhelin"],          $Xfirstpage, $Xpieni);
-      $Xpdf->draw_text(217, 35, t("Telefax", $kieli).":",        $Xfirstpage, $Xpieni);
+      $Xpdf->draw_text(217, 35, t("Fax", $kieli).":",        $Xfirstpage, $Xpieni);
       $Xpdf->draw_text(247, 35, $yhtiorow["fax"],            $Xfirstpage, $Xpieni);
       $Xpdf->draw_text(217, 25, t("Sähköposti", $kieli).": ".$yhtiorow["email"], $Xfirstpage, $Xpieni);
 

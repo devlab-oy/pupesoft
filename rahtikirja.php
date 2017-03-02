@@ -1122,6 +1122,9 @@ if ($tee == 'add') {
           if ($toimitustaparow['osoitelappu'] == 'intrade') {
             require 'tilauskasittely/osoitelappu_intrade_pdf.inc';
           }
+          elseif ($toimitustaparow['osoitelappu'] == 'osoitelappu_kesko') {
+            require 'tilauskasittely/osoitelappu_kesko_pdf.inc';
+          }
           elseif ($toimitustaparow['osoitelappu'] == 'hornbach') {
             require 'tilauskasittely/osoitelappu_hornbach_pdf.inc';
           }

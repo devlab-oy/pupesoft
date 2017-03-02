@@ -70,7 +70,7 @@ if (move_uploaded_file($_FILES['userfile']['tmp_name'], $filename)) {
     echo "</pre>";
   }
 
-  if ($tyyppi == 'magento' or $tyyppi == 'presta' or $tyyppi == 'ahkio' or $tyyppi = 'woo') {
+  if ($tyyppi == 'magento' or $tyyppi == 'presta' or $tyyppi == 'ahkio' or $tyyppi == 'woo') {
     // tarvitaan $filename
     echo "<pre>";
     $edi_tyyppi = $tyyppi;

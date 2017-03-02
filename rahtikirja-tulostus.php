@@ -1237,6 +1237,9 @@ if ($tee == 'tulosta') {
           if ($toitarow['osoitelappu'] == 'intrade') {
             require 'tilauskasittely/osoitelappu_intrade_pdf.inc';
           }
+          elseif ($toitarow['osoitelappu'] == 'osoitelappu_kesko') {
+            require 'tilauskasittely/osoitelappu_kesko_pdf.inc';
+          }
           // Hornbach-tyyppisiä osoitelappuja ei tulosteta, kun ollaan tulostamassa koontirahtikirjaa.
           elseif ($toitarow['osoitelappu'] == 'hornbach' && !in_array($toitarow['tulostustapa'], array('K', 'L'))) {
             require 'tilauskasittely/osoitelappu_hornbach_pdf.inc';

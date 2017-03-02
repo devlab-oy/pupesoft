@@ -1580,8 +1580,10 @@ class MagentoClient {
     }
     
     if ($onnistuiko_lisays === false) { 
+      $current = $offset;
       for ($i = $offset; $i <= $total; $i++) {
         $hintadata = $asiakaskohtainenhintadata[$i];
+        var_dump($hintadata);
         $current++;
         try {
           $reply = $this->_proxy->call(
@@ -1590,12 +1592,12 @@ class MagentoClient {
             array($magento_tuotenumero, array($hintadata))
           );
       
-          $this->log('magento_tuotteet', "({$current}/{$total}): Tuotteen {$magento_tuotenumero} asiakaskohtaiset ({$hintadata['customerEmail']}) hinnat lisätty");
+          $this->log('magento_tuotteet', "({$current}/{$i}/{$total}): Tuotteen {$magento_tuotenumero} asiakaskohtaiset ({$hintadata['customerEmail']}) hinnat lisätty");
           $this->debug('magento_tuotteet', $hintadata);
         }
         catch (Exception $e) {
           $this->_error_count++;
-          $this->log('magento_tuotteet', "Virhe! Tuotteen {$magento_tuotenumero} asiakaskohtaisen ({$hintadata['customerEmail']}) hinnan lisäys epäonnistui", $e);
+          $this->log('magento_tuotteet', "Virhe! Tuotteen {$magento_tuotenumero} asiakaskohtaisen ({$hintadata['customerEmail']}) hinnan lisäys epäonnistui", $e, $i);
         }
       }
     }
@@ -1698,7 +1700,7 @@ class MagentoClient {
             array($magento_tuotenumero, array($asiakashinnat))
           );
 
-          $this->log('magento_tuotteet', "({$current}/{$total}): Tuotteen {$magento_tuotenumero} asiakaskohtaiset hinnat poistettu ({$asiakas['asiakas_email']})");
+          $this->log('magento_tuotteet', "({$current}/{$i}/{$total}): Tuotteen {$magento_tuotenumero} asiakaskohtaiset hinnat poistettu ({$asiakas['asiakas_email']})");
         }
         catch(Exception $e) {
           $this->_error_count++;

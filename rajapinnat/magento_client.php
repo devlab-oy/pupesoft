@@ -1647,10 +1647,11 @@ class MagentoClient {
     $total = count($asiakkaat_per_yhteyshenkilo);
     $asiakashinnat = array();
     $offset = 0;
+    $poistettu = 0;
 
     if ($kaikki_kerralla) {
       // Poistetaan kaikkien asiakkaiden hinta tältä tuotteelta
-      $offset = 0;
+
       foreach ($asiakkaat_per_yhteyshenkilo as $asiakas) {
         $asiakashinnat[] = array(
           'customerEmail' => $asiakas['asiakas_email'],
@@ -1674,7 +1675,7 @@ class MagentoClient {
         catch(Exception $e) {
           $this->_error_count++;
           $this->log('magento_tuotteet', "Virhe asiakaskohtaisten hintojen poistossa! Magento-tuoteno {$magento_tuotenumero}, website-code: {$this->_asiakaskohtaiset_tuotehinnat}", $e);
-
+          $poistettu = $offset;
           return false;
         }
       }
@@ -1684,7 +1685,7 @@ class MagentoClient {
     else {
       $current = $offset;
       // Poistetaan kaikkien asiakkaiden hinta tältä tuotteelta
-      for ($i = $offset; $i <= $total; $i++) {
+      for ($i = $poistettu; $i <= $total; $i++) {
         $asiakas = $asiakkaat_per_yhteyshenkilo[$i];
         $current++;
         $asiakashinnat = array(

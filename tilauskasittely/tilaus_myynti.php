@@ -89,6 +89,7 @@ if ($yhtiorow['tilausrivin_esisyotto'] == 'K' and isset($ajax_toiminto) and trim
     'tilausnumero' => $tilausnumero,
     'tuoteno' => $tuoteno,
     'hinta_ajax' => $hinta,
+    'hinta_esisyotetty' => $hinta_esisyotetty,
     'kpl' => $kpl,
     'ale1' => $ale1,
     'ale2' => $ale2,
@@ -4952,7 +4953,7 @@ if ($tee == '') {
           $toimitettuaika = 0;
         }
 
-        if ($tila == "VARMUUTOS" and in_array($tapa, array("POISJTSTA","PUUTE","PUUTE"))) {
+        if ($tila == "VARMUUTOS" and in_array($tapa, array("POISJTSTA","PUUTE","JT"))) {
           //otetaan varattukpl ja jtkpl muuttuja käyttöön
           $varattukpl = 0;
           $jtkpl = 0;

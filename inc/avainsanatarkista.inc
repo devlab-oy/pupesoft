@@ -336,6 +336,7 @@ if (!function_exists("avainsanatarkista")) {
                   FROM avainsana
                   WHERE avainsana.yhtio = '{$kukarow['yhtio']}'
                   AND avainsana.laji    = '{$tem_laji}'
+                  AND kieli             = '$tem_kieli'
                   AND tunnus           != '{$tunnus}'";
         $result = pupe_query($query);
 

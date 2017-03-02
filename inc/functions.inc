@@ -29097,10 +29097,14 @@ if (!function_exists('sum_array')) {
 }
 
 if (!function_exists('hae_saldovahvistus_viestit')) {
-  function hae_saldovahvistus_viestit() {
+  function hae_saldovahvistus_viestit($kieli = "") {
     global $kukarow, $yhtiorow;
 
-    $result = t_avainsana('SALDOVAHVISTUS');
+    if ($kieli == "") {
+      $kieli = $yhtiorow["kieli"];
+    }
+
+    $result = t_avainsana('SALDOVAHVISTUS', $kieli);
     $saldovahvistus_viestit = array();
     while ($saldovahvistus_viesti = mysql_fetch_assoc($result)) {
       $saldovahvistus_viestit[] = $saldovahvistus_viesti;
@@ -29156,6 +29160,10 @@ if (!function_exists('generoi_saldovahvistus_sahkopostit')) {
       }
       else {
         $saldovahvistus = $request['valitut_laskut'][$valittu_saldovahvistus];
+
+        //Valittu saldovahvistusviesti
+        $saldovahvistus['saldovahvistus_viesti'] = search_array_key_for_value_recursive($request['saldovahvistus_viestit'], 'selite', $request["valitut_laskut"][$valittu_saldovahvistus]["saldovahvistus_viesti"]);
+        $saldovahvistus['saldovahvistus_viesti'] = $saldovahvistus['saldovahvistus_viesti'][0];
       }
 
       if ($saldovahvistus['asiakas']['talhal_email'] != '') {
@@ -34112,6 +34120,7 @@ if (!function_exists('tilausrivin_esisyotto')) {
     $tilausnumero
     $tuoteno
     $hinta_ajax
+    $hintaesisyotetty
     $kpl
     $ale1
     $ale2
@@ -34129,6 +34138,7 @@ if (!function_exists('tilausrivin_esisyotto')) {
     $tilausnumero           = $params['tilausnumero'];
     $tuoteno                = $params['tuoteno'];
     $hinta_ajax             = str_replace(",", ".", $params['hinta_ajax']);
+    $hinta_esisyotetty      = $params['hinta_esisyotetty'];
     $kpl                    = $params['kpl'];
     $ale1                   = $params['ale1'];
     $ale2                   = $params['ale2'];
@@ -34152,13 +34162,18 @@ if (!function_exists('tilausrivin_esisyotto')) {
     $tuoterow = mysql_fetch_assoc($aresult);
 
     // Tutkitaan onko tämä myyty ulkomaan alvilla
-    list($hinta, $netto, $ale, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $tuoterow, $kpl);
+    list($hinta_alehinta, $netto, $ale, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $tuoterow, $kpl);
 
     if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"])) and $laskurow["vienti_kurssi"] != 0) {
-      $hinta = hintapyoristys(laskuval($hinta, $laskurow["vienti_kurssi"]));
+      $hinta_alehinta = hintapyoristys(laskuval($hinta_alehinta, $laskurow["vienti_kurssi"]));
     }
 
-    $hinta = trim($hinta_ajax) != '' ? $hinta_ajax : $hinta;
+    if (trim($hinta_ajax) != '') {
+      $hinta = $hinta_ajax;
+    }
+    elseif(trim($hinta_ajax) == '' and strpos($hinta_esisyotetty, "esisyotetty") === FALSE) {
+      $hinta = $hinta_alehinta;
+    }
 
     $ale_arr = array();
 
@@ -34223,7 +34238,7 @@ if (!function_exists('tilausrivin_esisyotto')) {
     $kate = laske_tilausrivin_kate($arr, $kotisumma_kate, $tuoterow['kehahin']);
 
     return array(
-        'hinta' => round($hinta, $yhtiorow['hintapyoristys']),
+        'hinta' => $hinta,
         'netto' => $netto,
         'ale' => $ale_arr,
         'kate' => $kate,
@@ -34367,14 +34382,16 @@ if (!function_exists("tilauksen_seurantalinkit")) {
               rahtikirjat.sscc_ulkoinen,
               toimitustapa.rahtikirja,
               toimitustapa.virallinen_selite,
+              asiakas.kieli,
               sum(rahtikirjat.kollit) as kollit
               FROM rahtikirjat
               JOIN lasku on (lasku.tunnus = rahtikirjat.otsikkonro)
+              JOIN asiakas on (asiakas.tunnus = lasku.liitostunnus)
               JOIN toimitustapa on (toimitustapa.yhtio = rahtikirjat.yhtio
                 AND toimitustapa.selite = lasku.toimitustapa)
               WHERE rahtikirjat.yhtio = '{$kukarow['yhtio']}'
               AND rahtikirjat.otsikkonro IN ({$tunnukset})
-              GROUP BY 1,2,3,4,5,6";
+              GROUP BY 1,2,3,4,5,6,7";
     $result = pupe_query($query);
 
     while ($row = mysql_fetch_assoc($result)) {
@@ -34428,7 +34445,7 @@ if (!function_exists("tilauksen_seurantalinkit")) {
           $nro = str_replace(' ', '', $nro);
           $seurantakoodit[] = array(
             "id" => $nro,
-            "link" => "http://www.posti.fi/henkiloasiakkaat/seuranta/#/lahetys/{$nro}",
+            "link" => "http://www.posti.fi/henkiloasiakkaat/seuranta/#/lahetys/{$nro} \n",
           );
         }
       }
@@ -34478,6 +34495,21 @@ if (!function_exists("tilauksen_seurantalinkit")) {
       }
       // unifaun ja mittoihin perustuvat keräyserät ei ole käytössä
       elseif ($unifaun and $yhtiorow['kerayserat'] != 'K') {
+
+        if (strpos($_SERVER['SCRIPT_NAME'], "asiakkaantilaukset.php") !== FALSE) {
+          $row['kieli'] = $kukarow['kieli'];
+        }
+
+        if ($row['kieli'] == 'en') {
+          $_kieli = "gb.";
+        }
+        elseif ($row['kieli'] == 'se') {
+          $_kieli = "se.";
+        }
+        else {
+          $_kieli = "fi.";
+        }
+
         foreach (explode("\n", $rahtikirjanro) as $rakirno) {
           if (empty($rakirno)) {
             continue;
@@ -34485,7 +34517,7 @@ if (!function_exists("tilauksen_seurantalinkit")) {
 
           $seurantakoodit[] = array(
             "id" => $rakirno,
-            "link" => "https://www.unifaunonline.com/ext.uo.fi.track?key={$unifaun_url_key}&order={$tilausnumero}",
+            "link" => "https://www.unifaunonline.com/ext.uo.fi.{$_kieli}track?key={$unifaun_url_key}&order={$tilausnumero}",
           );
         }
       }

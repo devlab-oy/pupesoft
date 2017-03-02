@@ -1686,22 +1686,17 @@ class MagentoClient {
       $current = $poistettu;
       // Poistetaan kaikkien asiakkaiden hinta tältä tuotteelta
       for ($i = $poistettu; $i <= $total; $i++) {
-        $asiakas = $asiakkaat_per_yhteyshenkilo[$i];
+        $asiakashinta = $asiakashinnat[$i];
         $current++;
-        $asiakashinnat = array(
-          'customerEmail' => $asiakas['asiakas_email'],
-          'websiteCode' => $this->_asiakaskohtaiset_tuotehinnat,
-          'delete' => 1
-        );
 
         try {
           $this->_proxy->call(
             $this->_session,
             'price_per_customer.setPriceForCustomersPerProduct',
-            array($magento_tuotenumero, array($asiakashinnat))
+            array($magento_tuotenumero, array($asiakashinta))
           );
 
-          $this->log('magento_tuotteet', "({$current}/{$i}/{$total}): Tuotteen {$magento_tuotenumero} asiakaskohtaiset hinnat poistettu ({$asiakas['asiakas_email']})");
+          $this->log('magento_tuotteet', "({$current}/{$total}): Tuotteen {$magento_tuotenumero} asiakaskohtaiset hinnat poistettu ({$asiakas['asiakas_email']})");
         }
         catch(Exception $e) {
           $this->_error_count++;

@@ -1671,11 +1671,11 @@ class MagentoClient {
 
           $this->log('magento_tuotteet', "({$offset}/{$total}) Tuotteen {$magento_tuotenumero} kaikki asiakaskohtaiset hinnat poistettu. Block size 500");
           $offset += 500;
+          $poistettu += 500;
         }
         catch(Exception $e) {
           $this->_error_count++;
           $this->log('magento_tuotteet', "Virhe asiakaskohtaisten hintojen poistossa! Magento-tuoteno {$magento_tuotenumero}, website-code: {$this->_asiakaskohtaiset_tuotehinnat}", $e);
-          $poistettu = $offset;
           return false;
         }
       }
@@ -1683,7 +1683,7 @@ class MagentoClient {
       return true;
     }
     else {
-      $current = $offset;
+      $current = $poistettu;
       // Poistetaan kaikkien asiakkaiden hinta tältä tuotteelta
       for ($i = $poistettu; $i <= $total; $i++) {
         $asiakas = $asiakkaat_per_yhteyshenkilo[$i];

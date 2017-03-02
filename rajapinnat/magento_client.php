@@ -1538,6 +1538,7 @@ class MagentoClient {
       return false;
     }
 
+    $poistettu = 0;
     // Ensin poistetaan tuotteen asiakashinnat Magentosta kaikki kerralla
     $onnistuiko_paivitys = $this->poista_tuotteen_asiakaskohtaiset_hinnat($asiakkaat_per_yhteyshenkilo, $magento_tuotenumero, true);
 
@@ -1651,7 +1652,6 @@ class MagentoClient {
       // Poistetaan kaikkien asiakkaiden hinta tältä tuotteelta
 
       $offset = 0;
-      $poistettu = 0;
       foreach ($asiakkaat_per_yhteyshenkilo as $asiakas) {
         $asiakashinnat[] = array(
           'customerEmail' => $asiakas['asiakas_email'],
@@ -1687,6 +1687,7 @@ class MagentoClient {
       // Poistetaan kaikkien asiakkaiden hinta tältä tuotteelta
       for ($i = $poistettu; $i <= $total; $i++) {
         $asiakashinta = $asiakashinnat[$i];
+        var_dump($asiakashinta);
         $current++;
 
         try {
@@ -1696,11 +1697,11 @@ class MagentoClient {
             array($magento_tuotenumero, array($asiakashinta))
           );
 
-          $this->log('magento_tuotteet', "({$current}/{$total}): Tuotteen {$magento_tuotenumero} asiakaskohtaiset hinnat poistettu ({$asiakas['asiakas_email']})");
+          $this->log('magento_tuotteet', "({$current}/{$total}): Tuotteen {$magento_tuotenumero} asiakaskohtaiset hinnat poistettu ({$asiakashinta['asiakas_email']})");
         }
         catch(Exception $e) {
           $this->_error_count++;
-          $this->log('magento_tuotteet', "Virhe asiakaskohtaisten hintojen poistossa! Magento-tuoteno {$magento_tuotenumero}, asiakas_email: {$asiakas['asiakas_email']}, website-code: {$this->_asiakaskohtaiset_tuotehinnat}", $e);
+          $this->log('magento_tuotteet', "Virhe asiakaskohtaisten hintojen poistossa! Magento-tuoteno {$magento_tuotenumero}, asiakas_email: {$asiakashinta['asiakas_email']}, website-code: {$this->$asiakashinta}", $e);
         }
       }
 

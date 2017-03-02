@@ -697,7 +697,7 @@ function tuote_export_hae_lajitelmatuotteet($params) {
               AND tuote.status != 'P'
               AND tuote.tuotetyyppi NOT in ('A','B')
               AND tuote.tuoteno != ''
-              AND tuote.tutoeno = '107303'
+              AND tuote.tuoteno = '107303'
               AND tuote.nakyvyys != '')
             LEFT JOIN avainsana as try_fi ON (try_fi.yhtio = tuote.yhtio
               and try_fi.selite = tuote.try

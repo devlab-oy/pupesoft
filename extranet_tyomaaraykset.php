@@ -626,7 +626,7 @@ function email_tyomaarayskopio($request) {
     $mihin_maili_lahetetaan = $huolto_email;
   }
 
-  $body = t("Tämä on automaattinen viesti, älä vastaa!")."\n\n";
+  $body = t("Tämä on automaattinen viesti. Tähän sähköpostiin ei tarvitse vastata.")."\n\n";
   $body .= t("Huoltopyyntönumero").": {$tyom_tunnus}";
 
   // Sähköpostin lähetykseen parametrit

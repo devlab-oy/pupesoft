@@ -1576,7 +1576,6 @@ class MagentoClient {
     }
     
     if ($onnistuiko_lisays === false) {
-      $offset = $offset - 300;
       $current = $offset;
       for ($i = $offset; $i <= $total; $i++) {
         $hintadata = $asiakaskohtainenhintadata[$i];
@@ -1669,7 +1668,7 @@ class MagentoClient {
         }
         catch(Exception $e) {
           $this->_error_count++;
-          $this->log('magento_tuotteet', "Virhe asiakaskohtaisten hintojen poistossa! Magento-tuoteno {$magento_tuotenumero}, {$offset}, {$total}, website-code: {$this->_asiakaskohtaiset_tuotehinnat}", $e);
+          $this->log('magento_tuotteet', "Virhe asiakaskohtaisten hintojen poistossa! Magento-tuoteno {$magento_tuotenumero}, website-code: {$this->_asiakaskohtaiset_tuotehinnat}", $e);
           $onnistuiko_paivitys = false;
           break;
         }
@@ -1677,7 +1676,6 @@ class MagentoClient {
       $onnistuiko_paivitys = true;
     }
     if ($onnistuiko_paivitys === false) {
-      $offset = $offset - 500;
       $current = $offset;
       // Poistetaan kaikkien asiakkaiden hinta tältä tuotteelta
       for ($i = $offset; $i <= $total; $i++) {

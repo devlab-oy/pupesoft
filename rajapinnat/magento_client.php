@@ -1642,6 +1642,7 @@ class MagentoClient {
     $current = 0;
     $total = count($asiakkaat_per_yhteyshenkilo);
     $asiakashinnat = array();
+    $onnistuiko_paivitys = true;
 
     if ($kaikki_kerralla) {
       // Poistetaan kaikkien asiakkaiden hinta tältä tuotteelta
@@ -1673,7 +1674,6 @@ class MagentoClient {
           break;
         }
       }
-      $onnistuiko_paivitys = true;
     }
     if ($onnistuiko_paivitys === false) {
       $current = $offset;

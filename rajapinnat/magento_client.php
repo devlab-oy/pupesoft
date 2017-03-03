@@ -1554,7 +1554,7 @@ class MagentoClient {
     $onnistuiko_lisays = true;
     $offset = 0;
 
-    while ($hintadata = array_slice($asiakaskohtainenhintadata, $offset, 200)) {
+    while ($hintadata = array_slice($asiakaskohtainenhintadata, $offset, 500)) {
       try {
         $reply = $this->_proxy->call(
           $this->_session,
@@ -1562,9 +1562,9 @@ class MagentoClient {
           array($magento_tuotenumero, $hintadata)
         );
 
-        $this->log('magento_tuotteet', "({$current}/{$total}): Tuotteen {$magento_tuotenumero} asiakaskohtaiset hinnat lisätty. Block size 200");
+        $this->log('magento_tuotteet', "({$offset}/{$total}): Tuotteen {$magento_tuotenumero} asiakaskohtaiset hinnat lisätty. Block size 500");
         $this->debug('magento_tuotteet', $hintadata);
-        $offset += 200;
+        $offset += 500;
       }
       catch (Exception $e) {
         $this->_error_count++;
@@ -1671,6 +1671,7 @@ class MagentoClient {
           $this->_error_count++;
           $this->log('magento_tuotteet', "Virhe asiakaskohtaisten hintojen poistossa! Magento-tuoteno {$magento_tuotenumero}, website-code: {$this->_asiakaskohtaiset_tuotehinnat}", $e);
           $onnistuiko_paivitys = false;
+          continue;
         }
       }
 

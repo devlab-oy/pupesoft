@@ -1677,7 +1677,7 @@ if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
         // tehd‰‰n extranetiss‰ pop-up divi jos tuoteella kuvaus...
         if ($kukarow["extranet"] != "" and $row["kuvaus"] != "" and $yhtiorow["extranet_nayta_kuvaus"] == "Y") {
 
-          $kuvaus = str_replace($kuvaus_htmlfrom, $kuvaus_htmlto, $row['kuvaus']);
+          $kuvaus = str_replace($kuvaus_htmlfrom, $kuvaus_htmlto, t_tuotteen_avainsanat($row, 'kuvaus'));
 
           if ($kuvaus != $row['kuvaus'] and strpos($kuvaus, "*") !== FALSE) {
             $kuvausarray   = explode('*', str_replace(['<ul>', '</ul>'], ' ', $kuvaus));

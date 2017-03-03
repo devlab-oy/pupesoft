@@ -1554,7 +1554,7 @@ class MagentoClient {
     $onnistuiko_lisays = true;
     $offset = 0;
 
-    while ($hintadata = array_slice($asiakaskohtainenhintadata, $offset, 500)) {
+    while ($hintadata = array_slice($asiakaskohtainenhintadata, $offset, 200)) {
       try {
         $reply = $this->_proxy->call(
           $this->_session,
@@ -1562,9 +1562,9 @@ class MagentoClient {
           array($magento_tuotenumero, $hintadata)
         );
 
-        $this->log('magento_tuotteet', "({$current}/{$total}): Tuotteen {$magento_tuotenumero} asiakaskohtaiset hinnat lisätty. Block size 500");
+        $this->log('magento_tuotteet', "({$current}/{$total}): Tuotteen {$magento_tuotenumero} asiakaskohtaiset hinnat lisätty. Block size 200");
         $this->debug('magento_tuotteet', $hintadata);
-        $offset += 500;
+        $offset += 200;
       }
       catch (Exception $e) {
         $this->_error_count++;
@@ -1572,6 +1572,7 @@ class MagentoClient {
         $onnistuiko_lisays = false;
         continue;
       }
+      $onnistuiko_lisays = true;
     }
     
     if ($onnistuiko_lisays === false) { 

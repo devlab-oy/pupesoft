@@ -3377,6 +3377,18 @@ if ($fieldname == "extranet_nayta_saldo") {
   $jatko = 0;
 }
 
+if ($fieldname == "extranet_nayta_kuvaus") {
+  $ulos = "<td><select name='$nimi' " . js_alasvetoMaxWidth($nimi, 400) . ">";
+
+  $sel = $trow[$i] == 'Y' ? ' selected' : '';
+
+  $ulos .= "<option value = ''>" . t("Ei n‰ytet‰ tuotteen kuvausta extranetiss‰");
+  $ulos .= "<option value = 'Y' $sel>" . t("N‰ytet‰‰n tuotteen kuvaus extranetiss‰");
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
 if ($fieldname == "extranet_poikkeava_toimitusosoite") {
   $ulos = "<td><select name='{$nimi}' " . js_alasvetoMaxWidth($nimi, 400) . ">";
 

@@ -1554,7 +1554,7 @@ class MagentoClient {
     $onnistuiko_lisays = true;
     $offset = 0;
 
-    while ($hintadata = array_slice($asiakaskohtainenhintadata, $offset, 500)) {
+    while ($hintadata = array_slice($asiakaskohtainenhintadata, $offset, 300)) {
       try {
         $reply = $this->_proxy->call(
           $this->_session,
@@ -1562,9 +1562,9 @@ class MagentoClient {
           array($magento_tuotenumero, $hintadata)
         );
 
-        $this->log('magento_tuotteet', "({$offset}/{$total}): Tuotteen {$magento_tuotenumero} asiakaskohtaiset hinnat lisätty. Block size 500");
+        $this->log('magento_tuotteet', "({$offset}/{$total}): Tuotteen {$magento_tuotenumero} asiakaskohtaiset hinnat lisätty. Block size 300");
         $this->debug('magento_tuotteet', $hintadata);
-        $offset += 500;
+        $offset += 300;
       }
       catch (Exception $e) {
         $this->_error_count++;
@@ -1575,11 +1575,11 @@ class MagentoClient {
       $onnistuiko_lisays = true;
     }
     
-    if ($onnistuiko_lisays === false) { 
+    if ($onnistuiko_lisays === false) {
+      $offset = $offset - 300;
       $current = $offset;
       for ($i = $offset; $i <= $total; $i++) {
         $hintadata = $asiakaskohtainenhintadata[$i];
-        var_dump($hintadata);
         $current++;
         try {
           $reply = $this->_proxy->call(
@@ -1669,21 +1669,19 @@ class MagentoClient {
         }
         catch(Exception $e) {
           $this->_error_count++;
-          $this->log('magento_tuotteet', "Virhe asiakaskohtaisten hintojen poistossa! Magento-tuoteno {$magento_tuotenumero}, website-code: {$this->_asiakaskohtaiset_tuotehinnat}", $e);
+          $this->log('magento_tuotteet', "Virhe asiakaskohtaisten hintojen poistossa! Magento-tuoteno {$magento_tuotenumero}, {$offset}, {$total}, website-code: {$this->_asiakaskohtaiset_tuotehinnat}", $e);
           $onnistuiko_paivitys = false;
           break;
         }
       }
-
       $onnistuiko_paivitys = true;
     }
     if ($onnistuiko_paivitys === false) {
+      $offset = $offset - 500;
       $current = $offset;
       // Poistetaan kaikkien asiakkaiden hinta tältä tuotteelta
       for ($i = $offset; $i <= $total; $i++) {
         $asiakashinta = $asiakashinnat[$i];
-        
-        var_dump($asiakashinta);
         $current++;
 
         try {

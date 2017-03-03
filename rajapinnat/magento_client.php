@@ -1570,7 +1570,7 @@ class MagentoClient {
         $this->_error_count++;
         $this->log('magento_tuotteet', "Virhe! Tuotteen {$magento_tuotenumero} asiakaskohtaisen ({$hintadata['customerEmail']}) hinnan lisäys epäonnistui blockina", $e);
         $onnistuiko_lisays = false;
-        continue;
+        break;
       }
       $onnistuiko_lisays = true;
     }
@@ -1671,7 +1671,7 @@ class MagentoClient {
           $this->_error_count++;
           $this->log('magento_tuotteet', "Virhe asiakaskohtaisten hintojen poistossa! Magento-tuoteno {$magento_tuotenumero}, website-code: {$this->_asiakaskohtaiset_tuotehinnat}", $e);
           $onnistuiko_paivitys = false;
-          continue;
+          break;
         }
       }
 

@@ -998,19 +998,19 @@ if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
 
   if (mysql_num_rows($result) > 0) {
 
-    $kuvaus_htmlfrom = [
+    $kuvaus_htmlfrom = array(
         '[LIHAVOITU]', '[/LIHAVOITU]',
         '[LISTA]',     '[/LISTA]',
         '[lihavoitu]', '[/lihavoitu]',
         '[lista]',     '[/lista]',
-    ];
+    );
 
-    $kuvaus_htmlto = [
+    $kuvaus_htmlto = array(
         '<strong>', '</strong>',
         '<ul>',     '</ul>',
         '<strong>', '</strong>',
         '<ul>',     '</ul>',
-    ];
+    );
 
     $rows = array();
     $haetaan_perheet = ($piilota_tuoteperheen_lapset == "") ? TRUE : FALSE;
@@ -1680,7 +1680,7 @@ if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
           $kuvaus = str_replace($kuvaus_htmlfrom, $kuvaus_htmlto, t_tuotteen_avainsanat($row, 'kuvaus'));
 
           if ($kuvaus != $row['kuvaus'] and strpos($kuvaus, "*") !== FALSE) {
-            $kuvausarray   = explode('*', str_replace(['<ul>', '</ul>'], ' ', $kuvaus));
+            $kuvausarray   = explode('*', str_replace(array('<ul>', '</ul>'), ' ', $kuvaus));
             $lit           = '<ul>';
 
             foreach ($kuvausarray as $liarvo) {

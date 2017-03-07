@@ -449,7 +449,13 @@ if ($tee == 'TULOSTA') {
         $ulos .= sprintf('%-4.4s', "");
       }
 
-      $ulos .= sprintf('%-10.10s', str_replace('-', '', $laskurow["ytunnus"])); //ostajan ytunnus
+      if ($toim == "AKTIA") {
+        $ulos .= sprintf('%010.10s', str_replace('-', '', $yhtiorow["ytunnus"]));
+      }
+      else {
+        $ulos .= sprintf('%-10.10s', str_replace('-', '', $laskurow["ytunnus"])); //ostajan ytunnus
+
+      }
 
       if ($toim == "OKO") {
         $ulos .= sprintf('%-30.30s', strtoupper($laskurow["nimi"])); //ostajan nimi
@@ -574,6 +580,9 @@ if ($tee == 'TULOSTA') {
         $ulos .= sprintf('%06.6s', 0);
         $ulos .= sprintf('%06.6s', 0); // Kassa-ale 6
       }
+      elseif ($toim == 'AKTIA') {
+        $ulos .= sprintf('%-12.12s', "");
+      }
       else {
         $ulos .= sprintf('%012.12s', 0);
       }
@@ -593,6 +602,9 @@ if ($tee == 'TULOSTA') {
         $ulos .= sprintf('%012.12s', 0);
         $ulos .= sprintf('%012.12s', 0); // Ale6 valuutta
       }
+      elseif ($toim == 'AKTIA') {
+        $ulos .= sprintf('%-24.24s', "");
+      }
       else {
         $ulos .= sprintf('%024.24s', 0);
       }
@@ -611,6 +623,9 @@ if ($tee == 'TULOSTA') {
       if ($toim == 'SAMPO') {
         $ulos .= sprintf('%01.1s', 0);
         $ulos .= sprintf('%01.1s', 0); // Koodi 6 ...
+      }
+      elseif ($toim == 'AKTIA') {
+        $ulos .= sprintf('%-2.2s', "");
       }
       else {
         $ulos .= sprintf('%02.2s', 0);
@@ -640,7 +655,14 @@ if ($tee == 'TULOSTA') {
         $ulos .= sprintf('%-20.20s', $laskurow["toim_osoite"]); //toim osoite
         $ulos .= sprintf('%-20.20s', $laskurow["toim_postino"]." ".$laskurow["toim_postitp"]); //toim postitp ja postino
         $ulos .= sprintf('%-30.30s', "");
-        $ulos .= sprintf('%013.13s', 0);
+
+        if ($toim == 'AKTIA') {
+          $ulos .= sprintf('%-13.13s', 0);
+        }
+        else {
+          $ulos .= sprintf('%013.13s', 0);
+        }
+
         $ulos .= sprintf('%-30.30s', "");
         $ulos .= sprintf('%06.6s', 0);
 
@@ -656,7 +678,7 @@ if ($tee == 'TULOSTA') {
           }
 
           if ($toim == 'AKTIA') {
-            $ulos .= sprintf('%06.6s', $frow["sopimusnumero"]); // Aktia Yritysrahoituksen ostajanumero
+            $ulos .= sprintf('%-6.6s', ""); // Aktia Yritysrahoituksen ostajanumero, ei käytössä kotimaisilla asiakkailla
             $ulos .= sprintf('%-25.25s', "");
           }
           else {
@@ -757,7 +779,7 @@ if ($tee == 'TULOSTA') {
       if ($toim == "OKO") {
         $ulos .= sprintf('%-286.286s', "");
       }
-      elseif ($toim == 'SAMPO') {
+      elseif (in_array($toim, array("SAMPO", "AKTIA"))) {
         $ulos .= sprintf('%-286.286s', "");
       }
       else {

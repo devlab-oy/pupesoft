@@ -450,7 +450,7 @@ if ($tee == 'TULOSTA') {
       }
 
       if ($toim == "AKTIA") {
-        $ulos .= sprintf('%010.10s', str_replace('-', '', $yhtiorow["ytunnus"]));
+        $ulos .= sprintf('%010.10s', str_replace('-', '', $laskurow["ytunnus"]));
       }
       else {
         $ulos .= sprintf('%-10.10s', str_replace('-', '', $laskurow["ytunnus"])); //ostajan ytunnus
@@ -657,7 +657,7 @@ if ($tee == 'TULOSTA') {
         $ulos .= sprintf('%-30.30s', "");
 
         if ($toim == 'AKTIA') {
-          $ulos .= sprintf('%-13.13s', 0);
+          $ulos .= sprintf('%-13.13s', "");
         }
         else {
           $ulos .= sprintf('%013.13s', 0);

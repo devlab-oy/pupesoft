@@ -481,6 +481,8 @@ if ($tee == 'valmis') {
 
   $virheita = 0;
 
+  // Tehdään lukko, jotta vain yksi ajo kerrallaan,
+  // mutta lukko vain selaimesta mennessä
   if (php_sapi_name() != 'cli') {
     $lock_params = array(
       "return"   => true,

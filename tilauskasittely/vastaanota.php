@@ -481,13 +481,15 @@ if ($tee == 'valmis') {
 
   $virheita = 0;
 
-  $lock_params = array(
-    "return"   => true,
-  );
+  if (php_sapi_name() != 'cli') {
+    $lock_params = array(
+      "return"   => true,
+    );
 
-  if (!pupesoft_flock($lock_params)) {
-    echo "Ruuhkaa varastosiirtojen vastaanotossa, yritä myöhemmin uudelleen!";
-    exit();
+    if (!pupesoft_flock($lock_params)) {
+      echo "Ruuhkaa varastosiirtojen vastaanotossa, yritä myöhemmin uudelleen!";
+      exit();
+    }
   }
 
   //käydään kaikki riviti läpi ja siirretään saldoja

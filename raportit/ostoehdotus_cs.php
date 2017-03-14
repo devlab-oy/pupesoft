@@ -744,7 +744,9 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
       }
     }
     elseif ($toim == "LOG") {
-      $ostoehdotus = $toimirow['osto_era'];
+      if (($saldot - $enp + $ostot) <= $row["halytysraja"]) {
+        $ostoehdotus = $toimirow['osto_era'];
+      }
     }
     else {
       if (($saldot - $enp + $ostot) <= $row["halytysraja"]) {

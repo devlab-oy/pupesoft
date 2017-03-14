@@ -534,9 +534,13 @@ if ($tee == 'TARKISTA') {
   $xresult = pupe_query($xquery);
 
   while ($xrow = mysql_fetch_assoc($xresult)) {
-    $tuoteno_array[]                   = $xrow['tuoteno'];
-    $kpl_array[$xrow['tuoteno']]       = $xrow['tilkpl'];
-    $kommentti_array[$xrow['tuoteno']] = $xrow['kommentti'];
+    // Lis‰t‰‰n tuoteno_array muttujaan vain is‰tuotteet,
+    // koska muuten lapset lis‰t‰‰ perheen mukana JA itsen‰isin‰ tuotteina
+    if ($xrow["perheid"] == 0 or $xrow["perheid"] == $xrow["tunnus"]) {
+      $tuoteno_array[]                   = $xrow['tuoteno'];
+      $kpl_array[$xrow['tuoteno']]       = $xrow['tilkpl'];
+      $kommentti_array[$xrow['tuoteno']] = $xrow['kommentti'];
+    }
 
     $query = "UPDATE tilausrivi SET
               tyyppi      = 'D'

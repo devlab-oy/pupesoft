@@ -146,6 +146,9 @@ class MagentoClient {
   // Merkataanko tuote tilaan 'varastossa' saldosta riippumatta
   private $tuote_aina_varastossa = null;
 
+  // Default kielen lisäksi muut tuetut kauppakohtaiset kieliversiot, esim array("en" => array('4','13'), "se" => array('9'));
+  private $_TuetutKieliversiot = array();
+
   function __construct($url, $user, $pass, $client_options = array(), $debug = false) {
     try {
       $this->_proxy = new SoapClient($url, $client_options);
@@ -312,27 +315,28 @@ class MagentoClient {
       }
 
       $multi_data = array();
-      $tuetut_kieliversiot = array();
 
       $_key = $this->magento_simple_tuote_nimityskentta;
       $tuotteen_nimitys = $tuote[$_key];
 
-      // Simple tuotteiden parametrit kuten koko ja väri
-      foreach ($tuote['tuotteen_parametrit'] as $parametri) {
-        $key = $parametri['option_name'];
-        $option_id = $this->get_option_id($key, $parametri['arvo'], $attribute_set_id);
+      // Simple tuotteiden parametrit kuten koko ja väri (oletuskieli on fi)
+      if (!empty($tuote['tuotteen_parametrit']['fi'])) {
+        foreach ($tuote['tuotteen_parametrit']['fi'] as $parametri) {
+          $key = $parametri['option_name'];
+          $option_id = $this->get_option_id($key, $parametri['arvo'], $attribute_set_id);
 
-        if ($option_id == 0) {
-          continue;
-        }
+          if ($option_id === false) {
+            continue;
+          }
 
-        $multi_data[$key] = $option_id;
+          $multi_data[$key] = $option_id;
 
-        $this->log('magento_tuotteet', "Tuotteen parametri {$key}: {$parametri['arvo']} ({$multi_data[$key]})");
+          $this->log('magento_tuotteet', "Tuotteen parametri {$key}: {$parametri['arvo']} ({$multi_data[$key]})");
 
-        // Lisätään lapsituotteen nimeen variaatioiden arvot
-        if ($this->magento_nimitykseen_parametrien_arvot === true) {
-          $tuotteen_nimitys .= " - {$parametri['arvo']}";
+          // Lisätään lapsituotteen nimeen variaatioiden arvot
+          if ($this->magento_nimitykseen_parametrien_arvot === true) {
+            $tuotteen_nimitys .= " - {$parametri['arvo']}";
+          }
         }
       }
 
@@ -342,7 +346,6 @@ class MagentoClient {
         // Kieliversiot
         // poimitaan talteen koska niitä käytetään toisaalla
         if ($key == 'kieliversiot') {
-          $tuetut_kieliversiot = $erikoisparametri['arvo'];
           continue;
         }
 
@@ -358,12 +361,16 @@ class MagentoClient {
         if (isset($tuote[$erikoisparametri['arvo']])) {
           $option_id = $this->get_option_id($key, $tuote[$erikoisparametri['arvo']], $attribute_set_id);
 
-          if ($option_id == 0) {
+          if ($option_id === false) {
+            $this->log('magento_tuotteet', "Erikoisparametri {$key}: {$tuote[$erikoisparametri['arvo']]} #option_id == 0, jätetään päivittämättä");
             continue;
           }
 
           $multi_data[$key] = $option_id;
           $this->log('magento_tuotteet', "Erikoisparametri {$key}: {$tuote[$erikoisparametri['arvo']]}");
+        }
+        else {
+          $this->log('magento_tuotteet', "Erikoisparametri {$key}: {$tuote[$erikoisparametri['arvo']]} #!isset, jätetään päivittämättä");
         }
       }
 
@@ -499,7 +506,7 @@ class MagentoClient {
 
       // Päivitetään tuotteen kieliversiot kauppanäkymäkohtaisesti
       // jos nämä on asetettu konffissa
-      if (isset($tuetut_kieliversiot) and count($tuetut_kieliversiot) > 0) {
+      if (count($this->_TuetutKieliversiot) > 0) {
         try {
           // Kieliversiot-magentoerikoisparametrin tulee sisältää array jossa määritellään mikä kieliversio
           // siirretään mihinkin kauppatunnukseen
@@ -507,18 +514,65 @@ class MagentoClient {
           // Esim. array("en" => array('4','13'), "se" => array('9'));
           $kieliversio_data = $this->hae_kieliversiot($tuote_clean);
 
-          foreach ($tuetut_kieliversiot as $kieli => $kauppatunnukset) {
+          // katsotaan onko $verkkokauppatuotteet_erikoisparametrit taulukossa määritelty mainostekstiä.
+          $_mainosteksti = array();
+          foreach ($verkkokauppatuotteet_erikoisparametrit as $spessukentat) {
+
+            // spessukentät on määritelty taulukossa niin, että array(nimi => magentonimi, arvo => pupenimi)
+            // katsotaan onko mainostekstille määritelty kenttää Magentossa
+            if (isset($spessukentat['nimi']) and $spessukentat['arvo'] == 'mainosteksti') {
+              $_mainosteksti[] = $spessukentat['nimi'];
+            }
+          }
+
+          foreach ($this->_TuetutKieliversiot as $kieli => $kauppatunnukset) {
             if (empty($kieliversio_data[$kieli])) continue;
 
             $kaannokset = $kieliversio_data[$kieli];
+            $tuotteen_kauppakohtainen_data2 = array();
+            $tuotteen_kauppakohtainen_data3 = array();
+
+            if (!empty($_mainosteksti)) {
+              foreach ($_mainosteksti as $_magento_fieldname) {
+                $tuotteen_kauppakohtainen_data2[$_magento_fieldname] = $kaannokset['mainosteksti'];
+              }
+
+              $this->log('magento_tuotteet', "Tuotteen mainosteksti kielikäännös {$kieli}: {$tuote['tuoteno']} - {$_magento_fieldname}: {$kaannokset['mainosteksti']}");
+            }
+
+            // Simple tuotteiden parametrit kuten koko ja väri
+            if (!empty($tuote['tuotteen_parametrit'][$kieli])) {
+              foreach ($tuote['tuotteen_parametrit'][$kieli] as $parametri) {
+                $key = $parametri['option_name'];
+                $option_id = $this->get_option_id($key, $parametri['arvo'], $attribute_set_id);
+
+                if ($option_id === false) {
+                  continue;
+                }
+
+                $multi_data[$key] = $option_id;
+
+                $this->log('magento_tuotteet', "Tuotteen parametri kielikäännös {$kieli} {$tuote['tuoteno']} - {$key}: {$parametri['arvo']} ({$multi_data[$key]})");
+
+                // Lisätään lapsituotteen nimeen variaatioiden arvot
+                if ($this->magento_nimitykseen_parametrien_arvot === true) {
+                  $kaannokset['nimitys'] .= " - {$parametri['arvo']}";
+                }
+
+                $tuotteen_kauppakohtainen_data3['additional_attributes'] = array('multi_data' => $multi_data);
+              }
+            }
 
             // Päivitetään jokaiseen kauppatunnukseen haluttu käännös
             foreach ($kauppatunnukset as $kauppatunnus) {
+
               $tuotteen_kauppakohtainen_data = array(
                 'description' => $kaannokset['kuvaus'],
                 'name'        => $kaannokset['nimitys'],
-                'unit'        => $kaannokset['yksikko']
+                'unit'        => $kaannokset['yksikko'],
               );
+
+              $tuotteen_kauppakohtainen_data = array_merge($tuotteen_kauppakohtainen_data, $tuotteen_kauppakohtainen_data2, $tuotteen_kauppakohtainen_data3);
 
               $this->_proxy->call($this->_session, 'catalog_product.update',
                 array(
@@ -669,17 +723,19 @@ class MagentoClient {
       // Configurable-tuotteelle myös ensimmäisen lapsen parametrit
       $configurable_multi_data = array();
 
-      foreach ($lapsituotteen_tiedot['parametrit'] as $parametri) {
-        $key = $parametri['option_name'];
-        $option_id = $this->get_option_id($key, $parametri['arvo'], $attribute_set_id);
+      if (!empty($lapsituotteen_tiedot['parametrit']['fi'])) {
+        foreach ($lapsituotteen_tiedot['parametrit']['fi'] as $parametri) {
+          $key = $parametri['option_name'];
+          $option_id = $this->get_option_id($key, $parametri['arvo'], $attribute_set_id);
 
-        if ($option_id == 0) {
-          continue;
+          if ($option_id === false) {
+            continue;
+          }
+
+          $configurable_multi_data[$key] = $option_id;
+
+          $this->log('magento_tuotteet', "Tuotteen parametri {$key}: {$parametri['arvo']} ({$configurable_multi_data[$key]})");
         }
-
-        $configurable_multi_data[$key] = $option_id;
-
-        $this->log('magento_tuotteet', "Tuotteen parametri {$key}: {$parametri['arvo']} ({$configurable_multi_data[$key]})");
       }
 
       // Configurable-tuotteelle myös ensimmäisen lapsen erikoisparametrit
@@ -702,7 +758,7 @@ class MagentoClient {
         if (isset($lapsituotteen_tiedot[$erikoisparametri['arvo']])) {
           $option_id = $this->get_option_id($key, $lapsituotteen_tiedot[$erikoisparametri['arvo']], $attribute_set_id);
 
-          if ($option_id == 0) {
+          if ($option_id === false) {
             continue;
           }
 
@@ -761,16 +817,18 @@ class MagentoClient {
           $multi_data = array();
 
           // Simple tuotteiden parametrit kuten koko ja väri
-          foreach ($tuote['parametrit'] as $parametri) {
-            $key = $parametri['option_name'];
-            $option_id = $this->get_option_id($key, $parametri['arvo'], $attribute_set_id);
+          if (!empty($tuote['parametrit']['fi'])) {
+            foreach ($tuote['parametrit']['fi'] as $parametri) {
+              $key = $parametri['option_name'];
+              $option_id = $this->get_option_id($key, $parametri['arvo'], $attribute_set_id);
 
-            if ($option_id == 0) {
-              continue;
+              if ($option_id === false) {
+                continue;
+              }
+
+              $multi_data[$key] = $option_id;
+              $this->log('magento_tuotteet', "Tuotteen parametri {$key}: {$parametri['arvo']} ({$multi_data[$key]})");
             }
-
-            $multi_data[$key] = $option_id;
-            $this->log('magento_tuotteet', "Tuotteen parametri {$key}: {$parametri['arvo']} ({$multi_data[$key]})");
           }
 
           $simple_tuote_data = array(
@@ -1304,6 +1362,10 @@ class MagentoClient {
     $this->_verkkokauppatuotteet_erikoisparametrit = $verkkokauppatuotteet_erikoisparametrit;
   }
 
+  public function setTuetutKieliversiot($tuetut_kieliversiot) {
+    $this->_TuetutKieliversiot = $tuetut_kieliversiot;
+  }
+
   public function setAsiakkaatErikoisparametrit($asiakkaat_erikoisparametrit) {
     $this->_asiakkaat_erikoisparametrit = $asiakkaat_erikoisparametrit;
   }
@@ -1477,12 +1539,7 @@ class MagentoClient {
     }
 
     // Ensin poistetaan tuotteen asiakashinnat Magentosta kaikki kerralla
-    $onnistuiko_paivitys = $this->poista_tuotteen_asiakaskohtaiset_hinnat($asiakkaat_per_yhteyshenkilo, $magento_tuotenumero, true);
-
-    if ($onnistuiko_paivitys === false) {
-      // Ensin poistetaan tuotteen asiakashinnat Magentosta yksitellen
-      $this->poista_tuotteen_asiakaskohtaiset_hinnat($asiakkaat_per_yhteyshenkilo, $magento_tuotenumero);
-    }
+    $this->poista_tuotteen_asiakaskohtaiset_hinnat($asiakkaat_per_yhteyshenkilo, $magento_tuotenumero, true);
 
     // Sitten haetaan asiakaskohtainen hintadata Pupesta
     $asiakaskohtainenhintadata = $this->hae_tuotteen_asiakaskohtaiset_hinnat($asiakkaat_per_yhteyshenkilo, $tuotenumero);
@@ -1494,26 +1551,51 @@ class MagentoClient {
 
     $current = 0;
     $total = count($asiakaskohtainenhintadata);
+    $onnistuiko_lisays = true;
+    $offset = 0;
 
-    foreach($asiakaskohtainenhintadata as $hintadata) {
-      $current++;
-
+    while ($hintadata = array_slice($asiakaskohtainenhintadata, $offset, 300)) {
       try {
         $reply = $this->_proxy->call(
           $this->_session,
           'price_per_customer.setPriceForCustomersPerProduct',
-          array($magento_tuotenumero, array($hintadata))
+          array($magento_tuotenumero, $hintadata)
         );
 
-        $this->log('magento_tuotteet', "({$current}/{$total}): Tuotteen {$magento_tuotenumero} asiakaskohtaiset ({$hintadata['customerEmail']}) hinnat lisätty");
+        $this->log('magento_tuotteet', "({$offset}/{$total}): Tuotteen {$magento_tuotenumero} asiakaskohtaiset hinnat lisätty. Block size 300");
         $this->debug('magento_tuotteet', $hintadata);
+        $offset += 300;
       }
       catch (Exception $e) {
         $this->_error_count++;
-        $this->log('magento_tuotteet', "Virhe! Tuotteen {$magento_tuotenumero} asiakaskohtaisen ({$hintadata['customerEmail']}) hinnan lisäys epäonnistui", $e);
+        $this->log('magento_tuotteet', "Virhe! Tuotteen {$magento_tuotenumero} asiakaskohtaisen ({$hintadata['customerEmail']}) hinnan lisäys epäonnistui blockina", $e);
+        $onnistuiko_lisays = false;
+        break;
+      }
+      $onnistuiko_lisays = true;
+    }
+    
+    if ($onnistuiko_lisays === false) {
+      $current = $offset;
+      for ($i = $offset; $i <= $total; $i++) {
+        $hintadata = $asiakaskohtainenhintadata[$i];
+        $current++;
+        try {
+          $reply = $this->_proxy->call(
+            $this->_session,
+            'price_per_customer.setPriceForCustomersPerProduct',
+            array($magento_tuotenumero, array($hintadata))
+          );
+      
+          $this->log('magento_tuotteet', "({$current}/{$i}/{$total}): Tuotteen {$magento_tuotenumero} asiakaskohtaiset ({$hintadata['customerEmail']}) hinnat lisätty");
+          $this->debug('magento_tuotteet', $hintadata);
+        }
+        catch (Exception $e) {
+          $this->_error_count++;
+          $this->log('magento_tuotteet', "Virhe! Tuotteen {$magento_tuotenumero} asiakaskohtaisen ({$hintadata['customerEmail']}) hinnan lisäys epäonnistui", $e, $i);
+        }
       }
     }
-
     return $reply;
   }
 
@@ -1534,7 +1616,8 @@ class MagentoClient {
               WHERE yhteyshenkilo.yhtio                   = '{$yhtio}'
                 AND yhteyshenkilo.rooli                   = 'Magento'
                 AND yhteyshenkilo.email                  != ''
-                AND yhteyshenkilo.ulkoinen_asiakasnumero != ''";
+                AND yhteyshenkilo.ulkoinen_asiakasnumero != ''
+              ORDER BY yhteyshenkilo.muutospvm";
     $result = pupe_query($query);
 
     while ($rivi = mysql_fetch_assoc($result)) {
@@ -1559,10 +1642,11 @@ class MagentoClient {
     $current = 0;
     $total = count($asiakkaat_per_yhteyshenkilo);
     $asiakashinnat = array();
-    $offset = 0;
+    $onnistuiko_paivitys = true;
 
     if ($kaikki_kerralla) {
       // Poistetaan kaikkien asiakkaiden hinta tältä tuotteelta
+      $offset = 0;
       foreach ($asiakkaat_per_yhteyshenkilo as $asiakas) {
         $asiakashinnat[] = array(
           'customerEmail' => $asiakas['asiakas_email'],
@@ -1586,36 +1670,30 @@ class MagentoClient {
         catch(Exception $e) {
           $this->_error_count++;
           $this->log('magento_tuotteet', "Virhe asiakaskohtaisten hintojen poistossa! Magento-tuoteno {$magento_tuotenumero}, website-code: {$this->_asiakaskohtaiset_tuotehinnat}", $e);
-
-          return false;
+          $onnistuiko_paivitys = false;
+          break;
         }
       }
-
-      return true;
     }
-    else {
+    if ($onnistuiko_paivitys === false) {
+      $current = $offset;
       // Poistetaan kaikkien asiakkaiden hinta tältä tuotteelta
-      foreach ($asiakkaat_per_yhteyshenkilo as $asiakas) {
+      for ($i = $offset; $i <= $total; $i++) {
+        $asiakashinta = $asiakashinnat[$i];
         $current++;
-
-        $asiakashinnat = array(
-          'customerEmail' => $asiakas['asiakas_email'],
-          'websiteCode' => $this->_asiakaskohtaiset_tuotehinnat,
-          'delete' => 1
-        );
 
         try {
           $this->_proxy->call(
             $this->_session,
             'price_per_customer.setPriceForCustomersPerProduct',
-            array($magento_tuotenumero, array($asiakashinnat))
+            array($magento_tuotenumero, array($asiakashinta))
           );
 
-          $this->log('magento_tuotteet', "({$current}/{$total}): Tuotteen {$magento_tuotenumero} asiakaskohtaiset hinnat poistettu ({$asiakas['asiakas_email']})");
+          $this->log('magento_tuotteet', "({$current}/{$total}): Tuotteen {$magento_tuotenumero} asiakaskohtaiset hinnat poistettu ({$asiakashinta['asiakas_email']})");
         }
         catch(Exception $e) {
           $this->_error_count++;
-          $this->log('magento_tuotteet', "Virhe asiakaskohtaisten hintojen poistossa! Magento-tuoteno {$magento_tuotenumero}, asiakas_email: {$asiakas['asiakas_email']}, website-code: {$this->_asiakaskohtaiset_tuotehinnat}", $e);
+          $this->log('magento_tuotteet', "Virhe asiakaskohtaisten hintojen poistossa! Magento-tuoteno {$magento_tuotenumero}, asiakas_email: {$asiakashintarivi['asiakas_email']}, website-code: {$this->$asiakashinta}", $e);
         }
       }
 
@@ -1884,10 +1962,12 @@ class MagentoClient {
     $url_key = $this->sanitize_link_rewrite($tuotedata['nimi']);
     $parametrit = array();
 
-    foreach ($tuotedata['tuotteen_parametrit'] as $parametri) {
-      $key = $parametri['option_name'];
-      $value = $parametri['arvo'];
-      $parametrit[$key] = $value;
+    if (!empty($tuotedata['tuotteen_parametrit']['fi'])) {
+      foreach ($tuotedata['tuotteen_parametrit']['fi'] as $parametri) {
+        $key = $parametri['option_name'];
+        $value = $parametri['arvo'];
+        $parametrit[$key] = $value;
+      }
     }
 
     foreach ($halutut_array as $key => $value) {
@@ -2149,6 +2229,7 @@ class MagentoClient {
       if (strcasecmp($attribute['code'], $name) == 0) {
         $attribute_id = $attribute['attribute_id'];
         $attribute_type = $attribute['type'];
+        $this->log('magento_tuotteet', "Atribuutti '{$name}' ({$value}) löytyi setistä {$attribute_set_id}, attribute_id: {$attribute_id}, attribute_type: {$attribute_type}");
         break;
       }
     }
@@ -2157,11 +2238,12 @@ class MagentoClient {
     if (empty($attribute_id)) {
       $this->log('magento_tuotteet', "Atribuuttia '{$name}' ei löydetty setistä {$attribute_set_id}");
 
-      return 0;
+      return false;
     }
 
     // Jos dynaaminen parametri on matkalla teksti- tai hintakenttään niin idtä ei tarvita, palautetaan vaan arvo
     if ($attribute_type == 'text' or $attribute_type == 'textarea' or $attribute_type == 'price') {
+      $this->log('magento_tuotteet', "Palautetaan value, kun attribute_type: {$attribute_type}");
       return $value;
     }
 
@@ -2177,6 +2259,7 @@ class MagentoClient {
     // Etitään optionsin value
     foreach ($options as $option) {
       if (strcasecmp($option['label'], $value) == 0) {
+        $this->log('magento_tuotteet', "Palautetaan option-value: {$option['value']}");
         return $option['value'];
       }
     }
@@ -2215,6 +2298,7 @@ class MagentoClient {
       // Etitään optionsin value uudestaan..
       foreach ($options as $option) {
         if (strcasecmp($option['label'], $value) == 0) {
+          $this->log('magento_tuotteet', "Palautetaan option-value(2285): {$option[value]}");
           return $option['value'];
         }
       }
@@ -2223,7 +2307,7 @@ class MagentoClient {
     $this->log('magento_tuotteet', "Attribuutin '{$name}' arvon '{$value}' haku setistä {$attribute_set_id} ei onnistunut.");
 
     // Mitään ei löytyny
-    return 0;
+    return false;
   }
 
   // Hakee $status -tilassa olevat tilaukset Magentosta ja merkkaa ne noudetuksi.
@@ -2488,7 +2572,7 @@ class MagentoClient {
                 tuotteen_avainsanat
                 WHERE yhtio = '{$kukarow['yhtio']}'
                 AND tuoteno = '{$tuotenumero}'
-                AND laji    IN ('nimitys','kuvaus', 'yksikko')";
+                AND laji    IN ('nimitys','kuvaus', 'yksikko', 'mainosteksti')";
       $result = pupe_query($query);
 
       while ($avainsana = mysql_fetch_assoc($result)) {

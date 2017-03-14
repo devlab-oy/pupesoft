@@ -212,13 +212,13 @@ if (in_array($row["var"], array('', 'H')) and $row["tyyppi"] != "E" and $row["ty
 }
 
 if (in_array($row["var"], array('S', 'U', 'T', 'R', 'J')) and $row["tyyppi"] != "E") {
-  if (($yhtiorow["varaako_jt_saldoa"] == "") and $row["jt"] == 0) {
-    $varaosavirhe .= t("VIRHE: M‰‰r‰ puuttuu!")."<br>";
+  if (($yhtiorow["varaako_jt_saldoa"] == "") and $row["jt"] <= 0) {
+    $varaosavirhe .= t("VIRHE: M‰‰r‰ puuttuu tai se on negatiivinen!")."<br>";
     $riviok++;
     $tilausok++;
   }
-  if ($yhtiorow["varaako_jt_saldoa"] != "" and $row["varattu"] == 0) {
-    $varaosavirhe .= t("VIRHE: M‰‰r‰ puuttuu!")."<br>";
+  if ($yhtiorow["varaako_jt_saldoa"] != "" and $row["varattu"] <= 0) {
+    $varaosavirhe .= t("VIRHE: M‰‰r‰ puuttuu tai se on negatiivinen!")."<br>";
     $riviok++;
     $tilausok++;
   }
@@ -305,7 +305,7 @@ if (!in_array($row["var"], array('', 'P', 'J', 'H', 'S', 'T', 'U', 'V', 'A', 'B'
   $tilausok++;
 }
 
-if ($row["tyyppi"] == 'V' and $row["perheid"] == 0 and $toim == "VALMISTAVARASTOON") {
+if (in_array($row["tyyppi"], array('V', 'W')) and $row["perheid"] == 0 and $toim == "VALMISTAVARASTOON") {
   $varaosavirhe .= t("VIRHE: Tuote ei kuulu mihink‰‰n reseptiin!")."<br>";
   $riviok++;
   $tilausok++;

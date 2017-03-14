@@ -2333,7 +2333,7 @@ if (!function_exists('loppu')) {
     $pdf_lasku->draw_text(217, 55 + $tileja + $barcode_korkeus, t("Puhelin", $kieli).": $y_puhelin", $thispage, $pieni);
     $pdf_lasku->draw_text(217, 45 + $tileja + $barcode_korkeus, t("Sähköposti", $kieli).": $y_email", $thispage, $pieni);
     $pdf_lasku->draw_text(217, 35 + $tileja + $barcode_korkeus, t("Web", $kieli).": $y_www", $thispage, $pieni);
-    if (!empty($y_fax)) $pdf_lasku->draw_text(217, 25 + $tileja + $barcode_korkeus, t("Telefax", $kieli).": $y_fax", $thispage, $pieni);
+    if (!empty($y_fax)) $pdf_lasku->draw_text(217, 25 + $tileja + $barcode_korkeus, t("Fax", $kieli).": $y_fax", $thispage, $pieni);
 
     $pdf_lasku->draw_text(404, 55 + $tileja + $barcode_korkeus, t("Y-tunnus", $kieli).": ".tulosta_ytunnus($y_vatnumero, $y_maa, $laskurow["vienti"]), $thispage, $pieni);
     $pdf_lasku->draw_text(404, 45 + $tileja + $barcode_korkeus, t("Kotipaikka", $kieli).": $y_kotipaikka", $thispage, $pieni);

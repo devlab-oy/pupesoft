@@ -72,7 +72,8 @@ if (!function_exists("luo_myyntitilausotsikko")) {
       $eilahe = "";
       $sisainen = "";
 
-      if (($kukarow['extranet'] != '' and $kukarow['hyvaksyja'] != "") or $yhtiorow['lahetteen_tulostustapa'] == 'I') {
+      if (($kukarow['extranet'] != '' and $kukarow['hyvaksyja'] != "") or $yhtiorow['lahetteen_tulostustapa'] == 'I'
+        or $kukarow['eilahetetta'] == 'o') {
         $eilahe = "o";
       }
 

@@ -744,9 +744,9 @@ if ($tee == 'tulosta') {
 
       while ($rivi = mysql_fetch_assoc($res)) {
 
-        // otetaan kaikki otsikkonumerot ja rahtikirjanumerot talteen... tarvitaan myöhemmin hauissa
-        $otunnukset   .= "'$rivi[otunnus]',";
-        $tunnukset    .= "'$rivi[rtunnus]',";
+        // lasku.tunnus otunnus ja rahtikirjat.tunnus rtunnus... tarvitaan myöhemmin hauissa
+        $otunnukset   .= "$rivi[otunnus],";
+        $tunnukset    .= "$rivi[rtunnus],";
 
         // otsikkonumerot talteen, nämä printataan paperille
         if (!in_array($rivi['otunnus'], $lotsikot)) {

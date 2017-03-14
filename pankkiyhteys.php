@@ -26,6 +26,13 @@ $hae_viitteet = empty($hae_viitteet) ? '' : $hae_viitteet;
 $hae_laskut = empty($hae_laskut) ? '' : $hae_laskut;
 $hae_palautteet = empty($hae_palautteet) ? '' : $hae_palautteet;
 
+// Otetaan defaultit, jos ei olla yliajettu salasanat.php:ssä
+$verkkolaskut_in     = empty($verkkolaskut_in)     ? "/home/verkkolaskut"        : rtrim($verkkolaskut_in, "/");
+$verkkolaskut_ok     = empty($verkkolaskut_ok)     ? "/home/verkkolaskut/ok"     : rtrim($verkkolaskut_ok, "/");
+$verkkolaskut_orig   = empty($verkkolaskut_orig)   ? "/home/verkkolaskut/orig"   : rtrim($verkkolaskut_orig, "/");
+$verkkolaskut_error  = empty($verkkolaskut_error)  ? "/home/verkkolaskut/error"  : rtrim($verkkolaskut_error, "/");
+$verkkolaskut_reject = empty($verkkolaskut_reject) ? "/home/verkkolaskut/reject" : rtrim($verkkolaskut_reject, "/");
+
 $pankkitiedostot = array();
 $virheet_count = 0;
 $cookie_secret = "pupesoft_pankkiyhteys_secret";

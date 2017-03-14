@@ -238,11 +238,11 @@ if ($tee == '1') {
           $iiiiii++;
         }
 
-        $worksheet->write($excelrivi, $iiiiii, $trow["Vientejä"]);
+        $worksheet->writeNumber($excelrivi, $iiiiii, (float) $trow["Vientejä"]);
         $iiiiii++;
-        $worksheet->write($excelrivi, $iiiiii, $trow["Saldo"]);
+        $worksheet->writeNumber($excelrivi, $iiiiii, (float) $trow["Saldo"]);
         $iiiiii++;
-        $worksheet->write($excelrivi, $iiiiii, $trow["Kumulatiivinen"]);
+        $worksheet->writeNumber($excelrivi, $iiiiii, (float) $trow["Kumulatiivinen"]);
         $iiiiii++;
 
         $valuutta_summat = "";

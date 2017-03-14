@@ -91,7 +91,7 @@ echo "</select></td>";
 echo "</tr>";
 echo "</table><br>";
 
-$monivalintalaatikot = array("ASIAKASMYYJA", "ASIAKASRYHMA", "TRY");
+$monivalintalaatikot = array("ASIAKASMYYJA", "ASIAKASRYHMA", "TRY", "TUOTEMERKKI");
 $monivalintalaatikot_normaali = array();
 
 require "tilauskasittely/monivalintalaatikot.inc";
@@ -104,6 +104,7 @@ if (isset($aja_raportti) and !empty($vva) and !empty($kka) and !empty($ppa) and 
   $loppupvm = "$vvl-$kkl-$ppl";
   $rajaukset = array(
     'tuotteet' => $mul_try,
+    'tuotemerkit' => $mul_tme,
     'asiakasmyyjat' => $mul_asiakasmyyja,
     'asiakasryhmat' => $mul_asiakasryhma
   );
@@ -138,6 +139,10 @@ if (isset($aja_raportti) and !empty($vva) and !empty($kka) and !empty($ppa) and 
 
   echo "<tr><td class='ptop back'>";
   piirra_taulukko(hae_data('asiakasosastot', $limitit, $rajaukset, $asumvalinta));
+  echo "</td>";
+
+  echo "<td class='ptop back'>";
+  piirra_taulukko(hae_data('tuotemerkit', $limitit, $rajaukset, $asumvalinta));
   echo "</td></tr></table>";
 }
 
@@ -216,6 +221,7 @@ function hae_data($tyyppi, $limitit, $rajaukset, $asumvalinta) {
   $tuoterajaus = '';
   $ryhmarajaus = '';
   $myyjarajaus = '';
+  $tuotemerkkirajaus = '';
   $haettu_data = array();
   $nimikentta = ' tuote.nimitys ';
   $grouppauskentta = ' tuote.tunnus ';
@@ -251,6 +257,17 @@ function hae_data($tyyppi, $limitit, $rajaukset, $asumvalinta) {
 
     $myyjarajaus = substr($myyjarajaus, 0, -1);
     $myyjarajaus .= ") ";
+  }
+
+  if (!empty($rajaukset['tuotemerkit']) and count($rajaukset['tuotemerkit']) > 0) {
+    $tuotemerkkirajaus = " AND tuote.tuotemerkki IN (";
+
+    foreach ($rajaukset['tuotemerkit'] as $value) {
+      $tuotemerkkirajaus .= "'{$value}',";
+    }
+
+    $tuotemerkkirajaus = substr($tuotemerkkirajaus, 0, -1);
+    $tuotemerkkirajaus .= ") ";
   }
 
   switch ($tyyppi) {
@@ -290,6 +307,12 @@ function hae_data($tyyppi, $limitit, $rajaukset, $asumvalinta) {
     $grouppauskentta = " asiakas.osasto ";
     $limitti = in_array('asiakasosasto', $limitit) ? '' : ' LIMIT 10 ';
     break;
+  case "tuotemerkit":
+    $haettu_data['otsikko'] = t('Tuotemerkit');
+    $nimikentta = " ifnull(tuotemerkki.selite,'".t("Ei tuotemerkkiä")."') ";
+    $grouppauskentta = " tuote.tuotemerkki ";
+    $limitti = in_array('tuotemerkki', $limitit) ? '' : ' LIMIT 10 ';
+    break;
   }
 
   $query = "SELECT {$nimikentta} nimi,
@@ -304,7 +327,8 @@ function hae_data($tyyppi, $limitit, $rajaukset, $asumvalinta) {
             JOIN tuote use index (tuoteno_index) ON (tuote.yhtio = tilausrivi.yhtio
               AND tuote.tuoteno            = tilausrivi.tuoteno
               AND tuote.myynninseuranta    = ''
-              {$tuoterajaus})
+              {$tuoterajaus}
+              {$tuotemerkkirajaus})
             JOIN asiakas use index (PRIMARY) ON (asiakas.yhtio = lasku.yhtio
               AND asiakas.tunnus           = lasku.liitostunnus
               AND asiakas.myynninseuranta  = ''
@@ -314,11 +338,14 @@ function hae_data($tyyppi, $limitit, $rajaukset, $asumvalinta) {
               AND kuka.myyja               = asiakas.myyjanro
               AND kuka.myyja               > 0)
             LEFT JOIN avainsana AS ryhma ON (ryhma.yhtio = lasku.yhtio
-              AND ryhma.laji           = 'ASIAKASRYHMA'
-              AND ryhma.selite         = asiakas.ryhma)
+              AND ryhma.laji        = 'ASIAKASRYHMA'
+              AND ryhma.selite      = asiakas.ryhma)
             LEFT JOIN avainsana AS osasto ON (osasto.yhtio = lasku.yhtio
-              AND osasto.laji           = 'ASIAKASOSASTO'
-              AND osasto.selite         = asiakas.osasto)
+              AND osasto.laji        = 'ASIAKASOSASTO'
+              AND osasto.selite      = asiakas.osasto)
+            LEFT JOIN avainsana AS tuotemerkki ON (tuotemerkki.yhtio = lasku.yhtio
+              AND tuotemerkki.laji   = 'TUOTEMERKKI'
+              AND tuotemerkki.selite = tuote.tuotemerkki)
             WHERE lasku.yhtio              = '{$kukarow['yhtio']}'
             AND lasku.tila                 = 'U'
             AND lasku.alatila              = 'X'

@@ -277,6 +277,7 @@ if (mysql_field_name($result, $i) == "laji") {
   if ($lukitse_laji== "" or $lukitse_laji == "CRM_ROOLI") $ulos .= "<option value='CRM_ROOLI' $avain_sel[CRM_ROOLI]>".t("Yhteyshenkilön rooli")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "CRM_SUORAMARKKI") $ulos .= "<option value='CRM_SUORAMARKKI' $avain_sel[CRM_SUORAMARKKI]>".t("Yhteyshenkilön suoramarkkinointitiedot")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "CRM_HAAS") $ulos .= "<option value='CRM_HAAS' {$avain_sel['CRM_HAAS']}>".t("Haas USR-kentät")."</option>";
+  if ($lukitse_laji== "" or $lukitse_laji == "CRM_TARJOUSPOIS") $ulos .= "<option value='CRM_TARJOUSPOIS' {$avain_sel['CRM_TARJOUSPOIS']}>".t("CRM viesti tarjouksen hylkäyksestä")."</option>";
   if ($lukitse_laji== "") $ulos .= "</optgroup>";
 
   if ($lukitse_laji== "") $ulos .= "<optgroup label='".t("Muut avainsanat")."'>";

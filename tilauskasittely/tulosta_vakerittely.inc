@@ -246,7 +246,7 @@ if (!function_exists('vakadr_loppu')) {
 
     $pdf->draw_text(217, 55, t("Puhelin", $kieli).":",      $thispage, $pieni);
     $pdf->draw_text(247, 55, $y_puhelin,            $thispage, $pieni);
-    $pdf->draw_text(217, 45, t("Telefax", $kieli).":",      $thispage, $pieni);
+    $pdf->draw_text(217, 45, t("Fax", $kieli).":",      $thispage, $pieni);
     $pdf->draw_text(247, 45, $y_fax,              $thispage, $pieni);
     $pdf->draw_text(217, 35, t("Sähköposti", $kieli).":",    $thispage, $pieni);
     $pdf->draw_text(257, 35, $y_email,              $thispage, $pieni);

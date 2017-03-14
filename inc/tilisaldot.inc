@@ -230,11 +230,11 @@ if ($tee == '1') {
         $iiiiii++;
 
         if ($kustannuspaikoittain != "") {
-          $worksheet->writeNumber($excelrivi, $iiiiii, (float) $trow["kustp"]);
+          $worksheet->write($excelrivi, $iiiiii, $trow["kustp"]);
           $iiiiii++;
-          $worksheet->writeNumber($excelrivi, $iiiiii, (float) $trow["kohde"]);
+          $worksheet->write($excelrivi, $iiiiii, $trow["kohde"]);
           $iiiiii++;
-          $worksheet->writeNumber($excelrivi, $iiiiii, (float) $trow["projekti"]);
+          $worksheet->write($excelrivi, $iiiiii, $trow["projekti"]);
           $iiiiii++;
         }
 
@@ -250,7 +250,7 @@ if ($tee == '1') {
           $valuutta_summat .= "$sum $valuutta\n";
         }
 
-        $worksheet->writeNumber($excelrivi, $iiiiii, (float) $valuutta_summat);
+        $worksheet->write($excelrivi, $iiiiii, $valuutta_summat);
         $iiiiii++;
         $excelrivi++;
       }

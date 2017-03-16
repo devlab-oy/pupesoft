@@ -609,7 +609,7 @@ if ($tee == 'laske') {
   }
 
   $query = "SELECT
-            left(tilausrivi.laadittu, 10) AS 'pvm',
+            left(lasku.luontiaika, 10) AS 'pvm',
             kustannuspaikka.nimi AS kustannuspaikka,
             tuote.osasto,
             tuote.try,
@@ -623,9 +623,11 @@ if ($tee == 'laske') {
             LEFT JOIN kustannuspaikka ON (kustannuspaikka.yhtio = tilausrivi.yhtio AND kustannuspaikka.tunnus = asiakas.kustannuspaikka)
             WHERE tilausrivi.yhtio  IN ('{$query_yhtiot}')
             AND tilausrivi.tyyppi   = 'L'
-            AND tilausrivi.laadittu >= '{$vva}-{$kka}-{$ppa} 00:00:00'
-            AND tilausrivi.laadittu <= '{$vvl}-{$kkl}-{$ppl} 23:59:59'
-            AND (tilausrivi.laskutettuaika >= '{$vvl}-{$kkl}-{$ppl} 23:59:59' OR tilausrivi.laskutettuaika = 0)
+            #AND tilausrivi.laadittu >= '{$vva}-{$kka}-{$ppa} 00:00:00'
+            #AND tilausrivi.laadittu <= '{$vvl}-{$kkl}-{$ppl} 23:59:59'
+            #AND (tilausrivi.laskutettuaika >= '{$vvl}-{$kkl}-{$ppl} 23:59:59' OR tilausrivi.laskutettuaika = 0)
+            AND lasku.luontiaika >= '{$vva}-{$kka}-{$ppa} 00:00:00'
+            AND lasku.luontiaika <= '{$vvl}-{$kkl}-{$ppl} 23:59:59'
             GROUP BY 1,2,3,4
             ORDER BY tilausrivi.laadittu";
   $result = pupe_query($query);

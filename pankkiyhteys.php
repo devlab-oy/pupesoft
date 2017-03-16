@@ -117,7 +117,7 @@ if ($toim == "palaute") {
   require 'inc/pankkiyhteys_palautteet.inc';
 }
 
-// Jos toim on "laheta", tehd‚Ä∞‚Ä∞n l‚Ä∞hetyshommia
+// Jos toim on "laheta", tehd‰‰n l‰hetyshommia
 if ($toim == "laheta") {
   require 'inc/pankkiyhteys_send.inc';
 }

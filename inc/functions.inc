@@ -34552,6 +34552,72 @@ if (!function_exists('sscc_tarkiste')) {
   }
 }
 
+/**
+ * Hakee kaikki yhtion pankkiyhteydet tietokannasta ja lisaa pankin nimen palautettavaan arrayhyn
+ *
+ * @return array
+ */
+if (!function_exists('hae_pankkiyhteydet')) {
+  function hae_pankkiyhteydet() {
+    global $kukarow, $yhtiorow;
+
+    $luodut_pankkiyhteydet = array();
+    $tuetut_pankit = tuetut_pankit();
+
+    $query = "SELECT *
+              FROM pankkiyhteys
+              WHERE yhtio = '{$kukarow['yhtio']}'";
+    $result = pupe_query($query);
+
+    while ($rivi = mysql_fetch_assoc($result)) {
+      $rivi["pankin_nimi"] = $tuetut_pankit[$rivi["pankki"]]["nimi"];
+      array_push($luodut_pankkiyhteydet, $rivi);
+    }
+
+    return $luodut_pankkiyhteydet;
+  }
+}
+
+/**
+ * Palauttaa arrayn tuetuista pankeista muodossa BIC => [lyhyt_nimi, pitka_nimi]
+ *
+ * @return array
+ */
+if (!function_exists('tuetut_pankit')) {
+  function tuetut_pankit() {
+    return array(
+      "NDEAFIHH" => array(
+        "nimi"       => "Nordea",
+        "lyhyt_nimi" => "nordea"
+      ),
+      "DABAFIHH" => array(
+        "nimi"       => "Danske Bank",
+        "lyhyt_nimi" => "danske"
+      ),
+      "OKOYFIHH" => array(
+        "nimi"       => "OP",
+        "lyhyt_nimi" => "op",
+      ),
+      "HELSFIHH" => array(
+        "nimi"       => "Aktia",
+        "lyhyt_nimi" => "aktia",
+      ),
+      "ITELFIHH" => array(
+        "nimi"       => "Säästöpankki",
+        "lyhyt_nimi" => "sp",
+      ),
+      "POPFFI22" => array(
+        "nimi"       => "POP Pankki",
+        "lyhyt_nimi" => "pop",
+      ),
+      "HANDFIHH" => array(
+        "nimi"       => "Handelsbanken",
+        "lyhyt_nimi" => "shb",
+      ),
+    );
+  }
+}
+
 if (!function_exists('toimita_kaikki_tarkistus')) {
   function toimita_kaikki_tarkistus($toimita_kaikki, $result, $laskurow, $asiakasrow, $muokkauslukko, $muokkauslukko_rivi) {
     global $kukarow, $yhtiorow;

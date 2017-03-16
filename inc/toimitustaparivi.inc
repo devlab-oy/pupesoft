@@ -196,6 +196,11 @@ if (mysql_field_name($result, $i) == "virallinen_selite") {
   $ulos .= "<option value='DSVFIFULL' {$sel["DSVFIFULL"]}>DSV Road Osakuorma</option>";
   $ulos .= "</optgroup>";
 
+  $ulos .= "<optgroup label='Unifaun / FedEx'>";
+  $ulos .= "<option value='FDXIEP' {$sel["FDXIEP"]}>FedEx International Economy (Non Docs)</option>";
+  $ulos .= "<option value='FDXIPP' {$sel["FDXIPP"]}>FedEx International Priority (Non Docs)</option>";
+  $ulos .= "</optgroup>";
+
   $ulos .= "<optgroup label='Unifaun / Fennoway'>";
   $ulos .= "<option value='FENNORAHTI' {$sel["FENNORAHTI"]}>Fennoway Fennorahti</option>";
   $ulos .= "</optgroup>";

@@ -789,6 +789,9 @@ if ($tee == 'TULOSTA') {
 
       $ulos .= "\r\n";
 
+      $sepayhteys = 0;
+      $sepafile = "";
+
       //keksitään uudelle failille joku hyvä nimi:
       if ($toim == "OKO") {
         $filenimi = "OKOsiirto-$factoringsiirtonumero.txt";
@@ -797,9 +800,37 @@ if ($tee == 'TULOSTA') {
         $filenimi = "Samposiirto-$factoringsiirtonumero.txt";
       }
       elseif ($toim == 'AKTIA') {
+        // Lähetetäänkö facotringaineisto Aktiaan?
+        $pankkiyhteydet = hae_pankkiyhteydet();
+        $tuetut_pankit = tuetut_pankit();
+
+        foreach ($pankkiyhteydet as $pankkiyhteys) {
+          if ($pankkiyhteys['pankki'] == "HELSFIHH") {
+            $pankki = $tuetut_pankit[$pankkiyhteys['pankki']];
+
+            $sepayhteys = $pankkiyhteys["tunnus"];
+            $sepafile = "dataout/{$pankki['lyhyt_nimi']}_error/Factoringsiirto-Aktia-$factoringsiirtonumero.txt";
+            break;
+          }
+        }
+
         $filenimi = "Aktiasiirto-$factoringsiirtonumero.txt";
       }
       else {
+        // Lähetetäänkö facotringaineisto Nordeaan?
+        $pankkiyhteydet = hae_pankkiyhteydet();
+        $tuetut_pankit = tuetut_pankit();
+
+        foreach ($pankkiyhteydet as $pankkiyhteys) {
+          if ($pankkiyhteys['pankki'] == "NDEAFIHH") {
+            $pankki = $tuetut_pankit[$pankkiyhteys['pankki']];
+
+            $sepayhteys = $pankkiyhteys["tunnus"];
+            $sepafile = "dataout/{$pankki['lyhyt_nimi']}_error/Factoringsiirto-Nordea-$factoringsiirtonumero.txt";
+            break;
+          }
+        }
+
         $filenimi = "Nordeasiirto-$factoringsiirtonumero.txt";
       }
 
@@ -807,6 +838,12 @@ if ($tee == 'TULOSTA') {
       $fh = fopen("dataout/".$filenimi, "w");
       if (fwrite($fh, $ulos) === FALSE) die("Kirjoitus epäonnistui $filenimi");
       fclose($fh);
+
+      if (!empty($sepafile)) {
+        $fh = fopen($sepafile, "w");
+        if (fwrite($fh, $ulos) === FALSE) die("Kirjoitus epäonnistui $sepafile");
+        fclose($fh);
+      }
 
       echo "<tr><td class='back'><br></td></tr>";
 
@@ -824,6 +861,9 @@ if ($tee == 'TULOSTA') {
       if ($toim == "OKO") {
         echo "<input type='hidden' name='kaunisnimi' value='OKOMYSA.DAT'>";
       }
+      elseif ($toim == "AKTIA") {
+        echo "<input type='hidden' name='kaunisnimi' value='AKTIAMYSA.TXT'>";
+      }
       else {
         echo "<input type='hidden' name='kaunisnimi' value='SOLOMYSA.DAT'>";
       }
@@ -832,6 +872,17 @@ if ($tee == 'TULOSTA') {
       echo "<input type='hidden' name='toim' value='$toim'>";
       echo "<td><input type='submit' value='Tallenna'></td></form>";
       echo "</tr></table>";
+
+      if ($sepayhteys and in_array($toim, array("", "AKTIA"))) {
+        echo "<br><br><table>";
+        echo "<tr><th>Siirrä aineisto pankkiin:</th>";
+        echo "<form method='post' action='pankkiyhteys.php'>";
+        echo "<input type='hidden' name='toim' value='laheta'/>";
+        echo "<input type='hidden' name='tee' value=''/>";
+        echo "<input type='hidden' name='pankkiyhteys_tunnus' value='$sepayhteys'/>";
+        echo "<td><input type='submit' value='Lähetä'></td></form>";
+        echo "</tr></table>";
+      }
     }
   }
   else {

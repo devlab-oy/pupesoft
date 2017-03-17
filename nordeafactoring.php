@@ -219,7 +219,7 @@ if ($tee == 'TOIMINNOT') {
   echo "<tr><th>Siirtoluettelon numero:</th>
       <td><input type='text' name='factoringsiirtonumero' value='$factoringsiirtonumero' size='6'></td>";
 
-  echo "<td class='back'><input type='submit' value='Uudeleenluo siirtoaineisto'></td></tr></form></table><br><br>";
+  echo "<td class='back'><input type='submit' value='Uudelleenluo siirtoaineisto'></td></tr></form></table><br><br>";
 }
 
 if ($tee == 'TULOSTA') {

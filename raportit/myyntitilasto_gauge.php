@@ -411,9 +411,9 @@ if ($tee == 'laske') {
   if ($tavoitteet) {
     echo "<th>", t("Tavoite"), " $_k{$yhtiorow["valkoodi"]}</th>";
   }
-  echo "<th>", t("Avoimet"), " $_k{$yhtiorow["valkoodi"]}</th>";
-  echo "<th>", t("Avoimet Kate%"), "</th>";
-  echo "<th>", t("Avoimet Rivit"), "</th>";
+  echo "<th>", t("Uudet"), " $_k{$yhtiorow["valkoodi"]}</th>";
+  echo "<th>", t("Uudet Kate%"), "</th>";
+  echo "<th>", t("Uudet Rivit"), "</th>";
   echo "</tr>";
 
   $yhteensa = array(

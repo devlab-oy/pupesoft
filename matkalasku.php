@@ -2636,22 +2636,22 @@ function lisaa_kulurivi($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilino
               $jaljellaoleva_maara = $kokonaiskappalemaara - $ins_kpl;
               // Jos normihinnalla jää vielä lisättävää
               if ($ins_kpl > 0) {
-                tee_matkalaskurivin_kirjaukset(get_defined_vars());
+                list ($perhe_id, $perheid2, $rivitunnus) = tee_matkalaskurivin_kirjaukset(get_defined_vars());
               }
 
               // Jos erikoishinnalla on lisättävää
               if ($jaljellaoleva_maara > 0 and $trow['myymalahinta'] > 0) {
                 $ins_kpl = $jaljellaoleva_maara;
                 $hinta = $trow['myymalahinta'];
-                tee_matkalaskurivin_kirjaukset(get_defined_vars());
+                list ($perhe_id, $perheid2, $rivitunnus) = tee_matkalaskurivin_kirjaukset(get_defined_vars());
               }
             }
             else {
-              tee_matkalaskurivin_kirjaukset(get_defined_vars());
+              list ($perhe_id, $perheid2, $rivitunnus) = tee_matkalaskurivin_kirjaukset(get_defined_vars());
             }
           }
           else {
-            tee_matkalaskurivin_kirjaukset(get_defined_vars());
+            list ($perhe_id, $perheid2, $rivitunnus) = tee_matkalaskurivin_kirjaukset(get_defined_vars());
           }
         }
       }
@@ -3174,7 +3174,7 @@ function tee_matkalaskurivin_kirjaukset($variables) {
             muuttaja            = '$kukarow[kuka]'";
   $updres = pupe_query($query);
 
-  return true;
+  return array ($perhe_id, $perheid2, $rivitunnus);
 }
 
 require "inc/footer.inc";

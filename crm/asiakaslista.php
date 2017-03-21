@@ -29,7 +29,7 @@ if ($php_cli) {
   $kukarow = hae_kukarow('admin', $yhtio);
 
   $tee = "lataa_tiedosto";
-  $tmpfilenimi = "crm-haas-{$kukarow['yhtio']}-".date("YmdHis").".csv";
+  $tmpfilenimi = "crm-haas-{$kukarow['yhtio']}-".date("YmdHis").".h_calls";
 
   $crm_haas_date_alku[0] = date("d");
   $crm_haas_date_alku[1] = date("m");
@@ -42,6 +42,26 @@ if ($php_cli) {
   $crm_haas["call_type"] = "on";
 
   $mul_asiakas1[] = "2";
+
+  $query = "SELECT *
+            FROM transports
+            JOIN yhtio ON (transports.transportable_id=yhtio.tunnus and yhtio.yhtio = '{$kukarow['yhtio']}')
+            WHERE transports.transportable_type = 'Company'
+            AND transports.transport_name = 'Haas CRM'";
+  $res = pupe_query($query);
+  $row = mysql_fetch_assoc($res);
+
+  $ftphost = $row["hostname"];
+  $ftpuser = $row["username"];
+  $ftppass = $row["password"];
+  $ftppath = $row["path"];
+  $ftpport = $row["port"];
+  $ftpfile = "";
+  $ftpfail = "";
+  $ftpsucc = "";
+
+  $tulos_ulos = "";
+
 }
 else {
  if (isset($_POST["tee"])) {
@@ -287,14 +307,11 @@ if (isset($tee) and $tee == "lataa_tiedosto") {
   fclose($toot);
 
   if ($php_cli) {
-    $ftphost = (isset($verkkohost_lah) and trim($verkkohost_lah) != '') ? $verkkohost_lah : "ftp.verkkolasku.net";
-    $ftpuser = $yhtiorow['verkkotunnus_lah'];
-    $ftppass = $yhtiorow['verkkosala_lah'];
-    $ftppath = (isset($verkkopath_lah) and trim($verkkopath_lah) != '') ? $verkkopath_lah : "out/einvoice/data/";
-    $ftpfile = $kansio.$lasku;
-    $ftpsucc = "{$pupe_root_polku}/dataout/";
+    $ftpfile = "/tmp/".basename($tmpfilenimi);
 
-    $tulos_ulos = "";
+    if (!PUPE_UNICODE) {
+      exec("recode -f ISO-8859-15..UTF8 '$ftpfile'");
+    }
 
     require "inc/ftp-send.inc";
   }

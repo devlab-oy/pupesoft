@@ -53,8 +53,8 @@ echo "<tr><td class='ptop'>".t("Huomioi pankkitilin maksulimitti alkusaldona")."
        <td><table>";
 
  $query = "SELECT yriti.*,
-           round(yriti.maksulimitti) maksulimitti,
-           round(yriti.maksulimitti * valuu.kurssi) maksulimitti_kotival
+           round(yriti.maksulimitti) maksulimitti_kotival,
+           round(yriti.maksulimitti / valuu.kurssi) maksulimitti
            FROM yriti
            JOIN valuu ON (yriti.yhtio = valuu.yhtio and yriti.valkoodi = valuu.nimi)
            WHERE yriti.yhtio  = '$kukarow[yhtio]'
@@ -294,7 +294,7 @@ if ($aika != '') {
 
   // Pankkitilien saldo
   if (!empty($pankkisaldo)) {
-    $query = "SELECT round(sum(yriti.maksulimitti * valuu.kurssi), 2) saldo_nyt
+    $query = "SELECT round(sum(yriti.maksulimitti), 2) saldo_nyt
               FROM yriti
               JOIN valuu ON (yriti.yhtio = valuu.yhtio and yriti.valkoodi = valuu.nimi)
               WHERE yriti.yhtio  = '$kukarow[yhtio]'

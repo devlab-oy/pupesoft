@@ -242,8 +242,6 @@ unset($DAY_ARRAY);
 unset($AIKA_ARRAY);
 unset($MONTH_ARRAY);
 
-unset($VOIPURL);
-
 unset($kpexport);
 
 unset($liitetaanko_editilaus_laskulle_hakemisto);

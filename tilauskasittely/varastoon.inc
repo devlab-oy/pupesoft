@@ -650,9 +650,11 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
 
   // lasketaan rivin hinta
   $osuus_apu_hinta = round($tilrivirow['hinta']*$alvit*abs($tilrivirow['varattu'])*$ale_lisa_apu_kala*$tuorow['tuotekerroin'], $yhtiorow["hintapyoristys"]);
+  #$osuus_apu_hinta = round($tilrivirow['hinta']*$alvit*$tilrivirow['varattu']*$ale_lisa_apu_kala*$tuorow['tuotekerroin'], $yhtiorow["hintapyoristys"]);
 
   // jos keikan arvo on muuta kuin nolla ja rivin hinta on pienempi kuin keikan hinta, lasketaan rahtiosuus. muuten nollaa
-  if ($laskurow['summa'] != 0 and $osuus_apu_hinta <= $laskurow["summa"] + 0.01) {
+  if (($laskurow['summa'] > 0 and $osuus_apu_hinta <= $laskurow["summa"] + 0.01)
+    or ($laskurow['summa'] < 0 and $osuus_apu_hinta >= $laskurow["summa"] + 0.01)) {
 
     $osuus = $osuus_apu_hinta / $laskurow['summa'];  // kuinka paljon tämä rivi on koko keikasta
 
@@ -672,8 +674,7 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
     $rahtios = 0;
     $osuus   = 0;
   }
-
-  if ($tilrivirow['varattu'] < 0) {
+  if ($tilrivirow['varattu'] < 0 and $laskurow['summa'] > 0) {
     $rahtios = $rahtios * -1;
   }
 

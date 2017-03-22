@@ -131,27 +131,40 @@ if (!function_exists("onkokaikkivalmistettu")) {
   function onkokaikkivalmistettu($valmkpllat) {
     global $kukarow, $tee, $valmistettavat;
 
-    // Oletetaan ett‰ tilaus on kokonaan valmistettu,
-    // alla tarkastetaan onko tilaus valmistettu kokonaan vai ei
-    $valmistettu = TRUE;
+    $valmistetut_tilaukset = array();
 
     //katotaan onko en‰‰ mit‰‰n valmistettavaa
     foreach ($valmkpllat as $rivitunnus => $tuoteno) {
       //Haetaan tilausrivi
       $query = "SELECT otunnus, uusiotunnus
                 FROM tilausrivi
-                WHERE yhtio = '$kukarow[yhtio]'
+                WHERE yhtio = '{$kukarow["yhtio"]}'
                 and tunnus  = '{$rivitunnus}'
                 and tyyppi  in ('W','M')";
       $roxresult = pupe_query($query);
       $tilrivirow = mysql_fetch_assoc($roxresult);
+
+      $otun_uusiotun = $tilrivirow["otunnus"]."|".$tilrivirow["uusiotunnus"];
+
+      if (!in_array($otun_uusiotun, $valmistetut_tilaukset)) {
+        $valmistetut_tilaukset[] = $otun_uusiotun;
+      }
+    }
+
+    foreach ($valmistetut_tilaukset as $otun_uusiotun) {
+
+      list($tilrivirow["otunnus"], $tilrivirow["uusiotunnus"]) = explode("|", $otun_uusiotun);
+
+      // Oletetaan ett‰ tilaus on kokonaan valmistettu,
+      // alla tarkastetaan onko tilaus valmistettu kokonaan vai ei
+      $valmistettu = TRUE;
 
       //Katsotaan onko yht‰‰n valmistamatonta rivi‰ t‰ll‰ tilauksella/jobilla
       $query = "SELECT tunnus
                 FROM tilausrivi
                 WHERE yhtio        = '$kukarow[yhtio]'
                 AND tyyppi         IN ('W','M')
-                AND otunnus         = '{$tilrivirow["otunnus"]}'
+                AND otunnus        = '{$tilrivirow["otunnus"]}'
                 AND toimitettuaika = '0000-00-00 00:00:00'";
       $chkresult1 = pupe_query($query);
 
@@ -237,7 +250,8 @@ if (!function_exists("onkokaikkivalmistettu")) {
       else {
         if (!$tilrivirow["otunnus"]) {
           echo "<font class='error'>".t("VIRHE: Valmistukselta puuttuu valmisterivi. Tarkista valmistuksen rivit")."! </font><br>";
-      }
+        }
+
         $tee = "VALMISTA";
       }
     }

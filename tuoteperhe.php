@@ -933,8 +933,7 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
         echo "<th colspan='2'>".t("Samankaltaisuuden faktat")."</th>";
       }
       else {
-        echo "<th>".t("Reseptin faktat")."</th>";
-        echo "<th>".t("Yhdistämisen lisätiedot")."</th>";
+        echo "<th colspan='2'>".t("Reseptin faktat")."</th>";
       }
 
       $query = "SELECT fakta
@@ -976,6 +975,7 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
         $faktarow = mysql_fetch_array($ressu);
 
         echo "<tr>";
+        echo "<th colspan='2'>".t("Yhdistämisen lisätiedot")."</th>";
         echo "<td colspan='2'>";
 
         if ($oikeurow['paivitys'] == '1') {

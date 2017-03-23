@@ -948,7 +948,6 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
       $faktarow = mysql_fetch_array($ressu);
 
       echo "</tr>";
-
       echo "<tr>";
       echo "<td colspan='2'>";
 
@@ -976,6 +975,8 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
 
         echo "<tr>";
         echo "<th colspan='2'>".t("Yhdistämisen lisätiedot")."</th>";
+        echo "</tr>";
+        echo "<tr>";
         echo "<td colspan='2'>";
 
         if ($oikeurow['paivitys'] == '1') {

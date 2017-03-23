@@ -961,6 +961,7 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
       }
 
       echo "</td>";
+      echo "</tr>";
 
       if ($toim == "RESEPTI") {
         $query = "SELECT fakta2
@@ -974,7 +975,8 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
         $ressu = pupe_query($query);
         $faktarow = mysql_fetch_array($ressu);
 
-        echo "<td>";
+        echo "<tr>";
+        echo "<td colspan='2'>";
 
         if ($oikeurow['paivitys'] == '1') {
           echo "<textarea cols='35' rows='7' name='fakta2'>{$faktarow["fakta2"]}</textarea>";
@@ -984,9 +986,9 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
         }
 
         echo "</td>";
+        echo "</tr>";
       }
 
-      echo "</tr>";
       echo "</table>";
 
       if ($oikeurow['paivitys'] == '1') {

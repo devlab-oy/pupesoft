@@ -979,7 +979,7 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
         echo "<td colspan='2'>";
 
         if ($oikeurow['paivitys'] == '1') {
-          echo "<textarea cols='35' rows='7' name='fakta2'>{$faktarow["fakta2"]}</textarea>";
+          echo "<textarea cols='80' rows='7' name='fakta2'>{$faktarow["fakta2"]}</textarea>";
         }
         else {
           echo "$faktarow[fakta2]";

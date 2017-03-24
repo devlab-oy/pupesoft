@@ -338,7 +338,7 @@ elseif ($luottorajavirhe != '' or $ylivito > 0) {
     echo "<font class='error'>" . $errortext . t("Tilausta ei merkitä valmiiksi"), ".</font><br/><br/>";
   }
 }
-elseif ($tilausvalmis_asiakas_row['myyntikielto'] == 'K') {
+elseif ($tilausvalmis_asiakas_row['myyntikielto'] == 'K' and $korkolasku != 'kylla') {
   $query = "UPDATE lasku SET
             alatila     = ''
             WHERE yhtio = '$kukarow[yhtio]'

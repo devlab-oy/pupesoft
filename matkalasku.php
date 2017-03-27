@@ -3019,21 +3019,13 @@ function listdir($start_dir = '.') {
 function hae_matkustajan_kilometrit($tuoteno, $kuka) {
   global $kukarow;
 
-  $query = "SELECT tuoteno
-            FROM tuote
-            WHERE yhtio = '{$kukarow['yhtio']}'
-            AND status = 'A'
-            AND tuoteno LIKE 'KM-__'
-            LIMIT 1";
-  $km_tuoteno = mysql_fetch_assoc(pupe_query($query));
-
   $kilometrit = 0;
   $query = "SELECT sum(tilausrivi.kpl) yhteensa
             FROM tilausrivi
             JOIN lasku ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus AND lasku.tila in ('H','Y','M','P','Q'))
             WHERE lasku.yhtio          = '{$kukarow['yhtio']}'
               AND tilausrivi.tyyppi    = 'M'
-              AND tilausrivi.tuoteno   = '{$km_tuoteno["tuoteno"]}'
+              AND tilausrivi.tuoteno   = '{$tuoteno}'
               AND lasku.toim_ovttunnus = '{$kuka}'";
   $result = pupe_query($query);
   $row = mysql_fetch_assoc($result);
@@ -3183,6 +3175,7 @@ function tee_matkalaskurivin_kirjaukset($variables) {
   $updres = pupe_query($query);
 
   return array ($perhe_id, $perheid2, $rivitunnus);
+
 }
 
 require "inc/footer.inc";

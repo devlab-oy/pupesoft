@@ -3174,6 +3174,11 @@ function tee_matkalaskurivin_kirjaukset($variables) {
             muuttaja            = '$kukarow[kuka]'";
   $updres = pupe_query($query);
 
+  if (strpos($lisaa_tuoteno, "PR") === false) {
+    $perheid = 0;
+    $perheid2 = 0;
+  }
+
   return array ($perhe_id, $perheid2, $rivitunnus);
 
 }

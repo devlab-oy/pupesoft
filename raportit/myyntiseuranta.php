@@ -3135,6 +3135,10 @@ if ((isset($aja_raportti) or isset($valitse_asiakas)) and count($_REQUEST) > 0) 
                 $row[$ken_nimi] = tv1dateconv($kentta);
               }
 
+              if ($ken_nimi == "maksupvm") {
+                $row[$ken_nimi] = tv1dateconv($kentta);
+              }
+
               // jos kyseessa on asiakasosasto, haetaan sen nimi
               if ($ken_nimi == "asiakasosasto") {
                 $osre = t_avainsana("ASIAKASOSASTO", "", "and avainsana.selite  = '{$row[$ken_nimi]}'", $yhtio);

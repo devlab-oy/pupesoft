@@ -820,6 +820,7 @@ if ($tee == 'UV') { //Tehd‰‰n tuotteet!
 
       //printataan pikku raporttia mit‰ tulikaan tehty‰
       echo "<font class='message'>".t("Valmistettiin tuotetta")." $isatuoteno $isavarattu ".t_avainsana("Y", $kieli, "and avainsana.selite='$valmisterow[yksikko]'", "", "", "selite")."</font><br>";
+      echo "$selite<br>";
 
       $query = "SELECT paivitys
                 FROM oikeu

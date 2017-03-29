@@ -4830,6 +4830,137 @@ if (!function_exists("alehinta")) {
         }
       }
 
+      // 6C. lasku.piiri tuote.tuoteno nettohinta (asiakaspiirin tuotteen hinta) yhtiön valuutassa
+      if ($hinta == 0) {
+        $query = "SELECT hinta, laji
+                  FROM asiakashinta USE INDEX (yhtio_piiri_tuoteno)
+                  WHERE yhtio   = '{$kukarow['yhtio']}'
+                  and piiri     = '{$laskurow['piiri']}'
+                  and piiri    != ''
+                  and tuoteno   = '{$trow['tuoteno']}'
+                  and tuoteno  != ''
+                  and ytunnus   = ''
+                  and asiakas   = 0
+                  and valkoodi  in ('{$yhtiorow['valkoodi']}','')
+                  and (minkpl <= {$kpl} or minkpl = 0)
+                  and ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
+                  ORDER BY minkpl desc, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999),hinta asc, tunnus desc
+                  LIMIT 1";
+        $hresult = pupe_query($query);
+
+        if (mysql_num_rows($hresult) > 0) {
+          $hrow = mysql_fetch_assoc($hresult);
+
+          if ($hrow["laji"] == "N" or $hrow["laji"] == "E") {
+            $netto = $hrow["laji"];
+            for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+              $ale["ale" . $alepostfix] = 0;
+            }
+          }
+          elseif ($hrow["laji"] == "B") {
+            $netto = '';
+            for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+              if (isset($ale["ale" . $alepostfix]))
+                unset($ale["ale" . $alepostfix]);
+            }
+          }
+          else {
+            //Asiakashinnat ovat nettohintoja, mutta niille annetaan erikoisalennus, ei normaalia alennusta
+            if ($yhtiorow["asiakashinta_netto"] == "E") {
+              $netto = 'E';
+              for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+                $ale["ale" . $alepostfix] = 0;
+              }
+            }
+            //Asiakashinnat ovat bruttohintoja, alennuslaskentaa käytetään
+            elseif ($yhtiorow["asiakashinta_netto"] == "B") {
+              $netto = '';
+              for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+                if (isset($ale["ale" . $alepostfix]))
+                  unset($ale["ale" . $alepostfix]);
+              }
+            }
+            //Asiakashinnat ovat nettohintoja, ei alennuksia ollenkaan
+            else {
+              $netto = 'N';
+              for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+                $ale["ale" . $alepostfix] = 0;
+              }
+            }
+          }
+
+          $hinta = $hrow["hinta"];
+          $hperuste .= "Laskun piirin tuotteen nettohinta. ";
+          $hintaperuste = 6;
+        }
+      }
+
+      // 6D. lasku.piiri tuote.tuoteno nettohinta (asiakaspiirin tuotteen hinta) laskun valuutassa
+      if ($hinta == 0 and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
+        $query = "SELECT hinta, laji
+                  FROM asiakashinta USE INDEX (yhtio_piiri_tuoteno)
+                  WHERE yhtio   = '{$kukarow['yhtio']}'
+                  and piiri     = '{$laskurow['piiri']}'
+                  and piiri    != ''
+                  and tuoteno   = '{$trow['tuoteno']}'
+                  and tuoteno  != ''
+                  and ytunnus   = ''
+                  and asiakas   = 0
+                  and valkoodi  in ('{$laskurow['valkoodi']}','')
+                  and (minkpl <= {$kpl} or minkpl = 0)
+                  and ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
+                  ORDER BY minkpl desc, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999),hinta asc, tunnus desc
+                  LIMIT 1";
+        $hresult = pupe_query($query);
+
+        if (mysql_num_rows($hresult) > 0) {
+          $hrow = mysql_fetch_assoc($hresult);
+
+          if ($hrow["laji"] == "N" or $hrow["laji"] == "E") {
+            $netto = $hrow["laji"];
+            for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+              $ale["ale" . $alepostfix] = 0;
+            }
+          }
+          elseif ($hrow["laji"] == "B") {
+            $netto = '';
+            for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+              if (isset($ale["ale" . $alepostfix]))
+                unset($ale["ale" . $alepostfix]);
+            }
+          }
+          else {
+            //Asiakashinnat ovat nettohintoja, mutta niille annetaan erikoisalennus, ei normaalia alennusta
+            if ($yhtiorow["asiakashinta_netto"] == "E") {
+              $netto = 'E';
+              for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+                $ale["ale" . $alepostfix] = 0;
+              }
+            }
+            //Asiakashinnat ovat bruttohintoja, alennuslaskentaa käytetään
+            elseif ($yhtiorow["asiakashinta_netto"] == "B") {
+              $netto = '';
+              for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+                if (isset($ale["ale" . $alepostfix]))
+                  unset($ale["ale" . $alepostfix]);
+              }
+            }
+            //Asiakashinnat ovat nettohintoja, ei alennuksia ollenkaan
+            else {
+              $netto = 'N';
+              for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+                $ale["ale" . $alepostfix] = 0;
+              }
+            }
+          }
+
+          $hinta        = round(yhtioval($hrow["hinta"], $laskurow["vienti_kurssi"]), 6);
+          $hperuste    .= "Laskun piirin tuotteen nettohinta laskun valuutassa. ";
+          $alehinta_val = $laskurow["valkoodi"];
+          $hintaperuste = 6;
+        }
+      }
+
       // 6A. asiakas.piiri tuote.tuoteno nettohinta (asiakaspiirin tuotteen hinta) laskun valuutassa
       if ($hinta == 0 and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
 
@@ -5806,6 +5937,66 @@ if (!function_exists("alehinta")) {
           $netto    = "";
           $hperuste   .= "Myymälähinta. ";
           $hintaperuste = 14;
+        }
+      }
+
+      // 14B. lasku.piiri tuote.aleryhmä positiivinen-aleprosentti
+      if ($hinta == 0) {
+
+        $query = "SELECT alennus
+                  FROM asiakasalennus USE INDEX (yhtio_piiri_ryhma)
+                  WHERE yhtio  = '$kukarow[yhtio]'
+                  and piiri    = '{$laskurow['piiri']}'
+                  and piiri   != ''
+                  and ytunnus  = ''
+                  and asiakas  = 0
+                  and (minkpl <= $kpl or minkpl = 0)
+                  and ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
+                  and alennus > 0
+                  ORDER BY minkpl desc, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999),alennus desc, tunnus desc
+                  LIMIT 1";
+        $hresult = pupe_query($query);
+
+        if (mysql_num_rows($hresult) > 0) {
+
+          $hrow = mysql_fetch_assoc($hresult);
+
+          // Kehahinta saa olla nolla vain jos tuote on kokoepäkurantti, muuten katemyynti ei onnaa
+          if ($trow['kehahin'] <= 0) {
+            $hinta     = 0.01;
+            for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+              $ale["ale".$alepostfix] = 0;
+            }
+            $netto    = "";
+            $hperuste   .= "Asiakaspiirin Katemyyntihinta (kokoepäkurantti). ";
+            $hintaperuste = 11;
+          }
+          elseif ($trow['kehahin'] > 0) {
+            //Tuotteen myyntihinta
+            $hinta = $trow['myyntihinta'];
+
+            // Jos on poikkeava myyntihinta-määrä laitetaan se hintaan mukaan
+            if ($trow["myyntihinta_maara"] != 0) {
+              $hinta = $hinta * $trow["myyntihinta_maara"];
+            }
+
+            // Jos tuotteiden hinnat sisältävät arvonlisäveron lisätään vero päälle
+            if ($yhtiorow['alv_kasittely'] == '') {
+              $hinta = $hinta * (1 + ($trow['alv'] / 100));
+            }
+
+            // Pyöristetään hinta haluttuun tarkkuuteen
+            $hinta = round($hinta, $yhtiorow['hintapyoristys']);
+
+            for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+              $ale["ale".$alepostfix] = 0;
+            }
+
+            $ale['ale1'] = $hrow['alennus'];
+            $netto    = "";
+            $hperuste   .= "Asiakaspiirin Asiakasalennushinta. ";
+            $hintaperuste = '14B';
+          }
         }
       }
 

@@ -4331,6 +4331,36 @@ if (isset($jatka)) {
     $alv = 0;
   }
 
+  if (!empty($laskurow['tunnus']) and $piiri != $laskurow['piiri']) {
+    $piiri_temp = $laskurow['piiri'];
+    $laskurow['piiri'] = $piiri;
+    $tilausrivi_query = " SELECT tuote.*,
+                          tilausrivi.tilkpl AS kpl,
+                          tilausrivi.tunnus AS tilausrivi_tunnus
+                          FROM tilausrivi
+                          JOIN tuote
+                          ON (tuote.yhtio = tilausrivi.yhtio
+                            AND tuote.tuoteno = tilausrivi.tuoteno)
+                          WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+                          AND tilausrivi.otunnus = {$laskurow['tunnus']}";
+    $tilausrivi_result = pupe_query($tilausrivi_query);
+
+    while ($tilausrivi = mysql_fetch_assoc($tilausrivi_result)) {
+      $ale_hinta = alehinta($laskurow, $tilausrivi, $tilausrivi['kpl'], $netto, $hinta, $ale, 'hinta,hperuste,hintaperuste,ale1');
+
+      $ale_peruste = $ale_hinta['hperuste'] . '('.t('Aletaso').'): ' . $ale_hinta['hintaperuste'];
+      $tilausrivi_query = " UPDATE tilausrivi
+                            SET hinta = '{$ale_hinta['hinta']}',
+                            ale1 = '{$ale_hinta['ale1']}',
+                            ale_peruste = '{$ale_peruste}'
+                            WHERE yhtio = '{$kukarow['yhtio']}'
+                            AND tunnus = {$tilausrivi['tilausrivi_tunnus']}";
+      pupe_query($tilausrivi_query);
+    }
+
+    $laskurow['piiri'] = $piiri_temp;
+  }
+
   // onko yhtiön tai asiakkaan takaa säädetty extranet-tilaukset saldoa varaamattomiksi
   if ((($asiakasrow['extranet_tilaus_varaa_saldoa'] == "" and
         $yhtiorow["extranet_tilaus_varaa_saldoa"] == "E") or

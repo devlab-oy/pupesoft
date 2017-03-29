@@ -192,6 +192,8 @@ if ($tee == "AJA") {
 
   // 6A. asiakas.piiri tuote.tuoteno nettohinta (asiakaspiirin tuotteen hinta) laskun valuutassa
   // 6B. asiakas.piiri tuote.tuoteno nettohinta (asiakaspiirin tuotteen hinta) yhtiön valuutassa
+  // 6C. lasku.piiri tuote.tuoteno nettohinta (asiakaspiirin tuotteen hinta) yhtiön valuutassa
+  // 6D. lasku.piiri tuote.tuoteno nettohinta (asiakaspiirin tuotteen hinta) laskun valuutassa
   $query = "SELECT group_concat(tunnus ORDER BY IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999), hinta asc, tunnus desc) tunnukset
             FROM asiakashinta
             WHERE yhtio  = '$kukarow[yhtio]'
@@ -205,7 +207,7 @@ if ($tee == "AJA") {
   $hresult = pupe_query($query);
 
   while ($row = mysql_fetch_assoc($hresult)) {
-    //echo "HINTA: 6AB $row[tunnukset]<br>";
+    //echo "HINTA: 6ABCD $row[tunnukset]<br>";
 
     $tunnukset = explode(",", $row["tunnukset"]);
     array_shift($tunnukset);
@@ -488,6 +490,34 @@ if ($tee == "AJA") {
 
   while ($row = mysql_fetch_assoc($hresult)) {
     //echo "HINTA: 14 $row[tunnukset]<br>";
+
+    $tunnukset = explode(",", $row["tunnukset"]);
+    array_shift($tunnukset);
+    if (is_array($tunnukset)) $tunnukset = implode(",", $tunnukset);
+
+    $query = "DELETE FROM asiakasalennus
+              WHERE yhtio = '$kukarow[yhtio]'
+              AND tunnus  in ({$tunnukset})";
+    $result = pupe_query($query);
+
+    $asiakasale += count($tunnukset);
+  }
+
+  // 14B. lasku.piiri tuote.aleryhmä positiivinen-aleprosentti
+  $query = "SELECT group_concat(tunnus ORDER BY IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999),alennus desc, tunnus desc) tunnukset
+            FROM asiakasalennus
+            WHERE yhtio  = '$kukarow[yhtio]'
+            and piiri   != ''
+            and ytunnus  = ''
+            and asiakas  = 0
+            and ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
+            and alennus > 0
+            GROUP BY piiri, minkpl
+            HAVING count(*) > 1";
+  $hresult = pupe_query($query);
+
+  while ($row = mysql_fetch_assoc($hresult)) {
+    //echo "HINTA: 14B $row[tunnukset]<br>";
 
     $tunnukset = explode(",", $row["tunnukset"]);
     array_shift($tunnukset);

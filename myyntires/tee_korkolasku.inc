@@ -96,6 +96,7 @@ if (mysql_num_rows($result) == 1) {
             toim_ovttunnus  = '$asrow[toim_ovttunnus]',
             viesti          = 'Korkolasku',
             chn             = '$asrow[chn]',
+            clearing        = 'KORKOLASKU',
             maksuteksti     = '$merow[teksti]',
             laskutusvkopv   = '$asrow[laskutusvkopv]',
             yhtio           = '$kukarow[yhtio]',

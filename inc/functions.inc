@@ -5753,7 +5753,7 @@ if (!function_exists("alehinta")) {
                    WHERE yhtio  = '$kukarow[yhtio]'
                    and asiakas  = '$laskurow[liitostunnus]'
                    and asiakas  > 0
-                   and ryhma    = '$trow[aleryhma]'
+                   and ((ryhma    = '$trow[aleryhma]') or (ryhma='**'))
                    and ryhma   != ''
                    and (minkpl <= $kpl or minkpl = 0)
                    and ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'){$kampanjarajaus})

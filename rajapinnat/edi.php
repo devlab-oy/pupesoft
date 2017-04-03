@@ -128,6 +128,7 @@ class Edi {
     preg_match("/\[#([0-9]*)\]/", $shippingadress, $tunnistekoodi);
     if ($noutopistetunnus == '' and !empty($tunnistekoodi[1])) {
       $noutopistetunnus = $tunnistekoodi[1];
+      $shippingadress = str_replace($tunnistekoodi[0], "", $shippingadress);
     }
 
     $tilausviite = '';

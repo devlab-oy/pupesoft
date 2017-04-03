@@ -707,7 +707,10 @@ if ($tee == 'add') {
           if (count($kiloja) > 1) {
             $kollit[$i] = 1;
           }
-
+          // Jos yhditetty tilauksia rahtikirjalle, sortataan ne sellaiseen järjestykseen, että
+          // kollit ja kilot tulee sille tilaukselle, jolla otsikkonro=rahtikijranro,
+          // niin ollaan Unifaun-yhteensopivia
+          asort($tilaukset);
           foreach ($tilaukset as $otsikkonro) {
 
             foreach ($kiloja as $yksikilo) {

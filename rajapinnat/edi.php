@@ -276,7 +276,7 @@ class Edi {
       }
     }
 
-    // // Rahtikulu, veroton
+    // Rahtikulu, veroton
     $rahti_veroton = $order['shipping_amount'];
 
     if ($rahti_veroton != 0) {

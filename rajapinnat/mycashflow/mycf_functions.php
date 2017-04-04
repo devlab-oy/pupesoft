@@ -12,7 +12,6 @@ function mycf_hae_paivitettavat_saldot() {
     die('mycf varastot ei ole array!');
   }
 
-
   // Haetaan aika nyt
   $query = "SELECT now() as aika";
   $result = pupe_query($query);
@@ -22,10 +21,10 @@ function mycf_hae_paivitettavat_saldot() {
   // Haetaan aika jolloin tämä skripti on viimeksi ajettu
   $datetime_checkpoint = cron_aikaleima("MYCF_SALDO_CRON");
 
-  pupesoft_log("paivita_static", "Aloitetaan saldopäivitys {$aloitusaika}");
+  pupesoft_log("mycf_paivita_saldo", "Aloitetaan saldopäivitys {$aloitusaika}");
 
   if ($datetime_checkpoint != "" and $ajetaanko_kaikki == "NO") {
-    pupesoft_log("paivita_static", "Haetaan {$datetime_checkpoint} jälkeen muuttuneet");
+    pupesoft_log("mycf_paivita_saldo", "Haetaan {$datetime_checkpoint} jälkeen muuttuneet");
 
     $muutoslisa1 = "AND tapahtuma.laadittu  >= '{$datetime_checkpoint}'";
     $muutoslisa2 = "AND tilausrivi.laadittu >= '{$datetime_checkpoint}'";

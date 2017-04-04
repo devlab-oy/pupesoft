@@ -54,12 +54,6 @@ else {
 // kolmas parametri ajetaanko kaikki
 $ajetaanko_kaikki = (!empty($argv[3])) ? "YES" : "NO";
 
-$mycf_url = "https://beautypopup-dev.mycashflow.fi";
-$mycf_username = "johan.totterman+api@sprintit.fi";
-$mycf_api_key = "860a43782d318e2bf1152354efe621e7edd25ade";
-$mycf_webhooks_key = "860a43782d318e2bf1152";
-$mycf_varastot = array(141);
-
 // Tässä kaikki parametrit, jota voi säätää salasanat.php:ssä
 if (!isset($mycf_url)) {
   // mycfkaupan url
@@ -73,6 +67,31 @@ if (!isset($mycf_username)) {
   // mycfn API salasana
   die('MyCashflow käyttäjätunnus puuttuu');
 }
+
+if (!isset($mycf_edi_folderpath)) {
+  die('MyCashflow editilausten kansio puuttuu');
+}
+
+if (!isset($mycf_ovttunnus)) {
+  die('MyCashflow ovttunnus puuttuu');
+}
+
+if (!isset($mycf_rahtinimitys)) {
+  die('MyCashflow rahdin nimitys puuttuu');
+}
+
+if (!isset($mycf_rahtituoteno)) {
+  die('MyCashflow rahtituotenumero puuttuu');
+}
+
+if (!isset($mycf_tilaustyyppi)) {
+  die('MyCashflow tilaustyyppi puuttuu');
+}
+
+if (!isset($mycf_asiakasnro)) {
+  die('MyCashflow asiakasnumero puuttuu');
+}
+
 if (!isset($mycf_debug)) {
   // debug mode echottaa ruudulle ajon statusta
   $mycf_debug = false;
@@ -94,12 +113,12 @@ if (mycf_ajetaanko_sykronointi('tilaukset', $synkronoi)) {
   mycf_echo("Haetaan tilaukset.");
   $mycf_orders = new MyCashflowTilaukset($mycf_url, $mycf_webhooks_key, 'mycf_tilaukset');
 
-  $mycf_orders->set_edi_polku("/tmp");
-  $mycf_orders->set_ovt_tunnus(123);
-  $mycf_orders->set_rahtikulu_nimitys("Verkkokauppashippinki");
-  $mycf_orders->set_rahtikulu_tuoteno("RAHTI");
-  $mycf_orders->set_pupesoft_tilaustyyppi(2);
-  $mycf_orders->set_verkkokauppa_asiakasnro(999);
+  $mycf_orders->set_edi_polku($mycf_edi_folderpath);
+  $mycf_orders->set_ovt_tunnus($mycf_ovttunnus);
+  $mycf_orders->set_rahtikulu_nimitys($mycf_rahtinimitys);
+  $mycf_orders->set_rahtikulu_tuoteno($mycf_rahtituoteno);
+  $mycf_orders->set_pupesoft_tilaustyyppi($mycf_tilaustyyppi);
+  $mycf_orders->set_verkkokauppa_asiakasnro($mycf_asiakasnro);
   $mycf_orders->set_mycf_maksuehto_ohjaus(array());
   $mycf_orders->set_mycf_erikoiskasittely(array());
 

@@ -1,8 +1,7 @@
 <?php
 
-
 function mycf_hae_paivitettavat_saldot() {
-  global $kukarow, $yhtiorow, $mycf_varastot;
+  global $kukarow, $yhtiorow, $mycf_varastot, $ajetaanko_kaikki;
 
   mycf_echo("Haetaan kaikki tuotteet ja varastosaldot.");
 
@@ -73,14 +72,8 @@ function mycf_hae_paivitettavat_saldot() {
   while ($row = mysql_fetch_array($res)) {
     $tuoteno = $row['tuoteno'];
 
-    if ($row['ei_saldoa'] != '') {
-      // saldottomille tuoteteilla null, jotta mycf tietää olla lisäämättä tätä saldoa
-      $myytavissa = null;
-    }
-    else {
-      // normituote
-      list(, , $myytavissa) = saldo_myytavissa($tuoteno, '', $mycf_varastot);
-    }
+    // normituote
+    list(, , $myytavissa) = saldo_myytavissa($tuoteno, '', $mycf_varastot);
 
     // lisätään saldon päivittämiseen tarvittavat tiedot
     $tuotteet[] = array(
@@ -90,17 +83,16 @@ function mycf_hae_paivitettavat_saldot() {
     );
   }
 
+  cron_aikaleima("MYCF_SALDO_CRON", $aloitusaika);
+
   return $tuotteet;
 }
 
 function mycf_tuoterajaus() {
-
-  $tuoterajaus = " AND tuote.tuoteno = 'LOL-FP01'
-                   AND tuote.tuoteno != ''
+  $tuoterajaus = " AND tuote.tuoteno != ''
+                   AND tuote.ei_saldoa = ''
                    AND tuote.tuotetyyppi NOT in ('A','B')
-                   #AND tuote.status != 'P'
-                   #AND tuote.nakyvyys != ''
-                  ";
+                   AND tuote.status != 'P' ";
 
   return $tuoterajaus;
 }

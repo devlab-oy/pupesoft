@@ -25,9 +25,8 @@ class MyCashflowSaldot {
 
       $url = $this->apiurl."/api/v1/stock/".$product_row["tuoteno"];
 
-      $data_json = json_encode(array("quantity" => $product_row['saldo']));
-
-      echo "$url\n";
+      $data_json = json_encode(array("enabled" => true,
+                                     "quantity" => $product_row['saldo']));
 
       $ch = curl_init($url);
       curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PATCH');
@@ -41,10 +40,8 @@ class MyCashflowSaldot {
       $response = curl_exec($ch);
       curl_close($ch);
 
-      var_dump($response."\n");
-
       $current++;
-      $this->logger->log("[{$current}/{$total}] tuote {$product_row["tuoteno"]} saldo 6");
+      $this->logger->log("[{$current}/{$total}] tuote {$product_row["tuoteno"]} saldo {$product_row['saldo']}");
 
     }
 

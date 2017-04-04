@@ -76,13 +76,13 @@ class MyCashflowTilaukset {
   }
 
   public function fetch_orders() {
-    $this->logger->log('---------Aloitetaan tilausten ghaku---------');
+    $this->logger->log('---------Aloitetaan tilausten haku---------');
 
     // Haetaan aika jolloin tämä skripti on viimeksi ajettu
     $datetime_checkpoint = cron_aikaleima("MYCF_ORDR_CRON");
 
+    // Debuggia
     $datetime_checkpoint = 1;
-
 
     // EDI-tilauksen luontiin tarvittavat parametrit
     $options = array(
@@ -244,12 +244,14 @@ class MyCashflowTilaukset {
 
       $filename = Edi::create($tilaus, $options);
 
+      // Tallennetaan tämän tilauksen aikaleima
+      $tilausaika = $order->OrderedAt->attributes()->timestamp;
+
+      cron_aikaleima("MYCF_ORDR_CRON", $tilausaika);
+
       $this->logger->log("Tallennettiin tilaus '{$filename}'");
       $this->logger->log(print_r($tilaus, TRUE));
     }
-
-    // Kun kaikki onnistui, päivitetään lopuksi timestamppi talteen
-    #cron_aikaleima("MYCF_ORDR_CRON", $aloitusaika);
 
     $this->logger->log('---------Tilausten haku valmis---------');
   }

@@ -85,6 +85,8 @@ class MyCashflowTilaukset {
       $datetime_checkpoint = 1;
     }
 
+    $datetime_checkpoint = 1;
+
     // EDI-tilauksen luontiin tarvittavat parametrit
     $options = array(
       'edi_polku'          => $this->edi_polku,
@@ -151,9 +153,11 @@ class MyCashflowTilaukset {
       // Verkkokaupan nimi
       $tilaus['store_name'] = "MyCashflow";
 
+      // Maksettu
+      $tilaus['status'] = "processing";
+
       // Ei käytössä
       $tilaus['reference_number'] = "";
-      $tilaus['status'] = "";
       $tilaus['target'] = "";
       $tilaus['webtex_giftcard'] = "";
 

@@ -14611,7 +14611,7 @@ if (!function_exists("pupe_DataTablesEchoSort")) {
 
 if (!function_exists("pupe_DataTables")) {
   function pupe_DataTables($parametrit) {
-    global $yhtiorow;
+    global $yhtiorow, $lopetus;
 
     preg_match("/.*?\/\*(.*?(OK_COLOR))\*\//", $yhtiorow['active_css'], $varitmatch);
     preg_match("/(#[a-f0-9]{3,6});/i", $varitmatch[0], $varirgb);
@@ -14621,16 +14621,27 @@ if (!function_exists("pupe_DataTables")) {
     // Luetaan taulujen parametrit ja viedään ne javascriptille...
     foreach ($parametrit as $param) {
 
-      $taulu      = $param[0];
-      $sarakkeetVis  = $param[1];
-      $sarakkeetTot  = $param[2];
-      $paginate     = isset($param[3]) ? $param[3] : "false";
-      $info       = isset($param[4]) ? $param[4] : "false";
-      $sorting     = isset($param[5]) ? $param[5] : "true";
-      $aoColumns     = "";
+      $taulu = $param[0];
+      $sarakkeetVis = $param[1];
+      $sarakkeetTot = $param[2];
+      $paginate = isset($param[3]) ? $param[3] : "false";
+      $info = isset($param[4]) ? $param[4] : "false";
+      $sorting = isset($param[5]) ? $param[5] : "true";
+      $serverside = isset($param[6]) ? $param[6] : "false";
+      $serversideparams = isset($param[7]) ? $param[7] : "";
+      $aoColumns = "";
+      $paginationtype = $paginate !== false ? "full_numbers" : "two_button";
+      $taulu = $param[0];
+      $sarakkeetVis = $param[1];
+      $sarakkeetTot = $param[2];
+      $paginate = isset($param[3]) ? $param[3] : "false";
+      $info = isset($param[4]) ? $param[4] : "false";
+      $sorting = isset($param[5]) ? $param[5] : "true";
+      $aoColumns = "";
       $tyojonostatushakukentta = $param[6];
       $paginationtype = $paginate !== false ? "full_numbers" : "two_button";
 
+      $json_pass[$taulu] = array($sarakkeetVis, $sarakkeetTot, $paginate, $paginationtype, $info, $sorting, $serverside, $serversideparams);
       $json_pass[$taulu] = array($sarakkeetVis, $sarakkeetTot, $paginate, $paginationtype, $info, $sorting, $tyojonostatushakukentta);
     }
 
@@ -14690,7 +14701,7 @@ if (!function_exists("pupe_DataTables")) {
             aoColumns[i-1] = {\"bSortable\": false, \"bSearchable\": false};
           }
 
-          datatablesit[t] = $(this).dataTable( {
+          var settings = {
             \"bSortCellsTop\": true,
             \"bDestroy\" : true,
             \"bPaginate\" : parametrit[tableid][2],
@@ -14700,11 +14711,12 @@ if (!function_exists("pupe_DataTables")) {
             \"bStateSave\" : true,
             \"iDisplayLength\" : 25,
             \"oLanguage\": {
+              \"sProcessing\" : \"".t("Ladataan")."...\",
               \"sSearch\" : \"".t("Etsi taulukosta").":\",
               \"sZeroRecords\": \"".t("Ei hakuosumia")."\",
-              \"sLengthMenu\": \"", t("Näytä"), " _MENU_ ", t("riviä"), "\",
-              \"sInfo\": \"", t("Näytetään"), " _START_ - _END_ / _TOTAL_ ", t("rivistä"), "\",
-              \"sInfoFiltered\": \"(", t("suodatettu kaikista"), " _MAX_ ", t("rivistä"), ")\",
+              \"sLengthMenu\": \"",t("Näytä")," _MENU_ ",t("riviä"),"\",
+              \"sInfo\": \"",t("Näytetään")," _START_ - _END_ / _TOTAL_ ",t("rivistä"),"\",
+              \"sInfoFiltered\": \"(",t("suodatettu kaikista")," _MAX_ ",t("rivistä"),")\",
               \"oPaginate\": {
                 \"sFirst\": \"&laquo;&laquo;\",
                 \"sPrevious\": \"&laquo;\",
@@ -14966,8 +14978,23 @@ if (!function_exists("pupe_DataTables")) {
                 }
               }
             }
-          } );
-        } );
+          };
+
+          // ServerSide
+          if (parametrit[tableid][6] == true) {
+            settings.bProcessing = true;
+            settings.bServerSide = true,
+            settings.sAjaxSource = \"?dtss=TRUE&serversideparams=\"+parametrit[tableid][7]+\"&lopetus={$lopetus}\";
+          }
+
+          datatablesit[t] = $(this).dataTable(settings);
+
+          // ServerSide-keississä enabloidaan filtteröntidelay niin kuormitetaan kantaa vähemmän jos/kun kirjoitetaan pitkiä hakusanoja
+          if (parametrit[tableid][6] == true) {
+            datatablesit[t].fnSetFilteringDelay(500);
+          }
+        }
+        );
 
         // KEIKKA.PHPN OMAT JQUERY-TOIMINNALLISUUDET
         if (datatablesit[0].attr(\"id\") == 'keikka') {
@@ -14995,16 +15022,16 @@ if (!function_exists("pupe_DataTables")) {
             }).done(function(data) {
 
               if (data == 'error') {
-                alert('", t("VIRHE: Saapumisen tunnus on 0"), "!');
+                alert('",t("VIRHE: Saapumisen tunnus on 0"),"!');
               }
               else if (data == 'suljettu') {
-                alert('", t("Saapuminen on suljettu"), "!');
+                alert('",t("Saapuminen on suljettu"),"!');
               }
               else {
                 state = true;
               }
             }).fail(function(data) {
-              alert('", t("VIRHE: Tietokantayhteydessä ongelma"), "!');
+              alert('",t("VIRHE: Tietokantayhteydessä ongelma"),"!');
             });
 
             return state;
@@ -15770,38 +15797,51 @@ if (!function_exists("pupe_DataTables")) {
           });
         }
 
+        // Sarakefiltteröinnille myös delay
+        var delay = (function() {
+          var timer = 0;
+
+          return function(callback, ms) {
+            clearTimeout (timer);
+            timer = setTimeout(callback, ms);
+          };
+        })();
+
         // Sarakefiltteröinti, toistaiseksi vain ekalle taululle!
-        $(\"thead input\").keyup( function () {
-          var arvo = this.value;
+        $(\"thead input\").keyup(function() {
+          var that = this;
           var sarake = $(\"thead input\").index(this);
 
-          // fnFilter toistaiseksi vain ekalle tablelle
+          delay(function() {
+            var arvo = that.value;
+            var sarake = $(\"thead input\").index(that);
 
-          // Onko regular expressioni?
-          if (arvo.indexOf(\"|\") > -1) {
-            datatablesit[0].fnFilter( arvo, sarake, true, false );
-          }
-          else {
-            datatablesit[0].fnFilter( arvo, sarake, false, true );
-          }
-
-          // filtteröidään työjono.php:ssa myös alempaa taulua, jos ja vain jos alempi taulu on olemassa
-          if (datatablesit[0].attr(\"id\") == \"tyojono0\" && datatablesit[1] != undefined) {
-            var tyojono = [];
-
-            $(\"span[class=tyom_id]\").each(function(i) {
-              tyojono[i] = this.innerHTML;
-            });
-
-            var jonosearch = tyojono.join(\"|\");
-
-            if (arvo != \"\" && jonosearch == \"\") {
-              // ei näytetä mitään
-              jonosearch = \"xyzzypupe\";
+            // Onko regular expressioni?
+            if (arvo.indexOf(\"|\") > -1) {
+              datatablesit[0].fnFilter( arvo, sarake, true, false );
+            }
+            else {
+              datatablesit[0].fnFilter( arvo, sarake, false, true );
             }
 
-            datatablesit[1].fnFilter( jonosearch, 0, true, false, true );
-          }
+            // filtteröidään työjono.php:ssa myös alempaa taulua, jos ja vain jos alempi taulu on olemassa
+            if (datatablesit[0].attr(\"id\") == \"tyojono0\" && datatablesit[1] != undefined) {
+              var tyojono = [];
+
+              $(\"span[class=tyom_id]\").each(function(i) {
+                tyojono[i] = that.innerHTML;
+              });
+
+              var jonosearch = tyojono.join(\"|\");
+
+              if (arvo != \"\" && jonosearch == \"\") {
+                // ei näytetä mitään
+                jonosearch = \"xyzzypupe\";
+              }
+
+              datatablesit[1].fnFilter( jonosearch, 0, true, false, true );
+            }
+          }, 500);
         } );
 
         // Presorttaus, eli luetaan cookiesta tarvittavat tiedot, toistaiseksi vain ekalle taululle!

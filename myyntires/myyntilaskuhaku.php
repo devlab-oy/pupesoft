@@ -6,6 +6,10 @@ $useslave = 1;
 // DataTables p‰‰lle
 $pupe_DataTables = "myyntilaskuhaku";
 
+if (isset($_GET["dtss"]) and $_GET["dtss"] == "TRUE") {
+  $no_head = "yes";
+}
+
 require "../inc/parametrit.inc";
 
 if (!isset($tee))    $tee = '';
@@ -13,8 +17,8 @@ if (!isset($summa1)) $summa1 = '';
 if (!isset($summa2)) $summa2 = '';
 if (!isset($pvm))    $pvm = '';
 
-if (!function_exists("kuka_kayttaja")) {
-  function kuka_kayttaja($keta_haetaan) {
+if (!function_exists("mlh_nimi")) {
+  function mlh_nimi($keta_haetaan) {
     global $kukarow, $yhtiorow;
 
     $query = "SELECT kuka.nimi
@@ -31,6 +35,76 @@ if (!function_exists("kuka_kayttaja")) {
       return $keta_haetaan;
     }
   }
+}
+
+if (!function_exists("mlh_maksuteksti")) {
+  function mlh_maksuteksti($trow) {
+    global $kukarow;
+
+    $maksuviesti = "";
+
+    if ($trow['mapvm'] != "0000-00-00") {
+      $maksuviesti = t("Maksettu");
+    }
+    elseif ($trow['mapvm'] == "0000-00-00" and $trow['saldo_maksettu'] != 0) {
+      $maksuviesti = t("Osasuoritettu");
+
+      if ($trow['mapvm'] == "0000-00-00" and str_replace("-", "", $trow['erpcm']) < date("Ymd")) {
+        $maksuviesti .= " / ".t("Erâântynyt");
+      }
+    }
+    elseif ($trow['mapvm'] == "0000-00-00" and str_replace("-", "", $trow['erpcm']) < date("Ymd")) {
+      $maksuviesti = " ".t("Er‰‰ntynyt");
+    }
+    else {
+      $maksuviesti = t("Avoin");
+    }
+
+    return $maksuviesti;
+  }
+}
+
+if (isset($_GET["dtss"]) and $_GET["dtss"] == "TRUE") {
+
+  /*
+   * N‰m‰ sarakkeet haetaan kannasta ja tulostetaan tableen
+   */
+  $aColumns = array('tapvm', 'erpcm', 'laskunro', 'nimi', 'summa', 'valkoodi', 'ebid', 'tila', 'laatija');
+
+  /*
+   * N‰m‰ sarakkeet haetaan kannasta, mutta ei n‰ytet‰ tablessa
+   */
+  $aExtraColumns = array('tunnus', 'liitostunnus', 'ytunnus', 'mapvm', 'saldo_maksettu');
+
+  /*
+   * K‰yttˆliittym‰poikkeukset
+   */
+  $aExceptionColumns = array();
+
+  if (tarkista_oikeus("muutosite.php")) {
+    $aExceptionColumns[0] = "<a href = '../muutosite.php?tee=E&tunnus=#ROW_tunnus#&lopetus={$lopetus}'>#ROW_tapvm#</a>";
+  }
+
+  $aExceptionColumns[2] = "<a href = '../tilauskasittely/tulostakopio.php?toim=LASKU&tee=ETSILASKU&laskunro=#ROW_laskunro#&lopetus={$lopetus}'>#ROW_laskunro#</a>";
+  $aExceptionColumns[3] = "<a name='#ROW_tunnus#' href='{$palvelin2}myyntires/myyntilaskut_asiakasraportti.php?ytunnus=#ROW_ytunnus#&asiakasid=#ROW_liitostunnus#&alatila=Y&tila=tee_raportti&lopetus={$lopetus}'>#ROW_nimi#</a>";
+  $aExceptionColumns[6] = "#ROW_ebidFUNCTION#";
+  $aExceptionColumns[7] = "#ROW_mlh_maksutekstiFUNCTION#";
+  $aExceptionColumns[8] = "#ROW_mlh_nimiFUNCTION#";
+
+  /*
+   * Indeksisarake
+   */
+  $sIndexColumn = "tunnus";
+
+  /*
+   * DB table to use
+   */
+  $sTable = "lasku";
+
+  list($sUseIndex, $sInitialWhere, $sInitialOrder) = unserialize($_GET["serversideparams"]);
+
+  require "server_processing_getdata.inc";
+  exit;
 }
 
 echo "<font class='head'>", t("Myyntilaskuhaku"), "</font><hr>";
@@ -431,7 +505,7 @@ if (!empty($tee)) {
   }
   else {
 
-    pupe_DataTables(array(array($pupe_DataTables, 9, 9)));
+    pupe_DataTables(array(array($pupe_DataTables, 9, 9, true, false, true, true, urlencode(serialize(array($index, $ehto, $jarj))))));
 
     echo "<table class='display dataTable' id='{$pupe_DataTables}'>";
 
@@ -460,61 +534,12 @@ if (!empty($tee)) {
         </tr>
       </thead>";
 
-    echo "<tbody>";
-
-    while ($trow = mysql_fetch_assoc($result)) {
-      echo "<tr class='aktiivi'>";
-
-      if ($kukarow['taso'] < 2) {
-        echo "<td valign='top'>{$trow["tapvm"]}</td>";
-      }
-      else {
-        echo "<td valign='top'><a href = '../muutosite.php?tee=E&tunnus={$trow['tunnus']}&lopetus={$lopelisa}'>{$trow["tapvm"]}</td>";
-      }
-
-      echo "<td valign='top'>{$trow["erpcm"]}</td>";
-
-      echo "<td valign='top'>";
-      echo pupe_DataTablesEchoSort($trow['laskunro']);
-      echo "<a href='../tilauskasittely/tulostakopio.php?toim=LASKU&tee=ETSILASKU&laskunro={$trow['laskunro']}&lopetus={$lopelisa}'>{$trow['laskunro']}</a>";
-      echo "</td>";
-
-      echo "<td valign='top'>";
-      echo "<a name='$trow[tunnus]' href='".$palvelin2."myyntires/myyntilaskut_asiakasraportti.php?ytunnus=$trow[ytunnus]&asiakasid=$trow[liitostunnus]&alatila=Y&tila=tee_raportti&lopetus={$lopelisa}'>{$trow['nimi']}</a>";
-      echo "</td>";
-
-      echo "<td valign='top' align='right'>{$trow['summa']}</td>";
-      echo "<td valign='top'>{$trow['valkoodi']}</td>";
-
-      // tehd‰‰n lasku linkki
-      echo "<td>", ebid($trow['tunnus']), "</td>";
-
-      $maksuviesti = "";
-
-      if ($trow['mapvm'] != "0000-00-00") {
-        $maksuviesti = t("Maksettu");
-      }
-      elseif ($trow['mapvm'] == "0000-00-00" and $trow['saldo_maksettu'] != 0) {
-        $maksuviesti = t("Osasuoritettu");
-
-        if ($trow['mapvm'] == "0000-00-00" and str_replace("-", "", $trow['erpcm']) < date("Ymd")) {
-          $maksuviesti .= " / ".t("Er‰‰ntynyt");
-        }
-      }
-      elseif ($trow['mapvm'] == "0000-00-00" and str_replace("-", "", $trow['erpcm']) < date("Ymd")) {
-        $maksuviesti = " ".t("Er‰‰ntynyt");
-      }
-      else {
-        $maksuviesti = t("Avoin");
-      }
-
-      echo "<td>$maksuviesti</td>";
-      echo "<td>".kuka_kayttaja($trow["laatija"])."</td>";
-      echo "</tr>";
-    }
-
-    echo "</tbody>";
-    echo "</table><br /><br />";
+    echo "<tbody>
+          <tr>
+           <td colspan='9' class='dataTables_empty'>".t("Ladataan")."...</td>
+          </tr>
+          </tbody>
+          </table><br /><br />";
 
     $toim = "";
   }

@@ -26,6 +26,7 @@ margin-top: -15px;
 padding: 14px 0 2px 0;
 text-align: center;
 font-size: 14px;
+background-color: white;
 }
 
 .dataTables_length {

@@ -231,6 +231,7 @@ if (mysql_field_name($result, $i) == "laji") {
   if ($lukitse_laji== "" or $lukitse_laji == "RAHTIKIRJA") $ulos .= "<option value='RAHTIKIRJA' $avain_sel[RAHTIKIRJA]>".t("Rahtikirjatyyppi")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "TOIMTAPAKV") $ulos .= "<option value='TOIMTAPAKV' $avain_sel[TOIMTAPAKV]>".t("Toimitustavan kieliversio")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "TOIMTAPALP") $ulos .= "<option value='TOIMTAPALP' {$avain_sel['TOIMTAPALP']}>".t("Toimitustavan lajittelupiste")."</option>";
+  if ($lukitse_laji== "" or $lukitse_laji == "TOIMTAPAVKN") $ulos .= "<option value='TOIMTAPAVKN' {$avain_sel['TOIMTAPAVKN']}>".t("Toimitustavan verkkokauppanimi")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "TERMINAALIALUE") $ulos .= "<option value='TERMINAALIALUE' $avain_sel[TERMINAALIALUE]>".t("Varaston terminaalialue")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "SSCC") $ulos .= "<option value='SSCC' $avain_sel[SSCC]>".t("SSCC-koodi")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "GS1_SSCC") $ulos .= "<option value='GS1_SSCC' {$avain_sel['GS1_SSCC']}>".t("GS1 SSCC")."</option>";
@@ -455,6 +456,29 @@ if ($_siirtovarastot and $_selitetark_2) {
 
   $jatko = 0;
   $tyyppi = 1;
+}
+
+if ($avain_sel['TOIMTAPAVKN'] == 'SELECTED') {
+  if ($_selite) {
+    $query = "SELECT *
+              FROM toimitustapa
+              WHERE yhtio = '{$kukarow['yhtio']}'";
+    $toimitustapa_result = pupe_query($query);
+
+    $ulos .= "<td><select name = '$nimi'>";
+    $sel = "";
+    while ($toimitustapa = mysql_fetch_assoc($toimitustapa_result)) {
+      if ($toimitustapa['selite'] == $trow[$i]) {
+        $sel = "SELECTED";
+      }
+      $ulos .= "<option value = '{$toimitustapa['selite']}' {$sel}>{$toimitustapa['selite']}</option>";
+      $sel = "";
+    }
+    $ulos .= "</select></td>";
+
+    $jatko = 0;
+    $tyyppi = 1;
+  }
 }
 
 if ($avain_sel['CRM_HAAS'] == 'SELECTED') {

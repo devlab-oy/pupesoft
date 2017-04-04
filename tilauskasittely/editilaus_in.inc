@@ -1354,6 +1354,21 @@ while ($tietue = fgets($fd)) {
       if (trim($editilaus_toimitustapa) != '') {
         // tarkistetaan löytyykö toimitustapa pupesta suoraan
         if ($edi_tyyppi == "magento") {
+
+          // Löytyykö käännöstaulukosta?
+          $query = "SELECT selite
+                    FROM avainsana
+                    WHERE yhtio  = '{$kukarow['yhtio']}'
+                    AND selitetark = '{$editilaus_toimitustapa}'
+                    AND selite != ''
+                    AND selitetark != ''";
+          $ressu = pupe_query($query);
+
+          if (mysql_num_rows($ressu) == 1) {
+            $ftc = mysql_fetch_assoc($ressu);
+            $editilaus_toimitustapa = $ftc['selite'];
+          }
+
           $query = "SELECT *
                     FROM toimitustapa
                     WHERE yhtio  = '{$kukarow['yhtio']}'

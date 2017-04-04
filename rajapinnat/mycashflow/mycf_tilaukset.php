@@ -81,8 +81,9 @@ class MyCashflowTilaukset {
     // Haetaan aika jolloin tämä skripti on viimeksi ajettu
     $datetime_checkpoint = cron_aikaleima("MYCF_ORDR_CRON");
 
-    // Debuggia
-    $datetime_checkpoint = 1;
+    if (empty($datetime_checkpoint)) {
+      $datetime_checkpoint = 1;
+    }
 
     // EDI-tilauksen luontiin tarvittavat parametrit
     $options = array(
@@ -105,16 +106,11 @@ class MyCashflowTilaukset {
     $response = curl_exec($ch);
     curl_close($ch);
 
-    echo "$response\n";
-
     $xml = simplexml_load_string($response);
 
     if ($xml === FALSE) {
       echo "Response is not valid XML!\n";
     }
-
-    echo $xml->attributes()->time_from."\n";
-    echo $xml->attributes()->time_to."\n";
 
     $tilaus = array();
 
@@ -133,7 +129,7 @@ class MyCashflowTilaukset {
       // Toimitusosoitteen tiedot
       $tilaus['shipping_address']['city'] = $order->ShippingAddress->City;
       $tilaus['shipping_address']['company'] = "";
-      $tilaus['shipping_address']['country_id'] = $order->ShippingAddress->Country;
+      $tilaus['shipping_address']['country_id'] = strtoupper($order->ShippingAddress->Country);
       $tilaus['shipping_address']['firstname'] = $order->ShippingAddress->FirstName;
       $tilaus['shipping_address']['lastname'] = $order->ShippingAddress->FirstName;
       $tilaus['shipping_address']['postcode'] = $order->ShippingAddress->ZipCode;
@@ -163,9 +159,6 @@ class MyCashflowTilaukset {
 
       // Asiakasnumero
       $tilaus['customer_id'] = "";
-
-
-      var_dump((string) $order->Comments[0]);
 
       // Asiakkaan viesti meille
       $tilaus['customer_note'] = trim((string) $order->Comments[0]);
@@ -197,6 +190,7 @@ class MyCashflowTilaukset {
 
           // Toimitustavan nimi
           $tilaus['shipping_description'] = $product->ProductName;
+          $tilaus['shipping_description_line'] = $product->ProductName;
 
           // Noutopisteen tiedot
           $tilaus['shipping_method'] = "";

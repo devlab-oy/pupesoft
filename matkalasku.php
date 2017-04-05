@@ -2636,22 +2636,22 @@ function lisaa_kulurivi($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilino
               $jaljellaoleva_maara = $kokonaiskappalemaara - $ins_kpl;
               // Jos normihinnalla jää vielä lisättävää
               if ($ins_kpl > 0) {
-                tee_matkalaskurivin_kirjaukset(get_defined_vars());
+                list ($perhe_id, $perheid2, $rivitunnus) = tee_matkalaskurivin_kirjaukset(get_defined_vars());
               }
 
               // Jos erikoishinnalla on lisättävää
               if ($jaljellaoleva_maara > 0 and $trow['myymalahinta'] > 0) {
                 $ins_kpl = $jaljellaoleva_maara;
                 $hinta = $trow['myymalahinta'];
-                tee_matkalaskurivin_kirjaukset(get_defined_vars());
+                list ($perhe_id, $perheid2, $rivitunnus) = tee_matkalaskurivin_kirjaukset(get_defined_vars());
               }
             }
             else {
-              tee_matkalaskurivin_kirjaukset(get_defined_vars());
+              list ($perhe_id, $perheid2, $rivitunnus) = tee_matkalaskurivin_kirjaukset(get_defined_vars());
             }
           }
           else {
-            tee_matkalaskurivin_kirjaukset(get_defined_vars());
+            list ($perhe_id, $perheid2, $rivitunnus) = tee_matkalaskurivin_kirjaukset(get_defined_vars());
           }
         }
       }
@@ -3025,7 +3025,7 @@ function hae_matkustajan_kilometrit($tuoteno, $kuka) {
             JOIN lasku ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus AND lasku.tila in ('H','Y','M','P','Q'))
             WHERE lasku.yhtio          = '{$kukarow['yhtio']}'
               AND tilausrivi.tyyppi    = 'M'
-              AND tilausrivi.tuoteno   = 'km-16'
+              AND tilausrivi.tuoteno   = '{$tuoteno}'
               AND lasku.toim_ovttunnus = '{$kuka}'";
   $result = pupe_query($query);
   $row = mysql_fetch_assoc($result);
@@ -3174,7 +3174,13 @@ function tee_matkalaskurivin_kirjaukset($variables) {
             muuttaja            = '$kukarow[kuka]'";
   $updres = pupe_query($query);
 
-  return true;
+  if (strpos($lisaa_tuoteno, "PR") === false) {
+    $perheid = 0;
+    $perheid2 = 0;
+  }
+
+  return array ($perhe_id, $perheid2, $rivitunnus);
+
 }
 
 require "inc/footer.inc";

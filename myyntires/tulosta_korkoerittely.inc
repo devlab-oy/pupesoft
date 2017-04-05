@@ -13,6 +13,15 @@ if (!function_exists("paperi_alku")) {
     $yres = pupe_query($apuqu);
     $yrow = mysql_fetch_assoc($yres);
 
+    if (strlen(trim($asiakastiedot['laskutus_nimi'])) == 0) {
+      $asiakastiedot['laskutus_nimi']        = $asiakastiedot['nimi'];
+      $asiakastiedot['laskutus_nimitark']    = $asiakastiedot['nimitark'];
+      $asiakastiedot['laskutus_osoite']      = $asiakastiedot['osoite'];
+      $asiakastiedot['laskutus_postino']     = $asiakastiedot['postino'];
+      $asiakastiedot['laskutus_postitp']     = $asiakastiedot['postitp'];
+      $asiakastiedot['laskutus_maa']         = $asiakastiedot['maa'];
+    }
+    
     //Otsikko
     //$pdf->draw_rectangle(830, 20,  800, 580, $firstpage, $rectparam);
     $pdf->draw_text(30, 815,  $yhtiorow["nimi"], $firstpage);
@@ -22,11 +31,11 @@ if (!function_exists("paperi_alku")) {
     //Vasen sarake
     //$pdf->draw_rectangle(737, 20,  674, 300, $firstpage, $rectparam);
     $pdf->draw_text(50, 729, t("Laskutusosoite", $kieli), $firstpage, $pieni);
-    $pdf->draw_text(50, 717, $asiakastiedot["nimi"], $firstpage, $norm);
-    $pdf->draw_text(50, 707, $asiakastiedot["nimitark"], $firstpage, $norm);
-    $pdf->draw_text(50, 697, $asiakastiedot["osoite"], $firstpage, $norm);
-    $pdf->draw_text(50, 687, $asiakastiedot["postino"]." ".$asiakastiedot["postitp"], $firstpage, $norm);
-    $pdf->draw_text(50, 677, $asiakastiedot["maa"], $firstpage, $norm);
+    $pdf->draw_text(50, 717, $asiakastiedot["laskutus_nimi"], $firstpage, $norm);
+    $pdf->draw_text(50, 707, $asiakastiedot["laskutus_nimitark"], $firstpage, $norm);
+    $pdf->draw_text(50, 697, $asiakastiedot["laskutus_osoite"], $firstpage, $norm);
+    $pdf->draw_text(50, 687, $asiakastiedot["laskutus_postino"]." ".$asiakastiedot["laskutus_postitp"], $firstpage, $norm);
+    $pdf->draw_text(50, 677, $asiakastiedot["laskutus_maa"], $firstpage, $norm);
 
     //Oikea sarake
     $pdf->draw_rectangle(800, 300, 779, 580, $firstpage, $rectparam);

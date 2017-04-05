@@ -124,6 +124,13 @@ class Edi {
       $noutopistetunnus = is_numeric($tunnistekoodi) ? $tunnistekoodi : '';
     }
 
+    // Noutopiste voi olla myös katuosoitteen lopussa esim "Testitie 1 [#12345]"
+    preg_match("/\[#([0-9]*)\]/", $shippingadress, $tunnistekoodi);
+    if ($noutopistetunnus == '' and !empty($tunnistekoodi[1])) {
+      $noutopistetunnus = $tunnistekoodi[1];
+      $shippingadress = str_replace($tunnistekoodi[0], "", $shippingadress);
+    }
+
     $tilausviite = '';
     $tilausnumero = '';
     $kohde = '';

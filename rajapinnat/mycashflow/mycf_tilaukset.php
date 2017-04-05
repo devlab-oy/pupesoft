@@ -85,8 +85,6 @@ class MyCashflowTilaukset {
       $datetime_checkpoint = 1;
     }
 
-    $datetime_checkpoint = 1;
-
     // EDI-tilauksen luontiin tarvittavat parametrit
     $options = array(
       'edi_polku'          => $this->edi_polku,

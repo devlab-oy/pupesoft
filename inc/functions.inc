@@ -5409,7 +5409,7 @@ if (!function_exists("alehinta")) {
                    and (alennus < 0 or left(alennus,1) = '-'))
                    UNION
                    (SELECT '0' prio, alennus, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, minkpl, tunnus, campaign_id
-                   FROM asiakasalennus asale2 USE INDEX (yhtio_ytunnus_ryhma)
+                   FROM asiakasalennus asale3 USE INDEX (yhtio_ytunnus_ryhma)
                    WHERE yhtio        = '$kukarow[yhtio]'
                    and asiakas        = '$laskurow[liitostunnus]'
                    and asiakas        > 0
@@ -5421,7 +5421,7 @@ if (!function_exists("alehinta")) {
                    and (alennus < 0 or left(alennus,1) = '-'))
                    UNION
                    (SELECT '1' prio, alennus, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, minkpl, tunnus, campaign_id
-                   FROM asiakasalennus asale2 USE INDEX (yhtio_ytunnus_ryhma)
+                   FROM asiakasalennus asale4 USE INDEX (yhtio_ytunnus_ryhma)
                    WHERE yhtio        = '$kukarow[yhtio]'
                    and ytunnus        = '$laskurow[ytunnus]'
                    and ytunnus       != ''
@@ -5578,7 +5578,7 @@ if (!function_exists("alehinta")) {
       if ($hinta == 0) {
 
         $query = "(SELECT '2' prio, alennus, campaign_id, minkpl, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, tunnus
-                  FROM asiakasalennus USE INDEX (yhtio_asiakasryhma_ryhma)
+                  FROM asiakasalennus asale1 USE INDEX (yhtio_asiakasryhma_ryhma)
                   WHERE yhtio        = '$kukarow[yhtio]'
                   and asiakas_ryhma  = '$alehi_asrow[ryhma]'
                   and asiakas_ryhma != ''
@@ -5591,7 +5591,7 @@ if (!function_exists("alehinta")) {
                   and (alennus < 0 or left(alennus,1) = '-'))
                   UNION
                   (SELECT '1' prio, alennus, campaign_id, minkpl, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, tunnus
-                  FROM asiakasalennus USE INDEX (yhtio_asiakasryhma_ryhma)
+                  FROM asiakasalennus asale2 USE INDEX (yhtio_asiakasryhma_ryhma)
                   WHERE yhtio        = '$kukarow[yhtio]'
                   and asiakas_ryhma  = '$alehi_asrow[ryhma]'
                   and asiakas_ryhma != ''
@@ -5664,7 +5664,7 @@ if (!function_exists("alehinta")) {
       if ($hinta == 0) {
 
         $query = "(SELECT '2' prio, alennus, campaign_id, minkpl, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, tunnus
-                  FROM asiakasalennus USE INDEX (yhtio_piiri_ryhma)
+                  FROM asiakasalennus asale1 USE INDEX (yhtio_piiri_ryhma)
                   WHERE yhtio  = '$kukarow[yhtio]'
                   and piiri    = '$alehi_asrow[piiri]'
                   and piiri   != ''
@@ -5677,7 +5677,7 @@ if (!function_exists("alehinta")) {
                   and (alennus < 0 or left(alennus,1) = '-'))
                   UNION
                   (SELECT '1' prio, alennus, campaign_id, minkpl, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, tunnus
-                  FROM asiakasalennus USE INDEX (yhtio_piiri_ryhma)
+                  FROM asiakasalennus asale2 USE INDEX (yhtio_piiri_ryhma)
                   WHERE yhtio  = '$kukarow[yhtio]'
                   and piiri    = '$alehi_asrow[piiri]'
                   and piiri   != ''
@@ -34549,6 +34549,72 @@ if (!function_exists('sscc_tarkiste')) {
     $sscc = ceil($summa / 10) * 10 - $summa; // tarkiste on luku mikä pitää lisätä, että päästään seuraavaan tasakymmeneen
 
     return $sscc;
+  }
+}
+
+/**
+ * Hakee kaikki yhtion pankkiyhteydet tietokannasta ja lisaa pankin nimen palautettavaan arrayhyn
+ *
+ * @return array
+ */
+if (!function_exists('hae_pankkiyhteydet')) {
+  function hae_pankkiyhteydet() {
+    global $kukarow, $yhtiorow;
+
+    $luodut_pankkiyhteydet = array();
+    $tuetut_pankit = tuetut_pankit();
+
+    $query = "SELECT *
+              FROM pankkiyhteys
+              WHERE yhtio = '{$kukarow['yhtio']}'";
+    $result = pupe_query($query);
+
+    while ($rivi = mysql_fetch_assoc($result)) {
+      $rivi["pankin_nimi"] = $tuetut_pankit[$rivi["pankki"]]["nimi"];
+      array_push($luodut_pankkiyhteydet, $rivi);
+    }
+
+    return $luodut_pankkiyhteydet;
+  }
+}
+
+/**
+ * Palauttaa arrayn tuetuista pankeista muodossa BIC => [lyhyt_nimi, pitka_nimi]
+ *
+ * @return array
+ */
+if (!function_exists('tuetut_pankit')) {
+  function tuetut_pankit() {
+    return array(
+      "NDEAFIHH" => array(
+        "nimi"       => "Nordea",
+        "lyhyt_nimi" => "nordea"
+      ),
+      "DABAFIHH" => array(
+        "nimi"       => "Danske Bank",
+        "lyhyt_nimi" => "danske"
+      ),
+      "OKOYFIHH" => array(
+        "nimi"       => "OP",
+        "lyhyt_nimi" => "op",
+      ),
+      "HELSFIHH" => array(
+        "nimi"       => "Aktia",
+        "lyhyt_nimi" => "aktia",
+      ),
+      "ITELFIHH" => array(
+        "nimi"       => "Säästöpankki",
+        "lyhyt_nimi" => "sp",
+      ),
+      "POPFFI22" => array(
+        "nimi"       => "POP Pankki",
+        "lyhyt_nimi" => "pop",
+      ),
+      "HANDFIHH" => array(
+        "nimi"       => "Handelsbanken",
+        "lyhyt_nimi" => "shb",
+      ),
+    );
   }
 }
 

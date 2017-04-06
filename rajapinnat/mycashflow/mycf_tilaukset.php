@@ -246,7 +246,6 @@ class MyCashflowTilaukset {
       cron_aikaleima("MYCF_ORDR_CRON", $tilausaika);
 
       $this->logger->log("Tallennettiin tilaus '{$filename}'");
-      $this->logger->log(print_r($tilaus, TRUE));
     }
 
     $this->logger->log('---------Tilausten haku valmis---------');

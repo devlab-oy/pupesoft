@@ -64,7 +64,7 @@ function mycf_hae_tilausnumerot($pupesoft_tunnukset) {
   // tehdään tunnuksista stringi
   $tunnukset = implode(",", $pupesoft_tunnukset);
 
-  pupesoft_log("mycf_tilaukset", "Päivitetään tilaukset $tunnukset toimitetuiksi.");
+  pupesoft_log("mycf_toimita_tilaus", "Päivitetään tilaukset $tunnukset toimitetuiksi.");
 
   // tehdään request tilaus kerrallaan
   // ainoastaan jos moduli on magento ja asiakkaan tilausnumero löytyy

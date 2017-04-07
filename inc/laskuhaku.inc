@@ -440,9 +440,8 @@ if ($tee != '') {
     else {
       $lopelisa = "$PHP_SELF////toim=$toim//tee=$tee//laskuntyyppi=$laskuntyyppi//summa1=$summa1//summa2=$summa2//alkuvv=$alkuvv//alkukk=$alkukk//alkupp=$alkupp//loppuvv=$loppuvv//loppukk=$loppukk//loppupp=$loppupp//pvm=$pvm";
       if (isset($lopetus) and $lopetus != "") $lopelisa = "$lopetus/SPLIT/$lopelisa";
-      $tapvm = tv1dateconv($trow["tapvm"]);
-      $erpcm = tv1dateconv($trow["erpcm"]);
-      echo "<td valign='top'><a href = 'muutosite.php?tee=E&tunnus=$trow[tunnus]&lopetus=$lopelisa'>{$tapvm}</a><br>{$erpcm}</td>";
+
+      echo "<td valign='top'>".pupe_DataTablesEchoSort($trow['tapvm'])."<a href = 'muutosite.php?tee=E&tunnus=$trow[tunnus]&lopetus=$lopelisa'>".tv1dateconv($trow["tapvm"])."<br>".tv1dateconv($trow["erpcm"])."</a></td>";
     }
 
     echo "<td valign='top'>$trow[nimi]</td>";

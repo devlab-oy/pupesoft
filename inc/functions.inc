@@ -18434,7 +18434,7 @@ if (!function_exists("tee_keraysera")) {
     // Kun käyttäjän takana on keräysvyöhykkeiden monivalinta, joudutaan tilauksen order by ja group by tekemään niin, että pienimmän prioriteetin ja kellonajan mukaan järjestetään
     // tilaukset tulemaan keräysvyöhykkeittäin. Jos prio ja aika on sama, otetaan randomisti jonkun keräysvyöhykkeen tilauksia (kumpi nyt sattuu tulemaan ensiksi),
     // muuten prio ja aika määrää minkä keräysvyöhykkeen tilaukset tulevat ensiksi.
-    $query = "(SELECT SQL_NO_CACHE
+    $query = "(SELECT 
                lasku.prioriteettinro as prioriteetti,
                (TIME_TO_SEC(TIMEDIFF(lahdot.lahdon_kellonaika, CURTIME())) / 60) as erotus,
                lasku.ohjausmerkki,
@@ -18486,7 +18486,7 @@ if (!function_exists("tee_keraysera")) {
 
                UNION
 
-               (SELECT SQL_NO_CACHE
+               (SELECT 
                lasku.prioriteettinro as prioriteetti,
                0 as erotus,
                lasku.ohjausmerkki,

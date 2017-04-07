@@ -464,15 +464,14 @@ if (!empty($tee)) {
 
     while ($trow = mysql_fetch_assoc($result)) {
       echo "<tr class='aktiivi'>";
-      $tapvm = tv1dateconv($trow["tapvm"]);
+      
       if ($kukarow['taso'] < 2) {
-        echo "<td valign='top'>{$trow["tapvm"]}</td>";
+        echo "<td valign='top'>".pupe_DataTablesEchoSort($trow['tapvm']).tv1dateconv($trow["tapvm"])."</td>";
       }
       else {
-        echo "<td valign='top'><a href = '../muutosite.php?tee=E&tunnus={$trow['tunnus']}&lopetus={$lopelisa}'>{$tapvm}</td>";
+        echo "<td valign='top'>".pupe_DataTablesEchoSort($trow['tapvm'])."<a href = '../muutosite.php?tee=E&tunnus={$trow[tunnus]}&lopetus={$lopelisa}'>".tv1dateconv($trow["tapvm"])."</a></td>";
       }
-      $erpcm = tv1dateconv($trow["erpcm"]);
-      echo "<td valign='top'>{$erpcm}</td>";
+      echo "<td valign='top'>".pupe_DataTablesEchoSort($trow['erpcm']).tv1dateconv($trow["erpcm"])."</td>";
 
       echo "<td valign='top'>";
       echo pupe_DataTablesEchoSort($trow['laskunro']);

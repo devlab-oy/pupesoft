@@ -20910,6 +20910,13 @@ if (!function_exists("pupesoft_tulosta_lahete")) {
       $jtsort_lisa = "0 as jtsort,";
     }
 
+    if (strpos($lahetetyyppi, "_eipuute") !== FALSE) {
+      $varlisa = "and tilausrivi.var not in ('O','P')";
+    }
+    else {
+      $varlisa = "and tilausrivi.var != 'O'";
+    }
+
     $ale_query_select_lisa = generoi_alekentta_select('yhteen', 'M');
 
     //generoidaan lähetteelle ja keräyslistalle rivinumerot
@@ -20934,7 +20941,7 @@ if (!function_exists("pupesoft_tulosta_lahete")) {
               AND tilausrivi.yhtio        = '$kukarow[yhtio]'
               $tyyppilisa
               {$koontilisa}
-              and tilausrivi.var         != 'O'
+              {$varlisa}
               AND (tilausrivi.perheid = 0 or tilausrivi.perheid=tilausrivi.tunnus or tilausrivin_lisatiedot.ei_nayteta !='E' or tilausrivin_lisatiedot.ei_nayteta is null)
               ORDER BY jtsort, $koontisort $pjat_sortlisa sorttauskentta $order_sorttaus, tilausrivi.tunnus";
     $riresult = pupe_query($query);

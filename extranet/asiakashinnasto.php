@@ -30,12 +30,13 @@ else {
   if ($tee != '' and $ytunnus != '' and $kukarow["extranet"] == '') {
 
     if (isset($muutparametrit)) {
-      $muutparametrit = unserialize(urldecode($muutparametrit));
-      $mul_osasto   = $muutparametrit[0];
-      $mul_try     = $muutparametrit[1];
+      $muutparametrit  = unserialize(urldecode($muutparametrit));
+      $mul_osasto      = $muutparametrit[0];
+      $mul_try         = $muutparametrit[1];
+      $mul_tuotemerkki = $muutparametrit[2];
     }
 
-    $muutparametrit = array($mul_osasto, $mul_try);
+    $muutparametrit = array($mul_osasto, $mul_try, $mul_tuotemerkki);
     $muutparametrit = urlencode(serialize($muutparametrit));
 
     require "inc/asiakashaku.inc";

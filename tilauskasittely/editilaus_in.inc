@@ -30,6 +30,9 @@ if ($php_cli) {
   // ja toinen parametri komentoriviltä
   $edi_tyyppi  = trim($argv[2]);
 
+  // jos halutaan myydä tilauksen kaikki rivit väkisin
+  $editilaus_var_h  = trim($argv[3]);
+
   $verkkokauppa_filename = strtolower(basename($filename));
 
   // tunnistetaan magento -tyyppinen käsittely tiedostonimestä
@@ -2272,6 +2275,10 @@ while ($tietue = fgets($fd)) {
           if ($editilaus_tila == "Z") {
             $var = "Y";
             $kommentti = "$olinsapi#$edi_nimitys";
+          }
+
+          if (!empty($editilaus_var_h)) {
+            $var = "H";
           }
 
           // jos tullaan magentosta ja hinta on tiedossa ja kyseessä on rahtikulu, niin uskalletaan luottaa magenton antamaan hintaan

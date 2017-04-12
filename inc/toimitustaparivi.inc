@@ -439,6 +439,7 @@ if (mysql_field_name($result, $i) == "osoitelappu") {
   $sel3 = '';
   $sel4 = '';
   $sel5 = '';
+  $sel6 = '';
 
   if ($trow[$i] == 'intrade') {
     $sel2 = 'selected';
@@ -452,6 +453,9 @@ if (mysql_field_name($result, $i) == "osoitelappu") {
   elseif ($trow[$i] == 'hornbach') {
     $sel5 = 'selected';
   }
+  elseif ($trow[$i] == 'osoitelappu_kesko') {
+    $sel6 = 'selected';
+  }
   else {
     $sel1 = 'selected';
   }
@@ -460,6 +464,7 @@ if (mysql_field_name($result, $i) == "osoitelappu") {
   $ulos .= "<option value=''       $sel1>".t("Normaali")."</option>";
   $ulos .= "<option value='intrade' $sel2>".t("Intrade")."</option>";
   $ulos .= "<option value='hornbach' $sel5>".t("Hornbach")."</option>";
+  $ulos .= "<option value='osoitelappu_kesko' $sel6>".t("Normaali")." (".t("kesko").")</option>";
   $ulos .= "<option value='tiivistetty' $sel3>".t("Tiivistetty")."</option>";
   if ($yhtiorow['kerayserat'] == 'K') $ulos .= "<option value='oslap_mg' $sel4>".t("Yksinkertainen, tulostusmedia valitaan kirjoittimen takaa")."</option>";
   $ulos .= "</select></td>";

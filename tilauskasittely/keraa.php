@@ -1863,7 +1863,7 @@ if ($tee == 'P') {
                     AND mapvm   != '0000-00-00'
                     AND chn      = '999'";
           $yoimresult  = pupe_query($query);
-          
+
           // Etukäteen maksettu Magentotilaus laskutetaan, jos ei ole jo laskuttunut
           if ($laskurow['ohjelma_moduli'] == 'MAGENTOJT') {
             laskuta_magentojt($laskurow['tunnus']);
@@ -2289,6 +2289,9 @@ if ($tee == 'P') {
 
             if ($oslarow['osoitelappu'] == 'intrade') {
               require 'osoitelappu_intrade_pdf.inc';
+            }
+            elseif ($oslarow['osoitelappu'] == 'osoitelappu_kesko') {
+              require 'osoitelappu_kesko_pdf.inc';
             }
             elseif ($oslarow['osoitelappu'] == 'hornbach') {
               require 'osoitelappu_hornbach_pdf.inc';

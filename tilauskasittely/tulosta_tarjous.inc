@@ -1851,6 +1851,8 @@ if (!function_exists('loppu_tarjous')) {
               $pdf_tarjous->draw_text(30,  $_y, $teksi, $page_tarjous[$sivu], $norm);
               $_y = $_y - 10;
             }
+
+            $kuha = $_y;
           }
           else {
             $pdf_tarjous->draw_text(30,  $kuha-24, $vakioteksti, $page_tarjous[$sivu], $norm);

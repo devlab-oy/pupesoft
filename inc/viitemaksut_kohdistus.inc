@@ -395,7 +395,8 @@ while ($row = mysql_fetch_assoc($suorires)) {
     // Merkit‰‰n lasku maksetuksi
     $query = "UPDATE lasku
               SET mapvm = '$row[kirjpvm]',
-                  saldo_maksettu = 0
+              saldo_maksettu = 0,
+              saldo_maksettu_valuutassa = 0
               WHERE yhtio = '$kukarow[yhtio]'
               and tunnus  = '$row[laskutunnus]'";
     pupe_query($query);

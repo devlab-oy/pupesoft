@@ -1176,10 +1176,10 @@ if ($tee == 'E' or $tee == 'F') {
       }
     }
 
-    if ($trow["comments"] != '' or $trow['saldo_maksettu'] != 0) {
+    if ($trow["comments"] != '' or ($trow['saldo_maksettu'] != 0 and $trow['mapvm'] == "0000-00-00")) {
       echo "<tr><th>".t("Kommentti")."</th><td>$trow[comments]";
 
-      if ($trow['saldo_maksettu'] != 0) {
+      if ($trow['saldo_maksettu'] != 0 and $trow['mapvm'] == "0000-00-00") {
         if ($trow["comments"] != '') echo "<br>";
         echo t("Laskusta avoinna");
         echo " ";

@@ -4729,7 +4729,14 @@ if ($tee == '') {
           // Poistetaan muokattava tilausrivi
           $query = "DELETE FROM tilausrivi
                     WHERE tunnus = '$rivitunnus'";
-          $result = pupe_query($query);
+          pupe_query($query);
+
+          // Jos laiterekisteri käytössä, poistetaan myös laitteen_sopimukset -rivi
+          if ($yhtiorow['laiterekisteri_kaytossa'] != '') {
+            $query = "DELETE FROM laitteen_sopimukset
+                      WHERE sopimusrivin_tunnus = '$rivitunnus'";
+            pupe_query($query);
+          }
         }
 
         // Jos muokkaamme tilausrivin paikkaa ja se on speciaalikeissi, T,U niin laitetaan $paikka-muuttuja kuntoon

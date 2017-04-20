@@ -1264,7 +1264,7 @@ class Unifaun {
         if (isset($vak['kuljetus_kategoria']) and $vak['kuljetus_kategoria'] != '') {
 
           // Tunnel restriction code, löytyy sulkujen sisältä kuljetus_kategoria kentästä
-          preg_match("/\((.*)\)/", $vak_tiedot['kuljetus_kategoria'], $dngtrcode);
+          preg_match("/\((.*)\)/", $vak['kuljetus_kategoria'], $dngtrcode);
 
           $uni_par_val = $uni_article->addChild('val', utf8_encode($dngtrcode[1]));
           $uni_par_val->addAttribute('n', "dngtrcode");

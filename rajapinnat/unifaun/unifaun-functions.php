@@ -166,6 +166,7 @@ function unifaun_vak_tiedot($tuote_vak, $tuote_vakmaara, $type = 'vak') {
       'nimi_ja_kuvaus' => '',
       'pakkausryhma'   => '',
       'yk_nro'         => $tuote_vak,
+      'kuljetus_kategoria' => '',
     );
 
     return $vak_tiedot;
@@ -190,7 +191,7 @@ function unifaun_vak_tiedot($tuote_vak, $tuote_vakmaara, $type = 'vak') {
     'nimi_ja_kuvaus' => $vakkoodi_row['nimi_ja_kuvaus'],
     'pakkausryhma'   => $vakkoodi_row['pakkausryhma'],
     'yk_nro'         => $vakkoodi_row['yk_nro'],
-    'kuljetus_kategoria' => $vak_tiedot['kuljetus_kategoria'],
+    'kuljetus_kategoria' => $vakkoodi_row['kuljetus_kategoria'],
   );
 
   return $vak_tiedot;

@@ -533,6 +533,10 @@ if ($tee == 'TULOSTA') {
         $ulos .= sprintf('%-172.172s', "");
       }
 
+      if ($toim == "AKTIA") {
+        $ulos .= sprintf('%-13.13s', "");
+      }
+
       $ulos .= "\r\n";
 
       //luodaan laskutietue

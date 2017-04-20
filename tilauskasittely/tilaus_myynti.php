@@ -4729,19 +4729,13 @@ if ($tee == '') {
           // Poistetaan muokattava tilausrivi
           $query = "DELETE FROM tilausrivi
                     WHERE tunnus = '$rivitunnus'";
-          $result = pupe_query($query);
-          
+          pupe_query($query);
+
           // Jos laiterekisteri käytössä, poistetaan myös laitteen_sopimukset -rivi
           if ($yhtiorow['laiterekisteri_kaytossa'] != '') {
-            $laitesop = "SELECT tunnus
-                            FROM laitteen_sopimukset
-                            WHERE sopimusrivin_tunnus = '$rivitunnus'";
-            $laitesopres = pupe_query($laitesop);
-            if (mysql_num_rows($laitesopres) == 1) {
-              $query = "DELETE FROM laitteen_sopimukset
-                        WHERE sopimusrivin_tunnus = '$rivitunnus'";
-              $result = pupe_query($query);
-            }
+            $query = "DELETE FROM laitteen_sopimukset
+                      WHERE sopimusrivin_tunnus = '$rivitunnus'";
+            pupe_query($query);
           }
         }
 

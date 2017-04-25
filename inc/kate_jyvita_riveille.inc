@@ -37,7 +37,7 @@ function laske_tilausriveille_uudet_hinnat($uusi_kate, $tilausnumero = 0, $tilau
             WHERE yhtio = '{$kukarow['yhtio']}'
             {$tilausrivi_where}";
   $result = pupe_query($query);
-echo "32 $query <br><br>";
+
   $tilausrivit = array();
   while ($tilausrivi = mysql_fetch_assoc($result)) {
     $tilausrivit[] = $tilausrivi;
@@ -53,11 +53,11 @@ echo "32 $query <br><br>";
     }
 
     $rivin_alennus = generoi_alekentta_php($tilausrivi, 'M', 'kerto');
-echo "48 rivin_alennus $rivin_alennus tilausriviKehahin {$tilausrivi["kehahin"]} <br><br>";
+
     //Jos rivill‰ on alennuksia, niin kahahinnan p‰‰lle pit‰‰ laskea rivin alennukset, jotta uuden katteen laskenta menee oikein.
     $kehahin_plus_alennus = $tilausrivi['kehahin'] / $rivin_alennus;
     $uusi_hinta = $kehahin_plus_alennus / ( 1 - ( $uusi_kate / 100 ));
-echo "52 uusi_hinta $uusi_hinta = kehahin_plus_alennus $kehahin_plus_alennus / (1 - (uusi_kate $uusi_kate / 100)) // yhtiAlvKasittely {$yhtiorow['alv_kasittely']} <br><br>";
+
     //Jos alv_kasittely on p‰‰ll‰, tarkoittaa se,
     //ett‰ myyntihinnoissa on alv laskettuna myyntihinnan sis‰lle.
     //Verrattuna verottomaan myyntihintaan,
@@ -65,7 +65,7 @@ echo "52 uusi_hinta $uusi_hinta = kehahin_plus_alennus $kehahin_plus_alennus / (
     if ($yhtiorow['alv_kasittely'] == '') {
       $uusi_hinta = $uusi_hinta * (1 + ($tilausrivi['alv'] / 100));
     }
-echo "60 uusi_hinta $uusi_hinta <br><br><br><br>";
+
     $uusi_hinta = hintapyoristys($uusi_hinta);
 
     $summa += $uusi_hinta;

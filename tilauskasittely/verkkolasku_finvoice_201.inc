@@ -266,7 +266,7 @@ if (!function_exists('finvoice_otsik')) {
 
       fputs($tootfinvoice, "<MessageReceiverDetails>\r\n");
 
-      // PPG:llä ja Arvatolla tässä voi olla sähköpostiosite, siksi pitempi.
+      // PPG:llä ja Arvatolla tässä voi olla sähköpostiosoite, siksi pitempi.
       $toid_len = (($yhtiorow["verkkolasku_lah"] == "ppg") or ($yhtiorow["verkkolasku_lah"] == "arvato"))? 76 : 35;
 
       xml_add("ToIdentifier", $receiverpartyid, $tootfinvoice, $toid_len, 2);

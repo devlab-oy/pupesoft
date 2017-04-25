@@ -271,7 +271,32 @@ function presta_hae_asiakasryhmat() {
   $result = pupe_query($query);
 
   $ryhmat = array();
+
   while ($ryhma = mysql_fetch_assoc($result)) {
+
+    // Onko ryhmälle luotu kaikkiin tuotteisiin pureva alennus?
+    $query = "SELECT alennus, alennuslaji, minkpl, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, tunnus, campaign_id
+              FROM asiakasalennus USE INDEX (yhtio_asiakasryhma_ryhma)
+              WHERE yhtio        = '{$kukarow['yhtio']}'
+              and asiakas_ryhma  = '{$ryhma['selite']}'
+              and asiakas_ryhma != ''
+              and ryhma          = '**'
+              and ytunnus        = ''
+              and asiakas        = 0
+              and (minkpl = 0 or (minkpl <= 1 and monikerta = '') or (mod(1, minkpl) = 0 and monikerta != ''))
+              and ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
+              and alennus        >= 0
+              and alennus        <= 100
+              ORDER BY alennuslaji, minkpl desc, aika, alennus desc, tunnus desc
+              LIMIT 1";
+    $aleres = pupe_query($query);
+    $alerow = mysql_fetch_assoc($aleres);
+
+    if (!empty($alerow["alennus"])) {
+      // Ylikirjataan selitetark_2-johon voi myös käsin antaa vain Prestassa voimassa olevat alennukset
+      $ryhma["selitetark_2"] = $alerow["alennus"];
+    }
+
     $ryhmat[] = $ryhma;
   }
 

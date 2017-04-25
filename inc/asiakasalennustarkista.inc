@@ -11,8 +11,12 @@ if (!function_exists("asiakasalennustarkista")) {
         $virhe[$i] = t("Tieto puuttuu!");
       }
 
-      if (abs(trim($t[$i])) > 100 and (float)trim($t[$i]) != 999.99 and (float)trim($t[$i]) != -999.99) {
+      if (abs(trim($t[$i])) > 100 and (float) trim($t[$i]) != 999.99 and (float) trim($t[$i]) != -999.99) {
         $virhe[$i] = t("Alennus ei voi olla yli 100%");
+      }
+
+      if ($chryhma == "**" and (float) trim($t[$i]) < 0) {
+        $virhe[$i] = t("Katemyyntihintaa ei voi vielä sitoa kaikkiin tuotteisiin");
       }
     }
 

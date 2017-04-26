@@ -15,7 +15,7 @@ function unifaun_tilauksen_vak_koodit($tilausnumero) {
             tuote.tuoteno,
             tuote.nimitys,
             tilausrivi.varattu as kpl,
-            tilausrivi.varattu * tuote.tuotemassa AS kpl_paino
+            tuote.tuotemassa AS kpl_paino
             FROM tilausrivi
             JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio
               AND tuote.tuoteno = tilausrivi.tuoteno)
@@ -29,9 +29,6 @@ function unifaun_tilauksen_vak_koodit($tilausnumero) {
     return $vak_koodit;
   }
 
-  // haetaan tilauksen paino
-  $tilauksen_paino = unifaun_tilauksen_paino($tilausnumero);
-
   while ($vak_chk_row = mysql_fetch_assoc($vak_chk_res)) {
     $vak_tiedot = unifaun_vak_tiedot($vak_chk_row['vakkoodi'], $vak_chk_row['vakmaara']);
 
@@ -43,7 +40,7 @@ function unifaun_tilauksen_vak_koodit($tilausnumero) {
       'luokituskoodi'  => $vak_tiedot['luokituskoodi'],
       'luokka'         => $vak_tiedot['luokka'],
       'nimi_ja_kuvaus' => $vak_tiedot['nimi_ja_kuvaus'],
-      'paino'          => $tilauksen_paino,
+      'paino'          => $vak_chk_row['kpl_paino'],
       'pakkausryhma'   => $vak_tiedot['pakkausryhma'],
       'tuotenimitys'   => $vak_chk_row['nimitys'],
       'tuoteno'        => $vak_chk_row['tuoteno'],

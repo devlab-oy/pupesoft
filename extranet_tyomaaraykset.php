@@ -626,13 +626,16 @@ function email_tyomaarayskopio($request) {
     $mihin_maili_lahetetaan = $huolto_email;
   }
 
+  $body = t("Tämä on automaattinen viesti. Tähän sähköpostiin ei tarvitse vastata.")."\n\n";
+  $body .= t("Huoltopyyntönumero").": {$tyom_tunnus}";
+
   // Sähköpostin lähetykseen parametrit
   $parametrit = array(
     "to"       => $mihin_maili_lahetetaan,
     "cc"       => "",
     "subject"    => t('Huoltopyyntö')." {$tyom_tunnus}",
     "ctype"      => "text",
-    "body"      => t('Huoltopyyntönumero').": {$tyom_tunnus}",
+    "body"      => $body,
     "attachements"  => array(0   => array(
         "filename"    => $pdffilenimi,
         "ctype"      => "pdf"),

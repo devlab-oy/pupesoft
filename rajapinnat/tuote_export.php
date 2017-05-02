@@ -370,13 +370,16 @@ foreach ($verkkokauppatuotteet_erikoisparametrit as $erikoisparametri) {
   }
 }
 
-$magento_client->setTuetutKieliversiot($tuetut_kieliversiot);
-
 $kieliversiot = array("fi"); //oletuskieli
 
-// tuotteiden hakuun tehdään valmis taulukko kielistä
-foreach ($tuetut_kieliversiot as $kieli => $bar) {
-  $kieliversiot[] = $kieli;
+if (isset($tuetut_kieliversiot)) {
+  $magento_client->setTuetutKieliversiot($tuetut_kieliversiot);
+    
+  // tuotteiden hakuun tehdään valmis taulukko kielistä
+
+  foreach ($tuetut_kieliversiot as $kieli => $bar) {
+    $kieliversiot[] = $kieli;
+  }
 }
 
 if (in_array('tuotteet', $magento_ajolista)) {

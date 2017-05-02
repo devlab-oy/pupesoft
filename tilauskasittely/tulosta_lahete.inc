@@ -4377,6 +4377,7 @@ if (!function_exists('hae_base_lahetetyyppi')) {
     $base_lahetetyyppi = str_replace('perhe_', '', $lahetetyyppi);
     $base_lahetetyyppi = str_replace('hinnat_isalla_', '', $base_lahetetyyppi);
     $base_lahetetyyppi = str_replace('_verollinen', '', $base_lahetetyyppi);
+    $base_lahetetyyppi = str_replace('_eipuute', '', $base_lahetetyyppi);
 
     return $base_lahetetyyppi;
   }

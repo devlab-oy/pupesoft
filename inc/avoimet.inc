@@ -171,15 +171,15 @@ $toimipaikkares = hae_yhtion_toimipaikat($kukarow['yhtio']);
 
 if (mysql_num_rows($toimipaikkares) > 0) {
 
-  $toimipaikka = ($toimipaikka === 'kaikki') ? null : $toimipaikka;
-
   echo "<tr>";
   echo "<th>", t("Toimipaikka"), "</th>";
 
-  echo "<td colspan='3'><select name='toimipaikka'>";
-  echo "<option value='kaikki'>", t("Kaikki toimipaikat"), "</option>";
+  $sel = (isset($toimipaikka) and $toimipaikka === "kaikki") ? 'selected' : '';
 
-  $sel = (isset($toimipaikka) and $toimipaikka == 0) ? 'selected' : '';
+  echo "<td colspan='3'><select name='toimipaikka'>";
+  echo "<option value='kaikki' {$sel}>", t("Kaikki toimipaikat"), "</option>";
+
+  $sel = (isset($toimipaikka) and empty($toimipaikka)) ? 'selected' : '';
 
   echo "<option value='0' {$sel}>".t('Ei toimipaikkaa')."</option>";
 
@@ -405,7 +405,7 @@ if ($tee != '' and isset($ajaraportti)) {
       $indeksi = " use index (yhtio_tila_tapvm)";
     }
 
-    if (isset($toimipaikka)) {
+    if (isset($toimipaikka) and $toimipaikka !== "kaikki") {
       $toimipaikkalisa = " and lasku.yhtio_toimipaikka = {$toimipaikka} ";
     }
 
@@ -686,7 +686,7 @@ if ($tee != '' and isset($ajaraportti)) {
       $av_lisa1 .= " and lasku.maksuehto = '$maksuehto' ";
     }
 
-    if (isset($toimipaikka)) {
+    if (isset($toimipaikka) and $toimipaikka !== "kaikki") {
       $toimipaikkalisa = " and lasku.yhtio_toimipaikka = {$toimipaikka} ";
     }
 

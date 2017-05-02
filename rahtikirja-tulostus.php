@@ -744,9 +744,9 @@ if ($tee == 'tulosta') {
 
       while ($rivi = mysql_fetch_assoc($res)) {
 
-        // otetaan kaikki otsikkonumerot ja rahtikirjanumerot talteen... tarvitaan myöhemmin hauissa
-        $otunnukset   .= "'$rivi[otunnus]',";
-        $tunnukset    .= "'$rivi[rtunnus]',";
+        // lasku.tunnus otunnus ja rahtikirjat.tunnus rtunnus... tarvitaan myöhemmin hauissa
+        $otunnukset   .= "$rivi[otunnus],";
+        $tunnukset    .= "$rivi[rtunnus],";
 
         // otsikkonumerot talteen, nämä printataan paperille
         if (!in_array($rivi['otunnus'], $lotsikot)) {
@@ -1236,6 +1236,9 @@ if ($tee == 'tulosta') {
 
           if ($toitarow['osoitelappu'] == 'intrade') {
             require 'tilauskasittely/osoitelappu_intrade_pdf.inc';
+          }
+          elseif ($toitarow['osoitelappu'] == 'osoitelappu_kesko') {
+            require 'tilauskasittely/osoitelappu_kesko_pdf.inc';
           }
           // Hornbach-tyyppisiä osoitelappuja ei tulosteta, kun ollaan tulostamassa koontirahtikirjaa.
           elseif ($toitarow['osoitelappu'] == 'hornbach' && !in_array($toitarow['tulostustapa'], array('K', 'L'))) {

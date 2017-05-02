@@ -83,7 +83,7 @@ if (!function_exists('finvoice_otsik')) {
         list($receiverpartyid, $receiverintermediator) = explode("@", $lasrow["verkkotunnus"]);
 
         // Verkkotunnus voi olla sähköpostiosoite:
-        if ($yhtiorow["verkkolasku_lah"] == "ppg" and strpos($receiverintermediator, ".") !== FALSE) {
+        if (($yhtiorow["verkkolasku_lah"] == "ppg" or $yhtiorow["verkkolasku_lah"] == "arvato") and strpos($receiverintermediator, ".") !== FALSE) {
           $receiverpartyid = $lasrow["verkkotunnus"];
           $receiverintermediator = "EMAIL";
         }
@@ -266,8 +266,8 @@ if (!function_exists('finvoice_otsik')) {
 
       fputs($tootfinvoice, "<MessageReceiverDetails>\r\n");
 
-      // PPG:llä tässä voi olla sähköpostiosite, siksi pitempi.
-      $toid_len = ($yhtiorow["verkkolasku_lah"] == "ppg") ? 76 : 35;
+      // PPG:llä ja Arvatolla tässä voi olla sähköpostiosoite, siksi pitempi.
+      $toid_len = ($yhtiorow["verkkolasku_lah"] == "ppg" or $yhtiorow["verkkolasku_lah"] == "arvato")? 76 : 35;
 
       xml_add("ToIdentifier", $receiverpartyid, $tootfinvoice, $toid_len, 2);
       xml_add("ToIntermediator", $receiverintermediator, $tootfinvoice, 35, 2);

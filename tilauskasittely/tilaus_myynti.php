@@ -89,6 +89,7 @@ if ($yhtiorow['tilausrivin_esisyotto'] == 'K' and isset($ajax_toiminto) and trim
     'tilausnumero' => $tilausnumero,
     'tuoteno' => $tuoteno,
     'hinta_ajax' => $hinta,
+    'hinta_esisyotetty' => $hinta_esisyotetty,
     'kpl' => $kpl,
     'ale1' => $ale1,
     'ale2' => $ale2,
@@ -533,9 +534,13 @@ if ($tee == 'TARKISTA') {
   $xresult = pupe_query($xquery);
 
   while ($xrow = mysql_fetch_assoc($xresult)) {
-    $tuoteno_array[]                   = $xrow['tuoteno'];
-    $kpl_array[$xrow['tuoteno']]       = $xrow['tilkpl'];
-    $kommentti_array[$xrow['tuoteno']] = $xrow['kommentti'];
+    // Lis‰t‰‰n tuoteno_array muttujaan vain is‰tuotteet,
+    // koska muuten lapset lis‰t‰‰ perheen mukana JA itsen‰isin‰ tuotteina
+    if ($xrow["perheid"] == 0 or $xrow["perheid"] == $xrow["tunnus"]) {
+      $tuoteno_array[]                   = $xrow['tuoteno'];
+      $kpl_array[$xrow['tuoteno']]       = $xrow['tilkpl'];
+      $kommentti_array[$xrow['tuoteno']] = $xrow['kommentti'];
+    }
 
     $query = "UPDATE tilausrivi SET
               tyyppi      = 'D'
@@ -1102,6 +1107,16 @@ if ($kukarow["extranet"] == "" and $tee == "HYLKAATARJOUS" and $muokkauslukko ==
   if ((int) $kukarow["kesken"] == 0) {
     echo "<font class='error'> ".t("Taisit painaa takaisin tai p‰ivit‰ nappia. N‰in ei saa tehd‰")."! </font>";
     exit;
+  }
+
+  if (isset($crm_tarjouspois)) {
+    $hylkays_kommentti = " Tarjouksen hylk‰yksen syy: $crm_tarjouspois";
+
+    $query = "UPDATE lasku SET comments = CONCAT(comments, ' {$hylkays_kommentti}') where yhtio='$kukarow[yhtio]' and tunnus='$kukarow[kesken]'";
+    $result = pupe_query($query);
+
+    // Tehd‰‰n tarjouksen poistosta kommentti asiakasmemoon
+    kalenteritapahtuma("Memo", "Tarjous asiakkaalle", "Tarjouksen hylk‰yksen syy: {$crm_tarjouspois}", $laskurow["liitostunnus"], "", "", $laskurow["tunnus"]);
   }
 
   $query = "UPDATE lasku SET alatila='X' where yhtio='$kukarow[yhtio]' and tunnus='$kukarow[kesken]'";
@@ -10335,8 +10350,22 @@ if ($tee == '') {
       if ($toim != 'EXTTARJOUS') {
         echo "  <br>
             <br>
-            <form name='hylkaa' method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php' onsubmit=\"return confirm('Oletko varma ett‰ haluat hyl‰t‰ tarjouksen $kukarow[kesken]?')\">
-            <input type='hidden' name='toim' value='$toim'>
+            <form name='hylkaa' method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php' onsubmit=\"return confirm('Oletko varma ett‰ haluat hyl‰t‰ tarjouksen $kukarow[kesken]?')\">";
+
+        $tresult = t_avainsana("CRM_TARJOUSPOIS");
+
+        if (mysql_num_rows($tresult) > 0) {
+          echo t("Hylk‰yksen syy").":";
+
+          echo "<select name='crm_tarjouspois'>";
+
+          while ($itrow = mysql_fetch_assoc($tresult)) {
+            echo "<option value='$itrow[selitetark]' $sel>$itrow[selite]</option>";
+          }
+          echo "</select>";
+        }
+
+        echo "<input type='hidden' name='toim' value='$toim'>
             <input type='hidden' name='lopetus' value='$lopetus'>
             <input type='hidden' name='ruutulimit' value = '$ruutulimit'>
             <input type='hidden' name='projektilla' value='$projektilla'>
@@ -10891,7 +10920,7 @@ if ($tee == '') {
 
     $ei_laskutettu = ($row["laskutettuaika"] == "0000-00-00" or !isset($row["laskutettuaika"]));
     $ei_valmistettu = TRUE;
-    if ($laskurow["tila"] == "V" and $row["toimitettuaika"] != "0000-00-00" and isset($row["toimitettuaika"])) $ei_valmistettu = FALSE;
+    if ($laskurow["tila"] == "V" and $row["toimitettuaika"] != "0000-00-00 00:00:00" and isset($row["toimitettuaika"])) $ei_valmistettu = FALSE;
 
     if (($muokkauslukko == "" or $myyntikielto != '') and ($toim != "PROJEKTI" or ($toim == "PROJEKTI" and $projektilask == 0)) and $kukarow["mitatoi_tilauksia"] == "" and $ei_laskutettu and $ei_valmistettu) {
       echo "<SCRIPT LANGUAGE=JAVASCRIPT>

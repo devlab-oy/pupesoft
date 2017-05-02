@@ -119,7 +119,9 @@ $request['ryhmittely_tyypit'] = array(
   'asiakasnro' => t('Asiakasnumero'),
 );
 
-$request['saldovahvistus_viestit'] = hae_saldovahvistus_viestit();
+$_key = key($_SESSION['valitut_laskut']);
+
+$request['saldovahvistus_viestit'] = hae_saldovahvistus_viestit($_SESSION['valitut_laskut'][$_key]['asiakas']['kieli']);
 
 if ($request['tee'] == 'poista_valinnat') {
   unset($_SESSION['valitut_laskut']);

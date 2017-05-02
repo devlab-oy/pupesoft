@@ -1512,11 +1512,20 @@ if (!empty($valitse_tuotteetasiakashinnastoon)) {
   }
 
   if ($_asikasalennus_kayttooikeus) {
+
     echo "<label>";
     echo "<input type='checkbox' name='lisaa_asiakasalennus' {$_checked_a}>";
     echo t("Lis‰‰ tilauksen alennusprosentit asiakasalennuksiin");
     echo "</label>";
     echo "<br>";
+    
+    for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+      echo "<label>";
+      echo "<input type='checkbox' name='lisaa_asiakasalennus_{$alepostfix}' {$_checked_a}>";
+      echo t("Lis‰‰ tilauksen alennusprosentit asiakasalennuksiin");
+      echo "</label>";
+      echo "<br>";  
+    }    
   }
 
   echo "</td></tr>";
@@ -1544,7 +1553,8 @@ if (!empty($valitse_tuotteetasiakashinnastoon)) {
     }
 
     echo "</select>";
-    echo "</td></tr>";
+    echo "</td>";
+    echo "</tr>";
   }
 
   echo "<tr><th>";

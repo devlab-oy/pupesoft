@@ -372,7 +372,7 @@ class PrestaSalesOrders extends PrestaClient {
       $this->add_row("OSTOTILRIV.OTR_TILATTUMAARA:{$row['product_quantity']}");
       $this->add_row("OSTOTILRIV.OTR_RIVISUMMA:");
       $this->add_row("OSTOTILRIV.OTR_OSTOHINTA:{$row['unit_price_tax_excl']}"); // veroton hinta
-      $this->add_row("OSTOTILRIV.OTR_ALENNUS:");
+      $this->add_row("OSTOTILRIV.OTR_ALENNUS:0"); // prestan unit_price_tax_excl on nettohinta, joten laitetaan eksplisiittisesti alennus 0%
       $this->add_row("OSTOTILRIV.OTR_VEROKANTA:");
       $this->add_row("OSTOTILRIV.OTR_VIITE:");
       $this->add_row("OSTOTILRIV.OTR_OSATOIMITUSKIELTO:");

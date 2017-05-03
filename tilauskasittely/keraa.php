@@ -1542,6 +1542,13 @@ if ($tee == 'P') {
       $result = pupe_query($query);
       $laskurow = mysql_fetch_assoc($result);
 
+      $toimtapaquery = "  SELECT osoitelappu
+                          FROM toimitustapa
+                          WHERE yhtio = '{$laskurow['yhtio']}'
+                          AND selite = '{$laskurow['toimitustapa']}'";
+      $toimtaparesult = pupe_query($toimtapaquery);
+      $toimtaparow = mysql_fetch_assoc($toimtaparesult);
+
       $kieli = $laskurow["kieli"];
 
       $rivit = '';
@@ -1552,11 +1559,26 @@ if ($tee == 'P') {
 
         $poikkeama['nimitys'] = t_tuotteen_avainsanat($poikkeama, 'nimitys', $kieli);
 
+        $enariquery = " SELECT eankoodi
+                        FROM tuote
+                        WHERE yhtio = '{$laskurow['yhtio']}'
+                        AND tuoteno = '{$poikkeama['tuoteno']}'";
+        $enariresult = pupe_query($enariquery);
+        $enarirow = mysql_fetch_assoc($enariresult);
+
         if ($_plain_text_mail) {
           $rivit .= t("Nimitys", $kieli).": {$poikkeama['nimitys']}\r\n";
           $rivit .= t("Tuotenumero", $kieli).": {$poikkeama['tuoteno']}\r\n";
-          $rivit .= t("Tilattu", $kieli).": ".(float) $poikkeama["tilkpl"]."\r\n";
-          $rivit .= t("Toimitetaan", $kieli).": ".(float) $poikkeama["maara"]."\r\n";
+
+          if ($toimtaparow['osoitelappu'] == 'osoitelappu_kesko') {
+            $_puutemaara = $poikkeama["tilkpl"] - $poikkeama["maara"];
+            $rivit .= t("Eankoodi", $kieli).": {$enarirow['eankoodi']}\r\n";
+            $rivit .= t("Puutekappale", $kieli).": ".(float) $_puutemaara."\r\n";
+          }
+          else {
+            $rivit .= t("Tilattu", $kieli).": ".(float) $poikkeama["tilkpl"]."\r\n";
+            $rivit .= t("Toimitetaan", $kieli).": ".(float) $poikkeama["maara"]."\r\n";
+          }
 
           if ($yhtiorow["kerayspoikkeama_kasittely"] != '') {
             $rivit .= t("Poikkeaman käsittely", $kieli).": {$poikkeama['loput']}\r\n";
@@ -1568,8 +1590,17 @@ if ($tee == 'P') {
           $rivit .= "<tr>";
           $rivit .= "<td>$poikkeama[nimitys]</td>";
           $rivit .= "<td>$poikkeama[tuoteno]</td>";
-          $rivit .= "<td>". (float) $poikkeama["tilkpl"]."   </td>";
-          $rivit .= "<td>". (float) $poikkeama["maara"]."</td>";
+
+          if ($toimtaparow['osoitelappu'] == 'osoitelappu_kesko') {
+            $_puutemaara = $poikkeama["tilkpl"] - $poikkeama["maara"];
+            $rivit .= "<td>". $enarirow['eankoodi']."   </td>";
+            $rivit .= "<td>". (float) $_puutemaara."</td>";
+          }
+          else {
+            $rivit .= "<td>". (float) $poikkeama["tilkpl"]."   </td>";
+            $rivit .= "<td>". (float) $poikkeama["maara"]."</td>";
+          }
+
           if ($yhtiorow["kerayspoikkeama_kasittely"] != '') $rivit .= "<td>$poikkeama[loput]</td>";
           $rivit .= "</tr>";
         }
@@ -1669,7 +1700,14 @@ if ($tee == 'P') {
         $ulos .= "</table><br><br>";
 
         $ulos .= "<table>";
-        $ulos .= "<tr><th>".t("Nimitys", $kieli)."</th><th>".t("Tuotenumero", $kieli)."</th><th>".t("Tilattu", $kieli)."</th><th>".t("Toimitetaan", $kieli)."</th>";
+
+        if ($toimtaparow['osoitelappu'] == 'osoitelappu_kesko') {
+          $ulos .= "<tr><th>".t("Nimitys", $kieli)."</th><th>".t("Tuotenumero", $kieli)."</th><th>".t("Eankoodi", $kieli)."</th><th>".t("Puutekappale", $kieli)."</th>";
+        }
+        else {
+          $ulos .= "<tr><th>".t("Nimitys", $kieli)."</th><th>".t("Tuotenumero", $kieli)."</th><th>".t("Tilattu", $kieli)."</th><th>".t("Toimitetaan", $kieli)."</th>";
+        }
+
         if ($yhtiorow["kerayspoikkeama_kasittely"] != '') $ulos .= "<th>".t("Poikkeaman käsittely", $kieli)."</th>";
         $ulos .= "</tr>";
         $ulos .= $rivit;

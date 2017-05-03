@@ -1497,7 +1497,7 @@ if (!empty($valitse_tuotteetasiakashinnastoon)) {
   $_asiakashinta_kayttooikeus  = tarkista_oikeus("yllapito.php", "asiakashinta", "x");
   $_asikasalennus_kayttooikeus = tarkista_oikeus("yllapito.php", "asiakasalennus", "x") ;
   $_checked_h = $_asiakashinta_kayttooikeus ? 'checked' : '';
-  $_checked_a = empty($_checked_h) ? 'checked' : '';
+  $_checked_1 = empty($_checked_h) ? 'checked' : '';
 
   echo "<tr>";
   echo "<th>".t("Tallenna")."</th>";
@@ -1512,20 +1512,22 @@ if (!empty($valitse_tuotteetasiakashinnastoon)) {
   }
 
   if ($_asikasalennus_kayttooikeus) {
-
-    echo "<label>";
-    echo "<input type='checkbox' name='lisaa_asiakasalennus' {$_checked_a}>";
-    echo t("Lisää tilauksen alennusprosentit asiakasalennuksiin");
-    echo "</label>";
-    echo "<br>";
-    
-    for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+    if ($yhtiorow['myynnin_alekentat'] == 1) {
       echo "<label>";
-      echo "<input type='checkbox' name='lisaa_asiakasalennus_{$alepostfix}' {$_checked_a}>";
+      echo "<input type='checkbox' name='lisaa_asiakasalennus_1' {$_checked_1}>";
       echo t("Lisää tilauksen alennusprosentit asiakasalennuksiin");
       echo "</label>";
-      echo "<br>";  
-    }    
+      echo "<br>";
+    }
+    else {
+      for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+        echo "<label>";
+        echo "<input type='checkbox' name='lisaa_asiakasalennus_{$alepostfix}' {${"_checked_".$alepostfix}}>";
+        echo t("Lisää tilauksen Ale %s asiakasalennuksiin", "", $alepostfix);
+        echo "</label>";
+        echo "<br>";
+      }
+    }
   }
 
   echo "</td></tr>";
@@ -2607,9 +2609,6 @@ if ($tee == 'vakuutushakemus') {
 
 // siirretään tilauksella olevat tuotteet asiakkaan asiakashinnoiksi
 if ($tee == "tuotteetasiakashinnastoon" and in_array($toim, array("TARJOUS", "EXTTARJOUS", "PIKATILAUS", "RIVISYOTTO", "VALMISTAASIAKKAALLE", "TYOMAARAYS", "PROJEKTI"))) {
-  // katsotaan mitä halutaan lisätä
-  $lisataan_asiakasalennus = !empty($lisaa_asiakasalennus);
-  $lisataan_asiakashinta   = !empty($lisaa_asiakashinta);
 
   $query = "SELECT tilausrivi.*,
             if (tuote.myyntihinta_maara = 0, 1, tuote.myyntihinta_maara) myyntihinta_maara
@@ -2623,7 +2622,6 @@ if ($tee == "tuotteetasiakashinnastoon" and in_array($toim, array("TARJOUS", "EX
 
   while ($tilausrivi = mysql_fetch_assoc($result)) {
     $hinta = $tilausrivi["hinta"];
-    $alennus = $tilausrivi["ale1"];
 
     if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"])) and $laskurow["vienti_kurssi"] != 0) {
       $hinta = laskuval($hinta, $laskurow["vienti_kurssi"]);
@@ -2653,7 +2651,7 @@ if ($tee == "tuotteetasiakashinnastoon" and in_array($toim, array("TARJOUS", "EX
 
     $loppupaivamaaralisa = "loppupvm = '{$asiakas_hinta_loppuvv}-{$asiakas_hinta_loppukk}-$asiakas_hinta_loppupv'";
 
-    if ($lisataan_asiakashinta and $hinta != 0) {
+    if (!empty($lisaa_asiakashinta) and (float) $hinta != 0) {
       $query = "SELECT *
                 FROM asiakashinta
                 where yhtio  = '$kukarow[yhtio]'
@@ -2677,7 +2675,7 @@ if ($tee == "tuotteetasiakashinnastoon" and in_array($toim, array("TARJOUS", "EX
                   luontiaika = now(),
                   muuttaja   = '$kukarow[kuka]',
                   muutospvm  = now()";
-        $insert_result = pupe_query($query);
+        pupe_query($query);
 
         echo t("Lisättin tuote")." $tilausrivi[tuoteno] ".t("asiakkaan hinnastoon hinnalla").": ".hintapyoristys($hintapyoristys_echo)." $laskurow[valkoodi]<br>";
       }
@@ -2686,34 +2684,39 @@ if ($tee == "tuotteetasiakashinnastoon" and in_array($toim, array("TARJOUS", "EX
       }
     }
 
-    if ($lisataan_asiakasalennus and $alennus != 0) {
-      $query = "SELECT *
-                FROM asiakasalennus
-                where yhtio  = '$kukarow[yhtio]'
-                and tuoteno  = '$tilausrivi[tuoteno]'
-                and {$liitoslisa}
-                and {$loppupaivamaaralisa}
-                and alennus  = $alennus";
-      $chk_result = pupe_query($query);
+    for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
 
-      if (mysql_num_rows($chk_result) == 0) {
-        $query = "INSERT INTO asiakasalennus SET
-                  yhtio      = '$kukarow[yhtio]',
-                  tuoteno    = '$tilausrivi[tuoteno]',
-                  {$liitoslisa},
-                  {$loppupaivamaaralisa},
-                  alennus    = $alennus,
-                  alkupvm    = now(),
-                  laatija    = '$kukarow[kuka]',
-                  luontiaika = now(),
-                  muuttaja   = '$kukarow[kuka]',
-                  muutospvm  = now()";
-        $insert_result = pupe_query($query);
+      if (!empty(${"lisaa_asiakasalennus_".$alepostfix}) and (float) $tilausrivi["ale".$alepostfix] != 0) {
+        $query = "SELECT *
+                  FROM asiakasalennus
+                  where yhtio     = '$kukarow[yhtio]'
+                  and tuoteno     = '$tilausrivi[tuoteno]'
+                  and alennuslaji = '$alepostfix'
+                  and {$liitoslisa}
+                  and {$loppupaivamaaralisa}
+                  and alennus  = {$tilausrivi["ale".$alepostfix]}";
+        $chk_result = pupe_query($query);
 
-        echo t("Lisättin tuote")." $tilausrivi[tuoteno] ".t("asiakkaan alennuksiin alennukselle").": {$alennus}% <br>";
-      }
-      else {
-        echo t("Tuote")." $tilausrivi[tuoteno] ".t("löytyi jo asiakasalenuksista").": {$alennus}% <br>";
+        if (mysql_num_rows($chk_result) == 0) {
+          $query = "INSERT INTO asiakasalennus SET
+                    yhtio       = '$kukarow[yhtio]',
+                    tuoteno     = '$tilausrivi[tuoteno]',
+                    alennuslaji = '$alepostfix',
+                    {$liitoslisa},
+                    {$loppupaivamaaralisa},
+                    alennus    = {$tilausrivi["ale".$alepostfix]},
+                    alkupvm    = now(),
+                    laatija    = '$kukarow[kuka]',
+                    luontiaika = now(),
+                    muuttaja   = '$kukarow[kuka]',
+                    muutospvm  = now()";
+          pupe_query($query);
+
+          echo t("Lisättin tuote")." $tilausrivi[tuoteno] ".t("asiakkaan alennuksiin alennukselle").": {$tilausrivi["ale".$alepostfix]}% <br>";
+        }
+        else {
+          echo t("Tuote")." $tilausrivi[tuoteno] ".t("löytyi jo asiakasalenuksista").": {$tilausrivi["ale".$alepostfix]}% <br>";
+        }
       }
     }
   }

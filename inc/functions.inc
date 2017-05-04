@@ -5760,7 +5760,7 @@ if (!function_exists("alehinta")) {
                    and alennus  = 999.99)
                    UNION
                    (SELECT '2' prio, alennus, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, minkpl, tunnus, campaign_id
-                   FROM asiakasalennus asale1 USE INDEX (yhtio_asiakas_ryhma)
+                   FROM asiakasalennus asale2 USE INDEX (yhtio_asiakas_ryhma)
                    WHERE yhtio  = '$kukarow[yhtio]'
                    and asiakas  = '$laskurow[liitostunnus]'
                    and asiakas  > 0
@@ -5770,7 +5770,7 @@ if (!function_exists("alehinta")) {
                    and alennus  = 999.99)
                    UNION
                    (SELECT '3' prio, alennus, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, minkpl, tunnus, campaign_id
-                   FROM asiakasalennus asale2 USE INDEX (yhtio_ytunnus_ryhma)
+                   FROM asiakasalennus asale3 USE INDEX (yhtio_ytunnus_ryhma)
                    WHERE yhtio  = '$kukarow[yhtio]'
                    and ytunnus  = '$laskurow[ytunnus]'
                    and ytunnus != ''
@@ -5781,7 +5781,7 @@ if (!function_exists("alehinta")) {
                    and alennus  = 999.99)
                    UNION
                    (SELECT '4' prio, alennus, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, minkpl, tunnus, campaign_id
-                   FROM asiakasalennus asale2 USE INDEX (yhtio_ytunnus_ryhma)
+                   FROM asiakasalennus asale4 USE INDEX (yhtio_ytunnus_ryhma)
                    WHERE yhtio  = '$kukarow[yhtio]'
                    and ytunnus  = '$laskurow[ytunnus]'
                    and ytunnus != ''

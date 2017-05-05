@@ -5492,7 +5492,7 @@ if (!function_exists("alehinta")) {
       if ($hinta == 0 and isset($alehi_assegmenttirow["tunnukset"])) {
 
         $query = "(SELECT '2' prio, alennus, campaign_id, minkpl, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, tunnus
-                  FROM asiakasalennus USE INDEX (yhtio_asiakas_segmentti_ryhma)
+                  FROM asiakasalennus asale1 USE INDEX (yhtio_asiakas_segmentti_ryhma)
                   WHERE yhtio            = '$kukarow[yhtio]'
                   and asiakas_segmentti  in ($alehi_assegmenttirow[tunnukset])
                   and asiakas_segmentti != ''
@@ -5505,7 +5505,7 @@ if (!function_exists("alehinta")) {
                   and (alennus < 0 or left(alennus,1) = '-'))
                   UNION
                   (SELECT '1' prio, alennus, campaign_id, minkpl, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, tunnus
-                  FROM asiakasalennus USE INDEX (yhtio_asiakas_segmentti_ryhma)
+                  FROM asiakasalennus asale2 USE INDEX (yhtio_asiakas_segmentti_ryhma)
                   WHERE yhtio            = '$kukarow[yhtio]'
                   and asiakas_segmentti  in ($alehi_assegmenttirow[tunnukset])
                   and asiakas_segmentti != ''
@@ -6109,7 +6109,7 @@ if (!function_exists("alehinta")) {
                    and alennus  <= 100)
                    UNION
                    (SELECT '2' prio, alennus, alennuslaji, minkpl, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, tunnus, campaign_id
-                   FROM asiakasalennus asale1 USE INDEX (yhtio_asiakas_ryhma)
+                   FROM asiakasalennus asale2 USE INDEX (yhtio_asiakas_ryhma)
                    WHERE yhtio  = '$kukarow[yhtio]'
                    and asiakas  = '$laskurow[liitostunnus]'
                    and asiakas  > 0
@@ -6120,7 +6120,7 @@ if (!function_exists("alehinta")) {
                    and alennus  <= 100)
                    UNION
                    (SELECT '3' prio, alennus, alennuslaji, minkpl, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, tunnus, campaign_id
-                   FROM asiakasalennus asale2 USE INDEX (yhtio_ytunnus_ryhma)
+                   FROM asiakasalennus asale3 USE INDEX (yhtio_ytunnus_ryhma)
                    WHERE yhtio  = '$kukarow[yhtio]'
                    and ytunnus  = '$laskurow[ytunnus]'
                    and ytunnus != ''
@@ -6132,7 +6132,7 @@ if (!function_exists("alehinta")) {
                    and alennus  <= 100)
                    UNION
                    (SELECT '4' prio, alennus, alennuslaji, minkpl, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, tunnus, campaign_id
-                   FROM asiakasalennus asale2 USE INDEX (yhtio_ytunnus_ryhma)
+                   FROM asiakasalennus asale4 USE INDEX (yhtio_ytunnus_ryhma)
                    WHERE yhtio  = '$kukarow[yhtio]'
                    and ytunnus  = '$laskurow[ytunnus]'
                    and ytunnus != ''
@@ -6213,7 +6213,7 @@ if (!function_exists("alehinta")) {
       // 9. asiakas.segmentti tuote.aleryhmä aleprosentti (asiakassegmentin tuotealeryhmän alennus)
       if (jatka_ale($ale) and isset($alehi_assegmenttirow["tunnukset"])) {
         $query = "(SELECT '1' prio, alennus, alennuslaji, minkpl, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, tunnus, campaign_id
-                  FROM asiakasalennus USE INDEX (yhtio_asiakas_segmentti_ryhma)
+                  FROM asiakasalennus asale1 USE INDEX (yhtio_asiakas_segmentti_ryhma)
                   WHERE yhtio            = '$kukarow[yhtio]'
                   and asiakas_segmentti  in ($alehi_assegmenttirow[tunnukset])
                   and asiakas_segmentti != ''
@@ -6227,7 +6227,7 @@ if (!function_exists("alehinta")) {
                   and alennus            <= 100)
                   UNION
                   (SELECT '2' prio, alennus, alennuslaji, minkpl, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, tunnus, campaign_id
-                  FROM asiakasalennus USE INDEX (yhtio_asiakas_segmentti_ryhma)
+                  FROM asiakasalennus asale2 USE INDEX (yhtio_asiakas_segmentti_ryhma)
                   WHERE yhtio            = '$kukarow[yhtio]'
                   and asiakas_segmentti  in ($alehi_assegmenttirow[tunnukset])
                   and asiakas_segmentti != ''
@@ -6247,7 +6247,7 @@ if (!function_exists("alehinta")) {
       // 10. asiakas.ryhmä tuote.aleryhmä aleprosentti (asiakasryhmän tuotealeryhmän alennus)
       if (jatka_ale($ale)) {
         $query = "(SELECT '1' prio, alennus, alennuslaji, minkpl, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, tunnus, campaign_id
-                  FROM asiakasalennus USE INDEX (yhtio_asiakasryhma_ryhma)
+                  FROM asiakasalennus asale1 USE INDEX (yhtio_asiakasryhma_ryhma)
                   WHERE yhtio        = '$kukarow[yhtio]'
                   and asiakas_ryhma  = '$alehi_asrow[ryhma]'
                   and asiakas_ryhma != ''
@@ -6261,7 +6261,7 @@ if (!function_exists("alehinta")) {
                   and alennus        <= 100)
                   UNION
                   (SELECT '2' prio, alennus, alennuslaji, minkpl, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, tunnus, campaign_id
-                  FROM asiakasalennus USE INDEX (yhtio_asiakasryhma_ryhma)
+                  FROM asiakasalennus asale2 USE INDEX (yhtio_asiakasryhma_ryhma)
                   WHERE yhtio        = '$kukarow[yhtio]'
                   and asiakas_ryhma  = '$alehi_asrow[ryhma]'
                   and asiakas_ryhma != ''
@@ -6281,7 +6281,7 @@ if (!function_exists("alehinta")) {
       // 11. asiakas.piiri tuote.aleryhmä aleprosentti (asiakaspiirin tuotealeryhmän alennus)
       if (jatka_ale($ale)) {
         $query = "(SELECT '1' prio, alennus, alennuslaji, minkpl, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, tunnus, campaign_id
-                  FROM asiakasalennus USE INDEX (yhtio_piiri_ryhma)
+                  FROM asiakasalennus asale1 USE INDEX (yhtio_piiri_ryhma)
                   WHERE yhtio  = '$kukarow[yhtio]'
                   and piiri    = '$alehi_asrow[piiri]'
                   and piiri   != ''
@@ -6295,7 +6295,7 @@ if (!function_exists("alehinta")) {
                   and alennus  <= 100)
                   UNION
                   (SELECT '2' prio, alennus, alennuslaji, minkpl, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999) aika, tunnus, campaign_id
-                  FROM asiakasalennus USE INDEX (yhtio_piiri_ryhma)
+                  FROM asiakasalennus asale2 USE INDEX (yhtio_piiri_ryhma)
                   WHERE yhtio  = '$kukarow[yhtio]'
                   and piiri    = '$alehi_asrow[piiri]'
                   and piiri   != ''

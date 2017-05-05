@@ -10659,7 +10659,7 @@ if ($tee == '') {
                     LIMIT 1";
           $jaksoresult = pupe_query($query);
 
-          if (mysql_num_rows($jaksoresult) == 0) {
+          if (mysql_num_rows($jaksoresult) == 0 and $laskelisa == '') {
             echo "<br><br>";
             echo "<input type='submit' name='tee_100_ennakkolasku' value='".t("Ennakkolasku")." & $painike_txt'>";
 

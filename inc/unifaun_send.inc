@@ -133,6 +133,10 @@ class Unifaun {
                 and tunnus  = '{$this->postirow['liitostunnus']}'";
       $asres = pupe_query($query);
       $this->asiakasrow = mysql_fetch_assoc($asres);
+
+      if (!empty($this->postirow['toim_email'])) {
+        $this->asiakasrow['email'] = $this->postirow['toim_email'];
+      }
     }
   }
 

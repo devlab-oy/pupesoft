@@ -1290,13 +1290,13 @@ if (isset($ajax)) {
               JOIN lasku use index (PRIMARY) ON lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus {$toimipaikkarajaus}
               LEFT JOIN varastopaikat ON (varastopaikat.yhtio = lasku.yhtio
                 AND varastopaikat.tunnus    = lasku.varasto)
-              LEFT JOIN lasku as lasku2 ON lasku2.yhtio = tilausrivi.yhtio and lasku2.tunnus = tilausrivi.uusiotunnus
+              LEFT JOIN lasku as lasku2 ON (lasku2.yhtio = tilausrivi.yhtio AND lasku2.tunnus = tilausrivi.uusiotunnus AND lasku.tila != 'D')
               LEFT JOIN asiakas ON asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus
               WHERE tilausrivi.yhtio        = '$kukarow[yhtio]'
               and tilausrivi.tyyppi         in ('L','E','G','V','W','M','O')
               and tilausrivi.tuoteno        = '$tuoteno'
               and tilausrivi.laskutettuaika = '0000-00-00'
-              and ((tilausrivi.var != 'P' and tilausrivi.varattu + tilausrivi.jt != 0 and lasku.tila != 'D') or (tilausrivi.var = 'P' and lasku.tila != 'D' and lasku.alatila NOT IN ('X', 'V')))
+              and ((tilausrivi.var != 'P' and tilausrivi.varattu + tilausrivi.jt != 0) or (tilausrivi.var = 'P' and lasku.alatila NOT IN ('X', 'V')))
               ORDER BY pvm, tunnus";
     $jtresult = pupe_query($query);
 

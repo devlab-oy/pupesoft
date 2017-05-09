@@ -9708,6 +9708,10 @@ if (!function_exists("livesearch_tuotehaku")) {
       $tuoteindex = "";
       $nimitindex = "";
 
+      if ($kukarow["extranet"] != ""){
+        $yhtiorow['livetuotehaku_hakutapa'] = $yhtiorow['livetuotehaku_hakutapa_extranet'];
+      }
+
       if (in_array($yhtiorow['livetuotehaku_hakutapa'], array('F', 'G'))) {
         $tuoteindex = "USE INDEX (tuoteno)";
         $nimitindex = "USE INDEX (nimitys)";
@@ -9862,7 +9866,7 @@ if (!function_exists("livesearch_tuotehaku")) {
         $varastot_mista_saa_myyda = array();
 
         // Katsotaan mistä normaalivarastoista käyttäjä saa myydä
-        if (in_array($yhtiorow['livetuotehaku_hakutapa'], array('E', 'G', 'I', 'K', 'M'))) {
+        if (in_array($yhtiorow['livetuotehaku_hakutapa'], array('E', 'G', 'I', 'K', 'M', 'N'))) {
 
           if (!empty($laskurow['varasto'])) {
             $laskun_varasto = (int) $laskurow['varasto'];
@@ -9918,7 +9922,7 @@ if (!function_exists("livesearch_tuotehaku")) {
               <span class='livesearch_rivispan_{$hakuid}'>
               <font style='{$tyyli}'>{$row['tuoteno']}</font> &raquo; <font style='{$tyyli2}'>{$row['nimitys']}</font>";
 
-          if (in_array($yhtiorow['livetuotehaku_hakutapa'], array('E', 'G', 'I', 'K', 'M')) and count($varastot_mista_saa_myyda) > 0) {
+          if (in_array($yhtiorow['livetuotehaku_hakutapa'], array('E', 'G', 'I', 'K', 'M', 'N')) and count($varastot_mista_saa_myyda) > 0) {
 
             $saldo_yht = 0;
 
@@ -9927,7 +9931,17 @@ if (!function_exists("livesearch_tuotehaku")) {
               $saldo_yht += $saldo;
             }
 
-            echo " &raquo; <font style='{$tyyli2}'>", t("Saldo"), " {$saldo_yht}</font>";
+            if ($yhtiorow['livetuotehaku_hakutapa'] == 'N') {
+              if ($saldo_yht > '0') {
+                echo " &raquo; <font style='{$tyyli2}'>", t("Varastossa"), "";
+              }
+              else {
+                echo " &raquo; <font style='{$tyyli2}'>", t("Loppu"), "";
+              }
+            }
+            else {
+              echo " &raquo; <font style='{$tyyli2}'>", t("Saldo"), " {$saldo_yht}</font>";
+            }
           }
 
           echo "</span></div>";

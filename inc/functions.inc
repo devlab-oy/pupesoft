@@ -9930,12 +9930,13 @@ if (!function_exists("livesearch_tuotehaku")) {
               list(, , $saldo) = saldo_myytavissa($row["tuoteno"], "KAIKKI", $varaston_tunnus);
               $saldo_yht += $saldo;
             }
+
             if ($yhtiorow['livetuotehaku_hakutapa'] == 'N') {
               if ($saldo_yht > '0') {
-                echo " &raquo; <font style='{$tyyli2}'>", t("Kylä"), "";
+                echo " &raquo; <font style='{$tyyli2}'>", t("Varastossa"), "";
               }
               else {
-                echo " &raquo; <font style='{$tyyli2}'>", t("Ei"), "";
+                echo " &raquo; <font style='{$tyyli2}'>", t("Loppu"), "";
               }
             }
             else {

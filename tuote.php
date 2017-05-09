@@ -1287,10 +1287,10 @@ if (isset($ajax)) {
               lasku2.luontiaika
               FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika)
               LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio=tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus=tilausrivi.tunnus)
-              JOIN lasku use index (PRIMARY) ON lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus {$toimipaikkarajaus}
+              JOIN lasku use index (PRIMARY) ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus {$toimipaikkarajaus} AND lasku.tila != 'D')
               LEFT JOIN varastopaikat ON (varastopaikat.yhtio = lasku.yhtio
                 AND varastopaikat.tunnus    = lasku.varasto)
-              LEFT JOIN lasku as lasku2 ON (lasku2.yhtio = tilausrivi.yhtio AND lasku2.tunnus = tilausrivi.uusiotunnus AND lasku.tila != 'D')
+              LEFT JOIN lasku as lasku2 ON lasku2.yhtio = tilausrivi.yhtio and lasku2.tunnus = tilausrivi.uusiotunnus
               LEFT JOIN asiakas ON asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus
               WHERE tilausrivi.yhtio        = '$kukarow[yhtio]'
               and tilausrivi.tyyppi         in ('L','E','G','V','W','M','O')

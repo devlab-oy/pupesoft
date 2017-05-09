@@ -187,8 +187,8 @@ if ($tee != '') {
                     '{$yhtiorow['alennus_tuotenumero']}',
                     '{$yhtiorow['laskutuslisa_tuotenumero']}',
                     '{$yhtiorow['kuljetusvakuutus_tuotenumero']}'";
-    $ei_laskutusajo_tuotteita = lisaa_vaihtoehtoinen_rahti_merkkijonoon($ei_laskutusajo_tuotteita)
-    
+    $ei_laskutusajo_tuotteita = lisaa_vaihtoehtoinen_rahti_merkkijonoon($ei_laskutusajo_tuotteita);
+
     if ($toimitustapa_row['kuljetusvakuutus_tuotenumerot'] != '') $ei_laskutusajo_tuotteita .= ",'{$toimitustapa_row['kuljetusvakuutus_tuotenumerot']}'";
 
     $ei_laskutusajo_tuotteita .= ")";

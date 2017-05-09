@@ -3229,30 +3229,7 @@ if ($fieldname == "poistetut_lisays") {
   $jatko = 0;
 }
 
-if ($fieldname == "livetuotehaku_hakutapa") {
-
-  $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
-
-  $sel = array_fill_keys(explode(",", $trow[$i]), " selected") + array('E' => '', 'F' => '', 'G' => '', 'H' => '', 'I' => '');
-
-  $ulos .= "<option value = ''>".t("Livetuotehaku hakee tuotenumeron ja nimityksen millä tahansa osalla. (Hidas tapa)")."</option>";
-  $ulos .= "<option value = 'E' {$sel['E']}>".t("Livetuotehaku hakee tuotenumeron ja nimityksen millä tahansa osalla. Tehdään myös saldokysely. (Todella hidas tapa)")."</option>";
-  $ulos .= "<option value = 'F' {$sel['F']}>".t("Livetuotehaku hakee vain tuotenumeron ja nimityksen alulla. (Nopea tapa)")."</option>";
-  $ulos .= "<option value = 'G' {$sel['G']}>".t("Livetuotehaku hakee vain tuotenumeron ja nimityksen alulla. Tehdään myös saldokysely. (Todella hidas tapa)")."</option>";
-  $ulos .= "<option value = 'H' {$sel['H']}>".t("Livetuotehaku hakee tuotenumeron, nimityksen ja lempinimen millä tahansa osalla. (Hidas tapa)")."</option>";
-  $ulos .= "<option value = 'I' {$sel['I']}>".t("Livetuotehaku hakee tuotenumeron, nimityksen ja lempinimen millä tahansa osalla. Tehdään myös saldokysely. (Todella hidas tapa)")."</option>";
-  $ulos .= "<option value = 'J' {$sel['J']}>".t("Livetuotehaku hakee tuotenumeron, nimityksen ja EAN-koodin millä tahansa osalla. (Hidas tapa)")."</option>";
-  $ulos .= "<option value = 'K' {$sel['K']}>".t("Livetuotehaku hakee tuotenumeron, nimityksen ja EAN-koodin millä tahansa osalla. Tehdään myös saldokysely. (Todella hidas tapa)")."</option>";
-  $ulos .= "<option value = 'L' {$sel['L']}>".t("Livetuotehaku hakee tuotenumeron, nimityksen, lempinimen ja EAN-koodin millä tahansa osalla. (Hidas tapa)")."</option>";
-  $ulos .= "<option value = 'M' {$sel['M']}>".t("Livetuotehaku hakee tuotenumeron, nimityksen, lempinimen ja EAN-koodin millä tahansa osalla. Tehdään myös saldokysely. (Todella hidas tapa)")."</option>";
-  $ulos .= "<option value = 'N' {$sel['N']}>".t("Livetuotehaku hakee tuotenumeron ja nimityksen millä tahansa osalla. Näytetään saatavuus kyllä/ei. (Todella hidas tapa)")."</option>";
-
-  $ulos .= "</select></td>";
-
-  $jatko = 0;
-}
-
-if ($fieldname == "livetuotehaku_hakutapa_extranet") {
+if ($fieldname == "livetuotehaku_hakutapa" or $fieldname == "livetuotehaku_hakutapa_extranet") {
 
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
 

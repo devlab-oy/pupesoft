@@ -118,7 +118,6 @@ if ($toimitusvahvistus_email_lahetys) {
       $vtunrow = mysql_fetch_assoc($vtunres);
 
       if ($vtunrow["vanhatunnus"] != 0) {
-
         $query = "SELECT GROUP_CONCAT(distinct tunnus SEPARATOR ',') tunnukset
                   FROM lasku use index (yhtio_vanhatunnus)
                   WHERE yhtio     = '$kukarow[yhtio]'
@@ -128,7 +127,6 @@ if ($toimitusvahvistus_email_lahetys) {
       }
 
       if ($numrows == 0 or $vtunrow["vanhatunnus"] == 0) {
-
         $query = "SELECT GROUP_CONCAT(distinct tunnus SEPARATOR ',') tunnukset
                   FROM lasku use index (PRIMARY)
                   WHERE yhtio = '$kukarow[yhtio]'
@@ -139,7 +137,6 @@ if ($toimitusvahvistus_email_lahetys) {
       if (mysql_num_rows($perheresult) > 0) {
 
         $perherow = mysql_fetch_assoc($perheresult);
-        $isahintarivikpl = (float) $rivi_loop_row["maara"];
 
         // lasketaan isätuotteen riville lapsien (joita ei näytetä) hinnat yhteen
         $query = "SELECT

@@ -371,7 +371,6 @@ if ($tee == "tulosta") {
   }
 
   $query .= "  ORDER BY $ee_yhdistettyorder tullinimike1, maalahetys, alkuperamaa, maamaara, kuljetusmuoto, kauppatapahtuman_luonne, laskunro, tuoteno_nimitys";
-query_dump($query);
   $result = pupe_query($query);
 
   $nim     = "";

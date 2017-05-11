@@ -1831,8 +1831,6 @@ if ($tunnus == 0 and $uusi == 0 and $errori == '') {
             echo "<td>$fontlisa1 ".size_readable($trow[$i])." $fontlisa2</td>";
           }
           elseif (mysql_field_name($result, $i) == 'toim_tuoteno') {
-            $trow[$i] = preg_replace_callback("/[0-9]{4}\-[0-9]{2}\-[0-9]{2}/", "", $trow[$i]);
-
             echo "<td>$fontlisa1 $trow[$i] $fontlisa2</td>";
           }
           else {

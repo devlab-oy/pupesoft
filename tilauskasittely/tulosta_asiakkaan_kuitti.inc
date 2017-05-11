@@ -31,7 +31,16 @@ function tulosta_asiakkaan_kuitti($laskunro, $tulostimen_tunnus, $params = array
     return false;
   }
 
-  $footer_teksti      = empty($params["footer_teksti"]) ? false : $params["footer_teksti"];
+  if (isset($params["footer_teksti"])) {
+    $footer_teksti = $params["footer_teksti"];
+  }
+  elseif ($teksti_avainsanasta = t_avainsana("KUITIN_VAKTEXT", '', '', '', '', "selitetark")) {
+    $footer_teksti = $teksti_avainsanasta;
+  }
+  else {
+    $footer_teksti = false;
+  }
+
   $header_teksti      = empty($params["header_teksti"]) ? false : $params["header_teksti"];
   $kateinen           = empty($params["kateinen"]) ? 0 : hintapyoristys($params["kateinen"]);
   $avaa_lipas_lopuksi = $params["avaa_lipas_lopuksi"] !== false;
@@ -291,6 +300,17 @@ function tulosta_asiakkaan_kuitti($laskunro, $tulostimen_tunnus, $params = array
     if ($myyjan_nimi) {
       draw_center_aligned($pdf, $firstpage, t("Teit‰ palveli", $asiakkaan_kieli) . " {$myyjan_nimi}", $norm, $kala);
       $kala-=10;
+    }
+
+    if ($footer_teksti) {
+      $footer_teksti = explode("\n", $footer_teksti);
+      foreach ($footer_teksti as $footer_teksti_rivi) {
+        $footer_teksti_rivi = explode("\n", wordwrap($footer_teksti_rivi, 40));
+        foreach ($footer_teksti_rivi as $footer_teksti_subrivi) {
+          draw_center_aligned($pdf, $firstpage, $footer_teksti_subrivi, $norm, $kala);
+          $kala -= 10;
+        }
+      }
     }
 
     //keksit‰‰n uudelle failille joku varmasti uniikki nimi:

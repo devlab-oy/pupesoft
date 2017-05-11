@@ -235,6 +235,7 @@ if ($tee == "tulosta") {
           and lasku.alatila = 'X'
           and lasku.tilaustyyppi != 'A'
           and lasku.kauppatapahtuman_luonne != '999'
+          and lasku.vienti != ''
           and lasku.yhtio = '$kukarow[yhtio]'
           and lasku.tapvm >= '$vva-$kka-$ppa'
           and lasku.tapvm <= '$vvl-$kkl-$ppl'
@@ -358,6 +359,7 @@ if ($tee == "tulosta") {
             and lasku.alatila = 'X'
             and lasku.tilaustyyppi = 'A'
             and lasku.kauppatapahtuman_luonne != '999'
+            and lasku.vienti != ''
             and lasku.yhtio = '{$kukarow['yhtio']}'
             and lasku.tapvm >= '{$vva}-{$kka}-{$ppa}'
             and lasku.tapvm <= '{$vvl}-{$kkl}-{$ppl}'
@@ -369,6 +371,7 @@ if ($tee == "tulosta") {
   }
 
   $query .= "  ORDER BY $ee_yhdistettyorder tullinimike1, maalahetys, alkuperamaa, maamaara, kuljetusmuoto, kauppatapahtuman_luonne, laskunro, tuoteno_nimitys";
+query_dump($query);
   $result = pupe_query($query);
 
   $nim     = "";

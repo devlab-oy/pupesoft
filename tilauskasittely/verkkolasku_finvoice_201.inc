@@ -83,7 +83,7 @@ if (!function_exists('finvoice_otsik')) {
         list($receiverpartyid, $receiverintermediator) = explode("@", $lasrow["verkkotunnus"]);
 
         // Verkkotunnus voi olla sähköpostiosoite:
-        if (($yhtiorow["verkkolasku_lah"] == "ppg" or $yhtiorow["verkkolasku_lah"] == "arvato") and strpos($receiverintermediator, ".") !== FALSE) {
+        if (($yhtiorow["verkkolasku_lah"] == "ppg" or $yhtiorow["verkkolasku_lah"] == "arvato" or $yhtiorow["verkkolasku_lah"] == "trustpoint") and strpos($receiverintermediator, ".") !== FALSE) {
           $receiverpartyid = $lasrow["verkkotunnus"];
           $receiverintermediator = "EMAIL";
         }
@@ -423,7 +423,6 @@ if (!function_exists('finvoice_otsik')) {
       fputs($tootfinvoice, "<BuyerPartyDetails>\r\n");
       xml_add("BuyerPartyIdentifier", tulosta_ytunnus($lasrow['ytunnus'], $lasrow['maa'], ""), $tootfinvoice, 35);
 
-
       // Nimikentän pituus
       $nimikenpit = 70;
 
@@ -482,6 +481,12 @@ if (!function_exists('finvoice_otsik')) {
       }
 
       xml_add("BuyerContactPersonName", $asiakkaan_yhteyshenkilo, $tootfinvoice, 35);
+
+      if ($yhtiorow["verkkolasku_lah"] == "trustpoint" and $receiverintermediator == "EMAIL") {
+        fputs($tootfinvoice, "<BuyerCommunicationDetails>\r\n");
+        xml_add("BuyerEmailaddressIdentifier", $receiverpartyid, $tootfinvoice, 35);
+        fputs($tootfinvoice, "</BuyerCommunicationDetails>\r\n");
+      }
 
       fputs($tootfinvoice, "<DeliveryPartyDetails>\r\n");
       xml_add("DeliveryPartyIdentifier", tulosta_ytunnus($lasrow['ytunnus'], $lasrow['maa'], ""), $tootfinvoice, 35);

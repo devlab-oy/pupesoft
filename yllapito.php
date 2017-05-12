@@ -1830,6 +1830,9 @@ if ($tunnus == 0 and $uusi == 0 and $errori == '') {
           elseif (mysql_field_name($result, $i) == 'koko') {
             echo "<td>$fontlisa1 ".size_readable($trow[$i])." $fontlisa2</td>";
           }
+          elseif (mysql_field_name($result, $i) == 'toim_tuoteno') {
+            echo "<td>$fontlisa1 $trow[$i] $fontlisa2</td>";
+          }
           else {
 
             if (!function_exists("ps_callback")) {

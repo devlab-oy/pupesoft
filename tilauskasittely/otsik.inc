@@ -4011,6 +4011,13 @@ if (isset($jatka)) {
     //Kun tehdään uusi tilaus niin nollataan aina tilat ja alatilat
     $alatila = "";
     $ylatila = "";
+
+    if ($toim == "PIKATILAUS" or $toim == "RIVISYOTTO") {
+      $luontitapa = "myynti";
+    }
+    elseif ($toim == "TYOMAARAYS") {
+      $luontitapa = "tyomaarays";
+    }
   }
   else {
     // Jos ollaan piilottamassa tarjouksen toimitusaikaa niin pitää nollata nämä tiedot myös tilausriveiltä
@@ -4841,8 +4848,13 @@ if (isset($jatka)) {
                          sopimus_numero           = '$sopimus_numero', ";
       }
 
+      if (isset($luontitapa)) {
+        $luontitapa_arraylisa = "luontitapa = '{$luontitapa}',";
+      }
+
       $query3 .= "laskun_lisatiedot SET
             yhtio            = '$kukarow[yhtio]',
+            {$luontitapa_arraylisa}
             sopimus_kk          = '$sopimus_kk',
             sopimus_pp          = '$sopimus_pp',
             yllapito_kuukausihinnoittelu = '{$kuukausihinnoittelu}',

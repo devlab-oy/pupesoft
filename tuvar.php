@@ -698,7 +698,10 @@ if ($tee == 'Z') {
       echo "</td>";
       echo "<td nowrap align='right'>$prow[kpl]</td>";
 
-      $selite = preg_replace("/(\([0-9\.]*\)|\[[0-9\.]*\])/", "", $prow["selite"]);
+      $_jl_text = t("Jälkilaskennan ostohinta");
+      $_ot_text = t("Ostohinta");
+      $selite = preg_replace("/(\([0-9\.\-\> ]*\)|\[[0-9\.\-]*\]|{$_jl_text}: [0-9\.]*|, {$_ot_text}:[0-9\. ]*|,<br>|<br><br>)/", "", $prow["selite"]);
+      $selite = trim($selite);
 
       echo "<td>$selite</td>";
       echo "</tr>";

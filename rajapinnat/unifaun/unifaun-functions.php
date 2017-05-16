@@ -67,6 +67,8 @@ function unifaun_tilauksen_paino($tilausnumero) {
               AND tuote.tuoteno = tilausrivi.tuoteno)
             WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
             AND tilausrivi.otunnus = '{$tilausnumero}'
+            AND tilausrivi.tyyppi != 'D'
+            AND tilausrivi.var not in ('P','J','O','S')
             AND tuote.vakkoodi != ''";
   $result = pupe_query($query);
   $row = mysql_fetch_assoc($result);

@@ -122,7 +122,8 @@ if ($yhtiorow['kerayserat'] != 'K' and $kollityht > 0) {
         'syvyys'        => $pakkaus_row['syvyys'],
         'vakkoodi'      => $vak_tiedot,
         'kuutiot'       => $kuutiot[$indeksi],
-        'lavametri'     => $lavametri[$indeksi]
+        'lavametri'     => $lavametri[$indeksi],
+        'rahtikirjan_kollit_yhteensa' => $kollityht,
       );
 
       /* VOIDAAN LÄHETTÄÄ MYÖS MONTA CONTAINER-ROWTA PER SANOMA! YKSI HEADER */

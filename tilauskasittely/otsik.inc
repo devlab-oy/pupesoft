@@ -4122,8 +4122,11 @@ if (isset($jatka)) {
     $kassalipas = $kukarow["kassamyyja"];
   }
 
+  // Etukäteen maksetut tilaukset, ei sörkitä maksuehtoa enää
+  $_etukateen_maksettu = ($laskurow['mapvm'] != '0000-00-00' and $laskurow['chn'] == '999');
+
   // jos kyseessä oli käsin syötetty eräpäivä ja maksuehto on väärin laitetaan oikea maksuehto... hakee järjestyksessä ekan
-  if ($erpcm_kasin == "KYLLA" and $meapurow["erapvmkasin"] == "" and $meapurow["jaksotettu"] == "") {
+  if ($erpcm_kasin == "KYLLA" and $meapurow["erapvmkasin"] == "" and $meapurow["jaksotettu"] == "" and !$_etukateen_maksettu) {
 
     $erpquery = "SELECT * from maksuehto where yhtio = '$kukarow[yhtio]' and erapvmkasin != '' and kaytossa = '' order by tunnus limit 1";
     $erpres = pupe_query($erpquery);

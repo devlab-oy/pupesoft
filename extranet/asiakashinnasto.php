@@ -30,12 +30,13 @@ else {
   if ($tee != '' and $ytunnus != '' and $kukarow["extranet"] == '') {
 
     if (isset($muutparametrit)) {
-      $muutparametrit = unserialize(urldecode($muutparametrit));
-      $mul_osasto   = $muutparametrit[0];
-      $mul_try     = $muutparametrit[1];
+      $muutparametrit  = unserialize(urldecode($muutparametrit));
+      $mul_osasto      = $muutparametrit[0];
+      $mul_try         = $muutparametrit[1];
+      $mul_tuotemerkki = $muutparametrit[2];
     }
 
-    $muutparametrit = array($mul_osasto, $mul_try);
+    $muutparametrit = array($mul_osasto, $mul_try, $mul_tuotemerkki);
     $muutparametrit = urlencode(serialize($muutparametrit));
 
     require "inc/asiakashaku.inc";
@@ -155,7 +156,7 @@ else {
 
   // Monivalintalaatikot (osasto, try tuotemerkki...)
   // M‰‰ritell‰‰n mitk‰ latikot halutaan mukaan
-  $monivalintalaatikot = array("OSASTO", "TRY");
+  $monivalintalaatikot = array("OSASTO", "TRY", "TUOTEMERKKI");
 
   echo "<tr><th>".t("Osasto")." / ".t("tuoteryhm‰").":</th><td nowrap>";
 
@@ -254,6 +255,8 @@ else {
           $worksheet->writeString($excelrivi, $excelsarake, t("Osasto", $hinkieli), $format_bold);
           $excelsarake++;
           $worksheet->writeString($excelrivi, $excelsarake, t("Tuoteryhm‰", $hinkieli), $format_bold);
+          $excelsarake++;
+          $worksheet->writeString($excelrivi, $excelsarake, t("Tuotemerkki", $hinkieli), $format_bold);
           $excelsarake++;
         }
 
@@ -538,6 +541,8 @@ else {
             $worksheet->writeString($excelrivi, $excelsarake, $rrow["osasto"]);
             $excelsarake++;
             $worksheet->writeString($excelrivi, $excelsarake, $rrow["try"]);
+            $excelsarake++;
+            $worksheet->writeString($excelrivi, $excelsarake, $rrow["tuotemerkki"]);
             $excelsarake++;
           }
 

@@ -338,7 +338,7 @@ elseif ($luottorajavirhe != '' or $ylivito > 0) {
     echo "<font class='error'>" . $errortext . t("Tilausta ei merkitä valmiiksi"), ".</font><br/><br/>";
   }
 }
-elseif ($tilausvalmis_asiakas_row['myyntikielto'] == 'K') {
+elseif ($tilausvalmis_asiakas_row['myyntikielto'] == 'K' and $laskurow["clearing"] != "KORKOLASKU") {
   $query = "UPDATE lasku SET
             alatila     = ''
             WHERE yhtio = '$kukarow[yhtio]'
@@ -1138,7 +1138,7 @@ else {
     }
 
     // Jos on kassamyyntiä ja se on käteistä niin tulostetaan lasku heti ilman lähetettä
-    if (($kateinen == 'X' and $kateisohitus == "" and ($kukarow["kassamyyja"] != '' or $kertakassa != "") and $laskurow["vienti"] == '') or $korkolasku == 'kylla') {
+    if (($kateinen == 'X' and $kateisohitus == "" and ($kukarow["kassamyyja"] != '' or $kertakassa != "") and $laskurow["vienti"] == '') or $laskurow["clearing"] == "KORKOLASKU") {
 
       $query  = "UPDATE tilausrivi
                  SET kerattyaika = now(), keratty = '$kukarow[kuka]'

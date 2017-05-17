@@ -262,41 +262,6 @@ if (mysql_num_rows($result) > 0) {
 //Tarkistetaan aineisto tikon-mielessä
 $tikonerr = 0;
 
-$query  = "SELECT tapvm, nimi, summa, tunnus
-           FROM lasku
-           WHERE yhtio  = '$kukarow[yhtio]'
-           and tila     IN ('H','M','P','Q','Y','U')
-           and mapvm    = tapvm
-           and mapvm   != '0000-00-00'
-           and ((left(lasku.tapvm, 7) = '$kausi') or (left(lasku.tapvm, 7) = '$kausi'))";
-$result = pupe_query($query);
-
-if (mysql_num_rows($result) > 0) {
-
-  echo "<font class='error'>Näillä laskuilla laskunpvm ja maksupvm ovat samat. Tämä aiheuttaa ongelmia siirrossa.</font>";
-
-  echo "<table>";
-  echo "<tr>";
-  echo "<th>".t("tapvm")."</th>";
-  echo "<th>".t("nimi")."</th>";
-  echo "<th>".t("summa")."</th>";
-  echo "</tr>";
-
-  while ($trow = mysql_fetch_assoc($result)) {
-    echo "<tr>";
-    echo "<td>$trow[tapvm]</td>";
-    echo "<td>$trow[nimi]</td>";
-    echo "<td>$trow[summa]</td>";
-    echo "<td><a href='muutosite.php?tee=E&tunnus=$trow[tunnus]'>".t("Korjaa")."</a></td>";
-    echo "</tr>";
-  }
-
-  echo "</table>";
-
-  echo "<font class='error'>Nämä on korjattava ennenkuin siirto voidaan tehdä!</font><br><br>";
-  $tikonerr = 1;
-}
-
 //tapvm:n tilioinnit puuttuvat?
 $query  = "SELECT lasku.tapvm, nimi, lasku.summa, lasku.tunnus, count(*) kpl
            FROM lasku

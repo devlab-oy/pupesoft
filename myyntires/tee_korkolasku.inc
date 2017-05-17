@@ -96,6 +96,7 @@ if (mysql_num_rows($result) == 1) {
             toim_ovttunnus  = '$asrow[toim_ovttunnus]',
             viesti          = 'Korkolasku',
             chn             = '$asrow[chn]',
+            clearing        = 'KORKOLASKU',
             maksuteksti     = '$merow[teksti]',
             laskutusvkopv   = '$asrow[laskutusvkopv]',
             yhtio           = '$kukarow[yhtio]',
@@ -164,7 +165,6 @@ if (mysql_num_rows($result) == 1) {
   $result = pupe_query($query);
 
   $kukarow["kesken"] = $otunnus;
-  $korkolasku = "kylla";
 
   $query = "SELECT * from lasku where yhtio='$kukarow[yhtio]' and tunnus='$otunnus'";
   $result = pupe_query($query);
@@ -183,16 +183,16 @@ if (mysql_num_rows($result) == 1) {
     $tuoteno         = $yhtiorow["kasittelykulu_tuotenumero"];
     $toimaika        = $laskurow["toimaika"];
     $kerayspvm       = $laskurow["kerayspvm"];
-    $hinta          = $kasittelykulu;
-    $netto          = "N";
-    $var         = "H";
-    $alv         = "";
-    $paikka         = "";
-    $varasto        = "";
-    $rivitunnus     = "";
-    $korvaavakielto   = "";
+    $hinta           = $kasittelykulu;
+    $netto           = "N";
+    $var             = "H";
+    $alv             = "";
+    $paikka          = "";
+    $varasto         = "";
+    $rivitunnus      = "";
+    $korvaavakielto  = "";
     $varataan_saldoa = "";
-    $jtkielto      = $laskurow['jtkielto'];
+    $jtkielto        = $laskurow['jtkielto'];
 
     for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
       ${'ale'.$alepostfix} = '';

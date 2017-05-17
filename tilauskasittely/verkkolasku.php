@@ -354,6 +354,8 @@ else {
               asiakasalennus READ,
               asiakasalennus as asale1 READ,
               asiakasalennus as asale2 READ,
+              asiakasalennus as asale3 READ,
+              asiakasalennus as asale4 READ,
               asiakashinta READ,
               asiakashinta as ashin1 READ,
               asiakashinta as ashin2 READ,

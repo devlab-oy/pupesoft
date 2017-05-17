@@ -64,7 +64,7 @@ if ($tee == "VSRALVYV") {
             round(sum(rivihinta), 2) summa,
             count(distinct(lasku.tunnus)) laskuja
             FROM lasku USE INDEX (yhtio_tila_tapvm)
-            JOIN tilausrivi USE INDEX (uusiotunnus_index) ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.uusiotunnus = lasku.tunnus)
+            JOIN tilausrivi USE INDEX (uusiotunnus_index) ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.uusiotunnus = lasku.tunnus AND tilausrivi.tyyppi = 'L')
             JOIN tuote USE INDEX (tuoteno_index) ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.tuoteno != '{$yhtiorow["ennakkomaksu_tuotenumero"]}')
             JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND lasku.liitostunnus = asiakas.tunnus)
             WHERE lasku.yhtio       = '{$kukarow["yhtio"]}'

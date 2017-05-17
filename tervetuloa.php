@@ -22,7 +22,7 @@ if (!isset($tee) or $tee == '') {
   echo "<tr>";
 
   ///* Uutiset *///
-  echo "<tr><td class='back' valign='top'>";
+  echo "<tr><td class='back pnopad ptop' valign='top'>";
   $toim = "";
   require "uutiset.php";
   echo "</td>";

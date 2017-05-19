@@ -4012,10 +4012,7 @@ if (isset($jatka)) {
     $alatila = "";
     $ylatila = "";
 
-    if ($toim == "PIKATILAUS" or $toim == "RIVISYOTTO") {
-      $luontitapa = "myynti";
-    }
-    elseif ($toim == "TYOMAARAYS") {
+    if ($toim == "TYOMAARAYS") {
       $luontitapa = "tyomaarays";
     }
   }
@@ -4847,6 +4844,8 @@ if (isset($jatka)) {
                          sopimus_lisatietoja2     = '$sopimus_lisatietoja2',
                          sopimus_numero           = '$sopimus_numero', ";
       }
+
+      $luontitapa_arraylisa = "";
 
       if (isset($luontitapa)) {
         $luontitapa_arraylisa = "luontitapa = '{$luontitapa}',";

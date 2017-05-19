@@ -1,5 +1,5 @@
 <?php
-$otsikko = 'Factoring- ja Direct Debit-sopimukset';
+$otsikko = 'Factoring-sopimukset';
 $otsikko_nappi = 'sopimus';
 
 $kentat = 'tunnus, nimitys, sopimusnumero, valkoodi';

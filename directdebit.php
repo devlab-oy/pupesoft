@@ -14,34 +14,33 @@ if ($tee == "lataa_tiedosto") {
 echo "<font class='head'>".t("Direct Debit siirtotiedosto").":</font><hr><br>";
 
 // Nordea SEPA Direct Debit (toimii vain EUR-valuutalla)
-$factoringyhtio = "NORDEA_DD";
+$directdebityhtio = "NORDEA";
 $valkoodi = "EUR";
 
-$factoring_tarkista_lisa = "";
+$directdebit_tarkista_lisa = "";
 
 if ($tee == 'TARKISTA') {
   $tee = "TULOSTA";
 
-  // lis‰t‰‰n t‰m‰ queryyn alle, niin ei ikin‰ p‰‰st‰ eteenp‰in, jos factoring_id on virheellinen
-  $factoring_tarkista_lisa = " and tunnus = '$factoring_id' ";
+  // lis‰t‰‰n t‰m‰ queryyn alle, niin ei ikin‰ p‰‰st‰ eteenp‰in, jos directdebit_id on virheellinen
+  $directdebit_tarkista_lisa = " and tunnus = '$directdebit_id' ";
 }
 
 $query = "SELECT *
-          FROM factoring
-          WHERE yhtio        = '{$kukarow["yhtio"]}'
-          and factoringyhtio = '{$factoringyhtio}'
-          {$factoring_tarkista_lisa}";
-$factoring_result = pupe_query($query);
+          FROM directdebit
+          WHERE yhtio = '{$kukarow["yhtio"]}'
+          and nimitys = '{$directdebityhtio}'
+          {$directdebit_tarkista_lisa}";
+$directdebit_result = pupe_query($query);
 
-if (mysql_num_rows($factoring_result) == 0) {
-  echo t("%s Direct Debit-sopimusta ei ole perustettu!", null, $factoringyhtio);
-
+if (mysql_num_rows($directdebit_result) == 0) {
+  echo t("%s Direct Debit-sopimusta ei ole perustettu!", null, $directdebityhtio);
   $tee = "ohita";
 }
-elseif (mysql_num_rows($factoring_result) == 1) {
+elseif (mysql_num_rows($directdebit_result) == 1) {
   // meill‰ on vaan yksi, ei tarvitse valita
-  $vrow = mysql_fetch_assoc($factoring_result);
-  $factoring_id = $vrow['tunnus'];
+  $vrow = mysql_fetch_assoc($directdebit_result);
+  $directdebit_id = $vrow['tunnus'];
   $tee = isset($tee) ? $tee : 'TOIMINNOT';
 }
 
@@ -51,11 +50,11 @@ if ($tee == '') {
   echo "<input type='hidden' name='tee' value='TOIMINNOT'>";
 
   echo t("Valitse Direct Debit-sopimus");
-  echo " <select name='factoring_id' onchange='submit();'>";
+  echo " <select name='directdebit_id' onchange='submit();'>";
   echo "<option value=''></option>";
 
-  while ($vrow = mysql_fetch_assoc($factoring_result)) {
-    $sel = ($vrow['tunnus'] == $factoring_id) ? "selected" : "";
+  while ($vrow = mysql_fetch_assoc($directdebit_result)) {
+    $sel = ($vrow['tunnus'] == $directdebit_id) ? "selected" : "";
     echo "<option value='{$vrow["tunnus"]}' $sel>{$vrow["nimitys"]}</option>";
   }
 
@@ -69,30 +68,30 @@ if ($tee == 'TOIMINNOT') {
   echo "Luo uusi siirtotiedosto<br>";
   echo "<table>";
   echo "<input type='hidden' name='toim' value='$toim'>";
-  echo "<input type='hidden' name='factoring_id' value='$factoring_id'>";
+  echo "<input type='hidden' name='directdebit_id' value='$directdebit_id'>";
   echo "<input type='hidden' name='tee' value='TARKISTA'>";
 
   $query = "SELECT *
-            FROM factoring
-            WHERE yhtio        = '$kukarow[yhtio]'
-            and factoringyhtio = '$factoringyhtio'
-            and tunnus         = '$factoring_id'
-            and valkoodi       = '$valkoodi'";
+            FROM directdebit
+            WHERE yhtio  = '$kukarow[yhtio]'
+            and nimitys  = '$directdebityhtio'
+            and tunnus   = '$directdebit_id'";
   $fres = pupe_query($query);
   $frow = mysql_fetch_assoc($fres);
 
   $query = "SELECT min(laskunro) eka, max(laskunro) vika
             FROM lasku use index (yhtio_tila_tapvm)
             JOIN maksuehto ON (lasku.yhtio = maksuehto.yhtio
-              and lasku.maksuehto            = maksuehto.tunnus
-              and maksuehto.factoring_id     = '$factoring_id')
-            WHERE lasku.yhtio                = '$kukarow[yhtio]'
-            and lasku.tila                   = 'U'
-            and lasku.tapvm                  > date_sub(CURDATE(), interval 6 month)
-            and lasku.alatila                = 'X'
-            and lasku.summa                 != 0
-            and lasku.factoringsiirtonumero  = 0
-            and lasku.valkoodi               = '$valkoodi'";
+              and lasku.maksuehto = maksuehto.tunnus
+              and maksuehto.directdebit_id = '$directdebit_id')
+            WHERE lasku.yhtio = '$kukarow[yhtio]'
+            and lasku.tila = 'U'
+            and lasku.tapvm > date_sub(CURDATE(), interval 6 month)
+            and lasku.alatila = 'X'
+            and lasku.summa != 0
+            and lasku.directdebitsiirtonumero = 0
+            and lasku.valkoodi = '$valkoodi'
+            and lasku.summa > 0";
   $aresult = pupe_query($query);
   $arow = mysql_fetch_assoc($aresult);
 
@@ -102,7 +101,7 @@ if ($tee == 'TOIMINNOT') {
             ORDER BY jarjestys";
   $vresult = pupe_query($query);
 
-  echo "<tr><th>Sopimusnumero:</th><td>$frow[sopimusnumero]</td>";
+  echo "<tr><th>Palvelutunnus:</th><td>$frow[palvelutunnus]</td>";
   echo "<tr><th>Valitse valuutta:</th><td>EUR</td></tr>";
 
   echo "<tr>
@@ -114,22 +113,27 @@ if ($tee == 'TOIMINNOT') {
       <td><input type='text' name='ppl' value='$arow[vika]' size='10'></td>
       </tr>";
 
-  $query = "SELECT max(lasku.factoringsiirtonumero)+1 seuraava
+  $query = "SELECT max(lasku.directdebitsiirtonumero)+1 seuraava
             FROM lasku use index (yhtio_tila_tapvm)
             JOIN maksuehto ON (lasku.yhtio = maksuehto.yhtio
-              and lasku.maksuehto            = maksuehto.tunnus
-              and maksuehto.factoring_id     = '$factoring_id')
-            WHERE lasku.yhtio                = '$kukarow[yhtio]'
-            and lasku.tila                   = 'U'
-            and lasku.tapvm                  > date_sub(CURDATE(), interval 6 month)
-            and lasku.alatila                = 'X'
-            and lasku.summa                 != 0
-            and lasku.factoringsiirtonumero  > 0";
+              and lasku.maksuehto = maksuehto.tunnus
+              and maksuehto.directdebit_id = '$directdebit_id')
+            WHERE lasku.yhtio = '$kukarow[yhtio]'
+            and lasku.tila = 'U'
+            and lasku.tapvm > date_sub(CURDATE(), interval 6 month)
+            and lasku.alatila = 'X'
+            and lasku.summa != 0
+            and lasku.directdebitsiirtonumero > 0
+            and lasku.summa > 0";
   $aresult = pupe_query($query);
   $arow = mysql_fetch_assoc($aresult);
 
+  if (empty($arow["seuraava"])) {
+    $arow["seuraava"] = 1;
+  }
+
   echo "<tr><th>Siirtoluettelon numero:</th>
-      <td><input type='text' name='dd_siirtonumero' value='$arow[seuraava]' size='6'></td>";
+      <td><input type='text' name='dd_siirtonumero' value='".date("Y")."-$arow[seuraava]' size='10'></td>";
 
   echo "<td class='back'><input type='submit' value='Luo siirtoaineisto'></td></tr></form></table><br><br>";
 
@@ -140,20 +144,19 @@ if ($tee == 'TOIMINNOT') {
   echo "Uudelleenluo siirtotiedosto<br>";
   echo "<table>";
   echo "<input type='hidden' name='toim' value='$toim'>";
-  echo "<input type='hidden' name='factoring_id' value='$factoring_id'>";
+  echo "<input type='hidden' name='directdebit_id' value='$directdebit_id'>";
   echo "<input type='hidden' name='tee' value='TARKISTA'>";
   echo "<input type='hidden' name='tee_u' value='UUDELLEENLUO'>";
 
   $query = "SELECT *
-            FROM factoring
-            WHERE yhtio        = '$kukarow[yhtio]'
-            and factoringyhtio = '$factoringyhtio'
-            and tunnus         = '$factoring_id'
-            and valkoodi       = '$valkoodi'";
+            FROM directdebit
+            WHERE yhtio  = '$kukarow[yhtio]'
+            and nimitys  = '$directdebityhtio'
+            and tunnus   = '$directdebit_id'";
   $fres = pupe_query($query);
   $frow = mysql_fetch_assoc($fres);
 
-  echo "<tr><th>Sopimusnumero:</th><td>$frow[sopimusnumero]</td>";
+  echo "<tr><th>Palvelutunnus:</th><td>$frow[palvelutunnus]</td>";
   echo "<tr><th>Valitse valuutta:</th><td>EUR</td></tr>";
 
   echo "<tr><th>Siirtoluettelon numero:</th>
@@ -168,11 +171,10 @@ if ($tee == 'TULOSTA') {
   $luontiaika  = date("Hi");
 
   $query = "SELECT *
-            FROM factoring
-            WHERE yhtio        = '$kukarow[yhtio]'
-            and factoringyhtio = '$factoringyhtio'
-            and tunnus         = '$factoring_id'
-            and valkoodi       = '$valkoodi'";
+            FROM directdebit
+            WHERE yhtio  = '$kukarow[yhtio]'
+            and nimitys  = '$directdebityhtio'
+            and tunnus   = '$directdebit_id'";
   $fres = pupe_query($query);
   $frow = mysql_fetch_assoc($fres);
 
@@ -185,15 +187,15 @@ if ($tee == 'TULOSTA') {
   $xml = new SimpleXMLElement($xmlstr);
 
   $dd = $xml->addChild('CstmrDrctDbtInitn');
-  $GrpHdr = $dd->addChild('GrpHdr');                                                   // GroupHeader
-  $GrpHdr->addChild('MsgId', date('Ymd')."/".$dd_siirtonumero);                        // MessageIdentification, Text, Pakollinen kentt‰
-  $GrpHdr->addChild('CreDtTm', date('Y-m-d')."T".date('H:i:s'));                       // CreationDateTime, DateTime, Pakollinen kentt‰
-  $GrpHdr->addChild('NbOfTxs', 1);                                                     // NumberOfTransactions, Text, Pakollinen kentt‰
-  $GrpHdr->addChild('CtrlSum', 123456);                                                // Total of all individual amounts included in the message.
+  $GrpHdr = $dd->addChild('GrpHdr');                                   // GroupHeader
+  $GrpHdr->addChild('MsgId', $dd_siirtonumero);                        // MessageIdentification, Text, Pakollinen kentt‰
+  $GrpHdr->addChild('CreDtTm', date('Y-m-d')."T".date('H:i:s'));       // CreationDateTime, DateTime, Pakollinen kentt‰
+  $NumberOfTransactions = $GrpHdr->addChild('NbOfTxs', 0);             // NumberOfTransactions, Text, Pakollinen kentt‰
+  $ControlSum = $GrpHdr->addChild('CtrlSum', 0);                       // Total of all individual amounts included in the message.
 
-  $InitgPty = $GrpHdr->addChild('InitgPty');                                           // InitiatingParty, Pakollinen
-  $InitgPty->addChild('Nm', sprintf("%-1.70s", $yhtiorow['nimi']));                    // Name 1-70
-  $InitgPty->addChild('Id')->addChild('OrgId')->addChild('Othr')->addChild('id', $frow["sopimusnumero"]); // 'Palvelutunnus' or 'Intermediary code' informed by Nordea
+  $InitgPty = $GrpHdr->addChild('InitgPty');                           // InitiatingParty, Pakollinen
+  $InitgPty->addChild('Nm', sprintf("%-1.70s", $yhtiorow['nimi']));    // Name 1-70
+  $InitgPty->addChild('Id')->addChild('OrgId')->addChild('Othr')->addChild('id', $frow["palvelutunnus"]); // 'Palvelutunnus' or 'Intermediary code' informed by Nordea
 
   if ($ppl == '') {
     $ppl = $ppa;
@@ -205,24 +207,25 @@ if ($tee == 'TULOSTA') {
   }
 
   if ($tee_u == 'UUDELLEENLUO') {
-    $where = " and lasku.factoringsiirtonumero = '$dd_siirtonumero' ";
+    $where = " and lasku.directdebitsiirtonumero = '$dd_siirtonumero' ";
   }
   else {
     $where = " and lasku.laskunro >= '$ppa'
                and lasku.laskunro <= '$ppl'
-               and lasku.factoringsiirtonumero = 0 ";
+               and lasku.directdebitsiirtonumero = 0 ";
   }
 
   $dquery = "SELECT lasku.yhtio
              FROM lasku
              JOIN maksuehto ON (lasku.yhtio = maksuehto.yhtio
-              and lasku.maksuehto         = maksuehto.tunnus
-              and maksuehto.factoring_id  = '$factoring_id')
-             WHERE lasku.yhtio            = '$kukarow[yhtio]'
-             and lasku.tila               = 'U'
-             and lasku.alatila            = 'X'
-             and lasku.summa             != 0
-             and lasku.valkoodi           = '$valkoodi'
+              and lasku.maksuehto = maksuehto.tunnus
+              and maksuehto.directdebit_id = '$directdebit_id')
+             WHERE lasku.yhtio = '$kukarow[yhtio]'
+             and lasku.tila = 'U'
+             and lasku.alatila = 'X'
+             and lasku.summa != 0
+             and lasku.valkoodi = '$valkoodi'
+             and lasku.summa > 0
              $where";
   $dresult = pupe_query($dquery);
 
@@ -241,10 +244,7 @@ if ($tee == 'TULOSTA') {
             lasku.maa,
             lasku.laskunro,
             round(lasku.viikorkopros*100,0) viikorkopros,
-            round(abs(lasku.summa*100),0) summa,
-            round(abs(lasku.kasumma*100),0) kasumma,
-            round(abs(lasku.summa_valuutassa*100),0) summa_valuutassa,
-            round(abs(lasku.kasumma_valuutassa*100),0) kasumma_valuutassa,
+            lasku.summa,
             lasku.toim_nimi,
             lasku.toim_nimitark,
             lasku.toim_osoite,
@@ -254,40 +254,43 @@ if ($tee == 'TULOSTA') {
             lasku.maa,
             lasku.viite,
             DATE_FORMAT(lasku.tapvm, '%y%m%d') tapvm,
-            DATE_FORMAT(lasku.erpcm, '%y%m%d') erpcm,
+            lasku.erpcm,
             DATE_FORMAT(lasku.kapvm, '%y%m%d') kapvm,
             lasku.tunnus,
             lasku.valkoodi,
             lasku.liitostunnus
             FROM lasku
             JOIN maksuehto ON (lasku.yhtio = maksuehto.yhtio
-              and lasku.maksuehto         = maksuehto.tunnus
-              and maksuehto.factoring_id  = '$factoring_id')
-            WHERE lasku.yhtio             = '$kukarow[yhtio]'
-            and lasku.tila                = 'U'
-            and lasku.alatila             = 'X'
-            and lasku.summa              != 0
-            and lasku.valkoodi            = '$valkoodi'
+              and lasku.maksuehto = maksuehto.tunnus
+              and maksuehto.directdebit_id  = '$directdebit_id')
+            WHERE lasku.yhtio = '$kukarow[yhtio]'
+            and lasku.tila = 'U'
+            and lasku.alatila = 'X'
+            and lasku.summa != 0
+            and lasku.valkoodi = '$valkoodi'
+            and lasku.summa > 0
             $where
             ORDER BY laskunro";
   $laskures = pupe_query($query);
 
   if (mysql_num_rows($laskures) > 0) {
 
-    $laskukpl  = 0;
-    $vlaskukpl = 0;
-    $vlaskusum = 0;
+    $laskukpl = 0;
+    $laskusum = 0;
+
     $hlaskukpl = 0;
     $hlaskusum = 0;
     $laskuvirh = 0;
 
     echo "<table>";
     echo "<tr><th>P‰iv‰m‰‰r‰:</th><td>".date("d.m.Y")."</td>";
-    echo "<tr><th>Sopimusnumero:</th><td>{$frow["sopimusnumero"]}</td>";
+    echo "<tr><th>Palvelutunnus:</th><td>{$frow["palvelutunnus"]}</td>";
     echo "<tr><th>Siirtoluettelon numero:</th><td>$dd_siirtonumero</td></tr></table><br>";
 
     echo "<table>";
     echo "<tr><th>Tyyppi</th><th>Laskunumero</th><th>Nimi</th><th>Summa</th><th>Valuutta</th></tr>";
+
+    $y_vatnumero = tulosta_ytunnus(preg_replace("/^0037/", "", $yhtiorow["ovttunnus"]), "FI", "VATNUMERO");
 
     while ($laskurow = mysql_fetch_assoc($laskures)) {
 
@@ -299,19 +302,14 @@ if ($tee == 'TULOSTA') {
       $asires = pupe_query($query);
       $asirow = mysql_fetch_assoc($asires);
 
-      // Valuuttalasku
-      if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
-        $laskurow["summa"]   = $laskurow["summa_valuutassa"];
-        $laskurow["kasumma"] = $laskurow["kasumma_valuutassa"];
-      }
-
-      if ($asirow["asiakasnro"] == 0 or !is_numeric($asirow["asiakasnro"]) or strlen($asirow["asiakasnro"]) > 6) {
-        $laskuvirh++;
-      }
+      #if ($asirow["asiakasnro"] == 0 or !is_numeric($asirow["asiakasnro"]) or strlen($asirow["asiakasnro"]) > 6) {
+      #  $laskuvirh++;
+      #}
 
       echo "<tr>";
 
       $laskukpl++;
+      $laskusum += $laskurow["summa"];
 
       if ($laskurow["tyyppi"] == "01") {
         $vlaskukpl++;
@@ -326,9 +324,86 @@ if ($tee == 'TULOSTA') {
         echo "<td>Hyvityslasku:</td><td>$laskurow[laskunro]</td><td>$laskurow[nimi]</td><td align='right'>".sprintf('%.2f', $laskurow["summa"]/100)."</td><td>$laskurow[valkoodi]</td>";
       }
 
-      if ($asirow["asiakasnro"] == 0 or !is_numeric($asirow["asiakasnro"]) or strlen($asirow["asiakasnro"]) > 6) {
-        echo "<td><font class='error'>VIRHE: Asiakasnumero: $asirow[asiakasnro] ei kelpaa!</font> <a href='".$palvelin2."yllapito.php?ojarj=&toim=asiakas&tunnus=$laskurow[liitostunnus]'>Muuta asiakkaan tietoja</a></td>";
-      }
+      #if ($asirow["asiakasnro"] == 0 or !is_numeric($asirow["asiakasnro"]) or strlen($asirow["asiakasnro"]) > 6) {
+      #  echo "<td><font class='error'>VIRHE: Asiakasnumero: $asirow[asiakasnro] ei kelpaa!</font> <a href='".$palvelin2."yllapito.php?ojarj=&toim=asiakas&tunnus=$laskurow[liitostunnus]'>Muuta asiakkaan tietoja</a></td>";
+      #}
+
+      echo "</tr>";
+
+      $PmtInf = $dd->addChild('PmtInf');
+      $PmtInf->addChild('PmtInfId', "PMT/".$laskurow["tapvm"]."/".$laskurow["laskunro"]);
+      $PmtInf->addChild('PmtMtd', 'DD');
+      $PmtInf->addChild('NbOfTxs', '1');
+
+      $PmtTpInf = $PmtInf->addChild('PmtTpInf');
+
+      $SvcLvl = $PmtTpInf->addChild('SvcLvl');
+      $SvcLvl->addChild('Cd', 'SEPA');
+
+      $LclInstrm = $PmtTpInf->addChild('LclInstrm');
+      $LclInstrm->addChild('Cd', 'CORE');
+
+      $PmtTpInf->addChild('SeqTp', 'OOFF');
+
+      $PmtInf->addChild('ReqdColltnDt', $laskurow["erpcm"]);
+
+      $Cdtr = $PmtInf->addChild('Cdtr');
+      $Cdtr->addChild('Nm', sprintf("%-1.70s", $yhtiorow['nimi']));
+
+      $CdtrAcct = $PmtInf->addChild('CdtrAcct');
+      $Id = $CdtrAcct->addChild('Id');
+      $Id->addChild('IBAN', preg_replace("/[^a-z0-9]/i", "", $yhtiorow["pankkiiban1"]));
+
+      $CdtrAgt = $PmtInf->addChild('CdtrAgt');
+      $FinInstnId = $CdtrAgt->addChild('FinInstnId');
+      $FinInstnId->addChild('BIC', $yhtiorow["pankkiswift1"]);
+
+      $PmtInf->addChild('ChrgBr', 'SLEV');
+
+      $CdtrSchmeId = $PmtInf->addChild('CdtrSchmeId');
+      $Id = $CdtrSchmeId->addChild('Id');
+      $PrvtId = $Id->addChild('PrvtId');
+      $Othr = $PrvtId->addChild('Othr');
+      $Othr->addChild('Id', $y_vatnumero);
+      $SchmeNm = $Othr->addChild('SchmeNm');
+      $SchmeNm->addChild('Prtry', 'SEPA');
+
+      $DrctDbtTxInf = $PmtInf->addChild('DrctDbtTxInf');
+      $PmtId = $DrctDbtTxInf->addChild('PmtId');
+      $PmtId->addChild('InstrId', "INV/".$laskurow["tapvm"]."/".$laskurow["laskunro"]);
+      $PmtId->addChild('EndToEndId', "INV/".$laskurow["tapvm"]."/".$laskurow["laskunro"]);
+
+      $InstdAmt = $DrctDbtTxInf->addChild('InstdAmt', sprintf("%.2f", $laskurow["summa"]));
+      $InstdAmt->addAttribute('Ccy', 'EUR');
+
+      $DrctDbtTx = $DrctDbtTxInf->addChild('DrctDbtTx');
+      $MndtRltdInf = $DrctDbtTx->addChild('MndtRltdInf');
+
+      $MndtRltdInf->addChild('MndtId', '100000001');
+      $MndtRltdInf->addChild('DtOfSgntr', '2013-06-20');
+      $MndtRltdInf->addChild('AmdmntInd', 'false');
+      $MndtRltdInf->addChild('ElctrncSgntr', '');
+
+      $DbtrAgt = $DrctDbtTxInf->addChild('DbtrAgt');
+      $FinInstnId = $DbtrAgt->addChild('FinInstnId');
+      $FinInstnId->addChild('BIC', 'GENODE51KOB');
+
+      $Dbtr = $DrctDbtTxInf->addChild('Dbtr');
+      $Dbtr->addChild('Nm', $laskurow["nimi"]);
+
+      $DbtrAcct = $DrctDbtTxInf->addChild('DbtrAcct');
+      $Id = $DbtrAcct->addChild('Id');
+      $Id->addChild('IBAN', 'DE06570900007112345678');
+
+      $RmtInf = $DrctDbtTxInf->addChild('RmtInf');
+
+      $Strd = $RmtInf->addChild('Strd');
+
+      $CdtrRefInf = $Strd->addChild('CdtrRefInf');
+      $Tp = $CdtrRefInf->addChild('Tp');
+      $CdOrPrtry = $Tp->addChild('CdOrPrtry');
+      $CdOrPrtry->addChild('Cd', 'SCOR');
+      $Tp->addChild('Ref', sprintf("%-1.35s", $laskurow['viite']));
     }
 
     if ($laskuvirh > 0) {
@@ -337,21 +412,25 @@ if ($tee == 'TULOSTA') {
       echo "Aineistossa oli virheit‰! Korjaa ne ja aja uudestaan!";
     }
     else {
+      // Fix header values
+      $NumberOfTransactions[0] = $laskukpl;
+      $ControlSum[0] = $laskusum;
+
       if ($tee_u != 'UUDELLEENLUO') {
         $dquery = "UPDATE lasku, maksuehto
-                   SET lasku.factoringsiirtonumero = '$dd_siirtonumero'
+                   SET lasku.directdebitsiirtonumero = '$dd_siirtonumero'
                    WHERE lasku.yhtio                = '$kukarow[yhtio]'
                    and lasku.tila                   = 'U'
                    and lasku.alatila                = 'X'
                    and lasku.summa                 != 0
                    and lasku.laskunro               >= '$ppa'
                    and lasku.laskunro               <= '$ppl'
-                   and lasku.factoringsiirtonumero  = 0
+                   and lasku.directdebitsiirtonumero  = 0
                    and lasku.valkoodi               = '$valkoodi'
                    and lasku.yhtio                  = maksuehto.yhtio
                    and lasku.maksuehto              = maksuehto.tunnus
-                   and maksuehto.factoring_id       = '$factoring_id'";
-        $dresult = pupe_query($dquery);
+                   and maksuehto.directdebit_id       = '$directdebit_id'";
+        #$dresult = pupe_query($dquery);
       }
 
 

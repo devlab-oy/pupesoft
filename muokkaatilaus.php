@@ -1187,83 +1187,19 @@ if ($toim == 'HYPER') {
 
   $miinus = 6;
 }
-elseif ($toim == "SUPER_EITYOM") {
+elseif ($toim == 'SUPER' or $toim == 'SUPERTEHDASPALAUTUKSET' or $toim == "SUPER_EITYOM" or $toim == "SUPER_EILUONTITAPATYOM") {
 
-  $query = "  SELECT DISTINCT lasku.tunnus tilaus, $asiakasstring asiakas, lasku.luontiaika, if(kuka1.kuka is null, lasku.laatija, if (kuka1.kuka!=kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi)) laatija, lasku.viesti tilausviite, ";
+  $_ei_ollenkaan_tyomaarayksia_arraylisa = "";
 
-  if ($kukarow['hinnat'] == 0) {
-    $query .= " round(sum(tilausrivi.hinta
-                  / if('$yhtiorow[alv_kasittely]'  = '' AND tilausrivi.alv < 500,
-                    (1 + tilausrivi.alv / 100),
-                    1)
-                  * (tilausrivi.varattu + tilausrivi.jt + tilausrivi.kpl)
-                  * {$query_ale_lisa}), 2) AS arvo,
-                round(sum(tilausrivi.hinta
-                  * if('$yhtiorow[alv_kasittely]' != '' AND tilausrivi.alv < 500,
-                    (1 + tilausrivi.alv / 100),
-                    1)
-                  * (tilausrivi.varattu + tilausrivi.jt + tilausrivi.kpl)
-                  * {$query_ale_lisa}), 2) AS summa, ";
+  if ($toim == "SUPER_EITYOM") {
+    $_ei_ollenkaan_tyomaarayksia_arraylisa = "AND lasku.tilaustyyppi != 'A'";
   }
 
-  $query .= "  $toimaikalisa alatila, tila, lasku.tunnus, lasku.mapvm, lasku.tilaustyyppi, lasku.label, lasku.varasto
-        FROM lasku use index (tila_index)
-        LEFT JOIN kuka as kuka1 ON (kuka1.yhtio = lasku.yhtio and kuka1.kuka = lasku.laatija)
-        LEFT JOIN kuka as kuka2 ON (kuka2.yhtio = lasku.yhtio and kuka2.tunnus = lasku.myyja)
-        LEFT JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi != 'D')
-        {$tilausrivin_lisatiedot_join}
-        WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila in ('L', 'N') and lasku.alatila != 'X' and lasku.clearing != 'EXTENNAKKO'
-        AND lasku.tilaustyyppi != 'A'
-        $haku
-        $tepalisa
-        GROUP BY lasku.tunnus
-        $mt_order_by
-        $rajaus";
+  $_ei_tyomaarays_tyomaarayksia_arraylisa = "";
 
-  // haetaan tilausten arvo
-  if ($kukarow['hinnat'] == 0) {
-    $sumquery = "SELECT
-                 round(sum(if(lasku.alatila = 'X', 0, tilausrivi.hinta
-                   / if('$yhtiorow[alv_kasittely]'  = '' AND tilausrivi.alv < 500,
-                     (1 + tilausrivi.alv / 100),
-                     1)
-                   * (tilausrivi.varattu + tilausrivi.jt + tilausrivi.kpl)
-                   * {$query_ale_lisa})), 2) AS arvo,
-                 round(sum(if(lasku.alatila = 'X', 0, tilausrivi.hinta
-                   * if('$yhtiorow[alv_kasittely]' != '' AND tilausrivi.alv < 500,
-                     (1 + tilausrivi.alv / 100),
-                     1)
-                   * (tilausrivi.varattu + tilausrivi.jt + tilausrivi.kpl)
-                   * {$query_ale_lisa})), 2) AS summa,
-                 round(sum(if(lasku.alatila != 'X', 0, tilausrivi.hinta
-                   / if('$yhtiorow[alv_kasittely]'  = '' AND tilausrivi.alv < 500,
-                     (1 + tilausrivi.alv / 100),
-                     1)
-                   * (tilausrivi.varattu + tilausrivi.jt + tilausrivi.kpl)
-                   * {$query_ale_lisa})), 2) AS jt_arvo,
-                 round(sum(if(lasku.alatila != 'X', 0, tilausrivi.hinta
-                   * if('$yhtiorow[alv_kasittely]' != '' AND tilausrivi.alv < 500,
-                     (1 + tilausrivi.alv / 100),
-                     1)
-                   * (tilausrivi.varattu + tilausrivi.jt + tilausrivi.kpl)
-                   * {$query_ale_lisa})), 2) AS jt_summa,
-                 count(distinct lasku.tunnus) kpl
-                 FROM lasku use index (tila_index)
-                 JOIN tilausrivi use index (yhtio_otunnus) ON (tilausrivi.yhtio = lasku.yhtio
-                   AND tilausrivi.otunnus  = lasku.tunnus
-                   AND tilausrivi.tyyppi  != 'D')
-                 WHERE lasku.yhtio         = '{$kukarow['yhtio']}'
-                 AND lasku.tila            IN ('L', 'N')
-                 AND lasku.alatila        != 'X'
-                 AND lasku.clearing       != 'EXTENNAKKO'
-                 {$sumhaku}";
-    $sumresult = pupe_query($sumquery);
-    $sumrow = mysql_fetch_assoc($sumresult);
+  if ($toim == "SUPER_EILUONTITAPATYOM") {
+    $_ei_tyomaarays_tyomaarayksia_arraylisa = "AND laskun_lisatiedot.luontitapa != 'tyomaarays'";
   }
-
-  $miinus = 7;
-}
-elseif ($toim == "SUPER_EILUONTITAPATYOM") {
 
   $query = "  SELECT DISTINCT lasku.tunnus tilaus, $asiakasstring asiakas, lasku.luontiaika, if(kuka1.kuka is null, lasku.laatija, if (kuka1.kuka!=kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi)) laatija, lasku.viesti tilausviite, ";
 
@@ -1290,7 +1226,8 @@ elseif ($toim == "SUPER_EILUONTITAPATYOM") {
         LEFT JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio = lasku.yhtio AND laskun_lisatiedot.otunnus = lasku.tunnus)
         {$tilausrivin_lisatiedot_join}
         WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila in ('L', 'N') and lasku.alatila != 'X' and lasku.clearing != 'EXTENNAKKO'
-        AND laskun_lisatiedot.luontitapa != 'tyomaarays'
+        {$_ei_ollenkaan_tyomaarayksia_arraylisa}
+        {$_ei_tyomaarays_tyomaarayksia_arraylisa}
         $haku
         $tepalisa
         GROUP BY lasku.tunnus
@@ -1329,85 +1266,14 @@ elseif ($toim == "SUPER_EILUONTITAPATYOM") {
                  JOIN tilausrivi use index (yhtio_otunnus) ON (tilausrivi.yhtio = lasku.yhtio
                    AND tilausrivi.otunnus  = lasku.tunnus
                    AND tilausrivi.tyyppi  != 'D')
+                 LEFT JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio = lasku.yhtio
+                   AND laskun_lisatiedot.otunnus = lasku.tunnus)
                  WHERE lasku.yhtio         = '{$kukarow['yhtio']}'
                  AND lasku.tila            IN ('L', 'N')
                  AND lasku.alatila        != 'X'
                  AND lasku.clearing       != 'EXTENNAKKO'
-                 {$sumhaku}";
-    $sumresult = pupe_query($sumquery);
-    $sumrow = mysql_fetch_assoc($sumresult);
-  }
-
-  $miinus = 7;
-}
-elseif ($toim == 'SUPER' or $toim == 'SUPERTEHDASPALAUTUKSET') {
-
-  $query = "  SELECT DISTINCT lasku.tunnus tilaus, $asiakasstring asiakas, lasku.luontiaika, if(kuka1.kuka is null, lasku.laatija, if (kuka1.kuka!=kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi)) laatija, lasku.viesti tilausviite, ";
-
-  if ($kukarow['hinnat'] == 0) {
-    $query .= " round(sum(tilausrivi.hinta
-                  / if('$yhtiorow[alv_kasittely]'  = '' AND tilausrivi.alv < 500,
-                    (1 + tilausrivi.alv / 100),
-                    1)
-                  * (tilausrivi.varattu + tilausrivi.jt + tilausrivi.kpl)
-                  * {$query_ale_lisa}), 2) AS arvo,
-                round(sum(tilausrivi.hinta
-                  * if('$yhtiorow[alv_kasittely]' != '' AND tilausrivi.alv < 500,
-                    (1 + tilausrivi.alv / 100),
-                    1)
-                  * (tilausrivi.varattu + tilausrivi.jt + tilausrivi.kpl)
-                  * {$query_ale_lisa}), 2) AS summa, ";
-  }
-
-  $query .= "  $toimaikalisa alatila, tila, lasku.tunnus, lasku.mapvm, lasku.tilaustyyppi, lasku.label, lasku.varasto
-        FROM lasku use index (tila_index)
-        LEFT JOIN kuka as kuka1 ON (kuka1.yhtio = lasku.yhtio and kuka1.kuka = lasku.laatija)
-        LEFT JOIN kuka as kuka2 ON (kuka2.yhtio = lasku.yhtio and kuka2.tunnus = lasku.myyja)
-        LEFT JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi != 'D')
-        {$tilausrivin_lisatiedot_join}
-        WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila in ('L', 'N') and lasku.alatila != 'X' and lasku.clearing != 'EXTENNAKKO'
-        $haku
-        $tepalisa
-        GROUP BY lasku.tunnus
-        $mt_order_by
-        $rajaus";
-
-  // haetaan tilausten arvo
-  if ($kukarow['hinnat'] == 0) {
-    $sumquery = "SELECT
-                 round(sum(if(lasku.alatila = 'X', 0, tilausrivi.hinta
-                   / if('$yhtiorow[alv_kasittely]'  = '' AND tilausrivi.alv < 500,
-                     (1 + tilausrivi.alv / 100),
-                     1)
-                   * (tilausrivi.varattu + tilausrivi.jt + tilausrivi.kpl)
-                   * {$query_ale_lisa})), 2) AS arvo,
-                 round(sum(if(lasku.alatila = 'X', 0, tilausrivi.hinta
-                   * if('$yhtiorow[alv_kasittely]' != '' AND tilausrivi.alv < 500,
-                     (1 + tilausrivi.alv / 100),
-                     1)
-                   * (tilausrivi.varattu + tilausrivi.jt + tilausrivi.kpl)
-                   * {$query_ale_lisa})), 2) AS summa,
-                 round(sum(if(lasku.alatila != 'X', 0, tilausrivi.hinta
-                   / if('$yhtiorow[alv_kasittely]'  = '' AND tilausrivi.alv < 500,
-                     (1 + tilausrivi.alv / 100),
-                     1)
-                   * (tilausrivi.varattu + tilausrivi.jt + tilausrivi.kpl)
-                   * {$query_ale_lisa})), 2) AS jt_arvo,
-                 round(sum(if(lasku.alatila != 'X', 0, tilausrivi.hinta
-                   * if('$yhtiorow[alv_kasittely]' != '' AND tilausrivi.alv < 500,
-                     (1 + tilausrivi.alv / 100),
-                     1)
-                   * (tilausrivi.varattu + tilausrivi.jt + tilausrivi.kpl)
-                   * {$query_ale_lisa})), 2) AS jt_summa,
-                 count(distinct lasku.tunnus) kpl
-                 FROM lasku use index (tila_index)
-                 JOIN tilausrivi use index (yhtio_otunnus) ON (tilausrivi.yhtio = lasku.yhtio
-                   AND tilausrivi.otunnus  = lasku.tunnus
-                   AND tilausrivi.tyyppi  != 'D')
-                 WHERE lasku.yhtio         = '{$kukarow['yhtio']}'
-                 AND lasku.tila            IN ('L', 'N')
-                 AND lasku.alatila        != 'X'
-                 AND lasku.clearing       != 'EXTENNAKKO'
+                 #{$_ei_ollenkaan_tyomaarayksia_arraylisa}
+                 #{$_ei_tyomaarays_tyomaarayksia_arraylisa}
                  {$sumhaku}";
     $sumresult = pupe_query($sumquery);
     $sumrow = mysql_fetch_assoc($sumresult);

@@ -16,17 +16,12 @@ if ((mysql_field_name($result, $i) == "teksti_fi") or
   $jatko = 0;
 }
 
-if (mysql_field_name($result, $i) == "direct_debit") {
-  $tyyppi = 4;
-}
-
 if (mysql_field_name($result, $i) == "factoringyhtio") {
 
   $sel = array_fill_keys(array($trow[$i]), " selected") +
     array_fill_keys(array('NORDEA', 'SAMPO', 'SEB', 'OKO', 'SVEA', 'COLLECTOR', 'AKTIA', 'NORDEA_DD'), '');
 
   $ulos  = "<td><select name='$nimi'>";
-  $ulos .= "<optgroup label='".t("Factoringyhtiöt")."'>";
   $ulos .= "<option value='NORDEA' {$sel['NORDEA']}>".t("Nordea Factoring")."</option>";
   $ulos .= "<option value='SAMPO' {$sel['SAMPO']}>".t("Danske Factoring")."</option>";
   $ulos .= "<option value='SEB' {$sel['SEB']}>".t("SEB Factoring")."</option>";
@@ -34,10 +29,6 @@ if (mysql_field_name($result, $i) == "factoringyhtio") {
   $ulos .= "<option value='SVEA' {$sel['SVEA']}>".t("Svea Factoring")."</option>";
   $ulos .= "<option value='COLLECTOR' {$sel['COLLECTOR']}>".t("Collector Factoring")."</option>";
   $ulos .= "<option value='AKTIA' {$sel['AKTIA']}>".t("Aktia Factoring")."</option>";
-  $ulos .= "</optgroup>";
-  $ulos .= "<optgroup label='".t("Direct Debit")."'>";
-  $ulos .= "<option value='NORDEA_DD' {$sel['NORDEA_DD']}>".t("Nordea Direct Debit")."</option>";
-  $ulos .= "</optgroup>";
   $ulos .= "</select></td>";
 
   $jatko = 0;

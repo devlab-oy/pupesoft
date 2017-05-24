@@ -1359,6 +1359,7 @@ while ($tietue = fgets($fd)) {
           $query = "SELECT selite
                     FROM avainsana
                     WHERE yhtio  = '{$kukarow['yhtio']}'
+                    AND laji = 'TOIMTAPAVKN'
                     AND selitetark = '{$editilaus_toimitustapa}'
                     AND selite != ''
                     AND selitetark != ''";

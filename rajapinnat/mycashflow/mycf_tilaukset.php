@@ -194,8 +194,12 @@ class MyCashflowTilaukset {
           $tilaus['shipping_description'] = $product->ProductName;
           $tilaus['shipping_description_line'] = $product->ProductName;
 
-          // Noutopisteen tiedot
-          $tilaus['shipping_method'] = "";
+          // Noutopisteen tiedot: Tallennetaan toimitusosoitteen perään [# ]-tägeihin
+          $pickupcode = trim($order->ShippingMethod->attributes()->PickUpPointCode);
+
+          if (!empty($pickupcode)) {
+            $tilaus['shipping_address']['street'] .= " [#".$pickupcode."]";
+          }
 
           // Veron määrä
           $tilaus['shipping_tax_amount'] = $product->TotalTax;

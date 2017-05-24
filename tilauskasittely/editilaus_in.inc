@@ -30,6 +30,9 @@ if ($php_cli) {
   // ja toinen parametri komentoriviltä
   $edi_tyyppi  = trim($argv[2]);
 
+  // jos halutaan myydä tilauksen kaikki rivit väkisin
+  $editilaus_var_h  = trim($argv[3]);
+
   $verkkokauppa_filename = strtolower(basename($filename));
 
   // tunnistetaan magento -tyyppinen käsittely tiedostonimestä
@@ -2290,6 +2293,10 @@ while ($tietue = fgets($fd)) {
             $kommentti = "$olinsapi#$edi_nimitys";
           }
 
+          if (!empty($editilaus_var_h)) {
+            $var = "H";
+          }
+
           // jos tullaan magentosta ja hinta on tiedossa ja kyseessä on rahtikulu, niin uskalletaan luottaa magenton antamaan hintaan
           if ($edi_tyyppi == "magento" and ((isset($verkkokauppa_hinnatedifailista) and $verkkokauppa_hinnatedifailista == "JOO") or strtolower($tuoteno) == strtolower($yhtiorow['rahti_tuotenumero'])) and $editilaus_hinta > 0) {
             $hinta = $editilaus_hinta;
@@ -2301,6 +2308,10 @@ while ($tietue = fgets($fd)) {
           // jos tullaan magentosta ja alennus on tiedossa
           if ($edi_tyyppi == "magento" and (isset($verkkokauppa_hinnatedifailista) and $verkkokauppa_hinnatedifailista == "JOO") and $editilaus_alennus >= 0) {
             $ale1 = $editilaus_alennus;
+
+            for ($alepostfix = 2; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+              ${'ale'.$alepostfix} = 0;
+            }
           }
           elseif (is_array($hyvityssaanto_ale_array) and isset($hyvityssaanto_ale_array[$hyvityssaanto_indeksi]) and isset($hyvityssaanto_ale_array[$hyvityssaanto_indeksi][$tuoteno])) {
 

@@ -2492,6 +2492,9 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
         if ($oslarow['osoitelappu'] == 'intrade') {
           require 'osoitelappu_intrade_pdf.inc';
         }
+        elseif ($oslarow['osoitelappu'] == 'osoitelappu_kesko') {
+          require 'osoitelappu_kesko_pdf.inc';
+        }
         elseif ($oslarow['osoitelappu'] == 'hornbach') {
           require 'osoitelappu_hornbach_pdf.inc';
         }

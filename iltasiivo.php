@@ -636,6 +636,28 @@ if ($valmkorj > 0) {
   $iltasiivo .= is_log("Merkattiin $valmkorj valmistustilausta takaisin alkuperäisille alatiloille.");
 }
 
+$laskuri = 0;
+// Poistetaan kaikki laitteen_sopimukset -rivit, joille ei löydy enää tilausriviä sopimuksilta
+$query = "SELECT laitteen_sopimukset.tunnus 
+          FROM laitteen_sopimukset 
+	        LEFT JOIN tilausrivi ON (tilausrivi.yhtio = laitteen_sopimukset.yhtio 
+            AND tilausrivi.tunnus = laitteen_sopimukset.sopimusrivin_tunnus)
+	        WHERE laitteen_sopimukset.yhtio = '$kukarow[yhtio]'
+	        AND tilausrivi.tunnus IS NULL";
+$result = pupe_query($query);
+
+while ($row = mysql_fetch_assoc($result)) {
+  $query = "DELETE FROM laitteen_sopimukset WHERE tunnus='$row[tunnus]'";
+  if ($delete_result = pupe_query($query)) {
+    $laskuri++;
+  }
+}
+
+if ($laskuri > 0) {
+  $iltasiivo .= is_log("Poistettiin $laskuri laitteen sopimusriviä (laitteen_sopimukset), joita ei löydy sopimuksilta.");
+}
+
+$laskuri = 0;
 // Poistetaan kaikki myyntitili-varastopaikat, jos niiden saldo on nolla
 $query = "SELECT tunnus, tuoteno
           FROM tuotepaikat

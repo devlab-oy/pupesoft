@@ -92,14 +92,69 @@ if ($toimitusvahvistus_email_lahetys) {
             tilausrivi.varattu+tilausrivi.kpl as maara,
             tilausrivi.nimitys,
             round(tilausrivi.hinta * tilausrivi.varattu * {$query_ale_lisa}, 2) hinta,
-            lasku.valkoodi
+            lasku.valkoodi,
+            tilausrivi.otunnus,
+            tilausrivi.tunnus,
+            tilausrivi.perheid,
+            tilausrivin_lisatiedot.ei_nayteta
             FROM lasku
             JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus AND tilausrivi.tyyppi = 'L' AND tilausrivi.toimitettu != '' AND tilausrivi.toimitettuaika != '0000-00-00 00:00:00')
+            LEFT JOIN tilausrivin_lisatiedot ON (tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus)
             WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-            AND lasku.tunnus  IN ({$otunnukset})";
+            AND lasku.tunnus  IN ({$otunnukset})
+            AND (tilausrivi.perheid = 0 or tilausrivi.perheid=tilausrivi.tunnus or tilausrivin_lisatiedot.ei_nayteta !='E' or tilausrivin_lisatiedot.ei_nayteta is null)";
   $rivi_loop_res = pupe_query($query);
 
   while ($rivi_loop_row = mysql_fetch_assoc($rivi_loop_res)) {
+
+    // isätuote, jonka lapsia ei näytetä
+    if ($rivi_loop_row["perheid"] == $rivi_loop_row["tunnus"]) {
+
+      $query = "SELECT vanhatunnus
+                FROM lasku
+                WHERE yhtio = '$kukarow[yhtio]'
+                and tunnus  = '$rivi_loop_row[otunnus]'";
+      $vtunres = pupe_query($query);
+      $vtunrow = mysql_fetch_assoc($vtunres);
+
+      if ($vtunrow["vanhatunnus"] != 0) {
+        $query = "SELECT GROUP_CONCAT(distinct tunnus SEPARATOR ',') tunnukset
+                  FROM lasku use index (yhtio_vanhatunnus)
+                  WHERE yhtio     = '$kukarow[yhtio]'
+                  and vanhatunnus = '$vtunrow[vanhatunnus]'";
+        $perheresult = pupe_query($query);
+        $numrows = mysql_num_rows($perheresult);
+      }
+
+      if ($numrows == 0 or $vtunrow["vanhatunnus"] == 0) {
+        $query = "SELECT GROUP_CONCAT(distinct tunnus SEPARATOR ',') tunnukset
+                  FROM lasku use index (PRIMARY)
+                  WHERE yhtio = '$kukarow[yhtio]'
+                  and tunnus  = '$rivi_loop_row[otunnus]'";
+        $perheresult = pupe_query($query);
+      }
+
+      if (mysql_num_rows($perheresult) > 0) {
+
+        $perherow = mysql_fetch_assoc($perheresult);
+
+        // lasketaan isätuotteen riville lapsien (joita ei näytetä) hinnat yhteen
+        $query = "SELECT
+                  round(sum((tilausrivi.hinta/if(lasku.vienti_kurssi=0, 1, lasku.vienti_kurssi)) * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * {$query_ale_lisa}),'$yhtiorow[hintapyoristys]') rivihinta
+                  FROM tilausrivi
+                  JOIN lasku ON tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus
+                  LEFT JOIN tilausrivin_lisatiedot ON (tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio AND tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus)
+                  WHERE tilausrivi.yhtio  = '$kukarow[yhtio]'
+                  AND tilausrivi.otunnus  in ($perherow[tunnukset])
+                  AND tilausrivi.tyyppi  != 'D'
+                  AND tilausrivi.var     != 'O'
+                  AND tilausrivi.perheid  = '$rivi_loop_row[perheid]'
+                  AND tilausrivin_lisatiedot.ei_nayteta = 'E'";
+        $riresult = pupe_query($query);
+        $perherow = mysql_fetch_assoc($riresult);
+        $rivi_loop_row['hinta'] += $perherow["rivihinta"];
+      }
+    }
 
     if ($_toimvahvistus['selitetark_2'] == "eihintaa") {
       $_hinta = "";

@@ -402,26 +402,65 @@ else {
 
     }
 
-    $pdf->draw_text(mm_pt(5), mm_pt(165), "Lähettäjä - Avsändare - Sender: ",        $firstpage, $otsik);
-    $pdf->draw_text(mm_pt(5), mm_pt(160), "$kukarow[nimi]" ,                $firstpage, $kirj);
-
-    $pdf->draw_text(mm_pt(70), mm_pt(165), "Viite - Referens - Reference: ",        $firstpage, $otsik);
-
-    if ($rahtikirja_tulostus == "yep") {
-      $pdf->draw_text(mm_pt(70), mm_pt(160), $viestirarrow["viesti"] ,          $firstpage, $kirj);
+    if ($_asiakkaantilausnumero) {
+      $_otsikko = "Ostotilausnro: ";
+      $_mm_pt_y = "163";
+      $_mm_pt_y2 = "163";
+      $_mm_pt_x = "28";
     }
     else {
-      $pdf->draw_text(mm_pt(70), mm_pt(160), "$laskurow[viesti]" ,              $firstpage, $kirj);
+      $_otsikko = "Lähettäjä - Avsändare - Sender: ";
+      $_mm_pt_y = "165";
+      $_mm_pt_y2 = "160";
+      $_mm_pt_x = "5";
     }
 
-    $pdf->draw_text(mm_pt(5), mm_pt(155), "Tilaukset - Order - Orders: ",          $firstpage, $otsik);
+    $pdf->draw_text(mm_pt(5), mm_pt($_mm_pt_y), $_otsikko, $firstpage, $otsik);
+    $pdf->draw_text(mm_pt($_mm_pt_x), mm_pt($_mm_pt_y2), $_asiakkaantilausnumero ? $laskurow["asiakkaan_tilausnumero"] : $kukarow["nimi"], $firstpage, $kirj);
+
+    if ($_ohjausmerkki) {
+      $_otsikko = "Asiakkaan merkki: ";
+      $_mm_pt_y = "163";
+      $_mm_pt_y2 = "158";
+      $_mm_pt_x = "70";
+    }
+    else {
+      $_otsikko = "Viite - Referens - Reference: ";
+      $_mm_pt_y = "165";
+      $_mm_pt_y2 = "160";
+      $_mm_pt_x = "70";
+    }
+
+    $pdf->draw_text(mm_pt($_mm_pt_x), mm_pt($_mm_pt_y), $_otsikko,        $firstpage, $otsik);
+
+    if ($rahtikirja_tulostus == "yep") {
+      $pdf->draw_text(mm_pt($_mm_pt_x), mm_pt($_mm_pt_y2), $_ohjausmerkki ? $laskurow["ohjausmerkki"] : $viestirarrow["viesti"] ,          $firstpage, $kirj);
+    }
+    else {
+      $pdf->draw_text(mm_pt($_mm_pt_x), mm_pt($_mm_pt_y2), $_ohjausmerkki ? $laskurow["ohjausmerkki"] : $laskurow["viesti"] ,              $firstpage, $kirj);
+    }
+
+    if ($_tilausviite) {
+      $_otsikko = "Kuljetusnumero: ";
+      // tilausviitteessä on myös asiakkaan_tilausnumero, siivotaan se tässä
+      $_kuljetusnumero = trim(str_replace($laskurow["asiakkaan_tilausnumero"], "", $laskurow["viesti"]));
+      $_mm_pt_y = "158";
+      $_mm_pt_x = "32";
+    }
+    else {
+      $_otsikko = "Tilaukset - Order - Orders: ";
+      $_mm_pt_y = "155";
+      $_mm_pt_x = "50";
+    }
+
+    $pdf->draw_text(mm_pt(5), mm_pt($_mm_pt_y), $_otsikko,          $firstpage, $otsik);
     if ($tilausnumeroita == "") $tilausnumeroita = $laskurow["tunnus"];
 
     if ($rahtikirja_tulostus == "yep") {
-      $pdf->draw_text(mm_pt(50), mm_pt(155), $kaikki_lotsikot, $firstpage, $kirj);
+      $pdf->draw_text(mm_pt($_mm_pt_x), mm_pt($_mm_pt_y), $_tilausviite ? $_kuljetusnumero : $kaikki_lotsikot, $firstpage, $kirj);
     }
     else {
-      $pdf->draw_text(mm_pt(50), mm_pt(155), $tilausnumeroita, $firstpage, $kirj);
+      $pdf->draw_text(mm_pt($_mm_pt_x), mm_pt($_mm_pt_y), $_tilausviite ? $_kuljetusnumero : $tilausnumeroita, $firstpage, $kirj);
     }
 
 
@@ -501,7 +540,9 @@ else {
 
       if ($yhtiorow["osoitelappu_lisatiedot"] == "") {
         if ($laskurow['yhteyshenkilo'] != "")       $lisatiedot .= $laskurow['yhteyshenkilo'].". ";
-        if ($laskurow['asiakkaan_tilausnumero'] != "")  $lisatiedot .= $laskurow['asiakkaan_tilausnumero'].". ";
+        if ($laskurow['asiakkaan_tilausnumero'] != "" and !$_asiakkaantilausnumero) {
+          $lisatiedot .= $laskurow['asiakkaan_tilausnumero'].". ";
+        }
       }
 
       if ($rahtikirja_tulostus == "yep") {

@@ -1287,7 +1287,7 @@ if (isset($ajax)) {
               lasku2.luontiaika
               FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika)
               LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio=tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus=tilausrivi.tunnus)
-              JOIN lasku use index (PRIMARY) ON lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus {$toimipaikkarajaus}
+              JOIN lasku use index (PRIMARY) ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus {$toimipaikkarajaus} AND lasku.tila != 'D')
               LEFT JOIN varastopaikat ON (varastopaikat.yhtio = lasku.yhtio
                 AND varastopaikat.tunnus    = lasku.varasto)
               LEFT JOIN lasku as lasku2 ON lasku2.yhtio = tilausrivi.yhtio and lasku2.tunnus = tilausrivi.uusiotunnus
@@ -1296,7 +1296,7 @@ if (isset($ajax)) {
               and tilausrivi.tyyppi         in ('L','E','G','V','W','M','O')
               and tilausrivi.tuoteno        = '$tuoteno'
               and tilausrivi.laskutettuaika = '0000-00-00'
-              and ((tilausrivi.var != 'P' and tilausrivi.varattu + tilausrivi.jt != 0) or (tilausrivi.var = 'P' and lasku.tila != 'D' and lasku.alatila NOT IN ('X', 'V')))
+              and ((tilausrivi.var != 'P' and tilausrivi.varattu + tilausrivi.jt != 0) or (tilausrivi.var = 'P' and lasku.alatila NOT IN ('X', 'V')))
               ORDER BY pvm, tunnus";
     $jtresult = pupe_query($query);
 

@@ -193,6 +193,7 @@ if (mysql_field_name($result, $i) == "laji") {
   if ($lukitse_laji== "" or $lukitse_laji == "ELINKAARI") $ulos .= "<option value='ELINKAARI' {$avain_sel['ELINKAARI']}>".t("Tuotteen elinkaarityyppi")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "KOPIOITUOTE") $ulos .= "<option value='KOPIOITUOTE' {$avain_sel['KOPIOITUOTE']}>".t("Kopioi tuote parametri")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "MAARYHMA") $ulos .= "<option value='MAARYHMA' {$avain_sel['MAARYHMA']}>".t("Sallittu maaryhmä")."</option>";
+  if ($lukitse_laji== "" or $lukitse_laji == "WOO_FIELD") $ulos .= "<option value='WOO_FIELD' {$avain_sel['WOO_FIELD']}>".t("WooCommercen kenttä")."</option>";
   if ($lukitse_laji== "") $ulos .= "</optgroup>";
 
   if ($lukitse_laji== "") $ulos .= "<optgroup label='".t("Asiakkaiden avainsanat")."'>";

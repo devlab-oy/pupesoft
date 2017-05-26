@@ -186,9 +186,9 @@ elseif ($toiminto == "kalkyyli" and $tee == "varastoon") {
       if (mysql_num_rows($loytyiko_lapsi_res) == 0) {
 
         if ($chk_row["kerroin"] != 1) {
-          $chk_row["tilkpl"] = $chk_row["tilkpl"] * $chk_row["kerroin"];
-          $chk_row["varattu"] = $chk_row["varattu"] * $chk_row["kerroin"];
-          $chk_row["kpl"] = $chk_row["kpl"] * $chk_row["kerroin"];
+          $chk_row["tilkpl"] = round($chk_row["tilkpl"] * $chk_row["kerroin"], 2);
+          $chk_row["varattu"] = round($chk_row["varattu"] * $chk_row["kerroin"], 2);
+          $chk_row["kpl"] = round($chk_row["kpl"] * $chk_row["kerroin"], 2);
         }
 
         list($chk_hinta, , $chk_ale, ) = alehinta_osto($laskurow, $chk_row, $chk_row["varattu"]);

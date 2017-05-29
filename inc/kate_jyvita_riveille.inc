@@ -22,7 +22,15 @@ function laske_tilausriveille_uudet_hinnat($uusi_kate, $tilausnumero = 0, $tilau
   }
 
   $query = "SELECT tilausrivi.*,
-            tuote.kehahin
+                   if (tuote.epakurantti100pvm = '0000-00-00',
+                     if (tuote.epakurantti75pvm = '0000-00-00',
+                       if (tuote.epakurantti50pvm = '0000-00-00',
+                         if (tuote.epakurantti25pvm = '0000-00-00',
+                          tuote.kehahin,
+                         tuote.kehahin * 0.75),
+                       tuote.kehahin * 0.5),
+                     tuote.kehahin * 0.25),
+                   0) AS kehahin
             FROM tilausrivi
             JOIN tuote
             USING (yhtio, tuoteno)

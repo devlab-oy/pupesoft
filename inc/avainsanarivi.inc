@@ -1481,7 +1481,7 @@ if ($avain_sel['STCK_LST_FLTR'] == "SELECTED") {
   }
   elseif ($_selitetark_2) {
     if (empty($trow["selite"]) || $trow["selite"] == "tuotemerkki") {
-      $tuotemerkkiresult = t_avainsana("tuotemerkki");
+      $tuotemerkkiresult = t_avainsana("tuotemerkki", '', 'ORDER BY selite ASC');
 
       $ulos = "<td>";
       $ulos .= "<select name='{$nimi}'>";
@@ -1498,7 +1498,7 @@ if ($avain_sel['STCK_LST_FLTR'] == "SELECTED") {
       $jatko = 0;
     }
     elseif ($trow["selite"] == "try") {
-      $tryresult = t_avainsana("try");
+      $tryresult = t_avainsana("try", '', 'ORDER BY selite ASC');
 
       $ulos = "<td>";
       $ulos .= "<select name='{$nimi}'>";
@@ -1515,7 +1515,7 @@ if ($avain_sel['STCK_LST_FLTR'] == "SELECTED") {
       $jatko = 0;
     }
     elseif ($trow["selite"] == "osasto") {
-      $osastoresult = t_avainsana("osasto");
+      $osastoresult = t_avainsana("osasto", '', 'ORDER BY selite ASC');
 
       $ulos = "<td>";
       $ulos .= "<select name='{$nimi}'>";

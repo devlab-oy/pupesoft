@@ -22879,7 +22879,7 @@ if (!function_exists('lisaa_tuotepaikka')) {
                 hyllynro  = '{$hyllynro}',
                 hyllyvali = '{$hyllyvali}',
                 hyllytaso = '{$hyllytaso}',
-                selite    = trim('".t("{$viesti} lisättiin tuotepaikka")." {$hyllyalue} {$hyllynro} {$hyllyvali} {$hyllytaso}'),
+                selite    = trim('".t("{$viesti} lisättiin tuotepaikka", $yhtiorow['kieli'])." {$hyllyalue} {$hyllynro} {$hyllyvali} {$hyllytaso}'),
                 laatija   = '{$kukarow['kuka']}',
                 laadittu  = now()";
       pupe_query($query);

@@ -1216,12 +1216,15 @@ if (!function_exists('tarjous_rivi_custom')) {
 
     $rivinkorkeus = 12;
 
-    if (trim($row["perhe_kommentti"]) != '') {
+    if (trim($row["perhe_kommentti"]) != '' and $yhtiorow["tarjoustyyppi"] != 1) {
       $pohja = $pdf_tarjous->draw_paragraph($kala+$norm["height"], 150, 60, 480, $row["perhe_kommentti"],  $page_tarjous[$sivu], $norm);
       $kala = $pohja - $rivinkorkeus;
     }
 
-    if ($naytetaanko_tuoteno == '') $pdf_tarjous->draw_text(50, $kala, $row["tuoteno"], $page_tarjous[$sivu], $boldi);
+    if ($naytetaanko_tuoteno == '') {
+      list($ff_string, $ff_font) = pdf_fontfit($row["tuoteno"], 100, $pdf_tarjous, $boldi);
+      $pdf_tarjous->draw_text(50, $kala, $ff_string, $page_tarjous[$sivu], $ff_font);
+    }
 
     list($vv, $kk, $pp) = explode("-", $row["toimaika"]);
 
@@ -1324,6 +1327,11 @@ if (!function_exists('tarjous_rivi_custom')) {
 
         $ed_akey = $akey;
       }
+    }
+
+    if (trim($row["perhe_kommentti"]) != '' and $yhtiorow["tarjoustyyppi"] == 1) {
+      $pohja = $pdf_tarjous->draw_paragraph($kala+$norm["height"], 150, 60, 480, $row["perhe_kommentti"],  $page_tarjous[$sivu], $norm);
+      $kala = $pohja - $rivinkorkeus;
     }
 
     $kala = $kala - 5;

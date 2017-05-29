@@ -1272,8 +1272,8 @@ elseif ($toim == 'SUPER' or $toim == 'SUPERTEHDASPALAUTUKSET' or $toim == "SUPER
                  AND lasku.tila            IN ('L', 'N')
                  AND lasku.alatila        != 'X'
                  AND lasku.clearing       != 'EXTENNAKKO'
-                 #{$_ei_ollenkaan_tyomaarayksia_arraylisa}
-                 #{$_ei_tyomaarays_tyomaarayksia_arraylisa}
+                 {$_ei_ollenkaan_tyomaarayksia_arraylisa}
+                 {$_ei_tyomaarays_tyomaarayksia_arraylisa}
                  {$sumhaku}";
     $sumresult = pupe_query($sumquery);
     $sumrow = mysql_fetch_assoc($sumresult);

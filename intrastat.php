@@ -236,7 +236,7 @@ if ($tee == "tulosta") {
           and lasku.alatila = 'X'
           and lasku.tilaustyyppi != 'A'
           and lasku.kauppatapahtuman_luonne != '999'
-          and not (lasku.vienti = '' and asiakas.laji = 'H')
+          and not (lasku.vienti != '' and asiakas.laji = 'H')
           and lasku.yhtio = '$kukarow[yhtio]'
           and lasku.tapvm >= '$vva-$kka-$ppa'
           and lasku.tapvm <= '$vvl-$kkl-$ppl'
@@ -361,7 +361,7 @@ if ($tee == "tulosta") {
             and lasku.alatila = 'X'
             and lasku.tilaustyyppi = 'A'
             and lasku.kauppatapahtuman_luonne != '999'
-            and not (lasku.vienti = '' and asiakas.laji = 'H')
+            and not (lasku.vienti != '' and asiakas.laji = 'H')
             and lasku.yhtio = '{$kukarow['yhtio']}'
             and lasku.tapvm >= '{$vva}-{$kka}-{$ppa}'
             and lasku.tapvm <= '{$vvl}-{$kkl}-{$ppl}'

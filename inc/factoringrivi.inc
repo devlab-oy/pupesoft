@@ -19,7 +19,7 @@ if ((mysql_field_name($result, $i) == "teksti_fi") or
 if (mysql_field_name($result, $i) == "factoringyhtio") {
 
   $sel = array_fill_keys(array($trow[$i]), " selected") +
-    array_fill_keys(array('NORDEA', 'SAMPO', 'SEB', 'OKO', 'SVEA', 'COLLECTOR', 'AKTIA', 'NORDEA_DD'), '');
+    array_fill_keys(array('NORDEA', 'SAMPO', 'SEB', 'OKO', 'SVEA', 'COLLECTOR', 'AKTIA'), '');
 
   $ulos  = "<td><select name='$nimi'>";
   $ulos .= "<option value='NORDEA' {$sel['NORDEA']}>".t("Nordea Factoring")."</option>";

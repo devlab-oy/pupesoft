@@ -1305,10 +1305,10 @@ while ($tietue = fgets($fd)) {
           }
           else {
             $edi_ulos .= t("Vientitilaus EU -maahan")."\n";
-
-            $arow["vienti"] = "E";
+ 
             if ($arow["laji"] != "H") {
               $arow["alv"] = 0;
+              $arow["vienti"] = "E";
             }
           }
         }

@@ -4739,6 +4739,34 @@ if ($tee == '') {
           $_ei_jt_meilia = 'X';
         }
         elseif ($tapa != "POISJTSTA" and $tapa != "PUUTE" and $tapa != "JT") {
+          // Mikäli tilausriviin liittyy ostorivi, niin poistetaan myös se
+          $query = "SELECT tilausrivilinkki
+                    FROM tilausrivin_lisatiedot
+                    WHERE yhtio = '{$kukarow['yhtio']}'
+                    AND tilausrivitunnus = '{$rivitunnus}'";
+          $result = pupe_query($query);
+          $_ostorivi = mysql_fetch_assoc($result);
+
+          if (mysql_num_rows($result) == 1 and $_ostorivi["tilausrivilinkki"] != 0) {
+            // Tarkistetaan, ettei ostorivi ole jo tuloutettu,
+            // sillä jos rivi on jo tuloutettu sitä ei voida poistaa
+            $query = "SELECT kpl
+                      FROM tilausrivi
+                      WHERE yhtio = '{$kukarow['yhtio']}'
+                      AND tunnus = '{$_ostorivi["tilausrivilinkki"]}'";
+            $ostorivi_tarkistus = mysql_fetch_assoc(pupe_query($query));
+
+            if ($ostorivi_tarkistus["kpl"] == 0) {
+              $query = "DELETE FROM tilausrivi
+                        WHERE tunnus = '{$_ostorivi["tilausrivilinkki"]}'";
+              pupe_query($query);
+
+              echo "<font class='error'>".t("Rivi poistettiin myös ostotilaukselta")."</font><br/><br/>";
+            }
+            else {
+              echo "<font class='error'>".t("Riviin liitetty ostorivi oli jo tuloutettu, ei voitu poistaa")."!</font><br/><br/>";
+            }
+          }
           // Poistetaan muokattava tilausrivi
           $query = "DELETE FROM tilausrivi
                     WHERE tunnus = '$rivitunnus'";

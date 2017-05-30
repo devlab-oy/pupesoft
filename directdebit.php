@@ -29,7 +29,7 @@ if ($tee == 'TARKISTA') {
 $query = "SELECT *
           FROM directdebit
           WHERE yhtio = '{$kukarow["yhtio"]}'
-          and nimitys = '{$directdebityhtio}'
+          and rahalaitos = '{$directdebityhtio}'
           {$directdebit_tarkista_lisa}";
 $directdebit_result = pupe_query($query);
 
@@ -73,9 +73,9 @@ if ($tee == 'TOIMINNOT') {
 
   $query = "SELECT *
             FROM directdebit
-            WHERE yhtio  = '$kukarow[yhtio]'
-            and nimitys  = '$directdebityhtio'
-            and tunnus   = '$directdebit_id'";
+            WHERE yhtio = '$kukarow[yhtio]'
+            and rahalaitos = '$directdebityhtio'
+            and tunnus = '$directdebit_id'";
   $fres = pupe_query($query);
   $frow = mysql_fetch_assoc($fres);
 
@@ -150,9 +150,9 @@ if ($tee == 'TOIMINNOT') {
 
   $query = "SELECT *
             FROM directdebit
-            WHERE yhtio  = '$kukarow[yhtio]'
-            and nimitys  = '$directdebityhtio'
-            and tunnus   = '$directdebit_id'";
+            WHERE yhtio = '$kukarow[yhtio]'
+            and rahalaitos = '$directdebityhtio'
+            and tunnus = '$directdebit_id'";
   $fres = pupe_query($query);
   $frow = mysql_fetch_assoc($fres);
 
@@ -172,9 +172,9 @@ if ($tee == 'TULOSTA') {
 
   $query = "SELECT *
             FROM directdebit
-            WHERE yhtio  = '$kukarow[yhtio]'
-            and nimitys  = '$directdebityhtio'
-            and tunnus   = '$directdebit_id'";
+            WHERE yhtio = '$kukarow[yhtio]'
+            and rahalaitos = '$directdebityhtio'
+            and tunnus = '$directdebit_id'";
   $fres = pupe_query($query);
   $frow = mysql_fetch_assoc($fres);
 
@@ -302,31 +302,28 @@ if ($tee == 'TULOSTA') {
       $asires = pupe_query($query);
       $asirow = mysql_fetch_assoc($asires);
 
-      #if ($asirow["asiakasnro"] == 0 or !is_numeric($asirow["asiakasnro"]) or strlen($asirow["asiakasnro"]) > 6) {
-      #  $laskuvirh++;
-      #}
+      $query  = "SELECT *
+                 FROM directdebit_asiakas
+                 WHERE yhtio = '$kukarow[yhtio]'
+                 and liitostunnus = '$asirow[tunnus]'
+                 and directdebit_id = '$frow[tunnus]'";
+      $dd_asires = pupe_query($query);
+      $dd_asirow = mysql_fetch_assoc($dd_asires);
+
+      if (empty($dd_asirow["valtuutus_id"])) {
+        $laskuvirh++;
+      }
 
       echo "<tr>";
 
       $laskukpl++;
       $laskusum += $laskurow["summa"];
 
-      if ($laskurow["tyyppi"] == "01") {
-        $vlaskukpl++;
-        $vlaskusum += $laskurow["summa"];
+      echo "<td>Veloituslasku</td><td>$laskurow[laskunro]</td><td>$laskurow[nimi]</td><td align='right'>".sprintf('%.2f', $laskurow["summa"])."</td><td>$laskurow[valkoodi]</td>";
 
-        echo "<td>Veloituslasku</td><td>$laskurow[laskunro]</td><td>$laskurow[nimi]</td><td align='right'>".sprintf('%.2f', $laskurow["summa"]/100)."</td><td>$laskurow[valkoodi]</td>";
+      if (empty($dd_asirow["valtuutus_id"])) {
+        echo "<td><font class='error'>VIRHE: Valtuutus_id: {$dd_asirow["Valtuutus_id"]} ei kelpaa!</font> <a href='".$palvelin2."yllapito.php?ojarj=&toim=asiakas&tunnus=$laskurow[liitostunnus]'>Muuta asiakkaan tietoja</a></td>";
       }
-      if ($laskurow["tyyppi"] == "02") {
-        $hlaskukpl++;
-        $hlaskusum += $laskurow["summa"];
-
-        echo "<td>Hyvityslasku:</td><td>$laskurow[laskunro]</td><td>$laskurow[nimi]</td><td align='right'>".sprintf('%.2f', $laskurow["summa"]/100)."</td><td>$laskurow[valkoodi]</td>";
-      }
-
-      #if ($asirow["asiakasnro"] == 0 or !is_numeric($asirow["asiakasnro"]) or strlen($asirow["asiakasnro"]) > 6) {
-      #  echo "<td><font class='error'>VIRHE: Asiakasnumero: $asirow[asiakasnro] ei kelpaa!</font> <a href='".$palvelin2."yllapito.php?ojarj=&toim=asiakas&tunnus=$laskurow[liitostunnus]'>Muuta asiakkaan tietoja</a></td>";
-      #}
 
       echo "</tr>";
 
@@ -364,7 +361,7 @@ if ($tee == 'TULOSTA') {
       $Id = $CdtrSchmeId->addChild('Id');
       $PrvtId = $Id->addChild('PrvtId');
       $Othr = $PrvtId->addChild('Othr');
-      $Othr->addChild('Id', $y_vatnumero);
+      $Othr->addChild('Id', $frow['suoraveloitusmandaatti']);
       $SchmeNm = $Othr->addChild('SchmeNm');
       $SchmeNm->addChild('Prtry', 'SEPA');
 
@@ -379,21 +376,21 @@ if ($tee == 'TULOSTA') {
       $DrctDbtTx = $DrctDbtTxInf->addChild('DrctDbtTx');
       $MndtRltdInf = $DrctDbtTx->addChild('MndtRltdInf');
 
-      $MndtRltdInf->addChild('MndtId', '100000001');
-      $MndtRltdInf->addChild('DtOfSgntr', '2013-06-20');
+      $MndtRltdInf->addChild('MndtId', $dd_asirow['valtuutus_id']);
+      $MndtRltdInf->addChild('DtOfSgntr', $dd_asirow['valtuutus_pvm']);
       $MndtRltdInf->addChild('AmdmntInd', 'false');
       $MndtRltdInf->addChild('ElctrncSgntr', '');
 
       $DbtrAgt = $DrctDbtTxInf->addChild('DbtrAgt');
       $FinInstnId = $DbtrAgt->addChild('FinInstnId');
-      $FinInstnId->addChild('BIC', 'GENODE51KOB');
+      $FinInstnId->addChild('BIC', $dd_asirow['maksajan_swift']);
 
       $Dbtr = $DrctDbtTxInf->addChild('Dbtr');
       $Dbtr->addChild('Nm', $laskurow["nimi"]);
 
       $DbtrAcct = $DrctDbtTxInf->addChild('DbtrAcct');
       $Id = $DbtrAcct->addChild('Id');
-      $Id->addChild('IBAN', 'DE06570900007112345678');
+      $Id->addChild('IBAN', $dd_asirow['maksajan_iban']);
 
       $RmtInf = $DrctDbtTxInf->addChild('RmtInf');
 
@@ -450,9 +447,7 @@ if ($tee == 'TULOSTA') {
 
       echo "<tr><td class='back'><br></td></tr>";
 
-      echo "<tr><td class='back' colspan='2'></td><th>Yhteensä $vlaskukpl veloituslaskua</th><td align='right'>".sprintf('%.2f', $vlaskusum/100)."</td><td>$laskurow[valkoodi]</td></tr>";
-      echo "<tr><td class='back' colspan='2'></td><th>Yhteensä $hlaskukpl hyvityslaskua</th><td align='right'> ".sprintf('%.2f', $hlaskusum/100)."</td><td>$laskurow[valkoodi]</td></tr>";
-      echo "<tr><td class='back' colspan='2'></td><th>Yhteensä</th><td align='right'> ".sprintf('%.2f', ($vlaskusum+($hlaskusum*-1))/100)."</td><td>$laskurow[valkoodi]</td></tr>";
+      echo "<tr><td class='back' colspan='2'></td><th>Yhteensä $laskukpl veloituslaskua</th><td align='right'>".sprintf('%.2f', $laskusum)."</td><td>$laskurow[valkoodi]</td></tr>";
 
       echo "</table>";
       echo "<br><br>";

@@ -262,6 +262,15 @@ if ($tee != "" and isset($painoinnappia)) {
                   'XXX' saldo ";
   }
 
+  $_orderby = "";
+
+  if ($listaustyyppi == "kappaleet3") {
+    $_orderby = "tuoteno";
+  }
+  else {
+    $_orderby = "osasto, try, malli, tuoteno";
+  }
+
   $query = "SELECT
             tuote.tuoteno,
             tuote.nimitys,
@@ -286,7 +295,7 @@ if ($tee != "" and isset($painoinnappia)) {
             {$saldolisa}
             GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12
             {$unionlisa}
-            ORDER BY osasto, try, malli, tuoteno";
+            ORDER BY {$_orderby}";
   $eresult = pupe_query($query);
   $total_rows = mysql_num_rows($eresult);
 

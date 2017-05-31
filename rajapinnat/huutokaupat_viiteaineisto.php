@@ -47,6 +47,10 @@ function huutokaupat_receive($date) {
 $datetime_checkpoint = cron_aikaleima("HUUTOKAUPAT_CRON");
 $today = date("Y-m-d");
 
+if ($datetime_checkpoint == "") {
+  $datetime_checkpoint = date("Y-m-d", strtotime("-1 days", strtotime($today)));
+}
+
 if ($huutokaupat_url == "") {
   //error
 }
@@ -70,8 +74,6 @@ $verkkolaskut_in = empty($verkkolaskut_in) ? "/home/verkkolaskut" : rtrim($verkk
 if (!is_dir($verkkolaskut_in) or !is_writable($verkkolaskut_in)) exit;
 
 while ($datetime_checkpoint < $today) {
-
-  $datetime_checkpoint = date("Y-m-d", strtotime("+1 days", strtotime($datetime_checkpoint)));
 
   if ($response = huutokaupat_receive($datetime_checkpoint) != "") {
 
@@ -117,7 +119,9 @@ while ($datetime_checkpoint < $today) {
     rename($filepath, $verkkolaskut_in."/{$file}");
   }
 
-  // Tallennetaan aikaleima
-  $datetime_checkpoint_uusi = date('Y-m-d');
-  cron_aikaleima("HUUTOKAUPAT_CRON", $datetime_checkpoint_uusi);
+  // haetaan tarvittaessa seuraavan päivän aineisto
+  $datetime_checkpoint = date("Y-m-d", strtotime("+1 days", strtotime($datetime_checkpoint)));
 }
+
+// Tallennetaan aikaleima seuraavaa hakua varten
+cron_aikaleima("HUUTOKAUPAT_CRON", $datetime_checkpoint);

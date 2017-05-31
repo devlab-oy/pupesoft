@@ -63,6 +63,12 @@ if ($huutokaupat_payername == '') {
   //error
 }
 
+// Otetaan default, jos ei olla yliajettu salasanat.php:ss‰
+$verkkolaskut_in = empty($verkkolaskut_in) ? "/home/verkkolaskut" : rtrim($verkkolaskut_in, "/");
+
+// VIRHE: verkkolasku-kansio on v‰‰rin m‰‰ritelty!
+if (!is_dir($verkkolaskut_in) or !is_writable($verkkolaskut_in)) exit;
+
 while ($datetime_checkpoint < $today) {
 
   $datetime_checkpoint = date("Y-m-d", strtotime("+1 days", strtotime($datetime_checkpoint)));
@@ -71,7 +77,8 @@ while ($datetime_checkpoint < $today) {
 
     // Tallennetaan rivit tiedostoon
     $nimi = md5(uniqid(mt_rand(), true));
-    $filepath = "/tmp/viiteaineisto_{$nimi}_{$response->date}.txt";
+    $file = "{$nimi}_{$response->date}.txt";
+    $filepath = "/tmp/{$file}";
     $fd = fopen($filepath, "w") or die("Tiedostoa ei voitu luoda!");
 
     $maksupvm = $response->date;
@@ -106,6 +113,8 @@ while ($datetime_checkpoint < $today) {
 
     fwrite($fd, $ulos);
     fclose($fd);
+
+    rename($filepath, $verkkolaskut_in."/{$file}");
   }
 
   // Tallennetaan aikaleima

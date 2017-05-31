@@ -73,7 +73,7 @@ while ($datetime_checkpoint < $today) {
 
   $datetime_checkpoint = date("Y-m-d", strtotime("+1 days", strtotime($datetime_checkpoint)));
 
-  while (($response = huutokaupat_receive($datetime_checkpoint)) != "") {
+  if ($response = huutokaupat_receive($datetime_checkpoint) != "") {
 
     // Tallennetaan rivit tiedostoon
     $nimi = md5(uniqid(mt_rand(), true));

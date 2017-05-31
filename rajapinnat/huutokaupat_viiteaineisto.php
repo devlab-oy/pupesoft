@@ -2,7 +2,7 @@
 <?php
 
 // Kutsutaanko CLI:stä
-if (php_sapi_name() == 'cli') {
+if (php_sapi_name() != 'cli') {
   die ("Tätä scriptiä voi ajaa vain komentoriviltä!");
 }
 
@@ -11,6 +11,15 @@ $pupesoft_polku = dirname(dirname(__FILE__));
 // otetaan tietokanta connect
 require $pupesoft_polku."/inc/connect.inc";
 require $pupesoft_polku."/inc/functions.inc";
+
+if (!isset($argv[1]) or $argv[1] == '') {
+  die("Yhtiö on annettava!!");
+}
+
+// Yhtiö
+$yhtio = mysql_real_escape_string($argv[1]);
+$yhtiorow = hae_yhtion_parametrit($yhtio);
+$kukarow  = hae_kukarow('admin', $yhtiorow['yhtio']);
 
 // Logitetaan ajo
 cron_log();
@@ -44,7 +53,7 @@ function huutokaupat_receive($date) {
 }
 
 // Haetaan aika jolloin tämä skripti on viimeksi ajettu
-$datetime_checkpoint = cron_aikaleima("HUUTOKAUPAT_CRON");
+$datetime_checkpoint = cron_aikaleima("HK_CRON");
 $today = date("Y-m-d");
 
 if ($datetime_checkpoint == "") {
@@ -75,7 +84,9 @@ if (!is_dir($verkkolaskut_in) or !is_writable($verkkolaskut_in)) exit;
 
 while ($datetime_checkpoint < $today) {
 
-  if ($response = huutokaupat_receive($datetime_checkpoint) != "") {
+  $response = huutokaupat_receive($datetime_checkpoint);
+
+  if ($response != "") {
 
     // Tallennetaan rivit tiedostoon
     $nimi = md5(uniqid(mt_rand(), true));
@@ -124,4 +135,4 @@ while ($datetime_checkpoint < $today) {
 }
 
 // Tallennetaan aikaleima seuraavaa hakua varten
-cron_aikaleima("HUUTOKAUPAT_CRON", $datetime_checkpoint);
+cron_aikaleima("HK_CRON", $datetime_checkpoint);

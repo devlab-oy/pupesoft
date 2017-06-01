@@ -304,6 +304,17 @@ if (!function_exists("avainsanatarkista")) {
 
     if (mysql_field_name($result, $i) == 'tunnus') {
 
+      $st2lisa = "selitetark_2  = '$tem_selitetark_2'";
+      $st3lisa = "selitetark_3  = '$tem_selitetark_3'";
+
+      if (empty($tem_selitetark_2)) {
+        $st2lisa .= " OR selitetark_2 IS NULL";
+      }
+
+      if (empty($tem_selitetark_3)) {
+        $st3lisa .= " OR selitetark_3 IS NULL";
+      }
+
       $query = "SELECT kieli, selite, laji
                 FROM avainsana
                 WHERE yhtio       = '$kukarow[yhtio]'
@@ -312,8 +323,8 @@ if (!function_exists("avainsanatarkista")) {
                 AND nakyvyys      = '$tem_nakyvyys'
                 AND selite        = '$tem_selite'
                 AND selitetark    = '$tem_selitetark'
-                AND selitetark_2  = '$tem_selitetark_2'
-                AND selitetark_3  = '$tem_selitetark_3'
+                AND ({$st2lisa})
+                AND ({$st3lisa})
                 and tunnus       != '$tunnus'";
       $results = pupe_query($query);
 

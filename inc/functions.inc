@@ -31299,7 +31299,7 @@ if (!function_exists("tallenna_tiliote_viite")) {
           // useassa osassa
           if (in_array($xtyyppi, array(2, 3))) {
             // Group concatissa tulee kaikki t‰n p‰iv‰n tiliotedata
-            $query = "SELECT group_concat(tieto SEPARATOR '') AS kantaaineisto
+            $query = "SELECT group_concat(tieto SEPARATOR '') AS kanta_aineisto
                       FROM tiliotedata
                       WHERE tilino = '$tilino'
                       AND alku     = '$alkupvm'
@@ -31313,7 +31313,7 @@ if (!function_exists("tallenna_tiliote_viite")) {
             case 2:
               // Otetaan kaikki failissa olevat LMP:t arrayseen. (Nollaindeksiss‰ tyhj‰‰...)
               $distinct_aineistot = explode("T03", str_replace($serc, $repl, $kokoaineisto));
-              $_to_aineitso = trim($tiliotedatarow["kantaaineisto"]);
+              $_to_aineitso = trim($tiliotedatarow["kanta_aineisto"]);
 
               if ($_to_aineitso != "") {
                 for ($xlmpmaa_i = $xlmpmaa; $xlmpmaa_i < count($distinct_aineistot); $xlmpmaa_i++) {

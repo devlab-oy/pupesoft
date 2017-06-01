@@ -136,7 +136,7 @@ while ($datetime_checkpoint < $today) {
     rename($filepath, $tiliotteet_in."/{$file}");
 
     // Laukaistaan itse sisäänajo
-    exec("bash {$pupe_root_polku}/tiliote.sh {$tiliotteet_in} {$tiliotteet_ok} > /dev/null 2>/dev/null &");
+    exec("/bin/bash {$pupe_root_polku}/tiliote.sh {$tiliotteet_in} {$tiliotteet_ok} > /dev/null 2>/dev/null &");
   }
 
   // haetaan tarvittaessa seuraavan päivän aineisto

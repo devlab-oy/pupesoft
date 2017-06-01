@@ -21,6 +21,11 @@ $yhtio = mysql_real_escape_string($argv[1]);
 $yhtiorow = hae_yhtion_parametrit($yhtio);
 $kukarow  = hae_kukarow('admin', $yhtiorow['yhtio']);
 
+if (!isset($kukarow)) {
+  echo "VIRHE: admin-k‰ytt‰j‰‰ ei lˆydy!\n";
+  exit;
+}
+
 // Logitetaan ajo
 cron_log();
 
@@ -61,28 +66,28 @@ if ($datetime_checkpoint == "") {
 }
 
 if ($huutokaupat_url == "") {
-  //error
+  exit;
 }
 if ($huutokaupat_company == "") {
-  //error
+  exit;
 }
 if ($huutokaupat_secret == "") {
-  //error
+  exit;
 }
 if ($huutokaupat_tilino == '') {
-  //error
+  exit;
 }
 if ($huutokaupat_payername == '') {
-  //error
+  exit;
 }
 
 // Otetaan default, jos ei olla yliajettu salasanat.php:ss‰
-$verkkolaskut_in = empty($verkkolaskut_in) ? "/home/verkkolaskut" : rtrim($verkkolaskut_in, "/");
-$verkkolaskut_ok = empty($verkkolaskut_ok) ? "/home/verkkolaskut/ok" : rtrim($verkkolaskut_ok, "/");
+$tiliotteet_in = empty($tiliotteet_in) ? "/home/tiliotteet" : rtrim($tiliotteet_in, "/");
+$tiliotteet_ok = empty($tiliotteet_ok) ? "/home/tiliotteet/ok" : rtrim($tiliotteet_ok, "/");
 
 // VIRHE: verkkolasku-kansio on v‰‰rin m‰‰ritelty!
-if (!is_dir($verkkolaskut_in) or !is_writable($verkkolaskut_in)) exit;
-if (!is_dir($verkkolaskut_ok) or !is_writable($verkkolaskut_ok)) exit;
+if (!is_dir($tiliotteet_in) or !is_writable($tiliotteet_in)) exit;
+if (!is_dir($tiliotteet_ok) or !is_writable($tiliotteet_ok)) exit;
 
 while ($datetime_checkpoint < $today) {
 
@@ -129,10 +134,10 @@ while ($datetime_checkpoint < $today) {
     fwrite($fd, $ulos);
     fclose($fd);
 
-    rename($filepath, $verkkolaskut_in."/{$file}");
+    rename($filepath, $tiliotteet_in."/{$file}");
 
     // Laukaistaan itse sis‰‰najo
-    exec("{$pupesoft_polku}/tiliote.sh {$verkkolaskut_in} {$verkkolaskut_ok} > /dev/null 2>/dev/null &");
+    exec("{$pupesoft_polku}/tiliote.sh {$tiliotteet_in} {$tiliotteet_ok} > /dev/null 2>/dev/null &");
   }
 
   // haetaan tarvittaessa seuraavan p‰iv‰n aineisto

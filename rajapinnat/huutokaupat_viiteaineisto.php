@@ -6,11 +6,11 @@ if (php_sapi_name() != 'cli') {
   die ("Tätä scriptiä voi ajaa vain komentoriviltä!");
 }
 
-$pupesoft_polku = dirname(dirname(__FILE__));
+$pupe_root_polku = dirname(dirname(__FILE__));
 
 // otetaan tietokanta connect
-require $pupesoft_polku."/inc/connect.inc";
-require $pupesoft_polku."/inc/functions.inc";
+require $pupe_root_polku."/inc/connect.inc";
+require $pupe_root_polku."/inc/functions.inc";
 
 if (!isset($argv[1]) or $argv[1] == '') {
   die("Yhtiö on annettava!!");
@@ -103,12 +103,11 @@ while ($datetime_checkpoint < $today) {
 
     $maksupvm = $response->date;
     $maksupvm = date("ymj", strtotime($maksupvm));
-    $luontiaika = date("Hi");
 
     // tietue 0
     $ulos  = sprintf('%-1.1s', 0);
     $ulos .= sprintf('%06.6s', $maksupvm);
-    $ulos .= sprintf('%04.4s', $luontiaika);
+    $ulos .= sprintf('%04.4s', "0000");
     $ulos .= sprintf('%-2.2s', 5);
     $ulos .= sprintf('%-9.9s', "");
     $ulos .= sprintf('%-1.1s', 1);
@@ -137,7 +136,7 @@ while ($datetime_checkpoint < $today) {
     rename($filepath, $tiliotteet_in."/{$file}");
 
     // Laukaistaan itse sisäänajo
-    exec("{$pupesoft_polku}/tiliote.sh {$tiliotteet_in} {$tiliotteet_ok} > /dev/null 2>/dev/null &");
+    exec("bash {$pupe_root_polku}/tiliote.sh {$tiliotteet_in} {$tiliotteet_ok} > /dev/null 2>/dev/null &");
   }
 
   // haetaan tarvittaessa seuraavan päivän aineisto

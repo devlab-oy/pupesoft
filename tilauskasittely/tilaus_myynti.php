@@ -4739,37 +4739,40 @@ if ($tee == '') {
           $_ei_jt_meilia = 'X';
         }
         elseif ($tapa != "POISJTSTA" and $tapa != "PUUTE" and $tapa != "JT") {
-          // Mikäli tilausriviin liittyy ostorivi, niin poistetaan myös se
-          $query = "SELECT tilausrivilinkki
-                    FROM tilausrivin_lisatiedot
-                    WHERE yhtio = '{$kukarow['yhtio']}'
-                    AND tilausrivitunnus = '{$rivitunnus}'";
-          $result = pupe_query($query);
-          $_myyntirivi = mysql_fetch_assoc($result);
+          if ($tapa == "POISTA") {
+            // Mikäli tilausriviin liittyy ostorivi, niin poistetaan myös se
+            $query = "SELECT tilausrivilinkki
+                      FROM tilausrivin_lisatiedot
+                      WHERE yhtio = '{$kukarow['yhtio']}'
+                      AND tilausrivitunnus = '{$rivitunnus}'";
+            $result = pupe_query($query);
+            $_myyntirivi = mysql_fetch_assoc($result);
 
-          if (mysql_num_rows($result) == 1 and $_myyntirivi["tilausrivilinkki"] != 0) {
-            // Tarkistetaan, että ostotilaus on vielä kesken,
-            // koska jos ei ole kesken on jo lähetetty eteenpäin
-            $query = "SELECT lasku.tila,
-                      lasku.alatila,
-                      lasku.tunnus
-                      FROM tilausrivi
-                        JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio AND lasku.tunnus = tilausrivi.otunnus)
-                      WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-                      AND tilausrivi.tunnus = '{$_myyntirivi["tilausrivilinkki"]}'";
-            $ostotilaus_tarkistus = mysql_fetch_assoc(pupe_query($query));
+            if (mysql_num_rows($result) == 1 and $_myyntirivi["tilausrivilinkki"] != 0) {
+              // Tarkistetaan, että ostotilaus on vielä kesken,
+              // koska jos ei ole kesken on jo lähetetty eteenpäin
+              $query = "SELECT lasku.tila,
+                        lasku.alatila,
+                        lasku.tunnus
+                        FROM tilausrivi
+                          JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio AND lasku.tunnus = tilausrivi.otunnus)
+                        WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+                        AND tilausrivi.tunnus = '{$_myyntirivi["tilausrivilinkki"]}'";
+              $ostotilaus_tarkistus = mysql_fetch_assoc(pupe_query($query));
 
-            if ($ostotilaus_tarkistus["tila"] == "O" and $ostotilaus_tarkistus["alatila"] == "") {
-              $query = "DELETE FROM tilausrivi
-                        WHERE tunnus = '{$_myyntirivi["tilausrivilinkki"]}'";
-              pupe_query($query);
+              if ($ostotilaus_tarkistus["tila"] == "O" and $ostotilaus_tarkistus["alatila"] == "") {
+                $query = "DELETE FROM tilausrivi
+                          WHERE tunnus = '{$_myyntirivi["tilausrivilinkki"]}'";
+                pupe_query($query);
 
-              echo "<font class='error'>".t("Rivi poistettiin myös ostotilaukselta")."</font><br/><br/>";
-            }
-            else {
-              echo "<font class='error'>".t("Ostotilaus ei ollut enää kesken tilassa, ei voitu poistaa riviä ostolta ({$ostotilaus_tarkistus["tunnus"]})")."!</font><br/><br/>";
+                echo "<font class='error'>".t("Rivi poistettiin myös ostotilaukselta")."</font><br/><br/>";
+              }
+              else {
+                echo "<font class='error'>".t("Ostotilaus ei ollut enää kesken tilassa, ei voitu poistaa riviä ostolta ({$ostotilaus_tarkistus["tunnus"]})")."!</font><br/><br/>";
+              }
             }
           }
+
           // Poistetaan muokattava tilausrivi
           $query = "DELETE FROM tilausrivi
                     WHERE tunnus = '$rivitunnus'";

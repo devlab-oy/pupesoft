@@ -36,7 +36,7 @@ function huutokaupat_receive($date) {
   curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, FALSE);
   curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
   curl_setopt($ch, CURLOPT_HEADER, FALSE);
-  curl_setopt($ch, CURLOPT_USERAGENT, ìPupesoftî);
+  curl_setopt($ch, CURLOPT_USERAGENT, "Pupesoft");
 
   $tapahtumat = curl_exec($ch);
 
@@ -78,9 +78,11 @@ if ($huutokaupat_payername == '') {
 
 // Otetaan default, jos ei olla yliajettu salasanat.php:ss‰
 $verkkolaskut_in = empty($verkkolaskut_in) ? "/home/verkkolaskut" : rtrim($verkkolaskut_in, "/");
+$verkkolaskut_ok = empty($verkkolaskut_ok) ? "/home/verkkolaskut/ok" : rtrim($verkkolaskut_ok, "/");
 
 // VIRHE: verkkolasku-kansio on v‰‰rin m‰‰ritelty!
 if (!is_dir($verkkolaskut_in) or !is_writable($verkkolaskut_in)) exit;
+if (!is_dir($verkkolaskut_ok) or !is_writable($verkkolaskut_ok)) exit;
 
 while ($datetime_checkpoint < $today) {
 
@@ -96,7 +98,7 @@ while ($datetime_checkpoint < $today) {
 
     $maksupvm = $response->date;
     $maksupvm = date("ymj", strtotime($maksupvm));
-    $luontiaika = date("hs", strtotime());
+    $luontiaika = date("Hi");
 
     // tietue 0
     $ulos  = sprintf('%-1.1s', 0);
@@ -128,6 +130,9 @@ while ($datetime_checkpoint < $today) {
     fclose($fd);
 
     rename($filepath, $verkkolaskut_in."/{$file}");
+
+    // Laukaistaan itse sis‰‰najo
+    exec("{$pupesoft_polku}/tiliote.sh {$verkkolaskut_in} {$verkkolaskut_ok} > /dev/null 2>/dev/null &");
   }
 
   // haetaan tarvittaessa seuraavan p‰iv‰n aineisto

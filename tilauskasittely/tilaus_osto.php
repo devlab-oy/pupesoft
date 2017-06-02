@@ -662,7 +662,8 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
     $query = "SELECT *
               FROM tilausrivi
               WHERE yhtio = '{$kukarow["yhtio"]}'
-              AND otunnus = {$tilausnumero}";
+              AND otunnus = {$tilausnumero}
+              AND tyyppi = 'O'";
     $rivi_result = pupe_query($query);
 
     while ($tilausrivi = mysql_fetch_assoc($rivi_result)) {
@@ -703,7 +704,7 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
         // Lis‰t‰‰n vastaava rivi valitulle myyntitilaukselle
         require 'lisaarivi.inc';
 
-        echo "<font class='error'> Tuote {$tilausrivi["tuoteno"]} lis‰tty myyntitilaukselle {$myyntitilaus_otsikot_string} </font> <br><br>";
+        echo "<font class='error'>".t("Tuote {$tilausrivi["tuoteno"]} lis‰tty myyntitilaukselle {$myyntitilaus_otsikot_string}")." </font> <br><br>";
 
         // Palautetaan oston tiedot sinne minne ne kuuluu
         // ja nollataan k‰ytetyt muuttujat
@@ -2275,7 +2276,7 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
         if (count($myyntitilaus_otsikot) > 1) {
 
           echo "<td>";
-          echo "Myyntitilausnumero: ";
+          echo t("Myyntitilausnumero").": ";
           echo "<select name='myyntitilausnumero_valinta' onchange='submit();'>";
 
           foreach ($myyntitilaus_otsikot as $_myyntitilausnumeroavain => $_myyntitilausnumero) {
@@ -2301,7 +2302,7 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
         else {
           $myyntitilaus_otsikot_string = implode("", $myyntitilaus_otsikot);
           echo "<td>";
-          echo "Myyntitilausnumero: {$myyntitilaus_otsikot_string}";
+          echo t("Myyntitilausnumero").": {$myyntitilaus_otsikot_string}";
           echo "</td>";
         }
 

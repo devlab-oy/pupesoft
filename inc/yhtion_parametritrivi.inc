@@ -3229,7 +3229,7 @@ if ($fieldname == "poistetut_lisays") {
   $jatko = 0;
 }
 
-if ($fieldname == "livetuotehaku_hakutapa") {
+if ($fieldname == "livetuotehaku_hakutapa" or $fieldname == "livetuotehaku_hakutapa_extranet") {
 
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
 
@@ -3245,6 +3245,7 @@ if ($fieldname == "livetuotehaku_hakutapa") {
   $ulos .= "<option value = 'K' {$sel['K']}>".t("Livetuotehaku hakee tuotenumeron, nimityksen ja EAN-koodin millä tahansa osalla. Tehdään myös saldokysely. (Todella hidas tapa)")."</option>";
   $ulos .= "<option value = 'L' {$sel['L']}>".t("Livetuotehaku hakee tuotenumeron, nimityksen, lempinimen ja EAN-koodin millä tahansa osalla. (Hidas tapa)")."</option>";
   $ulos .= "<option value = 'M' {$sel['M']}>".t("Livetuotehaku hakee tuotenumeron, nimityksen, lempinimen ja EAN-koodin millä tahansa osalla. Tehdään myös saldokysely. (Todella hidas tapa)")."</option>";
+  $ulos .= "<option value = 'N' {$sel['N']}>".t("Livetuotehaku hakee tuotenumeron ja nimityksen millä tahansa osalla. Näytetään saatavuus kyllä/ei. (Todella hidas tapa)")."</option>";
 
   $ulos .= "</select></td>";
 

@@ -3629,9 +3629,11 @@ if ($tila == "" and !isset($jatka)) {
 
     echo "<tr class='otsik_laaja_kommentit' $hiddenlisa2><td>".t("Puhelin toimitukseen").":</td><td><input type='text' size='43' name='tpuh' value='$srow[toim_puh]'</td><td>".t("rahtikirja")." + ".t("osoitelappu")."</td></tr>";
 
-    if ($yhtiorow["vahvistusviesti_asiakkaalle"] or !empty($kukarow["kassamyyja"])) {
-      echo "<tr class='otsik_laaja_kommentit' $hiddenlisa2><td>".t("Email toimitukseen").":</td><td><input type='text' size='43' name='temail' value='$srow[toim_email]'</td><td></td></tr>";
+    if ($yhtiorow["vahvistusviesti_asiakkaalle"] == "Y") {
+      $_vahvistusviesti_asiakkaalle = " + ".t("vahvistusviesti asiakkaalle");
     }
+
+    echo "<tr class='otsik_laaja_kommentit' $hiddenlisa2><td>".t("Email toimitukseen").":</td><td><input type='text' size='43' name='temail' value='$srow[toim_email]'</td><td>".t("toimitusvahvistus").$_vahvistusviesti_asiakkaalle."</td></tr>";
 
     echo "<tr class='otsik_laaja_kommentit' $hiddenlisa2><td>".t("Kommentti")." 1:</td><td><textarea name='comments'   rows='2' cols='40'>$srow[comments]</textarea></td><td>".t("tilausvahvistus")." + ".t("keräyslista")." + ".t("valmistus")." + ".t("työmääräys")." + ".t("lähete")." + ".t("tarjous")."</td></tr>";
 
@@ -4011,6 +4013,10 @@ if (isset($jatka)) {
     //Kun tehdään uusi tilaus niin nollataan aina tilat ja alatilat
     $alatila = "";
     $ylatila = "";
+
+    if ($toim == "TYOMAARAYS") {
+      $luontitapa = "tyomaarays";
+    }
   }
   else {
     // Jos ollaan piilottamassa tarjouksen toimitusaikaa niin pitää nollata nämä tiedot myös tilausriveiltä
@@ -4122,8 +4128,11 @@ if (isset($jatka)) {
     $kassalipas = $kukarow["kassamyyja"];
   }
 
+  // Etukäteen maksetut tilaukset, ei sörkitä maksuehtoa enää
+  $_etukateen_maksettu = ($laskurow['mapvm'] != '0000-00-00' and $laskurow['chn'] == '999');
+
   // jos kyseessä oli käsin syötetty eräpäivä ja maksuehto on väärin laitetaan oikea maksuehto... hakee järjestyksessä ekan
-  if ($erpcm_kasin == "KYLLA" and $meapurow["erapvmkasin"] == "" and $meapurow["jaksotettu"] == "") {
+  if ($erpcm_kasin == "KYLLA" and $meapurow["erapvmkasin"] == "" and $meapurow["jaksotettu"] == "" and !$_etukateen_maksettu) {
 
     $erpquery = "SELECT * from maksuehto where yhtio = '$kukarow[yhtio]' and erapvmkasin != '' and kaytossa = '' order by tunnus limit 1";
     $erpres = pupe_query($erpquery);
@@ -4838,8 +4847,15 @@ if (isset($jatka)) {
                          sopimus_numero           = '$sopimus_numero', ";
       }
 
+      $luontitapa_arraylisa = "";
+
+      if (isset($luontitapa)) {
+        $luontitapa_arraylisa = "luontitapa = '{$luontitapa}',";
+      }
+
       $query3 .= "laskun_lisatiedot SET
             yhtio            = '$kukarow[yhtio]',
+            {$luontitapa_arraylisa}
             sopimus_kk          = '$sopimus_kk',
             sopimus_pp          = '$sopimus_pp',
             yllapito_kuukausihinnoittelu = '{$kuukausihinnoittelu}',

@@ -133,6 +133,10 @@ class Unifaun {
                 and tunnus  = '{$this->postirow['liitostunnus']}'";
       $asres = pupe_query($query);
       $this->asiakasrow = mysql_fetch_assoc($asres);
+
+      if (!empty($this->postirow['toim_email'])) {
+        $this->asiakasrow['email'] = $this->postirow['toim_email'];
+      }
     }
   }
 
@@ -1197,8 +1201,17 @@ class Unifaun {
           $uni_par_val->addAttribute('n', "count");
         }
 
+        // VAK tiedot annetaan aina lähetyskohtaisesti. Jos on useampi kolli, niin tiedot menee per kolli lähetykseen,
+        // joten painot pitää jakaa kollien määrällä, jottei painot moninkertaistu
+        if (isset($pakkaustiedot['rahtikirjan_kollit_yhteensa']) and $pakkaustiedot['rahtikirjan_kollit_yhteensa'] > 1) {
+          $_jakaja = $pakkaustiedot['rahtikirjan_kollit_yhteensa'];
+        }
+        else {
+          $_jakaja = 1;
+        }
+
         if (isset($vak['kpl_paino']) and $vak['kpl_paino'] != '') {
-          $uni_par_val = $uni_article->addChild('val', utf8_encode($vak['kpl_paino'])); // UN-number for ADR. Supplied as a 4 digit code.
+          $uni_par_val = $uni_article->addChild('val', utf8_encode($vak['kpl_paino'] / $_jakaja)); // UN-number for ADR. Supplied as a 4 digit code.
           $uni_par_val->addAttribute('n', "weight");
         }
 
@@ -1254,6 +1267,7 @@ class Unifaun {
 
         if (isset($vak['paino']) and $vak['paino'] != '') {
 
+          $vak['paino'] = $vak['paino'] / $_jakaja;
           $vak['paino'] = $vak['paino'] < 1 ? 1 : $vak['paino'];
 
           // Net weight for ADR goods class I (usually explosive contents). Always mandatory for DBSchenker, regardless of class. Defined in kg.

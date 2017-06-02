@@ -1305,10 +1305,10 @@ while ($tietue = fgets($fd)) {
           }
           else {
             $edi_ulos .= t("Vientitilaus EU -maahan")."\n";
-
-            $arow["vienti"] = "E";
+ 
             if ($arow["laji"] != "H") {
               $arow["alv"] = 0;
+              $arow["vienti"] = "E";
             }
           }
         }
@@ -1357,6 +1357,22 @@ while ($tietue = fgets($fd)) {
       if (trim($editilaus_toimitustapa) != '') {
         // tarkistetaan löytyykö toimitustapa pupesta suoraan
         if ($edi_tyyppi == "magento") {
+
+          // Löytyykö käännöstaulukosta?
+          $query = "SELECT selite
+                    FROM avainsana
+                    WHERE yhtio  = '{$kukarow['yhtio']}'
+                    AND laji = 'TOIMTAPAVKN'
+                    AND selitetark = '{$editilaus_toimitustapa}'
+                    AND selite != ''
+                    AND selitetark != ''";
+          $ressu = pupe_query($query);
+
+          if (mysql_num_rows($ressu) == 1) {
+            $ftc = mysql_fetch_assoc($ressu);
+            $editilaus_toimitustapa = $ftc['selite'];
+          }
+
           $query = "SELECT *
                     FROM toimitustapa
                     WHERE yhtio  = '{$kukarow['yhtio']}'
@@ -2292,6 +2308,10 @@ while ($tietue = fgets($fd)) {
           // jos tullaan magentosta ja alennus on tiedossa
           if ($edi_tyyppi == "magento" and (isset($verkkokauppa_hinnatedifailista) and $verkkokauppa_hinnatedifailista == "JOO") and $editilaus_alennus >= 0) {
             $ale1 = $editilaus_alennus;
+
+            for ($alepostfix = 2; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+              ${'ale'.$alepostfix} = 0;
+            }
           }
           elseif (is_array($hyvityssaanto_ale_array) and isset($hyvityssaanto_ale_array[$hyvityssaanto_indeksi]) and isset($hyvityssaanto_ale_array[$hyvityssaanto_indeksi][$tuoteno])) {
 

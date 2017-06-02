@@ -283,7 +283,7 @@ class Edi {
       }
     }
 
-    // // Rahtikulu, veroton
+    // Rahtikulu, veroton
     $rahti_veroton = $order['shipping_amount'];
 
     if ($rahti_veroton != 0) {
@@ -292,6 +292,10 @@ class Edi {
 
       // Rahtin alviprossa
       $rahti_alvpros = round((($rahti / $rahti_veroton) - 1) * 100);
+
+      if (!empty($order['shipping_description_line'])) {
+        $rahtikulu_nimitys .= " / {$order['shipping_description_line']}";
+      }
 
       $edi_order .= "*RS OSTOTILRIV {$i}\n";
       $edi_order .= "OSTOTILRIV.OTR_NRO:{$order['increment_id']}\n";
@@ -304,7 +308,7 @@ class Edi {
       $edi_order .= "OSTOTILRIV.OTR_OSTOHINTA:{$rahti_veroton}\n";
       $edi_order .= "OSTOTILRIV.OTR_ALENNUS:0\n";
       $edi_order .= "OSTOTILRIV.OTR_VEROKANTA:{$rahti_alvpros}\n";
-      $edi_order .= "OSTOTILRIV.OTR_VIITE:\n";
+      $edi_order .= "OSTOTILRIV.OTR_VIITE:{$rahtikulu_nimitys}\n";
       $edi_order .= "OSTOTILRIV.OTR_OSATOIMITUSKIELTO:\n";
       $edi_order .= "OSTOTILRIV.OTR_JALKITOIMITUSKIELTO:\n";
       $edi_order .= "OSTOTILRIV.OTR_YKSIKKO:\n";

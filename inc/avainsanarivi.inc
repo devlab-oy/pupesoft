@@ -193,6 +193,7 @@ if (mysql_field_name($result, $i) == "laji") {
   if ($lukitse_laji== "" or $lukitse_laji == "ELINKAARI") $ulos .= "<option value='ELINKAARI' {$avain_sel['ELINKAARI']}>".t("Tuotteen elinkaarityyppi")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "KOPIOITUOTE") $ulos .= "<option value='KOPIOITUOTE' {$avain_sel['KOPIOITUOTE']}>".t("Kopioi tuote parametri")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "MAARYHMA") $ulos .= "<option value='MAARYHMA' {$avain_sel['MAARYHMA']}>".t("Sallittu maaryhmä")."</option>";
+  if ($lukitse_laji== "" or $lukitse_laji == "WOO_FIELD") $ulos .= "<option value='WOO_FIELD' {$avain_sel['WOO_FIELD']}>".t("WooCommercen kenttä")."</option>";
   if ($lukitse_laji== "") $ulos .= "</optgroup>";
 
   if ($lukitse_laji== "") $ulos .= "<optgroup label='".t("Asiakkaiden avainsanat")."'>";
@@ -231,6 +232,7 @@ if (mysql_field_name($result, $i) == "laji") {
   if ($lukitse_laji== "" or $lukitse_laji == "RAHTIKIRJA") $ulos .= "<option value='RAHTIKIRJA' $avain_sel[RAHTIKIRJA]>".t("Rahtikirjatyyppi")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "TOIMTAPAKV") $ulos .= "<option value='TOIMTAPAKV' $avain_sel[TOIMTAPAKV]>".t("Toimitustavan kieliversio")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "TOIMTAPALP") $ulos .= "<option value='TOIMTAPALP' {$avain_sel['TOIMTAPALP']}>".t("Toimitustavan lajittelupiste")."</option>";
+  if ($lukitse_laji== "" or $lukitse_laji == "TOIMTAPAVKN") $ulos .= "<option value='TOIMTAPAVKN' {$avain_sel['TOIMTAPAVKN']}>".t("Toimitustavan verkkokauppanimi")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "TERMINAALIALUE") $ulos .= "<option value='TERMINAALIALUE' $avain_sel[TERMINAALIALUE]>".t("Varaston terminaalialue")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "SSCC") $ulos .= "<option value='SSCC' $avain_sel[SSCC]>".t("SSCC-koodi")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "GS1_SSCC") $ulos .= "<option value='GS1_SSCC' {$avain_sel['GS1_SSCC']}>".t("GS1 SSCC")."</option>";
@@ -328,6 +330,7 @@ if (mysql_field_name($result, $i) == "laji") {
   if ($lukitse_laji== "" or $lukitse_laji == "HUOLTOP_EMAIL") $ulos .= "<option value='HUOLTOP_EMAIL' {$avain_sel['HUOLTOP_EMAIL']}>".t("RMA portaalin huoltopyyntöemail")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "POSTEN_TKOODI")   $ulos .= "<option value='POSTEN_TKOODI' {$avain_sel['POSTEN_TKOODI']}>".t("Logmaster OutboundDelivery ja MaterialMaster sanomien kentät")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "UNIFAUN_REF") $ulos .= "<option value='UNIFAUN_REF' {$avain_sel['UNIFAUN_REF']}>".t("Unifaun lähettäjän viite")."</option>";
+  if ($lukitse_laji== "" or $lukitse_laji == "KUITIN_VAKTEXT") $ulos .= "<option value='KUITIN_VAKTEXT' {$avain_sel['KUITIN_VAKTEXT']}>".t("Kuitin vakioteksti")."</option>";
   if ($lukitse_laji== "") $ulos .= "</optgroup>";
 
   if ($lukitse_laji== "") $ulos .= "<optgroup label='".t("Verkkokaupan avainsanat")."'>";
@@ -455,6 +458,29 @@ if ($_siirtovarastot and $_selitetark_2) {
 
   $jatko = 0;
   $tyyppi = 1;
+}
+
+if ($avain_sel['TOIMTAPAVKN'] == 'SELECTED') {
+  if ($_selite) {
+    $query = "SELECT *
+              FROM toimitustapa
+              WHERE yhtio = '{$kukarow['yhtio']}'";
+    $toimitustapa_result = pupe_query($query);
+
+    $ulos .= "<td><select name = '$nimi'>";
+    $sel = "";
+    while ($toimitustapa = mysql_fetch_assoc($toimitustapa_result)) {
+      if ($toimitustapa['selite'] == $trow[$i]) {
+        $sel = "SELECTED";
+      }
+      $ulos .= "<option value = '{$toimitustapa['selite']}' {$sel}>{$toimitustapa['selite']}</option>";
+      $sel = "";
+    }
+    $ulos .= "</select></td>";
+
+    $jatko = 0;
+    $tyyppi = 1;
+  }
 }
 
 if ($avain_sel['CRM_HAAS'] == 'SELECTED') {
@@ -1436,6 +1462,16 @@ if ($avain_sel["TIL-LITETY"] == "SELECTED" and $_selitetark_2) {
   $ulos .= "</select>";
 
   $jatko = 0;
+}
+
+if ($avain_sel['KUITIN_VAKTEXT'] == "SELECTED") {
+  if ($_selite || $_jarjestys) {
+    $tyyppi = 0;
+  }
+  elseif ($_selitetark) {
+    $ulos = "<td><textarea name='{$nimi}' rows='10' cols='50'>{$trow[$i]}</textarea></td>";
+    $jatko = 0;
+  }
 }
 
 if ($avain_sel['PS_ALA_TRY'] == "SELECTED" and $_selite) {

@@ -1830,6 +1830,9 @@ if ($tunnus == 0 and $uusi == 0 and $errori == '') {
           elseif (mysql_field_name($result, $i) == 'koko') {
             echo "<td>$fontlisa1 ".size_readable($trow[$i])." $fontlisa2</td>";
           }
+          elseif (mysql_field_name($result, $i) == 'toim_tuoteno') {
+            echo "<td>$fontlisa1 $trow[$i] $fontlisa2</td>";
+          }
           else {
 
             if (!function_exists("ps_callback")) {
@@ -2371,6 +2374,10 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
       echo "<iframe id='asiakkaan_avainsanat_iframe' name='asiakkaan_avainsanat_iframe' src='yllapito.php?toim=$toikrow[alanimi]&from=yllapito&ohje=off&haku[5]=@$trow[tunnus]&lukitse_avaimeen=$trow[tunnus]' style='width: 600px; border: 0px; display: block;' frameborder='0'></iFrame>";
     }
 
+    if (($toikrow = tarkista_oikeus("yllapito.php", "directdebit_asiakas%", "", "OK", $toimi_array)) !== FALSE) {
+      echo "<iframe id='directdebit_asiakas_iframe' name='directdebit_asiakas_iframe' src='yllapito.php?toim=$toikrow[alanimi]&from=yllapito&ohje=off&haku[1]=@$trow[tunnus]&lukitse_avaimeen=$trow[tunnus]' style='width: 600px; border: 0px; display: block;' frameborder='0'></iFrame>";
+    }
+
     if (($toikrow = tarkista_oikeus("yllapito.php", "puun_alkio&laji=asiakas%", "", "OK", $toimi_array)) !== FALSE) {
       echo "<iframe id='puun_alkio_iframe' name='puun_alkio_iframe' src='yllapito.php?toim=$toikrow[alanimi]&lukitse_laji=asiakas&from=yllapito&ohje=off&haku[1]=@$trow[tunnus]&lukitse_avaimeen=$trow[tunnus]&lopetus_muut=$lopetus_muut' style='width: 600px; border: 0px; display: block;' frameborder='0'></iFrame>";
     }
@@ -2557,6 +2564,7 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
     $toim == "tuotteen_toimittajat_tuotenumerot" or
     $toim == "extranet_kayttajan_lisatiedot" or
     $toim == "asiakkaan_avainsanat" or
+    $toim == "directdebit_asiakas" or
     $toim == "rahtisopimukset" or
     $toim == "hyvityssaannot" or
     $toim == "varaston_hyllypaikat" or

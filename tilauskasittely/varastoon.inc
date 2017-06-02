@@ -148,6 +148,7 @@ elseif ($toiminto == "kalkyyli" and $tee == "varastoon") {
   // Satula-Runko case
   $query = "SELECT tuoteperhe.isatuoteno, tilausrivi.uusiotunnus,
             tuoteperhe.tuoteno,
+            tuoteperhe.kerroin,
             tuote.tuoteno, tuote.try,tuote.osasto,
             tuote.nimitys,tuote.yksikko,tuote.myyntihinta,
             tilausrivi.yhtio, tilausrivi.tyyppi,tilausrivi.toimaika, tilausrivi.kerayspvm,
@@ -183,6 +184,12 @@ elseif ($toiminto == "kalkyyli" and $tee == "varastoon") {
       $loytyiko_lapsi_res = pupe_query($query);
 
       if (mysql_num_rows($loytyiko_lapsi_res) == 0) {
+
+        if ($chk_row["kerroin"] != 1) {
+          $chk_row["tilkpl"] = round($chk_row["tilkpl"] * $chk_row["kerroin"], 2);
+          $chk_row["varattu"] = round($chk_row["varattu"] * $chk_row["kerroin"], 2);
+          $chk_row["kpl"] = round($chk_row["kpl"] * $chk_row["kerroin"], 2);
+        }
 
         list($chk_hinta, , $chk_ale, ) = alehinta_osto($laskurow, $chk_row, $chk_row["varattu"]);
 
@@ -918,7 +925,7 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
               hyllynro   = '$tilrivirow[hyllynro]',
               hyllytaso  = '$tilrivirow[hyllytaso]',
               hyllyvali  = '$tilrivirow[hyllyvali]',
-              selite     = '$tilrivirow[nimi] $tilrivirow[nimitark], ".t("Tilaus").": $tilrivirow[otunnus], ".t("Ostohinta").": $ohinta $lisavartlisa',
+              selite     = '$tilrivirow[nimi] $tilrivirow[nimitark], ".t("Tilaus", $yhtiorow['kieli']).": $tilrivirow[otunnus], ".t("Ostohinta").": $ohinta $lisavartlisa',
               laatija    = '$kukarow[kuka]',
               rivitunnus = '$tilrivirow[tunnus]',
               laadittu   = '$varastoonvientipva'";

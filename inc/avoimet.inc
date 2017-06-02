@@ -568,21 +568,32 @@ if ($tee != '' and isset($ajaraportti)) {
 
         if ($trow["tapvm"] == "0000-00-00" or $trow["tapvm"] == "0000-00-00 0000-00-00") {
           $trow["tapvm"] = "";
+          echo "<td align='right'>$trow[tapvm]</td>";
+        }
+        else {
+          echo "<td>".pupe_DataTablesEchoSort($trow['tapvm']).tv1dateconv($trow["tapvm"])."</td>";
         }
         if ($trow["mapvm"] == "0000-00-00" or $trow["mapvm"] == "0000-00-00 0000-00-00") {
           $trow["mapvm"] = "";
+          echo "<td>$trow[mapvm]</td>";
+        }
+        else {
+          echo "<td>".pupe_DataTablesEchoSort($trow['mapvm']).tv1dateconv($trow["mapvm"])."</td>";
         }
         if ($trow["olmapvm"] == "0000-00-00" or $trow["olmapvm"] == "0000-00-00 0000-00-00") {
           $trow["olmapvm"] = "";
+          echo "<td>$trow[olmapvm]</td>";
+        }
+        else {
+          echo "<td>".pupe_DataTablesEchoSort($trow['olmapvm']).tv1dateconv($trow["olmapvm"])."</td>";
         }
         if ($trow["erpcm"] == "0000-00-00" or $trow["erpcm"] == "0000-00-00 0000-00-00") {
           $trow["erpcm"] = "";
+          echo "<td>$trow[erpcm]</td>";
         }
-
-        echo "<td>$trow[tapvm]</td>";
-        echo "<td>$trow[mapvm]</td>";
-        echo "<td>$trow[olmapvm]</td>";
-        echo "<td>$trow[erpcm]</td>";
+        else {
+          echo "<td>".pupe_DataTablesEchoSort($trow['erpcm']).tv1dateconv($trow["erpcm"])."</td>";
+        }
 
         if ($valuutassako == "V") {
           // Laskun valuutassa
@@ -611,7 +622,7 @@ if ($tee != '' and isset($ajaraportti)) {
           $worksheet->writeString($excelrivi, 2, $trow["maa"]);
           $worksheet->write($excelrivi, 3, $trow["maksutieto"]);
           $worksheet->write($excelrivi, 4, $trow["laskunro"]);
-          $worksheet->write($excelrivi, 5, $trow["tapvm"]);
+          $worksheet->write($excelrivi, 5, tv1dateconv($trow["tapvm"]));
 
           if ($trow["mapvm"] != '0000-00-00') $worksheet->write($excelrivi, 6, $trow["mapvm"]);
           else $worksheet->write($excelrivi, 6, "");
@@ -901,17 +912,25 @@ if ($tee != '' and isset($ajaraportti)) {
 
         if ($trow["tapvm"] == "0000-00-00" or $trow["tapvm"] == "0000-00-00 0000-00-00") {
           $trow["tapvm"] = "";
+          echo "<td>$trow[tapvm]</td>";
+        }
+        else {
+          echo "<td>".pupe_DataTablesEchoSort($trow['tapvm']).tv1dateconv($trow["tapvm"])."</td>";
         }
         if ($trow["mapvm"] == "0000-00-00" or $trow["mapvm"] == "0000-00-00 0000-00-00") {
           $trow["mapvm"] = "";
+          echo "<td>$trow[mapvm]</td>";
+        }
+        else {
+          echo "<td>".pupe_DataTablesEchoSort($trow['mapvm']).tv1dateconv($trow["mapvm"])."</td>";
         }
         if ($trow["erpcm"] == "0000-00-00" or $trow["erpcm"] == "0000-00-00 0000-00-00") {
           $trow["erpcm"] = "";
+          echo "<td>$trow[erpcm]</td>";
         }
-
-        echo "<td>$trow[tapvm]</td>";
-        echo "<td>$trow[mapvm]</td>";
-        echo "<td>$trow[erpcm]</td>";
+        else {
+          echo "<td>".pupe_DataTablesEchoSort($trow['erpcm']).tv1dateconv($trow["erpcm"])."</td>";
+        }
 
         $summatotal += $trow['tiliointiavoinsaldo'];
 
@@ -1045,7 +1064,7 @@ if ($tee != '' and isset($ajaraportti)) {
         echo "<td>$trow[nimi_maksaja]</td>";
         echo "<td>$trow[maa]</td>";
         echo "<td>$trow[viite]</td>";
-        echo "<td>$trow[kirjpvm]</td>";
+        echo "<td>".pupe_DataTablesEchoSort($trow['kirjpvm']).tv1dateconv($trow["kirjpvm"])."</td>";
         echo "<td></td>";
         echo "<td></td>";
 

@@ -1542,6 +1542,13 @@ if ($tee == 'P') {
       $result = pupe_query($query);
       $laskurow = mysql_fetch_assoc($result);
 
+      $toimtapaquery = "  SELECT osoitelappu
+                          FROM toimitustapa
+                          WHERE yhtio = '{$laskurow['yhtio']}'
+                          AND selite = '{$laskurow['toimitustapa']}'";
+      $toimtaparesult = pupe_query($toimtapaquery);
+      $toimtaparow = mysql_fetch_assoc($toimtaparesult);
+
       $kieli = $laskurow["kieli"];
 
       $rivit = '';
@@ -1552,11 +1559,26 @@ if ($tee == 'P') {
 
         $poikkeama['nimitys'] = t_tuotteen_avainsanat($poikkeama, 'nimitys', $kieli);
 
+        $enariquery = " SELECT eankoodi
+                        FROM tuote
+                        WHERE yhtio = '{$laskurow['yhtio']}'
+                        AND tuoteno = '{$poikkeama['tuoteno']}'";
+        $enariresult = pupe_query($enariquery);
+        $enarirow = mysql_fetch_assoc($enariresult);
+
         if ($_plain_text_mail) {
           $rivit .= t("Nimitys", $kieli).": {$poikkeama['nimitys']}\r\n";
           $rivit .= t("Tuotenumero", $kieli).": {$poikkeama['tuoteno']}\r\n";
-          $rivit .= t("Tilattu", $kieli).": ".(float) $poikkeama["tilkpl"]."\r\n";
-          $rivit .= t("Toimitetaan", $kieli).": ".(float) $poikkeama["maara"]."\r\n";
+
+          if ($toimtaparow['osoitelappu'] == 'osoitelappu_kesko') {
+            $_puutemaara = $poikkeama["tilkpl"] - $poikkeama["maara"];
+            $rivit .= t("Eankoodi", $kieli).": {$enarirow['eankoodi']}\r\n";
+            $rivit .= t("Puutekappale", $kieli).": ".(float) $_puutemaara."\r\n";
+          }
+          else {
+            $rivit .= t("Tilattu", $kieli).": ".(float) $poikkeama["tilkpl"]."\r\n";
+            $rivit .= t("Toimitetaan", $kieli).": ".(float) $poikkeama["maara"]."\r\n";
+          }
 
           if ($yhtiorow["kerayspoikkeama_kasittely"] != '') {
             $rivit .= t("Poikkeaman k‰sittely", $kieli).": {$poikkeama['loput']}\r\n";
@@ -1568,8 +1590,17 @@ if ($tee == 'P') {
           $rivit .= "<tr>";
           $rivit .= "<td>$poikkeama[nimitys]</td>";
           $rivit .= "<td>$poikkeama[tuoteno]</td>";
-          $rivit .= "<td>". (float) $poikkeama["tilkpl"]."   </td>";
-          $rivit .= "<td>". (float) $poikkeama["maara"]."</td>";
+
+          if ($toimtaparow['osoitelappu'] == 'osoitelappu_kesko') {
+            $_puutemaara = $poikkeama["tilkpl"] - $poikkeama["maara"];
+            $rivit .= "<td>". $enarirow['eankoodi']."   </td>";
+            $rivit .= "<td>". (float) $_puutemaara."</td>";
+          }
+          else {
+            $rivit .= "<td>". (float) $poikkeama["tilkpl"]."   </td>";
+            $rivit .= "<td>". (float) $poikkeama["maara"]."</td>";
+          }
+
           if ($yhtiorow["kerayspoikkeama_kasittely"] != '') $rivit .= "<td>$poikkeama[loput]</td>";
           $rivit .= "</tr>";
         }
@@ -1669,7 +1700,14 @@ if ($tee == 'P') {
         $ulos .= "</table><br><br>";
 
         $ulos .= "<table>";
-        $ulos .= "<tr><th>".t("Nimitys", $kieli)."</th><th>".t("Tuotenumero", $kieli)."</th><th>".t("Tilattu", $kieli)."</th><th>".t("Toimitetaan", $kieli)."</th>";
+
+        if ($toimtaparow['osoitelappu'] == 'osoitelappu_kesko') {
+          $ulos .= "<tr><th>".t("Nimitys", $kieli)."</th><th>".t("Tuotenumero", $kieli)."</th><th>".t("Eankoodi", $kieli)."</th><th>".t("Puutekappale", $kieli)."</th>";
+        }
+        else {
+          $ulos .= "<tr><th>".t("Nimitys", $kieli)."</th><th>".t("Tuotenumero", $kieli)."</th><th>".t("Tilattu", $kieli)."</th><th>".t("Toimitetaan", $kieli)."</th>";
+        }
+
         if ($yhtiorow["kerayspoikkeama_kasittely"] != '') $ulos .= "<th>".t("Poikkeaman k‰sittely", $kieli)."</th>";
         $ulos .= "</tr>";
         $ulos .= $rivit;
@@ -3264,15 +3302,22 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
 
       echo "</table><br>";
 
+      $colspanni = 4;
+
+      $_toimtuoteno_otsikko = "";
+      if ($yhtiorow['kerays_riveittain'] == 'K') {
+        $_toimtuoteno_otsikko = "<th>".t("Toimittajan tuoteno")."</th>";
+        $colspanni++;
+      }
+
       echo "<table id='maintable'>
           <tr>
           <th>".t("Paikka")."</th>
           <th>".t("Tuoteno")."</th>
+          $_toimtuoteno_otsikko
           <th>".t("Nimitys")."</th>
           <th>".t("M‰‰r‰")."</th>
           <th>".t("Poikkeava m‰‰r‰")."</th>";
-
-      $colspanni = 4;
 
       if ($yhtiorow['kerayserat'] == 'P' or ($yhtiorow['kerayserat'] == 'A' and $row_chk['kerayserat'] == 'A')) {
         echo "<th>", t("Pakkaus"), "</th>";
@@ -3476,9 +3521,26 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
             echo "$row[varastopaikka]";
           }
 
+          $_toimtuoteno_rivi = "";
+          if ($yhtiorow['kerays_riveittain'] == 'K') {
+
+            // tuotteen p‰‰toimittajan toim_tuoteno
+            $tuto_query = " SELECT toim_tuoteno
+                            FROM tuotteen_toimittajat
+                            WHERE yhtio = '{$kukarow['yhtio']}'
+                            AND tuoteno = '{$row['puhdas_tuoteno']}'
+                            ORDER BY if(jarjestys=0,9999,jarjestys)
+                            LIMIT 1";
+            $tuto_results = pupe_query($tuto_query);
+            $tuto_row = mysql_fetch_assoc($tuto_results);
+
+            $_toimtuoteno_rivi = "<td>{$tuto_row['toim_tuoteno']}</td>";
+          }
+
           echo "<input type='hidden' name='vertaus_hylly[$row[tunnus]]' value='$row[varastopaikka_rekla]'>";
           echo "</td>";
           echo "<td>$row[tuoteno]<input type='hidden' name='rivin_puhdas_tuoteno[$row[tunnus]]' value='$row[puhdas_tuoteno]'></td>";
+          echo $_toimtuoteno_rivi;
           echo "<td>$row[nimitys]</td>";
           echo "<td class='text-right' id='{$row['tunnus']}_varattu'>".(float) $row[varattu]."<input type='hidden' name='rivin_varattu[$row[tunnus]]' value='$row[varattu]'></td>";
           echo "<td>";
@@ -3821,10 +3883,14 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
         $vakadrkpl  = $yhtiorow["oletus_lahetekpl"];
       }
 
-      $spanni = 3;
+      $spanni = 4;
 
       if ($yhtiorow['karayksesta_rahtikirjasyottoon'] != '') {
-        $spanni = 4;
+        $spanni = 5;
+      }
+
+      if ($yhtiorow['kerays_riveittain'] != '') {
+        $spanni += 2;
       }
 
       if ($yhtiorow["lahete_tyyppi_tulostus"] != '') {

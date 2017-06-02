@@ -4751,20 +4751,18 @@ if ($tee == '') {
             if (mysql_num_rows($result) == 1 and $_myyntirivi["tilausrivilinkki"] != 0) {
               // Tarkistetaan, että ostotilaus on vielä kesken,
               // koska jos ei ole kesken on jo lähetetty eteenpäin
-              $query = "SELECT lasku.tila,
-                        lasku.alatila,
-                        lasku.tunnus
+              $query = "DELETE tilausrivi.*
                         FROM tilausrivi
                           JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio AND lasku.tunnus = tilausrivi.otunnus)
                         WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-                        AND tilausrivi.tunnus = '{$_myyntirivi["tilausrivilinkki"]}'";
+                        AND tilausrivi.tunnus = '{$_myyntirivi["tilausrivilinkki"]}'
+                        AND lasku.tila = 'O'
+                        AND lasku.alatila = ''
+                        AND tilausrivi.tyyppi = 'O'
+                        AND tilausrivi.kpl = 0";
               $ostotilaus_tarkistus = mysql_fetch_assoc(pupe_query($query));
 
-              if ($ostotilaus_tarkistus["tila"] == "O" and $ostotilaus_tarkistus["alatila"] == "") {
-                $query = "DELETE FROM tilausrivi
-                          WHERE tunnus = '{$_myyntirivi["tilausrivilinkki"]}'";
-                pupe_query($query);
-
+              if (mysql_affected_rows() > 0) {
                 echo "<font class='error'>".t("Rivi poistettiin myös ostotilaukselta")."</font><br/><br/>";
               }
               else {

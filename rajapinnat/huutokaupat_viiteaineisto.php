@@ -102,7 +102,7 @@ while ($datetime_checkpoint < $today) {
     $fd = fopen($filepath, "w") or die("Tiedostoa ei voitu luoda!");
 
     $maksupvm = $response->date;
-    $maksupvm = date("ymj", strtotime($maksupvm));
+    $maksupvm = date("ymd", strtotime($maksupvm));
 
     // tietue 0
     $ulos  = sprintf('%-1.1s', 0);

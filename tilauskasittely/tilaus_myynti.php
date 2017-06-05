@@ -4766,7 +4766,7 @@ if ($tee == '') {
                 echo "<font class='error'>".t("Rivi poistettiin myös ostotilaukselta")."</font><br/><br/>";
               }
               else {
-                echo "<font class='error'>".t("Ostotilaus ei ollut enää kesken tilassa, ei voitu poistaa riviä ostolta ({$ostotilaus_tarkistus["tunnus"]})")."!</font><br/><br/>";
+                echo "<font class='error'>".t("Ostotilaus ei ollut enää kesken tilassa, ei voitu poistaa riviä ostolta")."!</font><br/><br/>";
               }
             }
           }

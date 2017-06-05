@@ -1816,6 +1816,12 @@ else {
             case 'toimitustavan_lahto':
               $values .= ", '$toimitustavan_lahto_arvo'";
               break;
+             case 'kohdistettu':
+               $values .= ", '$split_kohdistettu'";
+               break;
+             case 'rahtivapaa':
+               $values .= ", '$split_rahtivapaa'";
+               break;
             case 'ohjausmerkki':
               if ($row['omalle_tilaukselle'] > 0 and trim($laskurow['ohjausmerkki']) != "") {
                 $values .= ", '{$ohjausmerkki_nro}-{$laskurow['ohjausmerkki']}'";

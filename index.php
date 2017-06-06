@@ -6,6 +6,10 @@ else exit;
 
 $go = $goso = '';
 
+if ($tanaan == "PERJANTAIN") {
+	echo "Hieno homma!";
+}
+
 if (isset($_REQUEST['go'])) {
 
   $go = $_REQUEST['go'];

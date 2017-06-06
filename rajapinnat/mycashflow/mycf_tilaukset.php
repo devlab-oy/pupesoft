@@ -131,7 +131,7 @@ class MyCashflowTilaukset {
       $tilaus['shipping_address']['company'] = "";
       $tilaus['shipping_address']['country_id'] = strtoupper($order->ShippingAddress->Country);
       $tilaus['shipping_address']['firstname'] = $order->ShippingAddress->FirstName;
-      $tilaus['shipping_address']['lastname'] = $order->ShippingAddress->FirstName;
+      $tilaus['shipping_address']['lastname'] = $order->ShippingAddress->LastName;
       $tilaus['shipping_address']['postcode'] = $order->ShippingAddress->ZipCode;
       $tilaus['shipping_address']['street'] = $order->ShippingAddress->StreetAddress;
       $tilaus['shipping_address']['telephone'] = $order->ShippingAddress->Phone;

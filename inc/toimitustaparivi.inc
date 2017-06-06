@@ -199,6 +199,8 @@ if (mysql_field_name($result, $i) == "virallinen_selite") {
   $ulos .= "<optgroup label='Unifaun / FedEx'>";
   $ulos .= "<option value='FDXIEP' {$sel["FDXIEP"]}>FedEx International Economy (Non Docs)</option>";
   $ulos .= "<option value='FDXIPP' {$sel["FDXIPP"]}>FedEx International Priority (Non Docs)</option>";
+  $ulos .= "<option value='FDXIED' {$sel["FDXIED"]}>FedEx International Economy (Docs)</option>";
+  $ulos .= "<option value='FDXIPD' {$sel["FDXIPD"]}>FedEx International Priority (Docs)</option>";
   $ulos .= "</optgroup>";
 
   $ulos .= "<optgroup label='Unifaun / Fennoway'>";

@@ -20757,6 +20757,7 @@ if (!function_exists("pupesoft_laskutyypit")) {
       6  => "Normaali laskupohja (Ei näytetä tilausnumeroa/toimitusaikaa)",
       7  => "Normaali laskupohja (Näytetään tuotteen EAN koodi ja asiakaskommentti)",
       23 => "Normaali laskupohja (Näytetään myös yhteensä ilman alennuksia)",
+      24 => "Normaali laskupohja (Näytetään toimitusajan paikalla verollinen yksikköhinta)",
       1  => "Pelkistetty laskupohja 1",
       3  => "Pelkistetty laskupohja 2 (Tuoteperheet yhdistetty)",
       4  => "Pelkistetty laskupohja 3",

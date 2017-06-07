@@ -223,6 +223,14 @@ if ($tee2 == 'TULOSTA') {
   elseif (isset($tulostukseen_kaikki)) {
     $tilausnumerorypas = unserialize(urldecode($tulostukseen_kaikki));
     $tulostukseen_kaikki = "KYLLA";
+
+    require_once "pdflib/phppdflib.class.php";
+
+    $pdf_kaikki_tul = new pdffile;
+    $pdf_kaikki_tul->set_default('margin-top', 0);
+    $pdf_kaikki_tul->set_default('margin-bottom', 0);
+    $pdf_kaikki_tul->set_default('margin-left', 0);
+    $pdf_kaikki_tul->set_default('margin-right', 0);
   }
 
   if (is_array($tilausnumerorypas)) {

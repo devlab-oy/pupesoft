@@ -2,6 +2,8 @@
 
 require "../inc/parametrit.inc";
 
+require_once 'rajapinnat/woo/woo-functions.php';
+
 $logistiikka_yhtio = '';
 $logistiikka_yhtiolisa = '';
 

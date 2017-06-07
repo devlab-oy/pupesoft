@@ -1,4 +1,5 @@
 <?php
+
 //sisään halutaan $laskurow jossa on tulostettavan tilauksen tiedot
 //jos tilauksia on useita $laskurow muuttujassa on jonkun tilauksen tiedot
 
@@ -443,6 +444,9 @@ if ((int) $chk_row["ok"] == (int) $chk_row["kaikki"] and (int) $chk_row["ok"] !=
   $kerayseran_numero = !isset($kerayseran_numero) ? 0 : $kerayseran_numero;
 
   if ($yhtiorow["lahetteen_tulostustapa"] != "X") {
+    
+    $pdfdoc = isset($pdf_kaikki_tul) ? $pdf_kaikki_tul : NULL;
+
     $params_kerayslista = array(
       'asrow'             => $asrow,
       'boldi'             => $boldi,
@@ -455,7 +459,7 @@ if ((int) $chk_row["ok"] == (int) $chk_row["kaikki"] and (int) $chk_row["ok"] !=
       'norm'              => $norm,
       'page'              => '',
       'paino'             => 0,
-      'pdf'               => NULL,
+      'pdf'               => $pdfdoc,
       'perheid'           => 0,
       'perheid2'          => 0,
       'pieni'             => $pieni,

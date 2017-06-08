@@ -2926,8 +2926,11 @@ if ($tee == '') {
         $meapu2 = pupe_query($apuqu2);
         $meapu2row = mysql_fetch_assoc($meapu2);
 
+        // Etukäteen maksetut tilaukset, ei sörkitä toimitustapaa enää
+        $_etukateen_maksettu = ($laskurow['mapvm'] != '0000-00-00' and $laskurow['chn'] == '999');
+
         // ja toimitustapa ei ole nouto eikä kyseessä ole verkkokauppatilaus laitetaan toimitustavaksi nouto... hakee järjestyksessä ekan
-        if ($meapu2row["nouto"] == "" and $laskurow['tilaustyyppi'] != "W") {
+        if ($meapu2row["nouto"] == "" and ($laskurow['tilaustyyppi'] != "W" and !$_etukateen_maksettu)) {
           $apuqu = "SELECT *
                     FROM toimitustapa
                     WHERE yhtio  = '$kukarow[yhtio]'

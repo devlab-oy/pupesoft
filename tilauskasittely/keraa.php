@@ -1717,8 +1717,12 @@ if ($tee == 'P') {
         $ulos .= "</body></html>";
       }
 
-      // korvataan poikkeama-meili ker‰ysvahvistuksella JOs l‰hetet‰‰n ker‰ysvahvistus per toimitus
-      if (($laskurow["keraysvahvistus_lahetys"] == 'o' or ($yhtiorow["keraysvahvistus_lahetys"] == 'o' and $laskurow["keraysvahvistus_lahetys"] == '')) and $laskurow["kerayspoikkeama"] == 0) {
+      $sellahetetyyppi = (!isset($sellahetetyyppi)) ? $laskurow['lahetetyyppi'] : $sellahetetyyppi;
+      $ei_puutteita = (strpos($sellahetetyyppi, "_eipuute") === FALSE);
+
+      // korvataan poikkeama-meili ker‰ysvahvistuksella JOS l‰hetet‰‰n ker‰ysvahvistus per toimitus
+      // JA l‰hetetyyppi sis‰lt‰‰ puuterivej‰
+      if (($laskurow["keraysvahvistus_lahetys"] == 'o' or ($yhtiorow["keraysvahvistus_lahetys"] == 'o' and $laskurow["keraysvahvistus_lahetys"] == '')) and $laskurow["kerayspoikkeama"] == 0 and $ei_puutteita) {
         $laskurow["kerayspoikkeama"] = 2;
       }
 

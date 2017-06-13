@@ -612,6 +612,7 @@ if ($tee == 'P') {
 
   $tilausnumerot = array();
   $poikkeamat = array();
+  $ookoot = array();
 
   if ((int) $keraajanro > 0) {
     $query = "SELECT *
@@ -1295,6 +1296,12 @@ if ($tee == 'P') {
 
             $muuttuiko = 'kylsemuuttu';
           }
+          else {
+            // kerätään ok rivit talteen,
+            // ja tarkistetaan lopuksi tuliko puutteita
+            $ookoot[$tilrivirow["otunnus"]]["otunnus"] = $tilrivirow["otunnus"];
+            $ookoot[$tilrivirow["otunnus"]]["toimitustapa"] = $otsikkorivi["toimitustapa"];
+          }
 
           if ($keraysvirhe == 0 and ($yhtiorow['kerayserat'] == 'P' or ($yhtiorow['kerayserat'] == 'A' and $otsikkorivi['kerayserat'] == 'A'))) {
 
@@ -1492,6 +1499,33 @@ if ($tee == 'P') {
     $tee = '';
   }
 
+  // Jos ei ole puutteita, katsotaan halutaanko eräässä
+  // spessucasessa silti lähettää keräyspoikkeama-sähköposti
+  if ($muuttuiko == '') {
+
+    // Tsekataan osoitelappu vain kerran per tilaus
+    $_osoitelapputarkistus = array();
+    foreach ($ookoot as $tilausrivi) {
+
+      if (!in_array($tilausrivi["otunnus"], $_osoitelapputarkistus)) {
+
+        $toimtapaquery = "  SELECT osoitelappu
+                            FROM toimitustapa
+                            WHERE yhtio = '{$yhtiorow['yhtio']}'
+                            AND selite = '{$tilausrivi['toimitustapa']}'";
+        $toimtaparesult = pupe_query($toimtapaquery);
+        $toimtaparow = mysql_fetch_assoc($toimtaparesult);
+
+        if ($toimtaparow['osoitelappu'] == 'osoitelappu_kesko') {
+          $muuttuiko = 'kylsemuuttu';
+          $poikkeamat[$tilausrivi["otunnus"]] = $tilausrivi["otunnus"];
+        }
+
+        $_osoitelapputarkistus[$tilausrivi["otunnus"]] = $tilausrivi["otunnus"];
+      }
+    }
+  }
+
   // Jos keräyspoikkeamia syntyi, niin lähetetään mailit myyjälle ja asiakkaalle
   if ($muuttuiko == 'kylsemuuttu') {
     foreach ($poikkeamat as $poikkeamatilaus => $poikkeamatilausrivit) {
@@ -1554,6 +1588,18 @@ if ($tee == 'P') {
       $rivit = '';
 
       $_plain_text_mail = ($yhtiorow['kerayspoikkeama_email'] == 'P');
+
+      // Jos ei ole poikkeamarivejä, niin infotaan siitä
+      if (!is_array($poikkeamatilausrivit)) {
+
+        if ($_plain_text_mail) {
+          $rivit .= t("Ei keräyspoikkeamia", $kieli)."\r\n";
+        }
+        else {
+          $rivit .= t("Ei keräyspoikkeamia", $kieli);
+        }
+        $poikkeamatilausrivit = array();
+      }
 
       foreach ($poikkeamatilausrivit as $poikkeama) {
 
@@ -1701,14 +1747,17 @@ if ($tee == 'P') {
 
         $ulos .= "<table>";
 
-        if ($toimtaparow['osoitelappu'] == 'osoitelappu_kesko') {
+        if ($toimtaparow['osoitelappu'] == 'osoitelappu_kesko' and !empty($poikkeamatilausrivit)) {
           $ulos .= "<tr><th>".t("Nimitys", $kieli)."</th><th>".t("Tuotenumero", $kieli)."</th><th>".t("Eankoodi", $kieli)."</th><th>".t("Puutekappale", $kieli)."</th>";
+        }
+        elseif (empty($poikkeamatilausrivit)) {
+          $ulos .= "<tr>";
         }
         else {
           $ulos .= "<tr><th>".t("Nimitys", $kieli)."</th><th>".t("Tuotenumero", $kieli)."</th><th>".t("Tilattu", $kieli)."</th><th>".t("Toimitetaan", $kieli)."</th>";
         }
 
-        if ($yhtiorow["kerayspoikkeama_kasittely"] != '') $ulos .= "<th>".t("Poikkeaman käsittely", $kieli)."</th>";
+        if ($yhtiorow["kerayspoikkeama_kasittely"] != '' and !empty($poikkeamatilausrivit)) $ulos .= "<th>".t("Poikkeaman käsittely", $kieli)."</th>";
         $ulos .= "</tr>";
         $ulos .= $rivit;
         $ulos .= "</table><br><br>";

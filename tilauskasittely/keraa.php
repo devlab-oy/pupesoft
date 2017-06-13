@@ -1297,7 +1297,7 @@ if ($tee == 'P') {
             $muuttuiko = 'kylsemuuttu';
           }
           else {
-            // ker‰t‰‰n ok rivit talteen,
+            // ker‰t‰‰n ok tilaukset talteen,
             // ja tarkistetaan lopuksi tuliko puutteita
             $ookoot[$tilrivirow["otunnus"]]["otunnus"] = $tilrivirow["otunnus"];
             $ookoot[$tilrivirow["otunnus"]]["toimitustapa"] = $otsikkorivi["toimitustapa"];
@@ -1505,23 +1505,23 @@ if ($tee == 'P') {
 
     // Tsekataan osoitelappu vain kerran per tilaus
     $_osoitelapputarkistus = array();
-    foreach ($ookoot as $tilausrivi) {
+    foreach ($ookoot as $tilaus) {
 
-      if (!in_array($tilausrivi["otunnus"], $_osoitelapputarkistus)) {
+      if (!in_array($tilaus["otunnus"], $_osoitelapputarkistus)) {
 
         $toimtapaquery = "  SELECT osoitelappu
                             FROM toimitustapa
                             WHERE yhtio = '{$yhtiorow['yhtio']}'
-                            AND selite = '{$tilausrivi['toimitustapa']}'";
+                            AND selite = '{$tilaus['toimitustapa']}'";
         $toimtaparesult = pupe_query($toimtapaquery);
         $toimtaparow = mysql_fetch_assoc($toimtaparesult);
 
         if ($toimtaparow['osoitelappu'] == 'osoitelappu_kesko') {
           $muuttuiko = 'kylsemuuttu';
-          $poikkeamat[$tilausrivi["otunnus"]] = $tilausrivi["otunnus"];
+          $poikkeamat[$tilaus["otunnus"]] = $tilaus["otunnus"];
         }
 
-        $_osoitelapputarkistus[$tilausrivi["otunnus"]] = $tilausrivi["otunnus"];
+        $_osoitelapputarkistus[$tilaus["otunnus"]] = $tilaus["otunnus"];
       }
     }
   }

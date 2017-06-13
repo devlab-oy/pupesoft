@@ -549,6 +549,9 @@ if ((int) $chk_row["ok"] == (int) $chk_row["kaikki"] and (int) $chk_row["ok"] !=
   elseif ($yhtiorow["lahetteen_tulostustapa"] == "X") {
     $returnvalue = 0;
   }
+  elseif (!empty($pdf_kaikki_tul)) {
+    $returnvalue = 0;
+  }
   else {
     $returnvalue = 1;
   }

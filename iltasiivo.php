@@ -1,9 +1,9 @@
 <?php
 
-// Kutsutaanko CLI:st√§
+// Kutsutaanko CLI:st‰
 $php_cli = FALSE;
 
-// T√§m√§ vaatii paljon muistia
+// T‰m‰ vaatii paljon muistia
 ini_set("memory_limit", "5G");
 
 if (php_sapi_name() == 'cli') {
@@ -13,7 +13,7 @@ if (php_sapi_name() == 'cli') {
 if ($php_cli) {
 
   if (!isset($argv[1]) or $argv[1] == '') {
-    echo "Anna yhti√∂!!!\n";
+    echo "Anna yhtiˆ!!!\n";
     die;
   }
 
@@ -29,7 +29,7 @@ if ($php_cli) {
   // Logitetaan ajo
   cron_log();
 
-  // Haetaan yhti√∂row ja kukarow
+  // Haetaan yhtiˆrow ja kukarow
   $yhtiorow = hae_yhtion_parametrit($argv[1]);
   $kukarow  = hae_kukarow('admin', $yhtiorow['yhtio']);
 
@@ -112,8 +112,8 @@ if ($laskuri > 0) {
 $laskuri = 0;
 $laskuri2 = 0;
 
-// poistetaan kaikki JT-otsikot jolla ei ole en√§√§ rivej√§
-// ja extranet tilaukset joilla ei ole rivej√§ ja tietenkin my√∂s ennakkootsikot joilla ei ole rivej√§.
+// poistetaan kaikki JT-otsikot jolla ei ole en‰‰ rivej‰
+// ja extranet tilaukset joilla ei ole rivej‰ ja tietenkin myˆs ennakkootsikot joilla ei ole rivej‰.
 $query = "SELECT tilausrivi.tunnus, lasku.tunnus laskutunnus, lasku.tila, lasku.tunnusnippu
           FROM lasku
           LEFT JOIN tilausrivi on (tilausrivi.yhtio = lasku.yhtio
@@ -125,10 +125,10 @@ $query = "SELECT tilausrivi.tunnus, lasku.tunnus laskutunnus, lasku.tila, lasku.
 $result = pupe_query($query);
 
 while ($row = mysql_fetch_assoc($result)) {
-  $komm = "({$kukarow['kuka']}@".date('Y-m-d').") ".t("Mit√§t√∂i ohjelmassa iltasiivo.php")." (1)<br>";
+  $komm = "({$kukarow['kuka']}@".date('Y-m-d').") ".t("Mit‰tˆi ohjelmassa iltasiivo.php")." (1)<br>";
 
-  // Jos kyseess√§ on tunnusnippupaketti
-  // Halutaan s√§ilytt√§√§ linkki t√§st√§ tehtyihin tilauksiin, tilaus merkataan vain toimitetuksi
+  // Jos kyseess‰ on tunnusnippupaketti
+  // Halutaan s‰ilytt‰‰ linkki t‰st‰ tehtyihin tilauksiin, tilaus merkataan vain toimitetuksi
   if ($row["tunnusnippu"] > 0) {
     $query = "UPDATE lasku SET
               tila        = 'L',
@@ -149,7 +149,7 @@ while ($row = mysql_fetch_assoc($result)) {
     $laskuri++;
   }
 
-  //poistetaan TIETENKIN kukarow[kesken] ettei voi sy√∂tt√§√§ extranetiss√§ rivej√§ t√§lle
+  //poistetaan TIETENKIN kukarow[kesken] ettei voi syˆtt‰‰ extranetiss‰ rivej‰ t‰lle
   $query = "UPDATE kuka SET kesken = ''
             WHERE yhtio = '$kukarow[yhtio]'
             AND kesken  = '$row[laskutunnus]'";
@@ -157,16 +157,16 @@ while ($row = mysql_fetch_assoc($result)) {
 }
 
 if ($laskuri > 0) {
-  $iltasiivo .= is_log("Poistettiin $laskuri rivit√∂nt√§ tilausta.");
+  $iltasiivo .= is_log("Poistettiin $laskuri rivitˆnt‰ tilausta.");
 }
 
 if ($laskuri2 > 0) {
-  $iltasiivo .= is_log("Merkattiin toimitetuksi $laskuri2 rivit√∂nt√§ tilausta.");
+  $iltasiivo .= is_log("Merkattiin toimitetuksi $laskuri2 rivitˆnt‰ tilausta.");
 }
 
 $laskuri = 0;
 
-// Merkit√§√§n laskut mit√§t√∂idyksi joilla on pelk√§st√§√§n mit√§t√∂ityj√§ rivej√§ / pelk√§st√§√§n puuterivej√§.
+// Merkit‰‰n laskut mit‰tˆidyksi joilla on pelk‰st‰‰n mit‰tˆityj‰ rivej‰ / pelk‰st‰‰n puuterivej‰.
 $query = "SELECT lasku.tunnus laskutunnus,
           lasku.tila,
           count(*) kaikki,
@@ -181,7 +181,7 @@ $query = "SELECT lasku.tunnus laskutunnus,
 $result = pupe_query($query);
 
 while ($row = mysql_fetch_assoc($result)) {
-  $komm = "({$kukarow['kuka']}@".date('Y-m-d').") ".t("Mit√§t√∂i ohjelmassa iltasiivo.php")." (2)<br>";
+  $komm = "({$kukarow['kuka']}@".date('Y-m-d').") ".t("Mit‰tˆi ohjelmassa iltasiivo.php")." (2)<br>";
 
   $query = "UPDATE lasku set
             alatila     = '$row[tila]',
@@ -192,7 +192,7 @@ while ($row = mysql_fetch_assoc($result)) {
   pupe_query($query);
   $laskuri++;
 
-  //poistetaan TIETENKIN kukarow[kesken] ettei voi sy√∂tt√§√§ extranetiss√§ rivej√§ t√§lle
+  //poistetaan TIETENKIN kukarow[kesken] ettei voi syˆtt‰‰ extranetiss‰ rivej‰ t‰lle
   $query = "UPDATE kuka set
             kesken      = ''
             WHERE yhtio = '$kukarow[yhtio]'
@@ -201,13 +201,13 @@ while ($row = mysql_fetch_assoc($result)) {
 }
 
 if ($laskuri > 0) {
-  $iltasiivo .= is_log("Mit√§t√∂itiin $laskuri tilausta joilla oli pelkki√§ mit√§t√∂ityj√§ rivej√§.");
+  $iltasiivo .= is_log("Mit‰tˆitiin $laskuri tilausta joilla oli pelkki‰ mit‰tˆityj‰ rivej‰.");
 }
 
 $laskuri = 0;
 
-// Merkit√§√§n rivit mit√§t√∂idyksi joiden otsikot on mit√§t√∂ity
-// ei mit√§t√∂id√§ puuterivej√§, eik√§ suoraan saapumiseen lis√§ttyj√§ ostorivej√§ lasku.alatila != 'K'
+// Merkit‰‰n rivit mit‰tˆidyksi joiden otsikot on mit‰tˆity
+// ei mit‰tˆid‰ puuterivej‰, eik‰ suoraan saapumiseen lis‰ttyj‰ ostorivej‰ lasku.alatila != 'K'
 $query = "SELECT lasku.tunnus laskutunnus
           FROM lasku
           JOIN tilausrivi on (tilausrivi.yhtio = lasku.yhtio
@@ -221,7 +221,7 @@ $query = "SELECT lasku.tunnus laskutunnus
 $result = pupe_query($query);
 
 while ($row = mysql_fetch_assoc($result)) {
-  $komm = "({$kukarow['kuka']}@".date('Y-m-d').")".t("Mit√§t√∂i ohjelmassa iltasiivo.php")." (3)<br>";
+  $komm = "({$kukarow['kuka']}@".date('Y-m-d').")".t("Mit‰tˆi ohjelmassa iltasiivo.php")." (3)<br>";
 
   $query = "UPDATE tilausrivi SET
             tyyppi       = 'D'
@@ -233,12 +233,12 @@ while ($row = mysql_fetch_assoc($result)) {
 }
 
 if ($laskuri > 0) {
-  $iltasiivo .= is_log("Mit√§t√∂itiin $laskuri mit√§t√∂idyn tilauksen rivit.");
+  $iltasiivo .= is_log("Mit‰tˆitiin $laskuri mit‰tˆidyn tilauksen rivit.");
 }
 
 $laskuri = 0;
 
-// Arkistoidaan tulostetut ostotilaukset joilla ei ole yht√§√§n tulossa olevaa kamaa
+// Arkistoidaan tulostetut ostotilaukset joilla ei ole yht‰‰n tulossa olevaa kamaa
 $query = "SELECT distinct lasku.tunnus laskutunnus
           FROM lasku
           LEFT JOIN tilausrivi on (tilausrivi.yhtio = lasku.yhtio
@@ -264,7 +264,7 @@ if ($laskuri > 0) $iltasiivo .= is_log("Arkistoitiin $laskuri ostotilausta.");
 
 $laskuri = 0;
 
-// Vapautetaan holdissa olevat tilaukset, jos niill√§ on maksupositioita ja ennakkolaskut ovat maksettu
+// Vapautetaan holdissa olevat tilaukset, jos niill‰ on maksupositioita ja ennakkolaskut ovat maksettu
 // Holdissa olevat tilaukset ovat tilassa N B
 $query = "SELECT DISTINCT jaksotettu
           FROM lasku
@@ -284,7 +284,7 @@ if ($laskuri > 0) {
 
 $laskuri = 0;
 
-// Arkistoidaan saapumiset joilla ei ole yht√§√§n liitetty√§ rivi√§ eik√§ yht√§√§n laskuja liitetty
+// Arkistoidaan saapumiset joilla ei ole yht‰‰n liitetty‰ rivi‰ eik‰ yht‰‰n laskuja liitetty
 $query = "SELECT distinct lasku.tunnus laskutunnus
           FROM lasku
           LEFT JOIN lasku liitosotsikko ON (liitosotsikko.yhtio = lasku.yhtio
@@ -307,7 +307,7 @@ $query = "SELECT distinct lasku.tunnus laskutunnus
 $result = pupe_query($query);
 
 while ($row = mysql_fetch_assoc($result)) {
-  $komm = "({$kukarow['kuka']}@".date('Y-m-d').")".t("Mit√§t√∂i ohjelmassa iltasiivo.php")."<br>";
+  $komm = "({$kukarow['kuka']}@".date('Y-m-d').")".t("Mit‰tˆi ohjelmassa iltasiivo.php")."<br>";
 
   $query = "UPDATE lasku SET
             alatila     = tila,
@@ -320,10 +320,10 @@ while ($row = mysql_fetch_assoc($result)) {
 }
 
 if ($laskuri > 0) {
-  $iltasiivo .= is_log("Mit√§t√∂itiin $laskuri tyhj√§√§ saapumista.");
+  $iltasiivo .= is_log("Mit‰tˆitiin $laskuri tyhj‰‰ saapumista.");
 }
 
-// t√§ss√§ tehd√§√§n isitt√∂mist√§ perheist√§ ei-perheit√§ ja my√∂s perheist√§ joissa ei ole lapsia eli nollataan perheid
+// t‰ss‰ tehd‰‰n isittˆmist‰ perheist‰ ei-perheit‰ ja myˆs perheist‰ joissa ei ole lapsia eli nollataan perheid
 $lask = 0;
 $lask2 = 0;
 
@@ -370,11 +370,11 @@ while ($row = mysql_fetch_assoc($result)) {
 }
 
 if ($lask > 0) {
-  $iltasiivo .= is_log("Korjattiin $lask tilausrivi√§ joissa tuoteperheen lapsituotteelta puuttui is√§tuote");
+  $iltasiivo .= is_log("Korjattiin $lask tilausrivi‰ joissa tuoteperheen lapsituotteelta puuttui is‰tuote");
 }
 
 if ($lask2 > 0) {
-  $iltasiivo .= is_log("Korjattiin $lask2 tilausrivi√§ joissa tuoteperheen is√§tuotteella ei ollut lapsituotteita");
+  $iltasiivo .= is_log("Korjattiin $lask2 tilausrivi‰ joissa tuoteperheen is‰tuotteella ei ollut lapsituotteita");
 }
 
 $lasktuote = 0;
@@ -403,7 +403,7 @@ while ($row = mysql_fetch_assoc($result)) {
 }
 
 if ($lasktuote > 0) {
-  $iltasiivo .= is_log("Poistettiin $lasktuote tuotteelta yhteens√§ $laskpois duplikaattia toimittajaa");
+  $iltasiivo .= is_log("Poistettiin $lasktuote tuotteelta yhteens‰ $laskpois duplikaattia toimittajaa");
 }
 
 $kukaquery = "UPDATE kuka
@@ -413,10 +413,10 @@ $kukaquery = "UPDATE kuka
 pupe_query($kukaquery);
 
 if (mysql_affected_rows() > 0) {
-  $iltasiivo .= date("d.m.Y @ G:i:s").": P√§ivitettiin ".mysql_affected_rows()." k√§ytt√§j√§n taso 3 --> 2\n";
+  $iltasiivo .= date("d.m.Y @ G:i:s").": P‰ivitettiin ".mysql_affected_rows()." k‰ytt‰j‰n taso 3 --> 2\n";
 }
 
-// mit√§t√∂id√§√§n keskenolevia extranet-tilauksia, jos ne on liian vanhoja ja yhti√∂n parametri on p√§√§ll√§
+// mit‰tˆid‰‰n keskenolevia extranet-tilauksia, jos ne on liian vanhoja ja yhtiˆn parametri on p‰‰ll‰
 if ($yhtiorow['iltasiivo_mitatoi_ext_tilauksia'] != '') {
 
   $laskuri = 0;
@@ -460,7 +460,7 @@ if ($yhtiorow['iltasiivo_mitatoi_ext_tilauksia'] != '') {
       }
     }
 
-    $komm = "({$kukarow['kuka']}@".date('Y-m-d').")".t("Mit√§t√∂i ohjelmassa iltasiivo.php")." (4)<br>";
+    $komm = "({$kukarow['kuka']}@".date('Y-m-d').")".t("Mit‰tˆi ohjelmassa iltasiivo.php")." (4)<br>";
 
     $query = "UPDATE lasku SET
               alatila     = 'N',
@@ -477,7 +477,7 @@ if ($yhtiorow['iltasiivo_mitatoi_ext_tilauksia'] != '') {
               and var     != 'P'";
     pupe_query($query);
 
-    //poistetaan TIETENKIN kukarow[kesken] ettei voi sy√∂tt√§√§ extranetiss√§ rivej√§ t√§lle
+    //poistetaan TIETENKIN kukarow[kesken] ettei voi syˆtt‰‰ extranetiss‰ rivej‰ t‰lle
     $query = "UPDATE kuka SET
               kesken      = ''
               WHERE yhtio = '{$kukarow['yhtio']}'
@@ -488,7 +488,7 @@ if ($yhtiorow['iltasiivo_mitatoi_ext_tilauksia'] != '') {
   }
 
   if ($laskuri > 0) {
-    $iltasiivo .= is_log("Mit√§t√∂itiin $laskuri extranet-tilausta, jotka olivat $aikaraja tuntia vanhoja.");
+    $iltasiivo .= is_log("Mit‰tˆitiin $laskuri extranet-tilausta, jotka olivat $aikaraja tuntia vanhoja.");
   }
 }
 
@@ -499,10 +499,10 @@ if (table_exists('suorituskykyloki')) {
   pupe_query($query);
 
   $laskuri = mysql_affected_rows();
-  if ($laskuri > 0) $iltasiivo .= is_log("Poistettiin $laskuri rivi√§ suorituskykylokista.");
+  if ($laskuri > 0) $iltasiivo .= is_log("Poistettiin $laskuri rivi‰ suorituskykylokista.");
 }
 
-// Poistetaan poistettujen k√§ytt√§jien oikeudet
+// Poistetaan poistettujen k‰ytt‰jien oikeudet
 $query = "DELETE oikeu
           FROM oikeu
           LEFT JOIN kuka ON (oikeu.yhtio = kuka.yhtio AND oikeu.kuka = kuka.kuka)
@@ -513,7 +513,7 @@ $query = "DELETE oikeu
 pupe_query($query);
 $del = mysql_affected_rows();
 
-$iltasiivo .= is_log("Poistettiin $del poistettujen k√§ytt√§jien k√§ytt√∂oikeuksia.");
+$iltasiivo .= is_log("Poistettiin $del poistettujen k‰ytt‰jien k‰yttˆoikeuksia.");
 
 // Dellataan rogue oikeudet
 $query = "DELETE o1.*
@@ -529,9 +529,9 @@ $query = "DELETE o1.*
 pupe_query($query);
 $del = mysql_affected_rows();
 
-$iltasiivo .= is_log("Poistettiin $del poistettujen ohjelmien k√§ytt√∂oikeuksia.");
+$iltasiivo .= is_log("Poistettiin $del poistettujen ohjelmien k‰yttˆoikeuksia.");
 
-// Merkataan myyntitilit valmiiksi, jos niill√§ ei ole yht√§√§n k√§sittelem√§tt√∂mi√§ rivej√§
+// Merkataan myyntitilit valmiiksi, jos niill‰ ei ole yht‰‰n k‰sittelem‰ttˆmi‰ rivej‰
 $query = "SELECT lasku.tunnus,
           sum(if(tilausrivi.kpl != 0, 1, 0)) ei_valmis
           FROM lasku
@@ -558,7 +558,7 @@ while ($laskurow = mysql_fetch_assoc($result)) {
 }
 
 if ($myyntitili > 0) {
-  $iltasiivo .= is_log("Merkattiin $myyntitili myyntitili√§ valmiiksi.");
+  $iltasiivo .= is_log("Merkattiin $myyntitili myyntitili‰ valmiiksi.");
 }
 
 // Poistetaan kaikki yhden tuotteen korvaavuusketjut
@@ -604,7 +604,7 @@ if ($laskuri > 0) {
 
 $laskuri = 0;
 
-// Tsekataan jos joku valmistus tai valmistusmyynti on j√§√§nyt alatila = K tilaan
+// Tsekataan jos joku valmistus tai valmistusmyynti on j‰‰nyt alatila = K tilaan
 $query = "SELECT distinct tunnus, tila
           FROM lasku
           WHERE yhtio = '$kukarow[yhtio]'
@@ -633,11 +633,11 @@ while ($row = mysql_fetch_assoc($result)) {
 }
 
 if ($valmkorj > 0) {
-  $iltasiivo .= is_log("Merkattiin $valmkorj valmistustilausta takaisin alkuper√§isille alatiloille.");
+  $iltasiivo .= is_log("Merkattiin $valmkorj valmistustilausta takaisin alkuper‰isille alatiloille.");
 }
 
 $laskuri = 0;
-// Poistetaan kaikki laitteen_sopimukset -rivit, joille ei l√∂ydy en√§√§ tilausrivi√§ sopimuksilta
+// Poistetaan kaikki laitteen_sopimukset -rivit, joille ei lˆydy en‰‰ tilausrivi‰ sopimuksilta
 $query = "SELECT laitteen_sopimukset.tunnus
           FROM laitteen_sopimukset
 	        LEFT JOIN tilausrivi ON (tilausrivi.yhtio = laitteen_sopimukset.yhtio
@@ -654,7 +654,7 @@ while ($row = mysql_fetch_assoc($result)) {
 }
 
 if ($laskuri > 0) {
-  $iltasiivo .= is_log("Poistettiin $laskuri laitteen sopimusrivi√§ (laitteen_sopimukset), joita ei l√∂ydy sopimuksilta.");
+  $iltasiivo .= is_log("Poistettiin $laskuri laitteen sopimusrivi‰ (laitteen_sopimukset), joita ei lˆydy sopimuksilta.");
 }
 
 $laskuri = 0;
@@ -681,10 +681,10 @@ while ($iltatuotepaikatrow = mysql_fetch_assoc($iltatuotepaikatresult)) {
 }
 
 if ($myyntitili > 0) {
-  $iltasiivo .= is_log("Poistettiin $myyntitili tyhj√§√§ myyntitilin varastopaikkaa.");
+  $iltasiivo .= is_log("Poistettiin $myyntitili tyhj‰‰ myyntitilin varastopaikkaa.");
 }
 
-// Poistetaan tuotepaikat joiden saldo on 0 ja ne on m√§√§ritelty reservipaikoiksi
+// Poistetaan tuotepaikat joiden saldo on 0 ja ne on m‰‰ritelty reservipaikoiksi
 // Ei poisteta kuitenkaan jos se on oletuspaikka
 if ($yhtiorow['kerayserat'] == 'K') {
   $poistettu = 0;
@@ -707,7 +707,7 @@ if ($yhtiorow['kerayserat'] == 'K') {
             AND inventointilistarivi.tunnus IS NULL";
   $tuotepaikat = pupe_query($query);
 
-  // Poistetaan l√∂ydetyt rivit ja tehd√§√§n tapahtuma
+  // Poistetaan lˆydetyt rivit ja tehd‰‰n tapahtuma
   while ($tuotepaikkarow = mysql_fetch_assoc($tuotepaikat)) {
     // Merkataan paikka poistettavaksi
     $query = "UPDATE tuotepaikat
@@ -724,8 +724,8 @@ if ($yhtiorow['kerayserat'] == 'K') {
   }
 }
 
-// Poistetaan tuotepaikat jotka ovat varaston ensimm√§isell√§ paikalla (esim. A-0-0-0) ja joilla
-// ei ole saldoa eik√§ h√§lytysrajaa. Koska n√§m√§ ovat yleens√§ generoituja paikkoja. (ei poisteta oletuspaikkaa)
+// Poistetaan tuotepaikat jotka ovat varaston ensimm‰isell‰ paikalla (esim. A-0-0-0) ja joilla
+// ei ole saldoa eik‰ h‰lytysrajaa. Koska n‰m‰ ovat yleens‰ generoituja paikkoja. (ei poisteta oletuspaikkaa)
 if ($yhtiorow['kerayserat'] == 'K') {
   $poistettu = 0;
 
@@ -813,7 +813,7 @@ if (mysql_num_rows($poistettavat_tuotepaikat) > 0) {
     $avoimet_rivit[] = $avoinrivi['id'];
   }
 
-  // Haetaan inventointilistalla olevat k√§sittelem√§tt√∂m√§t rivit
+  // Haetaan inventointilistalla olevat k‰sittelem‰ttˆm‰t rivit
   $query = "SELECT LOWER(CONCAT(tuoteno, hyllyalue, hyllynro, hyllytaso, hyllyvali)) AS id
             FROM inventointilistarivi
             WHERE yhtio = '{$kukarow['yhtio']}'
@@ -840,7 +840,7 @@ if (mysql_num_rows($poistettavat_tuotepaikat) > 0) {
   }
 }
 
-// Loopataan poistettavat tuotepaikat l√§pi
+// Loopataan poistettavat tuotepaikat l‰pi
 while ($tuotepaikka = mysql_fetch_assoc($poistettavat_tuotepaikat)) {
 
   // Ei poisteta jos avoimia
@@ -892,13 +892,13 @@ if ($php_cli) {
   require "varastopaikkojen_siivous.php";
 
   if ($poistettu > 0) {
-    $iltasiivo .= is_log("Poistettiin $poistettu tuotepaikkaa jonka tuotetta ei en√§√§ ole.");
+    $iltasiivo .= is_log("Poistettiin $poistettu tuotepaikkaa jonka tuotetta ei en‰‰ ole.");
   }
 }
 
 // Tarkistetaan milloin pankkiyhteyden sertifikaatti menee vanhaksi
-// ja mik√§li se on menossa seuraavan kuukauden sis√§ll√§ vanhaksi niin l√§hetet√§√§n muistutusmaili.
-// Sen j√§lkeen kun sertifikaatti on mennyt vanhaksi niin ei en√§√§ t√§t√§ meili√§ l√§hetet√§.
+// ja mik‰li se on menossa seuraavan kuukauden sis‰ll‰ vanhaksi niin l‰hetet‰‰n muistutusmaili.
+// Sen j‰lkeen kun sertifikaatti on mennyt vanhaksi niin ei en‰‰ t‰t‰ meili‰ l‰hetet‰.
 $pankkiyhteydet = hae_pankkiyhteydet();
 
 foreach ($pankkiyhteydet as $pankkiyhteys) {
@@ -911,12 +911,12 @@ foreach ($pankkiyhteydet as $pankkiyhteys) {
   $serti_vanhenemispaiva_vertailuun = date("Ymd", strtotime($pankkiyhteys["signing_certificate_valid_to"]));
 
   if ($tanaan >= $kolmekymmentapaivaa_ennen and $tanaan <= $serti_vanhenemispaiva_vertailuun) {
-    // Rakennetaan s√§hk√∂postiin l√§hetett√§v√§ muistutusviesti
+    // Rakennetaan s‰hkˆpostiin l‰hetett‰v‰ muistutusviesti
     $sepayhteysmuistutus = t("SEPA-yheyden sertifikaatti vanhenemassa %s pankista", "", $pankkiyhteys["pankin_nimi"])."!\n\n";
     $sepayhteysmuistutus .= t("Sertifikaatti vanhenee").": {$serti_vanhenemispaiva} \n\n";
-    $sepayhteysmuistutus .= t("Sertifikaatti on uusittava ennenkuin se vanhenee. Uusiminen tapahtuu Kirjapito -> Yllapito -> Pankkiyhteydet-ohjelman kautta.")."\n\n";
+    $sepayhteysmuistutus .= t("Sertifikaatti on uusittava ennenkuin se vanhenee. Uusiminen tapahtuu Kirjapito -> Yll‰pito -> Pankkiyhteydet-ohjelman kautta.")."\n\n";
 
-    // Laitetaan s√§hk√∂posti admin osoitteeseen siin√§ tapauksessa,
+    // Laitetaan s‰hkˆposti admin osoitteeseen siin‰ tapauksessa,
     // jos talhal tai alert email osoitteita ei ole kumpaakaan setattu
     $error_email = $yhtiorow["admin_email"];
 
@@ -948,7 +948,7 @@ $iltasiivo .= is_log("Iltasiivo $yhtiorow[nimi]. Done!");
 if ($iltasiivo != "" and isset($iltasiivo_email) and $iltasiivo_email == 1) {
   $params = array(
     "to" => $yhtiorow["admin_email"],
-    "subject" => "Iltasiivo yhti√∂lle '{$yhtiorow["yhtio"]}'",
+    "subject" => "Iltasiivo yhtiˆlle '{$yhtiorow["yhtio"]}'",
     "ctype" => "text",
     "body"=> $iltasiivo
   );

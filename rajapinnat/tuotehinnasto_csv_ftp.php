@@ -76,7 +76,7 @@ while ($row = mysql_fetch_assoc($res)) {
 fclose($fp);
 
 // Tehd‰‰n FTP-siirto
-if ($paiva_ajo and !empty($hinnastocsv_ftphost)) {
+if (!empty($hinnastocsv_ftphost)) {
   $ftphost = $hinnastocsv_ftphost;
   $ftpuser = $hinnastocsv_ftpuser;
   $ftppass = $hinnastocsv_ftppass;

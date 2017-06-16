@@ -45,7 +45,7 @@ if (!$fp = fopen($filepath, 'w+')) {
 $header = "tuoteno;minkpl;maxkpl;hinta;alkupvm;loppupvm;laji;maa;valkoodi;selite\n";
 fwrite($fp, $header);
 
-// Haetaan varastot
+// Haetaan hinnasto-taulun sisältö
 $query = "SELECT *
           FROM hinnasto
           WHERE yhtio  = '{$yhtiorow['yhtio']}'";

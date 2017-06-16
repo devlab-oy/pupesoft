@@ -32,8 +32,10 @@ $yhtio = mysql_real_escape_string($argv[1]);
 
 $yhtiorow = hae_yhtion_parametrit($yhtio);
 
+$ajohetki = date("Y-m-d_His");
+
 // Tallennetaan rivit tiedostoon
-$filepath = "/tmp/location_update_{$yhtio}_$ajopaiva.csv";
+$filepath = "/tmp/tuotehinnasto_{$yhtio}_$ajohetki.csv";
 
 if (!$fp = fopen($filepath, 'w+')) {
   die("Tiedoston avaus epäonnistui: $filepath\n");

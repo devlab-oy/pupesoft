@@ -731,7 +731,7 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
           $osto_era = $osto_era == 0 ? 1 : $osto_era;
 
           $ostoehdotus = $row["tpaikka_tilausmaara"] - $vapaasaldo;
-          $ostoehdotus = floor($ostoehdotus / $osto_era) * $osto_era;
+          $ostoehdotus = ceil($ostoehdotus / $osto_era) * $osto_era;
         }
       }
     }

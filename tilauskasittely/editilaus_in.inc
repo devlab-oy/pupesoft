@@ -620,7 +620,6 @@ while ($tietue = fgets($fd)) {
   case 'ODTM2__DT' :
   case 'DTM' :
     // Toimituspäivä
-
     if ($edi_tyyppi == "edifact911") {
       $kentat = explode(":", $tieto);
       if ($kentat[0] == 2 and $kentat[2] == 102) {
@@ -1305,7 +1304,7 @@ while ($tietue = fgets($fd)) {
           }
           else {
             $edi_ulos .= t("Vientitilaus EU -maahan")."\n";
- 
+
             if ($arow["laji"] != "H") {
               $arow["alv"] = 0;
               $arow["vienti"] = "E";

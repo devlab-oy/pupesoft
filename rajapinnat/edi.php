@@ -134,6 +134,7 @@ class Edi {
     $tilausviite = '';
     $tilausnumero = '';
     $kohde = '';
+    $toimaika = '';
 
     if (!empty($order['reference_number'])) {
       $tilausviite = str_replace("\n", " ", $order['reference_number']);
@@ -145,6 +146,13 @@ class Edi {
 
     if (!empty($order['target'])) {
       $kohde = str_replace("\n", " ", $order['target']);
+    }
+
+    if (!empty($order['delivery_time'])) {
+      $toimaika = str_replace("\n", " ", $order['delivery_time']);
+    }
+    else {
+      $toimaika = date("Y-m-d");
     }
 
     // tilauksen otsikko
@@ -159,9 +167,9 @@ class Edi {
     $edi_order .= "OSTOTIL.OT_VERKKOKAUPPA_TILAUSVIITE:{$tilausviite}\n";
     $edi_order .= "OSTOTIL.OT_VERKKOKAUPPA_TILAUSNUMERO:{$tilausnumero}\n";
     $edi_order .= "OSTOTIL.OT_VERKKOKAUPPA_KOHDE:{$kohde}\n";
-    $edi_order .= "OSTOTIL.OT_TILAUSAIKA:\n";
+    $edi_order .= "OSTOTIL.OT_TILAUSAIKA:{$toimaika}\n";
     $edi_order .= "OSTOTIL.OT_KASITTELIJA:\n";
-    $edi_order .= "OSTOTIL.OT_TOIMITUSAIKA:\n";
+    $edi_order .= "OSTOTIL.OT_TOIMITUSAIKA:{$toimaika}\n";
     $edi_order .= "OSTOTIL.OT_TOIMITUSTAPA:{$order['shipping_description']}\n";
     $edi_order .= "OSTOTIL.OT_TOIMITUSEHTO:\n";
     $edi_order .= "OSTOTIL.OT_MAKSETTU:{$order['status']}\n";

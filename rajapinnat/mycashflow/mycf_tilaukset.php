@@ -208,30 +208,46 @@ class MyCashflowTilaukset {
 
         $item = array();
 
-        // Nimitys
-        $item['name'] = $product->ProductName;
+        // Tämä on alennustuote
+        if (!empty($product->ProductID->attributes()->CouponCode) and !empty($GLOBALS["yhtiorow"]["alennus_tuotenumero"])) {
+          // Tuoteno
+          $item['sku'] = $GLOBALS["yhtiorow"]["alennus_tuotenumero"];
+
+          // Nimitys
+          $item['name'] = "Alennuskoodi: ".$product->ProductName;
+
+          // Hinta ja määräkerroin
+          $kerroin = -1;
+        }
+        else {
+          // Tuoteno
+          $item['sku'] = $product->Code;
+
+          // Nimitys
+          $item['name'] = $product->ProductName;
+
+          // Hinta ja määräkerroin
+          $kerroin = 1;
+        }
 
         // Määrä
-        $item['qty_ordered'] = $product->Quantity;
-
-        // Tuoteno
-        $item['sku'] = $product->Code;
+        $item['qty_ordered'] = $product->Quantity * $kerroin;
 
         $item['base_discount_amount'] = 0;
         $item['discount_percent'] = 0;
 
         // Verollinen yksikköhinta
-        $item['original_price'] = $product->UnitPrice;
+        $item['original_price'] = $product->UnitPrice * $kerroin;
 
         // Veroton yksikköhinta
-        $item['price'] = (float) $product->UnitPrice - (float) $product->UnitTax;
+        $item['price'] = ((float) $product->UnitPrice - (float) $product->UnitTax) * $kerroin;
 
         // Verokanta
         $item['tax_percent'] = $product->UnitPrice->attributes()->vat;
 
         // Yheensäsumma
-        $tilaus['grand_total'] += (float) $product->Total;
-        $tilaus['tax_amount'] += (float) $product->TotalTax;
+        $tilaus['grand_total'] += (float) $product->Total * $kerroin;
+        $tilaus['tax_amount'] += (float) $product->TotalTax * $kerroin;
 
         // Ei käytössä
         $item['parent_item_id'] = "";

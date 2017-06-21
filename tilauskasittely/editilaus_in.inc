@@ -2072,6 +2072,7 @@ while ($tietue = fgets($fd)) {
     break;
 
   case 'OLINEN_NU' :
+  case 'OSTOTILRIV.OTR_EANKOODI' :
   case 'LIN':
     // tuotteen EAN-koodi
 

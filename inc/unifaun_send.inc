@@ -1266,7 +1266,7 @@ class Unifaun {
         //$uni_par_val = $uni_article->addChild('val', ""); # Defines if the contents contaminate the marine environment, ADR only. Valid values: 1 = Toxic and 2 = Non-toxic for the marine environment
         //$uni_par_val->addAttribute('n', "dngmpcode");
 
-        if (isset($vak['limited_qty']) and $vak['limited_qty'] != '') {
+        if (isset($vak['limited_qty']) and $vak['limited_qty'] != '' and $this->onko_lq()) {
           $uni_par_val = $uni_article->addChild('val', $vak['limited_qty']); // Note for ADR goods
           $uni_par_val->addAttribute('n', "dngnote");
 

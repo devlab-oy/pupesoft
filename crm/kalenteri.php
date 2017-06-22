@@ -107,6 +107,13 @@ if ( isset($poista_liite) and (int) $poista_liite > 0 ) {
 
 echo "<font class='head'>".t("Kalenteri")."</font>";
 
+if ($yhtiorow["kalenteri_aikavali"] == "") {
+  $aikavali = 30;
+}
+else {
+  $aikavali = (int)$yhtiorow["kalenteri_aikavali"];
+}
+
 // ollaan painettu lis‰‰ nappia
 if ($tee == 'LISAA') {
 
@@ -396,12 +403,12 @@ if ($tee == "SYOTA") {
 
   $lisays .= " - <select name='kello' id='alkukello' $paivitaloppu>";
 
-  if ($kello == "" or $kello == "00:00") {
+  if ($kello == ""){
     $kello = "08:00";
   }
 
-  $loophh = "07";
-  $loopmm = "30";
+  $loophh = "{$AIKA_ARRAY[0]}";
+  $loopmm = "{$aikavali}";
 
   list($whlopt, $whlopm) = explode(":", $AIKA_ARRAY[count($AIKA_ARRAY)-1]);
   $whileloppu = sprintf("%02d", $whlopt+1);
@@ -412,9 +419,9 @@ if ($tee == "SYOTA") {
   $loopdate = "";
 
   while ($loopdate != $whileloppu) {
-    $loopdate = date("H:i", mktime($loophh, $loopmm+30, 0));
-    $loophh   = date("H",   mktime($loophh, $loopmm+30, 0));
-    $loopmm   = date("i",   mktime($loophh, $loopmm+30, 0));
+    $loopdate = date("H:i", mktime($loophh, $loopmm+$aikavali, 0));
+    $loophh   = date("H",   mktime($loophh, $loopmm+$aikavali, 0));
+    $loopmm   = date("i",   mktime($loophh, $loopmm+$aikavali, 0));
 
     $sel = '';
     if ($loopdate == substr($kello, 0, 5)) {
@@ -434,19 +441,19 @@ if ($tee == "SYOTA") {
 
   $lisays .= " - <select name='lkello' id='loppukello'>";
 
-  $loophh = "07";
-  $loopmm = "30";
+  $loophh = "{$AIKA_ARRAY[0]}";
+  $loopmm = "{$aikavali}";
 
   if (empty($lkello)) {
-    $lkello = date("H:i", strtotime('+30 minutes', strtotime($kello)));
+    $lkello = date("H:i", strtotime('+{$aikavali} minutes', strtotime($kello)));
   }
 
   $loopdate = "";
 
   while ($loopdate != $whileloppu) {
-    $loophh   = date("H", mktime($loophh, $loopmm+30, 0));
-    $loopmm   = date("i", mktime($loophh, $loopmm+30, 0));
-    $loopdate = date("H:i", mktime($loophh, $loopmm+30, 0));
+    $loophh   = date("H", mktime($loophh, $loopmm+$aikavali, 0));
+    $loopmm   = date("i", mktime($loophh, $loopmm+$aikavali, 0));
+    $loopdate = date("H:i", mktime($loophh, $loopmm+$aikavali, 0));
 
     $sel = '';
     if ($loopdate == substr($lkello, 0, 5)) {
@@ -840,30 +847,30 @@ if (!empty($viikkonakyma)) {
   echo "<tr>";
 
   list($vy, $vm, $vd) = explode("-", date("Y-m-d", mktime(0, 0, 0, $kuu, $paiva++, $year)));
-  echo "<td class='back ptop pnopad' style='width: 14%; min-width: 100px;'>",piirra_kalenteripaiva($vy, $vm, $vd), "</td>";
+  echo "<td class='back ptop pnopad' style='width: 14%; min-width: 100px;'>",piirra_kalenteripaiva($vy, $vm, $vd, TRUE, $aikavali), "</td>";
 
   list($vy, $vm, $vd) = explode("-", date("Y-m-d", mktime(0, 0, 0, $kuu, $paiva++, $year)));
-  echo "<td class='back ptop pnopad' style='width: 14%; min-width: 100px;'>",piirra_kalenteripaiva($vy, $vm, $vd, FALSE), "</td>";
+  echo "<td class='back ptop pnopad' style='width: 14%; min-width: 100px;'>",piirra_kalenteripaiva($vy, $vm, $vd, FALSE, $aikavali), "</td>";
 
   list($vy, $vm, $vd) = explode("-", date("Y-m-d", mktime(0, 0, 0, $kuu, $paiva++, $year)));
-  echo "<td class='back ptop pnopad' style='width: 14%; min-width: 100px;'>",piirra_kalenteripaiva($vy, $vm, $vd, FALSE), "</td>";
+  echo "<td class='back ptop pnopad' style='width: 14%; min-width: 100px;'>",piirra_kalenteripaiva($vy, $vm, $vd, FALSE, $aikavali), "</td>";
 
   list($vy, $vm, $vd) = explode("-", date("Y-m-d", mktime(0, 0, 0, $kuu, $paiva++, $year)));
-  echo "<td class='back ptop pnopad' style='width: 14%; min-width: 100px;'>",piirra_kalenteripaiva($vy, $vm, $vd, FALSE), "</td>";
+  echo "<td class='back ptop pnopad' style='width: 14%; min-width: 100px;'>",piirra_kalenteripaiva($vy, $vm, $vd, FALSE, $aikavali), "</td>";
 
   list($vy, $vm, $vd) = explode("-", date("Y-m-d", mktime(0, 0, 0, $kuu, $paiva++, $year)));
-  echo "<td class='back ptop pnopad' style='width: 14%; min-width: 100px;'>",piirra_kalenteripaiva($vy, $vm, $vd, FALSE), "</td>";
+  echo "<td class='back ptop pnopad' style='width: 14%; min-width: 100px;'>",piirra_kalenteripaiva($vy, $vm, $vd, FALSE, $aikavali), "</td>";
 
   list($vy, $vm, $vd) = explode("-", date("Y-m-d", mktime(0, 0, 0, $kuu, $paiva++, $year)));
-  echo "<td class='back ptop pnopad' style='width: 14%; min-width: 100px;'>",piirra_kalenteripaiva($vy, $vm, $vd, FALSE), "</td>";
+  echo "<td class='back ptop pnopad' style='width: 14%; min-width: 100px;'>",piirra_kalenteripaiva($vy, $vm, $vd, FALSE, $aikavali), "</td>";
 
   list($vy, $vm, $vd) = explode("-", date("Y-m-d", mktime(0, 0, 0, $kuu, $paiva++, $year)));
-  echo "<td class='back ptop pnopad' style='width: 14%; min-width: 100px;'>",piirra_kalenteripaiva($vy, $vm, $vd, FALSE), "</td>";
+  echo "<td class='back ptop pnopad' style='width: 14%; min-width: 100px;'>",piirra_kalenteripaiva($vy, $vm, $vd, FALSE, $aikavali), "</td>";
   echo "</tr>";
 }
 else {
   piirra_kokopaivantapahtumat($kuu, $paiva, $year);
-  piirra_kalenteripaiva($year, $kuu, $paiva);
+  piirra_kalenteripaiva($year, $kuu, $paiva, TRUE, $aikavali);
 }
 
 echo "</table>";
@@ -873,7 +880,7 @@ echo "</td></tr>";
 echo "</table>";
 
 // Tarvittavat funktiot
-function piirra_kalenteripaiva($year, $kuu, $paiva, $aikasarake = TRUE) {
+function piirra_kalenteripaiva($year, $kuu, $paiva, $aikasarake = TRUE, $aikavali) {
   global $MONTH_ARRAY, $AIKA_ARRAY, $DAY_ARRAY, $konsernit, $vertaa, $valitut, $kenelle, $konserni, $toim, $tyomaarays, $palvelin2, $lopetus,
         $lisays, $lyear, $lkuu, $lpaiva, $kukarow, $yhtiorow, $kons, $viikkonakyma, $maxkokopaivamaara, $asmemolinkki;
 
@@ -884,7 +891,11 @@ function piirra_kalenteripaiva($year, $kuu, $paiva, $aikasarake = TRUE) {
 
   list($whlopt, $whlopm) = explode(":", $AIKA_ARRAY[count($AIKA_ARRAY)-1]);
 
-  $whlopm+=30;
+  $whlopm+=$aikavali;
+
+  if ($aikavali == 15) {
+    $whlopm = $whlopm + 30;
+  }
 
   if ($whlopm >= 60) {
     $whlopt++;
@@ -942,8 +953,8 @@ function piirra_kalenteripaiva($year, $kuu, $paiva, $aikasarake = TRUE) {
             and kalenteri.tyyppi in ($tyyppi)
             and kokopaiva = ''
             $konsernit
-            and pvmalku <= '$year-$kuu-$paiva 17:30:00'
-            and pvmloppu > '$year-$kuu-$paiva 08:00:00'
+            and pvmalku <= '$year-$kuu-$paiva 23:59:00'
+            and pvmloppu > '$year-$kuu-$paiva 00:00:00'
             order by kesto desc, pvmalku";
   $result = pupe_query($query);
 
@@ -962,13 +973,17 @@ function piirra_kalenteripaiva($year, $kuu, $paiva, $aikasarake = TRUE) {
   $vasenpad = array();
   $aikalask = 0;
 
+  if ($aikavali == 15) {
+    $mm = $mm + 30;
+  }
+
   while ($kello_nyt != $whileloppu) {
-    $hh        = date("H", mktime($hh, $mm+30, 0));
-    $mm        = date("i", mktime($hh, $mm+30, 0));
-    $kello_nyt = date("H:i", mktime($hh, $mm+30, 0));
+    $hh        = date("H", mktime($hh, $mm+$aikavali, 0));
+    $mm        = date("i", mktime($hh, $mm+$aikavali, 0));
+    $kello_nyt = date("H:i", mktime($hh, $mm+$aikavali, 0));
 
     foreach ($paivantapahtumat["$year-$kuu-$paiva $kello_nyt:00"] as $ind => $row) {
-      $kesto = round(($row['kesto']/60)/30);
+      $kesto = round(($row['kesto']/60)/$aikavali);
 
       for ($i = $aikalask; $i < $aikalask+$kesto; $i++) {
         $paallekkaiset[$i]++;
@@ -988,13 +1003,17 @@ function piirra_kalenteripaiva($year, $kuu, $paiva, $aikasarake = TRUE) {
   $mm = $whalkm;
   $aikalask = 0;
 
+  if ($aikavali == 15) {
+    $mm = $mm + 30;
+  }
+
   while ($kello_nyt != $whileloppu) {
-    $hh        = date("H", mktime($hh, $mm+30, 0));
-    $mm        = date("i", mktime($hh, $mm+30, 0));
-    $kello_nyt = date("H:i", mktime($hh, $mm+30, 0));
+    $hh        = date("H", mktime($hh, $mm+$aikavali, 0));
+    $mm        = date("i", mktime($hh, $mm+$aikavali, 0));
+    $kello_nyt = date("H:i", mktime($hh, $mm+$aikavali, 0));
 
     foreach ($paivantapahtumat["$year-$kuu-$paiva $kello_nyt:00"] as $ind => $row) {
-      $kesto = round(($row['kesto']/60)/30); //kuinka monta solua t‰m‰ itemi kest‰‰
+      $kesto = round(($row['kesto']/60)/$aikavali); //kuinka monta solua t‰m‰ itemi kest‰‰
 
       // Suurin p‰‰llekk‰ism‰‰r‰ t‰n tapahtuman aikana?
       for ($i = $aikalask; $i < $aikalask+$kesto; $i++) {
@@ -1015,10 +1034,14 @@ function piirra_kalenteripaiva($year, $kuu, $paiva, $aikasarake = TRUE) {
   $mm = $whalkm;
   $aikalask = 0;
 
+  if ($aikavali == 15) {
+    $mm = $mm + 30;
+  }
+
   while ($kello_nyt != $whileloppu) {
-    $hh        = date("H", mktime($hh, $mm+30, 0));
-    $mm        = date("i", mktime($hh, $mm+30, 0));
-    $kello_nyt = date("H:i", mktime($hh, $mm+30, 0));
+    $hh        = date("H", mktime($hh, $mm+$aikavali, 0));
+    $mm        = date("i", mktime($hh, $mm+$aikavali, 0));
+    $kello_nyt = date("H:i", mktime($hh, $mm+$aikavali, 0));
 
     // lasketaan montako p‰‰llekk‰ist‰ on t‰h‰n kellonaikaan
     $nyt    = $paallekkaiset[$aikalask];
@@ -1037,7 +1060,7 @@ function piirra_kalenteripaiva($year, $kuu, $paiva, $aikasarake = TRUE) {
 
     foreach($paivantapahtumat["$year-$kuu-$paiva $kello_nyt:00"] as $row) {
 
-      $kesto = round(($row['kesto']/60)/30); //kuinka monta solua t‰m‰ itemi kest‰‰
+      $kesto = round(($row['kesto']/60)/$aikavali); //kuinka monta solua t‰m‰ itemi kest‰‰
 
       //haetaan asiakkaan tiedot
       if ($row["liitostunnus"] > 0 and $row['tyyppi'] == 'kalenteri') {

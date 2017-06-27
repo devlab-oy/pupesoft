@@ -214,7 +214,7 @@ for ($i=800; $i < 2200; $i++) {
         <td><b>$kello</b></td>
         <td>";
 
-    if ($tun.$min <= 2100) {
+    if ($tun.$min <= 2130) {
       echo "<a href='$PHP_SELF?kello=$kello&year=$year&month=$month&day=$day&tee=SYOTA&toim=$toim'>".t("Lis‰‰")."</a>";
     }
     echo "  </td>
@@ -222,12 +222,13 @@ for ($i=800; $i < 2200; $i++) {
         <td colspan='2'></td>
         </tr>";
 
-    if ($tun <= 16) {
+    if ($tun <= 21) {
       $min = $min+30;
     }
     else {
       $min = $min+60;
     }
+
     if ($min == 60) {
       $tun = $tun+1;
       $min = "00";

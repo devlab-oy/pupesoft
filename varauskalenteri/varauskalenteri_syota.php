@@ -82,7 +82,7 @@ for ($i = 801; $i <= 2300; $i++) {
   }
   echo "<option value='$alku:$loppu' $sel>$alku:$loppu</option>";
 
-  if ($loppu == "00" && $alku <= 16) {
+  if ($loppu == "00" && $alku <= 21) {
     $loppu = "30";
   }
   else {

@@ -364,6 +364,7 @@ else {
               avainsana as avainsana_kieli READ,
               avainsana as b READ,
               avainsana READ,
+              directdebit READ,
               dynaaminen_puu AS node READ,
               dynaaminen_puu AS parent READ,
               etaisyydet READ,

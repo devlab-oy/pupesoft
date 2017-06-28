@@ -340,7 +340,7 @@ if ($tee == 'TULOSTA') {
       $LclInstrm = $PmtTpInf->addChild('LclInstrm');
       $LclInstrm->addChild('Cd', 'CORE');
 
-      $PmtTpInf->addChild('SeqTp', 'OOFF');
+      $PmtTpInf->addChild('SeqTp', 'RCUR');
 
       $PmtInf->addChild('ReqdColltnDt', $laskurow["erpcm"]);
 

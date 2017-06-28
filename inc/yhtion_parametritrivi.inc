@@ -2994,6 +2994,21 @@ if ($fieldname == "kalenterimerkinnat") {
   $jatko = 0;
 }
 
+if ($fieldname == "kalenteri_aikavali") {
+
+  $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+  $sel = array();
+  $apu = $trow[$i];
+  $sel[$apu] = "selected";
+
+  $ulos .= "<option value = ''>".t("Kalenterissa on 30 minuutin aikaväli")."</option>";
+  $ulos .= "<option value = '15' $sel[15]>".t("Kalenterissa on 15 minuutin aikaväli")."</option>";
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
 if ($fieldname == "tuntikirjausten_erittely") {
 
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";

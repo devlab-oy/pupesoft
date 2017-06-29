@@ -1887,7 +1887,9 @@ if ($tee == 'P') {
                 lasku.yhtio,
                 lasku.kohdistettu,
                 lasku.liitostunnus,
-                lasku.ohjelma_moduli
+                lasku.ohjelma_moduli,
+                lasku.mapvm,
+                lasku.chn
                 FROM lasku
                 LEFT JOIN toimitustapa ON (lasku.yhtio = toimitustapa.yhtio and lasku.toimitustapa = toimitustapa.selite)
                 where lasku.yhtio = '$kukarow[yhtio]'
@@ -1944,8 +1946,11 @@ if ($tee == 'P') {
                     AND mapvm   != '0000-00-00'
                     AND chn      = '999'";
           $yoimresult  = pupe_query($query);
-          $alatilak = "X";
-
+          
+          if ($laskurow['tunnus'] != '0000-00-00' and $laskurow['chn'] = '999') {
+            $alatilak = "X";
+          }
+          
           // Etukäteen maksettu Magentotilaus laskutetaan, jos ei ole jo laskuttunut
           if ($laskurow['ohjelma_moduli'] == 'MAGENTOJT') {
             laskuta_magentojt($laskurow['tunnus']);

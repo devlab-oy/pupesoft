@@ -427,9 +427,8 @@ if ($tee == 'TULOSTA') {
                    and lasku.yhtio                  = maksuehto.yhtio
                    and lasku.maksuehto              = maksuehto.tunnus
                    and maksuehto.directdebit_id       = '$directdebit_id'";
-        #$dresult = pupe_query($dquery);
+        pupe_query($dquery);
       }
-
 
       //keksit‰‰n uudelle failille joku hyv‰ nimi:
       $filenimi = "NordeaDirectDebit-$dd_siirtonumero.xml";

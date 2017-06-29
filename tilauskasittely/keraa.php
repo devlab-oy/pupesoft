@@ -1947,7 +1947,7 @@ if ($tee == 'P') {
                     AND chn      = '999'";
           $yoimresult  = pupe_query($query);
           
-          if ($laskurow['tunnus'] != '0000-00-00' and $laskurow['chn'] = '999') {
+          if ($laskurow['mapvm'] != '0000-00-00' and $laskurow['chn'] == '999') {
             $alatilak = "X";
           }
           

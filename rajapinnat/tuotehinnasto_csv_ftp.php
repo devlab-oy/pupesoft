@@ -46,9 +46,9 @@ $header = "tuoteno;minkpl;maxkpl;hinta;alkupvm;loppupvm;laji;maa;valkoodi;selite
 fwrite($fp, $header);
 
 // Haetaan hinnasto-taulun sisältö
-$query = "SELECT *
-          FROM hinnasto
-          WHERE yhtio  = '{$yhtiorow['yhtio']}'";
+$query = "SELECT hinnasto.*, tuote.myyntihinta
+          FROM hinnasto join tuote on (tuote.yhtio = hinnasto.yhtio and tuote.tuoteno = hinnasto.tuoteno)
+          WHERE hinnasto.yhtio  = '{$yhtiorow['yhtio']}'";
 $res = pupe_query($query);
 
 // Kerrotaan montako riviä käsitellään
@@ -59,15 +59,15 @@ echo date("d.m.Y @ G:i:s") . ": Hinnastorivejä {$rows} kappaletta.\n";
 while ($row = mysql_fetch_assoc($res)) {
 
   $rivi  = "{$row['tuoteno']};";
-  $rivi  = "{$row['minkpl']};";
-  $rivi  = "{$row['maxkpl']};";
-  $rivi  = "{$row['hinta']};";
-  $rivi  = "{$row['alkupvm']};";
-  $rivi  = "{$row['loppupvm']};";
-  $rivi  = "{$row['laji']};";
-  $rivi  = "{$row['maa']};";
-  $rivi  = "{$row['valkoodi']};";
-  $rivi  = "{$row['selite']};";
+  $rivi  .= "{$row['minkpl']};";
+  $rivi  .= "{$row['maxkpl']};";
+  $rivi  .= "{$row['hinta']};";
+  $rivi  .= "{$row['alkupvm']};";
+  $rivi  .= "{$row['loppupvm']};";
+  $rivi  .= "{$row['laji']};";
+  $rivi  .= "{$row['maa']};";
+  $rivi  .= "{$row['valkoodi']};";
+  $rivi  .= "{$row['selite']};";
   $rivi .= "\n";
 
   fwrite($fp, $rivi);

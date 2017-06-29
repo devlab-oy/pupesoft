@@ -198,7 +198,7 @@ if ($tee == '') {
   if (mysql_num_rows($result)>0) {
 
     ///* uutiset *///
-    echo "<td class='back' valign='top' width='700'>";
+    echo "<td class='back' valign='top' width='100%'>";
 
     while ($uutinen = mysql_fetch_array($result)) {
 

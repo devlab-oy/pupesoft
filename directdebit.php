@@ -113,7 +113,7 @@ if ($tee == 'TOIMINNOT') {
       <td><input type='text' name='ppl' value='$arow[vika]' size='10'></td>
       </tr>";
 
-  $query = "SELECT max(SUBSTRING(lasku.directdebitsiirtonumero, 6)) + 1 seuraava
+  $query = "SELECT max(SUBSTRING(lasku.directdebitsiirtonumero, 5)) + 1 seuraava
             FROM lasku use index (yhtio_tila_tapvm)
             JOIN maksuehto ON (lasku.yhtio = maksuehto.yhtio
               and lasku.maksuehto = maksuehto.tunnus
@@ -121,6 +121,7 @@ if ($tee == 'TOIMINNOT') {
             WHERE lasku.yhtio = '$kukarow[yhtio]'
             and lasku.tila = 'U'
             and lasku.tapvm > date_sub(CURDATE(), interval 6 month)
+            and year(lasku.tapvm) = year(curdate())
             and lasku.alatila = 'X'
             and lasku.summa != 0
             and lasku.directdebitsiirtonumero > 0
@@ -133,7 +134,7 @@ if ($tee == 'TOIMINNOT') {
   }
 
   echo "<tr><th>Siirtoluettelon numero:</th>
-      <td><input type='text' name='dd_siirtonumero' value='".date("Y")."-$arow[seuraava]' size='10'></td>";
+      <td><input type='text' name='dd_siirtonumero' value='".date("Y")."$arow[seuraava]' size='10'></td>";
 
   echo "<td class='back'><input type='submit' value='Luo siirtoaineisto'></td></tr></form></table><br><br>";
 

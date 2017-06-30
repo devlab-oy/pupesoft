@@ -24648,6 +24648,14 @@ if  (!function_exists('verkkolaskuputkeen')) {
       return TRUE;
     }
 
+    // Arvatoon laitetaan KAIKKI laskut (paitsi k‰teiskuitit)
+    if ($yhtiorow["verkkolasku_lah"] == "arvato" and $masrow["kateinen"] == "") {
+      if ($info) {
+        echo t("Arvato-siirto");
+      }
+      return TRUE;
+    }
+    
     // Maksuehdon takaa voidaan s‰‰t‰‰, ett‰ laskut eiv‰t mene verkkolaskuputkeen
     if ($masrow["itsetulostus"] != "") {
       if ($info) {

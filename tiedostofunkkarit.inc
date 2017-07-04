@@ -104,6 +104,22 @@ function hae_tiedostot($params) {
               AND liitetiedostot.yhtio           = '{$kukarow["yhtio"]}'
               ORDER BY liitetiedostot.selite";
   }
+  elseif ($tiedoston_tyyppi == "extranet") {
+    $query = "SELECT
+                liitetiedostot.tunnus,
+                liitetiedostot.selite
+              FROM liitetiedostot
+              INNER JOIN asiakas
+                ON liitetiedostot.yhtio = asiakas.yhtio
+                AND liitetiedostot.liitos = 'asiakas'
+                AND liitetiedostot.liitostunnus = asiakas.tunnus
+              INNER JOIN kuka
+                ON asiakas.yhtio = kuka.yhtio
+                AND asiakas.tunnus = kuka.oletus_asiakas
+              WHERE liitetiedostot.kayttotarkoitus = 'extranet'
+                AND liitetiedostot.yhtio = '{$kukarow["yhtio"]}'
+                AND kuka.tunnus = '{$kukarow["tunnus"]}'";
+  }
 
   if (empty($query)) {
     return false;

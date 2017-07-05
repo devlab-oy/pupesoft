@@ -80,7 +80,8 @@ if (!empty($hinnastocsv_ftphost)) {
   $ftphost = $hinnastocsv_ftphost;
   $ftpuser = $hinnastocsv_ftpuser;
   $ftppass = $hinnastocsv_ftppass;
-  $ftpfile = $hinnastocsv_filepath;
+  $ftppath = $hinnastocsv_ftppath;
+  $ftpfile = $filepath;
   require "inc/ftp-send.inc";
 }
 

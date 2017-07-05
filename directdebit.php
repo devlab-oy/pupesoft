@@ -196,7 +196,9 @@ if ($tee == 'TULOSTA') {
 
   $InitgPty = $GrpHdr->addChild('InitgPty');                           // InitiatingParty, Pakollinen
   $InitgPty->addChild('Nm', sprintf("%-1.70s", $yhtiorow['nimi']));    // Name 1-70
-  $InitgPty->addChild('Id')->addChild('OrgId')->addChild('Othr')->addChild('id', $frow["palvelutunnus"]); // 'Palvelutunnus' or 'Intermediary code' informed by Nordea
+  $Othr = $InitgPty->addChild('Id')->addChild('OrgId')->addChild('Othr'); // 'Palvelutunnus' or 'Intermediary code' informed by Nordea
+  $Othr->addChild('Id', $frow["palvelutunnus"]);
+  $Othr->addChild('SchmeNm')->addChild('Cd', 'CUST');
 
   if ($ppl == '') {
     $ppl = $ppa;
@@ -380,7 +382,7 @@ if ($tee == 'TULOSTA') {
       $MndtRltdInf->addChild('MndtId', $dd_asirow['valtuutus_id']);
       $MndtRltdInf->addChild('DtOfSgntr', $dd_asirow['valtuutus_pvm']);
       $MndtRltdInf->addChild('AmdmntInd', 'false');
-      $MndtRltdInf->addChild('ElctrncSgntr', '');
+      #$MndtRltdInf->addChild('ElctrncSgntr', '');
 
       $DbtrAgt = $DrctDbtTxInf->addChild('DbtrAgt');
       $FinInstnId = $DbtrAgt->addChild('FinInstnId');
@@ -401,7 +403,7 @@ if ($tee == 'TULOSTA') {
       $Tp = $CdtrRefInf->addChild('Tp');
       $CdOrPrtry = $Tp->addChild('CdOrPrtry');
       $CdOrPrtry->addChild('Cd', 'SCOR');
-      $Tp->addChild('Ref', sprintf("%-1.35s", $laskurow['viite']));
+      $Tp->addChild('Issr', sprintf("%-1.35s", $laskurow['viite']));
     }
 
     if ($laskuvirh > 0) {

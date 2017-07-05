@@ -12,6 +12,8 @@ if (php_sapi_name() != 'cli') {
   die ("Tätä scriptiä voi ajaa vain komentoriviltä!");
 }
 
+$pupe_root_polku = dirname(dirname(__FILE__));
+
 if (!isset($argv[1]) or $argv[1] == '') {
   die("Yhtiö on annettava!!");
 }
@@ -19,7 +21,7 @@ if (!isset($argv[1]) or $argv[1] == '') {
 ini_set("memory_limit", "5G");
 
 // Otetaan includepath aina rootista
-ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(dirname(dirname(__FILE__))).PATH_SEPARATOR."/usr/share/pear");
+ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.$pupe_root_polku);
 
 require 'inc/connect.inc';
 require 'inc/functions.inc';
@@ -80,7 +82,8 @@ if (!empty($hinnastocsv_ftphost)) {
   $ftphost = $hinnastocsv_ftphost;
   $ftpuser = $hinnastocsv_ftpuser;
   $ftppass = $hinnastocsv_ftppass;
-  $ftpfile = $hinnastocsv_filepath;
+  $ftppath = $hinnastocsv_ftppath;
+  $ftpfile = $filepath;
   require "inc/ftp-send.inc";
 }
 

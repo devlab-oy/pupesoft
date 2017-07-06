@@ -1710,6 +1710,7 @@ if ($tee == "VALMIS"
     echo "<form name='laskuri' id='laskuri' method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php'><table class='laskuri'>";
 
     echo "<input type='hidden' name='kassamyyja_kesken' value='ei'>";
+    echo "<input type='hidden' name='poikkeava_kpvm' value='$poikkeava_kpvm'>";
     echo "<input type='hidden' name='tilausnumero' value='$tilausnumero'>";
     echo "<input type='hidden' name='mista' value='$mista'>";
     echo "<input type='hidden' name='tee' value='VALMIS'>";

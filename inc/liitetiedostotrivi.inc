@@ -60,7 +60,7 @@ if (mysql_field_name($result, $i) == "kayttotarkoitus") {
   $ulos = "<td><select name='$nimi'>";
   $sel  = "";
 
-  if ($lukitse_laji == "tuote") {
+  if (in_array($lukitse_laji, array("tuote", "asiakas"))) {
     $kires = t_avainsana("LITETY");
   }
   elseif ($lukitse_laji == "lasku" and !in_array($lasrow['tila'], array("H", "Y", "M", "P", "Q", "X"))) {
@@ -88,6 +88,8 @@ if (mysql_field_name($result, $i) == "kayttotarkoitus") {
 
       $ulos .= "<option value='$kirow[selite]' $select>$paklisa $kirow[selitetark]</option>";
     }
+
+    $ulos .= "<option value='MU'>".t("Yleinen")."</option>";
   }
   else {
     $ulos .= "<option value='MU'>".t("Yleinen")."</option>";

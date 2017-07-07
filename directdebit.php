@@ -341,7 +341,7 @@ if ($tee == 'TULOSTA') {
       $SvcLvl->addChild('Cd', 'SEPA');
 
       $LclInstrm = $PmtTpInf->addChild('LclInstrm');
-      $LclInstrm->addChild('Cd', 'CORE');
+      $LclInstrm->addChild('Cd', 'B2B');
 
       $PmtTpInf->addChild('SeqTp', 'RCUR');
 

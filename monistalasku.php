@@ -1145,6 +1145,10 @@ if ($tee == 'MONISTA') {
             $values .= ", '{$aburow['tunnus']}'";
           }
           break;
+        case 'directdebitsiirtonumero':
+          $values .= ", 0";
+
+          break;  
         case 'toimaika':
           if (($kumpi == 'HYVITA' or $kumpi == 'REKLAMA' or $yhtiorow["tilausrivien_toimitettuaika"] == 'X') and $toim != 'OSTOTILAUS') {
             $values .= ", '{$monistarow[$fieldname]}'";

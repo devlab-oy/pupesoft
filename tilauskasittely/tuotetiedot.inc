@@ -58,7 +58,9 @@ if ($ostohinta) {
   echo "<li>" . t("Ostohinta") . ": {$ostohinta} {$valuutta}</li>";
 }
 
-echo "<li>" . t("Myyntihinta") . ": {$myyntihinta} {$valuutta}</li>";
+if ($myyntihinta) {
+  echo "<li>" . t("Myyntihinta") . ": {$myyntihinta} {$valuutta}</li>";
+}
 
 if ($myymalahinta) {
   echo "<li>" . t("Myymälähinta") . ": {$myymalahinta} {$valuutta}</li>";

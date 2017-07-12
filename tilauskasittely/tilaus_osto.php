@@ -1524,7 +1524,9 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
               tilausrivi.vahvistettu_maara,
               tilausrivi.vahvistettu_kommentti,
               tilausrivi.hinta_alkuperainen,
-              tilausrivi.laadittu
+              tilausrivi.laadittu,
+              tuote.myyntihinta,
+              tuote.myymalahinta
               FROM tilausrivi
               LEFT JOIN tuote ON tilausrivi.yhtio = tuote.yhtio
                 AND tilausrivi.tuoteno = tuote.tuoteno
@@ -1775,6 +1777,8 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
                 "&keskihinta={$prow["keskihinta"]}" .
                 "&valuutta={$prow["valuutta"]}" .
                 "&ostohinta={$prow["ostohinta"]}" .
+                "&myyntihinta={$prow["myyntihinta"]}" .
+                "&myymalahinta={$prow["myymalahinta"]}" .
                 "&vanhatunnus={$laskurow["vanhatunnus"]}";
 
               echo "<td $class>

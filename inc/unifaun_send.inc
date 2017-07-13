@@ -1278,7 +1278,7 @@ class Unifaun {
         if (isset($vak['paino']) and $vak['paino'] != '') {
 
           $vak['paino'] = $vak['paino'] / $_jakaja;
-          $vak['paino'] = $vak['paino'] < 1 ? 1 : $vak['paino'];
+          $vak['paino'] = $vak['paino'] < 0.01 ? 0.01 : $vak['paino']; //nettopaino vakilla pitää olla vähintään 0.01
 
           // Net weight for ADR goods class I (usually explosive contents). Always mandatory for DBSchenker, regardless of class. Defined in kg.
           $uni_par_val = $uni_article->addChild('val', utf8_encode($vak['paino']));

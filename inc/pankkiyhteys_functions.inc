@@ -640,8 +640,12 @@ function sepa_renew_certificate($params) {
 
     $csr_params['customer_id']  = $customer_id;
     $csr_params['company_name'] = $old_cert_info['subject']['CN'];
+
+    break;
   case 'danske':
     $customer_id = $pankkiyhteys['customer_id'];
+
+    break;
   case 'aktia':
   case 'sp':
   case 'pop':
@@ -650,6 +654,8 @@ function sepa_renew_certificate($params) {
 
     $csr_params['company_name'] = $old_cert_info['subject']['CN'];
     $csr_params['customer_id']  = $customer_id;
+
+    break;
   }
 
   $generoidut_tunnukset1 = generoi_private_key_ja_csr($csr_params);

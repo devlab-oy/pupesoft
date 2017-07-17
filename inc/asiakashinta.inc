@@ -40,7 +40,12 @@ if ($from == "") {
 else {
   // HUOM HUOM: ethän muuta näitä ilman, että korjaat myös yllapito.php:ssä iframen lukitse_avaimeen muuttujat
   $kentat = "asiakashinta.tunnus,
-  concat_ws('<br>', asiakashinta.tuoteno, asiakashinta.ryhma) 'Tuoteno/Alennusryhmä',
+  concat_ws('<br>', asiakashinta.tuoteno,
+    (SELECT LEFT(tuote.nimitys,25)
+    FROM tuote
+    WHERE tuote.tuoteno = asiakashinta.tuoteno
+    AND tuote.yhtio = asiakashinta.yhtio)
+  , asiakashinta.ryhma) 'Tuoteno/Alennusryhmä',
   asiakashinta.hinta,
   asiakashinta.laji,
   concat_ws('<br>', asiakashinta.minkpl, asiakashinta.maxkpl) 'Min/Maxkpl',

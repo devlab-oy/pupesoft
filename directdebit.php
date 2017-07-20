@@ -403,7 +403,7 @@ if ($tee == 'TULOSTA') {
       $Tp = $CdtrRefInf->addChild('Tp');
       $CdOrPrtry = $Tp->addChild('CdOrPrtry');
       $CdOrPrtry->addChild('Cd', 'SCOR');
-      $Tp->addChild('Issr', sprintf("%-1.35s", $laskurow['viite']));
+      $CdtrRefInf->addChild('Ref', sprintf("%-1.35s", $laskurow['viite']));
     }
 
     if ($laskuvirh > 0) {

@@ -20757,6 +20757,7 @@ if (!function_exists("pupesoft_laskutyypit")) {
       6  => "Normaali laskupohja (Ei n‰ytet‰ tilausnumeroa/toimitusaikaa)",
       7  => "Normaali laskupohja (N‰ytet‰‰n tuotteen EAN koodi ja asiakaskommentti)",
       23 => "Normaali laskupohja (N‰ytet‰‰n myˆs yhteens‰ ilman alennuksia)",
+      24 => "Normaali laskupohja (N‰ytet‰‰n toimitusajan paikalla verollinen yksikkˆhinta)",
       1  => "Pelkistetty laskupohja 1",
       3  => "Pelkistetty laskupohja 2 (Tuoteperheet yhdistetty)",
       4  => "Pelkistetty laskupohja 3",
@@ -22879,7 +22880,7 @@ if (!function_exists('lisaa_tuotepaikka')) {
                 hyllynro  = '{$hyllynro}',
                 hyllyvali = '{$hyllyvali}',
                 hyllytaso = '{$hyllytaso}',
-                selite    = trim('".t("{$viesti} lis‰ttiin tuotepaikka")." {$hyllyalue} {$hyllynro} {$hyllyvali} {$hyllytaso}'),
+                selite    = trim('".t("{$viesti} lis‰ttiin tuotepaikka", $yhtiorow['kieli'])." {$hyllyalue} {$hyllynro} {$hyllyvali} {$hyllytaso}'),
                 laatija   = '{$kukarow['kuka']}',
                 laadittu  = now()";
       pupe_query($query);
@@ -24647,6 +24648,14 @@ if  (!function_exists('verkkolaskuputkeen')) {
       return TRUE;
     }
 
+    // Arvatoon laitetaan KAIKKI laskut (paitsi k‰teiskuitit)
+    if ($yhtiorow["verkkolasku_lah"] == "arvato" and $masrow["kateinen"] == "") {
+      if ($info) {
+        echo t("Arvato-siirto");
+      }
+      return TRUE;
+    }
+    
     // Maksuehdon takaa voidaan s‰‰t‰‰, ett‰ laskut eiv‰t mene verkkolaskuputkeen
     if ($masrow["itsetulostus"] != "") {
       if ($info) {
@@ -31299,7 +31308,7 @@ if (!function_exists("tallenna_tiliote_viite")) {
           // useassa osassa
           if (in_array($xtyyppi, array(2, 3))) {
             // Group concatissa tulee kaikki t‰n p‰iv‰n tiliotedata
-            $query = "SELECT group_concat(tieto SEPARATOR '') AS kantaaineisto
+            $query = "SELECT group_concat(tieto SEPARATOR '') AS kanta_aineisto
                       FROM tiliotedata
                       WHERE tilino = '$tilino'
                       AND alku     = '$alkupvm'
@@ -31313,7 +31322,7 @@ if (!function_exists("tallenna_tiliote_viite")) {
             case 2:
               // Otetaan kaikki failissa olevat LMP:t arrayseen. (Nollaindeksiss‰ tyhj‰‰...)
               $distinct_aineistot = explode("T03", str_replace($serc, $repl, $kokoaineisto));
-              $_to_aineitso = trim($tiliotedatarow["kantaaineisto"]);
+              $_to_aineitso = trim($tiliotedatarow["kanta_aineisto"]);
 
               if ($_to_aineitso != "") {
                 for ($xlmpmaa_i = $xlmpmaa; $xlmpmaa_i < count($distinct_aineistot); $xlmpmaa_i++) {

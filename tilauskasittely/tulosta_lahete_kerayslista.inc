@@ -1243,16 +1243,16 @@ if (!function_exists('loppu_kerayslista')) {
     }
     else {
       // yhtiötiedot
-      $y_tiedot_ok  = FALSE;
-      $y_nimi     = $laskurow["yhtio_nimi"];
-      $y_osoite     = $laskurow["yhtio_osoite"];
-      $y_postino     = $laskurow["yhtio_postino"];
-      $y_postitp     = $laskurow["yhtio_postitp"];
-      $y_maa       = $laskurow["yhtio_maa"];
-      $y_kotipaikka  = $laskurow["yhtio_kotipaikka"];
-      $y_vatnumero  = preg_replace("/^0037/", "", $laskurow["yhtio_ovttunnus"]);
-      $y_iban     = $yhtiorow['pankkiiban1'];
-      $y_swift     = $yhtiorow['pankkiswift1'];
+      $y_tiedot_ok = FALSE;
+      $y_nimi = $laskurow["yhtio_nimi"];
+      $y_osoite = $laskurow["yhtio_osoite"];
+      $y_postino = $laskurow["yhtio_postino"];
+      $y_postitp = $laskurow["yhtio_postitp"];
+      $y_maa = $laskurow["yhtio_maa"];
+      $y_kotipaikka = $laskurow["yhtio_kotipaikka"];
+      $y_vatnumero = preg_replace("/^0037/", "", $laskurow["yhtio_ovttunnus"]);
+      $y_iban = $yhtiorow['pankkiiban1'];
+      $y_swift = $yhtiorow['pankkiswift1'];
 
       if ((int) $laskurow["yhtio_toimipaikka"] != 0) {
         // haetaan toimipaikan tiedot
@@ -1315,7 +1315,7 @@ if (!function_exists('loppu_kerayslista')) {
         }
       }
 
-      //Alimmat kolme laatikkoa, yhtiötietoja
+      // Alimmat kolme laatikkoa, yhtiötietoja
       $pdf->draw_rectangle(70, 20, 20, 580,  $thispage, $rectparam);
       $pdf->draw_rectangle(70, 207, 20, 580,  $thispage, $rectparam);
       $pdf->draw_rectangle(70, 394, 20, 580,  $thispage, $rectparam);
@@ -1358,7 +1358,16 @@ if (!function_exists('loppu_kerayslista')) {
         $pdf->draw_line($x, $y, $thispage, $rectparam);
 
         for ($pp=1; $pp<=$sivu; $pp++) {
-          $pdf->draw_text(330, 803, "$pp / $sivu", $page[$pp], $norm);
+          $pp_print = $pp;
+          $sivu_print = $sivu;
+
+          # Jos tulostetetaan monta keräyslistaa samaan PDF-dokkariin
+          if (!empty($tama_lista_sivu)) {
+            $pp_print = $pp-$tama_lista_sivu+1;
+            $sivu_print = $sivu-$tama_lista_sivu+1;
+          }
+
+          $pdf->draw_text(330, 803, "$pp_print / $sivu_print", $page[$pp], $norm);
         }
       }
     }

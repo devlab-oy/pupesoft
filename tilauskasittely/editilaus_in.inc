@@ -620,7 +620,6 @@ while ($tietue = fgets($fd)) {
   case 'ODTM2__DT' :
   case 'DTM' :
     // Toimituspäivä
-
     if ($edi_tyyppi == "edifact911") {
       $kentat = explode(":", $tieto);
       if ($kentat[0] == 2 and $kentat[2] == 102) {
@@ -1306,9 +1305,9 @@ while ($tietue = fgets($fd)) {
           else {
             $edi_ulos .= t("Vientitilaus EU -maahan")."\n";
 
-            $arow["vienti"] = "E";
             if ($arow["laji"] != "H") {
               $arow["alv"] = 0;
+              $arow["vienti"] = "E";
             }
           }
         }
@@ -1357,6 +1356,22 @@ while ($tietue = fgets($fd)) {
       if (trim($editilaus_toimitustapa) != '') {
         // tarkistetaan löytyykö toimitustapa pupesta suoraan
         if ($edi_tyyppi == "magento") {
+
+          // Löytyykö käännöstaulukosta?
+          $query = "SELECT selite
+                    FROM avainsana
+                    WHERE yhtio  = '{$kukarow['yhtio']}'
+                    AND laji = 'TOIMTAPAVKN'
+                    AND selitetark = '{$editilaus_toimitustapa}'
+                    AND selite != ''
+                    AND selitetark != ''";
+          $ressu = pupe_query($query);
+
+          if (mysql_num_rows($ressu) == 1) {
+            $ftc = mysql_fetch_assoc($ressu);
+            $editilaus_toimitustapa = $ftc['selite'];
+          }
+
           $query = "SELECT *
                     FROM toimitustapa
                     WHERE yhtio  = '{$kukarow['yhtio']}'
@@ -2057,6 +2072,7 @@ while ($tietue = fgets($fd)) {
     break;
 
   case 'OLINEN_NU' :
+  case 'OSTOTILRIV.OTR_EANKOODI' :
   case 'LIN':
     // tuotteen EAN-koodi
 

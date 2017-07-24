@@ -1065,7 +1065,7 @@ else {
 
             $otunnus   = $laskurow['tunnus'];
             $hinta     = $torow["jvkulu"]; // jvkulu
-            $nimitys   = t("Jälkivaatimuskulu");
+            $nimitys   = t("Jälkivaatimuskulu", $tilausvalmis_asiakas_row['kieli']);
 
             list($hinta, $alv) = alv($laskurow, $trow, $hinta, '', '');
 

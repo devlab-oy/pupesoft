@@ -1145,6 +1145,10 @@ if ($tee == 'MONISTA') {
             $values .= ", '{$aburow['tunnus']}'";
           }
           break;
+        case 'directdebitsiirtonumero':
+          $values .= ", 0";
+
+          break;  
         case 'toimaika':
           if (($kumpi == 'HYVITA' or $kumpi == 'REKLAMA' or $yhtiorow["tilausrivien_toimitettuaika"] == 'X') and $toim != 'OSTOTILAUS') {
             $values .= ", '{$monistarow[$fieldname]}'";
@@ -1458,6 +1462,9 @@ if ($tee == 'MONISTA') {
 
       if ($toim == 'SOPIMUS') {
         echo t("Uusi sopimusnumero on")." <a href='{$palvelin2}tilauskasittely/tilaus_myynti.php?toim=YLLAPITO&tilausnumero=$utunnus'>{$utunnus}</a><br><br>";
+      }
+      elseif ($toim == 'TARJOUS') {
+        echo t("Uusi tarjousnumero on")." <a href='{$palvelin2}tilauskasittely/tilaus_myynti.php?toim=TARJOUS&tilausnumero=$utunnus'>{$utunnus}</a><br><br>";
       }
       else {
         echo t("Uusi tilausnumero on")." <a href='{$palvelin2}tilauskasittely/tilaus_myynti.php?toim=PIKATILAUS&tilausnumero=$utunnus'>{$utunnus}</a><br><br>";

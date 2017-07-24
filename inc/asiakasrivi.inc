@@ -534,6 +534,7 @@ if ($fieldname == "kerayspoikkeama") {
   $ulos = "<td>
       <select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">
       <option value='0' $sel[0]>".t("L‰hetet‰‰n asiakkaalle ja myyj‰lle")."</option>
+      <option value='3' $sel[3]>".t("L‰hetet‰‰n asiakkaalle ja myyj‰lle (vaikka ei olisi poikkeamia)")."</option>
       <option value='2' $sel[2]>".t("L‰hetet‰‰n vain myyj‰lle")."</option>
       <option value='1' $sel[1]>".t("Ei l‰hetet‰ ollenkaan")."</option>
       </select></td>";

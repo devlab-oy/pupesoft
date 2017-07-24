@@ -223,6 +223,26 @@ if ($tee2 == 'TULOSTA') {
   elseif (isset($tulostukseen_kaikki)) {
     $tilausnumerorypas = unserialize(urldecode($tulostukseen_kaikki));
     $tulostukseen_kaikki = "KYLLA";
+
+    // Tsekataan komento valitulle tulostimelle
+    $query = "SELECT komento
+              from kirjoittimet
+              where tunnus = '$valittu_tulostin'
+              AND yhtio    = '$kukarow[yhtio]'";
+    $pres = pupe_query($query);
+    $prow = mysql_fetch_assoc($pres);
+
+    // Kun tulostetaan kaikki kerralla ja otetaan sähköpostiin,
+    // niin laitetaan kaikki yhteen dokkariin
+    if ($prow["komento"] == "email" and $yhtiorow["lahetteen_tulostustapa"] != "X") {
+      require_once "pdflib/phppdflib.class.php";
+
+      $pdf_kaikki_tul = new pdffile;
+      $pdf_kaikki_tul->set_default('margin-top', 0);
+      $pdf_kaikki_tul->set_default('margin-bottom', 0);
+      $pdf_kaikki_tul->set_default('margin-left', 0);
+      $pdf_kaikki_tul->set_default('margin-right', 0);
+    }
   }
 
   if (is_array($tilausnumerorypas)) {
@@ -332,6 +352,13 @@ if ($tee2 == 'TULOSTA') {
         echo t("Tilaus on kesken käyttäjällä").", $keskenrow[nimi], ".t("ota yhteyttä häneen ja käske hänen laittaa vähän vauhtia tähän touhuun")."!<br>";
         $tee2 = "";
       }
+    }
+
+    if (!empty($pdf_kaikki_tul)) {
+      // Tulostetaan sivu
+      $params_kerayslista["komento"] = $komento;
+
+      print_pdf_kerayslista($params_kerayslista);
     }
   }
   else {

@@ -9,6 +9,9 @@ $valuutta    = isset($valuutta)    ? $valuutta    : null;
 $vanhatunnus = isset($vanhatunnus) ? $vanhatunnus : 0;
 $varasto     = isset($varasto)     ? $varasto     : null;
 $yksikko     = isset($yksikko)     ? $yksikko     : null;
+$myyntihinta = isset($myyntihinta) ? $myyntihinta : null;
+$myymalahinta = isset($myymalahinta) && $myymalahinta > 0 ? $myymalahinta : null;
+
 
 $_varastot = array($varasto);
 
@@ -53,6 +56,14 @@ echo "<li>" . t("Keskihinta") . ": {$keskihinta} {$valuutta}</li>";
 
 if ($ostohinta) {
   echo "<li>" . t("Ostohinta") . ": {$ostohinta} {$valuutta}</li>";
+}
+
+if ($myyntihinta) {
+  echo "<li>" . t("Myyntihinta") . ": {$myyntihinta} {$valuutta}</li>";
+}
+
+if ($myymalahinta) {
+  echo "<li>" . t("Myymälähinta") . ": {$myymalahinta} {$valuutta}</li>";
 }
 
 echo "</ul>";

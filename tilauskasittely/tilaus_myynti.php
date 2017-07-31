@@ -1710,6 +1710,7 @@ if ($tee == "VALMIS"
     echo "<form name='laskuri' id='laskuri' method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php'><table class='laskuri'>";
 
     echo "<input type='hidden' name='kassamyyja_kesken' value='ei'>";
+    echo "<input type='hidden' name='poikkeava_kpvm' value='$poikkeava_kpvm'>";
     echo "<input type='hidden' name='tilausnumero' value='$tilausnumero'>";
     echo "<input type='hidden' name='mista' value='$mista'>";
     echo "<input type='hidden' name='tee' value='VALMIS'>";
@@ -2926,8 +2927,11 @@ if ($tee == '') {
         $meapu2 = pupe_query($apuqu2);
         $meapu2row = mysql_fetch_assoc($meapu2);
 
+        // Etukäteen maksetut tilaukset, ei sörkitä toimitustapaa enää
+        $_etukateen_maksettu = ($laskurow['mapvm'] != '0000-00-00' and $laskurow['chn'] == '999');
+
         // ja toimitustapa ei ole nouto eikä kyseessä ole verkkokauppatilaus laitetaan toimitustavaksi nouto... hakee järjestyksessä ekan
-        if ($meapu2row["nouto"] == "" and $laskurow['tilaustyyppi'] != "W") {
+        if ($meapu2row["nouto"] == "" and ($laskurow['tilaustyyppi'] != "W" and !$_etukateen_maksettu)) {
           $apuqu = "SELECT *
                     FROM toimitustapa
                     WHERE yhtio  = '$kukarow[yhtio]'
@@ -4739,6 +4743,38 @@ if ($tee == '') {
           $_ei_jt_meilia = 'X';
         }
         elseif ($tapa != "POISJTSTA" and $tapa != "PUUTE" and $tapa != "JT") {
+          if ($tapa == "POISTA") {
+            // Mikäli tilausriviin liittyy ostorivi, niin poistetaan myös se
+            $query = "SELECT tilausrivilinkki
+                      FROM tilausrivin_lisatiedot
+                      WHERE yhtio = '{$kukarow['yhtio']}'
+                      AND tilausrivitunnus = '{$rivitunnus}'";
+            $result = pupe_query($query);
+            $_myyntirivi = mysql_fetch_assoc($result);
+
+            if (mysql_num_rows($result) == 1 and $_myyntirivi["tilausrivilinkki"] != 0) {
+              // Tarkistetaan, että ostotilaus on vielä kesken,
+              // koska jos ei ole kesken on jo lähetetty eteenpäin
+              $query = "DELETE tilausrivi.*
+                        FROM tilausrivi
+                          JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio AND lasku.tunnus = tilausrivi.otunnus)
+                        WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+                        AND tilausrivi.tunnus = '{$_myyntirivi["tilausrivilinkki"]}'
+                        AND lasku.tila = 'O'
+                        AND lasku.alatila = ''
+                        AND tilausrivi.tyyppi = 'O'
+                        AND tilausrivi.kpl = 0";
+              $ostotilaus_tarkistus = mysql_fetch_assoc(pupe_query($query));
+
+              if (mysql_affected_rows() > 0) {
+                echo "<font class='error'>".t("Rivi poistettiin myös ostotilaukselta")."</font><br/><br/>";
+              }
+              else {
+                echo "<font class='error'>".t("Ostotilaus ei ollut enää kesken tilassa, ei voitu poistaa riviä ostolta")."!</font><br/><br/>";
+              }
+            }
+          }
+
           // Poistetaan muokattava tilausrivi
           $query = "DELETE FROM tilausrivi
                     WHERE tunnus = '$rivitunnus'";

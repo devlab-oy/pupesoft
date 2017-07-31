@@ -113,7 +113,7 @@ if ($tee == 'TOIMINNOT') {
       <td><input type='text' name='ppl' value='$arow[vika]' size='10'></td>
       </tr>";
 
-  $query = "SELECT max(lasku.directdebitsiirtonumero)+1 seuraava
+  $query = "SELECT max(SUBSTRING(lasku.directdebitsiirtonumero, 5)) + 1 seuraava
             FROM lasku use index (yhtio_tila_tapvm)
             JOIN maksuehto ON (lasku.yhtio = maksuehto.yhtio
               and lasku.maksuehto = maksuehto.tunnus
@@ -121,6 +121,7 @@ if ($tee == 'TOIMINNOT') {
             WHERE lasku.yhtio = '$kukarow[yhtio]'
             and lasku.tila = 'U'
             and lasku.tapvm > date_sub(CURDATE(), interval 6 month)
+            and year(lasku.tapvm) = year(curdate())
             and lasku.alatila = 'X'
             and lasku.summa != 0
             and lasku.directdebitsiirtonumero > 0
@@ -133,7 +134,7 @@ if ($tee == 'TOIMINNOT') {
   }
 
   echo "<tr><th>Siirtoluettelon numero:</th>
-      <td><input type='text' name='dd_siirtonumero' value='".date("Y")."-$arow[seuraava]' size='10'></td>";
+      <td><input type='text' name='dd_siirtonumero' value='".date("Y")."$arow[seuraava]' size='10'></td>";
 
   echo "<td class='back'><input type='submit' value='Luo siirtoaineisto'></td></tr></form></table><br><br>";
 
@@ -195,7 +196,9 @@ if ($tee == 'TULOSTA') {
 
   $InitgPty = $GrpHdr->addChild('InitgPty');                           // InitiatingParty, Pakollinen
   $InitgPty->addChild('Nm', sprintf("%-1.70s", $yhtiorow['nimi']));    // Name 1-70
-  $InitgPty->addChild('Id')->addChild('OrgId')->addChild('Othr')->addChild('id', $frow["palvelutunnus"]); // 'Palvelutunnus' or 'Intermediary code' informed by Nordea
+  $Othr = $InitgPty->addChild('Id')->addChild('OrgId')->addChild('Othr'); // 'Palvelutunnus' or 'Intermediary code' informed by Nordea
+  $Othr->addChild('Id', $frow["palvelutunnus"]);
+  $Othr->addChild('SchmeNm')->addChild('Cd', 'CUST');
 
   if ($ppl == '') {
     $ppl = $ppa;
@@ -338,9 +341,9 @@ if ($tee == 'TULOSTA') {
       $SvcLvl->addChild('Cd', 'SEPA');
 
       $LclInstrm = $PmtTpInf->addChild('LclInstrm');
-      $LclInstrm->addChild('Cd', 'CORE');
+      $LclInstrm->addChild('Cd', 'B2B');
 
-      $PmtTpInf->addChild('SeqTp', 'OOFF');
+      $PmtTpInf->addChild('SeqTp', 'RCUR');
 
       $PmtInf->addChild('ReqdColltnDt', $laskurow["erpcm"]);
 
@@ -379,7 +382,7 @@ if ($tee == 'TULOSTA') {
       $MndtRltdInf->addChild('MndtId', $dd_asirow['valtuutus_id']);
       $MndtRltdInf->addChild('DtOfSgntr', $dd_asirow['valtuutus_pvm']);
       $MndtRltdInf->addChild('AmdmntInd', 'false');
-      $MndtRltdInf->addChild('ElctrncSgntr', '');
+      #$MndtRltdInf->addChild('ElctrncSgntr', '');
 
       $DbtrAgt = $DrctDbtTxInf->addChild('DbtrAgt');
       $FinInstnId = $DbtrAgt->addChild('FinInstnId');
@@ -400,7 +403,7 @@ if ($tee == 'TULOSTA') {
       $Tp = $CdtrRefInf->addChild('Tp');
       $CdOrPrtry = $Tp->addChild('CdOrPrtry');
       $CdOrPrtry->addChild('Cd', 'SCOR');
-      $Tp->addChild('Ref', sprintf("%-1.35s", $laskurow['viite']));
+      $CdtrRefInf->addChild('Ref', sprintf("%-1.35s", $laskurow['viite']));
     }
 
     if ($laskuvirh > 0) {
@@ -427,9 +430,8 @@ if ($tee == 'TULOSTA') {
                    and lasku.yhtio                  = maksuehto.yhtio
                    and lasku.maksuehto              = maksuehto.tunnus
                    and maksuehto.directdebit_id       = '$directdebit_id'";
-        #$dresult = pupe_query($dquery);
+        pupe_query($dquery);
       }
-
 
       //keksit‰‰n uudelle failille joku hyv‰ nimi:
       $filenimi = "NordeaDirectDebit-$dd_siirtonumero.xml";

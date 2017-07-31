@@ -331,6 +331,7 @@ if (mysql_field_name($result, $i) == "laji") {
   if ($lukitse_laji== "" or $lukitse_laji == "POSTEN_TKOODI")   $ulos .= "<option value='POSTEN_TKOODI' {$avain_sel['POSTEN_TKOODI']}>".t("Logmaster OutboundDelivery ja MaterialMaster sanomien kent‰t")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "UNIFAUN_REF") $ulos .= "<option value='UNIFAUN_REF' {$avain_sel['UNIFAUN_REF']}>".t("Unifaun l‰hett‰j‰n viite")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "KUITIN_VAKTEXT") $ulos .= "<option value='KUITIN_VAKTEXT' {$avain_sel['KUITIN_VAKTEXT']}>".t("Kuitin vakioteksti")."</option>";
+  if ($lukitse_laji== "" or $lukitse_laji == "STCK_LST_FLTR") $ulos .= "<option value='STCK_LST_FLTR' {$avain_sel['STCK_LST_FLTR']}>".t("Varastosaldoraportin rajaus")."</option>";
   if ($lukitse_laji== "") $ulos .= "</optgroup>";
 
   if ($lukitse_laji== "") $ulos .= "<optgroup label='".t("Verkkokaupan avainsanat")."'>";
@@ -1471,6 +1472,92 @@ if ($avain_sel['KUITIN_VAKTEXT'] == "SELECTED") {
   elseif ($_selitetark) {
     $ulos = "<td><textarea name='{$nimi}' rows='10' cols='50'>{$trow[$i]}</textarea></td>";
     $jatko = 0;
+  }
+}
+
+if ($avain_sel['STCK_LST_FLTR'] == "SELECTED") {
+  if ($_selite) {
+    $sel = array();
+    $sel[$trow[$i]] = " selected";
+
+    $ulos = "<td>";
+    $ulos .= "<select name='{$nimi}' onchange='submit()'>";
+    $ulos .= "<option value='tuotemerkki'{$sel["tuotemerkki"]}>" . t("Tuotemerkki") . "</option>";
+    $ulos .= "<option value='try'{$sel["try"]}>" . t("Tuoteryhm‰") . "</option>";
+    $ulos .= "<option value='osasto'{$sel["osasto"]}>" . t("Tuoteosasto") . "</option>";
+    $ulos .= "</select>";
+    $ulos .= "</td>";
+
+    $jatko = 0;
+  }
+  elseif ($_selitetark) {
+    $sel = array();
+    $sel[$trow[$i]] = " selected";
+
+    $ulos = "<td>";
+    $ulos .= "<select name='{$nimi}'>";
+    $ulos .= "<option value='on'{$sel["on"]}>" . t("Lis‰t‰‰n raporttiin") . "</option>";
+    $ulos .= "<option value='off'{$sel["off"]}>" . t("Poistetaan raportista") . "</option>";
+    $ulos .= "</select>";
+    $ulos .= "</td>";
+
+    $jatko = 0;
+  }
+  elseif ($_selitetark_2) {
+    if (empty($trow["selite"]) || $trow["selite"] == "tuotemerkki") {
+      $tuotemerkkiresult = t_avainsana("tuotemerkki", '', 'ORDER BY selite ASC');
+
+      $ulos = "<td>";
+      $ulos .= "<select name='{$nimi}'>";
+
+      while ($tuotemerkkirow = mysql_fetch_assoc($tuotemerkkiresult)) {
+        $sel = $trow[$i] == $tuotemerkkirow["selite"] ? " selected" : "";
+        $ulos .= "<option value='{$tuotemerkkirow["selite"]}'{$sel}>{$tuotemerkkirow["selite"]}</option>";
+      }
+
+      $ulos .= "</select>";
+      $ulos .= "</td>";
+
+      $tyyppi = 1;
+      $jatko = 0;
+    }
+    elseif ($trow["selite"] == "try") {
+      $tryresult = t_avainsana("try", '', 'ORDER BY selite ASC');
+
+      $ulos = "<td>";
+      $ulos .= "<select name='{$nimi}'>";
+
+      while ($tryrow = mysql_fetch_assoc($tryresult)) {
+        $sel = $trow[$i] == $tryrow["selite"] ? " selected" : "";
+        $ulos .= "<option value='{$tryrow["selite"]}'{$sel}>{$tryrow["selitetark"]}</option>";
+      }
+
+      $ulos .= "</select>";
+      $ulos .= "</td>";
+
+      $tyyppi = 1;
+      $jatko = 0;
+    }
+    elseif ($trow["selite"] == "osasto") {
+      $osastoresult = t_avainsana("osasto", '', 'ORDER BY selite ASC');
+
+      $ulos = "<td>";
+      $ulos .= "<select name='{$nimi}'>";
+
+      while ($osastorow = mysql_fetch_assoc($osastoresult)) {
+        $sel = $trow[$i] == $osastorow["selite"] ? " selected" : "";
+        $ulos .= "<option value='{$osastorow["selite"]}'{$sel}>{$osastorow["selitetark"]}</option>";
+      }
+
+      $ulos .= "</select>";
+      $ulos .= "</td>";
+
+      $tyyppi = 1;
+      $jatko = 0;
+    }
+  }
+  elseif ($_jarjestys) {
+    $tyyppi = 0;
   }
 }
 

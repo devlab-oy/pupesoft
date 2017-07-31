@@ -20757,6 +20757,7 @@ if (!function_exists("pupesoft_laskutyypit")) {
       6  => "Normaali laskupohja (Ei n‰ytet‰ tilausnumeroa/toimitusaikaa)",
       7  => "Normaali laskupohja (N‰ytet‰‰n tuotteen EAN koodi ja asiakaskommentti)",
       23 => "Normaali laskupohja (N‰ytet‰‰n myˆs yhteens‰ ilman alennuksia)",
+      24 => "Normaali laskupohja (N‰ytet‰‰n toimitusajan paikalla verollinen yksikkˆhinta)",
       1  => "Pelkistetty laskupohja 1",
       3  => "Pelkistetty laskupohja 2 (Tuoteperheet yhdistetty)",
       4  => "Pelkistetty laskupohja 3",
@@ -24647,6 +24648,14 @@ if  (!function_exists('verkkolaskuputkeen')) {
       return TRUE;
     }
 
+    // Arvatoon laitetaan KAIKKI laskut (paitsi k‰teiskuitit)
+    if ($yhtiorow["verkkolasku_lah"] == "arvato" and $masrow["kateinen"] == "") {
+      if ($info) {
+        echo t("Arvato-siirto");
+      }
+      return TRUE;
+    }
+    
     // Maksuehdon takaa voidaan s‰‰t‰‰, ett‰ laskut eiv‰t mene verkkolaskuputkeen
     if ($masrow["itsetulostus"] != "") {
       if ($info) {

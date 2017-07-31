@@ -19,3 +19,11 @@ if (mysql_field_name($result, $i) == "rahalaitos") {
 
   $jatko = 0;
 }
+
+if ((mysql_field_name($result, $i) == "teksti_fi") or
+  (mysql_field_name($result, $i) == "teksti_en") or
+  (mysql_field_name($result, $i) == "teksti_se")) {
+  $ulos = "<td><textarea cols='80' rows='8' name='$nimi'>$trow[$i]</textarea></td>";
+  $jatko = 0;
+}
+

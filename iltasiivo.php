@@ -638,9 +638,9 @@ if ($valmkorj > 0) {
 
 $laskuri = 0;
 // Poistetaan kaikki laitteen_sopimukset -rivit, joille ei löydy enää tilausriviä sopimuksilta
-$query = "SELECT laitteen_sopimukset.tunnus 
-          FROM laitteen_sopimukset 
-	        LEFT JOIN tilausrivi ON (tilausrivi.yhtio = laitteen_sopimukset.yhtio 
+$query = "SELECT laitteen_sopimukset.tunnus
+          FROM laitteen_sopimukset
+	        LEFT JOIN tilausrivi ON (tilausrivi.yhtio = laitteen_sopimukset.yhtio
             AND tilausrivi.tunnus = laitteen_sopimukset.sopimusrivin_tunnus)
 	        WHERE laitteen_sopimukset.yhtio = '$kukarow[yhtio]'
 	        AND tilausrivi.tunnus IS NULL";
@@ -893,6 +893,48 @@ if ($php_cli) {
 
   if ($poistettu > 0) {
     $iltasiivo .= is_log("Poistettiin $poistettu tuotepaikkaa jonka tuotetta ei enää ole.");
+  }
+}
+
+// Tarkistetaan milloin pankkiyhteyden sertifikaatti menee vanhaksi
+// ja mikäli se on menossa seuraavan kuukauden sisällä vanhaksi niin lähetetään muistutusmaili.
+// Sen jälkeen kun sertifikaatti on mennyt vanhaksi niin ei enää tätä meiliä lähetetä.
+$pankkiyhteydet = hae_pankkiyhteydet();
+
+foreach ($pankkiyhteydet as $pankkiyhteys) {
+
+  $tanaan = date("Ymd");
+
+  $kolmekymmentapaivaa_ennen = date("Ymd", strtotime("-30 days", strtotime($pankkiyhteys["signing_certificate_valid_to"])));
+
+  $serti_vanhenemispaiva = date("d.m.Y", strtotime($pankkiyhteys["signing_certificate_valid_to"]));
+  $serti_vanhenemispaiva_vertailuun = date("Ymd", strtotime($pankkiyhteys["signing_certificate_valid_to"]));
+
+  if ($tanaan >= $kolmekymmentapaivaa_ennen and $tanaan <= $serti_vanhenemispaiva_vertailuun) {
+    // Rakennetaan sähköpostiin lähetettävä muistutusviesti
+    $sepayhteysmuistutus = t("SEPA-yheyden sertifikaatti vanhenemassa %s pankista", "", $pankkiyhteys["pankin_nimi"])."!\n\n";
+    $sepayhteysmuistutus .= t("Sertifikaatti vanhenee").": {$serti_vanhenemispaiva} \n\n";
+    $sepayhteysmuistutus .= t("Sertifikaatti on uusittava ennenkuin se vanhenee. Uusiminen tapahtuu Kirjapito -> Ylläpito -> Pankkiyhteydet-ohjelman kautta.")."\n\n";
+
+    // Laitetaan sähköposti admin osoitteeseen siinä tapauksessa,
+    // jos talhal tai alert email osoitteita ei ole kumpaakaan setattu
+    $error_email = $yhtiorow["admin_email"];
+
+    if (isset($yhtiorow["talhal_email"]) and $yhtiorow["talhal_email"] != "") {
+      $error_email = $yhtiorow["talhal_email"];
+    }
+    elseif (isset($yhtiorow["alert_email"]) and $yhtiorow["alert_email"] != "") {
+      $error_email = $yhtiorow["alert_email"];
+    }
+
+    $params = array(
+      "to"      => $error_email,
+      "subject" => t("SEPA-yheyden sertifikaatti vanhenemassa %s pankista", "", $pankkiyhteys["pankin_nimi"])."!",
+      "ctype"   => "text",
+      "body"    => $sepayhteysmuistutus
+    );
+
+      pupesoft_sahkoposti($params);
   }
 }
 

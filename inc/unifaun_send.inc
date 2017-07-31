@@ -611,14 +611,24 @@ class Unifaun {
     $uni_rcv_val = $uni_receiver->addChild('val', utf8_encode($this->rakir_row["toim_postino"])); // Zipcode
     $uni_rcv_val->addAttribute('n', "zipcode");
 
-    $uni_rcv_val = $uni_receiver->addChild('val', utf8_encode($this->rakir_row["toim_postitp"])); // City
-    $uni_rcv_val->addAttribute('n', "city");
-
-    //$uni_rcv_val = $uni_receiver->addChild('val', ""); # State
-    //$uni_rcv_val->addAttribute('n', "state");
-
     // jos asiakkaan toim_maa on tyhjä niin oletetaan, että se on sama ku yhtiön maa
     $toim_maa = ($this->rakir_row['toim_maa'] != "") ? $this->rakir_row['toim_maa'] : $this->postirow["yhtio_maa"];
+
+    if ($toim_maa == "US") {
+
+      list($toim_postitp, $state) = explode(" ", $this->rakir_row["toim_postitp"]);
+
+      if ($state != '') {
+
+        $this->rakir_row["toim_postitp"] = $toim_postitp;
+        $state = $toim_maa."_".$state;
+        $uni_rcv_val = $uni_receiver->addChild('val', utf8_encode($state)); # State
+        $uni_rcv_val->addAttribute('n', "state");
+      }
+    }
+
+    $uni_rcv_val = $uni_receiver->addChild('val', utf8_encode($this->rakir_row["toim_postitp"])); // City
+    $uni_rcv_val->addAttribute('n', "city");
 
     $uni_rcv_val = $uni_receiver->addChild('val', utf8_encode($toim_maa)); // Country code according to ISO standard
     $uni_rcv_val->addAttribute('n', "country");
@@ -1256,7 +1266,7 @@ class Unifaun {
         //$uni_par_val = $uni_article->addChild('val', ""); # Defines if the contents contaminate the marine environment, ADR only. Valid values: 1 = Toxic and 2 = Non-toxic for the marine environment
         //$uni_par_val->addAttribute('n', "dngmpcode");
 
-        if (isset($vak['limited_qty']) and $vak['limited_qty'] != '') {
+        if (isset($vak['limited_qty']) and $vak['limited_qty'] != '' and $this->onko_lq()) {
           $uni_par_val = $uni_article->addChild('val', $vak['limited_qty']); // Note for ADR goods
           $uni_par_val->addAttribute('n', "dngnote");
 
@@ -1268,7 +1278,7 @@ class Unifaun {
         if (isset($vak['paino']) and $vak['paino'] != '') {
 
           $vak['paino'] = $vak['paino'] / $_jakaja;
-          $vak['paino'] = $vak['paino'] < 1 ? 1 : $vak['paino'];
+          $vak['paino'] = $vak['paino'] < 0.01 ? 0.01 : $vak['paino']; //nettopaino vakilla pitää olla vähintään 0.01
 
           // Net weight for ADR goods class I (usually explosive contents). Always mandatory for DBSchenker, regardless of class. Defined in kg.
           $uni_par_val = $uni_article->addChild('val', utf8_encode($vak['paino']));

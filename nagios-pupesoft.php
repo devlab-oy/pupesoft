@@ -8,7 +8,7 @@ $STATE_CRITICAL  = 2;
 $STATE_UNKNOWN   = 3;
 $STATE_DEPENDENT = 4;
 
-if ($_SERVER['REMOTE_ADDR'] == '127.0.0.1' or $_SERVER['REMOTE_ADDR'] == '::1' or $_SERVER['SERVER_ADDR'] == $_SERVER['REMOTE_ADDR'] or $_SERVER['REMOTE_ADDR'] == '91.153.224.221') {
+if ($_SERVER['REMOTE_ADDR'] == '127.0.0.1' or $_SERVER['REMOTE_ADDR'] == '::1' or $_SERVER['SERVER_ADDR'] == $_SERVER['REMOTE_ADDR'] or $_SERVER['REMOTE_ADDR'] == '185.11.208.68') {
 
   if ($_GET["tee"] == "MYSQL") {
     $link = mysql_connect($dbhost, $dbuser, $dbpass) or die ("CRITICAL - mysql_connect() failed $STATE_CRITICAL");

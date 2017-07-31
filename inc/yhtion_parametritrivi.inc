@@ -1530,6 +1530,7 @@ if ($fieldname == "kerayspoikkeamaviestin_lahetys") {
   $sel[$trow[$i]]  = " selected";
 
   $ulos .= "<option value='0' $sel[0]>".t("Keräyspoikkeamaviesti lähetetään asiakkaalle ja myyjälle")."</option>";
+  $ulos .= "<option value='3' $sel[3]>".t("Keräyspoikkeamaviesti lähetetään asiakkaalle ja myyjälle (vaikka ei olisi poikkeamia)")."</option>";
   $ulos .= "<option value='2' $sel[2]>".t("Keräyspoikkeamaviesti lähetetään vain myyjälle")."</option>";
   $ulos .= "<option value='1' $sel[1]>".t("Keräyspoikkeamaviestiä ei lähetetä ollenkaan")."</option>";
   $ulos .= "</select></td>";
@@ -2988,6 +2989,21 @@ if ($fieldname == "kalenterimerkinnat") {
 
   $ulos .= "<option value = ''>".t("Kalenterimerkintöjä lisätään automaattisesti")."</option>";
   $ulos .= "<option value = 'E' $sel[E]>".t("Kalenterimerkintöjä EI lisätä automaattisesti")."</option>";
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
+if ($fieldname == "kalenteri_aikavali") {
+
+  $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+  $sel = array();
+  $apu = $trow[$i];
+  $sel[$apu] = "selected";
+
+  $ulos .= "<option value = ''>".t("Kalenterissa on 30 minuutin aikaväli")."</option>";
+  $ulos .= "<option value = '15' $sel[15]>".t("Kalenterissa on 15 minuutin aikaväli")."</option>";
   $ulos .= "</select></td>";
 
   $jatko = 0;

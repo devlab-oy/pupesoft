@@ -612,6 +612,7 @@ if ($tee == 'P') {
 
   $tilausnumerot = array();
   $poikkeamat = array();
+  $ookoot = array();
 
   if ((int) $keraajanro > 0) {
     $query = "SELECT *
@@ -682,7 +683,8 @@ if ($tee == 'P') {
                      laskun_lisatiedot.laskutus_postitp,
                      laskun_lisatiedot.laskutus_maa,
                      asiakas.kerayserat,
-                     asiakas.kieli
+                     asiakas.kieli,
+                     asiakas.kerayspoikkeama
                      FROM lasku
                      JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus)
                      LEFT JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio = lasku.yhtio and laskun_lisatiedot.otunnus = lasku.tunnus)
@@ -1295,6 +1297,13 @@ if ($tee == 'P') {
 
             $muuttuiko = 'kylsemuuttu';
           }
+          else {
+            // ker‰t‰‰n ok tilaukset talteen,
+            // ja tarkistetaan lopuksi tuliko puutteita
+            if ($otsikkorivi['kerayspoikkeama'] == 3) {
+              $ookoot[$tilrivirow["otunnus"]]["otunnus"] = $tilrivirow["otunnus"];
+            }
+          }
 
           if ($keraysvirhe == 0 and ($yhtiorow['kerayserat'] == 'P' or ($yhtiorow['kerayserat'] == 'A' and $otsikkorivi['kerayserat'] == 'A'))) {
 
@@ -1492,6 +1501,20 @@ if ($tee == 'P') {
     $tee = '';
   }
 
+  // Jos ei ole puutteita ja halutaan silti
+  // l‰hett‰‰ ker‰yspoikkeama-s‰hkˆposti
+  if (!empty($ookoot)) {
+    foreach ($ookoot as $tilaus) {
+
+      // tsekataan ett‰ kyseiselle tilaukselle ei ole jo puuterivej‰
+      // sill‰ tilauksella voi olla molempia rivej‰ samanaikaisesti
+      if (!array_key_exists($tilaus["otunnus"], $poikkeamat)) {
+        $poikkeamat[$tilaus["otunnus"]] = $tilaus["otunnus"];
+        $muuttuiko = 'kylsemuuttu';
+      }
+    }
+  }
+
   // Jos ker‰yspoikkeamia syntyi, niin l‰hetet‰‰n mailit myyj‰lle ja asiakkaalle
   if ($muuttuiko == 'kylsemuuttu') {
     foreach ($poikkeamat as $poikkeamatilaus => $poikkeamatilausrivit) {
@@ -1554,6 +1577,18 @@ if ($tee == 'P') {
       $rivit = '';
 
       $_plain_text_mail = ($yhtiorow['kerayspoikkeama_email'] == 'P');
+
+      // Jos ei ole poikkeamarivej‰, niin infotaan siit‰
+      if (!is_array($poikkeamatilausrivit)) {
+
+        if ($_plain_text_mail) {
+          $rivit .= t("Ei ker‰yspoikkeamia", $kieli)."\r\n";
+        }
+        else {
+          $rivit .= t("Ei ker‰yspoikkeamia", $kieli);
+        }
+        $poikkeamatilausrivit = array();
+      }
 
       foreach ($poikkeamatilausrivit as $poikkeama) {
 
@@ -1701,14 +1736,17 @@ if ($tee == 'P') {
 
         $ulos .= "<table>";
 
-        if ($toimtaparow['osoitelappu'] == 'osoitelappu_kesko') {
+        if ($toimtaparow['osoitelappu'] == 'osoitelappu_kesko' and !empty($poikkeamatilausrivit)) {
           $ulos .= "<tr><th>".t("Nimitys", $kieli)."</th><th>".t("Tuotenumero", $kieli)."</th><th>".t("Eankoodi", $kieli)."</th><th>".t("Puutekappale", $kieli)."</th>";
+        }
+        elseif (empty($poikkeamatilausrivit)) {
+          $ulos .= "<tr>";
         }
         else {
           $ulos .= "<tr><th>".t("Nimitys", $kieli)."</th><th>".t("Tuotenumero", $kieli)."</th><th>".t("Tilattu", $kieli)."</th><th>".t("Toimitetaan", $kieli)."</th>";
         }
 
-        if ($yhtiorow["kerayspoikkeama_kasittely"] != '') $ulos .= "<th>".t("Poikkeaman k‰sittely", $kieli)."</th>";
+        if ($yhtiorow["kerayspoikkeama_kasittely"] != '' and !empty($poikkeamatilausrivit)) $ulos .= "<th>".t("Poikkeaman k‰sittely", $kieli)."</th>";
         $ulos .= "</tr>";
         $ulos .= $rivit;
         $ulos .= "</table><br><br>";
@@ -1717,8 +1755,13 @@ if ($tee == 'P') {
         $ulos .= "</body></html>";
       }
 
-      // korvataan poikkeama-meili ker‰ysvahvistuksella JOs l‰hetet‰‰n ker‰ysvahvistus per toimitus
-      if (($laskurow["keraysvahvistus_lahetys"] == 'o' or ($yhtiorow["keraysvahvistus_lahetys"] == 'o' and $laskurow["keraysvahvistus_lahetys"] == '')) and $laskurow["kerayspoikkeama"] == 0) {
+      $sellahetetyyppi = (!isset($sellahetetyyppi)) ? $laskurow['lahetetyyppi'] : $sellahetetyyppi;
+      $ei_puutteita = (strpos($sellahetetyyppi, "_eipuute") === FALSE);
+      $kerpoik_myyjaasiakas = (in_array($laskurow["kerayspoikkeama"], array(0, 3)));
+
+      // korvataan poikkeama-meili ker‰ysvahvistuksella JOS l‰hetet‰‰n ker‰ysvahvistus per toimitus
+      // JA l‰hetetyyppi sis‰lt‰‰ puuterivej‰
+      if (($laskurow["keraysvahvistus_lahetys"] == 'o' or ($yhtiorow["keraysvahvistus_lahetys"] == 'o' and $laskurow["keraysvahvistus_lahetys"] == '')) and $kerpoik_myyjaasiakas and $ei_puutteita) {
         $laskurow["kerayspoikkeama"] = 2;
       }
 
@@ -1727,7 +1770,7 @@ if ($tee == 'P') {
       $_ctype = $_plain_text_mail ? "text" : "html";
 
       // L‰hetet‰‰n ker‰yspoikkeama asiakkaalle
-      if ($laskurow["email"] != '' and $laskurow["kerayspoikkeama"] == 0) {
+      if ($laskurow["email"] != '' and $kerpoik_myyjaasiakas) {
 
         // S‰hkˆpostin l‰hetykseen parametrit
         $parametri = array(
@@ -1743,11 +1786,11 @@ if ($tee == 'P') {
       }
 
       // L‰hetet‰‰n ker‰yspoikkeama myyj‰lle
-      if ($laskurow["kukamail"] != '' and ($laskurow["kerayspoikkeama"] == 0 or $laskurow["kerayspoikkeama"] == 2)) {
+      if ($laskurow["kukamail"] != '' and ($kerpoik_myyjaasiakas or $laskurow["kerayspoikkeama"] == 2)) {
 
         $uloslisa = "";
 
-        if (($laskurow["email"] == '' or $boob === FALSE) and $laskurow["kerayspoikkeama"] == 0) {
+        if (($laskurow["email"] == '' or $boob === FALSE) and $kerpoik_myyjaasiakas) {
           $uloslisa .= t("Asiakkaalta puuttuu s‰hkˆpostiosoite! Ker‰yspoikkeamia ei voitu l‰hett‰‰!")."<br><br>";
         }
         elseif ($laskurow["kerayspoikkeama"] == 2) {
@@ -1844,7 +1887,9 @@ if ($tee == 'P') {
                 lasku.yhtio,
                 lasku.kohdistettu,
                 lasku.liitostunnus,
-                lasku.ohjelma_moduli
+                lasku.ohjelma_moduli,
+                lasku.mapvm,
+                lasku.chn
                 FROM lasku
                 LEFT JOIN toimitustapa ON (lasku.yhtio = toimitustapa.yhtio and lasku.toimitustapa = toimitustapa.selite)
                 where lasku.yhtio = '$kukarow[yhtio]'
@@ -1901,7 +1946,11 @@ if ($tee == 'P') {
                     AND mapvm   != '0000-00-00'
                     AND chn      = '999'";
           $yoimresult  = pupe_query($query);
-
+          
+          if ($laskurow['mapvm'] != '0000-00-00' and $laskurow['chn'] == '999') {
+            $alatilak = "X";
+          }
+          
           // Etuk‰teen maksettu Magentotilaus laskutetaan, jos ei ole jo laskuttunut
           if ($laskurow['ohjelma_moduli'] == 'MAGENTOJT') {
             laskuta_magentojt($laskurow['tunnus']);

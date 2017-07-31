@@ -198,7 +198,7 @@ if ($tee == "SYOTA") {
     </tr>
     <tr>
       <th>".t("Uutinen")."</th>
-      <td><textarea wrap='none' name='uutinen' cols='40' rows='15'>$rivi[kentta02]</textarea></td>
+      <td><textarea wrap='none' name='uutinen' cols='100' rows='15'>$rivi[kentta02]</textarea></td>
     </tr>";
 
   if ($tunnus > 0) {
@@ -432,7 +432,7 @@ if ($tee == '') {
 
   if (mysql_num_rows($result) > 0) {
 
-    echo "<table width='600'>";
+    echo "<table width='1000'>";
 
     while ($uutinen = mysql_fetch_array($result)) {
 

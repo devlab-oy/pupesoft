@@ -620,7 +620,6 @@ while ($tietue = fgets($fd)) {
   case 'ODTM2__DT' :
   case 'DTM' :
     // Toimituspäivä
-
     if ($edi_tyyppi == "edifact911") {
       $kentat = explode(":", $tieto);
       if ($kentat[0] == 2 and $kentat[2] == 102) {
@@ -1305,7 +1304,7 @@ while ($tietue = fgets($fd)) {
           }
           else {
             $edi_ulos .= t("Vientitilaus EU -maahan")."\n";
- 
+
             if ($arow["laji"] != "H") {
               $arow["alv"] = 0;
               $arow["vienti"] = "E";
@@ -2073,6 +2072,7 @@ while ($tietue = fgets($fd)) {
     break;
 
   case 'OLINEN_NU' :
+  case 'OSTOTILRIV.OTR_EANKOODI' :
   case 'LIN':
     // tuotteen EAN-koodi
 

@@ -746,6 +746,13 @@ if ($tila == 'Q') {
     }
   }
 
+  // Katsotaan onko kyseessä valuuttalasku
+  // ja jos on niin muutetaan laskun summa yhtiön valuuttaan
+  // koska tiliöinnit on joka tapauksessa yhtiön valuutassa
+  if ($lasrow["vienti_kurssi"] != 1) {
+    $lasrow["summa"] = round($lasrow["summa"] * $lasrow["vienti_kurssi"], 2);
+  }
+
   mysql_data_seek($xres, 0);
 
   while ($xrow = mysql_fetch_assoc($xres)) {

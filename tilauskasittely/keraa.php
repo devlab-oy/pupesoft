@@ -137,17 +137,35 @@ $virherivi   = 0;
 $muuttuiko   = '';
 
 if (isset($indexvas) and $indexvas == 1 and $tuvarasto == '') {
-  // jos k‰ytt‰j‰ll‰ on oletusvarasto, valitaan se
-  if ($kukarow['oletus_varasto'] != 0) {
-    $tuvarasto = $kukarow['oletus_varasto'];
+
+  $keraakaikistares = t_avainsana("KERAAKAIKISTA");
+
+  if (mysql_num_rows($keraakaikistares) > 0) {
+
+    $keraakaikistarow = mysql_fetch_assoc($keraakaikistares);
+
+    if ($keraakaikistarow['selitetark'] == 'a') {
+      $_keraakaikista = true;
+    }
+    else {
+      $_keraakaikista = false;
+    }
   }
-  //  Varastorajaus jos k‰ytt‰j‰ll‰ on joku varasto valittuna
-  elseif ($kukarow['varasto'] != '' and $kukarow['varasto'] != 0) {
-    // jos k‰ytt‰j‰ll‰ on monta varastoa valittuna, valitaan ensimm‰inen
-    $tuvarasto   = strpos($kukarow['varasto'], ',') !== false ? array_shift(explode(",", $kukarow['varasto'])) : $kukarow['varasto'];
-  }
-  else {
-    $tuvarasto   = "KAIKKI";
+
+  // jos ei haluta pakottaa oletukseksi "ker‰‰ kaikista"
+  if (!$_keraakaikista) {
+    // jos k‰ytt‰j‰ll‰ on oletusvarasto, valitaan se
+    if ($kukarow['oletus_varasto'] != 0) {
+      $tuvarasto = $kukarow['oletus_varasto'];
+    }
+    //  Varastorajaus jos k‰ytt‰j‰ll‰ on joku varasto valittuna
+    elseif ($kukarow['varasto'] != '' and $kukarow['varasto'] != 0) {
+      // jos k‰ytt‰j‰ll‰ on monta varastoa valittuna, valitaan ensimm‰inen
+      $tuvarasto   = strpos($kukarow['varasto'], ',') !== false ? array_shift(explode(",", $kukarow['varasto'])) : $kukarow['varasto'];
+    }
+    else {
+      $tuvarasto   = "KAIKKI";
+    }
   }
 }
 
@@ -1946,11 +1964,11 @@ if ($tee == 'P') {
                     AND mapvm   != '0000-00-00'
                     AND chn      = '999'";
           $yoimresult  = pupe_query($query);
-          
+
           if ($laskurow['mapvm'] != '0000-00-00' and $laskurow['chn'] == '999') {
             $alatilak = "X";
           }
-          
+
           // Etuk‰teen maksettu Magentotilaus laskutetaan, jos ei ole jo laskuttunut
           if ($laskurow['ohjelma_moduli'] == 'MAGENTOJT') {
             laskuta_magentojt($laskurow['tunnus']);

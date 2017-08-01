@@ -602,7 +602,7 @@ if ($tee == '') {
 
   echo "<tr><th>".t("Tulosta toimitusosoitteen tiedot").":</th><td><input type='checkbox' name='toimas' value='on' $tck></td></tr>";
   echo "<tr><th>".t("Luo aineisto yhteyshenkilön osoitetiedoista").":</th><td><input type='checkbox' name='as_yht_tiedot' value='on' $chk></td></tr>";
-  echo "<tr><th>".t("Tulosta asiakkaan ja yht.hekilön tunnus (vain excel)").":</th><td><input type='checkbox' name='aytunnus' value='on' $ack></td></tr>";
+  echo "<tr><th>".t("Tulosta asiakkaan ja yht.henkilön tunnus (vain excel)").":</th><td><input type='checkbox' name='aytunnus' value='on' $ack></td></tr>";
   echo "<tr><th>".t("Valitse tarra-arkin tyyppi").":</th>
       <td><select name='raportti'>
       <option value='33' $sel[33]>33 ".t("Tarraa")."</option>

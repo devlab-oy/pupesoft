@@ -87,14 +87,14 @@ if ($tee == "TULOSTA") {
       $muuttuja = "mul_asiakas{$i}";
       $mul_asiakas = array_merge($mul_asiakas, ${$muuttuja});
     }
-    
+
     if ($aytunnus == 'on') {
       $selectilisa = ", yht.nimi AS yht_nimi, yht.titteli AS yht_titteli, yht.email yht_email, yht.puh yht_puhelin, yht.tunnus yht_id";
     }
     else {
       $selectilisa = ", yht.nimi AS yht_nimi, yht.titteli AS yht_titteli, yht.email yht_email, yht.puh yht_puhelin";
     }
-      
+
     $joinilisa = "  JOIN yhteyshenkilo yht
             ON ( yht.yhtio = asiakas.yhtio
               AND yht.liitostunnus = asiakas.tunnus
@@ -176,7 +176,7 @@ if ($tee == "TULOSTA") {
       $worksheet->writeString($excelrivi, $excelsarake, t("Asiakas-id"), $format_bold);
       $excelsarake++;
       if ($as_yht_tiedot == 'on') {
-        $worksheet->writeString($excelrivi, $excelsarake, t("Yht hekilö-id"), $format_bold);
+        $worksheet->writeString($excelrivi, $excelsarake, t("Yht henkilö-id"), $format_bold);
         $excelsarake++;
       }
     }
@@ -261,7 +261,7 @@ if ($tee == "TULOSTA") {
         $worksheet->writeString($excelrivi, $excelsarake, $row["email"]);
         $excelsarake++;
       }
-      
+
       if ($aytunnus == 'on') {
         $worksheet->writeString($excelrivi, $excelsarake,$row["tunnus"]);
         $excelsarake++;
@@ -587,7 +587,7 @@ if ($tee == '') {
   if ($as_yht_tiedot != "") {
     $chk = "CHECKED";
   }
-  
+
   if ($aytunnus != "") {
     $ack = "CHECKED";
   }

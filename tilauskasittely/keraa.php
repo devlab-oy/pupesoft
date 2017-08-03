@@ -135,6 +135,7 @@ if (!isset($sel_oslapp))   $sel_oslapp   = array();
 $keraysvirhe = 0;
 $virherivi   = 0;
 $muuttuiko   = '';
+$_tarkista_varastot = true;
 
 if (isset($indexvas) and $indexvas == 1 and $tuvarasto == '') {
 
@@ -145,15 +146,12 @@ if (isset($indexvas) and $indexvas == 1 and $tuvarasto == '') {
     $keraakaikistarow = mysql_fetch_assoc($keraakaikistares);
 
     if ($keraakaikistarow['selitetark'] == 'a') {
-      $_keraakaikista = true;
-    }
-    else {
-      $_keraakaikista = false;
+      $_tarkista_varastot = false;
     }
   }
 
   // jos ei haluta pakottaa oletukseksi "kerää kaikista"
-  if (!$_keraakaikista) {
+  if ($_tarkista_varastot) {
     // jos käyttäjällä on oletusvarasto, valitaan se
     if ($kukarow['oletus_varasto'] != 0) {
       $tuvarasto = $kukarow['oletus_varasto'];

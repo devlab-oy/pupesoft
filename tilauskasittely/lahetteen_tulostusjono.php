@@ -658,6 +658,8 @@ if ($tee2 == '') {
   /*
     Oletuksia
   */
+  $_tarkista_varastot = true;
+
   if (isset($indexvas) and $indexvas == 1 and $tuvarasto == '') {
 
     $karajaus = 1;
@@ -666,17 +668,31 @@ if ($tee2 == '') {
       $karajaus = $yhtiorow["keraysaikarajaus"];
     }
 
-    // jos k‰ytt‰j‰ll‰ on oletusvarasto, valitaan se
-    if ($kukarow['oletus_varasto'] != 0) {
-      $tuvarasto = $kukarow['oletus_varasto'];
+    $keraakaikistares = t_avainsana("KERAAKAIKISTA");
+
+    if (mysql_num_rows($keraakaikistares) > 0) {
+
+      $keraakaikistarow = mysql_fetch_assoc($keraakaikistares);
+
+      if ($keraakaikistarow['selitetark'] == 'a') {
+        $_tarkista_varastot = false;
+      }
     }
-    //  Varastorajaus jos k‰ytt‰j‰ll‰ on joku varasto valittuna
-    elseif ($kukarow['varasto'] != '' and $kukarow['varasto'] != 0) {
-      // jos k‰ytt‰j‰ll‰ on monta varastoa valittuna, valitaan ensimm‰inen
-      $tuvarasto   = strpos($kukarow['varasto'], ',') !== false ? array_shift(explode(",", $kukarow['varasto'])) : $kukarow['varasto'];
-    }
-    else {
-      $tuvarasto   = "KAIKKI";
+
+    // jos ei haluta pakottaa oletukseksi "ker‰‰ kaikista"
+    if ($_tarkista_varastot) {
+      // jos k‰ytt‰j‰ll‰ on oletusvarasto, valitaan se
+      if ($kukarow['oletus_varasto'] != 0) {
+        $tuvarasto = $kukarow['oletus_varasto'];
+      }
+      //  Varastorajaus jos k‰ytt‰j‰ll‰ on joku varasto valittuna
+      elseif ($kukarow['varasto'] != '' and $kukarow['varasto'] != 0) {
+        // jos k‰ytt‰j‰ll‰ on monta varastoa valittuna, valitaan ensimm‰inen
+        $tuvarasto   = strpos($kukarow['varasto'], ',') !== false ? array_shift(explode(",", $kukarow['varasto'])) : $kukarow['varasto'];
+      }
+      else {
+        $tuvarasto   = "KAIKKI";
+      }
     }
 
     $tutoimtapa = "KAIKKI";

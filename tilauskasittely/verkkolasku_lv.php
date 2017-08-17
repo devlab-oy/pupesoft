@@ -198,7 +198,7 @@ else {
   }
 
   if ($silent == "") {
-    $tulos_ulos .= "<font class='head'>".t("Laskutusajo")."</font><hr>\n";
+    $tulos_ulos .= "<font class='head'>".t("Laskutusajo laskutusvalmiille tilauksille")."</font><hr>\n";
   }
 
   if ($tee == 'TARKISTA') {

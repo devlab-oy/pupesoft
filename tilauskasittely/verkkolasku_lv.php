@@ -1,6 +1,6 @@
 <?php
 
-// verkkolasku.php
+// verkkolasku_lv.php
 //
 // tarvitaan $kukarow ja $yhtiorow
 //
@@ -61,6 +61,13 @@ if (!function_exists("laskunkieli")) {
     }
 
     return $laskun_kieli;
+  }
+}
+
+if (!function_exists("vlas_dateconv")) {
+  function vlas_dateconv($date) {
+    //k‰‰nt‰‰ mysqln vvvv-kk-mm muodon muotoon vvvvkkmm
+    return substr($date, 0, 4).substr($date, 5, 2).substr($date, 8, 2);
   }
 }
 
@@ -146,7 +153,7 @@ if ($php_cli) {
 
   $tee = "TARKISTA";
 }
-elseif (strpos($_SERVER['SCRIPT_NAME'], "verkkolasku.php") !== FALSE) {
+elseif (strpos($_SERVER['SCRIPT_NAME'], "verkkolasku_lv.php") !== FALSE) {
 
   if (isset($_POST["tee"])) {
     if ($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto = 1;
@@ -1958,7 +1965,7 @@ else {
     echo "$tulos_ulos";
 
     // Annetaan mahdollisuus tallentaa finvoicetiedosto jos se on luotu..
-    if (isset($nimifinvoice) and file_exists($nimifinvoice) and (strpos($_SERVER['SCRIPT_NAME'], "verkkolasku.php") !== FALSE or strpos($_SERVER['SCRIPT_NAME'], "valitse_laskutettavat_tilaukset.php") !== FALSE) and $yhtiorow["verkkolasku_lah"] == "finvoice") {
+    if (isset($nimifinvoice) and file_exists($nimifinvoice) and (strpos($_SERVER['SCRIPT_NAME'], "verkkolasku_lv.php") !== FALSE or strpos($_SERVER['SCRIPT_NAME'], "valitse_laskutettavat_tilaukset.php") !== FALSE) and $yhtiorow["verkkolasku_lah"] == "finvoice") {
       echo "<br><table><tr><th>".t("Tallenna finvoice-aineisto").":</th>";
       echo "<form method='post' class='multisubmit'>";
       echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
@@ -1968,7 +1975,7 @@ else {
     }
   }
 
-  if ($tee == '' and strpos($_SERVER['SCRIPT_NAME'], "verkkolasku.php") !== FALSE) {
+  if ($tee == '' and strpos($_SERVER['SCRIPT_NAME'], "verkkolasku_lv.php") !== FALSE) {
 
     //p‰iv‰m‰‰r‰n tarkistus
     $tilalk = explode("-", $yhtiorow["myyntireskontrakausi_alku"]);
@@ -2087,7 +2094,8 @@ else {
               LEFT JOIN maksuehto ON lasku.yhtio=maksuehto.yhtio and lasku.maksuehto=maksuehto.tunnus
               where lasku.yhtio  = '$kukarow[yhtio]'
               and lasku.tila     = 'L'
-              and lasku.alatila  = 'D'
+              and lasku.alatila  = 'V'
+              and lasku.tapvm != 0
               and lasku.viite    = ''
               and lasku.chn     != '999'";
     $res = pupe_query($query);
@@ -2126,6 +2134,6 @@ else {
   }
 }
 
-if (!$php_cli and strpos($_SERVER['SCRIPT_NAME'], "verkkolasku.php") !== FALSE) {
+if (!$php_cli and strpos($_SERVER['SCRIPT_NAME'], "verkkolasku_lv.php") !== FALSE) {
   require "inc/footer.inc";
 }

@@ -167,7 +167,7 @@ elseif (strpos($_SERVER['SCRIPT_NAME'], "verkkolasku_lv.php") !== FALSE) {
 ini_set("mysql.connect_timeout", 18000);
 ini_set("max_execution_time", 18000);
 
-if ($kukarow["kuka"] == "admin") {
+if ($kukarow["kuka"] != "admin") {
   die("Tätä ohjelmaa ei saa ajaa kuin admin");
 }
 

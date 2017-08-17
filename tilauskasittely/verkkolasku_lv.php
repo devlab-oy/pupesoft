@@ -167,6 +167,10 @@ elseif (strpos($_SERVER['SCRIPT_NAME'], "verkkolasku_lv.php") !== FALSE) {
 ini_set("mysql.connect_timeout", 18000);
 ini_set("max_execution_time", 18000);
 
+if ($kukarow["kuka"] == "admin") {
+  die("Tätä ohjelmaa ei saa ajaa kuin admin");
+}
+
 if (isset($tee) and $tee == "lataa_tiedosto") {
   readfile("$pupe_root_polku/dataout/".basename($filenimi));
   exit;

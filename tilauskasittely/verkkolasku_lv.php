@@ -491,6 +491,7 @@ else {
                  and lasku.alatila = 'V'
                  and lasku.tila    = 'L'
                  and lasku.viite   = ''
+                 and lasku.tapvm  != '0000-00-00'
                  $lasklisa
                  GROUP BY ketjutuskentta, reklamaatiot_lasku, lasku.ytunnus, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.postino, lasku.postitp, lasku.maksuehto, lasku.erpcm, lasku.vienti, lasku.kolmikantakauppa,
                  lasku.lisattava_era, lasku.vahennettava_era, lasku.maa_maara, lasku.kuljetusmuoto, lasku.kauppatapahtuman_luonne,
@@ -2099,7 +2100,7 @@ else {
               where lasku.yhtio  = '$kukarow[yhtio]'
               and lasku.tila     = 'L'
               and lasku.alatila  = 'V'
-              and lasku.tapvm != 0
+              and lasku.tapvm   != '0000-00-00'
               and lasku.viite    = ''
               and lasku.chn     != '999'";
     $res = pupe_query($query);

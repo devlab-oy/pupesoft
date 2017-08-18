@@ -9705,6 +9705,7 @@ if (!function_exists("livesearch_tuotehaku")) {
       $nimitys_haku_query = "";
       $muuta_haku_query = "";
       $ean_haku_query = "";
+      $lyhytkuvaus_haku_query = "";
       $tuoteindex = "";
       $nimitindex = "";
 
@@ -9739,6 +9740,12 @@ if (!function_exists("livesearch_tuotehaku")) {
         elseif (in_array($yhtiorow['livetuotehaku_hakutapa'], array('F', 'G'))) {
           $tuoteno_haku_query .= " and match (tuote.tuoteno) against ('{$haku}*' IN BOOLEAN MODE) ";
           $nimitys_haku_query .= " and match (tuote.nimitys) against ('{$haku}*' IN BOOLEAN MODE) ";
+        }
+        elseif (in_array($yhtiorow['livetuotehaku_hakutapa'], array('O', 'P'))) {
+          $tuoteno_haku_query .= " and tuote.tuoteno like ('%{$haku}%') ";
+          $nimitys_haku_query .= " and tuote.nimitys like ('%{$haku}%') ";
+          $ean_haku_query .= " and tuote.eankoodi like ('%{$haku}%') ";
+          $lyhytkuvaus_haku_query .= " and tuote.lyhytkuvaus like ('%{$haku}%') ";
         }
         else {
           $tuoteno_haku_query .= " and tuote.tuoteno like ('%{$haku}%') ";
@@ -9811,6 +9818,7 @@ if (!function_exists("livesearch_tuotehaku")) {
         tuote.epakurantti50pvm,
         tuote.epakurantti75pvm,
         tuote.epakurantti100pvm,
+        tuote.lyhytkuvaus,
         if(tuote.tuoteno  = '{$haku}', 1,
         if(tuote.nimitys  = '{$haku}', 2,
         if(tuote.muuta    = '{$haku}', 3,
@@ -9855,6 +9863,16 @@ if (!function_exists("livesearch_tuotehaku")) {
                   {$ean_haku_query})";
       }
 
+      if (!empty($lyhytkuvaus_haku_query)) {
+        $query .= "UNION
+                  (SELECT {$query_select}
+                  FROM tuote
+                  WHERE tuote.yhtio = '{$kukarow['yhtio']}'
+                  {$naytetaanko_poistetut}
+                  {$kieltolisa}
+                  {$lyhytkuvaus_haku_query})";
+      }
+
       $query .= " ORDER BY jarjestys, tuoteno
                  LIMIT 500";
       $result = pupe_query($query);
@@ -9866,7 +9884,7 @@ if (!function_exists("livesearch_tuotehaku")) {
         $varastot_mista_saa_myyda = array();
 
         // Katsotaan mist‰ normaalivarastoista k‰ytt‰j‰ saa myyd‰
-        if (in_array($yhtiorow['livetuotehaku_hakutapa'], array('E', 'G', 'I', 'K', 'M', 'N'))) {
+        if (in_array($yhtiorow['livetuotehaku_hakutapa'], array('E', 'G', 'I', 'K', 'M', 'N', 'P'))) {
 
           if (!empty($laskurow['varasto'])) {
             $laskun_varasto = (int) $laskurow['varasto'];
@@ -9922,7 +9940,7 @@ if (!function_exists("livesearch_tuotehaku")) {
               <span class='livesearch_rivispan_{$hakuid}'>
               <font style='{$tyyli}'>{$row['tuoteno']}</font> &raquo; <font style='{$tyyli2}'>{$row['nimitys']}</font>";
 
-          if (in_array($yhtiorow['livetuotehaku_hakutapa'], array('E', 'G', 'I', 'K', 'M', 'N')) and count($varastot_mista_saa_myyda) > 0) {
+          if (in_array($yhtiorow['livetuotehaku_hakutapa'], array('E', 'G', 'I', 'K', 'M', 'N', 'P')) and count($varastot_mista_saa_myyda) > 0) {
 
             $saldo_yht = 0;
 
@@ -9942,6 +9960,15 @@ if (!function_exists("livesearch_tuotehaku")) {
             else {
               echo " &raquo; <font style='{$tyyli2}'>", t("Saldo"), " {$saldo_yht}</font>";
             }
+          }
+
+          if ($lyhytkuvaus_haku_query) {
+
+            if (strlen($row['lyhytkuvaus']) > 35) {
+              $row['lyhytkuvaus'] = substr($row['lyhytkuvaus'],0, 35)."..";
+            }
+
+            echo "<br><i><font style='{$tyyli2}'>{$row['lyhytkuvaus']}</font></i>";
           }
 
           echo "</span></div>";
@@ -24655,7 +24682,7 @@ if  (!function_exists('verkkolaskuputkeen')) {
       }
       return TRUE;
     }
-    
+
     // Maksuehdon takaa voidaan s‰‰t‰‰, ett‰ laskut eiv‰t mene verkkolaskuputkeen
     if ($masrow["itsetulostus"] != "") {
       if ($info) {

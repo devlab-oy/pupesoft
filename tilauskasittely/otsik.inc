@@ -855,7 +855,7 @@ if ($tila == "" and !isset($jatka)) {
 
       $srow_from = "LASKU";
     }
-    elseif ($asiakasid != "" and $tiedot_laskulta == "") {
+    elseif (($asiakasid != "" and $tiedot_laskulta == "") or ($tiedot_laskulta == "YES" and isset($uusiasiakas) and $uusiasiakas == "uusiasiakas")) {
       // asiakashaussa pit‰‰ olla vakio columni kohdistettu, jonka arvo on O ett‰ saadaan OLETUS toimitustapa haettua asiakashaunkin yhteydess‰
       if ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA") {
         $puhlisa = " if (asiakas.puhelin!='', asiakas.puhelin, asiakas.gsm) kotipuh, asiakas.tyopuhelin tyopuh,";

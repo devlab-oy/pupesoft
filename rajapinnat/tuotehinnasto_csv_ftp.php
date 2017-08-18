@@ -44,7 +44,7 @@ if (!$fp = fopen($filepath, 'w+')) {
 }
 
 // Otsikkotieto
-$header = "tuoteno;minkpl;maxkpl;hinta;alkupvm;loppupvm;laji;maa;valkoodi;selite\n";
+$header = "tuoteno;minkpl;maxkpl;hinta;alkupvm;loppupvm;laji;maa;valkoodi;selite;myyntihinta\n";
 fwrite($fp, $header);
 
 // Haetaan hinnasto-taulun sisältö
@@ -70,6 +70,7 @@ while ($row = mysql_fetch_assoc($res)) {
   $rivi  .= "{$row['maa']};";
   $rivi  .= "{$row['valkoodi']};";
   $rivi  .= "{$row['selite']};";
+  $rivi  .= "{$row['myyntihinta']};";
   $rivi .= "\n";
 
   fwrite($fp, $rivi);

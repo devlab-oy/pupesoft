@@ -981,6 +981,7 @@ if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
             tuote.epakurantti50pvm,
             tuote.epakurantti75pvm,
             tuote.epakurantti100pvm,
+            tuote.lyhytkuvaus,
             tuote.alv,
             (SELECT group_concat(distinct tuotteen_toimittajat.toim_tuoteno order by tuotteen_toimittajat.tunnus separator '<br>') FROM tuotteen_toimittajat use index (yhtio_tuoteno) WHERE tuote.yhtio = tuotteen_toimittajat.yhtio and tuote.tuoteno = tuotteen_toimittajat.tuoteno) toim_tuoteno,
             tuote.sarjanumeroseuranta,
@@ -1538,6 +1539,15 @@ if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
           $row["nimitys"] .= "<li>$tuotteen_lisatiedot_arvo[kentta] &raquo; ".url_or_text($tuotteen_lisatiedot_arvo['selite'])."</li>";
         }
         $row["nimitys"] .= "</ul>";
+      }
+
+      if (in_array($yhtiorow['livetuotehaku_hakutapa'], array('O', 'P'))) {
+
+        if (strlen($row['lyhytkuvaus']) > 100) {
+          $row['lyhytkuvaus'] = substr($row['lyhytkuvaus'],0, 100)."..";
+        }
+
+        $row["nimitys"] .= "<br><i>{$row['lyhytkuvaus']}</i>";
       }
 
       // Peek ahead

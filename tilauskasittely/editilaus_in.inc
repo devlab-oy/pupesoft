@@ -1688,7 +1688,7 @@ while ($tietue = fgets($fd)) {
         // escapetaan
         $valkoodi = mysql_real_escape_string($editilaus_valuuttakoodi);
 
-        $query = "SELECT tunnus
+        $query = "SELECT tunnus, kurssi
                   FROM valuu
                   WHERE yhtio = '{$kukarow["yhtio"]}'
                   AND nimi    = '{$valkoodi}'";
@@ -1696,10 +1696,16 @@ while ($tietue = fgets($fd)) {
 
         if (mysql_num_rows($valuu_result) != 1) {
           $valkoodi = $yhtiorow['valkoodi'];
+          $valkurssi = 1;
+        }
+        else {
+          $valrow = mysql_fetch_assoc($valuu_result);
+          $valkurssi = $valrow['kurssi'];
         }
       }
       else {
         $valkoodi = $yhtiorow['valkoodi'];
+        $valkurssi = 1;
       }
 
       // Lis‰t‰‰n otsikko
@@ -1778,7 +1784,7 @@ while ($tietue = fgets($fd)) {
                 varasto                 = '{$insertvarasto[0]}',
                 verkkotunnus            = '$arow[verkkotunnus]',
                 vienti                  = '$til_vienti',
-                vienti_kurssi           = '1',
+                vienti_kurssi           = '{$valkurssi}',
                 viesti                  = '$viite',
                 viikorkopros            = '$yhtiorow[viivastyskorko]',
                 yhtio                   = '$kukarow[yhtio]',

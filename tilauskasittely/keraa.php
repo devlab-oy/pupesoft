@@ -1766,8 +1766,13 @@ if ($tee == 'P') {
       }
 
       $boob = "";
+      $_subject_lisa = "";
 
       $_ctype = $_plain_text_mail ? "text" : "html";
+
+      if ($toimtaparow['osoitelappu'] == 'osoitelappu_kesko') {
+        $_subject_lisa = " ".$laskurow['asiakkaan_tilausnumero'];
+      }
 
       // Lähetetään keräyspoikkeama asiakkaalle
       if ($laskurow["email"] != '' and $kerpoik_myyjaasiakas) {
@@ -1776,7 +1781,7 @@ if ($tee == 'P') {
         $parametri = array(
           "to"           => $laskurow["email"],
           "cc"           => "",
-          "subject"      => "{$yhtiorow['nimi']} - ".t("Keräyspoikkeamat", $kieli),
+          "subject"      => "{$yhtiorow['nimi']} - ".t("Keräyspoikkeamat", $kieli)."{$_subject_lisa}",
           "ctype"        => $_ctype,
           "body"         => $ulos,
           "attachements" => "",
@@ -1808,7 +1813,7 @@ if ($tee == 'P') {
         $parametri = array(
           "to"           => $laskurow["kukamail"],
           "cc"           => "",
-          "subject"      => "{$yhtiorow['nimi']} - ".t("Keräyspoikkeamat", $kieli),
+          "subject"      => "{$yhtiorow['nimi']} - ".t("Keräyspoikkeamat", $kieli)."{$_subject_lisa}",
           "ctype"        => $_ctype,
           "body"         => $ulos,
           "attachements" => "",
@@ -1825,7 +1830,7 @@ if ($tee == 'P') {
         $parametri = array(
           "to"           => $yhtiorow["extranet_kerayspoikkeama_email"],
           "cc"           => "",
-          "subject"      => "{$yhtiorow['nimi']} - ".t("Keräyspoikkeamat", $kieli),
+          "subject"      => "{$yhtiorow['nimi']} - ".t("Keräyspoikkeamat", $kieli)."{$_subject_lisa}",
           "ctype"        => $_ctype,
           "body"         => $ulos,
           "attachements" => "",
@@ -1946,11 +1951,11 @@ if ($tee == 'P') {
                     AND mapvm   != '0000-00-00'
                     AND chn      = '999'";
           $yoimresult  = pupe_query($query);
-          
+
           if ($laskurow['mapvm'] != '0000-00-00' and $laskurow['chn'] == '999') {
             $alatilak = "X";
           }
-          
+
           // Etukäteen maksettu Magentotilaus laskutetaan, jos ei ole jo laskuttunut
           if ($laskurow['ohjelma_moduli'] == 'MAGENTOJT') {
             laskuta_magentojt($laskurow['tunnus']);

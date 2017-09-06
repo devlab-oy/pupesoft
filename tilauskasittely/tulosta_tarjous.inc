@@ -1715,7 +1715,7 @@ if (!function_exists('loppu_tarjous')) {
 
         $kuha -= 30;
 
-        $pdf_tarjous->draw_text(30, $kuha, t("Kunnioittavasti", $kieli) . ",",
+        $pdf_tarjous->draw_text(30, $kuha, t("Yhteistyöterveisin", $kieli) . ",",
           $page_tarjous[$sivu], $boldi);
 
         $query  = "SELECT *
@@ -1880,9 +1880,7 @@ if (!function_exists('loppu_tarjous')) {
             t("Toivomme tarjouksemme kiinnostavan teitä ja johtavan " .
               "tilaukseen", $kieli) . "!", $page_tarjous[$sivu], $boldi);
 
-          $sanavalinta = $yhtiorow["tarjoustyyppi"] == 4 ? "Yhteistyöterveisin" : "Kunnioittavasti";
-
-          $pdf_tarjous->draw_text(30, $kuha - 80, t($sanavalinta, $kieli) . ",",
+          $pdf_tarjous->draw_text(30, $kuha - 80, t("Yhteistyöterveisin", $kieli) . ",",
             $page_tarjous[$sivu], $boldi);
         }
 

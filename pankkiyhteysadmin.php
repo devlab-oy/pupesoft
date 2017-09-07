@@ -747,7 +747,7 @@ if ($tee == "") {
         echo "</div>";
       }
 
-      if (in_array($pankkiyhteys['pankki'], array('NDEAFIHH', 'DABAFIHH', 'HELSFIHH', 'ITELFIHH', 'POPFFI22', 'HANDFIHH'))) {
+      if (in_array($pankkiyhteys['pankki'], array('NDEAFIHH', 'OKOYFIHH', 'DABAFIHH', 'HELSFIHH', 'ITELFIHH', 'POPFFI22', 'HANDFIHH'))) {
         echo "<div>";
         echo "<form method='post'>";
         echo "<input type='hidden' name='tee' value='uusi_sertifikaatti'/>";

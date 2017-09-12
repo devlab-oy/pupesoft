@@ -1291,7 +1291,7 @@ if (!function_exists("tee_jt_tilaus")) {
 }
 
 if (!function_exists("hae_toimitettavat_tilausrivit")) {
-  function hae_toimitettavat_tilausrivit($tilaus_tunnus, $varastot, $jtspec) {
+  function hae_toimitettavat_tilausrivit($tilaus_tunnus, $varastot, $jtspec, $toim) {
 
     global $yhtiorow, $kukarow;
 
@@ -1302,16 +1302,28 @@ if (!function_exists("hae_toimitettavat_tilausrivit")) {
     // Palautetaan false jos kaikilla tuotteille *EI OLE* saldoa
 
     // Haetaan tilauksen kaikkien jt-rivien määrät (vain myynti- ja ennakkotilaus rivit)
-    $query = "SELECT tilausrivi.tuoteno,
-              sum(tilausrivi.varattu + tilausrivi.jt) tuote_kpl
-              FROM tilausrivi
-              WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-              AND tilausrivi.otunnus = '{$tilaus_tunnus}'
-              AND tilausrivi.tyyppi  in ('L', 'E')
-              AND tilausrivi.var     = 'J'
-              AND tilausrivi.varattu + tilausrivi.jt > 0
-              GROUP BY tilausrivi.tuoteno";
-    $result = pupe_query($query);
+    if ($toim == 'ENNAKKO') {
+      $query = "SELECT tilausrivi.tuoteno,
+                sum(tilausrivi.varattu + tilausrivi.jt) tuote_kpl
+                FROM tilausrivi
+                WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+                AND tilausrivi.otunnus = '{$tilaus_tunnus}'
+                AND tilausrivi.tyyppi  = 'E'
+                AND tilausrivi.varattu + tilausrivi.jt > 0
+                GROUP BY tilausrivi.tuoteno";
+      $result = pupe_query($query);
+    }
+    else {
+      $query = "SELECT tilausrivi.tuoteno,
+                sum(tilausrivi.varattu + tilausrivi.jt) tuote_kpl
+                FROM tilausrivi
+                WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+                AND tilausrivi.otunnus = '{$tilaus_tunnus}'
+                AND tilausrivi.tyyppi  = 'L'
+                AND tilausrivi.var     = 'J'
+                AND tilausrivi.varattu + tilausrivi.jt > 0
+                GROUP BY tilausrivi.tuoteno";
+    }
 
     while ($tilausrivi_row = mysql_fetch_assoc($result)) {
 

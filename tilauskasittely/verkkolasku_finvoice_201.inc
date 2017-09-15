@@ -543,7 +543,7 @@ if (!function_exists('finvoice_otsik')) {
       xml_add("InvoiceDate Format=\"CCYYMMDD\"", vlas_dateconv($lasrow['tapvm']), $tootfinvoice);
       xml_add("SellerReferenceIdentifier", substr($lasrow['tilausnumerot'], 0, 35), $tootfinvoice, 35);
 
-      if ($yhtiorow["verkkolasku_lah"] == "talenom") {
+      if ($yhtiorow["verkkolasku_lah"] == "talenom" or $yhtiorow["verkkolasku_lah"] == "arvato") {
         xml_add("SellersBuyerIdentifier", substr($asiakasrow["asiakasnro"], 0, 35), $tootfinvoice, 35);
       }
       elseif (trim($lasrow['asiakkaan_tilausnumero']) != "") {

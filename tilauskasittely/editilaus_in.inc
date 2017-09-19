@@ -2431,12 +2431,6 @@ while ($tietue = fgets($fd)) {
 
           $kutsuja = "EDITILAUS";
 
-          // Jos meill‰ on t‰pp‰ p‰‰ll‰, ett‰ asiakas haluaa kamat j‰lkitoimitukseen
-          if ($sallitaanjt == '1') {
-            $var     = "J";
-            $kommentti   = ""; // HUOM: nollataan kommentti
-          }
-
           if (is_array($hyvityssaanto_kpl_array) and isset($hyvityssaanto_kpl_array[$hyvityssaanto_indeksi]) and isset($hyvityssaanto_kpl_array[$hyvityssaanto_indeksi][$tuoteno])) {
             $kpl = $hyvityssaanto_kpl_array[$hyvityssaanto_indeksi][$tuoteno];
           }

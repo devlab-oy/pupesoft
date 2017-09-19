@@ -3207,6 +3207,9 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
       }
     }
 
+    if ($kutsuja == "EDITILAUS" and $var == "J" and $sallitaanjt == '0') {
+      $var = '';
+    }
     // Jos ollaan tultu editilauksesta ja meill‰ on puute/jt, katsotaan onko t‰lle tuotteelle vastaavia ja pistet‰‰n ne kommenttiin
     if ($kutsuja == "EDITILAUS" and ($var == "J" or $var == "P")) {
       //vastaavat tuotteet

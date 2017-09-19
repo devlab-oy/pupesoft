@@ -2865,6 +2865,9 @@ if ($tee == '') {
     $tilausnumero = $kukarow['kesken'];
   }
 
+  // Etukäteen maksetut tilaukset, ei sörkitä toimitustapaa enää
+  $_etukateen_maksettu = ($laskurow['mapvm'] != '0000-00-00' and $laskurow['chn'] == '999');
+
   // Tässä päivitetään 'pikaotsikkoa' jos kenttiin on jotain syötetty ja arvoja vaihdettu
   if ($kukarow["kesken"] > 0 and (
       (isset($toimitustapa) and $toimitustapa != '' and $toimitustapa != $laskurow["toimitustapa"]) or
@@ -2929,11 +2932,8 @@ if ($tee == '') {
         $meapu2 = pupe_query($apuqu2);
         $meapu2row = mysql_fetch_assoc($meapu2);
 
-        // Etukäteen maksetut tilaukset, ei sörkitä toimitustapaa enää
-        $_etukateen_maksettu = ($laskurow['mapvm'] != '0000-00-00' and $laskurow['chn'] == '999');
-
         // ja toimitustapa ei ole nouto eikä kyseessä ole verkkokauppatilaus laitetaan toimitustavaksi nouto... hakee järjestyksessä ekan
-        if ($meapu2row["nouto"] == "" and ($laskurow['tilaustyyppi'] != "W" and !$_etukateen_maksettu)) {
+        if ($meapu2row["nouto"] == "" and ($laskurow['tilaustyyppi'] != "W" and empty($_etukateen_maksettu))) {
           $apuqu = "SELECT *
                     FROM toimitustapa
                     WHERE yhtio  = '$kukarow[yhtio]'
@@ -5858,6 +5858,12 @@ if ($tee == '') {
     require "${pupe_root_polku}/allr_kamppikset.php";
   }
 
+  if (!empty($_etukateen_maksettu)) {
+    $muokkauslukko = 'LUKOSSA';
+
+    echo "<br><font class='error'>",t("HUOM: Tilaus on etukäteen maksettu verkkokauppatilaus. Tilauksen rivitietoja ei voi muuttaa. Tee mahdolliset korjaukset tekemällä uusi tilaus."),"</font><br>";
+  }
+
   //Syöttörivi
   if (($muokkauslukko == "" or (!empty($rivitunnus) and $_keratty_ja_ylitetty)) and ($toim != "PROJEKTI" or $rivitunnus != 0) or $toim == "YLLAPITO") {
     echo "<table><tr>$jarjlisa<td class='back'><font class='head'>".t("Lisää rivi")."</font></td></tr></table>";
@@ -7390,7 +7396,7 @@ if ($tee == '') {
           $rivino--;
         }
 
-        if ($muokkauslukko_rivi == "" and $yhtiorow["tilauksen_jarjestys"] == "M" and in_array($toim, array("TARJOUS", "EXTTARJOUS", "PIKATILAUS", "RIVISYOTTO", "VALMISTAASIAKKAALLE", "SIIRTOLISTA", "TYOMAARAYS", "TYOMAARAYS_ASENTAJA", "REKLAMAATIO", "PROJEKTI"))) {
+        if ($muokkauslukko_rivi == "" and empty($_etukateen_maksettu) and $yhtiorow["tilauksen_jarjestys"] == "M" and in_array($toim, array("TARJOUS", "EXTTARJOUS", "PIKATILAUS", "RIVISYOTTO", "VALMISTAASIAKKAALLE", "SIIRTOLISTA", "TYOMAARAYS", "TYOMAARAYS_ASENTAJA", "REKLAMAATIO", "PROJEKTI"))) {
 
           $buttonit =  "<div align='center'><form action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php#rivi_$rivino' name='siirra_$rivino' method='post'>
                   <input type='hidden' name='toim' value='$toim'>
@@ -9798,7 +9804,7 @@ if ($tee == '') {
 
         $sallijyvitys = FALSE;
 
-        if ($kukarow["extranet"] == "") {
+        if ($kukarow["extranet"] == "" and empty($_etukateen_maksettu)) {
           if ($yhtiorow["salli_jyvitys_myynnissa"] == "" and ($kukarow['kassamyyja'] != '' or $kukarow['dynaaminen_kassamyynti'] != '') and $toim != 'SIIRTOLISTA') {
             $sallijyvitys = TRUE;
           }
@@ -9818,7 +9824,6 @@ if ($tee == '') {
           if ($toim == 'TARJOUS' and $yhtiorow['salli_jyvitys_tarjouksella'] != '') {
             $sallijyvitys = TRUE;
           }
-
         }
 
         //annetaan mahdollisuus antaa loppusumma joka jyvitetään riveille arvoosuuden mukaan

@@ -3205,27 +3205,29 @@ if ($tee == '') {
           </form>";
     }
 
-    echo "<form method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php'>
-        <input type='hidden' name='tee' value='mikrotila'>
-        <input type='hidden' name='tilausnumero' value='$tilausnumero'>
-        <input type='hidden' name='mista' value='$mista'>
-        <input type='hidden' name='toim' value='$toim'>
-        <input type='hidden' name='lopetus' value='$lopetus'>
-        <input type='hidden' name='ruutulimit' value = '$ruutulimit'>
-        <input type='hidden' name='tyojono' value='$tyojono'>
-        <input type='hidden' name='projektilla' value='$projektilla'>
-        <input type='hidden' name='orig_tila' value='$orig_tila'>
-        <input type='hidden' name='orig_alatila' value='$orig_alatila'>
-        <input type='hidden' name='lopetus' value='$tilmyy_lopetus'>";
+    if (empty($_etukateen_maksettu)) {
+      echo "<form method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php'>
+          <input type='hidden' name='tee' value='mikrotila'>
+          <input type='hidden' name='tilausnumero' value='$tilausnumero'>
+          <input type='hidden' name='mista' value='$mista'>
+          <input type='hidden' name='toim' value='$toim'>
+          <input type='hidden' name='lopetus' value='$lopetus'>
+          <input type='hidden' name='ruutulimit' value = '$ruutulimit'>
+          <input type='hidden' name='tyojono' value='$tyojono'>
+          <input type='hidden' name='projektilla' value='$projektilla'>
+          <input type='hidden' name='orig_tila' value='$orig_tila'>
+          <input type='hidden' name='orig_alatila' value='$orig_alatila'>
+          <input type='hidden' name='lopetus' value='$tilmyy_lopetus'>";
 
-    if ($toim != "VALMISTAVARASTOON") {
-      echo "<input type='submit' value='".t("Lue tilausrivit tiedostosta")."'>";
-    }
-    else {
-      echo "<input type='submit' value='".t("Lue valmistusrivit tiedostosta")."'>";
-    }
+      if ($toim != "VALMISTAVARASTOON") {
+        echo "<input type='submit' value='".t("Lue tilausrivit tiedostosta")."'>";
+      }
+      else {
+        echo "<input type='submit' value='".t("Lue valmistusrivit tiedostosta")."'>";
+      }
 
-    echo "</form>";
+      echo "</form>";
+    }
 
     if ($kukarow["extranet"] == "" and ($toim == "PIKATILAUS" or $toim == "RIVISYOTTO") and !empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A' and $laskurow["tila"] != 'G') {
       echo "  <form method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php' name='jalkitoimita'>

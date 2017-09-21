@@ -9,6 +9,8 @@ if ($livesearch_tee == "TUOTEHAKU") {
 
 echo "<font class='head'>".t("Etiketin tulostus")."</font><hr>";
 
+if (!isset($malli)) $malli = '';
+
 // Vakio lomake
 $formi  = 'formi';
 $kentta = 'tuoteno';
@@ -18,12 +20,14 @@ enable_ajax();
 echo "<form method='post' name='formi' autocomplete='off'>";
 echo "<input type='hidden' name='tee' value='hae'>";
 echo "<input type='hidden' name='toim' value='$toim'>";
+echo "<input type='hidden' name='malli' value='$malli'>";
 
 echo "<table>";
 echo "<tr>";
 echo "<th>".t("Tuotenumero")."</th>";
 echo "<th>".t("KPL")."</th>";
 echo "<th>".t("Kirjoitin")."</th>";
+echo "<th>".t("Malli") . "</th>";
 
 echo "<tr>";
 echo "<td>".livesearch_kentta("formi", "TUOTEHAKU", "tuoteno", 150, $tuoteno)."</td>";
@@ -46,6 +50,10 @@ while ($kirow = mysql_fetch_array($kires)) {
 
 echo "</select></td>";
 
+echo "<td><select name='malli'>";
+echo "<option value=''>" . t("Ei mallia") . "</option>";
+echo "<option value='zebra'>" . t("Zebra") . "</option>";
+echo "</select></td>";
 echo "<td class='back'><input name='submit' type='submit' value='".t("Tulosta")."'></td>";
 echo "</tr>";
 echo "</table>";
@@ -83,8 +91,8 @@ if ($tee == "hae") {
   }
 }
 
-if ($tee == "jatka") {
-
+if ($tee == "jatka" and $malli == '') {
+  echo "TÄMÄ ON NYKYINEN HAARA";
   $filenimi = "/tmp/sahantera_tulostus.txt";
   $hammastus = t_tuotteen_avainsanat($trow, 'HAMMASTUS');
 
@@ -115,6 +123,77 @@ if ($tee == "jatka") {
   else {
     $tee = "tulosta";
   }
+}
+
+if ($tee == "jatka" and $malli == 'zebra') {
+echo "TÄMÄ ON ZEBRA HAARA";
+  // tämä haara on zebra tarralle
+  // Toimii ja suunniteltu mallille GX420t
+  // Tarrankoko xx mm x xx mm
+
+  // Ohjelmointimanuaali löytyy : http://www.zebra.com/id/zebra/na/en/index/products/printers/desktop/gx420t.4.tabs.html
+  // "Programmin guide"
+  $hammastus = t_tuotteen_avainsanat($trow, 'HAMMASTUS');
+
+  // Mitat tulee olla millimetrejä, metreinä kannassa. Syvyys yhdellä desimaalilla, muut ilman desimaalia.
+  $mitat = round($trow["tuotekorkeus"] * 1000, 0)." x ".round($trow["tuoteleveys"] * 1000, 0)." x ".round($trow["tuotesyvyys"] * 1000, 1);
+
+  // Splitataan tuotteen nimitys spacesta
+  $nimitys = split(" ", $trow["nimitys"]);
+
+
+  // tulostetaan $nimitys[1]);     // Nimityksestä toka sana, max 9 merkkiä
+  // tulostetaan , $mitat);       // Pituus x leveys x paksuus, max 25 merkkiä
+  // tulostetaan  $hammastus);    // Hammastus, max 12 merkkiä
+  // tulostetaan  $trow["tuoteno"]);  // Tuotenumero, max 40 merkkiä
+
+// zebra blokki
+  // tämä haara on Zebra_tuote, joka liimataan tuotteeseen
+  // Toimii ja suunniteltu mallille GX420t
+  // Tarrakoko 76 mm x 25 mm
+
+  $pituus = 50; // voidaan määrittää mistä kohdasta katkaistaan teksti.
+
+  if (strlen($nimitys) > $pituus ) {
+    if (strpos($nimitys, " ")) {
+      $nimipalat = explode(' ', $nimitys);
+
+      $merkkimaara = 0;
+      $nimitys = "";
+      $nimitys2 = "";
+
+      foreach ($nimipalat as $nimipala) {
+        if (strlen($nimitys)+strlen($nimipala) <= $pituus or $merkkimaara == 0) {
+          $nimitys .= $nimipala." ";
+        }
+        else {
+          $nimitys2 .= $nimipala." ";
+        }
+        $merkkimaara += strlen($nimipala);
+      }
+    }
+
+    $nimitys = substr($nimitys, 0, $pituus);
+    $nimitys2 = substr($nimitys2, 0, $pituus);
+  }
+
+
+  $sivu  = "^XA\n";    // vakio alku, pakollinen
+  $sivu .= "^LH50\n";  // offset vasemmasta
+  $sivu .= "^LT000\n";  // offset ylhäältä
+  $sivu .= "^FO85,20\n^ASN,20,12\n^FDTuoteno: $tuoteno\n^FS";
+  $sivu .= "^FO85,65\n^AQN,18,8\n^FD$nimitys\n^FS";
+  $sivu .= "^FO85,88\n^AQN,18,8\n^FD$mitat\n^FS";
+  $sivu .= "^MD10";                        // TUMMUUS, vakio on 8 mutta se ei riitä viivakoodille.
+  $sivu .= "^PQ$tkpl";                    // Tulostettavien lukumäärä
+  $sivu .= "^FO80,120\n^AQN,18,8\n^FD$hammastus\n^FS";    // hammastus
+  $sivu .= "^FO260,180\n^AQN,18,8\n^FD$yhtiorow[nimi]\n^FS";  // Tulostetaan Firma
+
+  $sivu .= "\n^XZ";  // pakollinen lopetus
+  // zebra blokki
+
+  $tee = "tulosta";
+
 }
 
 if ($tee == "tulosta") {

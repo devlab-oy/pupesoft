@@ -92,7 +92,6 @@ if ($tee == "hae") {
 }
 
 if ($tee == "jatka" and $malli == '') {
-  echo "TÄMÄ ON NYKYINEN HAARA";
   $filenimi = "/tmp/sahantera_tulostus.txt";
   $hammastus = t_tuotteen_avainsanat($trow, 'HAMMASTUS');
 
@@ -126,7 +125,6 @@ if ($tee == "jatka" and $malli == '') {
 }
 
 if ($tee == "jatka" and $malli == 'zebra') {
-  echo "TÄMÄ ON ZEBRA HAARA";
   // tämä haara on zebra tarralle
   // Toimii ja suunniteltu mallille GX420t
   // Tarrankoko xx mm x xx mm
@@ -154,30 +152,35 @@ if ($tee == "jatka" and $malli == 'zebra') {
 
   $sivu  = "^XA\n";    // vakio alku, pakollinen
   $sivu .= "^LH000\n";  // offset vasemmasta
-  $sivu .= "^LT000\n";  // offset ylhäältä
+  $sivu .= "^LT200\n";  // offset ylhäältä
   // $sivu .= "^POI\n";  // offset ylhäältä
-  $sivu .= "^FO150,220\n^AQR,18,8\n^FDVAROITUS: VANNESAHANTERÄ JÄNNITYKSESSÄ. KÄYTÄ SUOJALASEJA JA -KÄSINEITÄ, KUN KÄSITTELET TERÄÄ,\n^FS";  // Tulostetaan varoitusteksti
-  $sivu .= "^FO120,380\n^AQR,18,8\n^FDASENNA TERÄ SAHAVALMISTAJAN OHJEIDEN MUKAISESTI\n^FS";  // Tulostetaan Firma
-  $sivu .= "^FO95,220\n^AQR,18,8\n^FDTuote ja koodi\n^FS";
-  $sivu .= "^FO75,220\n^ADR,18,8\n^FD$nimitys[1]\n^FS";
-  $sivu .= "^FO50,220\n^ADR,20,12\n^FD$tuoteno\n^FS";
-  $sivu .= "^FO95,700\n^AQR,18,8\n^FDpituus x leveys x paksuus\n^FS";
-  $sivu .= "^FO75,700\n^ADR,18,8\n^FD$mitat\n^FS";
+
+  $sivu .= "^FO015,350^XGE:LENOX.GRF,1,1^FS";
+  $sivu .= "^FO095,420^XGE:HANSKAT.GRF,1,1^FS";
+  $sivu .= "^FO015,420^XGE:LASIT.GRF,1,1^FS";
+  $sivu .= "^FO015,1750^XGE:TKP.GRF,1,1^FS";
+
+  $sivu .= "^FO150,520\n^AQR,18,8\n^FDVAROITUS: VANNESAHANTERÄ JÄNNITYKSESSÄ. KÄYTÄ SUOJALASEJA JA -KÄSINEITÄ, KUN KÄSITTELET TERÄÄ,\n^FS";  // Tulostetaan varoitusteksti
+  $sivu .= "^FO120,680\n^AQR,18,8\n^FDASENNA TERÄ SAHAVALMISTAJAN OHJEIDEN MUKAISESTI\n^FS";  // Tulostetaan Firma
+  $sivu .= "^FO95,520\n^AQR,18,8\n^FDTuote ja koodi\n^FS";
+  $sivu .= "^FO75,520\n^ADR,18,8\n^FD$nimitys[1]\n^FS";
+  $sivu .= "^FO50,520\n^ADR,20,12\n^FD$tuoteno\n^FS";
+  $sivu .= "^FO95,1000\n^AQR,18,8\n^FDpituus x leveys x paksuus\n^FS";
+  $sivu .= "^FO75,1000\n^ADR,18,8\n^FD$mitat\n^FS";
   $sivu .= "^MD10";                        // TUMMUUS, vakio on 8 mutta se ei riitä viivakoodille.
   $sivu .= "^PQ$tkpl";                    // Tulostettavien lukumäärä
-  $sivu .= "^FO95,1200\n^AQR,18,8\n^FDHammastus:\n^FS";    // hammastus
-  $sivu .= "^FO75,1200\n^ADR,18,8\n^FD$hammastus\n^FS";    // hammastus
-  $sivu .= "^FO20,220\n^ADR,18,8\n^FD$yhtiorow[nimi]\n^FS";  // Tulostetaan Firma
-  $sivu .= "^FO20,700\n^ADR,18,8\n^FD$yhtiorow[www]\n^FS";  // Tulostetaan Firma
-  $sivu .= "^FO20,1200\n^ADR,18,8\n^FDpuh: $yhtiorow[puhelin]\n^FS";  // Tulostetaan Firma
+  $sivu .= "^FO95,1500\n^AQR,18,8\n^FDHammastus:\n^FS";    // hammastus
+  $sivu .= "^FO75,1500\n^ADR,18,8\n^FD$hammastus\n^FS";    // hammastus
+  $sivu .= "^FO20,520\n^ADR,18,8\n^FD$yhtiorow[nimi]\n^FS";  // Tulostetaan Firma
+  $sivu .= "^FO20,1000\n^ADR,18,8\n^FD$yhtiorow[www]\n^FS";  // Tulostetaan Firma
+  $sivu .= "^FO20,1500\n^ADR,18,8\n^FDpuh: $yhtiorow[puhelin]\n^FS";  // Tulostetaan Firma
   $sivu .= "\n^XZ";  // pakollinen lopetus
 
   //konvertoidaan ääkköset printterin ymmärtämään muotoon
-  $from = array ('ä', 'å', 'ö', 'Ä', 'Å', 'Ö');
-  $to   = array (chr(132), chr(134), chr(148), chr(142), chr(143), chr(153));   // DOS charset
-  $sivu = str_replace($from, $to, $sivu);                  // Tehdään käännös
+  $from = array('ä', 'å', 'ö', 'Ä', 'Å', 'Ö', '|');
+  $to  = array(chr(132), chr(134), chr(148), chr(142), chr(143), chr(153), chr(179));      // DOS charset
 
-  $sivu = escapeshellarg($sivu);
+  $sivu = str_replace($from, $to, $sivu);                  // Tehdään käännös
 
   // zebra blokki
 

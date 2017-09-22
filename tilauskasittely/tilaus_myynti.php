@@ -115,7 +115,7 @@ if (($e1 or $e2) and $e3 and $e4) {
   exit;
 }
 
-if ($kukarow['extranet'] == '') {
+if ($kukarow['extranet'] == '' and empty($nayta_pdf)) {
   if (isset($ajax_popup)) {
     require "tuotetiedot.inc";
     exit;
@@ -215,7 +215,9 @@ if (isset($livesearch_tee) and $livesearch_tee == "TUOTEMERKKIHAKU") {
   exit;
 }
 
-enable_ajax();
+if (empty($nayta_pdf)) {
+  enable_ajax();
+}
 
 $tilauskaslisa = "";
 
@@ -223,10 +225,10 @@ $tilauskaslisa = "";
 if (strpos(dirname(__FILE__), "/tilauskasittely") !== FALSE) {
   $tilauskaslisa = "tilauskasittely/";
 }
-if (isset($liite_popup_toiminto) and $liite_popup_toiminto == "AK") {
+if (empty($nayta_pdf) and isset($liite_popup_toiminto) and $liite_popup_toiminto == "AK") {
   liite_popup("AK", $tuotetunnus, $width, $height);
 }
-else {
+elseif(empty($nayta_pdf)) {
   liite_popup("JS");
 }
 
@@ -780,7 +782,7 @@ if (isset($liitaasiakasnappi) and $kukarow["extranet"] == "") {
 }
 
 // Jos ylläpidossa on luotu uusi asiakas
-if (isset($from) and $from == "ASIAKASYLLAPITO" and $yllapidossa == "asiakas" and $yllapidontunnus != '' and $tilausnumero == '') {
+if (isset($from) and $from == "ASIAKASYLLAPITO" and $yllapidossa == "asiakas" and $yllapidontunnus != '' and ($tilausnumero == '' or (isset($uusiasiakas) and $uusiasiakas == "uusiasiakas"))) {
   $tee = "OTSIK";
   $asiakasid = $yllapidontunnus;
 }

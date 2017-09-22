@@ -3262,6 +3262,8 @@ if ($fieldname == "livetuotehaku_hakutapa" or $fieldname == "livetuotehaku_hakut
   $ulos .= "<option value = 'L' {$sel['L']}>".t("Livetuotehaku hakee tuotenumeron, nimityksen, lempinimen ja EAN-koodin millä tahansa osalla. (Hidas tapa)")."</option>";
   $ulos .= "<option value = 'M' {$sel['M']}>".t("Livetuotehaku hakee tuotenumeron, nimityksen, lempinimen ja EAN-koodin millä tahansa osalla. Tehdään myös saldokysely. (Todella hidas tapa)")."</option>";
   $ulos .= "<option value = 'N' {$sel['N']}>".t("Livetuotehaku hakee tuotenumeron ja nimityksen millä tahansa osalla. Näytetään saatavuus kyllä/ei. (Todella hidas tapa)")."</option>";
+  $ulos .= "<option value = 'O' {$sel['O']}>".t("Livetuotehaku hakee tuotenumeron, nimityksen, EAN-koodin ja lyhytkuvauksen millä tahansa osalla. (Hidas tapa)")."</option>";
+  $ulos .= "<option value = 'P' {$sel['P']}>".t("Livetuotehaku hakee tuotenumeron, nimityksen, EAN-koodin ja lyhytkuvauksen millä tahansa osalla. Tehdään myös saldokysely. (Todella hidas tapa)")."</option>";
 
   $ulos .= "</select></td>";
 

@@ -46,9 +46,10 @@ if (mysql_num_rows($result) > 0) {
   exit;
 }
 
-if ($toim == "Sauna") {
+if ($toim != "") {
   if ($kentta03 != '') {
-    $meili = "\n\n\n$kukarow[nimi] on varannut saunan ajalle:\n\n##################################################\n$day-$month-$year   Klo: $kello --> Klo: $lkello\n##################################################\n\n\n";
+    $meili = "\n\n$kukarow[nimi] on varannut \n$toim ajalle:";
+    $meili .= "\n$day-$month-$year Klo: \n$kello --> \n$lkello\n\n";
     $meili .= "Yhtiö:\n$kentta01\n";
     $meili .= "Osasto:\n$kentta02\n\n";
     $meili .= "Lisätiedot:\n$kentta05\n\n";
@@ -58,7 +59,7 @@ if ($toim == "Sauna") {
     $meili .= "Vieraslukumäärä:\n$kentta08\n\n\n";
     $meili .= "Juomatoivomus:\n$kentta10\n";
 
-    $tulos = mail("$yhtiorow[varauskalenteri_email]", mb_encode_mimeheader("Saunavaraus", "ISO-8859-1", "Q"), $meili, "From: ".mb_encode_mimeheader($kukarow["nimi"], "ISO-8859-1", "Q")." <".$kukarow["eposti"].">\nReply-To: ".mb_encode_mimeheader($kukarow["nimi"], "ISO-8859-1", "Q")." <".$row["eposti"].">\n", "-f $yhtiorow[postittaja_email]");
+    $tulos = mail("$yhtiorow[varauskalenteri_email]", mb_encode_mimeheader($toim, "ISO-8859-1", "Q"), $meili, "From: ".mb_encode_mimeheader($kukarow["nimi"], "ISO-8859-1", "Q")." <".$kukarow["eposti"].">\nReply-To: ".mb_encode_mimeheader($kukarow["nimi"], "ISO-8859-1", "Q")." <".$row["eposti"].">\n", "-f $yhtiorow[postittaja_email]");
   }
   else {
     echo "<br><br>Tarkista, ett&auml; kaikki tiedot on sy&ouml;tetty!";

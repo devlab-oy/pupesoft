@@ -1782,8 +1782,13 @@ if ($tee == 'P') {
       }
 
       $boob = "";
+      $_subject_lisa = "";
 
       $_ctype = $_plain_text_mail ? "text" : "html";
+
+      if ($toimtaparow['osoitelappu'] == 'osoitelappu_kesko') {
+        $_subject_lisa = " ".$laskurow['asiakkaan_tilausnumero'];
+      }
 
       // Lähetetään keräyspoikkeama asiakkaalle
       if ($laskurow["email"] != '' and $kerpoik_myyjaasiakas) {
@@ -1792,7 +1797,7 @@ if ($tee == 'P') {
         $parametri = array(
           "to"           => $laskurow["email"],
           "cc"           => "",
-          "subject"      => "{$yhtiorow['nimi']} - ".t("Keräyspoikkeamat", $kieli),
+          "subject"      => "{$yhtiorow['nimi']} - ".t("Keräyspoikkeamat", $kieli)."{$_subject_lisa}",
           "ctype"        => $_ctype,
           "body"         => $ulos,
           "attachements" => "",
@@ -1824,7 +1829,7 @@ if ($tee == 'P') {
         $parametri = array(
           "to"           => $laskurow["kukamail"],
           "cc"           => "",
-          "subject"      => "{$yhtiorow['nimi']} - ".t("Keräyspoikkeamat", $kieli),
+          "subject"      => "{$yhtiorow['nimi']} - ".t("Keräyspoikkeamat", $kieli)."{$_subject_lisa}",
           "ctype"        => $_ctype,
           "body"         => $ulos,
           "attachements" => "",
@@ -1841,7 +1846,7 @@ if ($tee == 'P') {
         $parametri = array(
           "to"           => $yhtiorow["extranet_kerayspoikkeama_email"],
           "cc"           => "",
-          "subject"      => "{$yhtiorow['nimi']} - ".t("Keräyspoikkeamat", $kieli),
+          "subject"      => "{$yhtiorow['nimi']} - ".t("Keräyspoikkeamat", $kieli)."{$_subject_lisa}",
           "ctype"        => $_ctype,
           "body"         => $ulos,
           "attachements" => "",

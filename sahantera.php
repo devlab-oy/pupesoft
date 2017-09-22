@@ -148,49 +148,37 @@ if ($tee == "jatka" and $malli == 'zebra') {
   // tulostetaan  $trow["tuoteno"]);  // Tuotenumero, max 40 merkkiä
 
 
-  $pituus = 50; // voidaan määrittää mistä kohdasta katkaistaan teksti.
-
-  if (strlen($nimitys) > $pituus ) {
-    if (strpos($nimitys, " ")) {
-      $nimipalat = explode(' ', $nimitys);
-
-      $merkkimaara = 0;
-      $nimitys = "";
-      $nimitys2 = "";
-
-      foreach ($nimipalat as $nimipala) {
-        if (strlen($nimitys)+strlen($nimipala) <= $pituus or $merkkimaara == 0) {
-          $nimitys .= $nimipala." ";
-        }
-        else {
-          $nimitys2 .= $nimipala." ";
-        }
-        $merkkimaara += strlen($nimipala);
-      }
-    }
-
-    $nimitys = substr($nimitys, 0, $pituus);
-    $nimitys2 = substr($nimitys2, 0, $pituus);
-  }
     //  Format ^FOx,y,z
 
+  $nimitys = split(" ", $trow["nimitys"]);
+
   $sivu  = "^XA\n";    // vakio alku, pakollinen
-  $sivu .= "^LH50\n";  // offset vasemmasta
+  $sivu .= "^LH000\n";  // offset vasemmasta
   $sivu .= "^LT000\n";  // offset ylhäältä
-  $sivu .= "^POI\n";  // offset ylhäältä
-  $sivu .= "^FO85,20\n^ASR,20,12\n^FDKeijo: $tuoteno\n^FS";
-  $sivu .= "^FO85,65\n^AQR,18,8\n^FD$nimitys\n^FS";
-  $sivu .= "^FO85,88\n^AQR,18,8\n^FD$mitat\n^FS";
+  // $sivu .= "^POI\n";  // offset ylhäältä
+  $sivu .= "^FO150,220\n^AQR,18,8\n^FDVAROITUS: VANNESAHANTERÄ JÄNNITYKSESSÄ. KÄYTÄ SUOJALASEJA JA -KÄSINEITÄ, KUN KÄSITTELET TERÄÄ,\n^FS";  // Tulostetaan varoitusteksti
+  $sivu .= "^FO120,380\n^AQR,18,8\n^FDASENNA TERÄ SAHAVALMISTAJAN OHJEIDEN MUKAISESTI\n^FS";  // Tulostetaan Firma
+  $sivu .= "^FO95,220\n^AQR,18,8\n^FDTuote ja koodi\n^FS";
+  $sivu .= "^FO75,220\n^ADR,18,8\n^FD$nimitys[1]\n^FS";
+  $sivu .= "^FO50,220\n^ADR,20,12\n^FD$tuoteno\n^FS";
+  $sivu .= "^FO95,700\n^AQR,18,8\n^FDpituus x leveys x paksuus\n^FS";
+  $sivu .= "^FO75,700\n^ADR,18,8\n^FD$mitat\n^FS";
   $sivu .= "^MD10";                        // TUMMUUS, vakio on 8 mutta se ei riitä viivakoodille.
   $sivu .= "^PQ$tkpl";                    // Tulostettavien lukumäärä
-  $sivu .= "^FO80,120\n^AQR,18,8\n^FD$hammastus\n^FS";    // hammastus
-  $sivu .= "^FO260,180\n^AQR,18,8\n^FD$yhtiorow[nimi]\n^FS";  // Tulostetaan Firma
+  $sivu .= "^FO95,1200\n^AQR,18,8\n^FDHammastus:\n^FS";    // hammastus
+  $sivu .= "^FO75,1200\n^ADR,18,8\n^FD$hammastus\n^FS";    // hammastus
+  $sivu .= "^FO20,220\n^ADR,18,8\n^FD$yhtiorow[nimi]\n^FS";  // Tulostetaan Firma
+  $sivu .= "^FO20,700\n^ADR,18,8\n^FD$yhtiorow[www]\n^FS";  // Tulostetaan Firma
+  $sivu .= "^FO20,1200\n^ADR,18,8\n^FDpuh: $yhtiorow[puhelin]\n^FS";  // Tulostetaan Firma
   $sivu .= "\n^XZ";  // pakollinen lopetus
 
-  //^XA
-  //^FO50,50^ADN,36,20^FDxxxxxxxxxxx
-  //^FS
-  //^XZ
+  //konvertoidaan ääkköset printterin ymmärtämään muotoon
+  $from = array ('ä', 'å', 'ö', 'Ä', 'Å', 'Ö');
+  $to   = array (chr(132), chr(134), chr(148), chr(142), chr(143), chr(153));   // DOS charset
+  $sivu = str_replace($from, $to, $sivu);                  // Tehdään käännös
+
+  $sivu = escapeshellarg($sivu);
+
   // zebra blokki
 
   list($usec, $sec) = explode(' ', microtime());

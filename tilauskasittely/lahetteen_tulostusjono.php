@@ -679,20 +679,17 @@ if ($tee2 == '') {
       }
     }
 
-    // jos ei haluta pakottaa oletukseksi "ker‰‰ kaikista"
-    if ($_tarkista_varastot) {
-      // jos k‰ytt‰j‰ll‰ on oletusvarasto, valitaan se
-      if ($kukarow['oletus_varasto'] != 0) {
-        $tuvarasto = $kukarow['oletus_varasto'];
-      }
-      //  Varastorajaus jos k‰ytt‰j‰ll‰ on joku varasto valittuna
-      elseif ($kukarow['varasto'] != '' and $kukarow['varasto'] != 0) {
-        // jos k‰ytt‰j‰ll‰ on monta varastoa valittuna, valitaan ensimm‰inen
-        $tuvarasto   = strpos($kukarow['varasto'], ',') !== false ? array_shift(explode(",", $kukarow['varasto'])) : $kukarow['varasto'];
-      }
-      else {
-        $tuvarasto   = "KAIKKI";
-      }
+    // jos k‰ytt‰j‰ll‰ on oletusvarasto, valitaan se
+    if ($_tarkista_varastot and $kukarow['oletus_varasto'] != 0) {
+      $tuvarasto = $kukarow['oletus_varasto'];
+    }
+    //  Varastorajaus jos k‰ytt‰j‰ll‰ on joku varasto valittuna
+    elseif ($_tarkista_varastot and $kukarow['varasto'] != '' and $kukarow['varasto'] != 0) {
+      // jos k‰ytt‰j‰ll‰ on monta varastoa valittuna, valitaan ensimm‰inen
+      $tuvarasto   = strpos($kukarow['varasto'], ',') !== false ? array_shift(explode(",", $kukarow['varasto'])) : $kukarow['varasto'];
+    }
+    else {
+      $tuvarasto   = "KAIKKI";
     }
 
     $tutoimtapa = "KAIKKI";

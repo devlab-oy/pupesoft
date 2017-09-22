@@ -126,7 +126,7 @@ if ($tee == "jatka" and $malli == '') {
 }
 
 if ($tee == "jatka" and $malli == 'zebra') {
-echo "TÄMÄ ON ZEBRA HAARA";
+  echo "TÄMÄ ON ZEBRA HAARA";
   // tämä haara on zebra tarralle
   // Toimii ja suunniteltu mallille GX420t
   // Tarrankoko xx mm x xx mm
@@ -147,10 +147,6 @@ echo "TÄMÄ ON ZEBRA HAARA";
   // tulostetaan  $hammastus);    // Hammastus, max 12 merkkiä
   // tulostetaan  $trow["tuoteno"]);  // Tuotenumero, max 40 merkkiä
 
-// zebra blokki
-  // tämä haara on Zebra_tuote, joka liimataan tuotteeseen
-  // Toimii ja suunniteltu mallille GX420t
-  // Tarrakoko 76 mm x 25 mm
 
   $pituus = 50; // voidaan määrittää mistä kohdasta katkaistaan teksti.
 
@@ -176,21 +172,31 @@ echo "TÄMÄ ON ZEBRA HAARA";
     $nimitys = substr($nimitys, 0, $pituus);
     $nimitys2 = substr($nimitys2, 0, $pituus);
   }
-
+    //  Format ^FOx,y,z
 
   $sivu  = "^XA\n";    // vakio alku, pakollinen
   $sivu .= "^LH50\n";  // offset vasemmasta
   $sivu .= "^LT000\n";  // offset ylhäältä
-  $sivu .= "^FO85,20\n^ASN,20,12\n^FDTuoteno: $tuoteno\n^FS";
-  $sivu .= "^FO85,65\n^AQN,18,8\n^FD$nimitys\n^FS";
-  $sivu .= "^FO85,88\n^AQN,18,8\n^FD$mitat\n^FS";
+  $sivu .= "^POI\n";  // offset ylhäältä
+  $sivu .= "^FO85,20\n^ASR,20,12\n^FDKeijo: $tuoteno\n^FS";
+  $sivu .= "^FO85,65\n^AQR,18,8\n^FD$nimitys\n^FS";
+  $sivu .= "^FO85,88\n^AQR,18,8\n^FD$mitat\n^FS";
   $sivu .= "^MD10";                        // TUMMUUS, vakio on 8 mutta se ei riitä viivakoodille.
   $sivu .= "^PQ$tkpl";                    // Tulostettavien lukumäärä
-  $sivu .= "^FO80,120\n^AQN,18,8\n^FD$hammastus\n^FS";    // hammastus
-  $sivu .= "^FO260,180\n^AQN,18,8\n^FD$yhtiorow[nimi]\n^FS";  // Tulostetaan Firma
-
+  $sivu .= "^FO80,120\n^AQR,18,8\n^FD$hammastus\n^FS";    // hammastus
+  $sivu .= "^FO260,180\n^AQR,18,8\n^FD$yhtiorow[nimi]\n^FS";  // Tulostetaan Firma
   $sivu .= "\n^XZ";  // pakollinen lopetus
+
+  //^XA
+  //^FO50,50^ADN,36,20^FDxxxxxxxxxxx
+  //^FS
+  //^XZ
   // zebra blokki
+
+  list($usec, $sec) = explode(' ', microtime());
+  mt_srand((float) $sec + ((float) $usec * 100000));
+  $filenimi = "/tmp/Zebra-tarrat-".md5(uniqid(mt_rand(), true)).".txt";
+  $fh = file_put_contents($filenimi, $sivu);
 
   $tee = "tulosta";
 

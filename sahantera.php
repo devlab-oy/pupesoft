@@ -127,7 +127,7 @@ if ($tee == "jatka" and $malli == '') {
 if ($tee == "jatka" and $malli == 'zebra') {
   // tämä haara on zebra tarralle
   // Toimii ja suunniteltu mallille GX420t
-  // Tarrankoko xx mm x xx mm
+  // Tarrankoko 254 mm x 25,4 mm
 
   // Ohjelmointimanuaali löytyy : http://www.zebra.com/id/zebra/na/en/index/products/printers/desktop/gx420t.4.tabs.html
   // "Programmin guide"
@@ -137,16 +137,6 @@ if ($tee == "jatka" and $malli == 'zebra') {
   $mitat = round($trow["tuotekorkeus"] * 1000, 0)." x ".round($trow["tuoteleveys"] * 1000, 0)." x ".round($trow["tuotesyvyys"] * 1000, 1);
 
   // Splitataan tuotteen nimitys spacesta
-  $nimitys = split(" ", $trow["nimitys"]);
-
-
-  // tulostetaan $nimitys[1]);     // Nimityksestä toka sana, max 9 merkkiä
-  // tulostetaan , $mitat);       // Pituus x leveys x paksuus, max 25 merkkiä
-  // tulostetaan  $hammastus);    // Hammastus, max 12 merkkiä
-  // tulostetaan  $trow["tuoteno"]);  // Tuotenumero, max 40 merkkiä
-
-
-    //  Format ^FOx,y,z
 
   $nimitys = split(" ", $trow["nimitys"]);
 

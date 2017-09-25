@@ -50,11 +50,20 @@ while ($kirow = mysql_fetch_array($kires)) {
 
 echo "</select></td>";
 
+
+$selmalli = "";
+
+if (!empty($malli)) {
+  $selmalli = "SELECTED";
+}
+
 echo "<td><select name='malli'>";
 echo "<option value=''>" . t("Ei mallia") . "</option>";
-echo "<option value='zebra'>" . t("Zebra") . "</option>";
+echo "<option value='zebra' $selmalli>" . t("Zebra") . "</option>";
 echo "</select></td>";
+
 echo "<td class='back'><input name='submit' type='submit' value='".t("Tulosta")."'></td>";
+
 echo "</tr>";
 echo "</table>";
 echo "</form>";

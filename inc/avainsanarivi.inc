@@ -228,6 +228,7 @@ if (mysql_field_name($result, $i) == "laji") {
 
   if ($lukitse_laji== "") $ulos .= "<optgroup label='".t("Varaston avainsanat")."'>";
   if ($lukitse_laji== "" or $lukitse_laji == "KERAYSLISTA") $ulos .= "<option value='KERAYSLISTA' $avain_sel[KERAYSLISTA]>".t("Ker‰yslista")."</option>";
+  if ($lukitse_laji== "" or $lukitse_laji == "KERAAKAIKISTA") $ulos .= "<option value='KERAAKAIKISTA' $avain_sel[KERAAKAIKISTA]>".t("Ker‰t‰‰n aina kaikista varastoista")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "LAHETETYYPPI") $ulos .= "<option value='LAHETETYYPPI' $avain_sel[LAHETETYYPPI]>".t("L‰hetetyyppi")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "RAHTIKIRJA") $ulos .= "<option value='RAHTIKIRJA' $avain_sel[RAHTIKIRJA]>".t("Rahtikirjatyyppi")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "TOIMTAPAKV") $ulos .= "<option value='TOIMTAPAKV' $avain_sel[TOIMTAPAKV]>".t("Toimitustavan kieliversio")."</option>";
@@ -729,6 +730,24 @@ if ($avain_sel["KERAYSLISTA"] == "SELECTED" and $_selite) {
 
   $ulos .= "</select></td>";
   $jatko = 0;
+}
+
+
+if ($avain_sel["KERAAKAIKISTA"] == "SELECTED") {
+
+  if ($_selite || $_jarjestys) {
+    $tyyppi = 0;
+  }
+
+  if ($_selitetark) {
+    $sel = trim($trow[$i]) == "a" ? " SELECTED" : "";
+
+    $ulos  = "<td><select name='{$nimi}'>";
+    $ulos .= "<option value='o'>".t("Ker‰‰ -ohjelmassa ker‰t‰‰n oletuksena k‰ytt‰j‰n oletusvarastosta/valikoidusta varastosta")."</option>";
+    $ulos .= "<option value='a'{$sel}>".t("Ker‰‰ -ohjelmassa ker‰t‰‰n oletuksena kaikista varastoista")."</option>";
+    $ulos .= "</select></td>";
+    $jatko = 0;
+  }
 }
 
 if ($avain_sel["SAHKTILTUN"] == "SELECTED" and $_selite) {

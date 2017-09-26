@@ -658,6 +658,8 @@ if ($tee2 == '') {
   /*
     Oletuksia
   */
+  $_tarkista_varastot = true;
+
   if (isset($indexvas) and $indexvas == 1 and $tuvarasto == '') {
 
     $karajaus = 1;
@@ -666,12 +668,23 @@ if ($tee2 == '') {
       $karajaus = $yhtiorow["keraysaikarajaus"];
     }
 
+    $keraakaikistares = t_avainsana("KERAAKAIKISTA");
+
+    if (mysql_num_rows($keraakaikistares) > 0) {
+
+      $keraakaikistarow = mysql_fetch_assoc($keraakaikistares);
+
+      if ($keraakaikistarow['selitetark'] == 'a') {
+        $_tarkista_varastot = false;
+      }
+    }
+
     // jos käyttäjällä on oletusvarasto, valitaan se
-    if ($kukarow['oletus_varasto'] != 0) {
+    if ($_tarkista_varastot and $kukarow['oletus_varasto'] != 0) {
       $tuvarasto = $kukarow['oletus_varasto'];
     }
     //  Varastorajaus jos käyttäjällä on joku varasto valittuna
-    elseif ($kukarow['varasto'] != '' and $kukarow['varasto'] != 0) {
+    elseif ($_tarkista_varastot and $kukarow['varasto'] != '' and $kukarow['varasto'] != 0) {
       // jos käyttäjällä on monta varastoa valittuna, valitaan ensimmäinen
       $tuvarasto   = strpos($kukarow['varasto'], ',') !== false ? array_shift(explode(",", $kukarow['varasto'])) : $kukarow['varasto'];
     }

@@ -1775,9 +1775,11 @@ else {
             $split_toimitustapa = $varaston_row["erikoistoimitus_toimitustapa"];
           }
 
+          // VAK tavarat eri tilaukselle ja rahtivapaana
           if ($vakit_eri_tilaukselle and $row["vakkoodi"] != "") {
             $splitattu_vakiksi = true;
             $split_toimitustapa = $totarowx["vaihtoehtoinen_vak_toimitustapa"];
+            $split_rahtivapaa  = "o";
           }
 
           if ($yhtiorow['kerayserat'] == 'K' and isset($toimitustavan_lahto) and isset($toimitustavan_lahto[$varasto]) and $toimitustavan_lahto[$varasto] > 0) {

@@ -5,16 +5,28 @@ echo_myyntiseuranta_table();
 function echo_myyntiseuranta_table() {
   global $kukarow, $yhtiorow;
 
-  $nykyinen_kvartaali = paata_kvartaali();
+  $now = date('Y-m-d');
 
-  $tulos_ja_liikevaihto = hae_tulos_ja_liikevaihto($nykyinen_kvartaali);
+  // Hae nykyinen tilikausi
+  $query = "SELECT
+            tilikausi_alku, tilikausi_loppu
+            FROM tilikaudet
+            WHERE tilikaudet.yhtio          = '{$kukarow['yhtio']}'
+            AND tilikaudet.tilikausi_alku   <= '{$now}'
+            AND tilikaudet.tilikausi_loppu  >= '{$now}'";
+  $result = pupe_query($query);
+  $tilikausi_row = mysql_fetch_assoc($result);
+
+  $tilikausi = array(
+    'start_date' => $tilikausi_row['tilikausi_alku'],
+    'end_date' => $tilikausi_row['tilikausi_loppu'],
+  );
+  $tulos_ja_liikevaihto = hae_tulos_ja_liikevaihto($tilikausi);
   $avoimet_tilaukset = hae_avoimet_tilaukset($kukarow['tunnus']);
 
   if (stristr($kukarow['asema'], 'myyjä')) {
-    $tilikausi = array(
-      'start_date' => $yhtiorow['tilikausi_alku'],
-      'end_date' => $yhtiorow['tilikausi_loppu'],
-    );
+    
+    $nykyinen_kvartaali = paata_kvartaali();
     $myynti_ja_kate_nykyinen_tilikausi = hae_myyjan_myynti_ja_kate($tilikausi, $kukarow['tunnus']);
     $myynti_ja_kate_nykyinen_kvartaali = hae_myyjan_myynti_ja_kate($nykyinen_kvartaali, $kukarow['tunnus']);
 
@@ -27,7 +39,7 @@ function echo_myyntiseuranta_table() {
 
   echo "<table>";
   echo "<tr>";
-  echo "<th colspan='2' style='text-align:center;'>{$yhtiorow['nimi']} <br/>".piirra_aikavali($nykyinen_kvartaali)."</th>";
+  echo "<th colspan='2' style='text-align:center;'>{$yhtiorow['nimi']} <br/>".piirra_aikavali($tilikausi)."</th>";
   echo "</tr>";
 
   echo "<tr>";
@@ -117,7 +129,7 @@ function echo_myyntiseuranta_table() {
   echo "</table>";
 }
 
-function hae_tulos_ja_liikevaihto($nykyinen_kvartaali) {
+function hae_tulos_ja_liikevaihto($aikajana) {
   global $kukarow;
 
   $query = "SELECT
@@ -129,8 +141,8 @@ function hae_tulos_ja_liikevaihto($nykyinen_kvartaali) {
               AND tili.sisainen_taso LIKE '3%')
             WHERE tiliointi.yhtio    = '{$kukarow['yhtio']}'
             AND tiliointi.korjattu   = ''
-            AND tiliointi.tapvm      >= '{$nykyinen_kvartaali['start_date']}'
-            AND tiliointi.tapvm      <= '{$nykyinen_kvartaali['end_date']}'";
+            AND tiliointi.tapvm      >= '{$aikajana['start_date']}'
+            AND tiliointi.tapvm      <= '{$aikajana['end_date']}'";
   $result = pupe_query($query);
 
   return mysql_fetch_assoc($result);

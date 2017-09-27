@@ -6621,7 +6621,7 @@ if ($tee == '') {
         echo "<br><font class='error'>" . t("HUOM: T‰m‰ toimitustapa ei salli VAK-tuotteita") .
           "! ($toimtapa_kv)</font><br>";
         echo "<font class='error'>$toimtapa_kv " .
-          t("toimitustavan VAK-tuotteet siirret‰‰n omalle tilaukselleen toimitustavalla") .
+          t("toimitustavan VAK-tuotteet siirret‰‰n omalle rahtivapaalle tilaukselleen toimitustavalla") .
           " {$vak_toimitustapa}.</font> ";
       }
       elseif ($kukarow['extranet'] == '') {

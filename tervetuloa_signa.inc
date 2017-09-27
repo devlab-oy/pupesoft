@@ -5,28 +5,29 @@ echo_myyntiseuranta_table();
 function echo_myyntiseuranta_table() {
   global $kukarow, $yhtiorow;
 
-  $now = date('Y-m-d');
-
-  // Hae nykyinen tilikausi
-  $query = "SELECT
-            tilikausi_alku, tilikausi_loppu
-            FROM tilikaudet
-            WHERE tilikaudet.yhtio          = '{$kukarow['yhtio']}'
-            AND tilikaudet.tilikausi_alku   <= '{$now}'
-            AND tilikaudet.tilikausi_loppu  >= '{$now}'";
-  $result = pupe_query($query);
-  $tilikausi_row = mysql_fetch_assoc($result);
-
-  $tilikausi = array(
-    'start_date' => $tilikausi_row['tilikausi_alku'],
-    'end_date' => $tilikausi_row['tilikausi_loppu'],
-  );
-  $tulos_ja_liikevaihto = hae_tulos_ja_liikevaihto($tilikausi);
+  $nykyinen_kvartaali = paata_kvartaali();
+ 
+  $tulos_ja_liikevaihto = hae_tulos_ja_liikevaihto($nykyinen_kvartaali);
   $avoimet_tilaukset = hae_avoimet_tilaukset($kukarow['tunnus']);
 
   if (stristr($kukarow['asema'], 'myyjä')) {
     
-    $nykyinen_kvartaali = paata_kvartaali();
+    $now = date('Y-m-d');
+
+    // Hae nykyinen tilikausi
+    $query = "SELECT
+              tilikausi_alku, tilikausi_loppu
+              FROM tilikaudet
+              WHERE tilikaudet.yhtio          = '{$kukarow['yhtio']}'
+              AND tilikaudet.tilikausi_alku   <= '{$now}'
+              AND tilikaudet.tilikausi_loppu  >= '{$now}'";
+    $result = pupe_query($query);
+    $tilikausi_row = mysql_fetch_assoc($result);
+
+    $tilikausi = array(
+      'start_date' => $tilikausi_row['tilikausi_alku'],
+      'end_date' => $tilikausi_row['tilikausi_loppu'],
+    );
     $myynti_ja_kate_nykyinen_tilikausi = hae_myyjan_myynti_ja_kate($tilikausi, $kukarow['tunnus']);
     $myynti_ja_kate_nykyinen_kvartaali = hae_myyjan_myynti_ja_kate($nykyinen_kvartaali, $kukarow['tunnus']);
 
@@ -39,7 +40,7 @@ function echo_myyntiseuranta_table() {
 
   echo "<table>";
   echo "<tr>";
-  echo "<th colspan='2' style='text-align:center;'>{$yhtiorow['nimi']} <br/>".piirra_aikavali($tilikausi)."</th>";
+  echo "<th colspan='2' style='text-align:center;'>{$yhtiorow['nimi']} <br/>".piirra_aikavali($nykyinen_kvartaali)."</th>";
   echo "</tr>";
 
   echo "<tr>";

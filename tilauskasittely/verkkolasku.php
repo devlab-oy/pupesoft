@@ -538,7 +538,7 @@ else {
         }
 
         // Mik‰li laskutuksessa tuotteen varastosaldo v‰henee negatiiviseksi, hyl‰t‰‰n KAIKKI tilaukset, joilla on kyseist‰ tuotetta
-        if ($yhtiorow['saldovirhe_esto_laskutus'] == 'H') {
+        if (empty($editil_cli) and $yhtiorow['saldovirhe_esto_laskutus'] == 'H') {
           $query = "SELECT sum(saldo) saldo
                     FROM tuotepaikat
                     WHERE yhtio = '$kukarow[yhtio]'
@@ -617,7 +617,7 @@ else {
       }
 
       // SALLITTAAN FIFO PERIAATTELLA SALDOJA
-      if ($yhtiorow['saldovirhe_esto_laskutus'] == 'K') {
+      if (empty($editil_cli) and $yhtiorow['saldovirhe_esto_laskutus'] == 'K') {
 
         // haetaan tilausriveilt‰ tuotenumero ja summataan varatut kappaleet
         $query = "SELECT tilausrivi.tuoteno, sum(tilausrivi.varattu) varattu

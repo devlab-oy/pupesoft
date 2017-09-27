@@ -12,11 +12,12 @@ if (in_array("gd", get_loaded_extensions())) {
   elseif (include_once "Barcode.php");
 }
 
-if ($kieli== '') {
-  $querykiel = "SELECT kieli FROM asiakas WHERE yhtio = '$kukarow[yhtio]' and ytunnus = '$laskurow[ytunnus]'";
-  $kielresult = pupe_query($querykiel);
-  $kielnum = mysql_num_rows($kielresult);
-  $kielrow = mysql_fetch_array($kielresult);
+// Haetaan asiakkaan kieli
+$querykiel = "SELECT kieli FROM asiakas WHERE yhtio = '$kukarow[yhtio]' and ytunnus = '$laskurow[ytunnus]'";
+$kielresult = pupe_query($querykiel);
+$kielrow = mysql_fetch_array($kielresult);
+
+if ($kielrow['kieli'] != '') {
   $kieli = strtolower($kielrow['kieli']);
 }
 
@@ -2023,11 +2024,10 @@ if (!function_exists('tulosta_tarjous')) {
 
     $laskurow['tunnus'] = $otunnus;
 
-    if ($kieli== '') {
-      $querykiel = "SELECT kieli FROM asiakas WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$laskurow[liitostunnus]'";
-      $kielresult = pupe_query($querykiel);
-      $kielnum = mysql_num_rows($kielresult);
-      $kielrow = mysql_fetch_array($kielresult);
+    $querykiel = "SELECT kieli FROM asiakas WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$laskurow[liitostunnus]'";
+    $kielresult = pupe_query($querykiel);
+    $kielrow = mysql_fetch_array($kielresult);
+    if ($kielrow['kieli'] != '') {
       $kieli = strtolower($kielrow['kieli']);
     }
 

@@ -1779,7 +1779,11 @@ else {
           if ($vakit_eri_tilaukselle and $row["vakkoodi"] != "") {
             $splitattu_vakiksi = true;
             $split_toimitustapa = $totarowx["vaihtoehtoinen_vak_toimitustapa"];
-            $split_rahtivapaa  = "o";
+
+            // Laitetaan rahtivapaaksi vain jos alkuperäiselle tilaukselle jäi normituotteita
+            if (!empty($riveja_jai_alkuperaiselle_tilaukselle)) {
+              $split_rahtivapaa  = "o";
+            }
           }
 
           if ($yhtiorow['kerayserat'] == 'K' and isset($toimitustavan_lahto) and isset($toimitustavan_lahto[$varasto]) and $toimitustavan_lahto[$varasto] > 0) {
@@ -1906,6 +1910,11 @@ else {
 
         //  edellinen omalle_tilaukselle talteen
         $edomalle_tilaukselle = $row["omalle_tilaukselle"];
+
+        // Rivi jäi alkuperäiselle tilaukelle
+        if (!$tilaus_splitattu and $row['otunnus'] == $laskurow['tunnus']) {
+          $riveja_jai_alkuperaiselle_tilaukselle = TRUE;
+        }
 
         //jos tilausrivin laskunumero on eri
         if ($row['otunnus'] != $laskurow['tunnus']) {

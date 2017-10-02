@@ -628,7 +628,7 @@ if (mysql_field_name($result, $i) == "vaihtoehtoinen_vak_toimitustapa") {
 
   while ($row = mysql_fetch_assoc($toimitustapa_result)) {
     $ulos .= "<option value='{$row["selite"]}' {$sel[$row['selite']]}>" .
-      t("VAK-tuotteet siirret‰‰n omalle tilaukselleen toimitustavalla") .
+      t("VAK-tuotteet siirret‰‰n (rahtivapaasti) omalle tilaukselleen toimitustavalla") .
       " {$row["selite"]}</option>";
   }
 

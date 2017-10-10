@@ -358,6 +358,13 @@ if (!function_exists('logmaster_outbounddelivery')) {
     $receiver->addChild('RecCustCity',     xml_cleanstring($looprow['toim_postitp'], 30));
     $receiver->addChild('RecCustCountry',  xml_cleanstring($looprow['toim_maa'], 10));
     $receiver->addChild('RecCustPhone',    xml_cleanstring($looprow['toim_puh'], 20));
+    if ($looprow['toim_maa'] == 'FI' or $looprow['toim_maa'] == '') {
+      $rec_lang = 'FI';
+    }
+      else {
+      $rec_lang = 'EN';
+    }
+    $receiver->addChild('RecCustLanguage',    xml_cleanstring($rec_lang, 2));
 
     $transport = $custpickinglist->addChild('Transport');
     $transport->addChild('TransportAccount',      $transport_account);

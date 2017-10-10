@@ -216,7 +216,7 @@ else {
       //luodaan viivakoodiolio kuljetusohjeelle = postino
       $nimi = "/tmp/".md5(uniqid(rand(), true)).".jpg";
 
-      imagejpeg(Image_Barcode::draw('400'.$laskurow['asiakkaan_tilausnumero'], 'code128', 'jpg', false, 3, 170), $nimi);
+      imagejpeg(Image_Barcode::draw('400'.$laskurow['asiakkaan_tilausnumero'], 'ean128', 'jpg', false, 3, 170), $nimi);
 
       $fh = fopen($nimi, "r");
       $data = fread($fh, filesize($nimi));

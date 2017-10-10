@@ -1880,7 +1880,7 @@ else {
         $rivikommentti = str_replace($tilaustunnus, $linkki, $rivikommentti);
       }
 
-      echo "<td $kommclass1 colspan='$cspan' valign='top'>".t("Kommentti").":<br><font class='message'>".$rivikommentti."</font></td>";
+      echo "<td $kommclass1 colspan='$cspan' valign='top'>".t("Kommentti").":<br><font class='black'>".$rivikommentti."</font></td>";
       echo "</tr>";
     }
   }

@@ -68,6 +68,7 @@ if (mysql_field_name($result, $i) == "virallinen_selite") {
 
   $ulos .= "<optgroup label='Unifaun / Posti'>";
   $ulos .= "<option value='PO2103'    {$sel["PO2103"]}    >Postipaketti</option>";
+  $ulos .= "<option value='PO2461'    {$sel["PO2461"]}    >Posti Pikkupaketti</option>";
   $ulos .= "<option value='PO2104'    {$sel["PO2104"]}    >Posti Kotipaketti</option>";
   $ulos .= "<option value='PO2102'    {$sel["PO2102"]}    >Posti Express-paketti</option>";
   $ulos .= "<option value='PO2102_09' {$sel["PO2102_09"]} >Posti Express-paketti 09</option>";
@@ -627,7 +628,7 @@ if (mysql_field_name($result, $i) == "vaihtoehtoinen_vak_toimitustapa") {
 
   while ($row = mysql_fetch_assoc($toimitustapa_result)) {
     $ulos .= "<option value='{$row["selite"]}' {$sel[$row['selite']]}>" .
-      t("VAK-tuotteet siirret‰‰n omalle tilaukselleen toimitustavalla") .
+      t("VAK-tuotteet siirret‰‰n (rahtivapaasti) omalle tilaukselleen toimitustavalla") .
       " {$row["selite"]}</option>";
   }
 

@@ -23713,7 +23713,7 @@ if (!function_exists('tee_keraysera_painon_perusteella')) {
 
       $lisatty_kol_maara = 0;
 
-      while (($pakkaukset_paino > $pakkauksen_kaytetty_paino)) {
+      while (($pakkaukset_paino >= $pakkauksen_kaytetty_paino)) {
 
         if (($pakkauksen_kaytetty_paino + ($kerayseran_rivit[$i]['data']['tuotemassa'] * $kerayseran_rivit[$i]['data']['myynti_era'])) > $pakkaukset_paino) {
 

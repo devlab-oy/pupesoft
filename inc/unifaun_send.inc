@@ -503,6 +503,7 @@ class Unifaun {
           or $this->toitarow['virallinen_selite'] == "PO2102"
           or $this->toitarow['virallinen_selite'] == "PO2103"
           or $this->toitarow['virallinen_selite'] == "PO2104"
+          or $this->toitarow['virallinen_selite'] == "PO2461"
           or $this->toitarow['virallinen_selite'] == "PO2711") $rahtisopimusnro = 123456;
         elseif ($this->toitarow['virallinen_selite'] == "KLGRP") $rahtisopimusnro = 1234567;
         elseif ($this->toitarow['virallinen_selite'] == "MH10" or $this->toitarow['virallinen_selite'] == "MH30") $rahtisopimusnro = 12345678;
@@ -517,6 +518,7 @@ class Unifaun {
             or $this->toitarow['virallinen_selite'] == "PO2102"
             or $this->toitarow['virallinen_selite'] == "PO2103"
             or $this->toitarow['virallinen_selite'] == "PO2104"
+            or $this->toitarow['virallinen_selite'] == "PO2461"
             or $this->toitarow['virallinen_selite'] == "PO2711") and strlen($rahtisopimusnro) != 6) {
           $rahtisopimusnro = 999999;
         }
@@ -570,6 +572,7 @@ class Unifaun {
         'ITKY14I',
         'IT14I',
         'PO2711',
+        'PO2461',
       );
     }
 

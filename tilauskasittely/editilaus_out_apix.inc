@@ -108,10 +108,27 @@ while ($laskurow = mysql_fetch_assoc($laskures)) {
   $uniq_merkki = 1;
   $counter = 1;
 
+  // tarkistetaan onko painoon perustuva keräyserä käytössä
+  $query = "SELECT *
+            FROM asiakas
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND tunnus = '{$laskurow['liitostunnus']}'";
+  $asiakasres = pupe_query($query);
+  $asiakasrow = mysql_fetch_assoc($asiakasres);
+
+  // vain yksi rivi rahtikirjoista, koska keräyseristä haetaan kerralla kaikki
+  if ($asiakasrow['kerayserat'] == 'A') {
+    $_limit = "LIMIT 1";
+  }
+  else {
+    $_limit = "";
+  }
+
   $query = "SELECT *
             FROM rahtikirjat
             WHERE yhtio = '{$kukarow['yhtio']}'
-            AND otsikkonro = '{$laskurow['tunnus']}'";
+            AND otsikkonro = '{$laskurow['tunnus']}'
+            {$_limit}";
   $rahtikirjares = pupe_query($query);
 
   while ($rahtikirjarow = mysql_fetch_assoc($rahtikirjares)) {
@@ -153,6 +170,20 @@ while ($laskurow = mysql_fetch_assoc($laskures)) {
 
         $rahtikirjarow['kollit'] = $rahtikirjarow_sum['kollit'] / count($sscc_array);
         $rahtikirjarow['kuutiot'] = $rahtikirjarow_sum['kuutiot'] / count($sscc_array);
+      }
+      elseif ($asiakasrow['kerayserat'] == 'A') {
+
+        $query = "SELECT distinct sscc_ulkoinen
+                  FROM kerayserat
+                  WHERE yhtio = '{$kukarow['yhtio']}'
+                  AND otunnus = '{$laskurow['tunnus']}'";
+        $kerayserares = pupe_query($query);
+
+        if (mysql_num_rows($kerayserares) > 1) {
+          while ($kerayserarow = mysql_fetch_assoc($kerayserares)) {
+            $sscc_array[] = $kerayserarow['sscc_ulkoinen'];
+          }
+        }
       }
       elseif ($expansioncode != "") {
         $sscc_array[] = gs1_sscc($expansioncode, $laskurow['tunnus'], $uniq_merkki);
@@ -232,13 +263,26 @@ while ($laskurow = mysql_fetch_assoc($laskures)) {
       $_rivinro = $i;
     }
 
+    if ($asiakasrow['kerayserat'] == 'A') {
+      $query = "SELECT distinct sscc_ulkoinen
+                FROM kerayserat
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND tilausrivi = '{$tilausrivi_row['tunnus']}'";
+      $kerayserares = pupe_query($query);
+      $keraysera_row = mysql_fetch_assoc($kerayserares);
+      $_sscc = $keraysera_row['sscc_ulkoinen'];
+    }
+    else {
+      $_sscc = "";
+    }
+
     $edi_order .= "*RS OSTOTILRIV {$i}\n";
     $edi_order .= "OSTOTILRIV.OTR_NRO:{$laskurow['asiakkaan_tilausnumero']}\n";
     $edi_order .= "OSTOTILRIV.OTR_RIVINRO:{$_rivinro}\n";
     $edi_order .= "OSTOTILRIV.OTR_TOIMITTAJANRO:\n";
     $edi_order .= "OSTOTILRIV.OTR_TUOTEKOODI:{$tuotenumero}\n";
     $edi_order .= "OSTOTILRIV.OTR_EANKOODI:{$tilausrivi_row['eankoodi']}\n";
-    $edi_order .= "OSTOTILRIV.OTR_SSCC:\n";
+    $edi_order .= "OSTOTILRIV.OTR_SSCC:{$_sscc}\n";
     $edi_order .= "OSTOTILRIV.OTR_NIMI:{$tuotteen_nimitys}\n";
     $edi_order .= "OSTOTILRIV.OTR_TILATTUMAARA:{$kpl}\n";
     $edi_order .= "OSTOTILRIV.OTR_RIVISUMMA:{$rivihinta}\n";

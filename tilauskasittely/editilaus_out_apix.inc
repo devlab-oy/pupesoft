@@ -244,7 +244,7 @@ while ($laskurow = mysql_fetch_assoc($laskures)) {
             JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.ei_saldoa = '')
             WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
             AND tilausrivi.otunnus = '{$laskurow['tunnus']}'
-            AND tilausrivi.var     not in ('P','J','O','S')
+            AND tilausrivi.var     not in ('O','S')
             AND tilausrivi.tyyppi = 'L'
             ORDER BY tilausrivi.tilaajanrivinro";
   $tilausrivi_res = pupe_query($query);
@@ -269,7 +269,7 @@ while ($laskurow = mysql_fetch_assoc($laskures)) {
       $_rivinro = $i;
     }
 
-    if ($asiakasrow['kerayserat'] == 'A') {
+    if ($asiakasrow['kerayserat'] == 'A' and $kpl != 0) {
       $query = "SELECT distinct sscc_ulkoinen
                 FROM kerayserat
                 WHERE yhtio = '{$kukarow['yhtio']}'

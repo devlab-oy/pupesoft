@@ -504,7 +504,6 @@ if ($lopetus == "") {
     <td><input type='text' name='jarjestys[160]' size='2' value='{$jarjestys[160]}'></td>
     <td><input type='checkbox' name='ruksit[160]' value='kohteittain' {$ruk160chk}></td>
     <td><input type='text' name='rajaus[160]' value='{$rajaus[160]}'></td>
-    <td class='back'>", t("(Toimii vain jos ajat raporttia tilauksista)"), "</td>
     </tr>
     <tr>
     <td class='back'><br></td>

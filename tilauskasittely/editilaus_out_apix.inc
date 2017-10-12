@@ -233,7 +233,7 @@ while ($laskurow = mysql_fetch_assoc($laskures)) {
     }
 
     $edi_order .= "*RS OSTOTILRIV {$i}\n";
-    $edi_order .= "OSTOTILRIV.OTR_NRO:{$laskurow['tunnus']}\n";
+    $edi_order .= "OSTOTILRIV.OTR_NRO:{$laskurow['asiakkaan_tilausnumero']}\n";
     $edi_order .= "OSTOTILRIV.OTR_RIVINRO:{$_rivinro}\n";
     $edi_order .= "OSTOTILRIV.OTR_TOIMITTAJANRO:\n";
     $edi_order .= "OSTOTILRIV.OTR_TUOTEKOODI:{$tuotenumero}\n";

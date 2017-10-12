@@ -135,7 +135,13 @@ while ($laskurow = mysql_fetch_assoc($laskures)) {
 
     $sscc_array = array();
 
-    $kollit = $rahtikirjarow['kollit'];
+    // kollien lukumäärä otetaan keräyseristä, joten ei loopata tässä kuin kerran
+    if ($asiakasrow['kerayserat'] == 'A') {
+      $kollit = 1;
+    }
+    else {
+      $kollit = $rahtikirjarow['kollit'];
+    }
 
     for (;$kollit > 0; $kollit--) {
 

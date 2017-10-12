@@ -118,7 +118,7 @@ while ($laskurow = mysql_fetch_assoc($laskures)) {
 
   // vain yksi rivi rahtikirjoista, koska keräyseristä haetaan kerralla kaikki
   if ($asiakasrow['kerayserat'] == 'A') {
-    $_limit = "LIMIT 1";
+    $_limit = " LIMIT 1";
   }
   else {
     $_limit = "";
@@ -179,7 +179,7 @@ while ($laskurow = mysql_fetch_assoc($laskures)) {
                   AND otunnus = '{$laskurow['tunnus']}'";
         $kerayserares = pupe_query($query);
 
-        if (mysql_num_rows($kerayserares) > 1) {
+        if (mysql_num_rows($kerayserares) > 0) {
           while ($kerayserarow = mysql_fetch_assoc($kerayserares)) {
             $sscc_array[] = $kerayserarow['sscc_ulkoinen'];
           }

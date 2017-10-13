@@ -1509,6 +1509,8 @@ if (!empty($valitse_tuotteetasiakashinnastoon)) {
     echo "<label>";
     echo "<input type='checkbox' name='lisaa_asiakashinta' {$_checked_h}>";
     echo t("Lis‰‰ tilauksen hinnat asiakashintoihin");
+    echo "<input type='checkbox' name='lisaa_nettohinta'>";
+    echo t("Lis‰‰ hinta nettona");
     echo "</label>";
     echo "<br>";
   }
@@ -2665,6 +2667,13 @@ if ($tee == "tuotteetasiakashinnastoon" and in_array($toim, array("TARJOUS", "EX
                 and valkoodi = '$laskurow[valkoodi]'";
       $chk_result = pupe_query($query);
 
+      if (!empty($lisaa_nettohinta)) {
+        $nettolaji='N';
+      }
+      else {
+        $nettolaji='';
+      }
+
       if (mysql_num_rows($chk_result) == 0) {
         $query = "INSERT INTO asiakashinta SET
                   yhtio      = '$kukarow[yhtio]',
@@ -2674,6 +2683,7 @@ if ($tee == "tuotteetasiakashinnastoon" and in_array($toim, array("TARJOUS", "EX
                   hinta      = round($hintapyoristys_echo * $tilausrivi[myyntihinta_maara], $yhtiorow[hintapyoristys]),
                   valkoodi   = '$laskurow[valkoodi]',
                   alkupvm    = now(),
+                  laji       = '$nettolaji',
                   laatija    = '$kukarow[kuka]',
                   luontiaika = now(),
                   muuttaja   = '$kukarow[kuka]',

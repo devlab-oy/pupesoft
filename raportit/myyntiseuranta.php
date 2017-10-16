@@ -1222,6 +1222,7 @@ if ((isset($aja_raportti) or isset($valitse_asiakas)) and count($_REQUEST) > 0) 
           $select .= "{$ytgfe}if({$etuliite}.toim_nimi!='' ,{$etuliite}.toim_maa,{$etuliite}.maa){$ytgft} toim_maa, ";
           $select .= "{$ytgfe}if(asiakas.puhelin!='',asiakas.puhelin,asiakas.gsm){$ytgft} puhelin, ";
           $select .= "{$ytgfe}asiakas.email{$ytgft} email, ";
+          $select .= "{$ytgfe}asiakas.luontiaika{$ytgft} luontiaika, ";
         }
         else {
           $select .= "{$etuliite}.ytunnus ytunnus, ";

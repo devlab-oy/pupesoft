@@ -82,7 +82,7 @@ for ($i = 801; $i <= 2300; $i++) {
   }
   echo "<option value='$alku:$loppu' $sel>$alku:$loppu</option>";
 
-  if ($loppu == "00" && $alku <= 16) {
+  if ($loppu == "00" && $alku <= 21) {
     $loppu = "30";
   }
   else {
@@ -107,7 +107,7 @@ echo "</select></td>
   <input type='text' name='kentta04' size='30'></td></tr>
   <tr><th>".t("Lisätiedot").":</th><td><textarea name='kentta05' cols='30' rows='3' wrap='hard'></textarea></td></tr>";
 
-if ($toim == "Sauna") {
+if ($toim != "") {
   echo "<tr><td colspan='2' class='back'><br><br>".t("Tilaisuuden tarkemmat tiedot").":</td></tr>";
   echo "<tr><th>".t("Isännät").":</th><td><textarea name='kentta06' cols='30' rows='3' wrap='hard'>$kukarow[nimi]</textarea></td></tr>";
   echo "<tr><th>".t("Vieraat").":</th><td><textarea name='kentta07' cols='30' rows='2' wrap='hard'></textarea></td></tr>";

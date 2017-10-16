@@ -354,6 +354,8 @@ else {
               asiakasalennus READ,
               asiakasalennus as asale1 READ,
               asiakasalennus as asale2 READ,
+              asiakasalennus as asale3 READ,
+              asiakasalennus as asale4 READ,
               asiakashinta READ,
               asiakashinta as ashin1 READ,
               asiakashinta as ashin2 READ,
@@ -362,6 +364,7 @@ else {
               avainsana as avainsana_kieli READ,
               avainsana as b READ,
               avainsana READ,
+              directdebit READ,
               dynaaminen_puu AS node READ,
               dynaaminen_puu AS parent READ,
               etaisyydet READ,
@@ -535,7 +538,7 @@ else {
         }
 
         // Mikäli laskutuksessa tuotteen varastosaldo vähenee negatiiviseksi, hylätään KAIKKI tilaukset, joilla on kyseistä tuotetta
-        if ($yhtiorow['saldovirhe_esto_laskutus'] == 'H') {
+        if (empty($editil_cli) and $yhtiorow['saldovirhe_esto_laskutus'] == 'H') {
           $query = "SELECT sum(saldo) saldo
                     FROM tuotepaikat
                     WHERE yhtio = '$kukarow[yhtio]'
@@ -614,7 +617,7 @@ else {
       }
 
       // SALLITTAAN FIFO PERIAATTELLA SALDOJA
-      if ($yhtiorow['saldovirhe_esto_laskutus'] == 'K') {
+      if (empty($editil_cli) and $yhtiorow['saldovirhe_esto_laskutus'] == 'K') {
 
         // haetaan tilausriveiltä tuotenumero ja summataan varatut kappaleet
         $query = "SELECT tilausrivi.tuoteno, sum(tilausrivi.varattu) varattu
@@ -1344,8 +1347,8 @@ else {
               }
             }
 
-            $query  = "INSERT INTO tilausrivi (laatija, laadittu, hinta, {$ale_lisa_insert_query_1} netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti)
-                       values ('automaatti', now(), '$rah_hinta', {$ale_lisa_insert_query_2} '$rah_netto', '1', '1', '$otunnus', '$trow[tuoteno]', '$nimitys', '$kukarow[yhtio]', 'L', '$rah_alv', '$kommentti')";
+            $query  = "INSERT INTO tilausrivi (laatija, laadittu, hinta, {$ale_lisa_insert_query_1} netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti, keratty, kerattyaika, toimitettu, toimitettuaika)
+                       values ('automaatti', now(), '$rah_hinta', {$ale_lisa_insert_query_2} '$rah_netto', '1', '1', '$otunnus', '$trow[tuoteno]', '$nimitys', '$kukarow[yhtio]', 'L', '$rah_alv', '$kommentti', 'saldoton', now(), 'saldoton', now())";
             $addtil = pupe_query($query);
 
             if ($silent == "") {
@@ -1559,7 +1562,10 @@ else {
                           perheid2        = '',
                           nimitys         = '$trow[nimitys]',
                           jaksotettu      = '',
-                          kerattyaika     = now()";
+                          keratty         = 'saldoton',
+                          kerattyaika     = now(),
+                          toimitettu      = 'saldoton',
+                          toimitettuaika  = now()";
                 $addtil = pupe_query($query);
                 $lisatty_tun = mysql_insert_id($GLOBALS["masterlink"]);
 
@@ -1798,7 +1804,10 @@ else {
                         perheid2        = '',
                         nimitys         = '$trow[nimitys]',
                         jaksotettu      = '',
-                        kerattyaika     = now()";
+                        keratty         = 'saldoton',
+                        kerattyaika     = now(),
+                        toimitettu      = 'saldoton',
+                        toimitettuaika  = now()";
               $addtil = pupe_query($query);
               $lisatty_tun = mysql_insert_id($GLOBALS["masterlink"]);
 
@@ -1972,6 +1981,9 @@ else {
           }
           elseif ($frow["sopimusnumero"] > 0 and $frow["factoringyhtio"] == 'SAMPO' and $frow["viitetyyppi"] == '') {
             $viite = $frow["sopimusnumero"]."1".sprintf('%09d', $lasno);
+          }
+          elseif ($frow["sopimusnumero"] > 0 and $frow["factoringyhtio"] == 'AKTIA' and $frow["viitetyyppi"] == '') {
+            $viite = str_pad($frow["sopimusnumero"], 6, '0', STR_PAD_RIGHT).sprintf("%010d", $lasno);
           }
           else {
             $viite = $lasno;

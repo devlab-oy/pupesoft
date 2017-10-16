@@ -102,7 +102,7 @@ while (false !== ($file = readdir($handle))) {
             WHERE yhtio = '{$kukarow['yhtio']}'
             AND tunnus  = '{$otunnus}'
             AND tila    IN ('L', 'V', 'G', 'S')
-            AND alatila IN ('A', 'E')";
+            AND alatila IN ('A', 'E', 'J')";
   $laskures = pupe_query($query);
 
   $tuotteiden_paino = 0;
@@ -209,7 +209,7 @@ while (false !== ($file = readdir($handle))) {
         $varattuupdate = ", tilausrivi.varattu = '{$keratty}' ";
       }
 
-      if ($laskurow["tila"] == "V" or $laskurow["tila"] == "S" or ($laskurow["tila"] == "G" and $laskurow["tilaustyyppi"] != 'M')) {
+      if ($laskurow["tila"] == "V" or $laskurow["tila"] == "S" or $laskurow["tila"] == "G") {
         $toimitettu_lisa = "";
       }
       else {

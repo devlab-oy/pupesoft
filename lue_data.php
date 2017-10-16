@@ -2286,6 +2286,32 @@ if ($kasitellaan_tiedosto) {
           }
         }
 
+        // Laitetaan oletuksena tuotteen toimittajalle toimittajan valuutta ja maa,
+        // jos saraketta excelissä ei ole
+        if ($table_mysql == "tuotteen_toimittajat" and $taulunrivit[$taulu][$eriviindex][$postoiminto] == "LISAA" and isset($toimi_liitostunnus)) {
+          if (stripos($query, ", valuutta = ") === FALSE) {
+            $toimi_val_query = "SELECT oletus_valkoodi
+                                FROM toimi
+                                WHERE yhtio  = '{$kukarow["yhtio"]}'
+                                AND tyyppi  != 'P'
+                                AND tunnus   = '{$toimi_liitostunnus}'";
+            $toimi_valuutta = mysql_fetch_assoc(pupe_query($toimi_val_query));
+
+            $query .= ", valuutta = '{$toimi_valuutta["oletus_valkoodi"]}'";
+          }
+
+          if (stripos($query, ", alkuperamaa = ") === FALSE) {
+            $toimi_maa_query = "SELECT maa
+                                FROM toimi
+                                WHERE yhtio  = '{$kukarow["yhtio"]}'
+                                AND tyyppi  != 'P'
+                                AND tunnus   = '{$toimi_liitostunnus}'";
+            $toimi_maa = mysql_fetch_assoc(pupe_query($toimi_maa_query));
+
+            $query .= ", alkuperamaa = '{$toimi_maa["maa"]}'";
+          }
+        }
+
         if ($taulunrivit[$taulu][$eriviindex][$postoiminto] == 'MUUTA') {
           if (($table_mysql == 'asiakasalennus' or $table_mysql == 'asiakashinta' or $table_mysql == 'toimittajahinta' or $table_mysql == 'toimittajaalennus') and $and != "") {
             $query .= " WHERE yhtio = '$kukarow[yhtio]'";

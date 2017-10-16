@@ -133,6 +133,8 @@ if (!isset($toim_nimitykset)) $toim_nimitykset = "";
 if (!isset($toim_tuoteno)) $toim_tuoteno = "";
 if (!isset($naytetaankolukitut)) $naytetaankolukitut = "";
 if (!isset($lopetus)) $lopetus = "";
+if (!isset($myyntitilaus_otsikot)) $myyntitilaus_otsikot = array();
+if (!isset($myyntitilaus_otsikot_string)) $myyntitilaus_otsikot_string = "";
 
 if ($tee == "lataa_tiedosto") {
   readfile("$pupe_root_polku/dataout/".basename($filenimi));
@@ -309,6 +311,10 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
   }
 
   $laskurow = mysql_fetch_assoc($aresult);
+
+  // Tehd‰‰n t‰m‰, jotta saadaan toimipaikan tiedot oikein tilaukselle
+  $kukarow['toimipaikka'] = $laskurow['vanhatunnus'];
+  $yhtiorow               = hae_yhtion_parametrit($kukarow["yhtio"]);
 
   $query = "SELECT *
             FROM toimi
@@ -645,6 +651,73 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
     if ($lopetus != '') {
       lopetus($lopetus, "META");
     }
+  }
+
+  // Lis‰t‰‰n valittuun myyntiin ostoon lis‰tyt rivit
+  if ($tee == "lisaa_uudetostorivit_myyntiin") {
+
+    // Haetaan ostotilauksen kaikki rivit
+    // ja katsotaan sitten liittyv‰tkˆ ne jo johonkin myyntiin,
+    // jos eiv‰t niin lis‰t‰‰n vastaavat rivit valitulle myyntitilaukselle
+    $query = "SELECT *
+              FROM tilausrivi
+              WHERE yhtio = '{$kukarow["yhtio"]}'
+              AND otunnus = {$tilausnumero}
+              AND tyyppi = 'O'";
+    $rivi_result = pupe_query($query);
+
+    while ($tilausrivi = mysql_fetch_assoc($rivi_result)) {
+      $query = "SELECT tilausrivilinkki
+                FROM tilausrivin_lisatiedot
+                WHERE yhtio = '{$kukarow["yhtio"]}'
+                AND tilausrivilinkki = {$tilausrivi["tunnus"]}";
+      $result = pupe_query($query);
+
+      if (!$myyntirivi = mysql_fetch_assoc($result)) {
+        // Haetaan tuotteen kaikki tiedot lisaarivi.inc varten
+        $query = "SELECT *
+                  FROM tuote
+                  WHERE yhtio = '{$kukarow["yhtio"]}'
+                  AND tuoteno =  '{$tilausrivi["tuoteno"]}'";
+        $trow = mysql_fetch_assoc(pupe_query($query));
+
+        // Settailaan tarpeellisia muuttujia lisaarivi.inc varten
+        $kpl = $tilausrivi["tilkpl"];
+        $tuoteno = $tilausrivi["tuoteno"];
+        $tilausrivilinkki = $tilausrivi["tunnus"];
+        $var = "J";
+
+        // Lis‰t‰‰n rivi myyntitilaukselle,
+        // joten otetaan oston tiedot talteen ja leikit‰‰n myyntitilausta
+        $ostolasku_kesken = $kukarow["kesken"];
+        $ostolaskurow = $laskurow;
+
+        $kukarow["kesken"] = $myyntitilaus_otsikot_string;
+
+        $query = "SELECT *
+                  FROM lasku
+                    JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio = lasku.yhtio AND laskun_lisatiedot.otunnus = lasku.tunnus)
+                  WHERE lasku.yhtio = '{$kukarow["yhtio"]}'
+                  AND lasku.tunnus = {$myyntitilaus_otsikot_string}";
+        $laskurow = mysql_fetch_assoc(pupe_query($query));
+
+        // Lis‰t‰‰n vastaava rivi valitulle myyntitilaukselle
+        require 'lisaarivi.inc';
+
+        echo "<font class='error'>".t("Tuote {$tilausrivi["tuoteno"]} lis‰tty myyntitilaukselle {$myyntitilaus_otsikot_string}")." </font> <br><br>";
+
+        // Palautetaan oston tiedot sinne minne ne kuuluu
+        // ja nollataan k‰ytetyt muuttujat
+        $kukarow["kesken"] = $ostolasku_kesken;
+        $laskurow = $ostolaskurow;
+
+        unset($kpl, $tuoteno, $tilausrivilinkki, $var);
+      }
+    }
+
+    $myyntitilaus_otsikot = array();
+    $myyntitilaus_otsikot_string = "";
+    $tee = "Y";
   }
 
   //Kuitataan OK-var riville
@@ -1448,21 +1521,18 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
               tilausrivi.ale1,
               tilausrivi.ale2,
               tilausrivi.ale3,
-              tilausrivin_lisatiedot.tilausrivitunnus,
-              tilausrivin_lisatiedot.tilausrivilinkki,
               tilausrivi.vahvistettu_maara,
               tilausrivi.vahvistettu_kommentti,
               tilausrivi.hinta_alkuperainen,
-              tilausrivi.laadittu
+              tilausrivi.laadittu,
+              tuote.myyntihinta,
+              tuote.myymalahinta
               FROM tilausrivi
               LEFT JOIN tuote ON tilausrivi.yhtio = tuote.yhtio
-                AND tilausrivi.tuoteno                      = tuote.tuoteno
+                AND tilausrivi.tuoteno = tuote.tuoteno
               LEFT JOIN tuotteen_toimittajat ON tuote.yhtio = tuotteen_toimittajat.yhtio
                 AND tuote.tuoteno                           = tuotteen_toimittajat.tuoteno
                 AND tuotteen_toimittajat.liitostunnus       = '$laskurow[liitostunnus]'
-              LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
-                AND tilausrivin_lisatiedot.tilausrivilinkki > 0
-                AND tilausrivin_lisatiedot.tilausrivilinkki = tilausrivi.tunnus)
               WHERE tilausrivi.otunnus                      = '$kukarow[kesken]'
               and tilausrivi.yhtio                          = '$kukarow[yhtio]'
               and tilausrivi.tyyppi                         = 'O'
@@ -1707,6 +1777,8 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
                 "&keskihinta={$prow["keskihinta"]}" .
                 "&valuutta={$prow["valuutta"]}" .
                 "&ostohinta={$prow["ostohinta"]}" .
+                "&myyntihinta={$prow["myyntihinta"]}" .
+                "&myymalahinta={$prow["myymalahinta"]}" .
                 "&vanhatunnus={$laskurow["vanhatunnus"]}";
 
               echo "<td $class>
@@ -2005,21 +2077,34 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
             }
           }
 
-          if (!empty($prow['tilausrivilinkki'])) {
-            $query = "SELECT tilausrivi.otunnus as otunnus, lasku.nimi as nimi
+          $query = "SELECT tilausrivilinkki, tilausrivitunnus
+                    FROM tilausrivin_lisatiedot
+                    WHERE yhtio          = '{$kukarow['yhtio']}'
+                    AND tilausrivilinkki = '{$prow['tunnus']}'";
+          $tlres = pupe_query($query);
+          $tlrow = mysql_fetch_assoc($tlres);
+
+          if (!empty($tlrow['tilausrivilinkki'])) {
+            $query = "SELECT tilausrivi.otunnus as otunnus,
+                      lasku.nimi as nimi,
+                      lasku.tila
                       FROM tilausrivi
                       JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio AND lasku.tunnus = tilausrivi.otunnus)
                       WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-                      AND tilausrivi.tunnus  = '{$prow['tilausrivitunnus']}'";
+                      AND tilausrivi.tunnus  = '{$tlrow['tilausrivitunnus']}'";
             $linkattu_myyntitilaus_result = pupe_query($query);
             $linkattu_myyntitilaus_row = mysql_fetch_assoc($linkattu_myyntitilaus_result);
+
+            if (!$myyntitilaus_otsikot[$linkattu_myyntitilaus_row['otunnus']] and $linkattu_myyntitilaus_row["tila"] == "N") {
+              $myyntitilaus_otsikot[$linkattu_myyntitilaus_row['otunnus']] = $linkattu_myyntitilaus_row['otunnus'];
+            }
 
             if (trim($prow["kommentti"]) != "") echo "<br>";
             echo "<a href='{$palvelin2}tilauskasittely/tilaus_myynti.php?toim=RIVISYOTTO&tilausnumero={$linkattu_myyntitilaus_row['otunnus']}&lopetus={$myyntitilaus_lopetus}'>".t('N‰yt‰ myyntitilaus').": {$linkattu_myyntitilaus_row['nimi']}</a>";
           }
 
           if (isset($vastaavat_html) and $vastaavat_html != "") {
-            if (trim($prow["kommentti"]) != "" or !empty($prow['tilausrivilinkki'])) echo "<br>";
+            if (trim($prow["kommentti"]) != "" or !empty($tlrow['tilausrivilinkki'])) echo "<br>";
             echo "<a href=\"javascript:return false;\" class='toggle_korvaavat_vastaavat' rivitunnus='{$prow['tunnus']}'>".t("N‰yt‰ korvaavat & vastaavat")."</a>";
           }
 
@@ -2030,7 +2115,7 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
             echo "<tr class='vastaavat_korvaavat_hidden {$prow['tunnus']}'>";
             echo "<td></td>";
             echo "<td colspan='$alespan' $kommclass1>";
-            if (!empty($prow['tilausrivilinkki'])) {
+            if (!empty($tlrow['tilausrivilinkki'])) {
               echo '<font class="message">'.t("Huom: vaihtamalla tuotteen vaihdetaan myˆs myyntitilauksen %s %s tilausrivi", '', $linkattu_myyntitilaus_row['otunnus'], $linkattu_myyntitilaus_row['nimi']).'</font>';
               echo "<br/>";
               echo "<br/>";
@@ -2186,6 +2271,60 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
               </form>
               </td>";
         }
+      }
+
+      if (count($myyntitilaus_otsikot) > 0) {
+
+        // Tehd‰‰n ostoon liittyvist‰ myyntitilauksista alasvetovalikko,
+        // jos niit‰ on useampia, muuten echotetaan myynnin tilausnumero
+        if (count($myyntitilaus_otsikot) > 1) {
+
+          echo "<td>";
+          echo t("Myyntitilausnumero").": ";
+          echo "<select name='myyntitilausnumero_valinta' onchange='submit();'>";
+
+          foreach ($myyntitilaus_otsikot as $_myyntitilausnumeroavain => $_myyntitilausnumero) {
+
+            if ($myyntitilausnumero_valinta == $_myyntitilausnumeroavain or !isset($numero_valinta_sel)) {
+              $numero_valinta_sel = "selected";
+            }
+            else {
+              $numero_valinta_sel = "";
+            }
+
+            echo "<option value = '{$_myyntitilausnumeroavain}' {$numero_valinta_sel}>".t("{$_myyntitilausnumero}")."</option>";
+
+            if ($numero_valinta_sel == "selected") {
+              $myyntitilaus_otsikot_string = $_myyntitilausnumero;
+            }
+          }
+
+          echo "</select>";
+          echo "</td>";
+
+        }
+        else {
+          $myyntitilaus_otsikot_string = implode("", $myyntitilaus_otsikot);
+          echo "<td>";
+          echo t("Myyntitilausnumero").": {$myyntitilaus_otsikot_string}";
+          echo "</td>";
+        }
+
+
+        echo "  <td class='back'>
+          <form method='post' action='{$palvelin2}tilauskasittely/tilaus_osto.php'>
+          <input type='hidden' name='toim'          value = '$toim'>
+          <input type='hidden' name='lopetus'        value = '$lopetus'>
+          <input type='hidden' name='tilausnumero'      value = '$tilausnumero'>
+          <input type='hidden' name='toim_nimitykset'    value = '$toim_nimitykset'>
+          <input type='hidden' name='toim_tuoteno'     value = '$toim_tuoteno'>
+          <input type='hidden' name='naytetaankolukitut' value = '$naytetaankolukitut'>
+          <input type='hidden' name='toimittajaid'      value = '$laskurow[liitostunnus]'>
+          <input type='hidden' name='myyntitilaus_otsikot_string' value = '$myyntitilaus_otsikot_string'>
+          <input type='hidden' name='tee'          value = 'lisaa_uudetostorivit_myyntiin'>
+          <input type='submit' value='".t("Lis‰‰ uudet rivit myyntitilaukselle")."'>
+          </form>
+          </td>";
       }
     }
 

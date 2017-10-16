@@ -150,6 +150,7 @@ if ($tee == "update") {
   $upd_erikoisale_res = pupe_query($query_erikoisale);
 
   foreach ($tilauksen_erikoisale as $etil => $eale) {
+    $eale = str_replace(",", ".", $eale);
     $query_erikoisale = "UPDATE tilausrivi
                          SET erikoisale = '{$eale}'
                          WHERE yhtio      = '{$kukarow['yhtio']}'
@@ -422,13 +423,12 @@ if ($tee == "") {
 
   echo "<tr><td class='back'><br>".t("Ostotilausten erikoisalennukset").":</td></tr>";
 
-  $query  = "SELECT otunnus, round(avg(erikoisale), 2) erikoisale
+  $query  = "SELECT otunnus, MAX(erikoisale) erikoisale
              FROM tilausrivi
              WHERE tilausrivi.yhtio      = '$kukarow[yhtio]'
              AND tilausrivi.uusiotunnus  = '$laskurow[tunnus]'
              AND tilausrivi.tyyppi      != 'D'
-             GROUP BY 1
-             ORDER BY 1";
+             GROUP BY 1";
   $painoresult = pupe_query($query);
 
   while ($painorow = mysql_fetch_array($painoresult)) {

@@ -98,6 +98,8 @@ if ($tee == "NAYTA") {
       if ($ednimi == "" or $ednimi != $row["nimi"]) {
         $nimi = $row["nimi"];
 
+        $vspserie[$row["ytunnus"]]["nimi"] = trim($row["nimi"]);
+
         if ($ednimi != "") {
           echo "<tr><td class='back' colspan='5'></td></tr>";
         }
@@ -111,12 +113,12 @@ if ($tee == "NAYTA") {
       if ($nimi != "") {
         echo "<td>$nimi</td>";
 
-        $vspserie[$row["ytunnus"]]["paivarahat"]       = 0;
+        $vspserie[$row["ytunnus"]]["paivarahat"]       = 0.00;
         $vspserie[$row["ytunnus"]]["kotimaanpuolipaivat"] = 0;
         $vspserie[$row["ytunnus"]]["kotimaanpaivat"]     = 0;
         $vspserie[$row["ytunnus"]]["ulkomaanpaivat"]      = 0;
         $vspserie[$row["ytunnus"]]["kilsat"]         = 0;
-        $vspserie[$row["ytunnus"]]["kilsat_raha"]       = 0;
+        $vspserie[$row["ytunnus"]]["kilsat_raha"]       = 0.00;
       }
       else {
         echo "<td class='back'></td>";
@@ -218,18 +220,18 @@ if ($tee == "NAYTA") {
 
     foreach ($vspserie as $htunnus => $matkustaja) {
 
-      $matkustaja['paivarahat']  = number_format(round($matkustaja['paivarahat'],  2), 2, "", "");
-      $matkustaja['kilsat_raha'] = number_format(round($matkustaja['kilsat_raha'], 2), 2, "", "");
+      $matkustaja['paivarahat']  = number_format(round($matkustaja['paivarahat'],  2), 2, ",", "");
+      $matkustaja['kilsat_raha'] = number_format(round($matkustaja['kilsat_raha'], 2), 2, ",", "");
       $matkustaja['kilsat']      = round($matkustaja['kilsat']);
 
       $file .= "000:VSPSERIE\n";
-      $file .= "101:0\n";
-      $file .= "110:P\n";
-      $file .= "109:$vv\n";
-      $file .= "102:{$ytunnus}\n";
-      $file .= "111:{$htunnus}\n";
-      $file .= "114:0\n";
-      $file .= "115:0\n";
+      $file .= "084:P\n";
+      $file .= "058:$vv\n";
+      $file .= "010:{$ytunnus}\n";
+      $file .= "083:{$htunnus}\n";
+      $file .= "085:{$matkustaja['nimi']}\n";
+      $file .= "114:0,00\n";
+      $file .= "115:0,00\n";
       $file .= "150:{$matkustaja['paivarahat']}\n";
       $file .= "151:{$matkustaja['kotimaanpaivat']}\n";
       $file .= "152:{$matkustaja['kotimaanpuolipaivat']}\n";
@@ -237,7 +239,8 @@ if ($tee == "NAYTA") {
       $file .= "154:0\n";
       $file .= "155:{$matkustaja['kilsat']}\n";
       $file .= "156:{$matkustaja['kilsat_raha']}\n";
-      $file .= "157:0\n";
+      $file .= "157:0,00\n";
+      $file .= "014:0838105-5_PS\n";
       $file .= "999:$lask\n";
 
       $lask++;

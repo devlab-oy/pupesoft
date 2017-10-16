@@ -49,7 +49,7 @@ class PrestaAddresses extends PrestaClient {
     $xml->address->address1     = $this->clean_field($address['osoite']);
     $xml->address->alias        = 'Home';
     $xml->address->city         = $this->clean_field($address['postitp']);
-    $xml->address->company      = $this->clean_name($address['asiakas_nimi'], 64);
+    $xml->address->company      = $this->clean_alphanumeric($address['asiakas_nimi'], 64);
     $xml->address->dni          = $address['asiakas_id'];
     $xml->address->firstname    = '-';
     $xml->address->id_country   = $country;
@@ -59,6 +59,10 @@ class PrestaAddresses extends PrestaClient {
     $xml->address->phone_mobile = $this->clean_field($address['gsm']);
     $xml->address->postcode     = $this->clean_field($address['postino']);
     $xml->address->vat_number   = $this->clean_field($address['ytunnus']);
+    
+    if ($yhtio != 'audio') {
+      $xml->address->address2 = $this->clean_field($address['asiakas_nimitark']);
+    }
 
     return $xml;
   }

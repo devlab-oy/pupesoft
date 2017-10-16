@@ -311,10 +311,10 @@ if ($kerayseran_numero > 0) {
               }
 
               $vakkoodi[] = array(
-                'tuoteno' => $vakkoodi_row['tuoteno'],
-                'tuotenimitys' => $vakkoodi_row['nimitys'],
-                'kpl' => $vakkoodi_row['kpl'],
-                'kpl_paino' => $vakkoodi_row['kpl_paino'],
+                'tuoteno' => $vak_chk_row['tuoteno'],
+                'tuotenimitys' => $vak_chk_row['nimitys'],
+                'kpl' => $vak_chk_row['kpl'],
+                'kpl_paino' => $vak_chk_row['kpl_paino'],
                 'yk_nro' => $vakkoodi_row['yk_nro'],
                 'nimi_ja_kuvaus' => $vakkoodi_row['nimi_ja_kuvaus'],
                 'luokka' => $vakkoodi_row['luokka'],

@@ -921,6 +921,10 @@ if ($monta != 1) {
     $asylloik1 = tarkista_oikeus("yllapito.php", "asiakas!!!VAHITTAISMYYNTI!!!true&laji=H", "X", TRUE);
     $asylloik2 = tarkista_oikeus("yllapito.php", "asiakas%", "X", TRUE);
 
+    $uusiasiakas = "uusiasiakas";
+
+    $ahlopetus .= "//uusiasiakas=$uusiasiakas";
+
     if ($monta != 1 and ($asylloik1 or $asylloik2)) {
 
       //Annetaan mahdollisuus perustaa uusi asiakas

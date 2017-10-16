@@ -3,6 +3,9 @@
 //* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
 $useslave = 1;
 
+// DataTables p‰‰lle
+$pupe_DataTables = 'tulossaolevat';
+
 require "../inc/parametrit.inc";
 
 echo "<font class='head'>", t("Tulossa olevat ostotilaukset"), "</font><hr>";
@@ -17,8 +20,8 @@ if (!isset($muutparametrit)) $muutparametrit = '';
 if ($tee == 'NAYTATILAUS') {
   echo "<font class='head'>", t("Tilausnro"), ": {$tunnus}</font><hr>";
   require "naytatilaus.inc";
-  echo "<br /><br /><br />";
-  $tee = "";
+  require "inc/footer.inc";
+  exit;
 }
 
 if ($vahvistus != '' or $myohassa != '') {
@@ -32,16 +35,39 @@ if ($ytunnus != '' and $ytunnus != 'TULKAIKKI') {
 
 if (($ytunnus != '' or $ytunnus == 'TULKAIKKI') and $komento == '') {
 
-  echo "<table><tr>";
+  pupe_DataTables(array(array($pupe_DataTables, 10, 10, false, false)));
+
+  echo "<table class='display dataTable' id='$pupe_DataTables'>";
+
+  echo "<thead>";
+  echo "<tr>";
   echo "<th>", t("tilno"), "</th>";
   echo "<th>", t("ytunnus"), "</th>";
   echo "<th>", t("nimi"), "</th>";
   echo "<th>", t("saapumispvm"), "</th>";
+  echo "<th>", t("tuoteno"), "</th>";
+  echo "<th>", t("nimitys"), "</th>";
   echo "<th>", t("rivim‰‰r‰"), "</th>";
   echo "<th>", t("m‰‰r‰"), "</th>";
   echo "<th>", t("arvo"), "</th>";
   echo "<th>", t("valuutta"), "</th>";
   echo "</tr>";
+
+  echo "<tr>";
+  echo "<td><input type='text' class='search_field' name='search_tilno'></td>";
+  echo "<td><input type='text' class='search_field' name='search_ytunnus'></td>";
+  echo "<td><input type='text' class='search_field' name='search_nimi'></td>";
+  echo "<td><input type='text' class='search_field' name='search_saapumispvm'></td>";
+  echo "<td><input type='text' class='search_field' name='search_tuoteno'></td>";
+  echo "<td><input type='text' class='search_field' name='search_nimitys'></td>";
+  echo "<td><input type='text' class='search_field' name='search_rivimaara'></td>";
+  echo "<td><input type='text' class='search_field' name='search_maara'></td>";
+  echo "<td><input type='text' class='search_field' name='search_arvo'></td>";
+  echo "<td><input type='text' class='search_field' name='search_valuutta'></td>";
+  echo "</tr>";
+
+  echo "</thead>";
+  echo "<tbody>";
 
   if ($ytunnus != 'TULKAIKKI') {
     $lisa = " and lasku.ytunnus = '{$toimittajarow['ytunnus']}' ";
@@ -69,7 +95,7 @@ if (($ytunnus != '' or $ytunnus == 'TULKAIKKI') and $komento == '') {
 
   $query_ale_lisa = generoi_alekentta('O');
 
-  $query = "SELECT lasku.tunnus, lasku.ytunnus, lasku.nimi, tilausrivi.tuoteno, tilausrivi.toimaika, lasku.valkoodi,
+  $query = "SELECT lasku.tunnus, lasku.ytunnus, lasku.nimi, tilausrivi.tuoteno, tilausrivi.nimitys, tilausrivi.toimaika, lasku.valkoodi,
             count(*) maara, sum(tilausrivi.varattu) tilattu, sum(tilausrivi.varattu * tilausrivi.hinta * {$query_ale_lisa}) arvo
             from tilausrivi use index (yhtio_tyyppi_laskutettuaika)
             JOIN lasku ON lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus
@@ -78,7 +104,7 @@ if (($ytunnus != '' or $ytunnus == 'TULKAIKKI') and $komento == '') {
             and tilausrivi.tyyppi         = 'O'
             and tilausrivi.laskutettuaika = '0000-00-00'
             {$lisa}
-            group by 1,2,3,4,5
+            group by 1,2,3,4,5,6
             order by {$sorttaus} lasku.nimi, tilausrivi.tuoteno";
   $result = pupe_query($query);
 
@@ -86,10 +112,18 @@ if (($ytunnus != '' or $ytunnus == 'TULKAIKKI') and $komento == '') {
 
   while ($tulrow = mysql_fetch_assoc($result)) {
     echo "<tr>";
-    echo "<td><a href='?tee=NAYTATILAUS&tunnus={$tulrow['tunnus']}&ytunnus={$ytunnus}&vahvistus={$vahvistus}&myohassa={$myohassa}'>{$tulrow['tunnus']}</a></td>";
+
+    $out = js_openUrlNewWindow("{$palvelin2}raportit/tulossa_olevat.php?tee=NAYTATILAUS&tunnus={$tulrow['tunnus']}&ytunnus={$ytunnus}&vahvistus={$vahvistus}&myohassa={$myohassa}", $tulrow['tunnus'], NULL, 1000, 800);
+    echo "<td>$out</td>";
+
     echo "<td>{$tulrow['ytunnus']}</td>";
     echo "<td>{$tulrow['nimi']}</td>";
-    echo "<td>", tv1dateconv($tulrow["toimaika"]), "</td>";
+    echo "<td>".pupe_DataTablesEchoSort($tulrow['toimaika']).tv1dateconv($tulrow["toimaika"]), "</td>";
+
+    $out = js_openUrlNewWindow("{$palvelin2}tuote.php?tee=Z&tuoteno=".urlencode($tulrow["tuoteno"]), $tulrow['tuoteno'], NULL, 1000, 800);
+    echo "<td>$out</td>";
+
+    echo "<td>{$tulrow['nimitys']}</td>";
     echo "<td align='right'>{$tulrow['maara']}</td>";
     echo "<td align='right'>{$tulrow['tilattu']}</td>";
     echo "<td align='right'>", hintapyoristys($tulrow["arvo"]), "</td>";
@@ -104,6 +138,7 @@ if (($ytunnus != '' or $ytunnus == 'TULKAIKKI') and $komento == '') {
 
   $lastunnus = rtrim($lastunnus, ",");
 
+  echo "</tbody>";
   echo "</table>";
 
   if ($ytunnus != 'TULKAIKKI' and $vahvistus == 0 and $vahvistus != '') {

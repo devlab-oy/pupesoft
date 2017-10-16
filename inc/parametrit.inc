@@ -242,14 +242,13 @@ unset($DAY_ARRAY);
 unset($AIKA_ARRAY);
 unset($MONTH_ARRAY);
 
-unset($VOIPURL);
-
 unset($kpexport);
 
 unset($liitetaanko_editilaus_laskulle_hakemisto);
 
 unset($siirrasuoritustilille);
 unset($ohjewiki_url);
+unset($synkronoi_ainoastaan);
 unset($synkronoi_kiellot);
 unset($alv_laskelman_sallittu_erotus);
 unset($e3_params);
@@ -272,6 +271,7 @@ unset($magento_api_ht_pas);
 unset($magento_api_ht_edi);
 
 unset($logmaster);
+unset($woo_config);
 
 unset($pupesoft_commandlinelog);
 

@@ -278,7 +278,7 @@ if (!function_exists('text_loppu')) {
 
     $sisalto .= "\r\n";
     $sisalto .= sprintf('%-25.25s', $yhtiorow["osoite"]);
-    $sisalto .= sprintf('%-50.50s', t("Telefax", $kieli).": ".$yhtiorow["fax"]);
+    $sisalto .= sprintf('%-50.50s', t("Fax", $kieli).": ".$yhtiorow["fax"]);
     $sisalto .= "\r\n";
     $sisalto .= sprintf('%-25.25s', $yhtiorow["postino"]."  ".$yhtiorow["postitp"]);
     $sisalto .= sprintf('%-50.50s', t("Sähköposti", $kieli).": ".$yhtiorow["email"]);

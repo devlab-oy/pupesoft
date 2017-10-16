@@ -338,12 +338,12 @@ echo "  <script type='text/javascript' language='JavaScript'>
 
 $toim = strtoupper($toim);
 
-if ($toim == "" or $toim == "SUPER" or $toim == "LASKUTUSKIELTO" or $toim == "KESKEN" or $toim == "TOSI_KESKEN" or $toim == 'KESKEN_TAI_TOIMITETTAVISSA') {
+if ($toim == "" or $toim == "SUPER" or $toim == "SUPER_EITYOM" or $toim == "SUPER_EILUONTITAPATYOM" or $toim == "LASKUTUSKIELTO" or $toim == "KESKEN" or $toim == "TOSI_KESKEN" or $toim == 'KESKEN_TAI_TOIMITETTAVISSA') {
   $pika_oikeu = tarkista_oikeus('tilaus_myynti.php', 'PIKATILAUS');
   $rivi_oikeu = tarkista_oikeus('tilaus_myynti.php', 'RIVISYOTTO');
 }
 
-if ($toim == "" or $toim == "SUPER" or $toim == "KESKEN") {
+if ($toim == "" or $toim == "SUPER" or $toim == "SUPER_EITYOM" or $toim == "SUPER_EILUONTITAPATYOM" or $toim == "KESKEN") {
   $otsikko = t("myyntitilausta");
 }
 elseif ($toim == "ENNAKKO") {
@@ -575,7 +575,7 @@ if (strpos($_SERVER['SCRIPT_NAME'], "muokkaatilaus.php") !== FALSE) {
   if ($toim != "MYYNTITILITOIMITA" and $toim != "EXTRANET" and $toim != "VALMISTUSMYYNTI" and $toim != "VALMISTUSMYYNTISUPER") {
     if (isset($eresult) and  mysql_num_rows($eresult) > 0) {
       // tehd‰‰n aktivoi nappi.. kaikki mit‰ n‰ytet‰‰n saa aktvoida, joten tarkkana queryn kanssa.
-      if ($toim == "" or $toim == "SUPER" or $toim == "LASKUTUSKIELTO" or $toim == "KESKEN" or $toim == "TOSI_KESKEN" or $toim == 'KESKEN_TAI_TOIMITETTAVISSA') {
+      if ($toim == "" or $toim == "SUPER" or $toim == "SUPER_EITYOM" or $toim == "SUPER_EILUONTITAPATYOM" or $toim == "LASKUTUSKIELTO" or $toim == "KESKEN" or $toim == "TOSI_KESKEN" or $toim == 'KESKEN_TAI_TOIMITETTAVISSA') {
 
         if (isset($pika_oikeu) and $pika_oikeu and !$rivi_oikeu) {
           $aputoim1 = "PIKATILAUS";
@@ -719,7 +719,7 @@ if (strpos($_SERVER['SCRIPT_NAME'], "muokkaatilaus.php") !== FALSE) {
 
       echo "</select></td>";
 
-      if ($aputoim2 != "" and ($toim == "" or $toim == "SUPER" or $toim == "ENNAKKO" or $toim == "LASKUTUSKIELTO" or $toim == "KESKEN" or $toim == "TOSI_KESKEN" or $toim == 'KESKEN_TAI_TOIMITETTAVISSA')) {
+      if ($aputoim2 != "" and ($toim == "" or $toim == "SUPER" or $toim == "SUPER_EITYOM" or $toim == "SUPER_EILUONTITAPATYOM" or $toim == "ENNAKKO" or $toim == "LASKUTUSKIELTO" or $toim == "KESKEN" or $toim == "TOSI_KESKEN" or $toim == 'KESKEN_TAI_TOIMITETTAVISSA')) {
         echo "<td class='back'><input type='submit' name='$aputoim2' value='$lisa2' $button_disabled></td>";
       }
 
@@ -1187,7 +1187,19 @@ if ($toim == 'HYPER') {
 
   $miinus = 6;
 }
-elseif ($toim == 'SUPER' or $toim == 'SUPERTEHDASPALAUTUKSET') {
+elseif ($toim == 'SUPER' or $toim == 'SUPERTEHDASPALAUTUKSET' or $toim == "SUPER_EITYOM" or $toim == "SUPER_EILUONTITAPATYOM") {
+
+  $_ei_ollenkaan_tyomaarayksia_arraylisa = "";
+
+  if ($toim == "SUPER_EITYOM") {
+    $_ei_ollenkaan_tyomaarayksia_arraylisa = "AND lasku.tilaustyyppi != 'A'";
+  }
+
+  $_ei_tyomaarays_tyomaarayksia_arraylisa = "";
+
+  if ($toim == "SUPER_EILUONTITAPATYOM") {
+    $_ei_tyomaarays_tyomaarayksia_arraylisa = "AND laskun_lisatiedot.luontitapa != 'tyomaarays'";
+  }
 
   $query = "  SELECT DISTINCT lasku.tunnus tilaus, $asiakasstring asiakas, lasku.luontiaika, if(kuka1.kuka is null, lasku.laatija, if (kuka1.kuka!=kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi)) laatija, lasku.viesti tilausviite, ";
 
@@ -1211,8 +1223,11 @@ elseif ($toim == 'SUPER' or $toim == 'SUPERTEHDASPALAUTUKSET') {
         LEFT JOIN kuka as kuka1 ON (kuka1.yhtio = lasku.yhtio and kuka1.kuka = lasku.laatija)
         LEFT JOIN kuka as kuka2 ON (kuka2.yhtio = lasku.yhtio and kuka2.tunnus = lasku.myyja)
         LEFT JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi != 'D')
+        LEFT JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio = lasku.yhtio AND laskun_lisatiedot.otunnus = lasku.tunnus)
         {$tilausrivin_lisatiedot_join}
         WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila in ('L', 'N') and lasku.alatila != 'X' and lasku.clearing != 'EXTENNAKKO'
+        {$_ei_ollenkaan_tyomaarayksia_arraylisa}
+        {$_ei_tyomaarays_tyomaarayksia_arraylisa}
         $haku
         $tepalisa
         GROUP BY lasku.tunnus
@@ -1251,10 +1266,14 @@ elseif ($toim == 'SUPER' or $toim == 'SUPERTEHDASPALAUTUKSET') {
                  JOIN tilausrivi use index (yhtio_otunnus) ON (tilausrivi.yhtio = lasku.yhtio
                    AND tilausrivi.otunnus  = lasku.tunnus
                    AND tilausrivi.tyyppi  != 'D')
+                 LEFT JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio = lasku.yhtio
+                   AND laskun_lisatiedot.otunnus = lasku.tunnus)
                  WHERE lasku.yhtio         = '{$kukarow['yhtio']}'
                  AND lasku.tila            IN ('L', 'N')
                  AND lasku.alatila        != 'X'
                  AND lasku.clearing       != 'EXTENNAKKO'
+                 {$_ei_ollenkaan_tyomaarayksia_arraylisa}
+                 {$_ei_tyomaarays_tyomaarayksia_arraylisa}
                  {$sumhaku}";
     $sumresult = pupe_query($sumquery);
     $sumrow = mysql_fetch_assoc($sumresult);
@@ -2760,7 +2779,8 @@ if (mysql_num_rows($result) != 0) {
       $excelrivi++;
 
       // tehd‰‰n aktivoi nappi.. kaikki mit‰ n‰ytet‰‰n saa aktvoida, joten tarkkana queryn kanssa.
-      if ($whiletoim == "" or $whiletoim == "SUPER" or $whiletoim == "KESKEN" or $toim == "KESKEN_TAI_TOIMITETTAVISSA" or $toim == "TOSI_KESKEN" or $whiletoim == "EXTRANET" or $whiletoim == "JTTOIMITA" or $whiletoim == "LASKUTUSKIELTO"or (($whiletoim == "VALMISTUSMYYNTI" or $whiletoim == "VALMISTUSMYYNTISUPER") and $row["tila"] != "V")) {
+      if ($whiletoim == "" or $whiletoim == "SUPER" or $whiletoim == "SUPER_EITYOM" or $whiletoim == "SUPER_EILUONTITAPATYOM" or $whiletoim == "KESKEN" or $toim == "KESKEN_TAI_TOIMITETTAVISSA" or $toim == "TOSI_KESKEN" or $whiletoim == "EXTRANET" or $whiletoim == "JTTOIMITA" or $whiletoim == "LASKUTUSKIELTO"or (($whiletoim == "VALMISTUSMYYNTI" or $whiletoim == "VALMISTUSMYYNTISUPER") and $row["tila"] != "V")) {
+
         if (isset($pika_oikeu) and $pika_oikeu and !$rivi_oikeu) {
           $aputoim1 = "PIKATILAUS";
           $aputoim2 = "";
@@ -2991,7 +3011,7 @@ if (mysql_num_rows($result) != 0) {
 
       $_class = $whiletoim == "EXTRANET" ? "check_kesken" : "";
 
-      if ($aputoim2 != "" and ($whiletoim == "" or $whiletoim == "SUPER" or $whiletoim == "KESKEN" or $toim == "KESKEN_TAI_TOIMITETTAVISSA" or $toim == "TOSI_KESKEN" or $whiletoim == "EXTRANET" or $whiletoim == "JTTOIMITA" or $whiletoim == "LASKUTUSKIELTO" or (($whiletoim == "VALMISTUSMYYNTI" or $whiletoim == "VALMISTUSMYYNTISUPER") and $row["tila"] != "V"))) {
+      if ($aputoim2 != "" and ($whiletoim == "" or $whiletoim == "SUPER" or $whiletoim == "SUPER_EITYOM" or $whiletoim == "SUPER_EILUONTITAPATYOM" or $whiletoim == "KESKEN" or $toim == "KESKEN_TAI_TOIMITETTAVISSA" or $toim == "TOSI_KESKEN" or $whiletoim == "EXTRANET" or $whiletoim == "JTTOIMITA" or $whiletoim == "LASKUTUSKIELTO" or (($whiletoim == "VALMISTUSMYYNTI" or $whiletoim == "VALMISTUSMYYNTISUPER") and $row["tila"] != "V"))) {
         echo "<input type='submit' class='{$_class}' name='$aputoim2' value='$lisa2' $button_disabled>";
       }
 

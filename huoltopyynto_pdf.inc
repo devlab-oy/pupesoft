@@ -102,7 +102,7 @@ $pdf->draw_text(50, 87, $tulostettavat_tiedot['lasku']['toim_maa'],    $firstpag
 list($usec, $sec) = explode(' ', microtime());
 mt_srand((float) $sec + ((float) $usec * 100000));
 $asiakasnimi = str_replace(" ", "", $tulostettavat_tiedot['asiakas']['nimi']);
-$pdffilenimi = "/tmp/huoltopyynto-{$tulostettavat_tiedot['huoltopyynto']}-{$asiakasnimi}.pdf";
+$pdffilenimi = "/tmp/".t("huoltopyynto", $kieli)."-{$tulostettavat_tiedot['huoltopyynto']}-{$asiakasnimi}.pdf";
 
 //kirjoitetaan pdf faili levylle..
 $fh = fopen($pdffilenimi, "w");

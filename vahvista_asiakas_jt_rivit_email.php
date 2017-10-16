@@ -194,7 +194,8 @@ function hae_myyntitilausrivit($tilaus_tunnus) {
             FROM tilausrivi
             WHERE yhtio = '{$kukarow['yhtio']}'
             AND otunnus = '{$tilaus_tunnus}'
-            AND var     = 'J'";
+            AND var     = 'J'
+            AND tyyppi != 'D'";
   $result = pupe_query($query);
 
   $tilausrivit = array();

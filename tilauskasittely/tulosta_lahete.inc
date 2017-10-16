@@ -480,7 +480,8 @@ if (!function_exists('alku_lahete')) {
 
       // maksuehto tekstin‰ jos on jokin muu kuin hinnaton maksuehto
       // extranet tilausvahvistuksessa ei n‰ytet‰ maksuehtoa (jos halutaan n‰ytt‰‰ niin setataan muuttuja nollaksi)
-      if ($base_lahetetyyppi != "tulosta_lahete_eiale_eihinta.inc" and $extranet_tilausvahvistus != 1 and $lahetetyyppi_avainsana != 1) {
+      if (($base_lahetetyyppi != "tulosta_lahete_eiale_eihinta.inc" and $laskurow['lahetetyyppi'] != 'perhe_tulosta_lahete_viivakoodi_eipuute.inc') and
+      $extranet_tilausvahvistus != 1 and $lahetetyyppi_avainsana != 1) {
         // haetaan maksuehdon tiedot
         $query  = "SELECT * from maksuehto where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[maksuehto]'";
         $masresult = pupe_query($query);
@@ -4377,6 +4378,7 @@ if (!function_exists('hae_base_lahetetyyppi')) {
     $base_lahetetyyppi = str_replace('perhe_', '', $lahetetyyppi);
     $base_lahetetyyppi = str_replace('hinnat_isalla_', '', $base_lahetetyyppi);
     $base_lahetetyyppi = str_replace('_verollinen', '', $base_lahetetyyppi);
+    $base_lahetetyyppi = str_replace('_eipuute', '', $base_lahetetyyppi);
 
     return $base_lahetetyyppi;
   }

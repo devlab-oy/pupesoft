@@ -162,6 +162,10 @@ if (!isset($jo_syotetty_rekisterinumero)) {
   $jo_syotetty_rekisterinumero = "";
 }
 
+if (!isset($keratty)) {
+  $keratty = "";
+}
+
 // Haetaan asiakkaan kieli erilaisten systeemikommenttien kääntämistä varten
 $query = "SELECT kieli
           FROM asiakas
@@ -512,21 +516,49 @@ else {
   unset($varasto);
 }
 
+// varastosiirtotyyppi ei saa olla K kirjanpidollinen eikä P palautus
 if ((!isset($from_tee_jt_tilaus) or !$from_tee_jt_tilaus) and
   $kpl > 0 and
-  (($trow['myynti_era'] > 0 and in_array($yhtiorow['myyntiera_pyoristys'], array('K', 'S'))) or $trow['minimi_era'] > 0) and
-  (((in_array($rivityyppi, array('L', 'E')) and in_array($yhtiorow['myyntiera_pyoristys'], array('K', 'S'))) or ($rivityyppi == 'G' and $yhtiorow['myyntiera_pyoristys'] == 'S')) and (!isset($varastosiirtotyyppi) or !in_array($varastosiirtotyyppi, array('P', 'K')))) and
   $rivitunnus == 0 and
+  (!isset($varastosiirtotyyppi) or !in_array($varastosiirtotyyppi, array('P', 'K'))) and
   (in_array($toim, array('RIVISYOTTO', 'PIKATILAUS', 'ENNAKKO', 'EXTRANET', 'SIIRTOLISTA')) or ($kutsuja == "EDITILAUS" and $edi_tyyppi != "magento"))
 ) {
 
   $org_kpl = $kpl;
 
-  if ($kpl < $trow['minimi_era']) {
+  // minimimaara_pyoristys K = myyntirivin ja ennakkotilausrivin määrä pyöristetään
+  $pyoristys_k = ($yhtiorow['minimimaara_pyoristys'] == 'K' and in_array($rivityyppi, array('L','E')));
+  // minimimaara_pyoristys S = myyntirivin, ennakkotilausrivin ja siirtorivin määrä pyöristetään
+  $pyoristys_s = ($yhtiorow['minimimaara_pyoristys'] == 'S' and in_array($rivityyppi, array('L','E','G')));
+  // minimimaara_pyoristys E = myyntirivin määrä pyöristetään ainoastaa extranetissä
+  $pyoristys_e = ($yhtiorow['minimimaara_pyoristys'] == 'E' and $rivityyppi == 'L' and !empty($kukarow['extranet']));
+
+  // Halutaan pyöristää minimimäärään, jos
+  // tuotteella on minimimäärä asetettu
+  // syötetty määrä on alle minimimäärän
+  // yhtiön parametrit vastaa rivityyppiä
+  $minimimaara_pyoristys = true;
+  $minimimaara_pyoristys &= ($trow['minimi_era'] > 0);
+  $minimimaara_pyoristys &= ($kpl < $trow['minimi_era']);
+  $minimimaara_pyoristys &= ($pyoristys_k or $pyoristys_e or $pyoristys_s);
+
+  if ($minimimaara_pyoristys) {
     $kpl = $trow['minimi_era'];
   }
 
-  if (in_array($yhtiorow['myyntiera_pyoristys'], array('K', 'S'))) {
+  // myyntiera_pyoristys K = myyntirivin ja ennakkotilausrivin määrä pyöristetään
+  $pyoristys_k = ($yhtiorow['myyntiera_pyoristys'] == 'K' and in_array($rivityyppi, array('L','E')));
+  // myyntiera_pyoristys S = myyntirivin, ennakkotilausrivin ja siirtorivin määrä pyöristetään
+  $pyoristys_s = ($yhtiorow['myyntiera_pyoristys'] == 'S' and in_array($rivityyppi, array('L','E','G')));
+
+  // Halutaan pyöristää lähimpään myyntierään, jos
+  // tuotteella on myyntierä asetettu
+  // yhtiön parametrit vastaa rivityyppiä
+  $myyntieran_pyoristys = true;
+  $myyntieran_pyoristys &= ($trow['myynti_era'] > 0);
+  $myyntieran_pyoristys &= ($pyoristys_k or $pyoristys_s);
+
+  if ($myyntieran_pyoristys) {
     if ($kpl <= $trow['myynti_era']) {
       $kpl = $trow['myynti_era'];
     }
@@ -1063,6 +1095,11 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
       for ($isa=0; $isa < $riikoko; $isa++) {
         list($tuoteperhe, $kaikkituotteet) = tuoteperhe_reku($isatuoteno, $isa_array[$isa], $tuoteperhe, $kaikkituotteet, $perhelisa, $kieltolisa, $lisaarivi_debug);
 
+        if (!empty($tuoteperhe)) {
+          $keratty = "";
+          $kerattyaika = "";
+        }
+
         // Ollaanko rekursiivisia vai ei
         if ($yhtiorow["rekursiiviset_tuoteperheet"] == "Y" and ($laskurow['tila'] != 'V' or $var == "W")) {
           $isa_array   = array_merge($isa_array, $tuoteperhe);
@@ -1173,6 +1210,11 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
 
         // Tutkitaan myydäänkö tiettyä jo varattua lisävarustetta, silloin annetaan AINA riittävä saldo
         if ($perheid2 > 0 and $perheid2 != $rivitunnus and strtoupper($zrow["hyllyalue"]."#!¡!#".$zrow["hyllynro"]."#!¡!#".$zrow["hyllyvali"]."#!¡!#".$zrow["hyllytaso"]) == strtoupper($paikka)) {
+          $myytavissa = $toimittamatta;
+        }
+
+        // Jos tilaus on kerätty saldo riittää aina
+        if ($keratty != '') {
           $myytavissa = $toimittamatta;
         }
 
@@ -1754,7 +1796,7 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
                   $myy_ohita_kerays[$j] = $perherow['ohita_kerays'];
 
                   // jos ei olla vielä toimitettu kaikkea, niin lisätään tilausrivi
-                  if ($lapsitoimittamatta > 0 and (($myy_kpl[$j] - $myy_kpl_myyty[$j]) > 0 or $yhtiorow["puute_jt_oletus"] == "O" or $varataan_saldoa == "EI")) {
+                  if ($lapsitoimittamatta != 0 and (($myy_kpl[$j] - $myy_kpl_myyty[$j]) > 0 or $yhtiorow["puute_jt_oletus"] == "O" or $varataan_saldoa == "EI")) {
 
                     if (($myy_kpl[$j] - $myy_kpl_myyty[$j] >= $lapsitoimittamatta) or $yhtiorow["puute_jt_oletus"] == "O" or $varataan_saldoa == "EI") {
                       // jos tällä paikalla on saldoa enemmän kun tarvitaan, otetaan sitten vaan tarvittava määrä
@@ -2007,6 +2049,8 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
                         netto           = '$lis_netto',
                         hinta           = '$lis_hinta',
                         kerayspvm       = '$kerayspvm',
+                        toimitettu      = '$toimitettu',
+                        toimitettuaika  = '$toimitettuaika',
                         otunnus         = '$kukarow[kesken]',
                         tyyppi          = '$rivityyppi',
                         toimaika        = '$toimaika',
@@ -2025,6 +2069,9 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
 
               if ($trow['ei_saldoa'] != '' and $yhtiorow["kerataanko_saldottomat"] == '') {
                 $query .= ", keratty = 'saldoton', kerattyaika = now()";
+              }
+              else {
+                $query .= ", keratty = '{$keratty}', kerattyaika = '{$kerattyaika}'";
               }
 
               $result = pupe_query($query);
@@ -2399,6 +2446,11 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
     for ($isa=0; $isa < $riikoko; $isa++) {
       list($perherow, $isat_array, $kaikki_array, $kerroin_array, $ohita_kerays_array) = tuoteperhe_reku2($kaikki_array[$isa], $isat_array, $kaikki_array, $kerroin_array, $perhelisa, $kieltolisa, $lisaarivi_debug, $ohita_kerays_array);
       $perhearray  = array_merge($perhearray, $perherow);
+
+      if (!empty($perherow)) {
+        $keratty = "";
+        $kerattyaika = "";
+      }
 
       // Ollaanko rekursiivisia vai ei
       if ($yhtiorow["rekursiiviset_tuoteperheet"] == "Y" and ($laskurow['tila'] != 'V' or $var == "W")) {
@@ -3341,6 +3393,8 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
               hinta           = '$lis_hinta',
               {$query_insert_hinta_alkuperainen_lisa}
               kerayspvm       = '$kerayspvm',
+              toimitettu      = '$toimitettu',
+              toimitettuaika  = '$toimitettuaika',
               otunnus         = '$kukarow[kesken]',
               tyyppi          = '$rivityyppi',
               toimaika        = '$toimaika',
@@ -3359,6 +3413,9 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
 
     if ($trow['ei_saldoa'] != '' and $yhtiorow["kerataanko_saldottomat"] == '') {
       $query .= ", keratty = 'saldoton', kerattyaika = now()";
+    }
+    else {
+      $query .= ", keratty = '{$keratty}', kerattyaika = '{$kerattyaika}'";
     }
 
     $result = pupe_query($query);

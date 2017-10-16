@@ -4,7 +4,7 @@
 // ja $from niin tiedetään mistä tullaan ja minne palata
 
 if (strpos($_SERVER['SCRIPT_NAME'], "sarjanumeroseuranta.php") !== false) {
-  if ($_REQUEST["tee"] == "NAYTATILAUS") {
+  if (isset($_REQUEST["tee"]) and $_REQUEST["tee"] == "NAYTATILAUS") {
     $_REQUEST['nayta_pdf'] = 1;
     $nayta_pdf             = 1;
   }
@@ -515,7 +515,6 @@ if ($toiminto == 'LISAA' and (trim($sarjanumero) != '' or $is_uploaded_file === 
   $sarjanumero_array = array();
 
   if ($is_uploaded_file === true) {
-
     $kasiteltava_tiedoto_path = $_FILES['userfile']['tmp_name'];
     $path_parts = pathinfo($_FILES['userfile']['name']);
     $ext = strtoupper($path_parts['extension']);
@@ -523,7 +522,13 @@ if ($toiminto == 'LISAA' and (trim($sarjanumero) != '' or $is_uploaded_file === 
     $excelrivit = pupeFileReader($kasiteltava_tiedoto_path, $ext);
 
     foreach($excelrivit as $rivi) {
-      $sarjanumero_array[] = $rivi[0];
+      $_sarjanumero = trim($rivi[0]);
+
+      if (empty($_sarjanumero)) {
+        continue;
+      }
+
+      $sarjanumero_array[] = $_sarjanumero;
     }
   }
   else {
@@ -535,6 +540,12 @@ if ($toiminto == 'LISAA' and (trim($sarjanumero) != '' or $is_uploaded_file === 
   $insok      = "OK";
 
   foreach ($sarjanumero_array as $sarjanumero) {
+    // E = Eränumeroseuranta. Osto-Myynti / Keskihinta-varastonarvo
+    // F = Eränumeroseuranta parasta-ennen päivällä. Osto-Myynti / Keskihinta-varastonarvo
+    // G = Eränumeroseuranta. Osto-Myynti / In-Out varastonarvo
+    // S = Sarjanumeroseuranta. Osto-Myynti / In-Out varastonarvo
+    // T = Sarjanumeroseuranta. Myynti / Keskihinta-varastonarvo
+    // V = Sarjanumeroseuranta. Osto-Myynti / Keskihinta-varastonarvo
     if ($rivirow["sarjanumeroseuranta"] == "S" or $rivirow["sarjanumeroseuranta"] == "T" or $rivirow["sarjanumeroseuranta"] == "V") {
       $query = "SELECT *
                 FROM sarjanumeroseuranta use index (yhtio_sarjanumero)
@@ -590,6 +601,7 @@ if ($toiminto == 'LISAA' and (trim($sarjanumero) != '' or $is_uploaded_file === 
     }
 
     $sarjares = pupe_query($query);
+    $tun = 0;
 
     if ($insok == "OK" and mysql_num_rows($sarjares) == 0) {
 
@@ -649,36 +661,33 @@ if ($toiminto == 'LISAA' and (trim($sarjanumero) != '' or $is_uploaded_file === 
       else {
         echo "<font class='message'>".t("Lisättiin eränumero")." $sarjanumero.</font><br><br>";
       }
+    }
+    elseif ($insok == "OK" and mysql_num_rows($sarjares) == 1) {
+      $sarjarow = mysql_fetch_assoc($sarjares);
+      $tun = $sarjarow['tunnus'];
 
-      // Yritetään liittää luotu sarjanumero tähän riviin
-      if ($rivitunnus > 0) {
+      echo "<font class='error'>".t("Sarjanumero löytyy jo").": $sarjanumero.</font><br><br>";
+    }
 
-        if ($valitut_sarjat != "") {
-          $valitut_sarjat = $valitut_sarjat.",".$tun;
-        }
-        else {
-          $valitut_sarjat = $tun;
-        }
-
-        $sarjataan   = explode(",", $valitut_sarjat);
-        $sarjat    = explode(",", $valitut_sarjat);
-        $formista  = "kylla";
+    // Yritetään liittää luotu sarjanumero tähän riviin
+    if ($rivitunnus > 0 and $tun > 0) {
+      if ($valitut_sarjat != "") {
+        $valitut_sarjat = $valitut_sarjat.",".$tun;
+      }
+      else {
+        $valitut_sarjat = $tun;
       }
 
-      $sarjanumero  = "";
-      $lisatieto    = "";
-      $kaytetty    = "";
-      $era_kpl    = "";
-    }
-    elseif ($insok != "EI") {
-      $sarjarow = mysql_fetch_assoc($sarjares);
-
-      $sarjanumero_haku = $sarjanumero;
-
-      echo "<font class='error'>".t("Sarjanumero löytyy jo tuotteelta")." $sarjarow[tuoteno]/$sarjanumero.</font><br><br>";
-      $sarjanumero = "";
+      $sarjataan = explode(",", $valitut_sarjat);
+      $sarjat    = explode(",", $valitut_sarjat);
+      $formista  = "kylla";
     }
   }
+
+  $sarjanumero  = "";
+  $lisatieto    = "";
+  $kaytetty    = "";
+  $era_kpl    = "";
 }
 
 // Ollaan valittu joku tunnus listasta ja halutaan liittää se tilausriviin tai poistaa se tilausriviltä

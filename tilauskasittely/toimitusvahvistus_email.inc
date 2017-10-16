@@ -11,6 +11,13 @@ if ($kieli == '') {
   $kieli = strtolower($kielrow['kieli']);
 }
 
+// Kutsutaanko CLI:stä
+$php_cli = FALSE;
+
+if (php_sapi_name() == 'cli') {
+  $php_cli = TRUE;
+}
+
 pupesoft_log('toimitusvahvistus_email', "Valmistellaan tilauksien {$otunnukset} toimitusvahvistuksien lähettämistä sähköpostiin");
 
 $toimitusvahvistus_email_lahetys = true;
@@ -92,14 +99,69 @@ if ($toimitusvahvistus_email_lahetys) {
             tilausrivi.varattu+tilausrivi.kpl as maara,
             tilausrivi.nimitys,
             round(tilausrivi.hinta * tilausrivi.varattu * {$query_ale_lisa}, 2) hinta,
-            lasku.valkoodi
+            lasku.valkoodi,
+            tilausrivi.otunnus,
+            tilausrivi.tunnus,
+            tilausrivi.perheid,
+            tilausrivin_lisatiedot.ei_nayteta
             FROM lasku
             JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus AND tilausrivi.tyyppi = 'L' AND tilausrivi.toimitettu != '' AND tilausrivi.toimitettuaika != '0000-00-00 00:00:00')
+            LEFT JOIN tilausrivin_lisatiedot ON (tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus)
             WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-            AND lasku.tunnus  IN ({$otunnukset})";
+            AND lasku.tunnus  IN ({$otunnukset})
+            AND (tilausrivi.perheid = 0 or tilausrivi.perheid=tilausrivi.tunnus or tilausrivin_lisatiedot.ei_nayteta !='E' or tilausrivin_lisatiedot.ei_nayteta is null)";
   $rivi_loop_res = pupe_query($query);
 
   while ($rivi_loop_row = mysql_fetch_assoc($rivi_loop_res)) {
+
+    // isätuote, jonka lapsia ei näytetä
+    if ($rivi_loop_row["perheid"] == $rivi_loop_row["tunnus"]) {
+
+      $query = "SELECT vanhatunnus
+                FROM lasku
+                WHERE yhtio = '$kukarow[yhtio]'
+                and tunnus  = '$rivi_loop_row[otunnus]'";
+      $vtunres = pupe_query($query);
+      $vtunrow = mysql_fetch_assoc($vtunres);
+
+      if ($vtunrow["vanhatunnus"] != 0) {
+        $query = "SELECT GROUP_CONCAT(distinct tunnus SEPARATOR ',') tunnukset
+                  FROM lasku use index (yhtio_vanhatunnus)
+                  WHERE yhtio     = '$kukarow[yhtio]'
+                  and vanhatunnus = '$vtunrow[vanhatunnus]'";
+        $perheresult = pupe_query($query);
+        $numrows = mysql_num_rows($perheresult);
+      }
+
+      if ($numrows == 0 or $vtunrow["vanhatunnus"] == 0) {
+        $query = "SELECT GROUP_CONCAT(distinct tunnus SEPARATOR ',') tunnukset
+                  FROM lasku use index (PRIMARY)
+                  WHERE yhtio = '$kukarow[yhtio]'
+                  and tunnus  = '$rivi_loop_row[otunnus]'";
+        $perheresult = pupe_query($query);
+      }
+
+      if (mysql_num_rows($perheresult) > 0) {
+
+        $perherow = mysql_fetch_assoc($perheresult);
+
+        // lasketaan isätuotteen riville lapsien (joita ei näytetä) hinnat yhteen
+        $query = "SELECT
+                  round(sum((tilausrivi.hinta/if(lasku.vienti_kurssi=0, 1, lasku.vienti_kurssi)) * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * {$query_ale_lisa}),'$yhtiorow[hintapyoristys]') rivihinta
+                  FROM tilausrivi
+                  JOIN lasku ON tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus
+                  LEFT JOIN tilausrivin_lisatiedot ON (tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio AND tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus)
+                  WHERE tilausrivi.yhtio  = '$kukarow[yhtio]'
+                  AND tilausrivi.otunnus  in ($perherow[tunnukset])
+                  AND tilausrivi.tyyppi  != 'D'
+                  AND tilausrivi.var     != 'O'
+                  AND tilausrivi.perheid  = '$rivi_loop_row[perheid]'
+                  AND tilausrivin_lisatiedot.ei_nayteta = 'E'";
+        $riresult = pupe_query($query);
+        $perherow = mysql_fetch_assoc($riresult);
+        $rivi_loop_row['hinta'] += $perherow["rivihinta"];
+      }
+    }
 
     if ($_toimvahvistus['selitetark_2'] == "eihintaa") {
       $_hinta = "";
@@ -112,52 +174,20 @@ if ($toimitusvahvistus_email_lahetys) {
   }
 
   $body .= "\n";
+  $body .= t("Seurantakoodit", $kieli).":\n\n";
 
-  // Jos Unifaun Track & Trace sekä XML Posting, laitetaan pelkkä seurantaosoite
-  $unifaun_xmlposting = ($unifaun_xp_developerid != "" and $unifaun_xp_user != "" and $unifaun_xp_pin != "");
+  $_tilausnumerot = explode(',', $otunnukset);
+  $linkit = tilauksen_seurantalinkit($_tilausnumerot);
 
-  if (!empty($unifaun_url_key)) {
-    $query = "SELECT distinct rahtikirjanro
-              FROM rahtikirjat
-              WHERE tunnus IN ({$tunnukset})
-              AND yhtio    = '{$kukarow['yhtio']}'";
-    $seurantakoodit_res = pupe_query($query);
+  foreach ($linkit as $seurantalinkki) {
+    $link = $seurantalinkki['link'];
+    $nro  = $seurantalinkki['id'];
 
-    $body .= t("Seurantalinkit", $kieli).":\n\n";
-
-    while ($seurantakoodit_row = mysql_fetch_assoc($seurantakoodit_res)) {
-      $body .= "https://www.unifaunonline.com/ext.uo.fi.track?key={$unifaun_url_key}&order={$seurantakoodit_row['rahtikirjanro']}\n\n";
+    if (empty($link)) {
+      $body .= "{$nro}\n";
     }
-  }
-  else {
-    $query = "SELECT if(sscc_ulkoinen != '', sscc_ulkoinen, rahtikirjanro) rahtikirjanro
-              FROM rahtikirjat
-              WHERE tunnus IN ({$tunnukset})
-              AND yhtio    = '{$kukarow['yhtio']}'";
-    $seurantakoodit_res = pupe_query($query);
-
-    $body .= t("Seurantakoodit", $kieli).":\n\n";
-
-    while ($seurantakoodit_row = mysql_fetch_assoc($seurantakoodit_res)) {
-      if (stripos($seurantakoodit_row['rahtikirjanro'], "JJFI") !== FALSE or stripos($seurantakoodit_row['sscc_ulkoinen'], "JJFI") !== FALSE) {
-        $linkurl = "";
-        preg_match_all("/JJFI ?[0-9]{6} ?[0-9]{11}/", $seurantakoodit_row['rahtikirjanro']." ".$seurantakoodit_row['sscc_ulkoinen'], $match);
-
-        foreach ($match[0] as $nro) {
-          $nro = str_replace(" ", "", $nro);
-          $linkurl .= "http://www.posti.fi/henkiloasiakkaat/seuranta/#/lahetys/{$nro}";
-        }
-        $body .= "{$linkurl}\n\n";
-      }
-      elseif (stripos(strtolower($laskurow["toimitustapa"]), "mypack") !== FALSE and !empty($seurantakoodit_row['rahtikirjanro'])) {
-        foreach (explode(" ", $seurantakoodit_row['rahtikirjanro']) as $mypnro) {
-          $linkurl .= "http://www.postnord.fi/fi/yritysasiakkaat/asiakaspalvelu/sahkoinen-asiointi/Sivut/Lahetysten-seuranta.aspx?view=item&itemid={$mypnro}";
-        }
-        $body .= "{$linkurl}\n\n";
-      }
-      else {
-        $body .= "{$seurantakoodit_row['rahtikirjanro']}\n\n";
-      }
+    else {
+      $body .= "{$link}\n";
     }
   }
 
@@ -183,7 +213,10 @@ if ($toimitusvahvistus_email_lahetys) {
     );
 
     if (pupesoft_sahkoposti($parametri)) {
-      echo t("Sähköpostin lähetys onnistui").": {$email_kuka}<br />";
+      if (!$php_cli) {
+        echo t("Sähköpostin lähetys onnistui").": {$email_kuka}<br />";
+      }
+
       pupesoft_log('toimitusvahvistus_email', "Sähköpostin lähetys onnistui osoitteeseen {$email_kuka}.");
     }
     else {

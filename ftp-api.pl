@@ -52,7 +52,7 @@ while (@row = $sth->fetchrow_array) {
   $pass = $row[1];
   $nimi = $row[2];
 
-  $ftp = Net::FTP->new($host, ('Debug' => 0, 'Passive' => 0)) or die "Net::FTP Initialization failed, host=$host\n\n";
+  $ftp = Net::FTP->new($host, ('Debug' => 0, 'Passive' => 1)) or die "Net::FTP Initialization failed, host=$host\n\n";
   $ftp->login($user, $pass) or die "FTP login failed, host=$host, user=$user, passwd=$pass\n\n";
 
   @list=$ftp->dir("/bills-new/by-ebid");

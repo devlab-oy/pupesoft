@@ -31,14 +31,25 @@ function tulosta_asiakkaan_kuitti($laskunro, $tulostimen_tunnus, $params = array
     return false;
   }
 
-  $footer_teksti      = empty($params["footer_teksti"]) ? false : $params["footer_teksti"];
+  if (isset($params["footer_teksti"])) {
+    $footer_teksti = $params["footer_teksti"];
+  }
+  elseif ($teksti_avainsanasta = t_avainsana("KUITIN_VAKTEXT", '', '', '', '', "selitetark")) {
+    $footer_teksti = $teksti_avainsanasta;
+  }
+  else {
+    $footer_teksti = false;
+  }
+
   $header_teksti      = empty($params["header_teksti"]) ? false : $params["header_teksti"];
   $kateinen           = empty($params["kateinen"]) ? 0 : hintapyoristys($params["kateinen"]);
   $avaa_lipas_lopuksi = $params["avaa_lipas_lopuksi"] !== false;
 
   list($maksupaatetapahtumat, $maksupaatesumma) = hae_maksupaatetapahtumat($laskunro);
   list($tilausrivit, $tilausnumerot, $verot) = hae_tilausrivit($laskunro);
+
   $lasku = hae_myyntilasku($laskunro);
+
   list($yhteensa, $pyoristys, $loppusumma) = summat($lasku);
   $yhteensa_num        = $yhteensa;
   $maksupaatesumma_num = $maksupaatesumma;
@@ -192,10 +203,43 @@ function tulosta_asiakkaan_kuitti($laskunro, $tulostimen_tunnus, $params = array
     }
 
     if ($kateinen != 0) {
-      $pdf->draw_text(0, $kala, t("KƒTEINEN"), $firstpage, $norm);
-      $oikpos = $pdf->strlen(trim($kateinen), $norm);
-      $pdf->draw_text(200-$oikpos, $kala, trim($kateinen), $firstpage, $norm);
-      $kala-=10;
+
+      // maksup‰‰teintegraatio ei k‰ytˆss‰, katsotaan tarkat maksutavat tiliˆinneist‰
+      if ($maksupaatesumma == 0) {
+
+          $maksutavat_ja_summat = hae_maksutavat_ja_summat($lasku);
+
+          if ($maksutavat_ja_summat[0] != 0) {
+            $_summa = sprintf("%34.34s", $maksutavat_ja_summat[0]);
+            $pdf->draw_text(0, $kala, t("KƒTEINEN"), $firstpage, $norm);
+            $oikpos = $pdf->strlen(trim($_summa), $norm);
+            $pdf->draw_text(200-$oikpos, $kala, trim($_summa), $firstpage, $norm);
+            $kala-=10;
+          }
+
+          if ($maksutavat_ja_summat[1] != 0) {
+            $_summa = sprintf("%34.34s", $maksutavat_ja_summat[1]);
+            $pdf->draw_text(0, $kala, t("LUOTTOKORTTI"), $firstpage, $norm);
+            $oikpos = $pdf->strlen(trim($_summa), $norm);
+            $pdf->draw_text(200-$oikpos, $kala, trim($_summa), $firstpage, $norm);
+            $kala-=10;
+          }
+
+          if ($maksutavat_ja_summat[2] != 0) {
+            $_summa = sprintf("%34.34s", $maksutavat_ja_summat[2]);
+            $pdf->draw_text(0, $kala, t("PANKKIKORTTI"), $firstpage, $norm);
+            $oikpos = $pdf->strlen(trim($_summa), $norm);
+            $pdf->draw_text(200-$oikpos, $kala, trim($_summa), $firstpage, $norm);
+            $kala-=10;
+          }
+
+      }
+      else {
+        $pdf->draw_text(0, $kala, t("KƒTEINEN"), $firstpage, $norm);
+        $oikpos = $pdf->strlen(trim($kateinen), $norm);
+        $pdf->draw_text(200-$oikpos, $kala, trim($kateinen), $firstpage, $norm);
+        $kala-=10;
+      }
 
       if (isset($takaisin)) {
         $pdf->draw_text(0, $kala, t("TAKAISIN"), $firstpage, $norm);
@@ -256,6 +300,17 @@ function tulosta_asiakkaan_kuitti($laskunro, $tulostimen_tunnus, $params = array
     if ($myyjan_nimi) {
       draw_center_aligned($pdf, $firstpage, t("Teit‰ palveli", $asiakkaan_kieli) . " {$myyjan_nimi}", $norm, $kala);
       $kala-=10;
+    }
+
+    if ($footer_teksti) {
+      $footer_teksti = explode("\n", $footer_teksti);
+      foreach ($footer_teksti as $footer_teksti_rivi) {
+        $footer_teksti_rivi = explode("\n", wordwrap($footer_teksti_rivi, 40));
+        foreach ($footer_teksti_rivi as $footer_teksti_subrivi) {
+          draw_center_aligned($pdf, $firstpage, $footer_teksti_subrivi, $norm, $kala);
+          $kala -= 10;
+        }
+      }
     }
 
     //keksit‰‰n uudelle failille joku varmasti uniikki nimi:
@@ -422,6 +477,52 @@ function hae_myyntilasku($laskunro) {
   $result = pupe_query($query);
 
   return mysql_fetch_assoc($result);
+}
+
+function hae_maksutavat_ja_summat($lasku) {
+  global $kukarow;
+
+  if (empty($lasku['kassalipas'])) {
+    return array(0,0,0);
+  }
+
+  $query = "SELECT kassa, luottokortti, pankkikortti
+            FROM kassalipas
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND tunnus = {$lasku['kassalipas']}";
+  $result = pupe_query($query);
+  $row = mysql_fetch_assoc($result);
+
+  $query = "SELECT sum(summa) summa
+            FROM tiliointi
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND ltunnus = {$lasku['tunnus']}
+            AND tilino  = {$row['kassa']}
+            AND korjattu = ''";
+  $result = pupe_query($query);
+  $kateis_row = mysql_fetch_assoc($result);
+
+  $query = "SELECT sum(summa) summa
+            FROM tiliointi
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND ltunnus = {$lasku['tunnus']}
+            AND tilino  = {$row['luottokortti']}
+            AND tilino not in ({$row['kassa']})
+            AND korjattu = ''";
+  $result = pupe_query($query);
+  $luottokortti_row = mysql_fetch_assoc($result);
+
+  $query = "SELECT sum(summa) summa
+            FROM tiliointi
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND ltunnus = {$lasku['tunnus']}
+            AND tilino  = {$row['pankkikortti']}
+            AND tilino not in ({$row['kassa']}, {$row['luottokortti']})
+            AND korjattu = ''";
+  $result = pupe_query($query);
+  $pankkikortti_row = mysql_fetch_assoc($result);
+
+  return array($kateis_row['summa'], $luottokortti_row['summa'], $pankkikortti_row['summa']);
 }
 
 function hae_maksupaatetapahtumat($laskunro) {

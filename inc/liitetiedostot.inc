@@ -63,7 +63,7 @@ if ($lukitse_laji == "lasku" and $lukitse_avaimeen > 0) {
     $poistolukko = "";
   }
 
-  if ($del == 1 or ($tunnus != "" and $_FILES["liite_data"]["size"] > 0)) {
+  if (laskun_hyvaksyjia() and ($del == 1 or ($tunnus != "" and $_FILES["liite_data"]["size"] > 0))) {
     if (in_array($lasrow['tila'], array('H', 'M')) and $kukarow["taso"] != 3) {
 
       $komm = "(" . $kukarow['nimi'] . "@" . date('Y-m-d') .") ".t("Lasku palautettiin hyväksyntään koska laskun liitteitä muutettiin.")."<br>";

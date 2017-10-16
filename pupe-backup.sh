@@ -31,12 +31,8 @@ if [ ! -z $7 ]; then
   REMOTELOCALDIR=${12}
 fi
 
-if [ ! -z ${13} ]; then
-  S3BUCKET=${13}
-fi
-
 # Tehdäänkö mysql-backuppi vai ei.
-if [ ! -z ${14} ]; then
+if [ ! -z ${13} ]; then
   MYSQLBACKUP=false;
 else
   MYSQLBACKUP=true;
@@ -394,21 +390,6 @@ fi
 
 # Siivotaan vanhat backupit pois
 find ${BACKUPDIR} -type f -follow -mtime +${BACKUPPAIVAT} -delete
-
-# Synkataan backuppi Amazon S3:een
-if [ ! -z "${S3BUCKET}" ]; then
-
-  # Katsotaan mistä löytyy config file
-  if [ -f "/home/devlab/secret/s3cfg" ]; then
-    S3CONFIG="/home/devlab/secret/s3cfg"
-  else
-    S3CONFIG="/root/.s3cfg"
-  fi
-
-  s3cmd --config=${S3CONFIG} --no-progress --delete-removed sync ${BACKUPDIR}/ s3://${S3BUCKET}
-  echo -n `date "+%d.%m.%Y @ %H:%M:%S"`
-  echo ": S3 copy done."
-fi
 
 echo -n `date "+%d.%m.%Y @ %H:%M:%S"`
 echo ": Backup done."

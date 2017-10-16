@@ -266,6 +266,7 @@ if (!$php_cli) {
   $sel2 = "";
   $sel3 = "";
   $sel4 = "";
+  $sel5 = "";
 
   if (isset($summaustaso) and $summaustaso == "S") {
     $sel1 = "SELECTED";
@@ -279,6 +280,9 @@ if (!$php_cli) {
   elseif (isset($summaustaso) and $summaustaso == "TRY") {
     $sel4 = "SELECTED";
   }
+  elseif (isset($summaustaso) and $summaustaso == "TME") {
+    $sel5 = "SELECTED";
+  }
 
   echo "<tr>";
   echo "<th>".t("Summaustaso").":</th>";
@@ -289,6 +293,7 @@ if (!$php_cli) {
       <option value='P'   $sel2>".t("Varastonarvo varastopaikoittain")."</option>
       <option value='T'   $sel3>".t("Varastonarvo tuotteittain")."</option>
       <option value='TRY' $sel4>".t("Varastonarvo tuoteryhmittäin")."</option>
+      <option value='TME' $sel5>".t("Varastonarvo tuotemerkeittäin")."</option>
       </select>";
 
   if ($yhtiorow['tuotteiden_jarjestys_raportoinnissa'] == 'V') {
@@ -483,7 +488,10 @@ if (isset($supertee) and $supertee == "RAPORTOI") {
     $varastontunnukset1 = " AND tapahtuma.varasto IN ($varastontunnukset)";
     $varastontunnukset2 = " AND tuotepaikat.varasto IN ($varastontunnukset)";
 
-    if ($summaustaso == "T" or $summaustaso == "TRY") {
+    if ($summaustaso == "TME") {
+      $order_lisa = "tuotemerkki, $order_extra";
+    }
+    elseif ($summaustaso == "T" or $summaustaso == "TRY") {
       $order_lisa = "osasto, try, $order_extra";
     }
     else {
@@ -586,7 +594,7 @@ if (isset($supertee) and $supertee == "RAPORTOI") {
   //################# Varaston tiedot ##################
   $varastolisa1 = " varastopaikat.nimitys varastonnimi, varastopaikat.tunnus varastotunnus, ";
 
-  if ($summaustaso == 'T' or $summaustaso == 'TRY') {
+  if ($summaustaso == 'T' or $summaustaso == 'TRY' or $summaustaso == 'TME') {
     $varastolisa1 = " 'varastot' varastonnimi, 0 varastotunnus, ";
   }
 
@@ -749,7 +757,7 @@ if (isset($supertee) and $supertee == "RAPORTOI") {
     $fh = fopen("/tmp/".$tiedostonimi, "w");
   }
 
-  if ($summaustaso != "T" and $summaustaso != "TRY") {
+  if ($summaustaso != "T" and $summaustaso != "TRY" and $summaustaso != "TME") {
     if ($tallennusmuoto_check) {
       $worksheet->writeString($excelrivi, $excelsarake, t("Varasto"),     $format_bold);
       $excelsarake++;
@@ -976,7 +984,7 @@ if (isset($supertee) and $supertee == "RAPORTOI") {
       $bar->increase();
     }
 
-    if ($summaustaso == 'T' or $summaustaso == 'TRY') {
+    if ($summaustaso == 'T' or $summaustaso == 'TRY' or $summaustaso == "TME") {
       $mistavarastosta = $varastontunnukset;
     }
     else {
@@ -1371,7 +1379,7 @@ if (isset($supertee) and $supertee == "RAPORTOI") {
         }
       }
 
-      if ($summaustaso != "T" and $summaustaso != "TRY") {
+      if ($summaustaso != "T" and $summaustaso != "TRY" and $summaustaso != "TME") {
         if ($tallennusmuoto_check) {
           $worksheet->writeString($excelrivi, $excelsarake, $row["varastonnimi"],   $format_bold);
           $excelsarake++;
@@ -1743,7 +1751,17 @@ if (isset($supertee) and $supertee == "RAPORTOI") {
 
       $excelsarake = 0;
 
-      if ($summaustaso == 'TRY') {
+      if ($summaustaso == 'TME') {
+        if (!isset($varastot2[$row["tuotemerkki"]])) {
+          $varastot2[$row["tuotemerkki"]]["netto"]  = $muutoshinta;
+          $varastot2[$row["tuotemerkki"]]["brutto"] = $bmuutoshinta;
+        }
+        else {
+          $varastot2[$row["tuotemerkki"]]["netto"]  += $muutoshinta;
+          $varastot2[$row["tuotemerkki"]]["brutto"] += $bmuutoshinta;
+        }
+      }
+      elseif ($summaustaso == 'TRY') {
         $tryosind = "$row[osasto] - ".$osasto_array[$row["osasto"]]."###$row[try] - ".$try_array[$row["try"]];
 
         if (!isset($varastot2[$tryosind])) {
@@ -1773,7 +1791,10 @@ if (isset($supertee) and $supertee == "RAPORTOI") {
     echo "<table>";
     echo "<tr>";
 
-    if ($summaustaso == 'TRY') {
+    if ($summaustaso == 'TME') {
+      echo "<th>".t("Tuotemerkki")."</th>";
+    }
+    elseif ($summaustaso == 'TRY') {
       echo "<th>".t("Osasto")."</th>";
       echo "<th>".t("Ryhmä")."</th>";
     }
@@ -1789,7 +1810,10 @@ if (isset($supertee) and $supertee == "RAPORTOI") {
     foreach ($varastot2 as $varasto => $arvot) {
       echo "<tr>";
 
-      if ($summaustaso == 'TRY') {
+      if ($summaustaso == 'TME') {
+        echo "<td>$varasto</td>";
+      }
+      elseif ($summaustaso == 'TRY') {
         list($osai, $tryi) = explode("###", $varasto);
         echo "<td>$osai</td>";
         echo "<td>$tryi</td>";

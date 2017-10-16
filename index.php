@@ -10,6 +10,10 @@ if (isset($_REQUEST['go'])) {
 
   $go = $_REQUEST['go'];
 
+  if (isset($_REQUEST['laji'])) {
+    $go .= "&laji={$_REQUEST["laji"]}";
+  }
+
   if (strpos($go, '?')) {
     $go .= "&indexvas=1";
   }

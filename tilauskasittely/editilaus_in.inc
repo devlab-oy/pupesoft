@@ -689,6 +689,12 @@ while ($tietue = fgets($fd)) {
   case 'OSTOTIL.OT_VIITTEEMME' :
     //Asiakkaan viite
     $viite .= $tieto. ' ';
+
+    // laitetaan tämä myös kohde-kenttään jos se on ennestään tyhjä
+    if (empty($ot_verkkokauppa_kohde)) {
+      $ot_verkkokauppa_kohde = $tieto;
+    }
+
     break;
 
   case 'OSTOTIL.OT_TILAUSVIESTI' :

@@ -182,6 +182,15 @@ $maksaja    = "''";
 if ($mehtorow['kateinen'] != '' or (float) $summa == 0) {
   $maksaja    = "$kukarow[kuka]";
   $maksupaiva = "now()";
+
+  if ($mehtorow['kateinen'] != '' and $poikkeava_pvm != "") {
+    $maksupaiva = "'$laskvv-$laskkk-$laskpp'";
+  }
+}
+elseif ($yhtiorow["verkkolasku_lah"] == "talenom") {
+  // Talenom hoitaa myyntireskontraa, joten ei jätetä laskuja auki Pupen reskontraan
+  $maksaja    = "$kukarow[kuka]";
+  $maksupaiva = "'$lasrow[erpcm]'";
 }
 
 ///* Lasketaan Kassa-alennus *///
@@ -195,9 +204,9 @@ $lisa_viestit  = "";
 if (isset($mehtorow["factoring_id"])) {
   $query = "SELECT *
             FROM factoring
-            WHERE yhtio        = '$kukarow[yhtio]'
-            and tunnus         = '$mehtorow[factoring_id]'
-            and valkoodi       = '$lasrow[valkoodi]'";
+            WHERE yhtio  = '$kukarow[yhtio]'
+            and tunnus   = '$mehtorow[factoring_id]'
+            and valkoodi = '$lasrow[valkoodi]'";
   $fres = pupe_query($query);
 
   if (mysql_num_rows($fres) > 0) {
@@ -209,6 +218,25 @@ if (isset($mehtorow["factoring_id"])) {
     elseif (stripos($sisviestit1, $frow["teksti_fi"]) === FALSE) $lisa_comments .= trim($frow["teksti_fi"])." \n\n";
   }
 }
+
+// Jos kyseessä on direct_debit niin laitetaan laskun kommenttiin infoteksti
+if (isset($mehtorow["directdebit_id"])) {
+  $query = "SELECT *
+            FROM directdebit
+            WHERE yhtio  = '$kukarow[yhtio]'
+            and tunnus   = '$mehtorow[directdebit_id]'";
+  $ddres = pupe_query($query);
+
+  if (mysql_num_rows($ddres) > 0) {
+    $ddrow = mysql_fetch_assoc($ddres);
+
+    $kieliind = "teksti_".$kielirow["kieli"];
+
+    if (trim($ddrow[$kieliind]) != "" and stripos($sisviestit1, $ddrow[$kieliind]) === FALSE) $lisa_comments .= trim($ddrow[$kieliind])." \n\n";
+    elseif (stripos($sisviestit1, $ddrow["teksti_fi"]) === FALSE) $lisa_comments .= trim($ddrow["teksti_fi"])." \n\n";
+  }
+}
+
 if ($lasrow["vienti"] == 'E') {
 
   if ($lasrow['kolmikantakauppa'] != "") {
@@ -325,14 +353,14 @@ if ($lisa_viestit != "") {
 $mainosteksti = $lasrow['mainosteksti'];
 
 //Siivotaan kommenteista kaikki kummalliset merkit pois
-$comments         = preg_replace("/[^A-Za-z0-9ÖöÄäÅåÜüÕõ ".preg_quote(".,-/!|+()%#§@:_", "/")."\r\n]/", "", $comments);
-$viestit          = preg_replace("/[^A-Za-z0-9ÖöÄäÅåÜüÕõ ".preg_quote(".,-/!|+()%#§@:_", "/")."\r\n]/", "", $viestit);
-$sisviestit1      = preg_replace("/[^A-Za-z0-9ÖöÄäÅåÜüÕõ ".preg_quote(".,-/!|+()%#§@:_", "/")."\r\n]/", "", $sisviestit1);
-$sisviestit2      = preg_replace("/[^A-Za-z0-9ÖöÄäÅåÜüÕõ ".preg_quote(".,-/!|+()%#§@:_", "/")."\r\n]/", "", $sisviestit2);
-$tilausyhteyshenkilo  = preg_replace("/[^A-Za-z0-9ÖöÄäÅåÜüÕõ ".preg_quote(".,-/!|+()%#§@:_", "/")."\r\n]/", "", $tilausyhteyshenkilo);
-$asiakkaan_tilausnumero  = preg_replace("/[^A-Za-z0-9ÖöÄäÅåÜüÕõ ".preg_quote(".,-/!|+()%#§@:_", "/")."\r\n]/", "", $asiakkaan_tilausnumero);
-$kohde          = preg_replace("/[^A-Za-z0-9ÖöÄäÅåÜüÕõ ".preg_quote(".,-/!|+()%#§@:_", "/")."\r\n]/", "", $kohde);
-$mainosteksti = preg_replace("/[^A-Za-z0-9ÖöÄäÅåÜüÕõ ".preg_quote(".,-/!|+()%#§@:_", "/")."\r\n]/", "", $mainosteksti);
+$comments = pupesoft_invoicestring($comments, "\r\n");
+$viestit = pupesoft_invoicestring($viestit, "\r\n");
+$sisviestit1 = pupesoft_invoicestring($sisviestit1, "\r\n");
+$sisviestit2 = pupesoft_invoicestring($sisviestit2, "\r\n");
+$tilausyhteyshenkilo = pupesoft_invoicestring($tilausyhteyshenkilo, "\r\n");
+$asiakkaan_tilausnumero = pupesoft_invoicestring($asiakkaan_tilausnumero, "\r\n");
+$kohde = pupesoft_invoicestring($kohde, "\r\n");
+$mainosteksti = pupesoft_invoicestring($mainosteksti, "\r\n");
 
 $fields = "yhtio";
 $values = "'$kukarow[yhtio]'";
@@ -379,6 +407,7 @@ for ($teeulasku_i=1; $teeulasku_i < mysql_num_fields($laskusplitres)-1; $teeulas
     $values .= ", '$kate'";
     break;
   case 'kate_korjattu':
+  case 'lahetetty_ulkoiseen_varastoon':
     $values .= ", NULL";
     break;
   case 'kohde':

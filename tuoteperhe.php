@@ -542,23 +542,49 @@ if ($tee == 'TALLENNAFAKTA' and $oikeurow['paivitys'] == '1') {
     $result = pupe_query($query);
   }
 
+  // P‰ivitet‰‰n hintatyyppi tuoteperheelle
   if (isset($hintatyyppi)) {
-    $query = "SELECT tuoteperhe.tunnus
-              FROM tuoteperhe
-              join tuote using(yhtio, tuoteno)
-              WHERE tuoteperhe.yhtio = '$kukarow[yhtio]'
-              and tuoteperhe.tyyppi = '$hakutyyppi'
-              and tuoteperhe.isatuoteno = '$isatuoteno'
-              AND tuote.kehahin = 0";
-    $result = pupe_query($query);
 
-    if (mysql_num_rows($result) > 0) {
-      echo "<br>";
-      echo "<font class='error'>";
-      echo t("Kaikilla tuotteilla ei ole keskihankintahintaa, ei voida k‰ytt‰‰ t‰t‰ hintatyyppi‰.");
-      echo "</font>";
+    // Hinta m‰‰ritell‰‰n is‰tuotteelle
+    if ($hintatyyppi == 'I') {
+      $query = "SELECT tuoteperhe.tunnus
+                FROM tuoteperhe
+                join tuote using(yhtio, tuoteno)
+                WHERE tuoteperhe.yhtio    = '$kukarow[yhtio]'
+                and tuoteperhe.tyyppi     = '$hakutyyppi'
+                and tuoteperhe.isatuoteno = '$isatuoteno'
+                AND tuote.kehahin         = 0";
+      $result = pupe_query($query);
 
-      $hintatyyppi = '';
+      if (mysql_num_rows($result) > 0) {
+        echo "<br>";
+        echo "<font class='error'>";
+        echo t("Kaikilla tuotteilla ei ole keskihankintahintaa, ei voida k‰ytt‰‰ t‰t‰ hintatyyppi‰.");
+        echo "</font>";
+
+        $hintatyyppi = '';
+      }
+    }
+
+    // "Hinta m‰‰ritell‰‰n is‰tuotteelle, lapsituote ei tarvitse keskihankintahintaa
+    if ($hintatyyppi == 'L') {
+      $query = "SELECT count(tuote.tunnus) as yht, sum(if(tuote.kehahin = 0, 1, 0)) as nolla
+                FROM tuoteperhe
+                JOIN tuote using(yhtio, tuoteno)
+                WHERE tuoteperhe.yhtio    = '$kukarow[yhtio]'
+                AND tuoteperhe.tyyppi     = '$hakutyyppi'
+                AND tuoteperhe.isatuoteno = '$isatuoteno'";
+      $result = pupe_query($query);
+      $row = mysql_fetch_assoc($result);
+
+      if ($row['yht'] === $row['nolla']) {
+        echo "<br>";
+        echo "<font class='error'>";
+        echo t("Yhdell‰k‰‰n lapsituotteella ei ole keskihankintahintaa, ei voida k‰ytt‰‰ t‰t‰ hintatyyppi‰.");
+        echo "</font>";
+
+        $hintatyyppi = '';
+      }
     }
 
     $query = "UPDATE tuoteperhe
@@ -788,9 +814,9 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
       if ($toim == "PERHE") {
         $query = "SELECT *
                   FROM tuoteperhe
-                  WHERE yhtio     = '$kukarow[yhtio]'
-                  AND tyyppi      = '$hakutyyppi'
-                  AND isatuoteno  = '$isatuoteno'
+                  WHERE yhtio    = '$kukarow[yhtio]'
+                  AND tyyppi     = '$hakutyyppi'
+                  AND isatuoteno = '$isatuoteno'
                   ORDER BY isatuoteno, tuoteno
                   LIMIT 1";
         $ressu = pupe_query($query);
@@ -832,11 +858,16 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
           $sel_hinta2 = "SELECTED";
           if ($oikeurow['paivitys'] != '1') echo t("Hinta m‰‰ritell‰‰n is‰tuotteelle");
         }
+        elseif ($faktarow["hintatyyppi"] == "L") {
+          $sel_hinta3 = "SELECTED";
+          if ($oikeurow['paivitys'] != '1') echo t("Hinta m‰‰ritell‰‰n is‰tuotteelle, lapsituote ei tarvitse keskihankintahintaa");
+        }
 
         if ($oikeurow['paivitys'] == '1') {
           echo "<select name='hintatyyppi'>";
           echo "<option value='' $sel_hinta1>".t("Hinta summataan is‰- ja lapsituotteilta")."</option>";
           echo "<option value='I' $sel_hinta2>".t("Hinta m‰‰ritell‰‰n is‰tuotteelle")."</option>";
+          echo "<option value='L' $sel_hinta3>".t("Hinta m‰‰ritell‰‰n is‰tuotteelle, lapsituote ei tarvitse keskihankintahintaa")."</option>";
           echo "</select>";
         }
 
@@ -902,8 +933,7 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
         echo "<th colspan='2'>".t("Samankaltaisuuden faktat")."</th>";
       }
       else {
-        echo "<th>".t("Reseptin faktat")."</th>";
-        echo "<th>".t("Yhdist‰misen lis‰tiedot")."</th>";
+        echo "<th colspan='2'>".t("Reseptin faktat")."</th>";
       }
 
       $query = "SELECT fakta
@@ -918,7 +948,6 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
       $faktarow = mysql_fetch_array($ressu);
 
       echo "</tr>";
-
       echo "<tr>";
       echo "<td colspan='2'>";
 
@@ -930,6 +959,7 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
       }
 
       echo "</td>";
+      echo "</tr>";
 
       if ($toim == "RESEPTI") {
         $query = "SELECT fakta2
@@ -943,19 +973,23 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
         $ressu = pupe_query($query);
         $faktarow = mysql_fetch_array($ressu);
 
-        echo "<td>";
+        echo "<tr>";
+        echo "<th colspan='2'>".t("Yhdist‰misen lis‰tiedot")."</th>";
+        echo "</tr>";
+        echo "<tr>";
+        echo "<td colspan='2'>";
 
         if ($oikeurow['paivitys'] == '1') {
-          echo "<textarea cols='35' rows='7' name='fakta2'>{$faktarow["fakta2"]}</textarea>";
+          echo "<textarea cols='80' rows='7' name='fakta2'>{$faktarow["fakta2"]}</textarea>";
         }
         else {
           echo "$faktarow[fakta2]";
         }
 
         echo "</td>";
+        echo "</tr>";
       }
 
-      echo "</tr>";
       echo "</table>";
 
       if ($oikeurow['paivitys'] == '1') {
@@ -983,7 +1017,7 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
         echo "<th>".t("Nimitys")."</th>";
         echo "<th></th>";
 
-        if ($hintatyyppi != 'I') {
+        if ($hintatyyppi == '') {
           echo "<th></th>";
           echo "<th></th>";
         }
@@ -999,7 +1033,7 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
         echo "<td>$isarow[nimitys]</th>";
         echo "<td></th>";
 
-        if ($hintatyyppi != 'I') {
+        if ($hintatyyppi == '') {
           echo "<td></th>";
           echo "<td></th>";
         }
@@ -1016,7 +1050,7 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
         echo "<th>".t("Nimitys")."</th>";
         echo "<th>".t("M‰‰r‰kerroin")."</th>";
 
-        if ($hintatyyppi != 'I') {
+        if ($hintatyyppi == '') {
           echo "<th>".t("Hintakerroin")."</th>";
           echo "<th>".t("Alennuskerroin")."</th>";
         }
@@ -1031,7 +1065,7 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
         $worksheet->writeString($excelrivi, $excelsarake++, t("Nimitys"));
         $worksheet->writeString($excelrivi, $excelsarake++, t("M‰‰r‰kerroin"));
 
-        if ($hintatyyppi != 'I') {
+        if ($hintatyyppi == '') {
           $worksheet->writeString($excelrivi, $excelsarake++, t("Hintakerroin"));
           $worksheet->writeString($excelrivi, $excelsarake++, t("Alennuskerroin"));
         }
@@ -1170,7 +1204,7 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
 
           echo "<td><input type='text' name='kerroin' size='10'></td>";
 
-          if ($hintatyyppi != 'I') {
+          if ($hintatyyppi == '') {
             echo "<td><input type='text' name='hintakerroin' size='10'></td>";
             echo "<td><input type='text' name='alekerroin' size='10'></td>";
           }
@@ -1289,7 +1323,7 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
           }
 
           if ($toim == "PERHE") {
-            if ($hintatyyppi != 'I') {
+            if ($hintatyyppi == '') {
               $query = "SELECT myyntihinta
                         FROM tuote
                         WHERE yhtio = '{$kukarow['yhtio']}'
@@ -1477,7 +1511,7 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
             }
           }
 
-          if ($toim == "PERHE" and $hintatyyppi != 'I') {
+          if ($toim == "PERHE" and $hintatyyppi == '') {
             echo "<td>";
             echo "<input type='text' name='hintakerroin' size='10' value='$zrow[hintakerroin]'>";
             echo "</td>";
@@ -1543,7 +1577,7 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
       if ($tunnus == "") {
         echo "<tr>";
         if ($toim == "PERHE") {
-          if ($hintatyyppi != 'I') {
+          if ($hintatyyppi == '') {
             echo "<td class='back' colspan='3'></td>";
           }
           else {
@@ -1593,7 +1627,7 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
         if ($toim == "PERHE") {
           echo "<tr>";
 
-          if ($hintatyyppi != 'I') {
+          if ($hintatyyppi == '') {
             echo "<td class='back' colspan='3'></td>";
           }
           else {

@@ -25,10 +25,10 @@ hr {
 }
 
 th {
-  font-size: 11pt;
+  font-size: 10pt;
   font-weight: bold;
   vertical-align: middle;
-  padding: 8px 8px 8px 8px;
+  padding: 5px 6px 5px 6px;
 }
 
 th a {
@@ -73,21 +73,29 @@ div.ohje {
 
 input, textarea {
   margin: 0px 4px 0px 4px;
-  padding: 7px 2px 8px 2px;
+  padding: 4px 2px 4px 2px;
   border-style: solid;
   border-width: 1px;
+  -webkit-border-radius: 3px;
+  border-radius: 3px;
 }
 
 select {
   font-size: 10pt;
   -webkit-appearance: none;
-  -webkit-border-radius: 0px;
-  padding: 8px 35px 8px 4px;
+  padding: 4px 35px 4px 4px;
   border-style: solid;
   border-width: 1px;
   background-image: url('../pics/facelift/dropdown_arrow.png');
   background-repeat: no-repeat;
   background-position: right;
+  -webkit-border-radius: 3px;
+  border-radius: 3px;
+}
+
+
+select.minpad_select {
+  padding: 4px 20px 4px 4px;
 }
 
 select:disabled {
@@ -105,11 +113,14 @@ select.multipleselect {
 
 button, input[type=submit], input[type=button] {
   border : solid 0px #ffffff;
-  font-size: 12pt;
+  font-size: 10pt;
+  font-weight: bold;
   color : #ffffff;
-  margin: 2px 4px 2px 0px;
-  padding: 8px 10px 8px 10px;
-  min-width: 100px;
+  margin: 1px;
+  padding: 5px 10px 5px 10px;
+  min-width: 90px;
+  -webkit-border-radius: 3px;
+  border-radius: 3px;
 }
 
 input[type=submit].lisaa_btn {
@@ -150,10 +161,6 @@ table.ostorivien_kohdistus input[type=text], table.ostorivien_kohdistus input[ty
   padding: 1px;
 }
 
-select.minpad_select {
-  padding: 8px 15px 8px 4px;
-}
-
 .no-close .ui-dialog-titlebar-close {
   display: none;
 }
@@ -162,9 +169,13 @@ select.minpad_select {
   display: none;
 }
 
+ul {
+  padding-left: 15px;
+}
+
 ul.list-unstyled {
   list-style: none;
-  padding-left: 20px;
+  padding-left: 0;
 }
 
 .text-large {
@@ -232,4 +243,15 @@ table.responsive td input[type=text] {
 
 .del {
   text-decoration: line-through;
+}
+
+.nowrap {
+  white-space: nowrap;
+}
+
+.kalepad {
+  padding-top: 1px;
+  padding-bottom: 1px;
+  padding-left: 3px;
+  padding-right:3px;
 }

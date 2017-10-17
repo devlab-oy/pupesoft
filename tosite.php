@@ -16,7 +16,7 @@ if (isset($livesearch_tee) and $livesearch_tee == "TILIHAKU") {
 // Talletetaan käyttäjän nimellä tositteen/liitteen kuva, jos sellainen tuli
 // koska, jos tulee virheitä tiedosto katoaa. Kun kaikki on ok, annetaan sille oikea nimi
 if ($tee == 'I' and isset($_FILES['userfile']) and is_uploaded_file($_FILES['userfile']['tmp_name'])) {
-  $retval = tarkasta_liite("userfile", array("PNG", "JPG", "GIF", "PDF"));
+  $retval = tarkasta_liite("userfile", array("PNG", "JPG", "GIF", "PDF", "XLS"));
 
   if ($retval === true) {
     $kuva = tallenna_liite("userfile", "lasku", 0, "");
@@ -1160,10 +1160,10 @@ if ($tee == '') {
           $tilinimi = $vrow['nimi'];
         }
       }
-      echo "<td width='200' valign='top'\">".livesearch_kentta("tosite", "TILIHAKU", "itili[$i]", 170, $itili[$i], "EISUBMIT", "ivero[$i]")." {$tilinimi}</td>\n";
+      echo "<td width='200' class='ptop'\">".livesearch_kentta("tosite", "TILIHAKU", "itili[$i]", 170, $itili[$i], "EISUBMIT", "ivero[$i]")." {$tilinimi}</td>\n";
     }
     else {
-      echo "<td width='200' valign='top'>{$iulos[$i]}</td>\n";
+      echo "<td width='200' class='ptop'>{$iulos[$i]}</td>\n";
     }
 
     echo "<td>\n";
@@ -1232,10 +1232,13 @@ if ($tee == '') {
     }
 
     echo "</td>\n";
-    echo "<td valign='top' align='right'><input type='text' size='13' style='text-align: right;' name='isumma[{$i}]' value='{$isumma_valuutassa[$i]}' onchange='javascript:tositesumma();' onkeyup='javascript:tositesumma();'> {$valkoodi}<br>&nbsp;&nbsp;{$isumma[$i]}&nbsp;&nbsp;{$valkoodi}</td>\n";
+    echo "<td align='right'>
+          <input type='text' size='13' style='text-align: right;' name='isumma[{$i}]' value='{$isumma_valuutassa[$i]}' onchange='javascript:tositesumma();' onkeyup='javascript:tositesumma();'> {$valkoodi}<br>
+          <input type='text' size='13' style='text-align: right; border: 0px solid; outline: none;' name='pupedevnull' value='{$isumma[$i]}' readonly='readonly'> {$valkoodi}
+          </td>\n";
 
     if (!isset($hardcoded_alv) or $hardcoded_alv != 1) {
-      echo "<td valign='top'>" . alv_popup('ivero['.$i.']', $ivero[$i]) . "</td>\n";
+      echo "<td class='ptop'>" . alv_popup('ivero['.$i.']', $ivero[$i]) . "</td>\n";
     }
     else {
       echo "<td></td>\n";

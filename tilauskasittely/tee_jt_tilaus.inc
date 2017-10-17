@@ -303,6 +303,8 @@ if (!function_exists("tee_jt_tilaus")) {
         // tehd‰‰n vanhasta laskusta 1:1 kopio...
         $query = "INSERT into lasku set ";
 
+        $_magentojt = ($otsikkorivi['ohjelma_moduli'] == 'MAGENTOJT' OR $otsikkorivi['ohjelma_moduli'] == 'MAGENTO');
+
         for ($i=0; $i<mysql_num_fields($stresult); $i++) {
 
           $fieldname = mysql_field_name($stresult, $i);
@@ -417,7 +419,8 @@ if (!function_exists("tee_jt_tilaus")) {
             $fieldname == 'poistumistoimipaikka_koodi') {
             $query .= $fieldname."='',";
           }
-          elseif ($fieldname == 'kate_korjattu') {
+          elseif ($fieldname == 'kate_korjattu' or
+            $fieldname == 'lahetetty_ulkoiseen_varastoon') {
             $query .= $fieldname." = NULL,";
           }
           elseif ($fieldname == 'tilausvahvistus') {
@@ -453,7 +456,7 @@ if (!function_exists("tee_jt_tilaus")) {
 
             // Ei nollata asiakkaan tilausnumeroa, jos se pit‰‰ huomioida otsikon etsinn‰ss‰
             $_asiakkaan_tilno = ($fieldname == 'asiakkaan_tilausnumero');
-            $_asiakkaan_tilno &= ($yhtiorow['jt_asiakkaan_tilausnumero'] == "K");
+            $_asiakkaan_tilno &= ($yhtiorow['jt_asiakkaan_tilausnumero'] == "K" or $_magentojt);
 
             if ($toim == "ENNAKKO" or $otsikkorivi['jtkielto'] == "Y" or $_asiakkaan_tilno) {
               $query .= $fieldname."='".$otsikkorivi[$fieldname]."',";
@@ -542,8 +545,8 @@ if (!function_exists("tee_jt_tilaus")) {
             // T‰t‰ ei tehd‰ jos tilauksen maksuehto on "jaksotettu"
             $maksuehto_query = "SELECT tunnus
                                 FROM maksuehto
-                                where yhtio = '$kukarow[yhtio]'
-                                and tunnus  = '$otsikkorivi[maksuehto]'
+                                where yhtio     = '$kukarow[yhtio]'
+                                and tunnus      = '$otsikkorivi[maksuehto]'
                                 and jaksotettu != ''";
             $maksuehto_result = pupe_query($maksuehto_query);
 
@@ -558,11 +561,21 @@ if (!function_exists("tee_jt_tilaus")) {
               $maksuehtorow = mysql_fetch_assoc($maksuehto_result);
 
               if ($maksuehtorow['jv'] != '') {
-                 $_maksuehto = $maksuehtorow["tunnus"];
+                $_maksuehto = $maksuehtorow["tunnus"];
               }
             }
 
             $query .= $fieldname."='$_maksuehto',";
+          }
+          elseif ($fieldname == 'ohjelma_moduli') {
+
+            if ($_magentojt) {
+              $query .= $fieldname."='MAGENTOJT',";
+            }
+            else {
+              $query .= $fieldname."='".$otsikkorivi[$fieldname]."',";
+            }
+
           }
           // ja kaikki muut paitsi tunnus sellaisenaan
           elseif ($fieldname != 'tunnus') {
@@ -790,12 +803,15 @@ if (!function_exists("tee_jt_tilaus")) {
 
               // Katotaan onko alkuper‰isell‰ tilauksella k‰sinsyˆtetty rahti joka tulisi nyt laskuttaa
               if ($yhtiorow["rahti_hinnoittelu"] == 'K' and $laskurow["rahtivapaa"] == "" and $laskurow["osatoimitus"] == "") {
+                $rahtituotelisa = "'$yhtiorow[rahti_tuotenumero]'";
+                $rahtituotelisa = lisaa_vaihtoehtoinen_rahti_merkkijonoon($rahtituotelisa);
+
                 $query = "SELECT tunnus
                           FROM tilausrivi
                           WHERE yhtio  = '$kukarow[yhtio]'
                           AND otunnus  = '$alkupotunnus'
                           AND tyyppi  != 'D'
-                          AND tuoteno  = '$yhtiorow[rahti_tuotenumero]'
+                          AND tuoteno IN ({$rahtituotelisa})
                           AND varattu != 0
                           AND kpl      = 0
                           AND var      in ('','H')";
@@ -809,7 +825,7 @@ if (!function_exists("tee_jt_tilaus")) {
                             WHERE yhtio  = '$kukarow[yhtio]'
                             AND otunnus  = '$alkupotunnus'
                             AND tyyppi  != 'D'
-                            AND tuoteno  = '$yhtiorow[rahti_tuotenumero]'
+                            AND tuoteno  IN ({$rahtituotelisa})
                             AND varattu != 0
                             AND kpl      = 0
                             AND var      in ('','H')";
@@ -1275,7 +1291,7 @@ if (!function_exists("tee_jt_tilaus")) {
 }
 
 if (!function_exists("hae_toimitettavat_tilausrivit")) {
-  function hae_toimitettavat_tilausrivit($tilaus_tunnus, $varastot, $jtspec) {
+  function hae_toimitettavat_tilausrivit($tilaus_tunnus, $varastot, $jtspec, $toim) {
 
     global $yhtiorow, $kukarow;
 
@@ -1286,16 +1302,28 @@ if (!function_exists("hae_toimitettavat_tilausrivit")) {
     // Palautetaan false jos kaikilla tuotteille *EI OLE* saldoa
 
     // Haetaan tilauksen kaikkien jt-rivien m‰‰r‰t (vain myynti- ja ennakkotilaus rivit)
-    $query = "SELECT tilausrivi.tuoteno,
-              sum(tilausrivi.varattu + tilausrivi.jt) tuote_kpl
-              FROM tilausrivi
-              WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-              AND tilausrivi.otunnus = '{$tilaus_tunnus}'
-              AND tilausrivi.tyyppi  in ('L', 'E')
-              AND tilausrivi.var     = 'J'
-              AND tilausrivi.varattu + tilausrivi.jt > 0
-              GROUP BY tilausrivi.tuoteno";
-    $result = pupe_query($query);
+    if ($toim == 'ENNAKKO') {
+      $query = "SELECT tilausrivi.tuoteno,
+                sum(tilausrivi.varattu + tilausrivi.jt) tuote_kpl
+                FROM tilausrivi
+                WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+                AND tilausrivi.otunnus = '{$tilaus_tunnus}'
+                AND tilausrivi.tyyppi  = 'E'
+                AND tilausrivi.varattu + tilausrivi.jt > 0
+                GROUP BY tilausrivi.tuoteno";
+      $result = pupe_query($query);
+    }
+    else {
+      $query = "SELECT tilausrivi.tuoteno,
+                sum(tilausrivi.varattu + tilausrivi.jt) tuote_kpl
+                FROM tilausrivi
+                WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+                AND tilausrivi.otunnus = '{$tilaus_tunnus}'
+                AND tilausrivi.tyyppi  = 'L'
+                AND tilausrivi.var     = 'J'
+                AND tilausrivi.varattu + tilausrivi.jt > 0
+                GROUP BY tilausrivi.tuoteno";
+    }
 
     while ($tilausrivi_row = mysql_fetch_assoc($result)) {
 

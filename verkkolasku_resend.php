@@ -376,6 +376,139 @@ if ($handle = opendir($kansio)) {
   closedir($handle);
 }
 
+// PPG
+$kansio = "{$pupe_root_polku}/dataout/ppg_error/";
+
+if ($handle = opendir($kansio)) {
+  while (($lasku = readdir($handle)) !== FALSE) {
+
+    // Ei k‰sitell‰ kun Finvoice tiedostoja
+    if (!preg_match("/laskutus\-(.*?)\-2/", $lasku, $yhtio)) {
+      continue;
+    }
+
+    $yhtio = $yhtio[1];
+    $yhtiorow = hae_yhtion_parametrit($yhtio);
+    $kukarow = hae_kukarow('admin', $yhtio);
+
+    // Jos lasku on liian vanha, ei k‰sitell‰, l‰hetet‰‰n maililla
+    if (onko_lasku_liian_vanha($kansio.$lasku)) {
+      continue;
+    }
+
+    // Nimet‰‰n tiedostot yksinkertaisemmin:
+    // LASKUNUMERO.xml ja LASKUNUMERO.pdf
+    $vainlaskunumero = preg_replace("/laskutus\-(.*?)\-2[0-9]{7,7}\-/", "", $lasku);
+    rename($kansio.$lasku, $kansio.$vainlaskunumero);
+    $lasku = $vainlaskunumero;
+
+    // Logitetaan ajo
+    cron_log("{$pupe_root_polku}/dataout/$lasku");
+
+    $ftphost = "213.214.148.38";
+    $ftpuser = $yhtiorow['verkkotunnus_lah'];
+    $ftppass = $yhtiorow['verkkosala_lah'];
+    //$ftppath = "test/invoice/finvoice/";
+    $ftppath = "/";
+    $ftpfile = $kansio.$lasku;
+    $ftpsucc = "{$pupe_root_polku}/dataout/";
+
+    $tulos_ulos = "";
+
+    require "inc/sftp-send.inc";
+  }
+
+  closedir($handle);
+}
+
+// Arvato
+$kansio = "{$pupe_root_polku}/dataout/arvato_error/";
+
+if ($handle = opendir($kansio)) {
+  while (($lasku = readdir($handle)) !== FALSE) {
+
+    // Ei k‰sitell‰ kun Finvoice tiedostoja
+    if (!preg_match("/laskutus\-(.*?)\-2/", $lasku, $yhtio)) {
+      continue;
+    }
+
+    $yhtio = $yhtio[1];
+    $yhtiorow = hae_yhtion_parametrit($yhtio);
+    $kukarow = hae_kukarow('admin', $yhtio);
+
+    // Jos lasku on liian vanha, ei k‰sitell‰, l‰hetet‰‰n maililla
+    if (onko_lasku_liian_vanha($kansio.$lasku)) {
+      continue;
+    }
+
+    // Nimet‰‰n tiedostot yksinkertaisemmin:
+    // LASKUNUMERO.xml ja LASKUNUMERO.pdf
+    $vainlaskunumero = preg_replace("/laskutus\-(.*?)\-2[0-9]{7,7}\-/", "", $lasku);
+    rename($kansio.$lasku, $kansio.$vainlaskunumero);
+    $lasku = $vainlaskunumero;
+
+    // Logitetaan ajo
+    cron_log("{$pupe_root_polku}/dataout/$lasku");
+
+    $ftphost = "file.gothiagroup.com";
+    $ftpuser = $yhtiorow['verkkotunnus_lah'];
+    $ftppass = $yhtiorow['verkkosala_lah'];
+    //$ftppath = "test/invoice/finvoice/";
+    $ftppath = "/";
+    $ftpfile = $kansio.$lasku;
+    $ftpsucc = "{$pupe_root_polku}/dataout/";
+
+    $tulos_ulos = "";
+
+    require "inc/sftp-send.inc";
+  }
+
+  closedir($handle);
+}
+
+// Talenom
+$kansio = "{$pupe_root_polku}/dataout/talenom_error/";
+
+if ($handle = opendir($kansio)) {
+  while (($lasku = readdir($handle)) !== FALSE) {
+
+    // Ei k‰sitell‰ kun Finvoice tiedostoja
+    if (!preg_match("/laskutus\-(.*?)\-2/", $lasku, $yhtio)) {
+      continue;
+    }
+
+    $yhtio = $yhtio[1];
+    $yhtiorow = hae_yhtion_parametrit($yhtio);
+    $kukarow = hae_kukarow('admin', $yhtio);
+
+    // Jos lasku on liian vanha, ei k‰sitell‰, l‰hetet‰‰n maililla
+    if (onko_lasku_liian_vanha($kansio.$lasku)) {
+      continue;
+    }
+
+    // Nimet‰‰n tiedostot yksinkertaisemmin:
+    // LASKUNUMERO.xml ja LASKUNUMERO.pdf
+    $vainlaskunumero = preg_replace("/laskutus\-(.*?)\-2[0-9]{7,7}\-/", "", $lasku);
+    rename($kansio.$lasku, $kansio.$vainlaskunumero);
+    $lasku = $vainlaskunumero;
+
+    // Logitetaan ajo
+    cron_log("{$pupe_root_polku}/dataout/$lasku");
+
+    $ftphost = "ftp.talenom.fi";
+    $ftpuser = $yhtiorow['verkkotunnus_lah'];
+    $ftppass = $yhtiorow['verkkosala_lah'];
+    $ftppath = "/In/ML/Muunto/";
+    $ftpfile = $kansio.$lasku;
+    $ftpsucc = "{$pupe_root_polku}/dataout/";
+
+    $tulos_ulos = "";
+
+    require "inc/sftp-send.inc";
+  }
+
+  closedir($handle);
+}
 
 function onko_lasku_liian_vanha($filename) {
   global $kukarow, $yhtiorow;

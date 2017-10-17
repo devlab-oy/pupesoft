@@ -17,14 +17,14 @@ if (in_array("gd", get_loaded_extensions())) {
 }
 
 if (!function_exists('alku_purku')) {
-  function alku_purku($kala = 0, $firstpage = null) {
+  function alku_purku($kala = 555, $firstpage = null) {
     global $pdf, $laskurow, $yhtiorow, $kukarow, $sivu, $rectparam, $kieli, $mista;
 
     if (empty($firstpage)) {
       $firstpage = $pdf->new_page("842x595");
     }
 
-    if ($kala == 0) $kala = 555;
+    $returnkala = 500;
 
     $p["height"]     = 10;
     $p["font"]       = "Times-Roman";
@@ -34,8 +34,6 @@ if (!function_exists('alku_purku')) {
     $pieni["font"]     = "Times-Roman";
 
     tulosta_logo_pdf($pdf, $firstpage, $laskurow, $kala, 22, 25, 120);
-
-    $pdf->draw_rectangle($kala+15, 20,  $kala-25, 808, $firstpage,       $rectparam);
 
     if ($mista == 'vastaanota') {
       $pdf->draw_text(280, $kala, t("VASTAANOTETUT", $kieli),     $firstpage);
@@ -64,11 +62,36 @@ if (!function_exists('alku_purku')) {
     $pdf->draw_text(440, $kala-10, t("Ajoaika", $kieli),         $firstpage, $pieni);
     $pdf->draw_text(440, $kala-20, tv1dateconv(date("Y-m-d H:i"), 'P'),   $firstpage, $p);
 
+    $looppeja = 0;
+
     if ($mista != 'vastaanota') {
-      $pdf->draw_text(520, $kala-10, t("Kommentti", $kieli),       $firstpage, $pieni);
-      $pdf->draw_text(520, $kala-20, $laskurow["comments"],      $firstpage, $p);
+      $pdf->draw_text(520, $kala-10, t("Kommentti", $kieli), $firstpage, $pieni);
+
+      if (in_array($yhtiorow['purkulistan_asettelu'], array('K','P'))) {
+        $kommentti = wordwrap($laskurow["comments"], 85, "\n");
+
+        $kalaloop = $kala - 20;
+        $looppeja = 0;
+
+        foreach (explode("\n", $kommentti) as $komm) {
+          list($ff_string, $ff_font) = pdf_fontfit($komm, 320, $pdf, $pieni);
+
+          $pdf->draw_text(520, $kalaloop, $ff_string, $firstpage, $ff_font);
+
+          $kalaloop -= 10;
+          $looppeja++;
+        }
+
+        $kala = $kalaloop + 25;
+        $returnkala = $kalaloop - 10 - 25;
+      }
+      else {
+        $pdf->draw_text(520, $kala-20, $laskurow["comments"], $firstpage, $p);
+        $looppeja = 1;
+      }
     }
 
+    $pdf->draw_rectangle($kala+15+($looppeja * 10), 20,  $kala-25, 808, $firstpage,       $rectparam);
     $pdf->draw_rectangle($kala-25, 20,  $kala-45, 808, $firstpage, $rectparam);
 
     if ($mista == 'vastaanota') {
@@ -90,7 +113,7 @@ if (!function_exists('alku_purku')) {
       $pdf->draw_text(280, $kala-35, t("Nimitys", $kieli),        $firstpage, $pieni);
     }
 
-    if ($yhtiorow['purkulistan_asettelu'] == 'A') {
+    if (in_array($yhtiorow['purkulistan_asettelu'], array('A','P'))) {
       if ($mista == 'vastaanota') {
         $pdf->draw_text(130, $kala-35, t("Paikasta", $kieli),    $firstpage, $pieni);
         $pdf->draw_text(130, $kala-45, t("Paikalle", $kieli),    $firstpage, $pieni);
@@ -123,7 +146,7 @@ if (!function_exists('alku_purku')) {
 
     $pdf->draw_rectangle($kala-25, 20, 20, 808, $firstpage, $rectparam);
 
-    return $firstpage;
+    return array($firstpage, $returnkala);
   }
 }
 
@@ -190,6 +213,8 @@ elseif ($sorttaus == 'tuote') {
 else {
   $sorttauskentta = generoi_sorttauskentta("10", $laskurow["liitostunnus"]);
 }
+
+$eanlisa = "";
 
 if ($mitkarivit == "viematta") {
   $mitkalisa = " and tilausrivi.varattu != 0 ";
@@ -407,6 +432,7 @@ if (!empty($tee_excel)) {
     echo "<tr><th>".t("Tallenna tulos").":</th>";
     echo "<form method='post' class='multisubmit'>";
     echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
+    echo "<input type='hidden' name='toim' value='{$toim}'>";
     echo "<input type='hidden' name='lataa_tiedosto' value='1'>";
     echo "<input type='hidden' name='kaunisnimi' value='".t('Tullinimikkeet').".xlsx'>";
     echo "<input type='hidden' name='tmpfilenimi' value='{$tiedosto}'>";
@@ -418,7 +444,7 @@ if (!empty($tee_excel)) {
   }
 }
 
-if ($tee == 'NAYTATILAUS' or $komento["Purkulista"] != '' or $komento["Vastaanotetut"] != '') {
+if ($tee == 'NAYTATILAUS' or !empty($komento["Purkulista"]) or !empty($komento["Vastaanotetut"])) {
 
   list($ryhmanimet, $ryhmaprossat, , , , ) = hae_ryhmanimet($abcvalintamenu);
 
@@ -514,7 +540,7 @@ if ($tee == 'NAYTATILAUS' or $komento["Purkulista"] != '' or $komento["Vastaanot
       $laskurow = mysql_fetch_assoc($result_lasku);
     }
 
-    $firstpage = alku_purku();
+    list($firstpage, $kala) = alku_purku();
 
     if ($yhtiorow['suuntalavat'] == 'S' and trim($suuntalavajoin) != '') {
 
@@ -547,8 +573,7 @@ if ($tee == 'NAYTATILAUS' or $komento["Purkulista"] != '' or $komento["Vastaanot
 
         if ($kala - 55 < 50) {
           $sivu++;
-          $firstpage = alku_purku();
-          $kala = 500;
+          list($firstpage, $kala) = alku_purku();
         }
       }
       elseif ($yhtiorow['suuntalavat'] == 'S' and $edellinen_sscc != $row['sscc']) {
@@ -556,8 +581,7 @@ if ($tee == 'NAYTATILAUS' or $komento["Purkulista"] != '' or $komento["Vastaanot
         $pdf->draw_text(185, 535, $edellinen_sscc,                 $firstpage, $p);
 
         $sivu++;
-        $firstpage = alku_purku();
-        $kala = 500;
+        list($firstpage, $kala) = alku_purku();
 
         $pdf->draw_text(185, 545, "SSCC-".t("koodi", $kieli),           $firstpage, $pieni);
         $pdf->draw_text(185, 535, $row['sscc'],                 $firstpage, $p);
@@ -570,8 +594,7 @@ if ($tee == 'NAYTATILAUS' or $komento["Purkulista"] != '' or $komento["Vastaanot
           }
 
           $sivu++;
-          $firstpage = alku_purku();
-          $kala = 500;
+          list($firstpage, $kala) = alku_purku();
 
           if ($yhtiorow['suuntalavat'] == 'S') {
             $pdf->draw_text(185, 545, "SSCC-".t("koodi", $kieli),           $firstpage, $pieni);
@@ -582,8 +605,7 @@ if ($tee == 'NAYTATILAUS' or $komento["Purkulista"] != '' or $komento["Vastaanot
       else {
         if ($kala < 50) {
           $sivu++;
-          $firstpage = alku_purku();
-          $kala = 500;
+          list($firstpage, $kala) = alku_purku();
         }
       }
 
@@ -695,7 +717,7 @@ if ($tee == 'NAYTATILAUS' or $komento["Purkulista"] != '' or $komento["Vastaanot
 
       if ($mista == "vastaanota") {
 
-        if ($yhtiorow['purkulistan_asettelu'] == 'A') {
+        if (in_array($yhtiorow['purkulistan_asettelu'], array('A','P'))) {
 
           $tekstiosa = hyllyalue('', $row['trhyllyalue'], 'riisuttu')." ".$row["trhyllynro"]." ".$row["trhyllyvali"]." ".$row["trhyllytaso"];
 
@@ -736,7 +758,7 @@ if ($tee == 'NAYTATILAUS' or $komento["Purkulista"] != '' or $komento["Vastaanot
 
           $hyllyssa = $olesaldorow['saldo']-$hylrow['keratty'];
 
-          if ($yhtiorow['purkulistan_asettelu'] == 'A') {
+          if (in_array($yhtiorow['purkulistan_asettelu'], array('A','P'))) {
 
             $tekstiosa = $t1[$row['tunnus']]." ".$t2[$row['tunnus']]." ".$t3[$row['tunnus']]." ".$t4[$row['tunnus']]." (".$hyllyssa.") ";
 
@@ -777,7 +799,7 @@ if ($tee == 'NAYTATILAUS' or $komento["Purkulista"] != '' or $komento["Vastaanot
 
           $hyllyssa = $olesaldorow['saldo']-$hylrow['keratty'];
 
-          if ($yhtiorow['purkulistan_asettelu'] == 'A') {
+          if (in_array($yhtiorow['purkulistan_asettelu'], array('A','P'))) {
 
             $tekstiosa = hyllyalue('', $row['hyllyalue'], 'riisuttu')." ".$row["hyllynro"]." ".$row["hyllyvali"]." ".$row["hyllytaso"]." (".$hyllyssa.") ";
 
@@ -793,7 +815,7 @@ if ($tee == 'NAYTATILAUS' or $komento["Purkulista"] != '' or $komento["Vastaanot
       }
       else {
 
-        if ($yhtiorow['purkulistan_asettelu'] == 'A') {
+        if (in_array($yhtiorow['purkulistan_asettelu'], array('A','P'))) {
           if ($yhtiorow['suuntalavat'] == 'S') {
 
             $tekstiosa = hyllyalue('', $olesaldorow['hyllyalue'], 'riisuttu')." ".$olesaldorow["hyllynro"]." ".$olesaldorow["hyllyvali"]." ".$olesaldorow["hyllytaso"]." (".$hyllyssa.") ";
@@ -941,7 +963,7 @@ if ($tee == 'NAYTATILAUS' or $komento["Purkulista"] != '' or $komento["Vastaanot
 
       if (trim($row["kommentti"]) != '') {
 
-        if ($yhtiorow['purkulistan_asettelu'] == 'A') {
+        if (in_array($yhtiorow['purkulistan_asettelu'], array('A','P'))) {
 
           $_row_height = $kala+25;
 
@@ -984,8 +1006,7 @@ if ($tee == 'NAYTATILAUS' or $komento["Purkulista"] != '' or $komento["Vastaanot
 
       if ($kala < 50) {
         $sivu++;
-        $firstpage = alku_purku();
-        $kala = 500;
+        list($firstpage, $kala) = alku_purku();
       }
 
       $sumarum = sprintf('%.2f', $sumarum);

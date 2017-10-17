@@ -11,6 +11,7 @@ if ($tee == '') {
 
     $kukarow['kesken']   = 0;
     $tilausnumero     = 0;
+    $otstoimaika      = '';
   }
 }
 
@@ -233,12 +234,12 @@ if ($tila == "Muuta" or $tila == "vaihdaasiakas") {
     echo "<tr><td colspan='4' class='back'><br></td></tr>";
     echo "<tr><th colspan='4'>".t("Tilauksen tiedot").":</th></tr>";
 
-    if ($kukarow['kesken'] == 0 and $yhtiorow['ostotilaukseen_toimittajan_toimaika'] != '2') {
+    if ($kukarow['kesken'] == 0 and (!in_array($yhtiorow['ostotilaukseen_toimittajan_toimaika'], array("2","3")) or empty($srow["oletus_toimaika"]))) {
       $toimpp = $kerpp = date("j");
       $toimkk = $kerkk = date("n");
       $toimvv = $kervv = date("Y");
     }
-    elseif ($kukarow['kesken'] == 0 and $yhtiorow['ostotilaukseen_toimittajan_toimaika'] == '2') {
+    elseif ($kukarow['kesken'] == 0 and in_array($yhtiorow['ostotilaukseen_toimittajan_toimaika'], array("2","3"))) {
       $toimittajan_toimaika = date('Y-m-d', time() + $srow["oletus_toimaika"] * 24 * 60 * 60);
 
       list($toimvv, $toimkk, $toimpp) = explode('-', $toimittajan_toimaika);
@@ -250,7 +251,6 @@ if ($tila == "Muuta" or $tila == "vaihdaasiakas") {
       list($kervv, $kerkk, $kerpp)    = explode('-', $srow["kerayspvm"]);
       $kerpp = substr($kerpp, 0, 2);
       $toimpp = substr($toimpp, 0, 2);
-
     }
 
     //voidaan tarvita
@@ -429,20 +429,21 @@ if ($tila == "Muuta" or $tila == "vaihdaasiakas") {
     echo "<td>".t("Tilaa Varastoon").":</td>";
     echo "<td><select name='varasto'><option value='0'>".t("Oletus")."</option>";
 
-    mysql_data_seek($vares, 0);
+    foreach (sallitut_varastot(array("toim" => "OSTO")) as $varasto) {
+      $sel = '';
 
-    while ($varow = mysql_fetch_array($vares)) {
-      if (($varow["tyyppi"] == '') or ($kukarow["varasto"] == $varow["tunnus"]) or ($varow['tunnus']==$srow["varasto"]) or ($kukarow['oletus_ostovarasto'] == $varow['tunnus'])) {
-
-        $sel = '';
-
-        // Jos kukarow varasto on vain YKSI varasto, niin silloin valitaan se
-        if ($varow['tunnus']==$srow["varasto"] or ($kukarow['oletus_ostovarasto'] == $varow['tunnus'] and $srow['varasto'] == '') or ($varow['tunnus'] == $kukarow['varasto'] and $srow['varasto'] == '' and $kukarow['oletus_ostovarasto'] == 0)) {
-          $sel = 'selected';
-        }
-
-        echo "<option value='$varow[tunnus]' $sel>$varow[nimitys]</option>";
+      // Jos kukarow varasto on vain YKSI varasto, niin silloin valitaan se
+      if (
+        $varasto['tunnus'] == $srow["varasto"] or
+        ($kukarow['oletus_ostovarasto'] == $varasto['tunnus'] and $srow['varasto'] == '') or
+        ($varasto['tunnus'] == $kukarow['varasto'] and $srow['varasto'] == '' and $kukarow['oletus_ostovarasto'] == 0)
+      ) {
+        $sel = ' selected';
       }
+
+      $tyyppi = $varasto['tyyppi'] != '' ? " ({$varasto['tyyppi']})" : '';
+
+      echo "<option value='{$varasto[tunnus]}'{$sel}>{$varasto[nimitys]}{$tyyppi}</option>";
     }
 
     echo "</select></td></tr>";
@@ -722,6 +723,7 @@ if (isset($jatka)) {
 
     $kukarow["kesken"] = $id;
     $tilausnumero = $id;
+    $otstoimaika = $toimvv."-".$toimkk."-".$toimpp;
   }
 
   //menn‰‰n tilaukselle

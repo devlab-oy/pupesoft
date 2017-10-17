@@ -2,7 +2,15 @@
 
 require "parametrit.inc";
 
-echo "<font class='head'>$yhtiorow[nimi] Extranet</font><hr>";
+// extranetin otsikko
+$otsikko = "$yhtiorow[nimi] Extranet";
+$otsikko_avainsanasta = t_avainsana("EXTRANET_H", "", "", "", "", "selite");
+
+if (!empty($otsikko_avainsanasta)) {
+  $otsikko = $otsikko_avainsanasta;
+}
+
+echo "<font class='head'>{$otsikko}</font><hr>";
 
 if ($tee == 'TUOTE' and $kukarow['extranet'] != "") {
 
@@ -190,7 +198,7 @@ if ($tee == '') {
   if (mysql_num_rows($result)>0) {
 
     ///* uutiset *///
-    echo "<td class='back' valign='top' width='700'>";
+    echo "<td class='back' valign='top' width='100%'>";
 
     while ($uutinen = mysql_fetch_array($result)) {
 
@@ -328,17 +336,19 @@ if ($tee == '') {
         $uutinen["kentta02"] = preg_replace($search, $replace, $uutinen["kentta02"]);
       }
 
-      echo "
-      <table width='100%'>
-      <tr>
-      <td colspan='2' class='back'><font class='head'>$uutinen[kentta01]</font><hr></td>
-      </tr><tr>
-      <td class='ptop' align='center' width='180'><br>$kuva<br><br></td>
-      <td class='ptop'>$uutinen[kentta02]</td>
-      </tr><tr>
-      <th colspan='2'>".t("Toimittaja").": $uutinen[nimi]<br>".t("P‰iv‰m‰‰r‰").": $uutinen[pvmalku]</th>
-      </tr>
-      </table><br>\n";
+      if ($uutinen["kentta02"] != '') {
+        echo "
+        <table width='100%'>
+        <tr>
+        <td colspan='2' class='back'><font class='head'>$uutinen[kentta01]</font><hr></td>
+        </tr><tr>
+        <td class='ptop' align='center' width='180'><br>$kuva<br><br></td>
+        <td class='ptop'>$uutinen[kentta02]</td>
+        </tr><tr>
+        <th colspan='2'>".t("Toimittaja").": $uutinen[nimi]<br>".t("P‰iv‰m‰‰r‰").": $uutinen[pvmalku]</th>
+        </tr>
+        </table><br>\n";
+      }
     }
 
     echo "<a href='tervetuloa.php?limit=10'>".t("N‰yt‰ viimeiset 10 uutista")."</a><br>";

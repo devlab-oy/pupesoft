@@ -18,9 +18,6 @@ if ($livesearch_tee == 'TILAUSVIITE') {
   exit;
 }
 
-// Enaboidaan ajax kikkare
-enable_ajax();
-
 if (substr($toim, 0, 8) == "KONSERNI") {
   $logistiikka_yhtio = '';
   $logistiikka_yhtiolisa = '';
@@ -124,8 +121,10 @@ if ($tee == "NAYTA" and $til != "") {
 // scripti balloonien tekemiseen
 js_popup();
 enable_ajax();
+// ekotetaan javascriptiä jotta saadaan pdf:ät uuteen ikkunaan
+js_openFormInNewWindow();
 
-if ($tee != 'NAYTATILAUS' and $ytunnus == '' and $otunnus == '' and $laskunro == '' and $sopimus == '' and $kukarow['kesken'] != 0 and $til != '') {
+if ($tee != 'NAYTATILAUS' and empty($vaihda) and $ytunnus == '' and $tilausviite == '' and $astilnro == '' and $otunnus == '' and $laskunro == '' and $sopimus == '' and $kukarow['kesken'] != 0 and $til != '') {
 
   $query = "SELECT ytunnus, liitostunnus
             FROM lasku
@@ -337,11 +336,11 @@ elseif ($astilnro != '' or $tilausviite != '') {
   else {
     $otunnus = $row["tunnus"];
   }
-  
+
   if ($row["jaksotettu"] <> 0) {
     $sopimus = abs($row["jaksotettu"]);
   }
-  
+
   $ytunnus   = $row["ytunnus"];
 
   if ($cleantoim == 'OSTO') {
@@ -450,7 +449,7 @@ if ($ytunnus != '') {
   $summaselli .= " lasku.asiakkaan_tilausnumero astilno, ";
 
   if ($otunnus > 0 or $laskunro > 0 or $sopimus > 0) {
-    
+
     if ($sopimus > 0) {
       $query = "(SELECT $yhtioekolisa lasku.tunnus tilaus, lasku.laskunro, concat_ws(' ', lasku.nimi, lasku.nimitark) asiakas, lasku.ytunnus, lasku.toimaika, lasku.laatija, $summaselli lasku.tila, lasku.alatila, lasku.hyvak1, lasku.hyvak2, lasku.h1time, lasku.h2time, lasku.luontiaika, lasku.yhtio
                  FROM lasku
@@ -581,18 +580,18 @@ if ($ytunnus != '') {
 
     if ($kukarow["hinnat"] == 0) {
       if (substr($toim, 0, 8) == "KONSERNI" and $yhtiorow['konsernivarasto'] != '' and $konsernivarasto_yhtiot != '') {
-        pupe_DataTables(array(array($pupe_DataTables, 11, 12)));
+        pupe_DataTables(array(array($pupe_DataTables, 12, 13)));
       }
       else {
-        pupe_DataTables(array(array($pupe_DataTables, 10, 11)));
+        pupe_DataTables(array(array($pupe_DataTables, 11, 12)));
       }
     }
     else {
       if (substr($toim, 0, 8) == "KONSERNI" and $yhtiorow['konsernivarasto'] != '' and $konsernivarasto_yhtiot != '') {
-        pupe_DataTables(array(array($pupe_DataTables, 10, 11)));
+        pupe_DataTables(array(array($pupe_DataTables, 11, 12)));
       }
       else {
-        pupe_DataTables(array(array($pupe_DataTables, 9, 10)));
+        pupe_DataTables(array(array($pupe_DataTables, 10, 11)));
       }
     }
 
@@ -615,8 +614,9 @@ if ($ytunnus != '') {
       echo "<td><input type='text' class='search_field' name='search_".t(mysql_field_name($result, $i))."'></td>";
     }
 
-    echo "<td><input type='text' class='search_field' name='search_tyyppi'></td>
-          <td class='back'></td>";
+    echo "<td><input type='text' class='search_field' name='search_tyyppi'></td>";
+    echo "<td class='back'></td>";
+    echo "<td class='back'></td>";
     echo "</tr>";
     echo "</thead>";
     echo "<tbody>";
@@ -712,7 +712,7 @@ if ($ytunnus != '') {
           echo "<td valign='top' nowrap align='right' $class>$row[$i]</td>";
         }
         elseif (mysql_field_name($result, $i) == 'ytunnus') {
-          echo "<td valign='top' {$class}>",tarkistahetu($row[$i]),"</td>";
+          echo "<td valign='top' {$class}>", tarkistahetu($row[$i]), "</td>";
         }
         else {
           echo "<td valign='top' $class>$row[$i]</td>";
@@ -777,6 +777,20 @@ if ($ytunnus != '') {
           <input type='submit' value='".t("Näytä tilaus")."'>
           </form></td>";
 
+      echo "<td class='back'>";
+
+      if ($row['tila'] == "U" and tarkista_oikeus("tilauskasittely/tulostakopio.php", "LASKU")) {
+        echo "<form id='tulostakopioform_{$row['tilaus']}' name='tulostakopioform_{$row['tilaus']}' action='../tilauskasittely/tulostakopio.php?toim=LASKU' method='post' autocomplete='off'>
+            <input type='hidden' name='lopetus' value='{$lopetus}'>
+            <input type='hidden' name='otunnus' value='{$row['tilaus']}'>
+            <input type='hidden' name='toim' value='LASKU'>
+            <input type='hidden' name='tee' value='NAYTATILAUS'>
+            <input type='hidden' name='mista' value='tulostakopio'>
+            <input type='submit' value='".t("Näytä pdf")."' onClick=\"js_openFormInNewWindow('tulostakopioform_{$row['tilaus']}', 'tulostakopio_{$row['tilaus']}'); return false;\"></form>";
+      }
+
+      echo "</td>";
+
       echo "</tr>";
 
       $edlaskunro = $row["laskunro"];
@@ -833,7 +847,7 @@ else {
   echo "<form action = 'asiakkaantilaukset.php' method = 'post'>
     <input type='hidden' name='toim' value='$toim'>
     <input type='hidden' name='lopetus' value='$lopetus'>";
-  echo "<br><input type='submit' value='".t("Tee uusi haku")."'>";
+  echo "<br><input name='vaihda' type='submit' value='".t("Tee uusi haku")."'>";
   echo "</form>";
 }
 

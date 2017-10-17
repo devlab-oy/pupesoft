@@ -20,15 +20,43 @@ class Unifaun {
   private $mehto;
   private $xml;
   private $kirjoitin;
+  private $developerid;
+  private $unifauntype;
+  private $vak_tiedot = array();
+  private $pikahaku_tunnus = null;
 
-  public function __construct($hostname, $username, $password, $ftppath, $ftpport, $ftpfail, $ftpsucc) {
-    $this->hostname = $hostname;
-    $this->username = $username;
-    $this->password = $password;
-    $this->ftppath   = $ftppath;
-    $this->ftpport   = $ftpport;
-    $this->ftpfail   = $ftpfail;
-    $this->ftpsucc   = $ftpsucc;
+  public function __construct() {
+  }
+
+  // FTP-siirto
+  public static function online($hostname, $username, $password, $ftppath, $ftpport, $ftpfail, $ftpsucc) {
+    $instance = new self();
+
+    $instance->unifauntype = "ONLINE";
+    $instance->hostname    = $hostname;
+    $instance->username    = $username;
+    $instance->password    = $password;
+    $instance->ftppath     = $ftppath;
+    $instance->ftpport     = $ftpport;
+    $instance->ftpfail     = $ftpfail;
+    $instance->ftpsucc     = $ftpsucc;
+
+    return $instance;
+  }
+
+  // XML-posting
+  public static function xmlposting($developerid, $username, $password, $ftpfail, $ftpsucc, $unifaun_packsoft) {
+    $instance = new self();
+
+    $instance->unifauntype = "XMLPOSTING";
+    $instance->developerid = $developerid;
+    $instance->username    = $username;
+    $instance->password    = $password;
+    $instance->ftpfail     = $ftpfail;
+    $instance->ftpsucc     = $ftpsucc;
+    $instance->packsoft    = $unifaun_packsoft;
+
+    return $instance;
   }
 
   public function setYhtioRow($yhtiorow) {
@@ -59,6 +87,30 @@ class Unifaun {
     $this->mehto = $mehto;
   }
 
+  public function setVak(Array $vak) {
+    $this->vak_tiedot = $vak;
+  }
+
+  public function onko_vak() {
+    // jos on vak tietoja, on vak tuotteita
+    return (count($this->vak_tiedot) > 0);
+  }
+
+  public function onko_lq() {
+    // ohitetaan toitaiseksi aina LQ, pit‰‰ testata unifaunin kanssa tarkemmin
+    // t‰m‰n funktion logiikka on kuitenkin oikein. xml tiedostoon tulee todenn‰kˆisesti
+    // muutoksia, mik‰li LQ on p‰‰ll‰, joita ei ole viel‰ tehty
+    return false;
+
+    // valitaan vaan elementit, jossa on limited_qty
+    $lq = array_filter($this->vak_tiedot, function($vak) {
+      return !empty($vak['limited_qty']);
+    });
+
+    // on LQ jos tilauksella on vak tietoja, ja kaikki niist‰ on LQ tietoja
+    return ($this->onko_vak() and count($lq) == count($this->vak_tiedot));
+  }
+
   private function setAsiakasRow() {
     //  Haetaan asiakastiedot
     if ($this->postirow['liitostunnus'] == '999999999') {
@@ -81,6 +133,10 @@ class Unifaun {
                 and tunnus  = '{$this->postirow['liitostunnus']}'";
       $asres = pupe_query($query);
       $this->asiakasrow = mysql_fetch_assoc($asres);
+
+      if (!empty($this->postirow['toim_email'])) {
+        $this->asiakasrow['email'] = $this->postirow['toim_email'];
+      }
     }
   }
 
@@ -95,35 +151,36 @@ class Unifaun {
     $this->postirow = $postirow;
 
     // haetaan varaston osoitetiedot, k‰ytet‰‰n niit‰ l‰hetystietoina
-    $query = "SELECT nimi, nimitark, osoite, postino, postitp, maa
+    $query = "SELECT osoite, postino, postitp, maa
               FROM varastopaikat
               WHERE yhtio  = '{$this->kukarow['yhtio']}'
               AND tunnus   = '{$this->postirow['varasto']}'
-              AND nimi    != ''
-              AND osoite  != ''";
+              AND osoite  != ''
+              AND postino != ''
+              AND postitp != ''
+              AND maa     != ''";
     $tempr = pupe_query($query);
-    $postirow_varasto = mysql_fetch_assoc($tempr);
+
+    // jos varastolle on annettu osoite, k‰ytet‰‰n sit‰
+    if (mysql_num_rows($tempr) == 1) {
+      $postirow_varasto = mysql_fetch_assoc($tempr);
+
+      $this->postirow["yhtio_osoite"]  = $postirow_varasto["osoite"];
+      $this->postirow["yhtio_postino"] = $postirow_varasto["postino"];
+      $this->postirow["yhtio_postitp"] = $postirow_varasto["postitp"];
+      $this->postirow["yhtio_maa"]     = $postirow_varasto["maa"];
+    }
 
     // haetaan laskun_lisatiedot, k‰ytet‰‰n noutopisteen_tunnus jos se on != ''
     $ll_query = "SELECT noutopisteen_tunnus
                  FROM laskun_lisatiedot
-                 WHERE yhtio  = '{$this->kukarow['yhtio']}'
-                 AND otunnus   = '{$this->postirow['tunnus']}'
+                 WHERE yhtio              = '{$this->kukarow['yhtio']}'
+                 AND otunnus              = '{$this->postirow['tunnus']}'
                  AND noutopisteen_tunnus != ''";
     $ll_res = pupe_query($ll_query);
 
     if ($ll_row = mysql_fetch_assoc($ll_res)) {
       $this->postirow["noutopisteen_tunnus"] = $ll_row['noutopisteen_tunnus'];
-    }
-
-    // jos varastolle on annettu joku osoite, k‰ytet‰‰n sit‰
-    if ($postirow_varasto["nimi"] != "") {
-      $this->postirow["yhtio_nimi"]     = $postirow_varasto["nimi"];
-      $this->postirow['yhtio_nimitark'] = $postirow_varasto["nimitark"];
-      $this->postirow["yhtio_osoite"]   = $postirow_varasto["osoite"];
-      $this->postirow["yhtio_postino"]  = $postirow_varasto["postino"];
-      $this->postirow["yhtio_postitp"]  = $postirow_varasto["postitp"];
-      $this->postirow["yhtio_maa"]      = $postirow_varasto["maa"];
     }
 
     $this->setAsiakasRow();
@@ -156,15 +213,88 @@ class Unifaun {
 
       $ftpfile = realpath($filenimi);
 
-      # L‰hetet‰‰n UTF-8 muodossa jos PUPE_UNICODE on true
+      // L‰hetet‰‰n UTF-8 muodossa jos PUPE_UNICODE on true
       $ftputf8 = PUPE_UNICODE;
 
       require "inc/ftp-send.inc";
     }
   }
 
+  public function xmlPost() {
+    $filenimi = "/tmp/unifaun-".md5(uniqid(rand(), true)).".txt";
+
+    //kirjoitetaan faili levylle..
+    if (file_put_contents($filenimi, $this->xml->asXML()) === FALSE) {
+      echo "<br><font class='error'>".t("VIRHE: tiedoston kirjoitus ep‰onnistui")."!</font><br>";
+    }
+    else {
+
+      $url      = "https://www.unifaunonline.com/ufoweb/order";
+      $user     = $this->username;
+      $pass     = $this->password;
+      $devi     = $this->developerid;
+      $ftpfail  = $this->ftpfail;
+      $ftpsucc  = $this->ftpsucc;
+      $packsoft = $this->packsoft;
+
+      if ($packsoft) {
+        $session = "po_SE";
+      }
+      else {
+        $session = "ufo_SE";
+      }
+
+      $f = fopen($filenimi, "r");
+
+      $ch = curl_init();
+      curl_setopt($ch, CURLOPT_URL, "{$url}?session={$session}&user={$user}&pin={$pass}&developerid={$devi}&type=xml");
+      curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
+      curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, FALSE);
+      curl_setopt($ch, CURLOPT_POST, TRUE);
+      curl_setopt($ch, CURLOPT_HTTPHEADER, array("Content-Type: text/xml"));
+      curl_setopt($ch, CURLOPT_POSTFIELDS, fread($f, filesize($filenimi)));
+      curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+
+      $result = curl_exec($ch);
+
+      if ($result === FALSE) {
+        echo "<font class='error'>VIRHE: \n";
+        echo curl_errno($ch) . " - " . curl_error($ch) . "</font><br>";
+        exit(1);
+      }
+      else {
+        $basefile = basename($filenimi);
+
+        $xml = simplexml_load_string($result);
+
+        foreach ($xml->val as $val) {
+          if ($val->attributes()->n == "status") {
+            $xmlstatus = $val;
+          }
+          if ($val->attributes()->n == "message") {
+            $xmlmessage = $val;
+          }
+        }
+
+        if ($xmlstatus == "201" and !empty($ftpsucc)) {
+          // Siirret‰‰n faili talteen jos siirto onnasi ja ok failit halutaan tallentaa
+          rename($filenimi, $ftpsucc."/".$basefile);
+        }
+        elseif (!empty($ftpfail)) {
+          // Siirret‰‰n faili outboxiin odottamaan uutta yrityst‰ jos siirto feilasi
+          rename($filenimi, $ftpfail."/".$basefile);
+
+          echo "<font class='error'>VIRHE: \n";
+          echo "$xmlstatus, $xmlmessage</font><br>";
+          exit(1);
+        }
+      }
+
+      curl_close($ch);
+    }
+  }
+
   public function _saveForDebug($postfix = "") {
-    //$filenimi = "/Users/sami/Sites/pupesoft/dataout/unifaun-{$postfix}-{$this->toitarow['selite']}-".md5(uniqid(rand(),true)).".txt";
     $filenimi = "/tmp/unifaun-{$postfix}-{$this->toitarow['selite']}-".md5(uniqid(rand(), true)).".txt";
 
     //kirjoitetaan faili levylle..
@@ -222,12 +352,16 @@ class Unifaun {
     $uni_discard_val->addAttribute('n', 'parcelno');
 
     $this->xml = $xml;
-
   }
 
   public function _getXML() {
 
+    if ($this->unifauntype == "ONLINE") {
     $xmlstr  = '<?xml version="1.0" encoding="UTF-8"?><printserver></printserver>';
+    }
+    else {
+      $xmlstr  = '<?xml version="1.0" encoding="UTF-8"?><unifaunonline></unifaunonline>';
+    }
 
     $query = "SELECT *
               FROM rahdinkuljettajat
@@ -242,25 +376,23 @@ class Unifaun {
     // Metatiedot
     $uni_meta = $xml->addChild('meta');
 
+    // siivotaan puhelinnumerosta v‰lilyˆnnit ja muut erikoismerkit veke
+    $this->postirow["toim_puh"] = preg_replace("/[^0-9\+]/", "", $this->postirow["toim_puh"]);
+
     // $uni_meta_val = $uni_meta->addChild('val', '|LASER1|'); # Sends the print job to defined printer/ID. The value must be enclosed in pipe characters, |.
     $uni_meta_val = $uni_meta->addChild('val', "{$this->kirjoitin}"); // Sends the print job to defined printer/ID. The value must be enclosed in pipe characters, |.
     $uni_meta_val->addAttribute('n', 'printer');
 
-    //$uni_meta_val = $uni_meta->addChild('val', ''); # Defines the print favourite in the online system which is used to auto-complete the order file if necessary.
-    //$uni_meta_val->addAttribute('n', 'favorite');
+    // Kovakoodataan t‰h‰n VAK. Unifaun Onliness‰ tule perustaa t‰m‰n niminen Tulostussuosikki (nimiketaso) jos halutaan k‰ytt‰‰ VAK -koodeja.
+    $uni_meta_val = $uni_meta->addChild('val', 'VAK'); # Defines the print favourite in the online system which is used to auto-complete the order file if necessary.
+    $uni_meta_val->addAttribute('n', 'favorite');
 
     //$uni_meta_val = $uni_meta->addChild('val', ''); # Defines the profile group where the shipment should be stored in the online system.
     //$uni_meta_val->addAttribute('n', 'partition');
 
     // L‰hett‰j‰n tiedot
-    /**
-     * tehd‰‰n yhtiˆn parametri "unifaun pikahakuarvo"
-     * voidaan silloin j‰tt‰‰ nimitiedot tyhjiksi
-     */
-
-
     $uni_sender = $xml->addChild('sender');  // Attribute sndid corresponds to sender ID/quick ID. Any contents. Mandatory
-    $uni_sender->addAttribute('sndid', utf8_encode("{$this->yhtiorow["tunnus"]}"));
+    $uni_sender->addAttribute('sndid', $this->pikahakuarvo());
 
     // $uni_snd_val = $uni_sender->addChild('val', str_replace($search, $replace, $this->postirow["yhtio_nimi"])); # Sender's name
     $_yhtio_nimi = htmlspecialchars($this->postirow["yhtio_nimi"]);
@@ -354,46 +486,40 @@ class Unifaun {
     $uni_receiver->addAttribute('rcvid', utf8_encode($this->asiakasrow["tunnus"]));
 
     // jos vastaanottaja maksaa rahdin, haetaan sopimusnumero asiakkaan rahtisopimukselta
-    if ($this->toitarow['merahti'] == '') {
+    if ($this->rakir_row['merahti'] == '') {
 
       // L‰hett‰j‰n rahtisopimustiedot
       $uni_receiver_partner = $uni_receiver->addChild('partner'); // Attribute parid corresponds to carrier's ID. See SUP-112-Services-en.xls.
       $uni_receiver_partner->addAttribute('parid', utf8_encode($this->toitarow['rahdinkuljettaja']));
 
-      $query = "SELECT rahtisopimus
-                FROM rahtisopimukset
-                WHERE yhtio       = '{$this->kukarow['yhtio']}'
-                AND (asiakas = '{$this->postirow['liitostunnus']}' OR ytunnus = '{$this->postirow['ytunnus']}')
-                AND toimitustapa  = '{$this->toitarow['selite']}'
-                AND rahtisopimus != ''
-                ORDER BY asiakas DESC
-                LIMIT 1";
-      $rahtisopimus_res = pupe_query($query);
-      $rahtisopimus_row = mysql_fetch_assoc($rahtisopimus_res);
-
-      $rahtisopimusnro = mysql_num_rows($rahtisopimus_res) == 0 ? 0 : $rahtisopimus_row['rahtisopimus'];
+      $rahtisopimusnro = $this->rakir_row['rahtisopimus'];
 
       // Jos sopparinumero puuttuu
       if ((is_numeric($rahtisopimusnro) and (int) $rahtisopimusnro == 0) or (!is_numeric($rahtisopimusnro) and (string) $rahtisopimusnro == "")) {
 
         if ($this->toitarow['virallinen_selite'] == "KKSTD") $rahtisopimusnro = 999999;
         elseif ($this->toitarow['virallinen_selite'] == "TPSTD"
-          or $this->toitarow['virallinen_selite'] == "IT09"
-          or $this->toitarow['virallinen_selite'] == "IT14"
-          or $this->toitarow['virallinen_selite'] == "IT16"
-          or $this->toitarow['virallinen_selite'] == "IT21") $rahtisopimusnro = 123456;
+          or $this->toitarow['virallinen_selite'] == "PO2102_09"
+          or $this->toitarow['virallinen_selite'] == "PO2102"
+          or $this->toitarow['virallinen_selite'] == "PO2103"
+          or $this->toitarow['virallinen_selite'] == "PO2104"
+          or $this->toitarow['virallinen_selite'] == "PO2461"
+          or $this->toitarow['virallinen_selite'] == "PO2711") $rahtisopimusnro = 123456;
         elseif ($this->toitarow['virallinen_selite'] == "KLGRP") $rahtisopimusnro = 1234567;
         elseif ($this->toitarow['virallinen_selite'] == "MH10" or $this->toitarow['virallinen_selite'] == "MH30") $rahtisopimusnro = 12345678;
+        elseif ($this->toitarow['virallinen_selite'] == "MH10_SPTR" or $this->toitarow['virallinen_selite'] == "MH30_SPTR") $rahtisopimusnro = 12345678;
         else $rahtisopimusnro = 123;
       }
 
       // Jos sopparinumero on, mutta se on virheellinen
       if ((is_numeric($rahtisopimusnro) and (int) $rahtisopimusnro > 0) or (!is_numeric($rahtisopimusnro) and (string) $rahtisopimusnro != "")) {
 
-        if (($this->toitarow['virallinen_selite'] == "IT09"
-            or $this->toitarow['virallinen_selite'] == "IT14"
-            or $this->toitarow['virallinen_selite'] == "IT16"
-            or $this->toitarow['virallinen_selite'] == "IT21") and strlen($rahtisopimusnro) != 6) {
+        if (($this->toitarow['virallinen_selite'] == "PO2102_09"
+            or $this->toitarow['virallinen_selite'] == "PO2102"
+            or $this->toitarow['virallinen_selite'] == "PO2103"
+            or $this->toitarow['virallinen_selite'] == "PO2104"
+            or $this->toitarow['virallinen_selite'] == "PO2461"
+            or $this->toitarow['virallinen_selite'] == "PO2711") and strlen($rahtisopimusnro) != 6) {
           $rahtisopimusnro = 999999;
         }
 
@@ -408,8 +534,8 @@ class Unifaun {
       // N‰m‰ ovat nyt k‰ytˆss‰:
       //FREEG     --> OPAY tai RPAY, numeric, minlength(1), maxlength(15)
       //H48     --> RPAY
-      //IT09     --> OPAY
-      //IT14     --> OPAY
+      //PO2102_09     --> OPAY
+      //PO2102     --> OPAY
       //KKSTD     --> OPAY tai RPAY, 6 numeroa
       //TPSTD     --> RPAY, 6 numeroa
       //KLGRP     --> OPAY tai RPAY, min 7 max 8
@@ -428,11 +554,25 @@ class Unifaun {
         'KLGRP',
         'MH10',
         'MH30',
+        'MH10_SPTR',
+        'MH30_SPTR',
       );
 
       $allowed_opay = array(
-        'IT09',
-        'IT14',
+        'PO2102',
+        'PO2102_09',
+        'PO2102_00',
+        'PO2103',
+        'PO2104',
+        'POF1',
+        'PO2144',
+        'PO2144_09',
+        'PO2144_21',
+        'PO2144_00',
+        'ITKY14I',
+        'IT14I',
+        'PO2711',
+        'PO2461',
       );
     }
 
@@ -477,14 +617,24 @@ class Unifaun {
     $uni_rcv_val = $uni_receiver->addChild('val', utf8_encode($this->rakir_row["toim_postino"])); // Zipcode
     $uni_rcv_val->addAttribute('n', "zipcode");
 
-    $uni_rcv_val = $uni_receiver->addChild('val', utf8_encode($this->rakir_row["toim_postitp"])); // City
-    $uni_rcv_val->addAttribute('n', "city");
-
-    //$uni_rcv_val = $uni_receiver->addChild('val', ""); # State
-    //$uni_rcv_val->addAttribute('n', "state");
-
     // jos asiakkaan toim_maa on tyhj‰ niin oletetaan, ett‰ se on sama ku yhtiˆn maa
     $toim_maa = ($this->rakir_row['toim_maa'] != "") ? $this->rakir_row['toim_maa'] : $this->postirow["yhtio_maa"];
+
+    if ($toim_maa == "US") {
+
+      list($toim_postitp, $state) = explode(" ", $this->rakir_row["toim_postitp"]);
+
+      if ($state != '') {
+
+        $this->rakir_row["toim_postitp"] = $toim_postitp;
+        $state = $toim_maa."_".$state;
+        $uni_rcv_val = $uni_receiver->addChild('val', utf8_encode($state)); # State
+        $uni_rcv_val->addAttribute('n', "state");
+      }
+    }
+
+    $uni_rcv_val = $uni_receiver->addChild('val', utf8_encode($this->rakir_row["toim_postitp"])); // City
+    $uni_rcv_val->addAttribute('n', "city");
 
     $uni_rcv_val = $uni_receiver->addChild('val', utf8_encode($toim_maa)); // Country code according to ISO standard
     $uni_rcv_val->addAttribute('n', "country");
@@ -564,22 +714,27 @@ class Unifaun {
       $uni_shipment->addAttribute('mergeid', utf8_encode($mergeid));
     }
 
-    $uni_shi_val = $uni_shipment->addChild('val', utf8_encode($this->yhtiorow["tunnus"])); // Defines the sender. Refers to the sndid value for sender.
+    $uni_shi_val = $uni_shipment->addChild('val', $this->pikahakuarvo()); // Defines the sender. Refers to the sndid value for sender.
     $uni_shi_val->addAttribute('n', "from");
 
-    //$uni_shi_val = $uni_shipment->addChild('val', ""); # Defines the legal sender (not printed on shipping documents).
-    //$uni_shi_val->addAttribute('n', "legalfrom");
-
     $uni_shi_val = $uni_shipment->addChild('val', utf8_encode($this->asiakasrow["tunnus"])); // Defines the receiver. Refers to rcvid value for receiver.
-
     $uni_shi_val->addAttribute('n', "to");
+
+    if ($this->toitarow['virallinen_selite'] == 'PO2711') {
+
+      $uni_shi_val = $uni_shipment->addChild('val', $this->pikahakuarvo()); # Juridisen l‰hett‰j‰n tunnus (sndid). Ei tulostu rahtiasiakirjaan.
+      $uni_shi_val->addAttribute('n', "legalfrom");
+
+      $uni_shi_val = $uni_shipment->addChild('val', utf8_encode($this->asiakasrow["tunnus"])); # Palautusvastaanottajan tunnus (rcvid).
+      $uni_shi_val->addAttribute('n', "returnto");
+    }
 
     //$uni_shi_val = $uni_shipment->addChild('val', ""); # Defines the legal receiver (not printed on shipping documents).
     //$uni_shi_val->addAttribute('n', "legalto");
 
     if (!empty($this->postirow["noutopisteen_tunnus"])) {
       //<val n="agentto">1234</val> # definaa noutopisteen tunnuksen
-      $agentto_noutopiste = $uni_shipment->addChild('val', utf8_encode($this->postirow["noutopisteen_tunnus"])); # Defines the agent's ID for recipient in shipment. Used by DBSchenker PrivPak to store the agent's details, address etc. For Bring it's used to store address details to MyQuickBox machine.
+      $agentto_noutopiste = $uni_shipment->addChild('val', utf8_encode($this->postirow["noutopisteen_tunnus"])); // Defines the agent's ID for recipient in shipment. Used by DBSchenker PrivPak to store the agent's details, address etc. For Bring it's used to store address details to MyQuickBox machine.
       $agentto_noutopiste->addAttribute('n', "agentto");
     }
 
@@ -635,12 +790,12 @@ class Unifaun {
     //$uni_shi_val->addAttribute('n', "eurpallets");
 
     // l‰hett‰j‰n viite
-    $reference = substr(preg_replace("/[^\x20-\xFF]/", "", trim($this->postirow["viesti"])), 0, 17);
+    $reference = $this->sender_reference();
 
-    $uni_shi_val = $uni_shipment->addChild('val', utf8_encode($reference)); // Shipment reference. Any contents. Max. 17 characters.
+    $uni_shi_val = $uni_shipment->addChild('val', $reference); // Shipment reference. Any contents. Max. 17 characters.
     $uni_shi_val->addAttribute('n', "reference");
 
-    if (trim($reference) != "" and is_int($reference)) {
+    if ($reference != "" and is_int($reference)) {
       $uni_shi_val = $uni_shipment->addChild('val', $reference); // Shipment reference as barcode. Max. 17 numeric characters.
       $uni_shi_val->addAttribute('n', "referencebarcode");
     }
@@ -650,6 +805,17 @@ class Unifaun {
 
     $uni_shi_val = $uni_shipment->addChild('val', utf8_encode($reference)); // Receiver's reference. Any contents. Max. 17 characters.
     $uni_shi_val->addAttribute('n', "rcvreference");
+
+    // Vain tietyille palveluille sallitaan goodsdescription
+    $_goodsdescription = array(
+      'DAME',
+      'DAECX',
+    );
+
+    if (in_array($this->toitarow['virallinen_selite'], $_goodsdescription)) {
+      $uni_shi_val = $uni_shipment->addChild('val', utf8_encode($this->postirow['kuljetusohjeet'])); // Description of contents, only used for some carriers.
+      $uni_shi_val->addAttribute('n', "goodsdescription");
+    }
 
     //$uni_shi_val = $uni_shipment->addChild('val', "sisfreetext1"); # Free text field with any contents. Can be used for delivery instructions, for example. It is printed on shipping documents. 5 lines available, sisfreetext1-5. Max. 30 characters/line.
     //$uni_shi_val->addAttribute('n', "sisfreetext1");
@@ -712,7 +878,98 @@ class Unifaun {
     }
     else {
       $uni_service = $uni_shipment->addChild('service'); // Corresponds to carrier's service. See SUP-112-Services-en.xls for valid services.
-      $uni_service->addAttribute('srvid', utf8_encode($this->toitarow['virallinen_selite']));
+
+      if (strpos($this->toitarow['virallinen_selite'], "PO2102") !== FALSE) {
+        $_virallinen_selite = "PO2102";
+      }
+      elseif (strpos($this->toitarow['virallinen_selite'], "PO2144") !== FALSE) {
+        $_virallinen_selite = "PO2144";
+      }
+      elseif (strpos($this->toitarow['virallinen_selite'], "MH10_") !== FALSE) {
+        $_virallinen_selite = "MH10";
+      }
+      elseif (strpos($this->toitarow['virallinen_selite'], "MH20_") !== FALSE) {
+        $_virallinen_selite = "MH20";
+      }
+      elseif (strpos($this->toitarow['virallinen_selite'], "MH3050_") !== FALSE) {
+        $_virallinen_selite = "MH3050";
+      }
+      else {
+        $_virallinen_selite = $this->toitarow['virallinen_selite'];
+      }
+
+      $uni_service->addAttribute('srvid', utf8_encode($_virallinen_selite));
+    }
+
+    $_DLV09 = array(
+      'PO2102_09',
+      'PO2144_09',
+    );
+    $_DLV21 = array(
+      'PO2144_21',
+    );
+    $_DLV00 = array(
+      'PO2102_00',
+      'PO2144_00',
+    );
+    // Matkahuollon "tankomainen" lis‰palvelu
+    $_MA_SPTR = array(
+      'MH10_SPTR',
+      'MH20_SPTR',
+      'MH3050_SPTR',
+    );
+
+    if (in_array($this->toitarow['virallinen_selite'], $_DLV09)) {
+      $uni_ser_val = $uni_service->addChild('addon');
+      $uni_ser_val->addAttribute('adnid', "DLV09");
+    }
+
+    if (in_array($this->toitarow['virallinen_selite'], $_DLV21)) {
+      $uni_ser_val = $uni_service->addChild('addon');
+      $uni_ser_val->addAttribute('adnid', "DLV21");
+    }
+
+    if (in_array($this->toitarow['virallinen_selite'], $_DLV00)) {
+      $uni_ser_val = $uni_service->addChild('addon');
+      $uni_ser_val->addAttribute('adnid', "DLV00");
+    }
+
+    if (in_array($this->toitarow['virallinen_selite'], $_MA_SPTR)) {
+      $uni_ser_val = $uni_service->addChild('addon');
+      $uni_ser_val->addAttribute('adnid', "SPTR");
+    }
+
+    // Postin palvelukoodit, jotka tukevat lis‰palvelua FDNGPP: "LQ Prosessilupa"
+    $_sallitut_posti_lq_palvelut = array(
+      'PO2102', // Express-paketti
+      'PO2103', // Postipaketti
+      'PO2104', // Kotipaketti
+      'PO2108', // Palautus
+    );
+
+    // Postin palvelukoodit, jotka tukevat lis‰palvelua DNG: "Vaarallisten aineiden kuljetus (VAK) / LQ Kuljetus"
+    $_sallitut_posti_vak_palvelut = array(
+      'PO2102', // Express-paketti
+      'PO2104', // Kotipaketti
+      'PO2144', // Express-rahti
+      'POF1',   // Rahti
+    );
+
+    // Jos meill‰ on vain LQ tuotteita tilauksella ja sopiva palvelukoodi, lis‰t‰‰n FDNGPP lis‰palvelu
+    if ($this->onko_lq() and in_array($_virallinen_selite, $_sallitut_posti_lq_palvelut)) {
+      $uni_addon = $uni_service->addChild('addon');
+      $uni_addon->addAttribute('adnid', "FDNGPP");
+
+      $uni_add_val = $uni_addon->addChild('val', utf8_encode($_yhtio_nimi));
+      $uni_add_val->addAttribute('n', 'declarant');
+    }
+    // Jos meill‰ on VAK tuotteita tilauksella ja sopiva palvelukoodi, lis‰t‰‰n DNG lis‰palvelu
+    elseif ($this->onko_vak() and in_array($_virallinen_selite, $_sallitut_posti_vak_palvelut)) {
+      $uni_addon = $uni_service->addChild('addon');
+      $uni_addon->addAttribute('adnid', "DNG");
+
+      $uni_add_val = $uni_addon->addChild('val', utf8_encode($_yhtio_nimi));
+      $uni_add_val->addAttribute('n', 'declarant');
     }
 
     if (trim($this->toitarow['lajittelupiste']) != "") {
@@ -734,43 +991,36 @@ class Unifaun {
     //$uni_ser_val = $uni_booking->addChild('val', ""); # Booking office, numeric code. See SUP-112-Services-en.xls for valid codes.
     //$uni_ser_val->addAttribute('n', "bookingoffice");
 
-    if ($this->toitarow['merahti'] == "" and in_array($this->toitarow['virallinen_selite'], $allowed_rpay)) {
+    if ($this->rakir_row['merahti'] == "" and in_array($this->toitarow['virallinen_selite'], $allowed_rpay)) {
       $uni_addon = $uni_service->addChild('addon');
       $uni_addon->addAttribute('adnid', 'rpay');
 
       $uni_add_val = $uni_addon->addChild('val', utf8_encode($rahtisopimusnro));
       $uni_add_val->addAttribute('n', 'custno');
     }
-    elseif ($this->toitarow['merahti'] == "" and in_array($this->toitarow['virallinen_selite'], $allowed_opay)) {
+    elseif ($this->rakir_row['merahti'] == "" and in_array($this->toitarow['virallinen_selite'], $allowed_opay)) {
       $uni_addon = $uni_service->addChild('addon');
       $uni_addon->addAttribute('adnid', 'opay');
 
       $uni_add_val = $uni_addon->addChild('val', utf8_encode($rahtisopimusnro));
       $uni_add_val->addAttribute('n', 'custno');
 
-      if ($this->toitarow['virallinen_selite'] == "IT09"
-        or $this->toitarow['virallinen_selite'] == "IT14"
-        or $this->toitarow['virallinen_selite'] == "IT16"
-        or $this->toitarow['virallinen_selite'] == "IT21") {
-        $uni_add_val = $uni_addon->addChild('val', utf8_encode($this->postirow["tunnus"])); // Payment reference. Used with add-on COD.
-        $uni_add_val->addAttribute('n', "reference");
-      }
+      $uni_add_val = $uni_addon->addChild('val', utf8_encode($this->postirow["tunnus"])); // Payment reference. Used with add-on COD.
+      $uni_add_val->addAttribute('n', "reference");
     }
 
     // n‰m‰ tukee mps palvelua
     $posti_mps = array(
-      'IT09',
-      'ITKY09',
-      'IT14',
-      'ITKY14',
+      'PO2102_09',
+      'PO2144_09',
+      'PO2102',
+      'PO2144',
       'ITKY14I',
       'IT14I',
-      'ITEXPC',
-      'ITKYEXPC',
-      'IT21',
-      'ITKY21',
-      'ITVAK',
-      'ITKYVAK',
+      'PO2102_00',
+      'PO2144_00',
+      'PO2104',
+      'PO2144_21',
     );
 
     $_mps = $this->toitarow["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc' ? true : false;
@@ -792,7 +1042,7 @@ class Unifaun {
       $uni_add_val = $uni_addon->addChild('val', "PHONE"); // Used to define notification mode for add-on NOT. Valid values: PHONE = Phone, FAX = Fax.
       $uni_add_val->addAttribute('n', "misctype");
     }
-    elseif ($this->toitarow['virallinen_selite'] == "IT16" and ($this->postirow["toim_puh"] != "" or $this->asiakasrow["email"] != "")) {
+    elseif ($this->toitarow['virallinen_selite'] == "PO2103" and ($this->postirow["toim_puh"] != "" or $this->asiakasrow["email"] != "")) {
       $uni_addon = $uni_service->addChild('addon'); // Corresponds to add-on service. See SUP-112-Services-en.xls for valid add-on services.
       $uni_addon->addAttribute('adnid', "NOT");
 
@@ -987,8 +1237,17 @@ class Unifaun {
           $uni_par_val->addAttribute('n', "count");
         }
 
+        // VAK tiedot annetaan aina l‰hetyskohtaisesti. Jos on useampi kolli, niin tiedot menee per kolli l‰hetykseen,
+        // joten painot pit‰‰ jakaa kollien m‰‰r‰ll‰, jottei painot moninkertaistu
+        if (isset($pakkaustiedot['rahtikirjan_kollit_yhteensa']) and $pakkaustiedot['rahtikirjan_kollit_yhteensa'] > 1) {
+          $_jakaja = $pakkaustiedot['rahtikirjan_kollit_yhteensa'];
+        }
+        else {
+          $_jakaja = 1;
+        }
+
         if (isset($vak['kpl_paino']) and $vak['kpl_paino'] != '') {
-          $uni_par_val = $uni_article->addChild('val', utf8_encode($vak['kpl_paino'])); // UN-number for ADR. Supplied as a 4 digit code.
+          $uni_par_val = $uni_article->addChild('val', utf8_encode($vak['kpl_paino'] / $_jakaja)); // UN-number for ADR. Supplied as a 4 digit code.
           $uni_par_val->addAttribute('n', "weight");
         }
 
@@ -1002,12 +1261,21 @@ class Unifaun {
           $uni_par_val->addAttribute('n', "dnghzcode");
         }
 
-        if (isset($vak['pakkausryhma']) and (int) $vak['pakkausryhma'] > 0) {
-          $vak['pakkausryhma'] = (int) $vak['pakkausryhma'];
-          $vak['pakkausryhma'] = $vak['pakkausryhma'] > 3 ? 3 : $vak['pakkausryhma'];
+        if (!empty($vak['pakkausryhma'])) {
+          $_pakkausryhma = strtoupper(trim($vak['pakkausryhma']));
 
-          $uni_par_val = $uni_article->addChild('val', utf8_encode(str_repeat("I", $vak['pakkausryhma']))); // Packaging group/ADR-class. Supplied as I, II or III.
-          $uni_par_val->addAttribute('n', "dngpkcode");
+          // Voidaan antaa numeerinen arvo, joka k‰‰nnet‰‰n roomalaisiksi
+          if (is_numeric($_pakkausryhma)) {
+            $_pakkausryhma = (int) $_pakkausryhma;
+            $_pakkausryhma = ($_pakkausryhma < 1 or $_pakkausryhma > 3) ? 0 : $_pakkausryhma;
+            $_pakkausryhma = str_repeat("I", $_pakkausryhma);
+          }
+
+          // Packaging group/ADR-class. Supplied as I, II or III.
+          if (in_array($_pakkausryhma, array('I', 'II', 'III'))) {
+            $uni_par_val = $uni_article->addChild('val', $_pakkausryhma);
+            $uni_par_val->addAttribute('n', "dngpkcode");
+          }
         }
 
         if (isset($vak['luokka']) and $vak['luokka'] != '') {
@@ -1024,20 +1292,103 @@ class Unifaun {
         //$uni_par_val = $uni_article->addChild('val', ""); # Defines if the contents contaminate the marine environment, ADR only. Valid values: 1 = Toxic and 2 = Non-toxic for the marine environment
         //$uni_par_val->addAttribute('n', "dngmpcode");
 
-        if (isset($vak['limited_qty']) and $vak['limited_qty'] != '') {
+        if (isset($vak['limited_qty']) and $vak['limited_qty'] != '' and $this->onko_lq()) {
           $uni_par_val = $uni_article->addChild('val', $vak['limited_qty']); // Note for ADR goods
           $uni_par_val->addAttribute('n', "dngnote");
+
+          // Defines if the parcel row contains Limited Quantities of dangerous goods. Valid values: YES/NO.
+          $uni_par_val = $uni_article->addChild('val', 'YES');
+          $uni_par_val->addAttribute('n', "dnglimitedquantities");
         }
 
         if (isset($vak['paino']) and $vak['paino'] != '') {
 
-          $vak['paino'] = $vak['paino'] < 1 ? 1 : $vak['paino'];
+          $vak['paino'] = $vak['paino'] / $_jakaja;
+          $vak['paino'] = $vak['paino'] < 0.01 ? 0.01 : $vak['paino']; //nettopaino vakilla pit‰‰ olla v‰hint‰‰n 0.01
 
           // Net weight for ADR goods class I (usually explosive contents). Always mandatory for DBSchenker, regardless of class. Defined in kg.
           $uni_par_val = $uni_article->addChild('val', utf8_encode($vak['paino']));
           $uni_par_val->addAttribute('n', "dngnetweight");
         }
+
+        if (isset($vak['kuljetus_kategoria']) and $vak['kuljetus_kategoria'] != '') {
+
+          // Tunnel restriction code, lˆytyy sulkujen sis‰lt‰ kuljetus_kategoria kent‰st‰
+          preg_match("/\((.*)\)/", $vak['kuljetus_kategoria'], $dngtrcode);
+
+          $uni_par_val = $uni_article->addChild('val', utf8_encode($dngtrcode[1]));
+          $uni_par_val->addAttribute('n', "dngtrcode");
+        }
       }
     }
+  }
+
+  private function pikahakuarvo() {
+    /**
+     * tehd‰‰n yhtiˆn parametri "unifaun pikahakuarvo"
+     * voidaan silloin j‰tt‰‰ nimitiedot tyhjiksi
+     * lis‰ksi pikahakuarvo lˆytyy hiukan alempaa shipment kohdan alta (from)
+     *
+     * Tarkistetaan t‰ss‰ kohtaa otetaanko pikahakuarvo yhtiorow tunnuksesta,
+     * vaiko yhtion_toimipaikat.pikahakuarvo -kent‰st‰ (eli toimipaikkakohtaisesti),
+     * vaiko varastopaikat.pikahakuarvo -kent‰st‰ (eli varastokohtaisesti)
+     */
+
+    // memoization, ei tehd‰ turhaa toista kertaa
+    if (!is_null($this->pikahaku_tunnus)) {
+      return $this->pikahaku_tunnus;
+    }
+
+    // oletus on yhtiˆn tunnus
+    $this->pikahaku_tunnus = $this->yhtiorow['tunnus'];
+
+    // tarkistetaan onko meill‰ pikahakuarvo varaston takana
+    $query = "SELECT pikahakuarvo
+              FROM varastopaikat
+              WHERE yhtio = '{$this->kukarow['yhtio']}'
+              AND tunnus = '{$this->postirow['varasto']}'";
+    $varastopaikat_res = pupe_query($query);
+    $varastopaikat_row = mysql_fetch_assoc($varastopaikat_res);
+
+    // k‰ytet‰‰n varaston pikahakuarvoa
+    if (!empty($varastopaikat_row['pikahakuarvo'])) {
+      $this->pikahaku_tunnus = $varastopaikat_row['pikahakuarvo'];
+
+      return $this->pikahaku_tunnus;
+    }
+
+    // palautetaan oletus (yhtiˆ tunnus), jos ei ole toimipaikkaa
+    if (empty($this->postirow['yhtio_toimipaikka'])) {
+      return $this->pikahaku_tunnus;
+    }
+
+    // tarkistetaan onko meill‰ pikahakuarvo toimipaikan takana
+    $query = "SELECT pikahakuarvo
+              FROM yhtion_toimipaikat
+              WHERE yhtio = '{$this->kukarow['yhtio']}'
+              AND tunnus = '{$this->postirow['yhtio_toimipaikka']}'";
+    $toimipaikka_res = pupe_query($query);
+    $toimipaikka_row = mysql_fetch_assoc($toimipaikka_res);
+
+    // k‰ytet‰‰n toimipaikan pikahakuarvoa
+    if (!empty($toimipaikka_row['pikahakuarvo'])) {
+      $this->pikahaku_tunnus = $toimipaikka_row['pikahakuarvo'];
+
+      return $this->pikahaku_tunnus;
+    }
+
+    // palautetaan oletus (yhtiˆ tunnus)
+    return $this->pikahaku_tunnus;
+  }
+
+  private function sender_reference() {
+    $key = unifaun_sender_reference();
+    $value = $this->postirow[$key];
+    $value = trim($value);
+    $value = preg_replace("/[^\x20-\xFF]/", "", $value);
+    $value = substr($value, 0, 17);
+    $value = utf8_encode($value);
+
+    return $value;
   }
 }

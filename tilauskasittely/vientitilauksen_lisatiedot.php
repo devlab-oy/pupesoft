@@ -18,6 +18,9 @@ echo "<font class='head'>".t("Lisätietojen syöttö")."</font><hr>";
 if (isset($bruttopaino)) $bruttopaino = str_replace(",", ".", $bruttopaino);
 if (isset($lisattava_era)) $lisattava_era = str_replace(",", ".", $lisattava_era);
 if (isset($vahennettava_era)) $vahennettava_era = str_replace(",", ".", $vahennettava_era);
+if (empty($tapa)) $tapa = '';
+if (empty($tee)) $tee = '';
+if (empty($etsi)) $etsi = null;
 
 $toim = strtoupper($toim);
 
@@ -61,16 +64,16 @@ if ($tapa == "tuonti" and $tee != "") {
 
     if ($toim == "TYOMAARAYS") {
       $query = "UPDATE tyomaarays SET
-                tullikoodi                       = '$tullikoodi',
-                tulliarvo                        = '$tulliarvo',
-                maa_maara                        = '$maa_maara',
-                maa_lahetys                      = '$maa_lahetys',
-                maa_alkupera                     = '$maa_alkupera',
-                kauppatapahtuman_luonne          = '$kauppatapahtuman_luonne',
-                kuljetusmuoto                    = '$kuljetusmuoto',
-                bruttopaino                      = '$bruttopaino'
-                WHERE otunnus                    in ($otunnus)
-                and yhtio                        = '$kukarow[yhtio]'";
+                tullikoodi              = '$tullikoodi',
+                tulliarvo               = '$tulliarvo',
+                maa_maara               = '$maa_maara',
+                maa_lahetys             = '$maa_lahetys',
+                maa_alkupera            = '$maa_alkupera',
+                kauppatapahtuman_luonne = '$kauppatapahtuman_luonne',
+                kuljetusmuoto           = '$kuljetusmuoto',
+                bruttopaino             = '$bruttopaino'
+                WHERE otunnus           in ($otunnus)
+                and yhtio               = '$kukarow[yhtio]'";
       $result = pupe_query($query);
     }
     else {
@@ -148,7 +151,7 @@ if ($tapa == "tuonti" and $tee != "") {
 
     if ($toim == "TYOMAARAYS") {
       echo "<tr>";
-      echo "<th>",t("Tullinimike"),"</th>";
+      echo "<th>", t("Tullinimike"), "</th>";
       echo "<td>";
       echo "<br>";
       echo livesearch_kentta("paaformi", 'TULLINIMIKEHAKU', 'tullikoodi', 140, $laskurow['tullikoodi'], 'EISUBMIT', '', '', 'ei_break_all');
@@ -156,7 +159,7 @@ if ($tapa == "tuonti" and $tee != "") {
       echo "</tr>";
 
       echo "<tr>";
-      echo "<th>",t("Tulliarvo"),"</th>";
+      echo "<th>", t("Tulliarvo"), "</th>";
       echo "<td>";
       echo "<br>";
       echo "<input type='text' name='tulliarvo' value='{$laskurow['tulliarvo']}' />";
@@ -367,21 +370,21 @@ elseif ($tee != "") {
       //päivitetään alatila vain jos tilaus ei vielä ole laskutettu
       $query = "UPDATE lasku
                 SET alatila = 'E'
-                WHERE yhtio = '$kukarow[yhtio]'
-                and tunnus  = '$otun'
-                and tila    = 'L'
+                WHERE yhtio    = '$kukarow[yhtio]'
+                and tunnus     = '$otun'
+                and tila       = 'L'
                 and jaksotettu = 0
-                and alatila NOT IN ('X', 'J')";
+                and alatila    NOT IN ('X', 'J')";
       $result = pupe_query($query);
 
       //päivitetään alatila vain jos tilauksella on maksupositioita
       $query = "UPDATE lasku SET
-                alatila = 'J'
-                WHERE yhtio = '{$kukarow['yhtio']}'
-                and tunnus  = '{$otun}'
-                and tila    = 'L'
+                alatila        = 'J'
+                WHERE yhtio    = '{$kukarow['yhtio']}'
+                and tunnus     = '{$otun}'
+                and tila       = 'L'
                 and jaksotettu > 0
-                and alatila NOT IN ('X', 'J', 'D')";
+                and alatila    NOT IN ('X', 'J', 'D')";
       $result = pupe_query($query);
     }
 
@@ -856,11 +859,19 @@ elseif ($tee == '') {
     $tilaehto = "";
   }
 
+  // ehto, millä valitaan mukaan laskutetut tilaukset
+  // vain avoin kausi. ei sisäisiä eikä KTL 999, koska niistä ei lähetetä intrastattia
+  $laskutetut = "lasku.tila = 'L'
+    AND lasku.alatila = 'X'
+    AND lasku.tapvm >= '{$yhtiorow['tilikausi_alku']}'
+    AND lasku.sisainen = ''
+    AND lasku.kauppatapahtuman_luonne != '999'";
+
   if (isset($toimittamattomat) and $toimittamattomat == 1) {
-    $tilaehto .= "AND ((lasku.tila = 'L' AND lasku.alatila NOT IN ('X')) OR (lasku.tila = '{$tyomaarays_tilaehto}'))";
+    $tilaehto .= "AND ((lasku.tila = 'L' AND lasku.alatila NOT IN ('X')) OR (lasku.tila = '{$tyomaarays_tilaehto}') OR ({$laskutetut}))";
   }
   else {
-    $tilaehto .= "AND lasku.tila = 'L' AND lasku.alatila IN ('B','D','E','J')";
+    $tilaehto .= "AND ((lasku.tila = 'L' AND lasku.alatila IN ('B','D','E','J')) OR ({$laskutetut}))";
   }
 
   if ($toim == "TYOMAARAYS") {
@@ -909,29 +920,59 @@ elseif ($tee == '') {
   echo "<table>";
 
   if (mysql_num_rows($tilre) > 0) {
-    echo "<tr>";
-    for ($i=0; $i<mysql_num_fields($tilre)-18; $i++)
+    echo "<tr class='aktiivi'>";
+
+    for ($i = 0; $i < mysql_num_fields($tilre) - 18; $i++) {
       echo "<th align='left'>".t(mysql_field_name($tilre, $i))."</th>";
+    }
 
     echo "<th>".t("Tyyppi")."</th>";
     echo "<th>".t("Lisätiedot")."</th>";
     echo "</tr>";
 
-    $lask = -1;
-    $tunnukset       = '';
-    $ketjutus      = '';
-    $erpcm        = '';
-    $ytunnus      = '';
-    $nimi        = '';
-    $nimitark      = '';
-    $postino      = '';
-    $postitp      = '';
-    $maksuehto      = '';
+    $lask             = -1;
+    $tunnukset        = '';
+    $ketjutus         = '';
+    $erpcm            = '';
+    $ytunnus          = '';
+    $nimi             = '';
+    $nimitark         = '';
+    $postino          = '';
+    $postitp          = '';
+    $maksuehto        = '';
     $lisattava_era    = '';
-    $vahennettava_era  = '';
-    $jaksotettu = '';
+    $vahennettava_era = '';
+    $jaksotettu       = '';
 
     while ($tilrow = mysql_fetch_assoc($tilre)) {
+
+      // Katsotaan onko kaikki tiedot kunnossa
+      if ((in_array($tilrow['alatila'], array('E', 'J', 'X')) or ($tilrow['alatila'] == 'D' and $tilrow['jaksotettu'] != 0))
+        and $tilrow['vienti'] == 'K'
+        and $tilrow['maa_maara'] != ''
+        and $tilrow['kuljetusmuoto'] > 0
+        and $tilrow['kauppatapahtuman_luonne'] > 0
+        and $tilrow['sisamaan_kuljetusmuoto'] > 0
+        and $tilrow['poistumistoimipaikka'] != ''
+        and $tilrow['poistumistoimipaikka_koodi'] != '') {
+        $rivi_ok = true;
+      }
+      elseif (((in_array($tilrow['alatila'], array('E', 'J', 'X')) or ($tilrow['alatila'] == 'D' and $tilrow['jaksotettu'] != 0)) or $toim == "TYOMAARAYS")
+        and $tilrow['vienti'] == 'E'
+        and $tilrow['maa_maara'] != ''
+        and $tilrow['kuljetusmuoto'] > 0
+        and $tilrow['kauppatapahtuman_luonne'] > 0) {
+        $rivi_ok = true;
+      }
+      else {
+        $rivi_ok = false;
+      }
+
+      // Jos laskutetut laskut on ok, ei näytetä niitä
+      if ($tilrow['alatila'] == 'X' and $rivi_ok) {
+        continue;
+      }
+
       $query = "SELECT sum(if(varattu>0,1,0))  veloitus, sum(if(varattu<0,1,0)) hyvitys
                 from tilausrivi
                 where yhtio = '$kukarow[yhtio]'
@@ -980,31 +1021,23 @@ elseif ($tee == '') {
       }
 
       if ($hyvrow["veloitus"] > 0 and $hyvrow["hyvitys"] == 0) {
-        $teksti = "Veloitus";
+        $teksti = t("Veloitus");
       }
       if ($hyvrow["veloitus"] > 0 and $hyvrow["hyvitys"] > 0) {
-        $teksti = "Veloitusta ja hyvitystä";
+        $teksti = t("Veloitusta ja hyvitystä");
       }
       if ($hyvrow["hyvitys"] > 0  and $hyvrow["veloitus"] == 0) {
-        $teksti = "Hyvitys";
+        $teksti = t("Hyvitys");
       }
-      echo "<td>$teksti</td>";
 
-      if ((in_array($tilrow['alatila'], array('E','J')) or ($tilrow['alatila'] == 'D' and $tilrow['jaksotettu'] != 0))
-        and $tilrow['vienti'] == 'K'
-        and $tilrow['maa_maara'] != ''
-        and $tilrow['kuljetusmuoto'] > 0
-        and $tilrow['kauppatapahtuman_luonne'] > 0
-        and $tilrow['sisamaan_kuljetusmuoto'] > 0
-        and $tilrow['poistumistoimipaikka'] != ''
-        and $tilrow['poistumistoimipaikka_koodi'] != '') {
-        echo "<td><font color='#00FF00'>".t("OK")."</font></td>";
+      echo "<td>";
+      echo $teksti;
+      if ($tilrow['alatila'] == 'X') {
+        echo " " . t('Laskutettu');
       }
-      elseif (((in_array($tilrow['alatila'], array('E','J')) or ($tilrow['alatila'] == 'D' and $tilrow['jaksotettu'] != 0)) or $toim == "TYOMAARAYS")
-        and $tilrow['vienti'] == 'E'
-        and $tilrow['maa_maara'] != ''
-        and $tilrow['kuljetusmuoto'] > 0
-        and $tilrow['kauppatapahtuman_luonne'] > 0) {
+      echo "</td>";
+
+      if ($rivi_ok) {
         echo "<td><font color='#00FF00'>".t("OK")."</font></td>";
       }
       else {
@@ -1059,4 +1092,4 @@ elseif ($tee == '') {
   echo "</table><br>";
 }
 
-require "../inc/footer.inc";
+require "inc/footer.inc";

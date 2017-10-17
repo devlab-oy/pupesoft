@@ -39,6 +39,7 @@ if (mysql_field_name($result, $i) == "laji") {
   $ulos .= "<option value='toimpalautus' {$sel['toimpalautus']}>".t("Palautus toimittajalle")."</option>";
   $ulos .= "<option value='varastopalautus' {$sel['varastopalautus']}>".t("Palautus sallittuihin varastoihin")."</option>";
   $ulos .= "<option value='hinnastoryhmittely' {$sel['hinnastoryhmittely']}>".t("hinnastoryhmittely")."</option>";
+  $ulos .= "<option value='magento_attribute_set_id' {$sel['magento_attribute_set_id']}>".t("Magento attribute set ID")."</option>";
 
   // Tuotteiden avainsanojen laji
   // N‰m‰ on dynaamisia ja k‰ytet‰‰n ainoastaan raporteissa/erikoistapauksissa, johon erikseen hardcoodattu sovittu arvo.
@@ -179,6 +180,9 @@ if (mysql_field_name($result, $i) == "selite") {
 
     $ulos .= "</select></td>";
   }
+  elseif (strtolower($tem_laji) == "magento_attribute_set_id") {
+    $ulos = "<td><input type='text' name='$nimi' value='{$trow[$i]}'></input></td>";
+  }
   elseif ($trow[3] == "sammutin_koko") {
     $sammuttimen_koot_result = t_avainsana('SAMMUTIN_KOKO');
     $sammutin_koot = array();
@@ -235,7 +239,12 @@ if (mysql_field_name($result, $i) == "selite") {
 }
 
 if (mysql_field_name($result, $i) == "selitetark") {
-  $ulos = "<td><textarea rows=10 cols=50 name='$nimi'>{$trow[$i]}</textarea></td>";
+  if (strtolower($tem_laji) == "magento_attribute_set_id") {
+    $tyyppi = 0;
+  }
+  else {
+    $ulos = "<td><textarea rows=10 cols=50 name='$nimi'>{$trow[$i]}</textarea></td>";
+  }
 }
 
 if (mysql_field_name($result, $i) == "kieli") {
@@ -308,4 +317,10 @@ if (mysql_field_name($result, $i) == 'selite' && $trow[3] == 'ps_ala_try') {
   $ulos .= "</select></td>";
 
   $jatko = 0;
+}
+
+if (mysql_field_name($result, $i) == 'jarjestys') {
+  if (strtolower($tem_laji) == "magento_attribute_set_id") {
+    $tyyppi = 0;
+  }
 }

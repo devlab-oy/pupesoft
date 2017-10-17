@@ -6,7 +6,7 @@ require "inc/parametrit.inc";
 
 $query = "UPDATE kuka SET
           session       = '',
-          kesken        = '0'
+          kesken        = 0
           WHERE session = '$session'";
 $result = pupe_query($query);
 

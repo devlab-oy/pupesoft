@@ -102,6 +102,9 @@ if ($toim == "OSTO" or $tulostimet[0] == "Ostotilaus") {
 
   echo "<tr><th>", t("Tulosta nimitykset ostotilaukselle"), "</th><td><input type='checkbox' name='nimitykset' {$chk}></td></tr>";
 
+  $chk = empty($asiakkaiden_nimet) ? '' : 'checked';
+  echo "<tr><th>", t("Tulosta myös asiakkaiden nimet"), "</th><td><input type='checkbox' name='asiakkaiden_nimet' {$chk}></td></tr>";
+
   $mista = 'toimi';
 
   $editsql = "SELECT *
@@ -282,7 +285,7 @@ echo "<tr><th>".t("Valitse kieli")."</th>";
 ///* Haetaan asiakkaan kieli *///
 if ($otunnus != '' or $laskunro != '') {
 
-  $querykieli = "SELECT liitostunnus
+  $querykieli = "SELECT liitostunnus, toim_email
                  FROM lasku
                  WHERE";
 
@@ -303,7 +306,10 @@ if ($otunnus != '' or $laskunro != '') {
 
   $querykieli .= " AND yhtio ='$kukarow[yhtio]'";
   $resultkieli = pupe_query($querykieli);
-  $asrow = mysql_fetch_array($resultkieli);
+  $asrow = mysql_fetch_assoc($resultkieli);
+
+  $toim_email = "";
+  if (!empty($asrow['toim_email'])) $toim_email = $asrow['toim_email'];
 
   $lasku_email = "";
   if ($mista == 'asiakas') $lasku_email = ", lasku_email";
@@ -388,7 +394,7 @@ foreach ($tulostimet as $tulostin) {
   if (empty($ei_inventointi)) {
     echo "<option value=''>".t("Ei kirjoitinta")."</option>";
 
-    if (strpos($_SERVER['SCRIPT_NAME'], "tulostakopio.php") === FALSE and in_array($tulostin, array('Työmääräys', 'Huoltosaate', 'Reklamaatio', 'Takuu', 'Tarjous'))) {
+    if (strpos($_SERVER['SCRIPT_NAME'], "tulostakopio.php") === FALSE and in_array($tulostin, array('Työmääräys', 'Huoltosaate', 'Reklamaatio', 'Takuu', 'Tarjous', 'Inventointi'))) {
       echo "<option value='-88'>".t('PDF Ruudulle')."</option>";
     }
     else {
@@ -410,6 +416,10 @@ foreach ($tulostimet as $tulostin) {
 
   if (($toim == 'TARJOUS' or $toim == 'MYYNTISOPIMUS' or $toim == 'LAHETE' or $toim == 'TILAUSVAHVISTUS' or $toim == 'LASKU') and $asrow['email'] != '') {
     echo "<option value='asiakasemail$asrow[email]'>".t("Asiakkaan sähköpostiin").": $asrow[email]</option>";
+
+    if (!empty($toim_email)) {
+      echo "<option value='asiakasemail$toim_email'>".t("Asiakkaan sähköpostiin").": $toim_email</option>";
+    }
   }
 
   if ($toim == 'LASKU' and trim($asrow['lasku_email']) != '') {
@@ -419,6 +429,10 @@ foreach ($tulostimet as $tulostin) {
   if ($toim == 'TILAUSVAHVISTUS') {
     echo "<option value='excel_lahete_geodis_wilson'>".t("Excel-tilausvahvistus")."</option>";
     echo "<option value='excel_lahete_hinnoilla'>".t("Excel-tilausvahvistus hintatiedoilla")."</option>";
+  }
+
+  if ($toim == 'TARJOUS') {
+    echo "<option value='excel_lahete_hinnoilla'>".t("Excel-tarjous hintatiedoilla")."</option>";
   }
 
   if (isset($editoimrow) and $editoimrow["edi_kuvaus"] != '' and

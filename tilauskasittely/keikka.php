@@ -35,7 +35,8 @@ if (isset($_POST["tee"])) {
 
 if (strpos($_SERVER['SCRIPT_NAME'], "keikka.php")  !== FALSE) {
 
-  if (isset($_REQUEST["toiminto"]) and ($_REQUEST["toiminto"] == "kalkyyli" or $_REQUEST["toiminto"] == "kaikkiok")) {
+  if (isset($_REQUEST["toiminto"]) and
+      ($_REQUEST["toiminto"] == "kalkyyli" or $_REQUEST["toiminto"] == "kaikkiok" or ($_REQUEST["toiminto"] == "tulosta" and !empty($_REQUEST["tee_excel"])))) {
     // Ei käytetä pakkausta
     $compression = FALSE;
   }
@@ -73,8 +74,7 @@ if (!isset($mobiili_keikka))   $mobiili_keikka = "";
 if (!isset($toimipaikka))    $toimipaikka = $kukarow['toimipaikka'];
 
 $onkolaajattoimipaikat = ($yhtiorow['toimipaikkakasittely'] == "L" and $toimipaikat_res = hae_yhtion_toimipaikat($kukarow['yhtio']) and mysql_num_rows($toimipaikat_res) > 0) ? TRUE : FALSE;
-$onkologmaster = (!empty($ftp_logmaster_host) and !empty($ftp_logmaster_user) and !empty($ftp_logmaster_pass) and !empty($ftp_logmaster_path));
-$onkologmaster = ($onkologmaster and in_array($yhtiorow['ulkoinen_jarjestelma'], array('','S')));
+$onkologmaster = (LOGMASTER_RAJAPINTA and in_array($yhtiorow['ulkoinen_jarjestelma'], array('', 'S')));
 
 if ($onkolaajattoimipaikat and isset($otunnus)) {
 
@@ -117,9 +117,8 @@ echo "<script type=\"text/javascript\" charset=\"utf-8\">
             var varasto = $('#'+id+'_varasto').val(),
                 tuoteno = $('#'+id+'_tuoteno').val();
 
-
-            if ($('.saldo_'+id).is(':visible')) {
-              $('.saldo_'+id).hide();
+            if ($('#div_'+id).is(':visible')) {
+              $('#div_'+id).hide();
             }
             else {
               $.post('{$_SERVER['SCRIPT_NAME']}',
@@ -131,13 +130,14 @@ echo "<script type=\"text/javascript\" charset=\"utf-8\">
                 function(return_value) {
                   var data = jQuery.parseJSON(return_value);
 
-                  $('.saldo_'+id).html(
+                  $('#span_'+id).html(
                     '<br />' +
-                    '<table>' +
-                    '<tr><th class=\"tumma\">".t("Saldo")."</th><td>' + data.saldo + '</td></tr>' +
-                    '<tr><th class=\"tumma\">".t("Hyllyssä")."</th><td>' + data.hyllyssa + '</td></tr>' +
-                    '<tr><th class=\"tumma\">".t("Myytävissä")."</th><td>' + data.myytavissa + '</td></tr>'
-                  ).show();
+                    '<li>".t("Saldo").": ' + data.saldo + '</li>' +
+                    '<li>".t("Hyllyssä").": ' + data.hyllyssa + '</li>' +
+                    '<li>".t("Myytävissä").": ' + data.myytavissa + '</li>'
+                  );
+
+                  $('#div_'+id).show();
                 });
             }
           });
@@ -355,7 +355,7 @@ if ($toiminto == "tulosta_hintalaput") {
 if ($onkologmaster and $toiminto == "saapuminen_ulkoiseen_jarjestelmaan") {
   $saapumisnro = $otunnus;
 
-  require "saapuminen_ulkoiseen_jarjestelmaan.php";
+  require "rajapinnat/logmaster/inbound_delivery.php";
 
   $toiminto = "kohdista";
 }
@@ -844,7 +844,7 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
             {$toimipaikkalisa}
             {$ei_lasku_lisa}
             GROUP BY lasku.liitostunnus
-            ORDER BY lasku.nimi, lasku.nimitark, lasku.ytunnus";
+            ORDER BY nimi, nimitark, ytunnus";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) > 0) {
@@ -1259,12 +1259,12 @@ if ($toiminto == "" and (($ytunnus != "" or $keikkarajaus != '') and $toimittaja
         echo "<td valign='top'>";
 
         switch ($row['sisviesti3']) {
-        case 'ei_vie_varastoon':
+        case 'lahetetty_ulkoiseen_jarjestelmaan':
           echo "<font class='error'>";
           echo t("Odottaa kuittausta");
           echo "</font>";
           break;
-        case 'ok_vie_varastoon':
+        case 'kuittaus_saapunut_ulkoisesta_jarjestelmasta':
           echo "<font class='ok'>";
           echo t("Kuittaus saapunut");
           echo "</font>";
@@ -1410,16 +1410,8 @@ if ($toiminto == "" and (($ytunnus != "" or $keikkarajaus != '') and $toimittaja
           echo "<option value='tulosta'>"      .t("Tulosta paperit")."</option>";
         }
 
-        $onkologmaster_varasto = $normivarastoja = 0;
-
-        if ($onkologmaster) {
-          list($onkologmaster_varasto, $normivarastoja) = ulkoinen_jarjestelma_varastot($row['tunnus']);
-        }
-
-        $logmaster_chk = (!$onkologmaster or ($onkologmaster and $normivarastoja > 0 and $onkologmaster_varasto == 0) or ($onkologmaster and $normivarastoja == 0 and $onkologmaster_varasto > 0 and $row['sisviesti3'] == 'ok_vie_varastoon'));
-
         // jos on kohdistettuja rivejä ja lisätiedot on syötetty ja varastopaikat on ok ja on vielä jotain vietävää varastoon
-        if ($kplyhteensa > 0 and $varok == 1 and $kplyhteensa != $kplvarasto and $sarjanrook == 1 and $yhtiorow['suuntalavat'] != 'S' and $logmaster_chk) {
+        if ($kplyhteensa > 0 and $varok == 1 and $kplyhteensa != $kplvarasto and $sarjanrook == 1 and $yhtiorow['suuntalavat'] != 'S') {
           echo "<option value='kalkyyli'>"     .t("Vie varastoon")."</option>";
         }
 
@@ -1609,16 +1601,8 @@ if ($toiminto == "kohdista" or $toiminto == "yhdista" or $toiminto == "poista" o
     $nappikeikka .= $formloppu;
   }
 
-  $onkologmaster_varasto = $normivarastoja = 0;
-
-  if ($onkologmaster) {
-    list($onkologmaster_varasto, $normivarastoja) = ulkoinen_jarjestelma_varastot($otunnus);
-  }
-
-  $logmaster_chk = (!$onkologmaster or ($onkologmaster and $normivarastoja > 0 and $onkologmaster_varasto == 0) or ($onkologmaster and $normivarastoja == 0 and $onkologmaster_varasto > 0 and $tsekkirow['sisviesti3'] == 'ok_vie_varastoon'));
-
   // jos on kohdistettuja rivejä ja lisätiedot on syötetty ja varastopaikat on ok ja on vielä jotain vietävää varastoon
-  if ($yhtiorow['suuntalavat'] != 'S' and $kplyhteensa > 0 and $varok == 1 and $kplyhteensa != $kplvarasto and $sarjanrook == 1 and $logmaster_chk) {
+  if ($yhtiorow['suuntalavat'] != 'S' and $kplyhteensa > 0 and $varok == 1 and $kplyhteensa != $kplvarasto and $sarjanrook == 1) {
     $nappikeikka .= "$formalku";
     $nappikeikka .= "<input type='hidden' name='toiminto' value='kalkyyli'>";
     $nappikeikka .= "<input type='submit' value='".t("Vie varastoon")."'>";

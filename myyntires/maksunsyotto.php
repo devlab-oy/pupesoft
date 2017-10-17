@@ -300,10 +300,10 @@ if ($tee == "SYOTTO") {
 if (!empty($viite_haku) and $tee == "ETSI") {
   $query = "SELECT liitostunnus, valkoodi
             FROM lasku
-            WHERE yhtio  = '$kukarow[yhtio]'
-            and tila     = 'U'
-            and alatila  = 'X'
-            and viite = '$viite_haku'";
+            WHERE yhtio = '$kukarow[yhtio]'
+            and tila    = 'U'
+            and alatila = 'X'
+            and viite   = '$viite_haku'";
   $result  = pupe_query($query);
 
   if ($asiakas = mysql_fetch_assoc($result)) {
@@ -635,9 +635,9 @@ if ($tee == "" and $ytunnus == "") {
 
   echo "<table>";
   echo "<tr>";
-  echo "<th>",t("Maksaja"),"</th>";
-  echo "<td>",livesearch_kentta("maksaja", "ASIAKASHAKU", "asiakasid", 300, $maksaja_haku),"</td>";
-  echo "<td class='back'>",asiakashakuohje(),"</td>";
+  echo "<th>", t("Maksaja"), "</th>";
+  echo "<td>", livesearch_kentta("maksaja", "ASIAKASHAKU", "asiakasid", 300, $maksaja_haku), "</td>";
+  echo "<td class='back'>", asiakashakuohje(), "</td>";
   echo "</tr>";
 
   echo "<tr>";
@@ -645,7 +645,7 @@ if ($tee == "" and $ytunnus == "") {
   echo "</tr>";
 
   echo "<tr>";
-  echo "<th>",t("Laskunro")."</th><td><input type='text' name='laskunro_haku' size='25'></td>";
+  echo "<th>", t("Laskunro")."</th><td><input type='text' name='laskunro_haku' size='25'></td>";
   echo "</tr>";
 
   echo "<tr>";
@@ -653,7 +653,7 @@ if ($tee == "" and $ytunnus == "") {
   echo "</tr>";
 
   echo "<tr>";
-  echo "<th>",t("Viitenumero")."</th><td><input type='text' name='viite_haku' size='25'></td>";
+  echo "<th>", t("Viitenumero")."</th><td><input type='text' name='viite_haku' size='25'></td>";
   echo "</tr>";
   echo "</table>";
 

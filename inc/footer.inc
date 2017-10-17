@@ -13,6 +13,14 @@ $timeparts = explode(" ", microtime());
 $endtime   = $timeparts[1].substr($timeparts[0], 1);
 $aika      = round($endtime-$starttime, 4);
 
+if (array_key_exists("password", $_REQUEST)) {
+  $_REQUEST["password"] = "";
+}
+
+if (array_key_exists("salasana", $_REQUEST)) {
+  $_REQUEST["salasana"] = "";
+}
+
 if (!isset($verkkokauppa) or $verkkokauppa == "") {
   $suoque = "INSERT INTO suorituskykyloki
              SET yhtio     = '$kukarow[yhtio]',
@@ -54,13 +62,7 @@ if (strpos($_SERVER['SCRIPT_NAME'], "sanakirja.php") !== FALSE or !isset($kaanne
 }
 
 if ($lopeta_body) {
-
-  echo "
-    <script>
-      $(document).ready(function() {
-        top.document.title = $('font.head').first().text().replace(\":\", \"\")+\" / Pupesoft\";
-      });
-    </script>";
+  echo "<script>top.document.title = $('font.head').first().text().replace(\":\", \"\")+\" / Pupesoft\";</script>";
 
   if ($piirra_sanakirja) {
     switch (strtoupper($kukarow["kieli"])) {

@@ -4,12 +4,16 @@ if (!function_exists("asiakashintatarkista")) {
   function asiakashintatarkista(&$t, $i, $result, $tunnus, &$virhe, $trow) {
     global $kukarow, $yhtiorow, $alias_set, $alasveto;
 
-    static $chytunnus, $chasiakas_ryhma, $chtuoteno, $chryhma, $chminkpl, $chmaxkpl, $chalkupvm, $chloppupvm, $chastunn, $chtuoteno_ind, $chsegmentti, $chpiiri;
+    static $chytunnus, $chasiakas_ryhma, $chtuoteno, $chryhma, $chminkpl, $chmaxkpl, $chalkupvm, $chloppupvm, $chastunn, $chtuoteno_ind, $chsegmentti, $chpiiri, $chvalkoodi;
 
     if (mysql_field_name($result, $i) == "hinta") {
       if (trim($t[$i]) == '') {
         $virhe[$i] = t("Tieto puuttuu!");
       }
+    }
+
+    if (mysql_field_name($result, $i) == "valkoodi") {
+      $chvalkoodi = trim($t[$i]);
     }
 
     if (mysql_field_name($result, $i) == "ytunnus") {
@@ -232,13 +236,13 @@ if (!function_exists("asiakashintatarkista")) {
       $and = '';
 
       if ($chasiakas_ryhma != '') $and .= " and asiakas_ryhma = '$chasiakas_ryhma'";
-      if ($chytunnus != '')     $and .= " and ytunnus = '$chytunnus'";
-      if ($chpiiri != '')     $and .= " and piiri = '$chpiiri'";
-      if ($chsegmentti > 0)     $and .= " and asiakas_segmentti = '$chsegmentti'";
-      if ($chastunn > 0)       $and .= " and asiakas = '$chastunn'";
-
-      if ($chryhma != '')     $and .= " and ryhma = '$chryhma'";
-      if ($chtuoteno != '')     $and .= " and tuoteno = '$chtuoteno'";
+      if ($chytunnus != '')       $and .= " and ytunnus = '$chytunnus'";
+      if ($chpiiri != '')         $and .= " and piiri = '$chpiiri'";
+      if ($chsegmentti > 0)       $and .= " and asiakas_segmentti = '$chsegmentti'";
+      if ($chastunn > 0)          $and .= " and asiakas = '$chastunn'";
+      if ($chryhma != '')         $and .= " and ryhma = '$chryhma'";
+      if ($chtuoteno != '')       $and .= " and tuoteno = '$chtuoteno'";
+      if ($chvalkoodi != '')      $and .= " and valkoodi = '$chvalkoodi'";
 
       $chminkpl = (int) $chminkpl;
       $chmaxkpl = (int) $chmaxkpl;

@@ -241,6 +241,7 @@ if (!function_exists("asiakastarkista")) {
 
         // jos ollaan valittu jotain muuta kuin PAPERI tai EMAIL niin verkkotunnus pitää syöttää!
         if (trim($t[$i]) != '999'
+          and trim($t[$i]) != '888'
           and trim($t[$i]) != '112'
           and trim($t[$i]) != '666'
           and trim($t[$i]) != '667'

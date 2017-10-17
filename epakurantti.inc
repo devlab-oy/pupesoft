@@ -15,6 +15,8 @@
 $tuoteno = isset($tuoteno) ? mysql_real_escape_string(trim($tuoteno)) : "";
 $tee = isset($tee) ? trim($tee) : "";
 $varaston_muutos = 0;
+$from = isset($from) ? $from : '';
+$toim = isset($toim) ? $toim : '';
 
 // Tehd‰‰n oletuksena kaikki muutokset nykyhetkeen
 $updatepvm = "now()";

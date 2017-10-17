@@ -1,8 +1,12 @@
 <?php
 
+ob_start();
+
 require "../inc/parametrit.inc";
 require 'validation/Validation.php';
 require 'valmistuslinjat.inc';
+
+$onkologmaster = (LOGMASTER_RAJAPINTA and in_array($yhtiorow['ulkoinen_jarjestelma'], array('', 'K')));
 
 if (isset($tee) and $tee == "TILAA_AJAX") {
   require_once "inc/tilaa_ajax.inc";
@@ -20,6 +24,14 @@ if (!isset($jarj)) $jarj = '';
 if (!isset($etsi)) $etsi = '';
 if (!isset($tumaa)) $tumaa = '';
 if (!isset($tee2)) $tee2 = '';
+if (!isset($show_ohjelma_moduli)) $show_ohjelma_moduli = false;
+
+
+if ($show_ohjelma_moduli) {
+  setcookie('show_ohjelma_moduli', true, strtotime('+1 year'));
+}
+
+$show_ohjelma_moduli = $show_ohjelma_moduli || isset($_COOKIE['show_ohjelma_moduli']) && $_COOKIE['show_ohjelma_moduli'] == true;
 
 $valmistuslinjat = hae_valmistuslinjat();
 
@@ -211,6 +223,26 @@ if ($tee2 == 'TULOSTA') {
   elseif (isset($tulostukseen_kaikki)) {
     $tilausnumerorypas = unserialize(urldecode($tulostukseen_kaikki));
     $tulostukseen_kaikki = "KYLLA";
+
+    // Tsekataan komento valitulle tulostimelle
+    $query = "SELECT komento
+              from kirjoittimet
+              where tunnus = '$valittu_tulostin'
+              AND yhtio    = '$kukarow[yhtio]'";
+    $pres = pupe_query($query);
+    $prow = mysql_fetch_assoc($pres);
+
+    // Kun tulostetaan kaikki kerralla ja otetaan s‰hkˆpostiin,
+    // niin laitetaan kaikki yhteen dokkariin
+    if ($prow["komento"] == "email" and $yhtiorow["lahetteen_tulostustapa"] != "X") {
+      require_once "pdflib/phppdflib.class.php";
+
+      $pdf_kaikki_tul = new pdffile;
+      $pdf_kaikki_tul->set_default('margin-top', 0);
+      $pdf_kaikki_tul->set_default('margin-bottom', 0);
+      $pdf_kaikki_tul->set_default('margin-left', 0);
+      $pdf_kaikki_tul->set_default('margin-right', 0);
+    }
   }
 
   if (is_array($tilausnumerorypas)) {
@@ -320,6 +352,13 @@ if ($tee2 == 'TULOSTA') {
         echo t("Tilaus on kesken k‰ytt‰j‰ll‰").", $keskenrow[nimi], ".t("ota yhteytt‰ h‰neen ja k‰ske h‰nen laittaa v‰h‰n vauhtia t‰h‰n touhuun")."!<br>";
         $tee2 = "";
       }
+    }
+
+    if (!empty($pdf_kaikki_tul)) {
+      // Tulostetaan sivu
+      $params_kerayslista["komento"] = $komento;
+
+      print_pdf_kerayslista($params_kerayslista);
     }
   }
   else {
@@ -585,7 +624,15 @@ if ($tee2 == 'VALITSE') {
       echo "</select></td></tr>";
       echo "</table><br><br>";
       echo "<input type='hidden' name='lasku_yhtio' value='$kukarow[yhtio]'>";
-      echo "<input type='submit' name='tila' value='".t("Tulosta")."'></form>";
+
+      if ($onkologmaster and in_array($prirow['ulkoinen_jarjestelma'], array('L','P'))) {
+        echo t("Ulkoisen varaston tilaus");
+      }
+      else {
+        echo "<input type='submit' name='tila' value='".t("Tulosta")."'>";
+      }
+
+      echo "</form>";
 
       echo "<br>";
       echo "<form action = 'lahetteen_tulostusjono.php' method = 'post'>
@@ -611,6 +658,8 @@ if ($tee2 == '') {
   /*
     Oletuksia
   */
+  $_tarkista_varastot = true;
+
   if (isset($indexvas) and $indexvas == 1 and $tuvarasto == '') {
 
     $karajaus = 1;
@@ -619,12 +668,23 @@ if ($tee2 == '') {
       $karajaus = $yhtiorow["keraysaikarajaus"];
     }
 
+    $keraakaikistares = t_avainsana("KERAAKAIKISTA");
+
+    if (mysql_num_rows($keraakaikistares) > 0) {
+
+      $keraakaikistarow = mysql_fetch_assoc($keraakaikistares);
+
+      if ($keraakaikistarow['selitetark'] == 'a') {
+        $_tarkista_varastot = false;
+      }
+    }
+
     // jos k‰ytt‰j‰ll‰ on oletusvarasto, valitaan se
-    if ($kukarow['oletus_varasto'] != 0) {
+    if ($_tarkista_varastot and $kukarow['oletus_varasto'] != 0) {
       $tuvarasto = $kukarow['oletus_varasto'];
     }
     //  Varastorajaus jos k‰ytt‰j‰ll‰ on joku varasto valittuna
-    elseif ($kukarow['varasto'] != '' and $kukarow['varasto'] != 0) {
+    elseif ($_tarkista_varastot and $kukarow['varasto'] != '' and $kukarow['varasto'] != 0) {
       // jos k‰ytt‰j‰ll‰ on monta varastoa valittuna, valitaan ensimm‰inen
       $tuvarasto   = strpos($kukarow['varasto'], ',') !== false ? array_shift(explode(",", $kukarow['varasto'])) : $kukarow['varasto'];
     }
@@ -983,6 +1043,7 @@ if ($tee2 == '') {
 
   $query = "SELECT lasku.yhtio, lasku.yhtio_nimi, lasku.ytunnus, lasku.toim_ovttunnus, lasku.toim_nimi, lasku.toim_nimitark, lasku.nimi, lasku.nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp, lasku.toim_maa, lasku.varasto,
             lasku.yhtio_toimipaikka,
+            lasku.ohjelma_moduli,
             if (tila = 'V', lasku.viesti, lasku.toimitustapa) toimitustapa,
             if (maksuehto.jv!='', lasku.tunnus, '') jvgrouppi,
             if (lasku.vienti!='', lasku.tunnus, '') vientigrouppi,
@@ -1062,6 +1123,10 @@ if ($tee2 == '') {
     echo "<th valign='top'><a href='#' onclick=\"getElementById('jarj').value='toimitustapa'; document.forms['find'].submit();\">".t("Toimitustapa")."</a></th>";
     echo "<th valign='top'><a href='#' onclick=\"getElementById('jarj').value='riveja'; document.forms['find'].submit();\">".t("Riv")."</a></th>";
     echo "<th valign='top'><a href='#' onclick=\"getElementById('jarj').value='tilauksen_paino'; document.forms['find'].submit();\">".t("Paino")."</a></th>";
+
+    if ($show_ohjelma_moduli) {
+      echo "<th valign='top'><a href='#' onclick=\"getElementById('jarj').value='ohjelma_moduli'; document.forms['find'].submit();\">".t("L‰hde")."</a></th>";
+    }
 
     if ($yhtiorow["pakkaamolokerot"] != "" or $logistiikka_yhtio != '') {
       echo "<th valign='top'><a href='#' onclick=\"getElementById('jarj').value='riveja'; document.forms['find'].submit();\">".t("Ei lokeroa")."</a></th>";
@@ -1189,6 +1254,20 @@ if ($tee2 == '') {
       echo "<$ero valign='top'>$tilrow[riveja]</$ero>";
       echo "<$ero valign='top' align='right'>$tilrow[tilauksen_paino] kg</$ero>";
 
+      if ($show_ohjelma_moduli) {
+        echo "<{$ero} valign='top'>" . humanize_ohjelma_moduli($tilrow['ohjelma_moduli']) . "</{$ero}>";
+      }
+
+      //haetaan ker‰yslistan oletustulostin
+      $query = "SELECT *
+                from varastopaikat
+                where yhtio = '$kukarow[yhtio]'
+                and tunnus  = '$tilrow[varasto]'";
+      $prires = pupe_query($query);
+      $prirow = mysql_fetch_array($prires);
+
+      $onkologmaster_varasto = ($onkologmaster and in_array($prirow['ulkoinen_jarjestelma'], array('L','P')));
+
       if ($tilrow["tilauksia"] > 1) {
         echo "<$ero valign='top'></$ero>";
 
@@ -1225,13 +1304,6 @@ if ($tee2 == '') {
         echo "</tr>";
       }
       else {
-        //haetaan ker‰yslistan oletustulostin
-        $query = "SELECT *
-                  from varastopaikat
-                  where yhtio = '$kukarow[yhtio]'
-                  and tunnus  = '$tilrow[varasto]'";
-        $prires = pupe_query($query);
-        $prirow = mysql_fetch_array($prires);
         $kirjoitin = $toim == 'VASTAANOTA_REKLAMAATIO' ? $prirow['printteri9'] : $prirow['printteri0'];
 
         $varasto = $tilrow["varasto"];
@@ -1316,7 +1388,27 @@ if ($tee2 == '') {
         echo "<input type='hidden' name='tee2'       value='TULOSTA'>";
         echo "<input type='hidden' name='tulostukseen[]' value='$tilrow[otunnus]'>";
         echo "<input type='hidden' name='lasku_yhtio'   value='$tilrow[yhtio]'>";
-        echo "<$ero valign='top'><input type='submit'   value='".t("Tulosta")."'></form></$ero>";
+        echo "<$ero valign='top'>";
+
+        if ($onkologmaster_varasto) {
+          echo t("Ulkoisen varaston tilaus");
+
+          $keskenres = tilaus_aktiivinen_kayttajalla($tilrow['otunnus']);
+
+          if (mysql_num_rows($keskenres) != 0) {
+            $keskenrow = mysql_fetch_assoc($keskenres);
+
+            echo "<br>";
+            echo "<font class='error'>";
+            echo t("Tilaus on kesken k‰ytt‰j‰ll‰ %s (%s)", "", $keskenrow['nimi'], $keskenrow['kuka']);
+            echo "</font>";
+          }
+        }
+        else {
+          echo "<input type='submit' value='".t("Tulosta")."'>";
+        }
+
+        echo "</$ero></form>";
 
         echo "<form method='post'>";
         echo "<input type='hidden' name='toim'       value='$toim'>";
@@ -1343,7 +1435,10 @@ if ($tee2 == '') {
       }
 
       // Ker‰t‰‰n tunnukset tulosta kaikki-toimintoa varten
-      $tulostakaikki_tun[$tilrow['otunnus']] = $tilrow["yhtio"];
+      if (!$onkologmaster_varasto) {
+        $tulostakaikki_tun[$tilrow['otunnus']] = $tilrow["yhtio"];
+      }
+
       $riveja_yht += $tilrow["riveja"];
     }
 
@@ -1355,7 +1450,12 @@ if ($tee2 == '') {
     echo t("Rivej‰ yhteens‰")."</th>";
     echo "<th>".$riveja_yht."</th>";
 
-    $spanni = ($yhtiorow["pakkaamolokerot"] != "" or $logistiikka_yhtio != '') ? 4 : 3;
+    if ($show_ohjelma_moduli) {
+      $spanni = 5;
+    }
+    else {
+      $spanni = 4;
+    }
 
     if ($toim == "VASTAANOTA_REKLAMAATIO") {
       $spanni++;

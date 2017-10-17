@@ -15,10 +15,10 @@ abstract class PrestaClient {
   // ids of installed languages
   protected $languages_table = null;
 
-  /**
-   *
-   * @var PrestaShopWebservice REST-client
-   */
+  // dynamic fields for xml
+  protected $dynamic_fields = array();
+
+  // PrestaShopWebservice REST-client
   protected $ws = null;
 
   /**
@@ -140,8 +140,8 @@ abstract class PrestaClient {
     );
 
     $kauppa  = "";
-    $kauppa .= is_null($id_shop) ? '' : "kaupasta {$id_shop}";
-    $kauppa .= is_null($id_group_shop) ? '' : "kaupparyhmästä {$id_group_shop}";
+    $kauppa .= is_null($id_shop) ? '' : "kaupasta {$id_shop} ";
+    $kauppa .= is_null($id_group_shop) ? '' : "kaupparyhmästä {$id_group_shop} ";
 
     try {
       $msg = "Haetaan {$resource} id {$id} {$kauppa}";
@@ -149,7 +149,7 @@ abstract class PrestaClient {
       $response_xml = $this->ws->get($opt);
     }
     catch (Exception $e) {
-      $msg = "Haku {$resource} id {$id} {$kauppa} epäonnistui!";
+      $msg = "Haku {$resource} id {$id} {$kauppa}epäonnistui!";
       $this->logger->log($msg, $e);
       throw $e;
     }
@@ -172,8 +172,8 @@ abstract class PrestaClient {
     );
 
     $kauppa  = "";
-    $kauppa .= is_null($id_shop) ? '' : "kauppaan {$id_shop}";
-    $kauppa .= is_null($id_group_shop) ? '' : "kaupparyhmään {$id_group_shop}";
+    $kauppa .= is_null($id_shop) ? '' : "kauppaan {$id_shop} ";
+    $kauppa .= is_null($id_group_shop) ? '' : "kaupparyhmään {$id_group_shop} ";
 
     try {
       $xml = $this->generate_xml($resource);
@@ -182,10 +182,10 @@ abstract class PrestaClient {
 
       $response_xml = $this->ws->add($opt);
 
-      $this->logger->log("Luotiin {$kauppa} uusi " . $this->resource_name());
+      $this->logger->log("Luotiin {$kauppa}uusi " . $this->resource_name());
     }
     catch (Exception $e) {
-      $msg = "Resurssin " . $this->resource_name() . " luonti {$kauppa} epäonnistui";
+      $msg = "Resurssin " . $this->resource_name() . " luonti {$kauppa}epäonnistui";
       $this->logger->log($msg, $e);
       throw $e;
     }
@@ -245,8 +245,8 @@ abstract class PrestaClient {
     );
 
     $kauppa  = "";
-    $kauppa .= is_null($id_shop) ? '' : "kauppaan {$id_shop}";
-    $kauppa .= is_null($id_group_shop) ? '' : "kaupparyhmään {$id_group_shop}";
+    $kauppa .= is_null($id_shop) ? '' : "kauppaan {$id_shop} ";
+    $kauppa .= is_null($id_group_shop) ? '' : "kaupparyhmään {$id_group_shop} ";
 
     try {
       $xml = $this->remove_read_only_fields($xml);
@@ -298,8 +298,8 @@ abstract class PrestaClient {
     }
 
     $kauppa  = "";
-    $kauppa .= is_null($id_shop) ? '' : "kaupasta {$id_shop}";
-    $kauppa .= is_null($id_group_shop) ? '' : "kaupparyhmästä {$id_group_shop}";
+    $kauppa .= is_null($id_shop) ? '' : "kaupasta {$id_shop} ";
+    $kauppa .= is_null($id_group_shop) ? '' : "kaupparyhmästä {$id_group_shop} ";
 
     try {
       $response_xml = $this->ws->get($opt);
@@ -307,7 +307,7 @@ abstract class PrestaClient {
       $this->logger->log($msg);
     }
     catch (Exception $e) {
-      $msg = "Kaikkien {$resource} rivien haku {$kauppa} epäonnistui!";
+      $msg = "Kaikkien {$resource} rivien haku {$kauppa}epäonnistui!";
       $this->logger->log($msg, $e);
       throw $e;
     }
@@ -364,8 +364,8 @@ abstract class PrestaClient {
     );
 
     $kauppa  = "";
-    $kauppa .= is_null($id_shop) ? '' : "kaupasta {$id_shop}";
-    $kauppa .= is_null($id_group_shop) ? '' : "kaupparyhmästä {$id_group_shop}";
+    $kauppa .= is_null($id_shop) ? '' : "kaupasta {$id_shop} ";
+    $kauppa .= is_null($id_group_shop) ? '' : "kaupparyhmästä {$id_group_shop} ";
 
     try {
       $response_bool = $this->ws->delete($opt);
@@ -383,7 +383,7 @@ abstract class PrestaClient {
 
   protected function delete_all() {
     $this->logger->log('---------Start ' . $this->resource_name() . ' delete all---------');
-    # TODO, this only fetches records from the default shop
+    // TODO, this only fetches records from the default shop
     $existing_resources = $this->all(array('id'));
     $existing_resources = array_column($existing_resources, 'id');
 
@@ -446,7 +446,7 @@ abstract class PrestaClient {
     // if we want to reset
     if (empty($value)) {
       $this->shop_ids = null;
-      return;
+      return null;
     }
 
     if (is_null($this->presta_shops)) {
@@ -476,6 +476,8 @@ abstract class PrestaClient {
     }
 
     $this->shop_ids = $value;
+
+    return $value;
   }
 
   protected function all_shop_ids() {
@@ -507,7 +509,7 @@ abstract class PrestaClient {
     }
     else {
       // substract one, since API key starts from zero
-      return ($this->languages_table[$code] - 1);
+      return $this->languages_table[$code] - 1;
     }
   }
 
@@ -516,6 +518,53 @@ abstract class PrestaClient {
     $value = htmlspecialchars($value, ENT_IGNORE);
 
     return $value;
+  }
+
+  protected function assign_dynamic_fields(SimpleXMLElement &$xml_node, $value_array) {
+    $parameters = $this->dynamic_fields;
+
+    if (empty($parameters)) {
+      return;
+    }
+
+    foreach ($parameters as $parameter) {
+      $key       = $parameter['arvo'];
+      $attribute = $parameter['nimi'];
+
+      if (empty($value_array[$key])) {
+        $this->logger->log("VIRHE! Kenttää {$key} ei ole asetettu. Ei voida asettaa arvoa {$attribute} -kenttään.");
+        continue;
+      }
+
+      $value = $this->xml_value($value_array[$key]);
+      $xml_node->$attribute = $value;
+
+      $this->logger->log("Poikkeava arvo {$attribute} -kenttään. Asetetaan {$key} kentän arvo {$value}");
+    }
+  }
+
+  protected function clean_field($value) {
+    $field = empty($value) ? "-" : trim($value);
+
+    return $this->xml_value($field);
+  }
+
+  protected function clean_alphanumeric($value, $length = 32) {
+    // max $length, special characters not allowed
+    $name = preg_replace("/[^0-9a-zA-ZäöåÄÖÅ ]+/", "", substr($value, 0, $length));
+
+    return $this->clean_field($name);
+  }
+
+  protected function clean_name($value, $length = 32) {
+    // max $length, numbers and special characters not allowed
+    $name = preg_replace("/[^a-zA-ZäöåÄÖÅ ]+/", "", substr($value, 0, $length));
+
+    return $this->clean_field($name);
+  }
+
+  public function set_dynamic_fields($fields) {
+    $this->dynamic_fields = $fields;
   }
 
   public function set_languages_table($value) {

@@ -1,10 +1,19 @@
 <?php
 
+$pupe_DataTables = "tyomaaraystable";
+
 if (strpos($_SERVER['SCRIPT_NAME'], "extranet_tyomaaraykset.php") !== FALSE) {
   require "parametrit.inc";
 }
 
+if ($kukarow['extranet'] == '') die(t("Käyttäjän parametrit - Tämä ominaisuus toimii vain extranetissä"));
+
 enable_ajax();
+
+if (isset($livesearch_tee) and $livesearch_tee == "LAITEHAKU") {
+  livesearch_laitehaku();
+  exit;
+}
 
 $tyom_parametrit = array(
   'valmnro' => isset($_REQUEST['valmnro']) ? $_REQUEST['valmnro'] : '',
@@ -43,13 +52,6 @@ $request = array(
   'osoite_parametrit' => $osoite_parametrit
 );
 
-if ($kukarow['extranet'] == '') die(t("Käyttäjän parametrit - Tämä ominaisuus toimii vain extranetissä"));
-
-if (isset($livesearch_tee) and $livesearch_tee == "LAITEHAKU") {
-  livesearch_laitehaku();
-  exit;
-}
-
 ?>
 <style>
   .tr_border_top {
@@ -62,7 +64,7 @@ if (isset($livesearch_tee) and $livesearch_tee == "LAITEHAKU") {
 <script>
 
 $(function() {
-  
+
   function confirmation(question) {
       var defer = $.Deferred();
       $('<div></div>')
@@ -90,11 +92,11 @@ $(function() {
     var onkoviesti2 = $('#viesti2').val();
     $('#tarkistusmuuttuja').val('JOO');
     if (onkoviesti1.length > 0) {
-        var question = "<?php 
-          echo t("Laitetta ei löydy laiterekisteristä");
-          echo "<br>";
-          echo t("Haluatko silti avata huoltopyynnön?");
-        ?>";
+        var question = "<?php
+echo t("Laitetta ei löydy laiterekisteristä");
+echo "<br>";
+echo t("Haluatko silti avata huoltopyynnön?");
+?>";
         confirmation(question).then(function (answer) {
             if(answer){
               $('#tyomaarays_form').submit();
@@ -102,11 +104,11 @@ $(function() {
         });
     }
     else if (onkoviesti2.length > 0) {
-      var question = "<?php 
-        echo t("Laitetta ei löydy sopimukselta");
-        echo "<br>";
-        echo t("Haluatko silti avata huoltopyynnön?");
-      ?>";
+      var question = "<?php
+echo t("Laitetta ei löydy sopimukselta");
+echo "<br>";
+echo t("Haluatko silti avata huoltopyynnön?");
+?>";
       confirmation(question).then(function (answer) {
           if(answer){
             $('#tyomaarays_form').submit();
@@ -122,6 +124,10 @@ $(function() {
 </script>
 <?php
 
+if ($request['tyom_toiminto'] == '' and $_REQUEST["tee"] != 'NAYTATILAUS') {
+  pupe_DataTables(array(array($pupe_DataTables, 8, 9, true, true)));
+}
+
 $avataanko_tyomaarays = false;
 $virheviesti1 = '';
 $virheviesti2 = '';
@@ -130,7 +136,7 @@ if (isset($valmnro) and !empty($valmnro)) {
   // Jos on valittu sarjanumero niin yritetään täyttää muut laitekentät
   $query = "SELECT *
             FROM laite
-            WHERE yhtio = '{$kukarow['yhtio']}'
+            WHERE yhtio  = '{$kukarow['yhtio']}'
             AND sarjanro = '{$valmnro}'
             LIMIT 1";
   $result = pupe_query($query);
@@ -183,15 +189,23 @@ elseif ($request['tyom_toiminto'] == 'EMAIL_KOPIO') {
 }
 
 function piirra_kayttajan_tyomaaraykset() {
+  global $pupe_DataTables, $request;
+
   echo "<font class='head'>".t("Huoltopyynnöt")."</font><hr>";
   piirra_nayta_aktiiviset_poistetut();
   $naytettavat_tyomaaraykset = hae_kayttajan_tyomaaraykset();
   if (count($naytettavat_tyomaaraykset) > 0) {
     echo "<form name ='tyomaaraysformi'>";
-    echo "<table>";
+    echo "<table class='display dataTable' id='$pupe_DataTables'>";
+    echo "<thead>";
     echo "<tr>";
     piirra_tyomaaraysheaderit();
     echo "</tr>";
+
+    echo "<tr>";
+    piirra_hakuboksit();
+    echo "</tr>";
+    echo "</thead>";
 
     foreach ($naytettavat_tyomaaraykset as $tyomaarays) {
       piirra_tyomaaraysrivi($tyomaarays);
@@ -201,7 +215,7 @@ function piirra_kayttajan_tyomaaraykset() {
     echo "</form>";
   }
   else {
-    echo "<br><font class='error'>".t('Työmääräyksiä ei löydy järjestelmästä')."!</font><br/>";
+    echo "<br><font class='message'>".t('Ei avoimia huoltopyyntöjä')."!</font><br/>";
   }
 
   piirra_luo_tyomaarays();
@@ -258,7 +272,7 @@ function hae_kayttajan_tyomaaraykset() {
             LEFT JOIN laskun_lisatiedot ON (lasku.yhtio=laskun_lisatiedot.yhtio and lasku.tunnus=laskun_lisatiedot.otunnus)
             LEFT JOIN kuka ON (kuka.yhtio=lasku.yhtio and kuka.tunnus=lasku.myyja)
             JOIN avainsana a1 ON (a1.yhtio=tyomaarays.yhtio and a1.laji='TYOM_TYOJONO'   and a1.selite=tyomaarays.tyojono and a1.selite = 1)
-            LEFT JOIN avainsana a2 ON (a2.yhtio=tyomaarays.yhtio and a2.laji='TYOM_TYOSTATUS' and a2.selite=tyomaarays.tyostatus)
+            LEFT JOIN avainsana a2 ON (a2.yhtio=tyomaarays.yhtio and a2.laji='TYOM_TYOSTATUS' and a2.selite=tyomaarays.tyostatus and a2.kieli = '{$kukarow['kieli']}')
             LEFT JOIN kuka a3 ON (a3.yhtio=tyomaarays.yhtio and a3.kuka=tyomaarays.suorittaja)
             LEFT JOIN kalenteri ON (kalenteri.yhtio = lasku.yhtio and kalenteri.tyyppi = 'asennuskalenteri' and kalenteri.liitostunnus = lasku.tunnus)
             LEFT JOIN avainsana a4 ON (a4.yhtio=kalenteri.yhtio and a4.laji='TYOM_TYOLINJA'  and a4.selitetark=kalenteri.kuka)
@@ -266,8 +280,8 @@ function hae_kayttajan_tyomaaraykset() {
             LEFT JOIN laite ON (laite.yhtio = lasku.yhtio and laite.sarjanro = tyomaarays.valmnro)
             LEFT JOIN tuote ON (tuote.yhtio = laite.yhtio and tuote.tuoteno = laite.tuoteno)
             LEFT JOIN avainsana a6 ON (a6.yhtio = tuote.yhtio and a6.laji = 'TRY' and a6.selite = tuote.try)
-            WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-            AND lasku.tila     in ('A','L','N','S','C')
+            WHERE lasku.yhtio      = '{$kukarow['yhtio']}'
+            AND lasku.tila         in ('A','L','N','S','C')
             {$alatila}
             AND lasku.liitostunnus = '{$kukarow['oletus_asiakas']}'
             GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22
@@ -277,7 +291,7 @@ function hae_kayttajan_tyomaaraykset() {
   while ($row = mysql_fetch_assoc($result)) {
     $historiaquery = "SELECT count(*) tapahtumahistoria_count
                       FROM tyomaarayksen_tapahtumat
-                      WHERE yhtio = '{$kukarow['yhtio']}'
+                      WHERE yhtio           = '{$kukarow['yhtio']}'
                       AND tyomaarays_tunnus = '{$row['tunnus']}'";
     $historiaresult = pupe_query($historiaquery);
     $historiarow = mysql_fetch_assoc($historiaresult);
@@ -302,8 +316,27 @@ function piirra_tyomaaraysheaderit($rajattu = false) {
 
   foreach ($headers as $header => $rajataan) {
     if ($rajattu and $rajataan) continue;
+
     echo "<th>$header</th>";
   }
+}
+
+function piirra_hakuboksit() {
+  $headers = array(
+    'tunnus',
+    'luontiaika',
+    'valmistaja',
+    'mallivari',
+    'valmnro',
+    'tyostatus',
+    'komm1',
+    'komm2'
+   );
+  foreach ($headers as $header) {
+    echo "<td><input type='text' class='search_field' name='search_{$header}'/></td>";
+  }
+  // Huoltpyyntökopi hidden search
+  echo "<td style ='display:none'><input type='hidden' class='search_field' name='search_hidden'/></td>";
 }
 
 function piirra_tyomaaraysrivi($tyomaarays) {
@@ -322,8 +355,8 @@ function piirra_tyomaaraysrivi($tyomaarays) {
   echo "<td>{$tyomaarays['luontiaika']}</td>";
   $valmistajatieto = !empty($tyomaarays['valmistaja']) ? $tyomaarays['valmistaja'] : $tyomaarays['merkki'];
   echo "<td>{$valmistajatieto}</td>";
-  echo "<td>{$tyomaarays['valmnro']}</td>";
   echo "<td>{$tyomaarays['mallivari']}</td>";
+  echo "<td>{$tyomaarays['valmnro']}</td>";
   echo "<td>{$tyomaarays['tyostatus']}</td>";
   echo "<td>{$tyomaarays['komm1']}</td>";
   echo "<td>{$tyomaarays['komm2']}</td>";
@@ -334,7 +367,7 @@ function piirra_tyomaaraysrivi($tyomaarays) {
 }
 
 function piirra_luo_tyomaarays() {
-  echo "<br>";
+  echo "<br><br>";
   echo "<form name='uusi_tyomaarays_button'>";
   echo "<input type='hidden' name='tyom_toiminto' value='UUSI'>";
   echo "<input type='submit' value='".t('Uusi huoltopyyntö')."'>";
@@ -392,6 +425,7 @@ function uusi_tyomaarays_formi($laite_tunnus) {
   echo "<input type='hidden' id='viesti1' name='viesti1' value='{$virhe1}'>";
   echo "<input type='hidden' id='viesti2' name='viesti2' value='{$virhe2}'>";
   echo "<input type='hidden' id='tarkistusmuuttuja' name='tarkistusmuuttuja' value=''>";
+  echo "<input type='hidden' name='tee' value='NAYTATILAUS'>";
   echo "<div style='display: none;'>";
   echo "<input type='submit'>";
   echo "</div>";
@@ -408,7 +442,7 @@ function piirra_edit_tyomaaraysrivi($request, $piilota = false) {
   echo "<td>";
   echo livesearch_kentta("tyomaarays_form", "LAITEHAKU", "valmnro", 140, $request['tyom_parametrit']['valmnro'], '', '', '', 'ei_break_all');
   echo "</td>";
-  
+
   if (!$piilota) echo "<td></td>";
   echo "<td><textarea cols='40' rows='5' name='komm1'>{$request['tyom_parametrit']['komm1']}</textarea></td>";
   if (!$piilota) echo "<td></td>";
@@ -464,24 +498,24 @@ function tallenna_tyomaarays($request) {
   // Luodaan uusi lasku
   $query  = "INSERT INTO lasku
              SET yhtio = '{$kukarow['yhtio']}',
-             luontiaika = now(),
-             laatija = '{$kukarow['kuka']}',
-             nimi = '{$asiakastiedot['nimi']}',
-             nimitark = '{$asiakastiedot['nimitark']}',
-             osoite = '{$asiakastiedot['osoite']}',
-             postino = '{$asiakastiedot['postino']}',
-             postitp = '{$asiakastiedot['postitp']}',
-             maa = '{$asiakastiedot['maa']}',
-             toim_nimi     = '{$request['osoite_parametrit']['toim_nimi']}',
-             toim_nimitark = '{$request['osoite_parametrit']['toim_nimitark']}',
-             toim_osoite   = '{$request['osoite_parametrit']['toim_osoite']}',
-             toim_postino  = '{$request['osoite_parametrit']['toim_postino']}',
-             toim_postitp  = '{$request['osoite_parametrit']['toim_postitp']}',
-             toim_maa      = '{$request['osoite_parametrit']['toim_maa']}',
-             ytunnus = '{$asiakastiedot['ytunnus']}',
-             liitostunnus = '{$kukarow['oletus_asiakas']}',
-             tilaustyyppi = 'A',
-             tila = 'A',
+             luontiaika          = now(),
+             laatija             = '{$kukarow['kuka']}',
+             nimi                = '{$asiakastiedot['nimi']}',
+             nimitark            = '{$asiakastiedot['nimitark']}',
+             osoite              = '{$asiakastiedot['osoite']}',
+             postino             = '{$asiakastiedot['postino']}',
+             postitp             = '{$asiakastiedot['postitp']}',
+             maa                 = '{$asiakastiedot['maa']}',
+             toim_nimi           = '{$request['osoite_parametrit']['toim_nimi']}',
+             toim_nimitark       = '{$request['osoite_parametrit']['toim_nimitark']}',
+             toim_osoite         = '{$request['osoite_parametrit']['toim_osoite']}',
+             toim_postino        = '{$request['osoite_parametrit']['toim_postino']}',
+             toim_postitp        = '{$request['osoite_parametrit']['toim_postitp']}',
+             toim_maa            = '{$request['osoite_parametrit']['toim_maa']}',
+             ytunnus             = '{$asiakastiedot['ytunnus']}',
+             liitostunnus        = '{$kukarow['oletus_asiakas']}',
+             tilaustyyppi        = 'A',
+             tila                = 'A',
              tilausyhteyshenkilo = '{$request['osoite_parametrit']['tilausyhteyshenkilo']}'";
   $result = pupe_query($query);
   $utunnus = mysql_insert_id($GLOBALS["masterlink"]);
@@ -502,18 +536,18 @@ function tallenna_tyomaarays($request) {
   // Luodaan uusi työmääräys
   $query  = "INSERT INTO tyomaarays
              SET yhtio = '{$kukarow['yhtio']}',
-             luontiaika = now(),
-             otunnus = '{$utunnus}',
-             laatija = '{$kukarow['kuka']}',
-             tyojono = '1',
-             tyostatus = 'O',
+             luontiaika   = now(),
+             otunnus      = '{$utunnus}',
+             laatija      = '{$kukarow['kuka']}',
+             tyojono      = '1',
+             tyostatus    = 'O',
              prioriteetti = '3',
-             hyvaksy = 'Kyllä',
-             komm1 = '{$request['tyom_parametrit']['komm1']}',
-             sla = '{$request['tyom_parametrit']['sla']}',
-             mallivari = '{$request['tyom_parametrit']['tuotenro']}',
-             valmnro = '{$request['tyom_parametrit']['valmnro']}',
-             merkki = '{$request['tyom_parametrit']['valmistaja']}'";
+             hyvaksy      = 'Kyllä',
+             komm1        = '{$request['tyom_parametrit']['komm1']}',
+             sla          = '{$request['tyom_parametrit']['sla']}',
+             mallivari    = '{$request['tyom_parametrit']['tuotenro']}',
+             valmnro      = '{$request['tyom_parametrit']['valmnro']}',
+             merkki       = '{$request['tyom_parametrit']['valmistaja']}'";
   $result  = pupe_query($query);
 
   $request['tyom_tunnus'] = $utunnus;
@@ -531,16 +565,16 @@ function hae_laitteen_parametrit($laite_tunnus) {
             tuote.tuotemerkki malli
             FROM laite
             LEFT JOIN tuote ON (tuote.yhtio = laite.yhtio
-            AND tuote.tuoteno = laite.tuoteno)
+            AND tuote.tuoteno                           = laite.tuoteno)
             LEFT JOIN avainsana ON (avainsana.yhtio = tuote.yhtio
-            AND avainsana.laji = 'TRY'
-            AND avainsana.selite = tuote.try)
+            AND avainsana.laji                          = 'TRY'
+            AND avainsana.selite                        = tuote.try)
             LEFT JOIN laitteen_sopimukset ON (laitteen_sopimukset.laitteen_tunnus = laite.tunnus)
-            LEFT JOIN tilausrivi ON (laitteen_sopimukset.yhtio = tilausrivi.yhtio 
+            LEFT JOIN tilausrivi ON (laitteen_sopimukset.yhtio = tilausrivi.yhtio
             AND laitteen_sopimukset.sopimusrivin_tunnus = tilausrivi.tunnus)
             LEFT JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio AND lasku.tunnus = tilausrivi.otunnus)
-            WHERE laite.yhtio = '{$kukarow['yhtio']}'
-            AND laite.tunnus = '{$laite_tunnus}'";
+            WHERE laite.yhtio                           = '{$kukarow['yhtio']}'
+            AND laite.tunnus                            = '{$laite_tunnus}'";
 
   $result = pupe_query($query);
   $row = mysql_fetch_assoc($result);
@@ -571,7 +605,7 @@ function hae_asiakasdata() {
             IF(toim_maa = '', maa, toim_maa) toim_maa
             FROM asiakas
             WHERE asiakas.yhtio = '{$kukarow['yhtio']}'
-            AND asiakas.tunnus = '{$kukarow['oletus_asiakas']}'";
+            AND asiakas.tunnus  = '{$kukarow['oletus_asiakas']}'";
   $result = pupe_query($query);
   $asiakasdata = mysql_fetch_assoc($result);
   return $asiakasdata;
@@ -583,13 +617,25 @@ function email_tyomaarayskopio($request) {
 
   require_once "huoltopyynto_pdf.inc";
 
+  $huolto_email = t_avainsana("HUOLTOP_EMAIL", '', '', '', '', "selite");
+
+  if ($request['tyom_toiminto'] == 'EMAIL_KOPIO') {
+    $mihin_maili_lahetetaan = $kukarow['eposti'];
+  }
+  else {
+    $mihin_maili_lahetetaan = $huolto_email;
+  }
+
+  $body = t("Tämä on automaattinen viesti. Tähän sähköpostiin ei tarvitse vastata.")."\n\n";
+  $body .= t("Huoltopyyntönumero").": {$tyom_tunnus}";
+
   // Sähköpostin lähetykseen parametrit
   $parametrit = array(
-    "to"       => $kukarow['eposti'],
+    "to"       => $mihin_maili_lahetetaan,
     "cc"       => "",
     "subject"    => t('Huoltopyyntö')." {$tyom_tunnus}",
     "ctype"      => "text",
-    "body"      => t('Huoltopyyntönumero').": {$tyom_tunnus}",
+    "body"      => $body,
     "attachements"  => array(0   => array(
         "filename"    => $pdffilenimi,
         "ctype"      => "pdf"),
@@ -598,17 +644,17 @@ function email_tyomaarayskopio($request) {
 
   pupesoft_sahkoposti($parametrit);
 
-  // Näytä pdf nappi
+  // Avataan pdf ruudulle
   if ($request['pdf_ruudulle']) {
-    js_openFormInNewWindow();
 
+    js_openFormInNewWindow();
     echo "<br><form id='tulostakopioform_{$tyom_tunnus}' name='tulostakopioform_{$tyom_tunnus}' method='post' action='{$palvelin2}tulostakopio.php' autocomplete='off'>
           <input type='hidden' name='otunnus' value='{$tyom_tunnus}'>
           <input type='hidden' name='tyom_tunnus' value='{$tyom_tunnus}'>
           <input type='hidden' name='pdffilenimi' value='{$pdffilenimi}'>
           <input type='hidden' name='toim' value='HUOLTOPYYNTOKOPIO'>
           <input type='hidden' name='tee' value='NAYTATILAUS'>
-          <input type='submit' value='".t("Huoltopyyntö").": {$tyom_tunnus}' onClick=\"js_openFormInNewWindow('tulostakopioform_{$tyom_tunnus}', ''); return false;\"></form><br><br>";
+          <input type='submit' value='".t("Avaa huoltopyyntö").": {$tyom_tunnus}' onClick=\"js_openFormInNewWindow('tulostakopioform_{$tyom_tunnus}', ''); return false;\"></form><br><br>";
   }
 }
 
@@ -618,8 +664,8 @@ function puuttuuko_laite_jarjestelmasta($sarjanumero, $tuotenumero) {
   $puuttuu = true;
   $query = "SELECT *
             FROM laite
-            WHERE yhtio = '{$kukarow['yhtio']}'
-            AND tuoteno = '{$tuotenumero}'
+            WHERE yhtio  = '{$kukarow['yhtio']}'
+            AND tuoteno  = '{$tuotenumero}'
             AND sarjanro = '{$sarjanumero}'";
   $result = pupe_query($query);
   if (mysql_num_rows($result) != 0) {
@@ -636,8 +682,8 @@ function puuttuuko_laitteelta_sopimus($sarjanumero, $tuotenumero) {
             FROM laite
             JOIN laitteen_sopimukset ON laite.yhtio = laitteen_sopimukset.yhtio
               AND laite.tunnus = laitteen_sopimukset.laitteen_tunnus
-            WHERE laite.yhtio = '{$kukarow['yhtio']}'
-            AND laite.tuoteno = '{$tuotenumero}'
+            WHERE laite.yhtio  = '{$kukarow['yhtio']}'
+            AND laite.tuoteno  = '{$tuotenumero}'
             AND laite.sarjanro = '{$sarjanumero}'";
   $result = pupe_query($query);
   if (mysql_num_rows($result) != 0) {

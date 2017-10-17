@@ -58,9 +58,9 @@ if ($tee == 'aja') {
             FROM tilausrivi
             JOIN lasku ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus)
             LEFT JOIN asiakas ON (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus)
-            WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-            AND tilausrivi.tyyppi = 'L'
-            AND tilausrivi.var not in ('P','J','O','S')
+            WHERE tilausrivi.yhtio        = '{$kukarow['yhtio']}'
+            AND tilausrivi.tyyppi         = 'L'
+            AND tilausrivi.var            not in ('P','J','O','S')
             AND tilausrivi.varattu+tilausrivi.kpl != 0
             AND tilausrivi.toimitettuaika > '0000-00-00 00:00:00'
             AND tilausrivi.toimitettuaika <= '$vva-$kka-$ppa 23:59:59'
@@ -103,7 +103,7 @@ if ($tee == 'aja') {
   $worksheet->write($excelrivi, 7, t("Asiakasnro"), $format_bold);
   $worksheet->write($excelrivi, 8, t("Hyvitys"), $format_bold);
   $worksheet->write($excelrivi, 9, t("Sisäinen viesti"), $format_bold);
-  $worksheet->write($excelrivi,10, t("Tila"), $format_bold);
+  $worksheet->write($excelrivi, 10, t("Tila"), $format_bold);
   $excelrivi++;
 
   $summat = 0;
@@ -144,7 +144,7 @@ if ($tee == 'aja') {
     $worksheet->writeString($excelrivi, 7, $row['asiakasnro']);
     $worksheet->writeString($excelrivi, 8, $row['viesti']);
     $worksheet->writeString($excelrivi, 9, $row['sisviesti3']);
-    $worksheet->writeString($excelrivi,10, t("$laskutyyppi")." ".t("$alatila"));
+    $worksheet->writeString($excelrivi, 10, t("$laskutyyppi")." ".t("$alatila"));
     $excelrivi++;
 
     $summat += $row['rivihinta_verolli'];

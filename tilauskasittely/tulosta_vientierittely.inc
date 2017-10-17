@@ -20,35 +20,32 @@ $Xkala = 540;
 $Xlask = 1;
 $Xsivu = 1;
 
-
-//hetaan kaikki otunnukset jotka löytyvät tän uusiotunnuksen alta
-$Xquery = "SELECT distinct otunnus
+// hetaan kaikki otunnukset, jotka löytyvät tän uusiotunnuksen alta
+$Xquery = "SELECT group_concat(distinct tilausrivi.otunnus) as tilausnumerot
            FROM tilausrivi
-           WHERE tilausrivi.uusiotunnus = '$uusiotunnus'
-           and tilausrivi.yhtio         = '$kukarow[yhtio]'";
+           WHERE tilausrivi.uusiotunnus = '{$uusiotunnus}'
+           AND tilausrivi.yhtio = '{$kukarow['yhtio']}'";
 $Xuresult = pupe_query($Xquery);
-
-$Xtunnukset2 = '';
-while ($Xurow = mysql_fetch_array($Xuresult)) {
-  $Xtunnukset2  .= "'".$Xurow['otunnus']."',";
-}
-
-$Xtunnukset2 = substr($Xtunnukset2, 0, -1);
+$Xurow = mysql_fetch_array($Xuresult);
+$Xtunnukset2 = $Xurow['tilausnumerot'];
 
 // varmistetaan vielä, että löyty tilauksia
 if ($Xtunnukset2 != "") {
+  $Xkilot = 0;
 
-  $Xkilot  = 0;
+  // Jos vientierittelyn painot perustuu rahtikikirjan painoihin
+  if ($yhtiorow['vientierittelyn_painot'] == '') {
+    // haetaan kollimäärä ja bruttopaino
+    $Xquery = "SELECT sum(kilot) as kilot
+               FROM rahtikirjat
+               WHERE otsikkonro in ({$Xtunnukset2})
+               AND yhtio = '{$kukarow['yhtio']}'";
+    $Xrahtiresult = pupe_query($Xquery);
+    $Xrahtirow = mysql_fetch_array($Xrahtiresult);
 
-  //haetaan kollimäärä ja bruttopaino
-  $Xquery = "SELECT sum(kilot) kilot
-             FROM rahtikirjat
-             WHERE otsikkonro in ($Xtunnukset2) and yhtio='$kukarow[yhtio]'";
-  $Xrahtiresult = pupe_query($Xquery);
-  $Xrahtirow = mysql_fetch_array($Xrahtiresult);
-
-  if ($Xrahtirow["kilot"] > 0) {
-    $Xkilot = $Xrahtirow["kilot"];
+    if ($Xrahtirow["kilot"] > 0) {
+      $Xkilot = $Xrahtirow["kilot"];
+    }
   }
 
   $group = 'tuote.tuoteno,
@@ -86,9 +83,10 @@ if ($Xtunnukset2 != "") {
 
   $Xquery = "SELECT
              {$select}
-             sum(tilausrivi.rivihinta) summa,
+             sum(round(tilausrivi.rivihinta / if ($laskurow[vienti_kurssi] > 0, $laskurow[vienti_kurssi], 1),2)) summa,
              sum(tilausrivi.kpl) kpl,
-             round(sum((tilausrivi.rivihinta/$laskurow[summa])*$Xkilot),0) paino
+             round(sum((tilausrivi.rivihinta / $laskurow[summa]) * $Xkilot), 0) as rahtikirja_paino,
+             round(sum(tilausrivi.kpl * tuote.tuotemassa), 0) as tuote_paino
              FROM tilausrivi
              JOIN tuote ON tuote.yhtio=tilausrivi.yhtio
                and tuote.tuoteno=tilausrivi.tuoteno
@@ -110,6 +108,10 @@ if ($Xtunnukset2 != "") {
   if (!function_exists('erittely_alku')) {
     function erittely_alku() {
       global $Xpdf, $laskurow, $yhtiorow, $kukarow, $Xsivu, $Xrectparam, $Xnorm, $Xpieni, $kieli, $vakkeja;
+
+      if (!is_object($Xpdf)) {
+        return;
+      }
 
       $Xfirstpage = $Xpdf->new_page("a4");
       $Xpdf->enable('template');
@@ -166,8 +168,12 @@ if ($Xtunnukset2 != "") {
       $Xpdf->draw_text(310, 719, t_tunnus_avainsanat($laskurow['toimitustapa'], "selite", "TOIMTAPAKV", $kieli),   $Xfirstpage, $Xnorm);
 
       $Xpdf->draw_rectangle(716, 300, 695, 580,         $Xfirstpage, $Xrectparam);
-      $Xpdf->draw_text(310, 708, t("Kommentti", $kieli),     $Xfirstpage, $Xpieni);
-      $Xpdf->draw_text(310, 698, $laskurow["viesti"],     $Xfirstpage, $Xnorm);
+      $Xpdf->draw_text(310, 708, t("Valuutta", $kieli),     $Xfirstpage, $Xpieni);
+      $Xpdf->draw_text(310, 698, $laskurow["valkoodi"],     $Xfirstpage, $Xnorm);
+
+      $Xpdf->draw_rectangle(695, 300, 674, 580,         $Xfirstpage, $Xrectparam);
+      $Xpdf->draw_text(310, 687, t("Kommentti", $kieli),     $Xfirstpage, $Xpieni);
+      $Xpdf->draw_text(310, 677, $laskurow["viesti"],     $Xfirstpage, $Xnorm);
 
       //rivien otsikkotiedot
       $Xpdf->draw_text(30,  572, t("Nimike", $kieli),      $Xfirstpage, $Xpieni);
@@ -194,6 +200,10 @@ if ($Xtunnukset2 != "") {
   if (!function_exists('erittely_rivi')) {
     function erittely_rivi($Xfirstpage) {
       global $Xfirstpage, $yhtiorow, $Xpdf, $Xrow, $Xkala, $Xsivu, $Xlask, $Xrectparam, $Xnorm, $Xpieni, $kieli, $vakkeja;
+
+      if (!is_object($Xpdf)) {
+        return;
+      }
 
       if ($Xlask == 36) {
         $Xsivu++;
@@ -234,7 +244,15 @@ if ($Xtunnukset2 != "") {
       $oikpos = $Xpdf->strlen($Xrow["summa"], $Xnorm);
       $Xpdf->draw_text(450-$oikpos, $Xkala, $Xrow["summa"],   $Xfirstpage, $Xnorm);
 
-      $Xpdf->draw_text(470, $Xkala, $Xrow["paino"],      $Xfirstpage, $Xnorm);
+      // Vientierittelyn painot tuotteelta
+      if ($yhtiorow['vientierittelyn_painot'] == 'T') {
+        $_paino = $Xrow["tuote_paino"];
+      }
+      else {
+        $_paino = $Xrow["rahtikirja_paino"];
+      }
+
+      $Xpdf->draw_text(470, $Xkala, $_paino, $Xfirstpage, $Xnorm);
 
       if ($yhtiorow["vienti_erittelyn_tulostus"] != "I") {
         $Xpdf->draw_text(520, $Xkala, $Xrow["alkuperamaa"],  $Xfirstpage, $Xnorm);
@@ -249,6 +267,10 @@ if ($Xtunnukset2 != "") {
     function erittely_loppu($Xfirstpage) {
       global $Xpdf, $yhtiorow, $Xsivu, $Xrectparam, $Xnorm, $Xpieni, $kieli;
 
+      if (!is_object($Xpdf)) {
+        return;
+      }
+
       //Alimmat kolme laatikkoa, yhtiötietoja
       $Xpdf->draw_rectangle(55, 20, 20, 580,              $Xfirstpage, $Xrectparam);
       $Xpdf->draw_rectangle(55, 207, 20, 580,              $Xfirstpage, $Xrectparam);
@@ -260,7 +282,7 @@ if ($Xtunnukset2 != "") {
 
       $Xpdf->draw_text(217, 45, t("Puhelin", $kieli).":",        $Xfirstpage, $Xpieni);
       $Xpdf->draw_text(257, 45, $yhtiorow["puhelin"],          $Xfirstpage, $Xpieni);
-      $Xpdf->draw_text(217, 35, t("Telefax", $kieli).":",        $Xfirstpage, $Xpieni);
+      $Xpdf->draw_text(217, 35, t("Fax", $kieli).":",        $Xfirstpage, $Xpieni);
       $Xpdf->draw_text(247, 35, $yhtiorow["fax"],            $Xfirstpage, $Xpieni);
       $Xpdf->draw_text(217, 25, t("Sähköposti", $kieli).": ".$yhtiorow["email"], $Xfirstpage, $Xpieni);
 

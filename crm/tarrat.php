@@ -72,7 +72,12 @@ if ($tee == "TULOSTA") {
   $selectilisa = "";
 
   if ($as_yht_tiedot == 'on') {
-    $selectilisa = ", yht.nimi AS yht_nimi, yht.titteli AS yht_titteli, yht.email yht_email ";
+    if ($aytunnus == 'on') {
+      $selectilisa = ", yht.nimi AS yht_nimi, yht.titteli AS yht_titteli, yht.email yht_email, yht.puh yht_puhelin, yht.tunnus yht_id";
+    }
+    else {
+      $selectilisa = ", yht.nimi AS yht_nimi, yht.titteli AS yht_titteli, yht.email yht_email, yht.puh yht_puhelin";
+    }
     $joinilisa = " LEFT JOIN yhteyshenkilo yht ON yht.yhtio = asiakas.yhtio and yht.liitostunnus = asiakas.tunnus and yht.tyyppi = 'A' ";
   }
 
@@ -83,7 +88,13 @@ if ($tee == "TULOSTA") {
       $mul_asiakas = array_merge($mul_asiakas, ${$muuttuja});
     }
 
-    $selectilisa = ", yht.nimi AS yht_nimi, yht.titteli AS yht_titteli, yht.email yht_email";
+    if ($aytunnus == 'on') {
+      $selectilisa = ", yht.nimi AS yht_nimi, yht.titteli AS yht_titteli, yht.email yht_email, yht.puh yht_puhelin, yht.tunnus yht_id";
+    }
+    else {
+      $selectilisa = ", yht.nimi AS yht_nimi, yht.titteli AS yht_titteli, yht.email yht_email, yht.puh yht_puhelin";
+    }
+
     $joinilisa = "  JOIN yhteyshenkilo yht
             ON ( yht.yhtio = asiakas.yhtio
               AND yht.liitostunnus = asiakas.tunnus
@@ -156,6 +167,20 @@ if ($tee == "TULOSTA") {
 
     $worksheet->writeString($excelrivi, $excelsarake, t("Sähköpostiosoite"), $format_bold);
     $excelsarake++;
+
+    if ($as_yht_tiedot == 'on') {
+      $worksheet->writeString($excelrivi, $excelsarake, t("Sähköpostiosoite"), $format_bold);
+      $excelsarake++;
+    }
+    if ($aytunnus == 'on') {
+      $worksheet->writeString($excelrivi, $excelsarake, t("Asiakas-id"), $format_bold);
+      $excelsarake++;
+      if ($as_yht_tiedot == 'on') {
+        $worksheet->writeString($excelrivi, $excelsarake, t("Yht henkilö-id"), $format_bold);
+        $excelsarake++;
+      }
+    }
+
     $excelrivi++;
   }
 
@@ -228,10 +253,22 @@ if ($tee == "TULOSTA") {
       if ($as_yht_tiedot == 'on' or $asiakas_segmentin_yhteystiedot == 'on') {
         $worksheet->writeString($excelrivi, $excelsarake, $row["yht_email"]);
         $excelsarake++;
+
+        $worksheet->writeString($excelrivi, $excelsarake, $row["yht_puhelin"]);
+        $excelsarake++;
       }
       else {
         $worksheet->writeString($excelrivi, $excelsarake, $row["email"]);
         $excelsarake++;
+      }
+
+      if ($aytunnus == 'on') {
+        $worksheet->writeString($excelrivi, $excelsarake,$row["tunnus"]);
+        $excelsarake++;
+        if ($as_yht_tiedot == 'on') {
+          $worksheet->writeString($excelrivi, $excelsarake, $row["yht_id"]);
+          $excelsarake++;
+        }
       }
 
       $excelrivi++;
@@ -309,7 +346,16 @@ if ($tee == "TULOSTA") {
     fputs($fh, $sisalto);
     fclose($fh);
 
-    $line = exec("a2ps -o ".$filenimi.".ps --no-header -R --columns=$sarakkeet --medium=a4 --chars-per-line=$rivinpituus_ps --margin=0 --major=columns --borders=0 $filenimi");
+    $params = array(
+      'chars'    => $rivinpituus_ps,
+      'columns'  => $sarakkeet,
+      'filename' => $filenimi,
+      'major'    => 'columns',
+      'mode'     => 'portrait',
+    );
+
+    // konveroidaan postscriptiksi
+    $filenimi_ps = pupesoft_a2ps($params);
 
     // itse print komento...
     if ($komento["Tarrat"] == 'email') {
@@ -317,18 +363,18 @@ if ($tee == "TULOSTA") {
       $kutsu = "Tarrat";
       $ctype = "pdf";
 
-      system("ps2pdf -sPAPERSIZE=a4 ".$filenimi.".ps $liite");
+      system("ps2pdf -sPAPERSIZE=a4 {$filenimi_ps} $liite");
 
       require "inc/sahkoposti.inc";
     }
     else {
-      $cmd = $komento["Tarrat"]." ".$filenimi.".ps";
+      $cmd = $komento["Tarrat"]." {$filenimi_ps}";
       $line = exec($cmd);
     }
 
     //poistetaan tmp file samantien kuleksimasta...
     unlink($filenimi);
-    unlink($filenimi.".ps");
+    unlink($filenimi_ps);
 
     echo "<br>".t("Tarrat tulostuu")."!<br><br>";
   }
@@ -531,6 +577,7 @@ if ($tee == '') {
 
   $tck = "";
   $chk = "";
+  $ack = "";
   $sel = "";
 
   if ($toimas != "") {
@@ -539,6 +586,10 @@ if ($tee == '') {
 
   if ($as_yht_tiedot != "") {
     $chk = "CHECKED";
+  }
+
+  if ($aytunnus != "") {
+    $ack = "CHECKED";
   }
 
   $sel[$raportti] = "SELECTED";
@@ -551,6 +602,7 @@ if ($tee == '') {
 
   echo "<tr><th>".t("Tulosta toimitusosoitteen tiedot").":</th><td><input type='checkbox' name='toimas' value='on' $tck></td></tr>";
   echo "<tr><th>".t("Luo aineisto yhteyshenkilön osoitetiedoista").":</th><td><input type='checkbox' name='as_yht_tiedot' value='on' $chk></td></tr>";
+  echo "<tr><th>".t("Tulosta asiakkaan ja yht.henkilön tunnus (vain excel)").":</th><td><input type='checkbox' name='aytunnus' value='on' $ack></td></tr>";
   echo "<tr><th>".t("Valitse tarra-arkin tyyppi").":</th>
       <td><select name='raportti'>
       <option value='33' $sel[33]>33 ".t("Tarraa")."</option>

@@ -1,4 +1,5 @@
 <?php
+
 //sisään halutaan $laskurow jossa on tulostettavan tilauksen tiedot
 //jos tilauksia on useita $laskurow muuttujassa on jonkun tilauksen tiedot
 
@@ -442,65 +443,77 @@ if ((int) $chk_row["ok"] == (int) $chk_row["kaikki"] and (int) $chk_row["ok"] !=
 
   $kerayseran_numero = !isset($kerayseran_numero) ? 0 : $kerayseran_numero;
 
-  $params_kerayslista = array(
-    'asrow'             => $asrow,
-    'boldi'             => $boldi,
-    'iso'               => $iso,
-    'iso_boldi'         => $iso_boldi,
-    'kala'              => 0,
-    'kieli'             => $kieli,
-    'komento'           => '',
-    'laskurow'          => $laskurow,
-    'norm'              => $norm,
-    'page'              => '',
-    'paino'             => 0,
-    'pdf'               => NULL,
-    'perheid'           => 0,
-    'perheid2'          => 0,
-    'pieni'             => $pieni,
-    'pieni_boldi'       => $pieni_boldi,
-    'rectparam'         => $rectparam,
-    'rivinkorkeus'      => $rivinkorkeus,
-    'rivinumerot'       => $rivinumerot,
-    'row'               => NULL,
-    'sivu'              => 1,
-    'tee'               => $tee,
-    'thispage'          => NULL,
-    'tilausnumeroita'   => $tilausnumeroita,
-    'toim'              => $toim,
-    'tots'              => 0,
-    'tyyppi'            => $tyyppi,
-    'kerayseran_numero' => $kerayseran_numero,
-    'kerayslistatyyppi' => $kerayslistatyyppi,
-  );
+  if ($yhtiorow["lahetteen_tulostustapa"] != "X") {
 
-  // Aloitellaan keräyslistan teko
-  $params_kerayslista = alku_kerayslista($params_kerayslista);
+    $pdfdoc = isset($pdf_kaikki_tul) ? $pdf_kaikki_tul : NULL;
+    $ekasivu = !empty($vikasivu) ? $vikasivu : 1;
 
-  while ($row = mysql_fetch_assoc($riresult)) {
-    $params_kerayslista["row"] = $row;
-    $params_kerayslista = rivi_kerayslista($params_kerayslista);
-  }
-
-  $params_kerayslista["tots"] = 1;
-  $params_kerayslista = loppu_kerayslista($params_kerayslista);
-
-  $valittu_tulostin = !isset($valittu_tulostin) ? '' : $valittu_tulostin;
-
-  if ($valittu_tulostin == "-88") {
-    $komento = "-88";
-  }
-  else {
-    $komento = hae_lahete_printteri(
-      $laskurow['varasto'],
-      $laskurow['yhtio_toimipaikka'],
-      $tilausnumeroita,
-      $valittu_tulostin
+    $params_kerayslista = array(
+      'asrow'             => $asrow,
+      'boldi'             => $boldi,
+      'iso'               => $iso,
+      'iso_boldi'         => $iso_boldi,
+      'kala'              => 0,
+      'kieli'             => $kieli,
+      'komento'           => '',
+      'laskurow'          => $laskurow,
+      'norm'              => $norm,
+      'page'              => '',
+      'paino'             => 0,
+      'pdf'               => $pdfdoc,
+      'perheid'           => 0,
+      'perheid2'          => 0,
+      'pieni'             => $pieni,
+      'pieni_boldi'       => $pieni_boldi,
+      'rectparam'         => $rectparam,
+      'rivinkorkeus'      => $rivinkorkeus,
+      'rivinumerot'       => $rivinumerot,
+      'row'               => NULL,
+      'sivu'              => $ekasivu,
+      'tee'               => $tee,
+      'thispage'          => NULL,
+      'tilausnumeroita'   => $tilausnumeroita,
+      'toim'              => $toim,
+      'tots'              => 0,
+      'tyyppi'            => $tyyppi,
+      'kerayseran_numero' => $kerayseran_numero,
+      'kerayslistatyyppi' => $kerayslistatyyppi,
     );
+
+    // Aloitellaan keräyslistan teko
+    $params_kerayslista = alku_kerayslista($params_kerayslista);
+
+    while ($row = mysql_fetch_assoc($riresult)) {
+      $params_kerayslista["row"] = $row;
+      $params_kerayslista = rivi_kerayslista($params_kerayslista);
+    }
+
+    $params_kerayslista["tama_lista_sivu"] = $vikasivu;
+
+    $params_kerayslista["tots"] = 1;
+    $params_kerayslista = loppu_kerayslista($params_kerayslista);
+
+    $vikasivu = $params_kerayslista["sivu"];
+
+    $valittu_tulostin = !isset($valittu_tulostin) ? '' : $valittu_tulostin;
+
+    if ($valittu_tulostin == "-88") {
+      $komento = "-88";
+    }
+    else {
+      $komento = hae_lahete_printteri(
+        $laskurow['varasto'],
+        $laskurow['yhtio_toimipaikka'],
+        $tilausnumeroita,
+        $valittu_tulostin,
+        "0"
+      );
+    }
   }
 
-  if ($komento != "") {
-    //tulostetaan sivu
+  # Tulostetaan lista kerrallaan vain jos ei tulosteta kaikkia listoja kerrallaan
+  if ($komento != "" and $yhtiorow["lahetteen_tulostustapa"] != "X" and empty($pdf_kaikki_tul)) {
+    // tulostetaan sivu
     $params_kerayslista["komento"] = $komento;
 
     print_pdf_kerayslista($params_kerayslista);
@@ -516,21 +529,27 @@ if ((int) $chk_row["ok"] == (int) $chk_row["kaikki"] and (int) $chk_row["ok"] !=
       // Loopataan kaikki keräyslistan tilaukset ja tulostetaan lähete
       while ($lahetteen_tulostustapa_row = mysql_fetch_assoc($lahetteen_tulostustapa_result)) {
         $params = array(
-          'laskurow'          => $lahetteen_tulostustapa_row,
-          'sellahetetyyppi'       => "",
-          'extranet_tilausvahvistus'   => "",
-          'naytetaanko_rivihinta'    => "",
-          'tee'            => "",
-          'toim'            => $toim,
-          'komento'           => $komento,
-          'lahetekpl'          => "",
-          'kieli'           => ""
+          'laskurow' => $lahetteen_tulostustapa_row,
+          'sellahetetyyppi' => "",
+          'extranet_tilausvahvistus' => "",
+          'naytetaanko_rivihinta' => "",
+          'tee' => "",
+          'toim' => $toim,
+          'komento' => $komento,
+          'lahetekpl' => "",
+          'kieli' => ""
         );
 
         pupesoft_tulosta_lahete($params);
       }
     }
 
+    $returnvalue = 0;
+  }
+  elseif ($yhtiorow["lahetteen_tulostustapa"] == "X") {
+    $returnvalue = 0;
+  }
+  elseif (!empty($pdf_kaikki_tul)) {
     $returnvalue = 0;
   }
   else {

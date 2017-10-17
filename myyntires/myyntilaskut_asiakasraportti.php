@@ -238,7 +238,7 @@ if ($tee == "") {
               WHERE yhtio  = '{$kukarow['yhtio']}'
               and {$haku_sql}
               and laji    != 'P'
-              ORDER BY email DESC";
+              ORDER BY talhal_email DESC, lasku_email DESC, email DESC";
     $result = pupe_query($query);
 
     if (mysql_num_rows($result) > 0) {
@@ -635,7 +635,6 @@ if ($tee == "") {
                 if(mapvm!='0000-00-00', 0, summa_valuutassa-saldo_maksettu_valuutassa) avoinsumma_valuutassa,
                 kapvm, kasumma, kasumma_valuutassa, mapvm,
                 TO_DAYS(if(mapvm!='0000-00-00', mapvm, now())) - TO_DAYS(erpcm) ika,
-                round((viikorkopros * (TO_DAYS(if(mapvm!='0000-00-00', mapvm, now())) - TO_DAYS(erpcm)) * summa / 36500),2) as korko,
                 olmapvm korkolaspvm,
                 tunnus,
                 saldo_maksettu,
@@ -823,7 +822,17 @@ if ($tee == "") {
 
           echo "<td align='right'>$maksurow[ika]</td>";
 
-          if ($maksurow["korko"] > 0) echo "<td align='right'>$maksurow[korko]</td>";
+          $params = array(
+            'tunnukset' => $maksurow['tunnus'],
+          );
+
+          $korkorivit = laske_korko($params);
+
+          $korkosumma = 0;
+          foreach ($korkorivit as $korkorow) {
+            $korkosumma += $korkorow['korkosumma'];
+          }
+          if ($korkosumma > 0) echo "<td align='right'>$korkosumma</td>";
           else echo "<td></td>";
 
           if ($maksurow["korkolaspvm"] != '0000-00-00') echo "<td align='right'>".pupe_DataTablesEchoSort($maksurow['korkolaspvm']).tv1dateconv($maksurow["korkolaspvm"])."</td>";
@@ -857,7 +866,7 @@ if ($tee == "") {
             $avoimet[$maksurow['valkoodi']] += $maksurow['avoinsumma'];
           }
 
-          if ($maksurow["korko"] > 0) $korkoja += $maksurow['korko'];
+          if ($korkosumma > 0) $korkoja += $korkosumma;
         }
 
         echo "</tbody>";

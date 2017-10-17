@@ -1,8 +1,13 @@
 <?php
 echo "<font class='head'>".t("Maksuvalmius")."</font><hr>";
 
-$sel1 = $sel2 = $sel3 = $sel4 = $sel5 = $sel6 = "";
+$sel1 = $sel2 = $sel3 = $sel4 = $sel5 = "";
 $kumulat = 0;
+
+if (!empty($pankkisaldo_ser)) {
+  $pankkisaldo = explode(",", $pankkisaldo_ser);
+  $pankkisaldo = array_combine($pankkisaldo, $pankkisaldo);
+}
 
 if ($aika == 'pv') {
   $sel1 = 'SELECTED';
@@ -24,10 +29,6 @@ if ($eilahetettyja != '') {
   $sel5 = "CHECKED";
 }
 
-if ($pankkisaldo != '') {
-  $sel6 = "CHECKED";
-}
-
 echo "<form action = 'raportit.php' method='post'>
     <table><tr>
     <td>
@@ -35,9 +36,9 @@ echo "<form action = 'raportit.php' method='post'>
     <input type = 'hidden' name = 'toim' value = 'maksuvalmius'>
     ".t("Maksuvalmius")."</td><td>
     <select name='aika'>
-                   <option value = 'pv' $sel1>".t("Päivä")."
-                   <option value = 'vi' $sel2>".t("Viikko")."
-                   <option value = 'kk' $sel3>".t("Kuukausi")."
+      <option value = 'pv' $sel1>".t("Päivä")."
+      <option value = 'vi' $sel2>".t("Viikko")."
+      <option value = 'kk' $sel3>".t("Kuukausi")."
     </select></td>";
 
 if ($yhtiorow["konserni"] != "") {
@@ -48,8 +49,42 @@ if ($yhtiorow["konserni"] != "") {
 echo "<tr><td>".t("Älä näytä lähetettyjä")."</td>
     <td><input type = 'checkbox' name = 'eilahetettyja' $sel5></td></tr>";
 
-echo "<tr><td>".t("Kätyä pankkitilin maksulimittiä alkusaldona")."</td>
-       <td><input type = 'checkbox' name = 'pankkisaldo' $sel6></td></tr>";
+echo "<tr><td class='ptop'>".t("Huomioi pankkitilin maksulimitti alkusaldona")."</td>
+       <td><table>";
+
+ $query = "SELECT yriti.*,
+           round(yriti.maksulimitti) maksulimitti_kotival,
+           round(yriti.maksulimitti / valuu.kurssi) maksulimitti
+           FROM yriti
+           JOIN valuu ON (yriti.yhtio = valuu.yhtio and yriti.valkoodi = valuu.nimi)
+           WHERE yriti.yhtio  = '$kukarow[yhtio]'
+           AND yriti.maksulimitti > 0";
+ $yres = pupe_query($query);
+
+ while ($yrow = mysql_fetch_assoc($yres)) {
+
+  $chk = (!empty($pankkisaldo[$yrow[tunnus]])) ? "CHECKED" : "";
+
+  echo "<tr>
+        <td><input type = 'checkbox' name = 'pankkisaldo[$yrow[tunnus]]' value='$yrow[tunnus]' $chk></td>
+        <td>$yrow[nimi]</td>
+        <td align='right'>$yrow[maksulimitti] $yrow[valkoodi]</td>
+        <td align='right'>$yrow[maksulimitti_kotival] $yhtiorow[valkoodi]</td>
+        </tr>";
+ }
+
+echo "</table></td></tr>";
+
+$chk = array_fill_keys(array($saamisrajaus), " selected") + array_fill_keys(array('1', '2', '3'), '');
+
+echo "<tr><td>".t("Älä huomioi rajausta vanhempia myyntisaamisia")." </td>
+      <td><select name='saamisrajaus'>
+            <option value = ''>".t("Ei rajausta")."</option>
+            <option value = '1' $chk[1]>1 ".t("kuukausi")."</option>
+            <option value = '2' $chk[2]>2 ".t("kuukautta")."</option>
+            <option value = '3' $chk[3]>3 ".t("kuukautta")."</option>
+      </select>
+      </td></tr>";
 
 echo "</table><br><input type = 'submit' value = '".t("Näytä")."'></form><br>";
 
@@ -67,6 +102,13 @@ if ($aika != '') {
   else {
     echo t("Yhtiöitä löytyi monta tai ei lainkaan! Virhe!");
     exit;
+  }
+
+  $saamislisa = "";
+
+  if (!empty($saamisrajaus)) {
+    $saamisrajaus = (int) $saamisrajaus;
+    $saamislisa = " AND lasku.erpcm >= date_sub(current_date, INTERVAL $saamisrajaus MONTH)";
   }
 
   // Poistetaan vanhat tapahtumat
@@ -102,12 +144,13 @@ if ($aika != '') {
     }
 
     while ($yrow = mysql_fetch_assoc($result)) {
-      //Myyntireskontra
+      // Myyntireskontra
       $query = "SELECT if(kapvm > now(), kapvm,erpcm) olmapvm, sum(summa-saldo_maksettu) summa, count(*)
                 FROM lasku
                 WHERE yhtio    = '$yrow[yhtio]'
                 and lasku.tila = 'U'
                 and mapvm      = '0000-00-00'
+                {$saamislisa}
                 GROUP BY 1";
       $yresult = pupe_query($query);
 
@@ -168,6 +211,7 @@ if ($aika != '') {
               WHERE lasku.yhtio = '$kukarow[yhtio]'
               AND lasku.tila    = 'U'
               AND mapvm         = '0000-00-00'
+              {$saamislisa}
               GROUP BY 1";
     $result = pupe_query($query);
 
@@ -250,10 +294,11 @@ if ($aika != '') {
 
   // Pankkitilien saldo
   if (!empty($pankkisaldo)) {
-    $query = "SELECT sum(maksulimitti) saldo_nyt
+    $query = "SELECT round(sum(yriti.maksulimitti), 2) saldo_nyt
               FROM yriti
-              WHERE yhtio  = '$kukarow[yhtio]'
-              AND valkoodi = '$yhtiorow[valkoodi]'";
+              JOIN valuu ON (yriti.yhtio = valuu.yhtio and yriti.valkoodi = valuu.nimi)
+              WHERE yriti.yhtio  = '$kukarow[yhtio]'
+              AND yriti.tunnus in (".implode(",", $pankkisaldo).")";
     $yres = pupe_query($query);
     $yrow = mysql_fetch_assoc($yres);
 
@@ -293,8 +338,8 @@ if ($aika != '') {
     }
 
     if ($aika == 'pv' and !empty($trow["Aika"])) {
-      echo "<td class='text-right{$class}'><a href = '${palvelin2}myyntires/myyntilaskuhaku.php?tee=M&pvm=$trow[Aika]&laskuntyyppi=A&lopetus=$PHP_SELF////tee=$tee//toim=$toim//aika=$aika//konserni=$konserni//eilahetettyja=$eilahetettyja//pankkisaldo=$pankkisaldo'>$trow[Myyntires]</a></td>";
-      echo "<td class='text-right{$class}'><a href = 'raportit.php?toim=laskuhaku&tee=M&pvm=$trow[Aika]&lopetus=$PHP_SELF////tee=$tee//toim=$toim//aika=$aika//konserni=$konserni//eilahetettyja=$eilahetettyja//pankkisaldo=$pankkisaldo'>$trow[Ostores]</a></td>";
+      echo "<td class='text-right{$class}'><a href = '${palvelin2}myyntires/myyntilaskuhaku.php?tee=M&pvm=$trow[Aika]&laskuntyyppi=A&lopetus=$PHP_SELF////tee=$tee//toim=$toim//aika=$aika//konserni=$konserni//eilahetettyja=$eilahetettyja//pankkisaldo_ser=".urlencode(implode(",", $pankkisaldo))."//saamisrajaus=$saamisrajaus'>$trow[Myyntires]</a></td>";
+      echo "<td class='text-right{$class}'><a href = 'raportit.php?toim=laskuhaku&tee=M&pvm=$trow[Aika]&lopetus=$PHP_SELF////tee=$tee//toim=$toim//aika=$aika//konserni=$konserni//eilahetettyja=$eilahetettyja//pankkisaldo_ser=".urlencode(implode(",", $pankkisaldo))."//saamisrajaus=$saamisrajaus'>$trow[Ostores]</a></td>";
     }
     else {
       echo "<td class='text-right{$class}'>$trow[Myyntires]</td>";

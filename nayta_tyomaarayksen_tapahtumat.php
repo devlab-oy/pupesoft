@@ -33,9 +33,11 @@ function hae_tapahtumahistoria($tyomaaraystunnus) {
             ifnull(tilataulu.selitetark_5, '".t('Status ei ole nähtävissä')."') tilassa,
             ifnull(jonotaulu.selitetark, '') jonossa
             FROM tyomaarayksen_tapahtumat
-            LEFT JOIN avainsana tilataulu ON tilataulu.yhtio = tyomaarayksen_tapahtumat.yhtio
+            JOIN avainsana tilataulu ON tilataulu.yhtio = tyomaarayksen_tapahtumat.yhtio
               AND tilataulu.laji                           = 'TYOM_TYOSTATUS'
               AND tilataulu.selite                         = tyomaarayksen_tapahtumat.tyostatus_selite
+              AND tilataulu.selitetark_5                  != ''
+              AND tilataulu.kieli                          = '{$kukarow['kieli']}'
             LEFT JOIN avainsana jonotaulu ON jonotaulu.yhtio = tyomaarayksen_tapahtumat.yhtio
               AND jonotaulu.laji                           = 'TYOM_TYOJONO'
               AND jonotaulu.selite                         = tyomaarayksen_tapahtumat.tyojono_selite

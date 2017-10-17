@@ -11,8 +11,12 @@ if (!function_exists("asiakasalennustarkista")) {
         $virhe[$i] = t("Tieto puuttuu!");
       }
 
-      if (abs(trim($t[$i])) > 100 and (float)trim($t[$i]) != 999.99 and (float)trim($t[$i]) != -999.99) {
+      if (abs(trim($t[$i])) > 100 and (float) trim($t[$i]) != 999.99 and (float) trim($t[$i]) != -999.99) {
         $virhe[$i] = t("Alennus ei voi olla yli 100%");
+      }
+
+      if ($chryhma == "**" and (float) trim($t[$i]) < 0) {
+        $virhe[$i] = t("Katemyyntihintaa ei voi vielä sitoa kaikkiin tuotteisiin");
       }
     }
 
@@ -165,31 +169,8 @@ if (!function_exists("asiakasalennustarkista")) {
       }
     }
 
-    if ($chryhma == '' and $chtuoteno == '' and mysql_field_name($result, $i) == 'ryhma') {
+    if ((($chryhma == '' and $chtuoteno == '') or ($chryhma != '' and $chtuoteno != '')) and mysql_field_name($result, $i) == 'ryhma') {
       $virhe[$i] = t("Sinun on annettava joko tuote tai ryhmä!");
-    }
-
-    if ($chryhma == '**') {
-      // Jos on syötetty tuote kaikki tuotteet-"ryhmän" lisäksi
-      if ($chtuoteno != '' and mysql_field_name($result, $i) == 'ryhma') {
-        $virhe[$i] = t("Alennusryhmävalintaa ei voi liittää tuotteeseen!");
-      }
-      // Asiakasvalinta pakollinen kaikki tuotteet-"ryhmälle"
-      if ($chastunn == '' and mysql_field_name($result, $i) == 'asiakas') {
-        $virhe[$i] = t("Alennusryhmävalinnalle pitää määritellä asiakas!");
-      }
-      // Jos on syötetty ytunnus kaikki tuotteet-"ryhmän" lisäksi
-      if ($chytunnus != '' and mysql_field_name($result, $i) == 'ytunnus') {
-        $virhe[$i] = t("Alennusryhmävalintaa ei voi liittää y-tunnukseen!");
-      }
-      // Jos on syötetty piiri kaikki tuotteet-"ryhmän" lisäksi
-      if ($chpiiri != '' and mysql_field_name($result, $i) == 'piiri') {
-        $virhe[$i] = t("Alennusryhmävalintaa ei voi liittää piiriin!");
-      }
-      // Jos on syötetty asiakas_segmentti kaikki tuotteet-"ryhmän" lisäksi
-      if ($chsegmentti != '' and mysql_field_name($result, $i) == 'asiakas_segmentti') {
-        $virhe[$i] = t("Alennusryhmävalintaa ei voi liittää asiakas-segmenttiin!");
-      }
     }
 
     if (mysql_field_name($result, $i) == "minkpl") {

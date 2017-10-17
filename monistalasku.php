@@ -542,7 +542,7 @@ if ($tee == "ETSILASKU") {
       echo "</{$ero}>";
 
       echo "<{$ero}>{$row['asiakas']}</{$ero}>";
-      echo "<{$ero}>",tarkistahetu($row['ytunnus']),"</{$ero}>";
+      echo "<{$ero}>", tarkistahetu($row['ytunnus']), "</{$ero}>";
       echo "<{$ero}>{$row['summa']}</{$ero}>";
       echo "<{$ero}>".tv1dateconv($row["tapvm"])."</{$ero}>";
       echo "<{$ero}>".tv1dateconv($row["luontiaika"])."</{$ero}>";
@@ -1145,6 +1145,10 @@ if ($tee == 'MONISTA') {
             $values .= ", '{$aburow['tunnus']}'";
           }
           break;
+        case 'directdebitsiirtonumero':
+          $values .= ", 0";
+
+          break;  
         case 'toimaika':
           if (($kumpi == 'HYVITA' or $kumpi == 'REKLAMA' or $yhtiorow["tilausrivien_toimitettuaika"] == 'X') and $toim != 'OSTOTILAUS') {
             $values .= ", '{$monistarow[$fieldname]}'";
@@ -1269,6 +1273,7 @@ if ($tee == 'MONISTA') {
           $values .= ", ''";
           break;
         case 'kate_korjattu':
+        case 'lahetetty_ulkoiseen_varastoon':
           $values .= ", NULL";
           break;
         case 'toimitustavan_lahto':
@@ -1456,10 +1461,13 @@ if ($tee == 'MONISTA') {
       $tulos_ulos[] = $utunnus;
 
       if ($toim == 'SOPIMUS') {
-        echo t("Uusi sopimusnumero on")." {$utunnus}<br><br>";
+        echo t("Uusi sopimusnumero on")." <a href='{$palvelin2}tilauskasittely/tilaus_myynti.php?toim=YLLAPITO&tilausnumero=$utunnus'>{$utunnus}</a><br><br>";
+      }
+      elseif ($toim == 'TARJOUS') {
+        echo t("Uusi tarjousnumero on")." <a href='{$palvelin2}tilauskasittely/tilaus_myynti.php?toim=TARJOUS&tilausnumero=$utunnus'>{$utunnus}</a><br><br>";
       }
       else {
-        echo t("Uusi tilausnumero on")." {$utunnus}<br><br>";
+        echo t("Uusi tilausnumero on")." <a href='{$palvelin2}tilauskasittely/tilaus_myynti.php?toim=PIKATILAUS&tilausnumero=$utunnus'>{$utunnus}</a><br><br>";
       }
 
       //  Päivitetään myös tunnusnippu jotta tätä voidaan versioida..
@@ -2101,7 +2109,10 @@ if ($tee == 'MONISTA') {
       if ($toim == '' and $kumpi == 'MONISTA' and $korjrahdit == 'on' and $monistarow['laskunro'] > 0 and $yhtiorow['rahti_hinnoittelu'] == '') {
 
         // Poistetaan virheelliset rahdit
-        $query  = " UPDATE tilausrivi set tyyppi='D' where yhtio = '$kukarow[yhtio]' and otunnus='$utunnus' AND tuoteno = '$yhtiorow[rahti_tuotenumero]'";
+        $rahtituotelisa = "'$yhtiorow[rahti_tuotenumero]'";
+        $rahtituotelisa = lisaa_vaihtoehtoinen_rahti_merkkijonoon($rahtituotelisa);
+
+        $query  = " UPDATE tilausrivi set tyyppi='D' where yhtio = '$kukarow[yhtio]' and otunnus='$utunnus' AND tuoteno IN ({$rahtituotelisa})";
         $addtil = pupe_query($query);
 
         $query   = "SELECT date_format(rahtikirjat.tulostettu, '%Y-%m-%d') tulostettu, group_concat(distinct lasku.tunnus) tunnukset

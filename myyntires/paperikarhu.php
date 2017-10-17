@@ -49,7 +49,7 @@ if (!function_exists("alku")) {
 
     //Otsikko
     $pdf->draw_text(310, 815, t("Maksukehotus", $kieli), $firstpage, $iso);
-    $pdf->draw_text(430, 815, t("Sivu", $kieli)." ".$sivu,   $firstpage, $norm);
+    $pdf->draw_text(490, 815, t("Sivu", $kieli)." ".$sivu,   $firstpage, $norm);
 
     tulosta_logo_pdf($pdf, $firstpage, "");
 
@@ -58,12 +58,28 @@ if (!function_exists("alku")) {
       //$pdf->draw_rectangle(737, 20,  674, 300, $firstpage, $rectparam);
       $pdf->draw_text(50, 729, t("Laskutusosoite", $kieli),   $firstpage, $pieni);
 
-      if ($asiakastiedot["laskutus_nimi"] != "" and ($asiakastiedot["maksukehotuksen_osoitetiedot"] == "B" or ($yhtiorow["maksukehotuksen_osoitetiedot"] == "K" and $asiakastiedot["maksukehotuksen_osoitetiedot"] == ""))) {
+      if ($asiakastiedot["laskutus_nimi"] != "" and (
+        ($asiakastiedot["maksukehotuksen_osoitetiedot"] == "B" or ($yhtiorow["maksukehotuksen_osoitetiedot"] == "K" and $asiakastiedot["maksukehotuksen_osoitetiedot"] == "")) or
+        ($asiakastiedot["maksukehotuksen_osoitetiedot"] == "C" or ($yhtiorow["maksukehotuksen_osoitetiedot"] == "C" and $asiakastiedot["maksukehotuksen_osoitetiedot"] == ""))
+        )) {
+
         $pdf->draw_text(50, 717, $asiakastiedot["laskutus_nimi"],     $firstpage, $norm);
         $pdf->draw_text(50, 707, $asiakastiedot["laskutus_nimitark"],   $firstpage, $norm);
         $pdf->draw_text(50, 697, $asiakastiedot["laskutus_osoite"],   $firstpage, $norm);
         $pdf->draw_text(50, 687, $asiakastiedot["laskutus_postino"]." ".$asiakastiedot["laskutus_postitp"], $firstpage, $norm);
         $pdf->draw_text(50, 677, $asiakastiedot["laskutus_maa"],     $firstpage, $norm);
+
+        if (($asiakastiedot["maksukehotuksen_osoitetiedot"] == "C" or ($yhtiorow["maksukehotuksen_osoitetiedot"] == "C" and $asiakastiedot["maksukehotuksen_osoitetiedot"] == "")) and
+          $asiakastiedot["laskutus_nimi"].$asiakastiedot["laskutus_osoite"].$asiakastiedot["laskutus_postino"].$asiakastiedot["laskutus_postitp"].$asiakastiedot["laskutus_maa"] != $asiakastiedot["nimi"].$asiakastiedot["osoite"].$asiakastiedot["postino"].$asiakastiedot["postitp"].$asiakastiedot["maa"]
+          ) {
+
+          $pdf->draw_text(50, 654, t("Ostaja", $kieli), $firstpage, $pieni);
+          $pdf->draw_text(50, 644, $asiakastiedot["nimi"],     $firstpage, $norm);
+          $pdf->draw_text(50, 634, $asiakastiedot["nimitark"],   $firstpage, $norm);
+          $pdf->draw_text(50, 624, $asiakastiedot["osoite"],     $firstpage, $norm);
+          $pdf->draw_text(50, 614, $asiakastiedot["postino"]." ".$asiakastiedot["postitp"], $firstpage, $norm);
+          $pdf->draw_text(50, 604, $asiakastiedot["maa"],     $firstpage, $norm);
+        }
       }
       else {
         $pdf->draw_text(50, 717, $asiakastiedot["nimi"],     $firstpage, $norm);
@@ -425,7 +441,7 @@ if (!function_exists("loppu")) {
       $query = "SELECT *
                 FROM factoring
                 WHERE yhtio = '$kukarow[yhtio]'
-                AND tunnus = '$maksuehtotiedot[factoring_id]'";
+                AND tunnus  = '$maksuehtotiedot[factoring_id]'";
       $fac_result = pupe_query($query);
       $factoringrow = mysql_fetch_assoc($fac_result);
 
@@ -917,7 +933,7 @@ if ($yhtiorow["verkkolasku_lah"] == "maventa" and $_REQUEST['maventa_laheta'] ==
 
   finvoice_otsik($tootfinvoice, $laskurow, $kieli, $pankkitiedot, $masrow, $myyrow, $tyyppi, $toimaikarow, "", $silent);
   finvoice_alvierittely($tootfinvoice, $laskurow, $alvrow);
-  finvoice_otsikko_loput($tootfinvoice, $laskurow, $masrow);
+  finvoice_otsikko_loput($tootfinvoice, $laskurow, $masrow, $pankkitiedot);
 
   $tilrow = array(
     'tuoteno'      => 1,

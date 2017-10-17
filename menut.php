@@ -105,7 +105,7 @@ if (isset($synkronoi) and count($syncyhtiot) > 1) {
   }
 }
 
-if ((isset($synkronoireferenssi) or isset($synkronoireferenssialapaivita)) and count($syncyhtiot) > 0) {
+if ($kukarow['kuka'] == 'admin' and (isset($synkronoireferenssi) or isset($synkronoireferenssialapaivita)) and count($syncyhtiot) > 0) {
 
   $ch  = curl_init();
   curl_setopt($ch, CURLOPT_URL, "http://api.devlab.fi/referenssivalikot.sql");
@@ -336,85 +336,101 @@ if ($tee == "PAIVITA") {
     $tunnus = '';
   }
 
-  if ($tunnus != '') {
-    $query  = "SELECT *
-               FROM oikeu
-               WHERE tunnus='$tunnus'";
-    $result = pupe_query($query);
+  // Tarkistetaan ettei yritetä tehdä duplikaattia jo olemassaolevasta valikosta
+  $t_query = "SELECT tunnus
+              FROM oikeu
+              WHERE yhtio  = '$yht'
+              AND sovellus = '$sove'
+              AND nimi     = '$nimi'
+              AND alanimi  = '$alanimi'
+              AND kuka     = ''
+              AND tunnus  != '$tunnus'";
+  $tarkistus = pupe_query($t_query);
 
-    if (mysql_num_rows($result) == 1) {
-
-      $row = mysql_fetch_assoc($result);
-
-      $yht = str_replace(",", "','", $yht);
-      $yht = "'".$yht."'";
-
-      //päivitetään uudet menun tiedot kaikille käyttäjille
-      $query = "UPDATE oikeu SET
-                sovellus       = '$sove',
-                nimi           = '$nimi',
-                alanimi        = '$alanimi',
-                nimitys        = '$nimitys',
-                jarjestys      = '$jarjestys',
-                jarjestys2     = '$jarjestys2',
-                hidden         = '$hidden',
-                usermanualurl  = '$usermanualurl',
-                muutospvm      = now(),
-                muuttaja       = '{$kukarow['kuka']}'
-                WHERE
-                sovellus       = '$row[sovellus]'
-                and nimi       = '$row[nimi]'
-                and alanimi    = '$row[alanimi]'
-                and nimitys    = '$row[nimitys]'
-                and jarjestys  = '$row[jarjestys]'
-                and jarjestys2 = '$row[jarjestys2]'
-                and hidden     = '$row[hidden]'
-                and yhtio      in ($yht)";
-      $result = pupe_query($query);
-      $num1 = mysql_affected_rows();
-
-      echo "<font class='message'>$num1 ".t("riviä päivitetty")."!<br></font>";
-    }
-
-    $yhtiot = array();
-    $yht = str_replace("'", "", $yht);
-    $yht = explode(",", $yht);
-
-    foreach ($yht as $yhtio) {
-      $yhtiot[$yhtio] = $yhtio;
-    }
+  if (mysql_num_rows($tarkistus) > 0) {
+    echo "<font class='error'> Ohjelma on jo lisätty valikoihin näillä tiedoilla - tarkista valikot ja syöttämäsi tiedot! </font> <br><br>";
   }
   else {
-    $yhtiot = array();
-    $yht = str_replace("'", "", $yht);
-    $yht = explode(",", $yht);
+    if ($tunnus != '') {
+      $query  = "SELECT *
+                 FROM oikeu
+                 WHERE tunnus='$tunnus'";
+      $result = pupe_query($query);
 
-    foreach ($yht as $yhtio) {
-      $yhtiot[$yhtio] = $yhtio;
+      if (mysql_num_rows($result) == 1) {
 
-      if ($yhtio != "REFERENSSI") {
-        $query = "INSERT into oikeu SET
-                  kuka          = '',
-                  sovellus      = '$sove',
-                  nimi          = '$nimi',
-                  alanimi       = '$alanimi',
-                  paivitys      = '',
-                  lukittu       = '',
-                  nimitys       = '$nimitys',
-                  jarjestys     = '$jarjestys',
-                  jarjestys2    = '$jarjestys2',
-                  profiili      = '',
-                  yhtio         = '$yhtio',
-                  hidden        = '$hidden',
-                  usermanualurl = '$usermanualurl',
-                  laatija       = '{$kukarow['kuka']}',
-                  luontiaika    = now(),
-                  muutospvm     = now(),
-                  muuttaja      = '{$kukarow['kuka']}'";
+        $row = mysql_fetch_assoc($result);
+
+        $yht = str_replace(",", "','", $yht);
+        $yht = "'".$yht."'";
+
+        //päivitetään uudet menun tiedot kaikille käyttäjille
+        $query = "UPDATE oikeu SET
+                  sovellus       = '$sove',
+                  nimi           = '$nimi',
+                  alanimi        = '$alanimi',
+                  nimitys        = '$nimitys',
+                  jarjestys      = '$jarjestys',
+                  jarjestys2     = '$jarjestys2',
+                  hidden         = '$hidden',
+                  usermanualurl  = '$usermanualurl',
+                  muutospvm      = now(),
+                  muuttaja       = '{$kukarow['kuka']}'
+                  WHERE
+                  sovellus       = '$row[sovellus]'
+                  and nimi       = '$row[nimi]'
+                  and alanimi    = '$row[alanimi]'
+                  and nimitys    = '$row[nimitys]'
+                  and jarjestys  = '$row[jarjestys]'
+                  and jarjestys2 = '$row[jarjestys2]'
+                  and hidden     = '$row[hidden]'
+                  and yhtio      in ($yht)";
         $result = pupe_query($query);
-        $num = mysql_affected_rows();
+        $num1 = mysql_affected_rows();
 
-        echo "<font class='message'>$num ".t("riviä lisätty")."!<br></font>";
+        echo "<font class='message'>$num1 ".t("riviä päivitetty")."!<br></font>";
+      }
+
+      $yhtiot = array();
+      $yht = str_replace("'", "", $yht);
+      $yht = explode(",", $yht);
+
+      foreach ($yht as $yhtio) {
+        $yhtiot[$yhtio] = $yhtio;
+      }
+    }
+    else {
+      $yhtiot = array();
+      $yht = str_replace("'", "", $yht);
+      $yht = explode(",", $yht);
+
+      foreach ($yht as $yhtio) {
+        $yhtiot[$yhtio] = $yhtio;
+
+        if ($yhtio != "REFERENSSI") {
+          $query = "INSERT into oikeu SET
+                    kuka          = '',
+                    sovellus      = '$sove',
+                    nimi          = '$nimi',
+                    alanimi       = '$alanimi',
+                    paivitys      = '',
+                    lukittu       = '',
+                    nimitys       = '$nimitys',
+                    jarjestys     = '$jarjestys',
+                    jarjestys2    = '$jarjestys2',
+                    profiili      = '',
+                    yhtio         = '$yhtio',
+                    hidden        = '$hidden',
+                    usermanualurl = '$usermanualurl',
+                    laatija       = '{$kukarow['kuka']}',
+                    luontiaika    = now(),
+                    muutospvm     = now(),
+                    muuttaja      = '{$kukarow['kuka']}'";
+          $result = pupe_query($query);
+          $num = mysql_affected_rows();
+
+          echo "<font class='message'>$num ".t("riviä lisätty")."!<br></font>";
+        }
       }
     }
   }
@@ -597,8 +613,10 @@ if ($tee == "") {
     echo "<tr><th>".t("Synkronoi").":</th><td><input type='submit' name='synkronoi' value='".t("Synkronoi")."'></td></tr>";
   }
 
-  echo "<tr><th>".t("Synkronoi referenssiin").":</th><td><input type='submit' name='synkronoireferenssi' value='".t("Synkronoi")."'></td></tr>";
-  echo "<tr><th>".t("Synkronoi referenssiin")." ".t("älä päivitä järjestyksiä").":</th><td><input type='submit' name='synkronoireferenssialapaivita' value='".t("Synkronoi")."'></td></tr>";
+  if ($kukarow['kuka'] == 'admin') {
+    echo "<tr><th>".t("Synkronoi referenssiin").":</th><td><input type='submit' name='synkronoireferenssi' value='".t("Synkronoi")."'></td></tr>";
+    echo "<tr><th>".t("Synkronoi referenssiin")." ".t("älä päivitä järjestyksiä").":</th><td><input type='submit' name='synkronoireferenssialapaivita' value='".t("Synkronoi")."'></td></tr>";
+  }
 
   echo "</form>";
 

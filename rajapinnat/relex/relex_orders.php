@@ -31,6 +31,7 @@ cron_log();
 $ajopaiva  = date("Y-m-d");
 $paiva_ajo = FALSE;
 $ftppath = "/data/input";
+$extra_laskutiedot = false;
 
 if (isset($argv[2]) and $argv[2] != '') {
 
@@ -45,6 +46,10 @@ if (isset($argv[2]) and $argv[2] != '') {
 
 if (isset($argv[3]) and trim($argv[3]) != '') {
   $ftppath = trim($argv[3]);
+}
+
+if (isset($argv[4]) and trim($argv[4]) == 'extra') {
+  $extra_laskutiedot = true;
 }
 
 // Yhtiö
@@ -79,14 +84,30 @@ function add_open_orders_line($fp, $row) {
   $rivi .= "{$row['type']};";                                        // Open order type
   $rivi .= "{$row['maara']};";                                       // Open order quantity in inventory units
   $rivi .= "{$row['toimituspaiva']};";                               // Estimated delivery date of the order
-  $rivi .= ";";                                                      // Open order value in currency
-  $rivi .= ";";                                                      // Sales or purchase order number
-  $rivi .= ";";                                                      // Sales or purchase order row number
+  $rivi .= "{$row['kplhinta']};";                                    // Open order value in currency
+  $rivi .= "{$row['tilausnumero']};";                                // Sales or purchase order number
+  $rivi .= "{$row['rivinumero']};";                                  // Sales or purchase order row number
   $rivi .= ";";                                                      // Additional order type that can be used to distinct normal sales and deliveries from special sales and deliveries
   $rivi .= "{$row['partner']}";                                      // Customer for sales orders and Supplier for purchase orders
   $rivi .= "\n";
 
   fwrite($fp, $rivi);
+}
+
+$ostolisa = $myyntilisa = $siirtolisa = ", '' kplhinta";
+$tilausnumero = "'' tilausnumero, ";
+$rivinumero = "'' rivinumero, ";
+
+if ($extra_laskutiedot) {
+ 
+  $query_ale_lisa_myynti = generoi_alekentta('M');
+  $query_ale_lisa_osto = generoi_alekentta('O');
+  
+  $ostolisa = ", round(tilausrivi.hinta / if ('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * {$query_ale_lisa_osto}, 2) kplhinta";
+  $myyntilisa = ", if (tilausrivi.tyyppi='V', tuote.kehahin, round(tilausrivi.hinta / if ('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * {$query_ale_lisa_myynti}, 2)) kplhinta";
+  $siirtolisa = ", tuote.kehahin kplhinta";
+  $tilausnumero = "lasku.tunnus tilausnumero, ";
+  $rivinumero = "tilausrivi.tunnus rivinumero, ";
 }
 
 // Haetaan avoimet ostot : myynnit ja kulutukset : varastosiirrot ja valmistukset
@@ -100,8 +121,11 @@ $query = "(SELECT
            tilausrivi.toimaika toimituspaiva,
            tilausrivi.keratty,
            lasku.liitostunnus partner,
+           $tilausnumero
+           $rivinumero
            '' vastaanottovarasto,
            '' sisainen_siirto
+           $ostolisa
            FROM tilausrivi USE INDEX (yhtio_tyyppi_laskutettuaika)
            JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus)
            JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio
@@ -125,8 +149,11 @@ $query = "(SELECT
            tilausrivi.toimaika toimituspaiva,
            tilausrivi.keratty,
            lasku.liitostunnus partner,
+           $tilausnumero
+           $rivinumero
            '' vastaanottovarasto,
            '' sisainen_siirto
+           $myyntilisa
            FROM tilausrivi USE INDEX (yhtio_tyyppi_kerattyaika)
            JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus)
            JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio
@@ -150,8 +177,11 @@ $query = "(SELECT
            tilausrivi.toimaika toimituspaiva,
            tilausrivi.keratty,
            lasku.liitostunnus partner,
+           $tilausnumero
+           $rivinumero
            lasku.clearing vastaanottovarasto,
            if (tilausrivi.tyyppi = 'G' and tilausrivi.varasto = lasku.clearing, 1, 0) sisainen_siirto
+           $siirtolisa
            FROM tilausrivi USE INDEX (yhtio_tyyppi_toimitettuaika)
            JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus)
            JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio

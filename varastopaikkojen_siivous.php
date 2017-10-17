@@ -734,9 +734,9 @@ if ($tee == "LISTAAVIRHEELLISETRIVIT" and !$_cli) {
               AND concat(rpad(upper(varastopaikat.loppuhyllyalue), 5, '0'), lpad(upper(varastopaikat.loppuhyllynro), 5, '0'))
                                    >= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'), lpad(upper(tilausrivi.hyllynro), 5, '0')))
             WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
-            AND tilausrivi.tyyppi  in ('L','G','V')
+            AND tilausrivi.tyyppi  in ('L','G','V','W','M')
             AND tilausrivi.jt + tilausrivi.varattu != 0
-            AND varastopaikat.tunnus is null
+            AND (varastopaikat.tunnus is null or tilausrivi.hyllyalue='')
             ORDER BY tilausrivi.tuoteno";
   $tilrivires = pupe_query($query);
 

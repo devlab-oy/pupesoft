@@ -1,5 +1,4 @@
 <?php
-
 // Tarvitsemme
 // $laskurow jossa on laskun tiedot
 // $kutsuja jossa on skripti josta kutsutaan
@@ -26,19 +25,23 @@ else {
   $lisavarattu = "";
 }
 
+$rajattavat_tuotteet = "'{$yhtiorow['rahti_tuotenumero']}'";
+$rajattavat_tuotteet = lisaa_vaihtoehtoinen_rahti_merkkijonoon($rajattavat_tuotteet);
+
 $query = "SELECT count(*) riveja,
           sum(if (tilausrivi.var = 'P' and tilausrivi.tilkpl $lis_plus_kpl > 0, 1, 0)) puutteet,
           sum(if (tilausrivi.var = 'J' and tilausrivi.jt $lisavarattu > 0, 1, 0)) jteet,
           sum(if (tilausrivi.var not in ('P','J','O','S') and tilausrivi.varattu $lis_plus_kpl < 0, 1, 0)) hyvitykset,
           sum(if (tilausrivi.var not in ('P','J','O','S') and (('$yhtiorow[kerataanko_saldottomat]' = '' and tuote.ei_saldoa = '') or '$yhtiorow[kerataanko_saldottomat]' = 'S') and tilausrivi.varattu $lis_plus_kpl > 0, 1, 0)) normaalit_kerataan,
           sum(if (tilausrivi.var not in ('P','J','O','S') and '$yhtiorow[kerataanko_saldottomat]' = '' and tuote.ei_saldoa != '' and tilausrivi.varattu $lis_plus_kpl > 0, 1, 0)) saldottomat,
+          sum(if (tilausrivi.var not in ('P','J','O','S') and '{$yhtiorow['saldottomat_rahtikirjansyottoon']}' != '' and tuote.ei_saldoa != '' and tuote.tuotetyyppi = '' and tilausrivi.varattu {$lis_plus_kpl} > 0, 1, 0)) saldottomat_rahtikirjansyottoon,
           sum(if (tilausrivi.toimitettu != '' and tuote.ei_saldoa = '' and (tilausrivi.varattu $lis_plus_kpl > 0 and tilausrivi.var not in ('P','J','O','S')), 1, 0)) toimitetut
           FROM tilausrivi
           LEFT JOIN tuote ON tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno
           WHERE tilausrivi.yhtio  = '$kukarow[yhtio]'
           and tilausrivi.otunnus  = '$laskurow[tunnus]'
           and tilausrivi.tyyppi   = 'L'
-          and tilausrivi.tuoteno != '$yhtiorow[rahti_tuotenumero]'";
+          and tilausrivi.tuoteno NOT IN ({$rajattavat_tuotteet})";
 $tresult = pupe_query($query);
 $rivirow = mysql_fetch_array($tresult);
 
@@ -166,6 +169,9 @@ elseif ($rivirow["jteet"] > 0 and $laskurow["osatoimitus"] != '') {
   $tilaus_valmis_message .= "<font class='message'>".sprintf(t("Tilauksella %s oli JT-rivejä ja osatoimitusta ei tehdä, eli se jätettiin odottamaan JT-tuotteita."), $laskurow["tunnus"])."</font><br><br>\n";
 }
 elseif ($kerattavia == 0 or $tilaus_toimitetuksi) {
+  // Rahtikulurivien rajaus
+  $rajattavat_tuotteet = "'{$yhtiorow['rahti_tuotenumero']}'";
+  $rajattavat_tuotteet = lisaa_vaihtoehtoinen_rahti_merkkijonoon($rajattavat_tuotteet);
   // Tilauskella on pelkästään puuterivejä joita ei kerätä
   // merkataan otsikko mitätöidyksi, mutta jätetään PUUTE rivit analyysejä varten...
   if ($rivirow["riveja"] == $rivirow["puutteet"]) {
@@ -173,7 +179,7 @@ elseif ($kerattavia == 0 or $tilaus_toimitetuksi) {
     $query  = "DELETE FROM tilausrivi
                WHERE otunnus = '$laskurow[tunnus]'
                AND yhtio     = '$kukarow[yhtio]'
-               AND tuoteno   = '$yhtiorow[rahti_tuotenumero]'";
+               AND tuoteno IN ({$rajattavat_tuotteet})";
     $result = pupe_query($query);
 
     $komm = "(" . $kukarow['kuka'] . "@" . date('Y-m-d') .") ".t("Mitätöi ohjelmassa tilaus-valmis-valitsetila.php (2)")."<br>";
@@ -194,7 +200,7 @@ elseif ($kerattavia == 0 or $tilaus_toimitetuksi) {
       $query  = "DELETE FROM tilausrivi
                  WHERE otunnus = '$laskurow[tunnus]'
                  AND yhtio     = '$kukarow[yhtio]'
-                 AND tuoteno   = '$yhtiorow[rahti_tuotenumero]'";
+                 AND tuoteno IN ({$rajattavat_tuotteet})";
       $result = pupe_query($query);
     }
 
@@ -214,7 +220,7 @@ elseif ($kerattavia == 0 or $tilaus_toimitetuksi) {
       $query  = "DELETE FROM tilausrivi
                  WHERE otunnus = '$laskurow[tunnus]'
                  AND yhtio     = '$kukarow[yhtio]'
-                 AND tuoteno   = '$yhtiorow[rahti_tuotenumero]'";
+                 AND tuoteno IN ({$rajattavat_tuotteet})";
       $result = pupe_query($query);
     }
 
@@ -226,6 +232,29 @@ elseif ($kerattavia == 0 or $tilaus_toimitetuksi) {
     $result = pupe_query($query);
 
     $tilaus_valmis_message .= "<font class='message'>".sprintf(t("Tilauksella %s oli pelkästään JT-rivejä ja Puuterivejä ja se jätettiin odottamaan JT-tuotteita."), $laskurow["tunnus"])."</font><br><br>\n";
+  }
+  elseif ($rivirow["riveja"] == $rivirow["saldottomat_rahtikirjansyottoon"]) {
+    // merkataan rivit kerätyiksi, mutta ei toimitetuiksi ja tilaukselle alatila "kerätty"
+    $query  = "UPDATE tilausrivi SET
+               kerattyaika = now(),
+               keratty = '{$kukarow['kuka']}'
+               WHERE otunnus   = '{$laskurow['tunnus']}'
+               and yhtio       = '{$kukarow['yhtio']}'
+               and var         NOT IN ('P','J','O','S')
+               and keratty     = ''
+               and toimitettu  = ''
+               and tyyppi     != 'D'";
+    $result = pupe_query($query);
+
+    $query  = "UPDATE lasku SET
+               tila         = 'L',
+               alatila      = 'C',
+               lahetepvm    = now()
+               WHERE tunnus = '{$laskurow['tunnus']}'
+               AND yhtio    = '{$kukarow['yhtio']}'";
+    $result = pupe_query($query);
+
+    $tilaus_valmis_message .= "<font class='message'>".sprintf(t("Tilauksella %s ei ollut yhtään kerättävää riviä. Tilaus siirretty rahtikirjansyöttöön."), $laskurow["tunnus"])."</font><br><br>\n";
   }
   elseif ($tilaus_toimitetuksi or $ei_kerattavia > 0) {
     if ($kateinen == 'X' or $itsetulostus == "X" or $laskurow["vienti"] != '') {
@@ -380,7 +409,7 @@ elseif ($kerattavia > 0 and $kutsuja != 'keraa.php' and !$tilaus_toimitetuksi) {
   $result = pupe_query($query);
 
   ///* Tähän mennään jos lähete tosiaan tulostetaan *///
-  if ($yhtiorow["lahetteen_tulostustapa"] == "A" or $yhtiorow["lahetteen_tulostustapa"] == "B") {
+  if (in_array($yhtiorow["lahetteen_tulostustapa"], array("A","B","X"))) {
     $tilausnumeroita = $laskurow["tunnus"];
     require "tilaus-valmis-tulostus.inc";
 
@@ -429,7 +458,7 @@ if ($asirow['toimitusvahvistus'] != '') {
 
   // Jos Magento on käytössä, halutaan toimitusvahvistus, tämä on noutotilaus ja tullut Magentosta
   $_magento_tv       = ($asirow['toimitusvahvistus'] == 'Magento' and $toitarow['nouto'] != '');
-  $_magento_tilaus   = ($laskurow['laatija'] == 'Magento');
+  $_magento_tilaus   = ($laskurow['ohjelma_moduli'] == 'MAGENTO' OR $laskurow['ohjelma_moduli'] == 'MAGENTOJT');
   $_magento_kaytossa = (!empty($magento_api_tt_url) and !empty($magento_api_tt_usr) and !empty($magento_api_tt_pas));
 
   if ($_magento_kaytossa and $_magento_tilaus and $_magento_tv and $kutsuja == 'keraa.php') {
@@ -437,6 +466,7 @@ if ($asirow['toimitusvahvistus'] != '') {
     $magento_api_rak = '';
     $magento_api_ord = $laskurow["asiakkaan_tilausnumero"];
     $magento_api_noutokuittaus = "JOO";
+    $magento_api_laskutunnus = $laskurow["tunnus"];
 
     require "magento_toimita_tilaus.php";
   }

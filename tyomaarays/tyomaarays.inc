@@ -92,7 +92,7 @@ if ($tee ==  "VALMIS" or $tee == "LEPAA") {
         <input type='hidden' name='tyomtyyppi' value='$tyomtyyppi'>
         <input type='submit' value='".t("Näytä työmääräys").": $laskurow[tunnus]' onClick=\"js_openFormInNewWindow('tulostakopioform_tm_$laskurow[tunnus]', ''); return false;\"></form><br>";
 
-        $lopetus = "";
+    $lopetus = "";
   }
 
   if (!empty($komento["Huoltosaate"]) and $komento["Huoltosaate"] == "-88") {
@@ -105,7 +105,7 @@ if ($tee ==  "VALMIS" or $tee == "LEPAA") {
         <input type='hidden' name='kieli' value='$kieli'>
         <input type='submit' value='".t("Näytä huoltosaate").": $laskurow[tunnus]' onClick=\"js_openFormInNewWindow('tulostakopioform_hs_$laskurow[tunnus]', ''); return false;\"></form><br>";
 
-        $lopetus = "";
+    $lopetus = "";
   }
 
   if (!empty($komento["Reklamaatio"]) and $komento["Reklamaatio"] == "-88") {
@@ -118,7 +118,7 @@ if ($tee ==  "VALMIS" or $tee == "LEPAA") {
         <input type='hidden' name='kieli' value='$kieli'>
         <input type='submit' value='".t("Näytä reklamaatio").": $laskurow[tunnus]' onClick=\"js_openFormInNewWindow('tulostakopioform_rm_$laskurow[tunnus]', ''); return false;\"></form><br>";
 
-        $lopetus = "";
+    $lopetus = "";
   }
 
   if (!empty($komento["Takuu"]) and $komento["Takuu"] == "-88") {
@@ -131,7 +131,7 @@ if ($tee ==  "VALMIS" or $tee == "LEPAA") {
         <input type='hidden' name='kieli' value='$kieli'>
         <input type='submit' value='".t("Näytä takuu").": $laskurow[tunnus]' onClick=\"js_openFormInNewWindow('tulostakopioform_tk_$laskurow[tunnus]', ''); return false;\"></form><br>";
 
-        $lopetus = "";
+    $lopetus = "";
   }
 
   if (!empty($komento["Lähete"]) and $komento["Lähete"] == "-88") {
@@ -144,7 +144,7 @@ if ($tee ==  "VALMIS" or $tee == "LEPAA") {
         <input type='hidden' name='kieli' value='$kieli'>
         <input type='submit' value='".t("Näytä lähete").": $laskurow[tunnus]' onClick=\"js_openFormInNewWindow('tulostakopioform_la_$laskurow[tunnus]', ''); return false;\"></form><br>";
 
-        $lopetus = "";
+    $lopetus = "";
   }
 
   if ($toim == "REKLAMAATIO" and !empty($komento["Lähete"]) and $komento["Lähete"] != "-88") {
@@ -503,8 +503,8 @@ if (($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA") and $tee == 'VALMI
               FROM lasku
               JOIN tyomaarays ON (tyomaarays.yhtio = lasku.yhtio AND tyomaarays.otunnus = lasku.tunnus)
               LEFT JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio = lasku.yhtio and laskun_lisatiedot.otunnus = lasku.tunnus)
-              WHERE lasku.tunnus  = '$kukarow[kesken]'
-              AND lasku.yhtio     = '$kukarow[yhtio]'";
+              WHERE lasku.tunnus = '$kukarow[kesken]'
+              AND lasku.yhtio    = '$kukarow[yhtio]'";
     $result = pupe_query($query);
     $laskurow = mysql_fetch_assoc($result);
 

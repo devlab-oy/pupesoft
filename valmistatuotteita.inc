@@ -818,8 +818,9 @@ if ($tee == 'UV') { //Tehd‰‰n tuotteet!
         }
       }
 
+      preg_match("/\((.*)\)/", $selite, $selite_2);
       //printataan pikku raporttia mit‰ tulikaan tehty‰
-      echo "<font class='message'>".t("Valmistettiin tuotetta")." $isatuoteno $isavarattu ".t_avainsana("Y", $kieli, "and avainsana.selite='$valmisterow[yksikko]'", "", "", "selite")."</font><br>";
+      echo "<font class='message'>".t("Valmistettiin tuotetta")." $isatuoteno $isavarattu ".t_avainsana("Y", $kieli, "and avainsana.selite='$valmisterow[yksikko]'", "", "", "selite")."</font> ".t("Kehahintamuutos")." ($selite_2[1])<br>";
 
       $query = "SELECT paivitys
                 FROM oikeu
@@ -863,11 +864,41 @@ if ($tee == 'UV') { //Tehd‰‰n tuotteet!
 
         $varastosta = array(kuuluukovarastoon($tilrivirow["hyllyalue"], $tilrivirow["hyllynro"]));
 
-        // Toimitetaan vain valmistettua is‰tuotetta, ei KAIKKIA firman j‰lkitoimitusrivej‰
-        jt_toimita("", "", $varastosta, $jtrivit, $jtrivit_paikat, "tosi_automaaginen", "JATKA", "", $isatuoteno, '', "TULLAAN_VALMISTUKSESTA");
+        // parametri: automaattinen_jt_toimitus_valmistus
+        // ''  = Valmistusrivej‰ ei toimiteta eik‰ kohdisteta automaattisesti
+        // 'K' = J‰lkitoimitusrivit kohdistetaan automaattisesti valmistuksen yhteydess‰
+        // 'J' = J‰lkitoimitusrivit kohdistetaan ja toimitetaan automaattisesti valmistuksen yhteydess‰
+        // 'T' = J‰lkitoimitusrivit kohdistetaan ja toimitetaan automaattisesti valmistuksen yhteydess‰, jos k‰ytt‰j‰ll‰ on p‰ivitysoikeus JT-selaukseen
+        // 'S' = Ainoastaan asiakkaalle valmistetut j‰lkitoimitusrivit kohdistetaan ja siirret‰‰n tulostusjonoon automaattisesti valmistuksen yhteydess‰
+        // 'V' = Asiakkaalle sek‰ myyntitilaukselta varastoon valmistetut j‰lkitoimitusrivit kohdistetaan asiakkaalle ja toimitetaan automaattisesti valmistuksen yhteydess‰
+        $param        = $yhtiorow["automaattinen_jt_toimitus_valmistus"];
+        $kohdistetaan = in_array($param, array('K', 'J'));
+        $toimitetaan  = ($param == 'J');
 
-        //  Laitetaan tavarat liikkeelle jos sallitaan!
-        if (($jtoikeudetrow["paivitys"] == 1 and ($yhtiorow["automaattinen_jt_toimitus_valmistus"] == "T" or $yhtiorow["automaattinen_jt_toimitus_valmistus"] == "S" or $yhtiorow["automaattinen_jt_toimitus_valmistus"] == "V")) or $yhtiorow["automaattinen_jt_toimitus_valmistus"] == "J") {
+        // T parametrin poikkeukset
+        if ($param == 'T') {
+          $kayttajalla_oikeus = ($jtoikeudetrow["paivitys"] == 1);
+
+          $kohdistetaan = $kayttajalla_oikeus;
+          $toimitetaan  = $kayttajalla_oikeus;
+        }
+
+        // S ja V parametrin poikkeukset, oikeantyyppiset rivitlinkit katsotaan parametrin mukaan ylemp‰n‰
+        if (in_array($param, array('S', 'V'))) {
+          $riveja_linkattu = (count($jtrivit) > 0);
+
+          $kohdistetaan = $riveja_linkattu;
+          $toimitetaan  = $riveja_linkattu;
+        }
+
+        // Kohdistetaan JT rivit
+        if ($kohdistetaan) {
+          // Toimitetaan vain valmistettua is‰tuotetta, ei KAIKKIA firman j‰lkitoimitusrivej‰
+          jt_toimita("", "", $varastosta, $jtrivit, $jtrivit_paikat, "tosi_automaaginen", "JATKA", "", $isatuoteno, '', "TULLAAN_VALMISTUKSESTA");
+        }
+
+        // Toimitetaan JT rivit
+        if ($toimitetaan) {
           jt_toimita("", "", "", "", "", "dummy", "TOIMITA");
         }
       }

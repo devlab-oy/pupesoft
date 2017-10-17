@@ -38,6 +38,9 @@ if ($php_cli) {
 // Sallitaan vain yksi instanssi t‰st‰ skriptist‰ kerrallaan
 pupesoft_flock();
 
+// L‰hetet‰‰n UTF-8 muodossa jos PUPE_UNICODE on true
+$ftputf8 = PUPE_UNICODE;
+
 // PrintServer
 // koitetaan uudelleen l‰hett‰‰ unifaun-tiedosto, jos FTP-siirto on feilannut aikaisemmin
 if ($unifaun_ps_host != "" and $unifaun_ps_user != "" and $unifaun_ps_pass != "" and $unifaun_ps_path != "" and $unifaun_ps_fail != "") {

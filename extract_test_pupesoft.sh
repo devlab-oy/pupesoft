@@ -239,6 +239,10 @@ UPDATE kuka set
 kirjoitin = 0,
 eposti = 'development@devlab.fi';
 
+UPDATE lasku set
+email = 'development@devlab.fi',
+toim_email = 'development@devlab.fi';
+
 UPDATE yhteyshenkilo set
 email = 'development@devlab.fi';
 

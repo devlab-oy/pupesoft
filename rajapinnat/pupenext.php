@@ -68,7 +68,7 @@ function pupenext_luo_myyntitilausotsikko($params) {
   $query = "SELECT *
             FROM asiakas
             WHERE yhtio = '{$kukarow['yhtio']}'
-            AND tunnus = {$customer_id}
+            AND tunnus  = {$customer_id}
             LIMIT 1";
   $result = pupe_query($query);
 
@@ -101,7 +101,7 @@ function pupenext_tilaus_valmis($params) {
   $query = "SELECT *
             FROM lasku
             WHERE yhtio = '{$kukarow['yhtio']}'
-            AND tunnus = {$order_id}
+            AND tunnus  = {$order_id}
             LIMIT 1";
   $result = pupe_query($query);
 
@@ -127,7 +127,7 @@ function pupenext_lisaa_rivi($params) {
 
   $query = "SELECT *
             FROM tuote
-            WHERE tuote.yhtio = '{$kukarow['yhtio']}'
+            WHERE tuote.yhtio  = '{$kukarow['yhtio']}'
               AND tuote.tunnus = $product_id
             LIMIT 1";
   $result = pupe_query($query);
@@ -139,7 +139,7 @@ function pupenext_lisaa_rivi($params) {
   $query = "SELECT *
             FROM lasku
             WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-            AND lasku.tunnus = $order_id";
+            AND lasku.tunnus  = $order_id";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) != 1) die('Tilausta ei löytynyt');

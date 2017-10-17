@@ -205,7 +205,8 @@ if ($tee == "laskuta" and count($laskutapvm) > 0) {
                  eilahetetta  = 'o',
                  clearing     = 'sopimus',
                  swift        = '$tilausnumero',
-                 tilaustyyppi = ''
+                 tilaustyyppi = '',
+                 luontiaika  = '$tapahtumapvm'
                  {$laskutuskausilisa}
                  WHERE yhtio  = '$kukarow[yhtio]'
                  and tunnus   = '$ok'
@@ -275,8 +276,7 @@ if ($tee == "laskuta" and count($laskutapvm) > 0) {
       // päivitetään tila myyntitilaus valmis, suoraan laskutukseen (clearing on sopimus ja swift kentässä on mikä soppari on kopsattu)
       $query  = "UPDATE lasku
                  SET tila   = 'L',
-                 alatila     = 'D',
-                 luontiaika  = '$tapahtumapvm'
+                 alatila     = 'D'
                  WHERE yhtio = '$kukarow[yhtio]'
                  and tunnus  = '$ok'
                  and tila    = 'L'";
@@ -411,12 +411,12 @@ if (mysql_num_rows($result) > 0) {
 
     echo "<tr class='aktiivi'>";
     echo "<td valign='top'>$row[laskutunnus]</td>";
-    echo "<td valign='top'>",tarkistahetu($row["ytunnus"]),"</td>";
+    echo "<td valign='top'>", tarkistahetu($row["ytunnus"]), "</td>";
     echo "<td valign='top'>";
 
     if (strpos($row["nimi"], '!¡!') !== false) {
       list($_ytunnus, $_nimi) = explode('!¡!', $row["nimi"]);
-      echo tarkistahetu($_ytunnus),"<br>{$_nimi}";
+      echo tarkistahetu($_ytunnus), "<br>{$_nimi}";
     }
     else {
       echo $row["nimi"];

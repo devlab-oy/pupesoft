@@ -65,9 +65,9 @@ if (isset($_POST['valmis']) and $_POST['valmis'] != '') {
 
   // korjataan ensimm‰inen rivi jossa on v‰‰r‰ otsikkonro sek‰ rahtikirjanro
   $query = "UPDATE rahtikirjat SET
-            otsikkonro = '{$rahtikirjanro}',
+            otsikkonro    = '{$rahtikirjanro}',
             rahtikirjanro = '{$rahtikirjanro}'
-            WHERE tunnus = '{$otsikkonro}'";
+            WHERE tunnus  = '{$otsikkonro}'";
   pupe_query($query);
 
   $tulosta = "JOO";
@@ -99,6 +99,8 @@ if ((isset($tulosta) or isset($tulostakopio)) and $otsikkonro > 0) {
   // kerrotaan ett‰ t‰m‰ on custom rahtikirja == ei haeta laskulta mit‰‰n
   $GLOBALS['tyhja'] = 1;
 
+  $osoitelappurow = array();
+
   if ($data['merahti'] == 'K') {
     $rahdinmaksaja = 'L‰hett‰j‰';
     $toitarow = array(
@@ -113,9 +115,11 @@ if ((isset($tulosta) or isset($tulostakopio)) and $otsikkonro > 0) {
       'selite'           => $data['toimitustapa'],
       'rahdinkuljettaja' => '',
     );
-  }
 
-  $osoitelappurow = array();
+    if (!empty($data["rahtisopimus"])) {
+      $osoitelappurow["rahtisopimus"] = $data["rahtisopimus"];
+    }
+  }
 
   if (isset($tulostakopio)) {
     $osoitelappurow = unserialize($data['tyhjanrahtikirjan_otsikkotiedot'][0]);
@@ -150,7 +154,7 @@ if ((isset($tulosta) or isset($tulostakopio)) and $otsikkonro > 0) {
                     if(asiakas.puhelin != '', asiakas.puhelin, ''))) AS toim_puh
                 FROM asiakas
                 WHERE yhtio = '$kukarow[yhtio]'
-                AND tunnus = '$asiakasid'";
+                AND tunnus  = '$asiakasid'";
       $asres = pupe_query($query);
       $asiakasrow = mysql_fetch_assoc($asres);
 
@@ -251,6 +255,9 @@ if ((isset($tulosta) or isset($tulostakopio)) and $otsikkonro > 0) {
     }
   }
 
+  $osoitelappurow['viitelah'] = $data['viitelah'][0];
+  $osoitelappurow['viitevas'] = $data['viitevas'][0];
+
   // haetaan varaston osoitetiedot, k‰ytet‰‰n niit‰ l‰hetystietoina
   $query = "SELECT nimi, nimitark, osoite, postino, postitp, maa
             FROM varastopaikat
@@ -276,11 +283,11 @@ if ((isset($tulosta) or isset($tulostakopio)) and $otsikkonro > 0) {
 
     $query = "SELECT summa, viite, valkoodi
               FROM lasku
-              WHERE yhtio = '$kukarow[yhtio]'
-              and tila = 'U'
-              and alatila = 'X'
+              WHERE yhtio      = '$kukarow[yhtio]'
+              and tila         = 'U'
+              and alatila      = 'X'
               and liitostunnus = '$asiakasrow[tunnus]'
-              and tunnus = $lt";
+              and tunnus       = $lt";
     $res = pupe_query($query);
     $row = mysql_fetch_array($res);
 
@@ -379,6 +386,9 @@ if ((isset($tulosta) or isset($tulostakopio)) and $otsikkonro > 0) {
       if ($toitarow['osoitelappu'] == 'intrade') {
         require 'tilauskasittely/osoitelappu_intrade_pdf.inc';
       }
+      elseif ($toitarow['osoitelappu'] == 'osoitelappu_kesko') {
+        require 'tilauskasittely/osoitelappu_kesko_pdf.inc';
+      }
       elseif ($toitarow['osoitelappu'] == 'hornbach') {
         require 'tilauskasittely/osoitelappu_hornbach_pdf.inc';
       }
@@ -471,7 +481,7 @@ if (!$asiakasid and !$rahtikirja_ilman_asiakasta) {
 
         mysql_data_seek($kirre, 0);
 
-        echo "<option value='-88'>",t("PDF ruudulle"),"</option>";
+        echo "<option value='-88'>", t("PDF ruudulle"), "</option>";
 
         while ($kirow = mysql_fetch_assoc($kirre)) {
           echo "<option value='$kirow[tunnus]'>$kirow[kirjoitin]</option>";
@@ -717,11 +727,11 @@ if ($asiakasid or $rahtikirja_ilman_asiakasta) {
     $query = "SELECT lasku.*
               FROM lasku use index (yhtio_tila_liitostunnus_tapvm)
               JOIN maksuehto ON (lasku.yhtio=maksuehto.yhtio and lasku.maksuehto=maksuehto.tunnus and maksuehto.jv!='')
-              WHERE lasku.yhtio     = '$kukarow[yhtio]'
-              and lasku.tila        = 'U'
-              and lasku.alatila     = 'X'
+              WHERE lasku.yhtio      = '$kukarow[yhtio]'
+              and lasku.tila         = 'U'
+              and lasku.alatila      = 'X'
               and lasku.liitostunnus = '$asiakasid'
-              and lasku.tapvm >= date_sub(now(), INTERVAL 90 DAY)";
+              and lasku.tapvm        >= date_sub(now(), INTERVAL 90 DAY)";
     $res = pupe_query($query);
 
     if (mysql_num_rows($res)) {
@@ -928,6 +938,8 @@ function pupe_rahtikirja_fetch($otsikkonro) {
     'kollityht'      => 0,
     'kuutiotyht'    => 0,
     'lavametriyht'    => 0,
+    'viitelah' => '',
+    'viitevas' => '',
     'tyhjanrahtikirjan_otsikkotiedot' => array(),
   );
 
@@ -948,6 +960,8 @@ function pupe_rahtikirja_fetch($otsikkonro) {
     $data['kuutiot'][$i]       = $rahtikirja['kuutiot'];
     $data['lavametri'][$i]     = $rahtikirja['lavametri'];
     $data['toimitustapa'][$i]   = $rahtikirja['toimitustapa'];
+    $data['viitelah'][$i] = $rahtikirja['viitelah'];
+    $data['viitevas'][$i] = $rahtikirja['viitevas'];
     $data['tyhjanrahtikirjan_otsikkotiedot'][$i] = $rahtikirja['tyhjanrahtikirjan_otsikkotiedot'];
 
     // lis‰t‰‰n totaaleja
@@ -997,7 +1011,7 @@ function pupe_toimitustapa_fetch_all() {
   $query  = "SELECT *
              FROM toimitustapa
              WHERE yhtio    = '{$GLOBALS['kukarow']['yhtio']}'
-             and rahtikirja not in ('rahtikirja_ups_siirto.inc','rahtikirja_dpd_siirto.inc','rahtikirja_unifaun_ps_siirto.inc','rahtikirja_unifaun_uo_siirto.inc','rahtikirja_hrx_siirto.inc', 'rahtikirja_tyhja.inc')
+             and rahtikirja not in ('rahtikirja_ups_siirto.inc','rahtikirja_dpd_siirto.inc','rahtikirja_unifaun_ps_siirto.inc','rahtikirja_unifaun_uo_siirto.inc','rahtikirja_unifaun_xp_siirto.inc','rahtikirja_hrx_siirto.inc', 'rahtikirja_tyhja.inc')
              order by jarjestys,selite";
   $result = pupe_query($query);
 

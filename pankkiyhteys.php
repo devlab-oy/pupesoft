@@ -16,13 +16,22 @@ toggle_all("viite_toggler", "viite_boxes");
 toggle_all("tiliote_toggler", "tiliote_boxes");
 toggle_all("factoring_tiliote_toggler", "factoring_tiliote_boxes");
 toggle_all("factoring_viite_toggler", "factoring_viite_boxes");
+toggle_all("finvoice_toggler", "finvoice_boxes");
 toggle_all("palaute_toggler", "palaute_boxes");
 
 $tee = empty($tee) ? '' : $tee;
 $toim = empty($toim) ? '' : $toim;
 $hae_tiliotteet = empty($hae_tiliotteet) ? '' : $hae_tiliotteet;
 $hae_viitteet = empty($hae_viitteet) ? '' : $hae_viitteet;
+$hae_laskut = empty($hae_laskut) ? '' : $hae_laskut;
 $hae_palautteet = empty($hae_palautteet) ? '' : $hae_palautteet;
+
+// Otetaan defaultit, jos ei olla yliajettu salasanat.php:ssä
+$verkkolaskut_in     = empty($verkkolaskut_in)     ? "/home/verkkolaskut"        : rtrim($verkkolaskut_in, "/");
+$verkkolaskut_ok     = empty($verkkolaskut_ok)     ? "/home/verkkolaskut/ok"     : rtrim($verkkolaskut_ok, "/");
+$verkkolaskut_orig   = empty($verkkolaskut_orig)   ? "/home/verkkolaskut/orig"   : rtrim($verkkolaskut_orig, "/");
+$verkkolaskut_error  = empty($verkkolaskut_error)  ? "/home/verkkolaskut/error"  : rtrim($verkkolaskut_error, "/");
+$verkkolaskut_reject = empty($verkkolaskut_reject) ? "/home/verkkolaskut/reject" : rtrim($verkkolaskut_reject, "/");
 
 $pankkitiedostot = array();
 $virheet_count = 0;
@@ -108,13 +117,21 @@ if ($toim == "palaute") {
   require 'inc/pankkiyhteys_palautteet.inc';
 }
 
+// Jos toim on "laheta", tehdään lähetyshommia
+if ($toim == "laheta") {
+  require 'inc/pankkiyhteys_send.inc';
+}
+
 // Sisäänkirjautumisen käyttöliittymä
 if ($tee == "") {
+  $formi  = 'pankkiyhteys';
+  $kentta = 'salasana';
+
   $kaytossa_olevat_pankkiyhteydet = hae_pankkiyhteydet();
 
   if ($kaytossa_olevat_pankkiyhteydet) {
 
-    echo "<form method='post' action='pankkiyhteys.php'>";
+    echo "<form name='pankkiyhteys' method='post' action='pankkiyhteys.php'>";
     echo "<input type='hidden' name='tee' value='kirjaudu'/>";
     echo "<input type='hidden' name='toim' value='$toim'/>";
     echo "<table>";

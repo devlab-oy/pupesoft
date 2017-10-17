@@ -87,7 +87,21 @@ $request['haku_tyypit'] = array(
   'nimi'     => t('Nimi'),
 );
 
-$request['saldovahvistus_viestit'] = hae_saldovahvistus_viestit();
+if (isset($saldovahvistus_tunnus)) {
+  $query = "SELECT asiakas.kieli
+          FROM saldovahvistukset
+          JOIN asiakas ON (asiakas.yhtio = saldovahvistukset.yhtio AND asiakas.tunnus = saldovahvistukset.liitostunnus)
+          WHERE saldovahvistukset.yhtio = '{$kukarow['yhtio']}'
+          AND saldovahvistukset.tunnus = '{$saldovahvistus_tunnus}'";
+  $kielirow = mysql_fetch_assoc(pupe_query($query));
+}
+
+$kieli = "";
+if (!empty($kielirow)) {
+  $kieli = $kielirow["kieli"];
+}
+
+$request['saldovahvistus_viestit'] = hae_saldovahvistus_viestit($kieli);
 
 echo_lahetetyt_saldovahvistukset_kayttoliittyma($request);
 

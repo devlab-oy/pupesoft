@@ -167,16 +167,16 @@ $create_excel = (isset($excel) and $excel != "");
 
 if ($tee == "aja" and $alisa != "" and $llisa != "") {
   switch ($vo_laskurajaus) {
-    case 'vain':
-      // halutaan listata vain vaihto-omaisuuslaskuja
-      $vo_laskurajaus_lisa = "AND lasku.vienti in ('C','F','I')";
-      break;
-    case 'muut':
-      // ei haluta listata vaihto-omaisuuslaskuja
-      $vo_laskurajaus_lisa = "AND lasku.vienti not in ('C','F','I')";
-      break;
-    default:
-      $vo_laskurajaus_lisa = '';
+  case 'vain':
+    // halutaan listata vain vaihto-omaisuuslaskuja
+    $vo_laskurajaus_lisa = "AND lasku.vienti in ('C','F','I')";
+    break;
+  case 'muut':
+    // ei haluta listata vaihto-omaisuuslaskuja
+    $vo_laskurajaus_lisa = "AND lasku.vienti not in ('C','F','I')";
+    break;
+  default:
+    $vo_laskurajaus_lisa = '';
   }
 
   if ($rajaa_myos_lasku_tapvm == 'YES') {
@@ -197,10 +197,10 @@ if ($tee == "aja" and $alisa != "" and $llisa != "") {
             sum(tiliointi.summa) AS matkalla
             FROM tiliointi
             JOIN lasku on (lasku.tunnus = tiliointi.ltunnus)
-            WHERE tiliointi.yhtio = '{$kukarow['yhtio']}'
-            AND tiliointi.tilino = '{$yhtiorow['matkalla_olevat']}'
-            AND tiliointi.tapvm >= '{$alisa}'
-            AND tiliointi.tapvm <= '{$llisa}'
+            WHERE tiliointi.yhtio  = '{$kukarow['yhtio']}'
+            AND tiliointi.tilino   = '{$yhtiorow['matkalla_olevat']}'
+            AND tiliointi.tapvm    >= '{$alisa}'
+            AND tiliointi.tapvm    <= '{$llisa}'
             AND tiliointi.korjattu = ''
             {$vo_laskurajaus_lisa}
             {$tapvm_laskurajaus_lisa}
@@ -295,9 +295,9 @@ if ($tee == "aja" and $alisa != "" and $llisa != "") {
         // Milloin rivit on viety saldoille keskimäärin
         $query = "SELECT DATE_FORMAT(FROM_UNIXTIME(AVG(UNIX_TIMESTAMP(laskutettuaika))),'%Y-%m-%d') AS laskutettuaika
                   FROM tilausrivi
-                  WHERE yhtio     = '{$kukarow['yhtio']}'
-                  AND uusiotunnus = {$keikrow['tunnus']}
-                  AND tyyppi      = 'O'
+                  WHERE yhtio         = '{$kukarow['yhtio']}'
+                  AND uusiotunnus     = {$keikrow['tunnus']}
+                  AND tyyppi          = 'O'
                   AND laskutettuaika != '0000-00-00'";
         $rivires = pupe_query($query);
         $rivirow = mysql_fetch_assoc($rivires);
@@ -306,9 +306,9 @@ if ($tee == "aja" and $alisa != "" and $llisa != "") {
         $query = "SELECT
                   round(sum(rivihinta), 2) va_arvo
                   FROM tilausrivi
-                  WHERE yhtio     = '{$kukarow['yhtio']}'
-                  AND uusiotunnus = {$keikrow['tunnus']}
-                  AND tyyppi      = 'O'
+                  WHERE yhtio        = '{$kukarow['yhtio']}'
+                  AND uusiotunnus    = {$keikrow['tunnus']}
+                  AND tyyppi         = 'O'
                   AND laskutettuaika <= '$llisa'";
         $varivires = pupe_query($query);
         $varivirow = mysql_fetch_assoc($varivires);

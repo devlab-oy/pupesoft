@@ -312,18 +312,14 @@ class LumoClient {
    * @param exception|string $exception $exception Exception
    */
   private function log($message, $exception = '') {
-
-    if (self::LOGGING == true) {
-      $timestamp = date('d.m.y H:i:s');
-      $message   = utf8_encode($message);
-
-      if ($exception != '') {
-        $message .= " (" . $exception->getMessage() . ") faultcode: " . $exception->faultcode;
-      }
-
-      $message .= "\n";
-
-      error_log("{$timestamp}: {$message}", 3, '/tmp/lumo_log.txt');
+    if (self::LOGGING !== true) {
+      return;
     }
+
+    if (!empty($exception)) {
+      $message .= " (" . $exception->getMessage() . ") faultcode: " . $exception->faultcode;
+    }
+
+    pupesoft_log('lumo_client', $message);
   }
 }

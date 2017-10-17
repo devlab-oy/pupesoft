@@ -3,15 +3,10 @@
 if (!function_exists("tuotetarkista")) {
   function tuotetarkista(&$t, $i, $result, $tunnus, &$virhe, $trow) {
     global $kukarow, $yhtiorow, $alias_set, $laji, $poistolukko, $luedata_toiminto;
-    global $ftp_logmaster_host, $ftp_logmaster_user, $ftp_logmaster_pass, $ftp_logmaster_path;
-    global $ftp_posten_logistik_host, $ftp_posten_logistik_user, $ftp_posten_logistik_pass, $ftp_posten_logistik_path;
 
     static $tem_tuoteno, $tem_tullinimike1, $tem_eisaldoa, $tem_kehahin, $tem_kehahin_ind;
     static $tem_tuotetyyppi, $tem_status, $tem_status_vanha, $tem_try, $tem_try_vanha;
     static $tem_eankoodi, $tem_yksikko, $tem_nimitys, $tem_tuotemassa;
-
-    $onkologmaster = (!empty($ftp_logmaster_host) and !empty($ftp_logmaster_user) and !empty($ftp_logmaster_pass) and !empty($ftp_logmaster_path));
-    $onkoposten    = (!empty($ftp_posten_logistik_host) and !empty($ftp_posten_logistik_user) and !empty($ftp_posten_logistik_pass) and !empty($ftp_posten_logistik_path));
 
     $fieldname = mysql_field_name($result, $i);
 
@@ -78,10 +73,10 @@ if (!function_exists("tuotetarkista")) {
 
     if ($laji != "V" and
       ($fieldname == "osasto"
-      or $fieldname == "try"
-      or $fieldname == "tuotemerkki"
-      or $fieldname == "malli"
-      or $fieldname == "mallitarkenne")) {
+        or $fieldname == "try"
+        or $fieldname == "tuotemerkki"
+        or $fieldname == "malli"
+        or $fieldname == "mallitarkenne")) {
 
       // Ei tehdä tarkistuksia jos tietoa ei oo syötetty
       if (empty($t[$i])) {
@@ -367,10 +362,17 @@ if (!function_exists("tuotetarkista")) {
     }
 
     if ($fieldname == 'status') {
+      // trim ja upcase statukselle
+      $t[$i] = strtoupper(trim($t[$i]));
+
       $tem_status = $t[$i];
       $tem_status_vanha = $trow[$i];
 
-      if (!empty($trow) and $tem_status_vanha != $tem_status) {
+      if (!in_array($tem_status, array('A', 'P', 'E', 'T', 'X'))) {
+        $virhe[$i] = t("Status tulee olla A, P, E, T tai X");
+      }
+
+      if (empty($virhe) and !empty($trow) and $tem_status_vanha != $tem_status) {
         //jos tuotteella status muutetaan ja tuotteella on vain oletuspaikka ja saldo on nolla,
         //niin tuotteen muokkauksen yhteydessä mitätöidään nykyinen tuotepaikka + tapahtumiin jälki ja perustetaan määritellyin ehdoin uudet tuotepaikat.
         list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($tem_tuoteno);
@@ -398,7 +400,7 @@ if (!function_exists("tuotetarkista")) {
         }
       }
       // Jos kyseessä tuotteen poisto, tarkistetaan löytyykö tuotetta avoimilta ostotilauksilta, jos löytyy niin poistoa ei sallita.
-      if ($tem_status == 'P') {
+      if (empty($virhe) and $tem_status == 'P') {
         $query = "SELECT tuoteno
                   FROM tilausrivi
                   WHERE yhtio  = '$kukarow[yhtio]'
@@ -464,19 +466,22 @@ if (!function_exists("tuotetarkista")) {
         $chkressires = pupe_query($query);
       }
 
+      # Kun nämä tiedot muuttuvat, tuote täytyy siirtää uudestaan ulkoiseen järjestelmään
+      # Tuotteen avainsana "synkronointi" kertoo milloin tuote täytyy siirtää
+      # Jos avainsanaa ei ole olemassa tuotteella tai selite on tyhjää, siirretään tuote seuraavalla
+      # synkronointiajolla ulkoiseen järjestelmään
       if (count($virhe) == 0 and
-          ($onkologmaster or $onkoposten) and
-          ($tem_status     != $trow['status']     or
-           $tem_eankoodi   != $trow['eankoodi']   or
-           $tem_yksikko    != $trow['yksikko']    or
-           $tem_nimitys    != $trow['nimitys']    or
-           $tem_tuotemassa != $trow['tuotemassa'] or
-           $tem_try        != $tem_try_vanha)) {
+        ($tem_status     != $trow['status']     or
+          $tem_eankoodi   != $trow['eankoodi']   or
+          $tem_yksikko    != $trow['yksikko']    or
+          $tem_nimitys    != $trow['nimitys']    or
+          $tem_tuotemassa != $trow['tuotemassa'] or
+          $tem_try        != $tem_try_vanha)) {
 
         $query = "UPDATE tuotteen_avainsanat SET
-                  selite = ''
+                  selite      = ''
                   WHERE yhtio = '{$kukarow['yhtio']}'
-                  AND laji = 'synkronointi'
+                  AND laji    = 'synkronointi'
                   AND tuoteno = '{$tem_tuoteno}'";
         $updres = pupe_query($query);
       }

@@ -3,7 +3,7 @@
 if (!function_exists("toimitarkista")) {
   function toimitarkista(&$t, $i, $result, $tunnus, &$virhe, $trow) {
     global $kukarow, $yhtiorow, $alias_set, $ulosarray, $toimtyyppi;
-    static $tmp_maakoodi, $ytunnus, $hetu, $tmp_ytunnus, $tmp_valkoodi, $tmp_iban, $tmp_swift, $tmp_nimi, $tmp_ultilno_maa, $ytunnus_ind, $hetuok;
+    static $tmp_maakoodi, $ytunnus, $hetu, $tmp_ytunnus, $tmp_valkoodi, $tmp_tili, $tmp_iban, $tmp_swift, $tmp_nimi, $tmp_ultilno_maa, $ytunnus_ind;
     static $tmp_edi_kuvaus, $tmp_edi_salasana, $tmp_edi_kayttaja, $tmp_edi_palvelin;
     static $tmp_edi_kuvaus_i, $tmp_edi_salasana_i, $tmp_edi_kayttaja_i, $tmp_edi_palvelin_i;
 
@@ -29,7 +29,7 @@ if (!function_exists("toimitarkista")) {
         $t[$i] = $tmp_nimi;
       }
 
-      if (trim($t[$i]) == '' and ($yhtiorow['jalkilaskenta_kuluperuste'] != 'VS' or $alias_set == "KAYTTAJA")) {
+      if (trim($t[$i]) == '' and ($yhtiorow['jalkilaskenta_kuluperuste'] != 'VS' or $alias_set == "KAYTTAJA") and laskun_hyvaksyjia()) {
         $virhe[$i] = t("Tieto puuttuu");
       }
     }
@@ -56,6 +56,8 @@ if (!function_exists("toimitarkista")) {
 
     if ($fieldname == "tilinumero") {
       $t[$i] = trim($t[$i]);
+      $tmp_tili = '';
+      $tmp_swift = '';
 
       if ($tmp_maakoodi == strtoupper($yhtiorow['maa'])) {
         if ((int) trim($t[$i]) != 0) {
@@ -67,7 +69,7 @@ if (!function_exists("toimitarkista")) {
             if ($pankkitili != '') {
               $t[$i]     = $pankkitili;
               $vastaus   = luoiban($t[$i]);
-              $tmp_iban  = $vastaus['iban'];
+              $tmp_tili  = $vastaus['iban'];
               $tmp_swift = $vastaus['swift'];
             }
           }
@@ -76,33 +78,42 @@ if (!function_exists("toimitarkista")) {
     }
 
     if ($fieldname == "ultilno") {
-
-      if ($t[$i] == '') $t[$i] = $tmp_iban;
-
       // Vaaditaan isot kirjaimet
-      $t[$i] = strtoupper(trim($t[$i]));
+      $tilinumero = $t[$i] = strtoupper(trim($t[$i]));
+      $tmp_iban = '';
+
+      // jos tämä kenttä on tyhjää, ja ollaan generoitu tilinumero -kentästä iban
+      if (empty($tilinumero) and !empty($tmp_tili)) {
+        $tilinumero = $t[$i] = $tmp_tili;
+      }
 
       if ($tmp_ultilno_maa != "") $ibanmaa = $tmp_ultilno_maa;
       else $ibanmaa = $tmp_maakoodi;
 
-      if ($t[$i] == '' and $yhtiorow['jalkilaskenta_kuluperuste'] != 'VS') {
+      if ($tilinumero == '' and $yhtiorow['jalkilaskenta_kuluperuste'] != 'VS') {
         $virhe[$i] = t("Tieto puuttuu");
       }
 
       // Luodaan swift, jos sitä ei olla syötetty ja tili on suomalainen
-      if (substr($t[$i], 0, 2) == "FI" and $tmp_swift == "") {
+      if (substr($tilinumero, 0, 2) == "FI" and $tmp_swift == "") {
         include "inc/pankkitiedot.inc";
-        $vastaus = pankkitiedot($t[$i], '');
+        $vastaus = pankkitiedot($tilinumero, '');
         $tmp_swift = $vastaus['swift'];
       }
 
-      if ($t[$i] != '') {
-        // Jos SEPA-maa, tarkistetaan IBAN
-        if (tarkista_sepa($ibanmaa) and tarkista_iban($t[$i]) != $t[$i]) {
-          $virhe[$i] = t("Virheellinen IBAN!")." $t[$i]";
+      if ($tilinumero != '') {
+        // Jos SEPA-maa
+        if (tarkista_sepa($ibanmaa)) {
+          // tarkistetaan IBAN
+          if (tarkista_iban($tilinumero) == $tilinumero) {
+            $tmp_iban = $tilinumero;
+          }
+          else {
+            $virhe[$i] = t("Virheellinen IBAN!")." $tilinumero";
+          }
         }
-        elseif (tarkista_bban($t[$i]) === FALSE) {
-          $virhe[$i] = t("Virheellinen BBAN!")." $t[$i] ".t("Tilinumerossa saa olla vain kirjaimia A-Z ja/tai numeroita 0-9");
+        elseif (tarkista_bban($tilinumero) === FALSE) {
+          $virhe[$i] = t("Virheellinen BBAN!")." $tilinumero ".t("Tilinumerossa saa olla vain kirjaimia A-Z ja/tai numeroita 0-9");
         }
       }
     }
@@ -120,22 +131,39 @@ if (!function_exists("toimitarkista")) {
       if ($tmp_ultilno_maa != "") $ibanmaa = $tmp_ultilno_maa;
       else $ibanmaa = $tmp_maakoodi;
 
+      $swift_virhe = FALSE;
+      if (strtoupper($ibanmaa) == "FI" or substr($tmp_iban, 0, 2) == "FI") {
+        // Haetaan swift tarkistusta varten
+        include "inc/pankkitiedot.inc";
+        $vastaus = pankkitiedot($tmp_iban, '');
+
+        if ($t[$i] != $vastaus['swift'] and $vastaus['swift'] != '' and $vastaus['rahalaitos'] != '') {
+          $swift_virhe = TRUE;
+        }
+        elseif ($t[$i] != '' and $vastaus['swift'] == '' and $vastaus['rahalaitos'] == '') {
+          $swift_virhe = TRUE;
+        }
+      }
+
       if ($t[$i] != '') {
         // Jos SEPA-maa, tarkistetaan BIC
-        if (tarkista_sepa($ibanmaa) and tarkista_bic($t[$i]) === FALSE) {
+        if ($swift_virhe or (tarkista_sepa($ibanmaa) and tarkista_bic($t[$i]) === FALSE)) {
           $virhe[$i] = t("Virheellinen BIC!")." $t[$i]";
         }
       }
     }
 
-    if ($fieldname == "ytunnus" and trim($t[$i]) != '') {
+    if ($fieldname == "ytunnus") {
       $ytunnus = trim($t[$i]);
       $ytunnus_ind = $i;
+      $hetu = '';
+      $tmp_ytunnus = $t[$i];
+    }
 
+    if ($fieldname == "ytunnus" and trim($t[$i]) != '') {
       if ($tmp_maakoodi == 'FI' and ($yhtiorow["ytunnus_tarkistukset"] == "" or $yhtiorow["ytunnus_tarkistukset"] == "T")) {
 
-
-        if (strlen($ytunnus) == 11) {
+        if ($t["tyyppi"] == "K" or strlen($ytunnus) == 11) {
           $hetu = $ytunnus;
 
           // katotaan oliko kyseessä hetu
@@ -160,8 +188,6 @@ if (!function_exists("toimitarkista")) {
       else { // ulkomaalainen saa olla mitä se haluaa
         $t[$i] = $ytunnus;
       }
-
-      $tmp_ytunnus = $t[$i];
     }
 
     if ($fieldname == "ohjeitapankille") {
@@ -180,7 +206,7 @@ if (!function_exists("toimitarkista")) {
     if ($fieldname == "ovttunnus") {
       if ($tmp_maakoodi == 'FI') {
 
-        if (trim($t[$i]) == '' and !isset($hetuok)) {
+        if (trim($t[$i]) == '') {
           // täytetään ovttunnus jos sitä ei ole, eikä ytunnus oo henkilötunnus
           $t[$i] = "0037".sprintf("%08d", preg_replace("/[^0-9]/", "", $tmp_ytunnus));
         }

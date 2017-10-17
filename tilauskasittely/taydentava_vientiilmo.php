@@ -534,16 +534,32 @@ if ($tee == 'TULOSTA') {
   fclose($fhtark);
 
   //paperilista pit‰‰ saada kauniiksi
-  $line1 = exec("a2ps -o ".$paperifaili.".ps --no-header -r --columns=1 --chars-per-line=169 --margin=0 --borders=0 $paperifaili");
+  $params = array(
+    'chars'    => 169,
+    'filename' => $paperifaili,
+    'margin'   => 0,
+    'mode'     => 'landscape',
+  );
+
+  // konveroidaan postscriptiksi
+  $filenimi1_ps = pupesoft_a2ps($params);
 
   //tarkastuslistalle sama juttu
-  $line2 = exec("a2ps -o ".$tarkfaili.".ps --no-header -r --columns=1 --chars-per-line=121 --margin=0 --borders=0 $tarkfaili");
+  $params = array(
+    'chars'    => 121,
+    'filename' => $tarkfaili,
+    'margin'   => 0,
+    'mode'     => 'landscape',
+  );
+
+  // konveroidaan postscriptiksi
+  $filenimi2_ps = pupesoft_a2ps($params);
 
   //lopuks k‰‰nnet‰‰n viel‰ pdf:iks ja l‰hetet‰‰n s‰hkˆpostiin, voi sitten tulostella kun silt‰ tuntuu
-  $line3 = exec("ps2pdf -sPAPERSIZE=a4 ".$paperifaili.".ps ".$paperifaili.".pdf");
+  $line3 = exec("ps2pdf -sPAPERSIZE=a4 {$filenimi1_ps} ".$paperifaili.".pdf");
 
   //tarkastuslistalle sama juttu
-  $line4 = exec("ps2pdf -sPAPERSIZE=a4 ".$tarkfaili.".ps ".$tarkfaili.".pdf");
+  $line4 = exec("ps2pdf -sPAPERSIZE=a4 {$filenimi2_ps} ".$tarkfaili.".pdf");
 
   //mergataan pdf-‰t yhdeksi failiksi joka sit l‰hetet‰‰n k‰ytt‰j‰lle
   //$kaikkilaskut = "/tmp/TVI_Kaikki_Vientilaskut-".md5(uniqid(mt_rand(), true)).".pdf";
@@ -554,9 +570,9 @@ if ($tee == 'TULOSTA') {
     //virheit‰ on sattunut
     echo "<br><br>".t("Korjaa ensin kaikki virheet. Ja kokeile sitten uudestaan").".<br><br>";
     system("rm -f $tarkfaili");
-    system("rm -f ".$tarkfaili.".ps");
+    system("rm -f {$filenimi2_ps}");
     system("rm -f ".$tarkfaili.".pdf");
-    system("rm -f ".$paperifaili.".ps");
+    system("rm -f {$filenimi1_ps}");
     system("rm -f ".$paperifaili.".pdf");
     system("rm -f $paperifaili");
     system("rm -f $atkfaili");
@@ -695,9 +711,9 @@ if ($tee == 'TULOSTA') {
 
   //Dellataan viel‰ viimeiset failit
   system("rm -f $tarkfaili");
-  system("rm -f ".$tarkfaili.".ps");
+  system("rm -f {$filenimi2_ps}");
   system("rm -f ".$tarkfaili.".pdf");
-  system("rm -f ".$paperifaili.".ps");
+  system("rm -f {$filenimi1_ps}");
   system("rm -f ".$paperifaili.".pdf");
   system("rm -f $paperifaili");
   system("rm -f $atkfaili");

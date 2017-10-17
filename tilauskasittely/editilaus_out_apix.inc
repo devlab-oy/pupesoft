@@ -249,7 +249,17 @@ while ($laskurow = mysql_fetch_assoc($laskures)) {
             ORDER BY tilausrivi.tilaajanrivinro";
   $tilausrivi_res = pupe_query($query);
 
+  $_rivi_check = array();
+
   while ($tilausrivi_row = mysql_fetch_assoc($tilausrivi_res)) {
+
+    if (in_array($tilausrivi_row['tuoteno'], $_rivi_check) and empty($tilausrivi_row['varattu'])) {
+
+      if ($tilausrivi_row['tilaajanrivinro'] == $_rivi_check[$tilausrivi_row['tuoteno']]) {
+        continue;
+      }
+      $_rivi_check[$tilausrivi_row['tuoteno']] = $tilausrivi_row['tilaajanrivinro'];
+    }
 
     $kpl = $tilausrivi_row['varattu'];
 

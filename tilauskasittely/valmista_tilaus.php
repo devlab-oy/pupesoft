@@ -420,9 +420,20 @@ if ($tee == 'TEEVALMISTUS') {
     }
 
     // Tän verran on saldoilla
-    foreach ($tuotenumerot as $tuotenumero) {
-
-      list ($saldo, $hyllyssa, $myytavissa, $true) = saldo_myytavissa($tuotenumero);
+    foreach ($tuotenumerot as $rivitunnus => $tuotenumero) {
+      $query = "SELECT tunnus, varasto
+                FROM tilausrivi
+                WHERE yhtio = '$kukarow[yhtio]'
+                and tunnus  = '$rivitunnus'";
+      $sxresult = pupe_query($query);
+      $salrivirow = mysql_fetch_assoc($sxresult);
+      
+      if ($salrivirow["varasto"] > 0) {
+        list ($saldo, $hyllyssa, $myytavissa, $true) = saldo_myytavissa($tuotenumero, '', $salrivirow["varasto"]);
+      }
+      else {
+        list ($saldo, $hyllyssa, $myytavissa, $true) = saldo_myytavissa($tuotenumero);
+      }
 
       $saldot[$tuotenumero] = $saldo;
       $saldot_valm[$tuotenumero] = $saldo;

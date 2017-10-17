@@ -244,22 +244,12 @@ while ($laskurow = mysql_fetch_assoc($laskures)) {
             JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.ei_saldoa = '')
             WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
             AND tilausrivi.otunnus = '{$laskurow['tunnus']}'
-            AND tilausrivi.var     not in ('O','S')
+            AND tilausrivi.var     not in ('J','P','O','S')
             AND tilausrivi.tyyppi = 'L'
             ORDER BY if(tilausrivi.varattu <> 0, 1, 0) desc, tilausrivi.tilaajanrivinro";
   $tilausrivi_res = pupe_query($query);
 
-  $_rivi_check = array();
-
   while ($tilausrivi_row = mysql_fetch_assoc($tilausrivi_res)) {
-
-    if (in_array($tilausrivi_row['tuoteno'], $_rivi_check)) {
-
-      // nollarivi skipataan jos sama tuoteno/rivinro on jo lisätty
-      if ($tilausrivi_row['tilaajanrivinro'] == $_rivi_check[$tilausrivi_row['tuoteno']] and empty($tilausrivi_row['varattu'])) {
-        continue;
-      }
-    }
 
     // otetaan tuoteno ja rivinumero talteen
     $_rivi_check[$tilausrivi_row['tuoteno']] = $tilausrivi_row['tilaajanrivinro'];

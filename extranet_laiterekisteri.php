@@ -53,7 +53,7 @@ function piirra_kayttajan_laitteet() {
 }
 
 function hae_kayttajan_laitteet() {
-  global $kukarow;
+  global $kukarow, $asiakasvalinta;
 
   $laitteet = array();
 
@@ -64,7 +64,10 @@ function hae_kayttajan_laitteet() {
   }
 
   $toimipistelisa = '';
-  if (!empty($toimipistetunnukset)) {
+  if ($asiakasvalinta != '') {
+    $toimipistelisa = " AND laite.toimipiste = {$asiakasvalinta} ";
+  }
+  else if (!empty($toimipistetunnukset)) {
     $toimipistelisa = " AND laite.toimipiste IN ({$toimipistetunnukset}) ";
   }
 

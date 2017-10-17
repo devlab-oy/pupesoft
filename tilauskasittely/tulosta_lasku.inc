@@ -1098,8 +1098,12 @@ if (!function_exists('rivi_otsikot')) {
         $pdf_lasku->draw_text(340, $kala-9, t("Yksikkö", $kieli), $thispage, $pieni);
       }
 
-      if (!in_array($laskutyyppi, array('6', '21', '22'))) {
+      if (!in_array($laskutyyppi, array('6', '21', '22', '24'))) {
         $pdf_lasku->draw_text(390, $kala-9, t("Toimituspvm", $kieli), $thispage, $pieni);
+      }
+
+      if ($laskutyyppi == 24) {
+        $pdf_lasku->draw_text(390, $kala-9, t("A-hinta, verollinen", $kieli), $thispage, $pieni);
       }
 
       if ($laskutyyppi != 5 and !(($laskutyyppi == 21 or $laskutyyppi == 22) and $laskurow['vienti'] != "")) {
@@ -1312,10 +1316,39 @@ if (!function_exists('rivi_original')) {
       $pdf_lasku->draw_text(365-$oikpos, $kala, $_yks, $thispage, $pieni);
     }
 
-    //Toimitusaika
-    if (substr($row["toimitettuaika"], 0, 10) != "0000-00-00" and !in_array($laskutyyppi, array(6, 21, 22))) {
-      $oikpos = $pdf_lasku->strlen(tv1dateconv(substr($row["toimitettuaika"], 0, 10)), $pieni);
-      $pdf_lasku->draw_text(435-$oikpos, $kala, tv1dateconv(substr($row["toimitettuaika"], 0, 10)), $thispage, $pieni);
+    // Jos on
+    if ($laskutyyppi == 24) {
+      // yksikköhinta pitää olla verollinen tässä
+      if ($yhtiorow["alv_kasittely"] == '') {
+        $verollinen_hinta = $row["hinta"];
+      }
+      else {
+        // Onko marginaaliverotusta
+        $laskalv = $row["alv"];
+
+        // Jos meillä on marginaalimyyntiä/käänteinen alv
+        if ($row["alv"] >= 500) {
+          $laskalv = 0;
+        }
+
+        if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
+          $verollinen_hinta = $row["hinta"] * (1 + $laskalv / 100);
+        }
+        else {
+          $verollinen_hinta = round($row["hinta"] * (1 + $laskalv / 100), 2);
+        }
+      }
+
+      // A-hinta verollisena
+      $oikpos = $pdf_lasku->strlen(hintapyoristys(laskuval($verollinen_hinta, $kurssi), 0, $laskurow['_loppunollat']), $norm);
+      $pdf_lasku->draw_text(435-$oikpos, $kala, hintapyoristys(laskuval($verollinen_hinta, $kurssi), 0, $laskurow['_loppunollat']), $thispage, $norm);
+
+    } else {
+      //Toimitusaika
+      if (substr($row["toimitettuaika"], 0, 10) != "0000-00-00" and !in_array($laskutyyppi, array(6, 21, 22))) {
+        $oikpos = $pdf_lasku->strlen(tv1dateconv(substr($row["toimitettuaika"], 0, 10)), $pieni);
+        $pdf_lasku->draw_text(435-$oikpos, $kala, tv1dateconv(substr($row["toimitettuaika"], 0, 10)), $thispage, $pieni);
+      }
     }
 
     // Näytetäänkö verollinen rivihinta
@@ -2333,7 +2366,7 @@ if (!function_exists('loppu')) {
     $pdf_lasku->draw_text(217, 55 + $tileja + $barcode_korkeus, t("Puhelin", $kieli).": $y_puhelin", $thispage, $pieni);
     $pdf_lasku->draw_text(217, 45 + $tileja + $barcode_korkeus, t("Sähköposti", $kieli).": $y_email", $thispage, $pieni);
     $pdf_lasku->draw_text(217, 35 + $tileja + $barcode_korkeus, t("Web", $kieli).": $y_www", $thispage, $pieni);
-    if (!empty($y_fax)) $pdf_lasku->draw_text(217, 25 + $tileja + $barcode_korkeus, t("Telefax", $kieli).": $y_fax", $thispage, $pieni);
+    if (!empty($y_fax)) $pdf_lasku->draw_text(217, 25 + $tileja + $barcode_korkeus, t("Fax", $kieli).": $y_fax", $thispage, $pieni);
 
     $pdf_lasku->draw_text(404, 55 + $tileja + $barcode_korkeus, t("Y-tunnus", $kieli).": ".tulosta_ytunnus($y_vatnumero, $y_maa, $laskurow["vienti"]), $thispage, $pieni);
     $pdf_lasku->draw_text(404, 45 + $tileja + $barcode_korkeus, t("Kotipaikka", $kieli).": $y_kotipaikka", $thispage, $pieni);

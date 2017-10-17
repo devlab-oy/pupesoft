@@ -4,7 +4,8 @@ if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-tulostus.php") !== FALSE) {
   require "inc/parametrit.inc";
 }
 
-require_once 'rajapinnat/woo/woo-functions.php';
+require_once "rajapinnat/woo/woo-functions.php";
+require_once "rajapinnat/mycashflow/mycf_toimita_tilaus.php";
 
 $logistiikka_yhtio = '';
 $logistiikka_yhtiolisa = '';
@@ -744,9 +745,9 @@ if ($tee == 'tulosta') {
 
       while ($rivi = mysql_fetch_assoc($res)) {
 
-        // otetaan kaikki otsikkonumerot ja rahtikirjanumerot talteen... tarvitaan myöhemmin hauissa
-        $otunnukset   .= "'$rivi[otunnus]',";
-        $tunnukset    .= "'$rivi[rtunnus]',";
+        // lasku.tunnus otunnus ja rahtikirjat.tunnus rtunnus... tarvitaan myöhemmin hauissa
+        $otunnukset   .= "$rivi[otunnus],";
+        $tunnukset    .= "$rivi[rtunnus],";
 
         // otsikkonumerot talteen, nämä printataan paperille
         if (!in_array($rivi['otunnus'], $lotsikot)) {
@@ -1146,6 +1147,14 @@ if ($tee == 'tulosta') {
 
       woo_commerce_toimita_tilaus($woo_params);
 
+      // Merkaatan MyCashflow tilaukset toimitetuiksi kauppaan
+      $mycf_params = array(
+        "pupesoft_tunnukset" => explode(",", $otunnukset),
+        "tracking_code" => $seurantakoodi,
+      );
+
+      mycf_toimita_tilaus($mycf_params);
+
       // Katsotaan onko Magento käytössä, silloin merkataan tilaus toimitetuksi Magentoon kun rahtikirja tulostetaan
       $_magento_kaytossa = (!empty($magento_api_tt_url) and !empty($magento_api_tt_usr) and !empty($magento_api_tt_pas));
 
@@ -1236,6 +1245,9 @@ if ($tee == 'tulosta') {
 
           if ($toitarow['osoitelappu'] == 'intrade') {
             require 'tilauskasittely/osoitelappu_intrade_pdf.inc';
+          }
+          elseif ($toitarow['osoitelappu'] == 'osoitelappu_kesko') {
+            require 'tilauskasittely/osoitelappu_kesko_pdf.inc';
           }
           // Hornbach-tyyppisiä osoitelappuja ei tulosteta, kun ollaan tulostamassa koontirahtikirjaa.
           elseif ($toitarow['osoitelappu'] == 'hornbach' && !in_array($toitarow['tulostustapa'], array('K', 'L'))) {

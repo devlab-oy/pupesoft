@@ -1,14 +1,76 @@
 <?php
 
-// käsittämätön juttu, mutta ei voi muuta
-if ($_POST["voipcall"] != "") $_GET["voipcall"]  = "";
+// Kutsutaanko CLI:stä
+$php_cli = php_sapi_name() == 'cli';
 
-if (isset($_POST["tee"])) {
-  if ($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
-  if ($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/", "", $_POST["kaunisnimi"]);
+if ($php_cli) {
+  $pupe_root_polku = dirname(dirname(__FILE__));
+  ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.$pupe_root_polku.PATH_SEPARATOR."/usr/share/pear");
+  error_reporting(E_ALL ^ E_WARNING ^ E_NOTICE);
+  ini_set("display_errors", 0);
+
+  require "inc/connect.inc";
+  require "inc/functions.inc";
+
+  // Logitetaan ajo
+  cron_log();
+
+  $yhtio = trim($argv[1]);
+
+  //yhtiötä ei ole annettu
+  if (empty($yhtio)) {
+    echo "\nUsage: php ".basename($argv[0])." yhtio\n\n";
+    die;
+  }
+
+  $yhtiorow = hae_yhtion_parametrit($yhtio);
+
+  // Haetaan käyttäjän tiedot
+  $kukarow = hae_kukarow('admin', $yhtio);
+
+  $tee = "lataa_tiedosto";
+  $tmpfilenimi = "crm-haas-{$kukarow['yhtio']}-".date("YmdHis").".h_calls";
+
+  $crm_haas_date_alku[0] = date("d");
+  $crm_haas_date_alku[1] = date("m");
+  $crm_haas_date_alku[2] = date("Y")-1;
+
+  $crm_haas_date_loppu[0] = date("d");
+  $crm_haas_date_loppu[1] = date("m");
+  $crm_haas_date_loppu[2] = date("Y");
+
+  $crm_haas["call_type"] = "on";
+
+  $mul_asiakas1[] = "2";
+
+  $query = "SELECT *
+            FROM transports
+            JOIN yhtio ON (transports.transportable_id=yhtio.tunnus and yhtio.yhtio = '{$kukarow['yhtio']}')
+            WHERE transports.transportable_type = 'Company'
+            AND transports.transport_name = 'Haas CRM'";
+  $res = pupe_query($query);
+  $row = mysql_fetch_assoc($res);
+
+  $ftphost = $row["hostname"];
+  $ftpuser = $row["username"];
+  $ftppass = $row["password"];
+  $ftppath = $row["path"];
+  $ftpport = $row["port"];
+  $ftpfile = "";
+  $ftpfail = "";
+  $ftpsucc = "";
+
+  $tulos_ulos = "";
+
 }
+else {
+ if (isset($_POST["tee"])) {
+   if ($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
+   if ($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/", "", $_POST["kaunisnimi"]);
+ }
 
-require "../inc/parametrit.inc";
+ require "../inc/parametrit.inc";
+}
 
 if (isset($tee) and $tee == "lataa_tiedosto") {
 
@@ -16,16 +78,18 @@ if (isset($tee) and $tee == "lataa_tiedosto") {
 
   $toot = fopen("/tmp/".$tiedostonimi, "w");
 
-  fwrite($toot, "SALESPERSON_ID;addressNo;CustomerNo;COMPANY_NAME;CONTACT;CUST_CITY;CUST_STREET;");
-  fwrite($toot, "CUST_POST_CODE;CUST_REGION;CUST_COUNTRY;CUST_TELEPHONE;CUST_EMAIL;CALL_DATE");
+  if (!$php_cli) {
+    fwrite($toot, "SALESPERSON_ID;addressNo;CustomerNo;COMPANY_NAME;CONTACT;CUST_CITY;CUST_STREET;");
+    fwrite($toot, "CUST_POST_CODE;CUST_REGION;CUST_COUNTRY;CUST_TELEPHONE;CUST_EMAIL;CALL_DATE");
+    fwrite($toot, ";CALL_TYPE");
+    fwrite($toot, ";OPPORTUNITY");
+    fwrite($toot, ";QTY");
+    fwrite($toot, ";OPP_PROJ_DATE");
+    fwrite($toot, ";END_REASON");
+    fwrite($toot, "\r\n");
+  }
 
   $haaslisa = "";
-
-  fwrite($toot, ";CALL_TYPE");
-  fwrite($toot, ";OPPORTUNITY");
-  fwrite($toot, ";QTY");
-  fwrite($toot, ";OPP_PROJ_DATE");
-  fwrite($toot, ";END_REASON");
 
   if (!empty($crm_haas['call_type'])) {
     $haaslisa .= " AND kalenteri.kentta02 != '' ";
@@ -42,8 +106,6 @@ if (isset($tee) and $tee == "lataa_tiedosto") {
   if (!empty($crm_haas['end_reason'])) {
     $haaslisa .= " AND kalenteri.kentta06 != '' ";
   }
-
-  fwrite($toot, "\r\n");
 
   $asiakaslisa = "";
 
@@ -78,7 +140,7 @@ if (isset($tee) and $tee == "lataa_tiedosto") {
             AND node.lft     > 1
             GROUP BY node.lft
             ORDER BY syvyys";
-  $dynpuu_count_result = pupe_query($query, $link);
+  $dynpuu_count_result = pupe_query($query);
 
   while ($count_row = mysql_fetch_assoc($dynpuu_count_result)) {
 
@@ -122,7 +184,7 @@ if (isset($tee) and $tee == "lataa_tiedosto") {
                     AND node.lft     > 1
                     {$liitoksetlisawhere}
                     ORDER BY node.lft";
-          $kaikki_puun_tunnukset_res = pupe_query($query, $link);
+          $kaikki_puun_tunnukset_res = pupe_query($query);
           $kaikki_puun_tunnukset_row = mysql_fetch_assoc($kaikki_puun_tunnukset_res);
 
           if ($kaikki_puun_tunnukset_row["tunnukset"] != "") {
@@ -244,26 +306,29 @@ if (isset($tee) and $tee == "lataa_tiedosto") {
 
   fclose($toot);
 
-  readfile("/tmp/".basename($tmpfilenimi));
+  if ($php_cli) {
+    $ftpfile = "/tmp/".basename($tmpfilenimi);
+
+    if (!PUPE_UNICODE) {
+      exec("recode -f ISO-8859-15..UTF8 '$ftpfile'");
+    }
+
+    require "inc/ftp-send.inc";
+  }
+  else {
+    readfile("/tmp/".basename($tmpfilenimi));
+  }
+
   exit;
 }
 
-if (!isset($konserni))   $konserni = '';
-if (!isset($tee))     $tee = '';
+if (!isset($konserni)) $konserni = '';
+if (!isset($tee))      $tee = '';
 if (!isset($oper))     $oper = '';
-
-if ($voipcall == "call" and $o != "" and $d != "") {
-  ob_start();
-  $retval = @readfile($VOIPURL."&o=$o&d=$d");
-  $retval = ob_get_contents();
-  ob_end_clean();
-  if ($retval != "OK") echo "<font class='error'>Soitto $o -&gt; $d epäonnistui!</font><br><br>";
-}
 
 echo "<font class='head'>".t("Asiakaslista")."</font><hr>";
 
-echo "<form method='post'>
-    <input type='hidden' name='voipcall' value='kala'>";
+echo "<form method='post'>";
 
 $monivalintalaatikot = array("ASIAKASOSASTO", "ASIAKASRYHMA", "ASIAKASPIIRI", "ASIAKASMYYJA", "ASIAKASTILA", "<br>DYNAAMINEN_ASIAKAS");
 $monivalintalaatikot_normaali = array();
@@ -549,15 +614,6 @@ while ($trow=mysql_fetch_array($result)) {
     }
   }
 
-  echo "<td class='back'>";
-
-  if ($trow["puhelin"] != "" and $kukarow["puhno"] != "" and isset($VOIPURL)) {
-    $d = ereg_replace("[^0-9]", "", $trow["puhelin"]);  // dest
-    $o = ereg_replace("[^0-9]", "", $kukarow["puhno"]); // orig
-    echo "<a href='$PHP_SELF?konserni=$konserni&ojarj=$ojarj&o=$o&d=$d&voipcall=call".$ulisa."'>Soita $o -&gt; $d</a>";
-  }
-
-  echo "</td>";
   echo "</tr>\n\n";
 
   $kalalask++;

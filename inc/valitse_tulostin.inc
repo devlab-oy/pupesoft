@@ -431,6 +431,10 @@ foreach ($tulostimet as $tulostin) {
     echo "<option value='excel_lahete_hinnoilla'>".t("Excel-tilausvahvistus hintatiedoilla")."</option>";
   }
 
+  if ($toim == 'TARJOUS') {
+    echo "<option value='excel_lahete_hinnoilla'>".t("Excel-tarjous hintatiedoilla")."</option>";
+  }
+
   if (isset($editoimrow) and $editoimrow["edi_kuvaus"] != '' and
     (preg_match("/(excel|wabco|xml|sendorder)/", $editoimrow['edi_kuvaus']) or
       ($editoimrow["edi_palvelin"] != '' and $editoimrow["edi_kayttaja"] != '' and $editoimrow["edi_salasana"] != '' and $editoimrow["edi_polku"] != '') or

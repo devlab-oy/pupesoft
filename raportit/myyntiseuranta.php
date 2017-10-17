@@ -284,6 +284,7 @@ if ($lopetus == "") {
   if ($ruksit[130] != '')     $ruk130chk         = "CHECKED";
   if ($ruksit[140] != '')     $ruk140chk         = "CHECKED";
   if ($ruksit[150] != '')     $ruk150chk         = "CHECKED";
+  if ($ruksit[160] != '')     $ruk160chk         = "CHECKED";
 
   if ($nimitykset != '')       $nimchk           = "CHECKED";
   if ($mitat != '')        $mitatchk        = "CHECKED";
@@ -497,6 +498,12 @@ if ($lopetus == "") {
     <td><input type='checkbox' name='ruksit[150]' value='toimitusehdoittain' {$ruk150chk}></td>
     <td><input type='text' name='rajaus[150]' value='{$rajaus[150]}'></td>
     <td class='back'>", t("(Toimii vain jos ajat raporttia tilauksista)"), "</td>
+    </tr>
+    <tr>
+    <th>", t("Listaa kohteittain"), "</th>
+    <td><input type='text' name='jarjestys[160]' size='2' value='{$jarjestys[160]}'></td>
+    <td><input type='checkbox' name='ruksit[160]' value='kohteittain' {$ruk160chk}></td>
+    <td><input type='text' name='rajaus[160]' value='{$rajaus[160]}'></td>
     </tr>
     <tr>
     <td class='back'><br></td>
@@ -1215,6 +1222,7 @@ if ((isset($aja_raportti) or isset($valitse_asiakas)) and count($_REQUEST) > 0) 
           $select .= "{$ytgfe}if({$etuliite}.toim_nimi!='' ,{$etuliite}.toim_maa,{$etuliite}.maa){$ytgft} toim_maa, ";
           $select .= "{$ytgfe}if(asiakas.puhelin!='',asiakas.puhelin,asiakas.gsm){$ytgft} puhelin, ";
           $select .= "{$ytgfe}asiakas.email{$ytgft} email, ";
+          $select .= "{$ytgfe}asiakas.luontiaika{$ytgft} luontiaika, ";
         }
         else {
           $select .= "{$etuliite}.ytunnus ytunnus, ";
@@ -1600,6 +1608,19 @@ if ((isset($aja_raportti) or isset($valitse_asiakas)) and count($_REQUEST) > 0) 
         }
       }
       //**  Toimitusehdoittain loppu **//
+
+      //**  Kohteittain start **//
+      if ($mukaan == "kohteittain") {
+        $group .= ",lasku.kohde";
+        $select .= "lasku.kohde, ";
+        $order  .= "lasku.kohde,";
+        $gluku++;
+
+        if ($rajaus[$i] != "") {
+          $lisa .= " and lasku.kohde LIKE '%{$rajaus[$i]}%' ";
+        }
+      }
+      //**  Kohteittain loppu **//
     }
 
     // Näytetään tilausrivin kommentit ja groupataan tilausriveittäin
@@ -3132,6 +3153,10 @@ if ((isset($aja_raportti) or isset($valitse_asiakas)) and count($_REQUEST) > 0) 
               }
 
               if ($ken_nimi == "laskutuspvm") {
+                $row[$ken_nimi] = tv1dateconv($kentta);
+              }
+
+              if ($ken_nimi == "maksupvm") {
                 $row[$ken_nimi] = tv1dateconv($kentta);
               }
 

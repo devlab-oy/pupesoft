@@ -92,6 +92,7 @@ if (isset($_REQUEST["ajax"]) and $_REQUEST["ajax"] == "OK") {
 
   // tarvii romplata tekstimuuttujia kun tehdaan jQuery.ajaxin kanssa
   $uusi_nimi  = (isset($uusi_nimi)) ? utf8_decode($uusi_nimi): "";
+  $uusi_nimi_en  = (isset($uusi_nimi_en)) ? utf8_decode($uusi_nimi_en): "";
   $uusi_koodi  = (isset($uusi_koodi)) ? utf8_decode($uusi_koodi): "";
 
   function getnoderow($toim, $nodeid) {
@@ -137,7 +138,7 @@ if (isset($_REQUEST["ajax"]) and $_REQUEST["ajax"] == "OK") {
 
           $uusi_koodi = $uusi_koodi == '' ? '0' : $uusi_koodi;
 
-          $uusirivi = LisaaLapsi($toim, $noderow['lft'], $noderow['syvyys'], $uusi_koodi, $uusi_nimi);
+          $uusirivi = LisaaLapsi($toim, $noderow['lft'], $noderow['syvyys'], $uusi_koodi, $uusi_nimi, $uusi_nimi_en);
           paivitapuunsyvyys($toim);
 
           echo "<input type='hidden' id='newid' value='{$uusirivi['tunnus']}' />
@@ -193,7 +194,7 @@ if (isset($_REQUEST["ajax"]) and $_REQUEST["ajax"] == "OK") {
         }
         elseif ($tee == 'muokkaa' and isset($uusi_nimi) and trim($uusi_nimi) != "") {
           $uusi_koodi = $uusi_koodi == '' ? '0' : $uusi_koodi;
-          paivitakat($toim, $uusi_koodi, $uusi_nimi, $nodeid);
+          paivitakat($toim, $uusi_koodi, $uusi_nimi, $nodeid, $uusi_nimi_en);
 
           echo "<input type='hidden' id='newcode' value='{$uusi_koodi}' />";
         }
@@ -234,8 +235,16 @@ if (isset($_REQUEST["ajax"]) and $_REQUEST["ajax"] == "OK") {
       exit;
     }
 
+    if (!empty($noderow['nimi_en'])) {
+      $_nimi_en = "<p><font class='message'>".t("Nimi en").":".$noderow['nimi_en']."<br />";
+    }
+    else {
+      $_nimi_en = "";
+    }
+
     echo "<h2 style='font-size: 20px'>".$noderow['nimi']."</h2><hr />
-        <p><font class='message'>".t("Koodi").":</font> ".$noderow['koodi']."<br />".
+      {$_nimi_en}
+        <font class='message'>".t("Koodi").":</font> ".$noderow['koodi']."<br />".
       "<font class='message'>".t("Tunnus").":</font> ".$noderow['tunnus']."<br />".
       " <font class='message'>".t("Syvyys").":</font> ".$noderow['syvyys']."<br />".
       " <font class='message'>lft / rgt:</font> ".$noderow['lft']." / ".$noderow['rgt'].
@@ -268,7 +277,7 @@ if (isset($_REQUEST["ajax"]) and $_REQUEST["ajax"] == "OK") {
 
     echo "<p>";
     if ($own_items > 0) {
-      echo "<font class='message'>".t("Liitoksia").":</font> <a href='yllapito.php?toim=puun_alkio&laji={$toim}&haku[4]={$nodeid}'>".$own_items."</a><br />";
+      echo "<font class='message'>".t("Liitoksia").":</font> <a href='yllapito.php?toim=puun_alkio&laji={$toim}&haku[5]={$nodeid}'>".$own_items."</a><br />";
     }
     if ($child_items > 0) echo "<font class='message'>".t("Liitoksia lapsitasoilla").":</font>".$child_items;
     echo "</p>";
@@ -339,6 +348,10 @@ if (isset($_REQUEST["ajax"]) and $_REQUEST["ajax"] == "OK") {
             <input size='35' id='uusi_nimi' autocomplete='off' />
           </li>
           <li style='padding: 3px'>
+            <label style='display: inline-block; width: 50px'>".t("Nimi en")." <font class='error'>*</font></label>
+            <input size='35' id='uusi_nimi_en' autocomplete='off' />
+          </li>
+          <li style='padding: 3px'>
             <label style='display: inline-block; width: 50px'>".t("Koodi")."</label>
             <input size='35' id='uusi_koodi' autocomplete='off' />
           </li>
@@ -368,6 +381,7 @@ if (isset($_REQUEST["ajax"]) and $_REQUEST["ajax"] == "OK") {
       }
 
       echo "var nimi = '{$noderow["nimi"]}';";
+      echo "var nimi_en = '{$noderow["nimi_en"]}';";
       echo "var koodi = '{$noderow["koodi"]}';";
       echo "params['liitos']  = '{$liitos}';";
 ?>
@@ -385,6 +399,7 @@ if (isset($_REQUEST["ajax"]) and $_REQUEST["ajax"] == "OK") {
       var editboxbutton  = jQuery("#showeditbox");
       var nodeboxtitle  = jQuery("#nodeboxtitle");
       var nodeboxname    = jQuery("#uusi_nimi");
+      var nodeboxname_en    = jQuery("#uusi_nimi_en");
       var nodeboxcode    = jQuery("#uusi_koodi");
       var tee        = jQuery("#tee");
 
@@ -400,6 +415,7 @@ if (isset($_REQUEST["ajax"]) and $_REQUEST["ajax"] == "OK") {
         nodeboxtitle.html("Lis‰‰ taso");
         addboxbutton.replaceWith(nodebox);
         nodeboxname.val("").focus();
+        nodeboxname_en.val("");
         nodebox.show();
         nodeboxcode.val("");
         return false;
@@ -437,12 +453,14 @@ if (isset($_REQUEST["ajax"]) and $_REQUEST["ajax"] == "OK") {
         editboxbutton.replaceWith(nodebox);
         nodebox.show();
         nodeboxname.val(nimi).focus();
+        nodeboxname_en.val(nimi_en);
         nodeboxcode.val(koodi);
         return false;
       });
 
       jQuery("#tasoform").submit(function() {
         params["uusi_nimi"]    = jQuery("#uusi_nimi").val();
+        params["uusi_nimi_en"]    = jQuery("#uusi_nimi_en").val();
         params["uusi_koodi"]  = jQuery("#uusi_koodi").val();
         params["tee"]      = jQuery("#tee").val();
 
@@ -647,6 +665,7 @@ $qu = "SELECT
        node.lft AS lft,
        node.rgt AS rgt,
        node.nimi AS node_nimi,
+       node.nimi_en AS node_nimi_en,
        node.koodi AS node_koodi,
        node.tunnus AS node_tunnus,
        node.syvyys as node_syvyys,

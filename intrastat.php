@@ -231,10 +231,12 @@ if ($tee == "tulosta") {
           JOIN tuote use index (tuoteno_index) ON (tuote.yhtio=lasku.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.ei_saldoa = '')
           LEFT JOIN tullinimike ON (tuote.tullinimike1=tullinimike.cn and tullinimike.kieli = '$yhtiorow[kieli]' and tullinimike.cn != '')
           LEFT JOIN varastopaikat ON (varastopaikat.yhtio=lasku.yhtio and varastopaikat.tunnus=lasku.varasto)
+          LEFT JOIN asiakas on (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus)
           WHERE lasku.tila = 'L'
           and lasku.alatila = 'X'
           and lasku.tilaustyyppi != 'A'
           and lasku.kauppatapahtuman_luonne != '999'
+          and not (lasku.vienti = '' and asiakas.laji = 'H')
           and lasku.yhtio = '$kukarow[yhtio]'
           and lasku.tapvm >= '$vva-$kka-$ppa'
           and lasku.tapvm <= '$vvl-$kkl-$ppl'
@@ -354,10 +356,12 @@ if ($tee == "tulosta") {
             JOIN tuote use index (tuoteno_index) ON (tuote.yhtio=lasku.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.ei_saldoa = '')
             LEFT JOIN tullinimike ON (tuote.tullinimike1=tullinimike.cn and tullinimike.kieli = '{$yhtiorow['kieli']}' and tullinimike.cn != '')
             LEFT JOIN varastopaikat ON (varastopaikat.yhtio=lasku.yhtio and varastopaikat.tunnus=lasku.varasto)
+            LEFT JOIN asiakas on (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus)
             WHERE lasku.tila = 'L'
             and lasku.alatila = 'X'
             and lasku.tilaustyyppi = 'A'
             and lasku.kauppatapahtuman_luonne != '999'
+            and not (lasku.vienti = '' and asiakas.laji = 'H')
             and lasku.yhtio = '{$kukarow['yhtio']}'
             and lasku.tapvm >= '{$vva}-{$kka}-{$ppa}'
             and lasku.tapvm <= '{$vvl}-{$kkl}-{$ppl}'

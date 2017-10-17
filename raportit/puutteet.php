@@ -48,7 +48,7 @@ if ($tee != '') {
   $rivilisa     = "";
 
   if ((int) $asiakasid > 0) {
-    echo "<table><tr><th>".t("Asiakas")."</th><td colspan='3'>$asiakasrow[nimi] $asiakasrow[nimitark]<input type='hidden' name='asiakasid' value='$asiakasid'></td></tr></table><br>";
+    echo "<table><tr><th>".t("Asiakas")."</th><td colspan='3'>$asiakasrow[nimi] $asiakasrow[nimitark] $asiakasrow[asiakasnro]<input type='hidden' name='asiakasid' value='$asiakasid'></td></tr></table><br>";
 
     $lisaasiakas = " and lasku.liitostunnus='$asiakasid' ";
   }
@@ -115,8 +115,8 @@ if ($tee != '') {
 
   $pvm = date("Ymd");
 
-  $worksheet->writeString($excelrivi, 0, t("Puutelistaus"));
-  $worksheet->writeString($excelrivi, 1, $pvm);
+  $worksheet->writeString($excelrivi, 0, t("Puutelistaus")." $asiakasrow[nimi]"." $asiakasrow[nimitark]".", $asiakasrow[asiakasnro]");
+  $worksheet->writeString($excelrivi, 3, $pvm);
 
   $excelrivi++;
   $excelsarake = 0;
@@ -616,7 +616,7 @@ echo "<tr><th>".t("Syötä alkupäivämäärä (pp-kk-vvvv)")."</th>
     <td><input type='text' name='vvl' value='$vvl' size='5'></td></tr>";
 
 if ((int) $asiakasid > 0) {
-  echo "<tr><th>".t("Asiakas")."</th><td colspan='3'>$asiakasrow[nimi] $asiakasrow[nimitark]<input type='hidden' name='asiakasid' value='$asiakasid'></td></tr>";
+  echo "<tr><th>".t("Asiakas")."</th><td colspan='3'>$asiakasrow[nimi] $asiakasrow[nimitark] $asiakasrow[toim_nimi]<input type='hidden' name='asiakasid' value='$asiakasid'></td></tr>";
 }
 else {
   echo "<tr><th>".t("Valitse asiakas")."</th><td colspan='3'><input type='text' name='ytunnus' value='$ytunnus' size='20'></td></tr>";

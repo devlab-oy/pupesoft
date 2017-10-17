@@ -1906,11 +1906,15 @@ if (!function_exists("verkkolasku_in")) {
 
           // Haetaan liitteet
           unset($liitefilet);
+          $_pdf_liitteet = array();
+
           $liitteet = exec("find $verkkolaskut_orig -name \"*{$match[1]}_{$match[2]}_{$match[1]}*\"", $liitefilet);
 
           if ($liitteet != "") {
             foreach ($liitefilet as $liitefile) {
               if (strtoupper(substr($liitefile, -4)) == ".PDF") {
+
+                $_pdf_liitteet[] = $liitefile;
 
                 $data = file_get_contents($liitefile);
                 $data = mysql_real_escape_string($data);
@@ -2021,11 +2025,30 @@ if (!function_exists("verkkolasku_in")) {
       }
 
       // päästiin onnillisesti loppuun
-      $meili = "Verkkolasku $verkapunimi yritykselle $yhtiorow[nimi]\nTiedosto: $file\nLähettäjä: $laskuttajan_nimi\nLaskunro: $laskun_numero\nPäivä: $laskun_tapvm\nSumma: $laskun_summa_eur\nViite: $laskun_pankkiviite\nEnsimmäinen hyväksyjä: $hyvaksyja_nyt\n$laskuvirhe\n";
+      $meili = "Verkkolasku $verkapunimi yritykselle $yhtiorow[nimi]\n\nTiedosto: $file\n\nLähettäjä: $laskuttajan_nimi\n\nLaskunro: $laskun_numero\n\nPäivä: $laskun_tapvm\n\nSumma: $laskun_summa_eur\n\nViite: $laskun_pankkiviite\n\nEnsimmäinen hyväksyjä: $hyvaksyja_nyt\n\n$laskuvirhe\n\n";
 
-      $tulos = mail($yhtiorow['talhal_email'], mb_encode_mimeheader("$yhtiorow[nimi] vastaanotti laskun $verkapunimi:lta", "ISO-8859-1", "Q"), $meili, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
+      $attachments = array();
 
-      if ($tulos === FALSE) echo t("Sähköpostin lähetys epäonnistui").": $yhtiorow[talhal_email]<br>\n";
+      if (!empty($_pdf_liitteet)) {
+
+        foreach ($_pdf_liitteet as $pdf_liite) {
+          $attachments[] = array(
+            "filename"    => "$pdf_liite",
+            "newfilename" => "",
+            "ctype" => "PDF",
+          );
+        }
+      }
+
+      $params = array(
+        "to"      => $yhtiorow['talhal_email'],
+        "subject" => "{$yhtiorow['nimi']} vastaanotti laskun {$verkapunimi}:lta",
+        "ctype"   => "text",
+        "body"    => $meili,
+        "attachements"  => $attachments,
+      );
+
+      pupesoft_sahkoposti($params);
       return 0;
     }
     else {

@@ -496,7 +496,7 @@ if ($handle = opendir($verkkolaskuvirheet_vaarat)) {
               <input type = 'hidden' name = 't[5]' value = '$laskuttajan_postino'>
               <input type = 'hidden' name = 't[6]' value = '$laskuttajan_postitp'>
               <input type = 'hidden' name = 't[7]' value = '$laskuttajan_maa'>
-              <input type = 'hidden' name = 't[20]' value = '$laskuttajan_tilino'>
+              <input type = 'hidden' name = 't[28]' value = '$laskuttajan_tilino'>
               <input type = 'hidden' name = 't[59]' value = '$laskuttajan_vat'>
               <input type = 'hidden' name = 't[60]' value = '$laskuttajan_ovt'>
               <input type = 'hidden' name = 'lopetus' value = '".$palvelin2."verkkolaskuvirheet.php////'>

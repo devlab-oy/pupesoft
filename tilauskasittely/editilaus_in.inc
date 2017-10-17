@@ -30,6 +30,9 @@ if ($php_cli) {
   // ja toinen parametri komentoriviltä
   $edi_tyyppi  = trim($argv[2]);
 
+  // jos halutaan myydä tilauksen kaikki rivit väkisin
+  $editilaus_var_h  = trim($argv[3]);
+
   $verkkokauppa_filename = strtolower(basename($filename));
 
   // tunnistetaan magento -tyyppinen käsittely tiedostonimestä
@@ -617,7 +620,6 @@ while ($tietue = fgets($fd)) {
   case 'ODTM2__DT' :
   case 'DTM' :
     // Toimituspäivä
-
     if ($edi_tyyppi == "edifact911") {
       $kentat = explode(":", $tieto);
       if ($kentat[0] == 2 and $kentat[2] == 102) {
@@ -687,6 +689,12 @@ while ($tietue = fgets($fd)) {
   case 'OSTOTIL.OT_VIITTEEMME' :
     //Asiakkaan viite
     $viite .= $tieto. ' ';
+
+    // laitetaan tämä myös kohde-kenttään jos se on ennestään tyhjä
+    if (empty($ot_verkkokauppa_kohde)) {
+      $ot_verkkokauppa_kohde = $tieto;
+    }
+
     break;
 
   case 'OSTOTIL.OT_TILAUSVIESTI' :
@@ -1280,6 +1288,12 @@ while ($tietue = fgets($fd)) {
         $arow['laskutus_postino']  = $lpostino;
         $arow['laskutus_maa']      = $ltoim_maa;
 
+        // jos Magento tilauksella on erillinen tilausyhteyshenkilö, niin
+        // laitetaan se tilauksen yhteyshenkilöksi, mikäli ei ole yritys ($lnimitark)
+        if (empty($lnimitark)) {
+          $tilausyhteyshenkilo = $lnimi;
+        }
+
         if ($arow["maa"] != "" and $arow["maa"] != $yhtiorow["maa"]) {
           // katsotaan mimmosesta viennistä on kysymys
           $maa_eu_query = "SELECT DISTINCT eu
@@ -1297,9 +1311,9 @@ while ($tietue = fgets($fd)) {
           else {
             $edi_ulos .= t("Vientitilaus EU -maahan")."\n";
 
-            $arow["vienti"] = "E";
             if ($arow["laji"] != "H") {
               $arow["alv"] = 0;
+              $arow["vienti"] = "E";
             }
           }
         }
@@ -1348,6 +1362,22 @@ while ($tietue = fgets($fd)) {
       if (trim($editilaus_toimitustapa) != '') {
         // tarkistetaan löytyykö toimitustapa pupesta suoraan
         if ($edi_tyyppi == "magento") {
+
+          // Löytyykö käännöstaulukosta?
+          $query = "SELECT selite
+                    FROM avainsana
+                    WHERE yhtio  = '{$kukarow['yhtio']}'
+                    AND laji = 'TOIMTAPAVKN'
+                    AND selitetark = '{$editilaus_toimitustapa}'
+                    AND selite != ''
+                    AND selitetark != ''";
+          $ressu = pupe_query($query);
+
+          if (mysql_num_rows($ressu) == 1) {
+            $ftc = mysql_fetch_assoc($ressu);
+            $editilaus_toimitustapa = $ftc['selite'];
+          }
+
           $query = "SELECT *
                     FROM toimitustapa
                     WHERE yhtio  = '{$kukarow['yhtio']}'
@@ -1534,20 +1564,22 @@ while ($tietue = fgets($fd)) {
 
       $edi_kommentti = trim($edi_kommentti);
 
-      // Onko asiakkaalla oletusyhteyshenkilö?
-      $yhteysquery = "SELECT nimi
-                      FROM yhteyshenkilo
-                      where yhtio              = '$kukarow[yhtio]'
-                      and liitostunnus         = '$arow[tunnus]'
-                      and tyyppi               = 'A'
-                      and tilausyhteyshenkilo != ''
-                      and oletusyhteyshenkilo != ''
-                      ORDER BY nimi
-                      LIMIT 1";
-      $yhteysresult = pupe_query($yhteysquery);
+      if (empty($tilausyhteyshenkilo)) {
+        // Onko asiakkaalla oletusyhteyshenkilö?
+        $yhteysquery = "SELECT nimi
+                        FROM yhteyshenkilo
+                        where yhtio              = '$kukarow[yhtio]'
+                        and liitostunnus         = '$arow[tunnus]'
+                        and tyyppi               = 'A'
+                        and tilausyhteyshenkilo != ''
+                        and oletusyhteyshenkilo != ''
+                        ORDER BY nimi
+                        LIMIT 1";
+        $yhteysresult = pupe_query($yhteysquery);
 
-      if ($yhteysrow = mysql_fetch_assoc($yhteysresult)) {
-        $tilausyhteyshenkilo = $yhteysrow['nimi'];
+        if ($yhteysrow = mysql_fetch_assoc($yhteysresult)) {
+          $tilausyhteyshenkilo = $yhteysrow['nimi'];
+        }
       }
 
       if ($arow['toimipaikka'] != 0) {
@@ -1662,7 +1694,7 @@ while ($tietue = fgets($fd)) {
         // escapetaan
         $valkoodi = mysql_real_escape_string($editilaus_valuuttakoodi);
 
-        $query = "SELECT tunnus
+        $query = "SELECT tunnus, kurssi
                   FROM valuu
                   WHERE yhtio = '{$kukarow["yhtio"]}'
                   AND nimi    = '{$valkoodi}'";
@@ -1670,10 +1702,16 @@ while ($tietue = fgets($fd)) {
 
         if (mysql_num_rows($valuu_result) != 1) {
           $valkoodi = $yhtiorow['valkoodi'];
+          $valkurssi = 1;
+        }
+        else {
+          $valrow = mysql_fetch_assoc($valuu_result);
+          $valkurssi = $valrow['kurssi'];
         }
       }
       else {
         $valkoodi = $yhtiorow['valkoodi'];
+        $valkurssi = 1;
       }
 
       // Lisätään otsikko
@@ -1752,7 +1790,7 @@ while ($tietue = fgets($fd)) {
                 varasto                 = '{$insertvarasto[0]}',
                 verkkotunnus            = '$arow[verkkotunnus]',
                 vienti                  = '$til_vienti',
-                vienti_kurssi           = '1',
+                vienti_kurssi           = '{$valkurssi}',
                 viesti                  = '$viite',
                 viikorkopros            = '$yhtiorow[viivastyskorko]',
                 yhtio                   = '$kukarow[yhtio]',
@@ -2046,6 +2084,7 @@ while ($tietue = fgets($fd)) {
     break;
 
   case 'OLINEN_NU' :
+  case 'OSTOTILRIV.OTR_EANKOODI' :
   case 'LIN':
     // tuotteen EAN-koodi
 
@@ -2266,6 +2305,10 @@ while ($tietue = fgets($fd)) {
             $kommentti = "$olinsapi#$edi_nimitys";
           }
 
+          if (!empty($editilaus_var_h)) {
+            $var = "H";
+          }
+
           // jos tullaan magentosta ja hinta on tiedossa ja kyseessä on rahtikulu, niin uskalletaan luottaa magenton antamaan hintaan
           if ($edi_tyyppi == "magento" and ((isset($verkkokauppa_hinnatedifailista) and $verkkokauppa_hinnatedifailista == "JOO") or strtolower($tuoteno) == strtolower($yhtiorow['rahti_tuotenumero'])) and $editilaus_hinta > 0) {
             $hinta = $editilaus_hinta;
@@ -2277,6 +2320,10 @@ while ($tietue = fgets($fd)) {
           // jos tullaan magentosta ja alennus on tiedossa
           if ($edi_tyyppi == "magento" and (isset($verkkokauppa_hinnatedifailista) and $verkkokauppa_hinnatedifailista == "JOO") and $editilaus_alennus >= 0) {
             $ale1 = $editilaus_alennus;
+
+            for ($alepostfix = 2; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+              ${'ale'.$alepostfix} = 0;
+            }
           }
           elseif (is_array($hyvityssaanto_ale_array) and isset($hyvityssaanto_ale_array[$hyvityssaanto_indeksi]) and isset($hyvityssaanto_ale_array[$hyvityssaanto_indeksi][$tuoteno])) {
 

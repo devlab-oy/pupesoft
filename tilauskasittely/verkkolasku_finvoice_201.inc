@@ -83,7 +83,7 @@ if (!function_exists('finvoice_otsik')) {
         list($receiverpartyid, $receiverintermediator) = explode("@", $lasrow["verkkotunnus"]);
 
         // Verkkotunnus voi olla sähköpostiosoite:
-        if ($yhtiorow["verkkolasku_lah"] == "ppg" and strpos($receiverintermediator, ".") !== FALSE) {
+        if (($yhtiorow["verkkolasku_lah"] == "ppg" or $yhtiorow["verkkolasku_lah"] == "arvato" or $yhtiorow["verkkolasku_lah"] == "trustpoint") and strpos($receiverintermediator, ".") !== FALSE) {
           $receiverpartyid = $lasrow["verkkotunnus"];
           $receiverintermediator = "EMAIL";
         }
@@ -254,32 +254,55 @@ if (!function_exists('finvoice_otsik')) {
         fputs($tootfinvoice, "<?xml-stylesheet type=\"text/xsl\" href=\"Finvoice.xsl\"?>\r\n");
       }
 
+      $messagetransmissiondetails_elementti = true;
+
+      $pankit_array = array("AABAFI22",
+                            "CITIFIHX",
+                            "DABAFIHH",
+                            "DABAFIHX",
+                            "DNBAFIHX",
+                            "ESSEFIHX",
+                            "HANDFIHH",
+                            "HELSFIHH",
+                            "ITELFIHH",
+                            "NDEAFIHH",
+                            "OKOYFIHH",
+                            "POPFFI22",
+                            "SBANFIHH",
+                            "SWEDFIHH");
+      // Mikäli käytössä on Maventa ja lasku on menossa pankkiverkkoon, niin ei laiteta mukaan MessageTransmissionDetails-elementtiä
+      if ($yhtiorow["verkkolasku_lah"] == "maventa" and in_array($receiverintermediator, $pankit_array)) {
+        $messagetransmissiondetails_elementti = false;
+      }
+
       //tästä lähtee Finvoice koodi
       fputs($tootfinvoice, "<Finvoice Version=\"2.01\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:noNamespaceSchemaLocation=\"Finvoice2.01.xsd\">\r\n");
 
-      fputs($tootfinvoice, "<MessageTransmissionDetails>\r\n");
+      if ($messagetransmissiondetails_elementti) {
+        fputs($tootfinvoice, "<MessageTransmissionDetails>\r\n");
 
-      fputs($tootfinvoice, "<MessageSenderDetails>\r\n");
-      xml_add("FromIdentifier", $senderpartyid, $tootfinvoice, 35, 2);
-      xml_add("FromIntermediator", $senderintermediator, $tootfinvoice, 35, 2);
-      fputs($tootfinvoice, "</MessageSenderDetails>\r\n");
+        fputs($tootfinvoice, "<MessageSenderDetails>\r\n");
+        xml_add("FromIdentifier", $senderpartyid, $tootfinvoice, 35, 2);
+        xml_add("FromIntermediator", $senderintermediator, $tootfinvoice, 35, 2);
+        fputs($tootfinvoice, "</MessageSenderDetails>\r\n");
 
-      fputs($tootfinvoice, "<MessageReceiverDetails>\r\n");
+        fputs($tootfinvoice, "<MessageReceiverDetails>\r\n");
 
-      // PPG:llä tässä voi olla sähköpostiosite, siksi pitempi.
-      $toid_len = ($yhtiorow["verkkolasku_lah"] == "ppg") ? 76 : 35;
+        // PPG:llä ja Arvatolla tässä voi olla sähköpostiosoite, siksi pitempi.
+        $toid_len = ($yhtiorow["verkkolasku_lah"] == "ppg" or $yhtiorow["verkkolasku_lah"] == "arvato")? 76 : 35;
 
-      xml_add("ToIdentifier", $receiverpartyid, $tootfinvoice, $toid_len, 2);
-      xml_add("ToIntermediator", $receiverintermediator, $tootfinvoice, 35, 2);
-      fputs($tootfinvoice, "</MessageReceiverDetails>\r\n");
+        xml_add("ToIdentifier", $receiverpartyid, $tootfinvoice, $toid_len, 2);
+        xml_add("ToIntermediator", $receiverintermediator, $tootfinvoice, 35, 2);
+        fputs($tootfinvoice, "</MessageReceiverDetails>\r\n");
 
-      fputs($tootfinvoice, "<MessageDetails>\r\n");
-      xml_add("MessageIdentifier", $mid, $tootfinvoice, 48, 2);
-      xml_add("MessageTimeStamp", date("Y-m-d")."T".date("H:i:s")."+02", $tootfinvoice, 35, 2);
-      xml_add("RefToMessageIdentifier", "", $tootfinvoice, 48);
-      fputs($tootfinvoice, "</MessageDetails>\r\n");
+        fputs($tootfinvoice, "<MessageDetails>\r\n");
+        xml_add("MessageIdentifier", $mid, $tootfinvoice, 48, 2);
+        xml_add("MessageTimeStamp", date("Y-m-d")."T".date("H:i:s")."+02", $tootfinvoice, 35, 2);
+        xml_add("RefToMessageIdentifier", "", $tootfinvoice, 48);
+        fputs($tootfinvoice, "</MessageDetails>\r\n");
 
-      fputs($tootfinvoice, "</MessageTransmissionDetails>\r\n");
+        fputs($tootfinvoice, "</MessageTransmissionDetails>\r\n");
+      }
 
       fputs($tootfinvoice, "<SellerPartyDetails>\r\n");
       xml_add("SellerPartyIdentifier", tulosta_ytunnus($yhtiorow['ytunnus'], $y_maa), $tootfinvoice, 35);
@@ -400,7 +423,6 @@ if (!function_exists('finvoice_otsik')) {
       fputs($tootfinvoice, "<BuyerPartyDetails>\r\n");
       xml_add("BuyerPartyIdentifier", tulosta_ytunnus($lasrow['ytunnus'], $lasrow['maa'], ""), $tootfinvoice, 35);
 
-
       // Nimikentän pituus
       $nimikenpit = 70;
 
@@ -460,6 +482,12 @@ if (!function_exists('finvoice_otsik')) {
 
       xml_add("BuyerContactPersonName", $asiakkaan_yhteyshenkilo, $tootfinvoice, 35);
 
+      if ($yhtiorow["verkkolasku_lah"] == "trustpoint" and $receiverintermediator == "EMAIL") {
+        fputs($tootfinvoice, "<BuyerCommunicationDetails>\r\n");
+        xml_add("BuyerEmailaddressIdentifier", $receiverpartyid, $tootfinvoice, 35);
+        fputs($tootfinvoice, "</BuyerCommunicationDetails>\r\n");
+      }
+
       fputs($tootfinvoice, "<DeliveryPartyDetails>\r\n");
       xml_add("DeliveryPartyIdentifier", tulosta_ytunnus($lasrow['ytunnus'], $lasrow['maa'], ""), $tootfinvoice, 35);
 
@@ -513,9 +541,9 @@ if (!function_exists('finvoice_otsik')) {
       xml_add("OriginCode", "Original", $tootfinvoice);
       xml_add("InvoiceNumber", $lasrow['laskunro'], $tootfinvoice, 20, 1);
       xml_add("InvoiceDate Format=\"CCYYMMDD\"", vlas_dateconv($lasrow['tapvm']), $tootfinvoice);
-      xml_add("SellerReferenceIdentifier", $lasrow['tilausnumerot'], $tootfinvoice);
+      xml_add("SellerReferenceIdentifier", substr($lasrow['tilausnumerot'], 0, 35), $tootfinvoice, 35);
 
-      if ($yhtiorow["verkkolasku_lah"] == "talenom") {
+      if ($yhtiorow["verkkolasku_lah"] == "talenom" or $yhtiorow["verkkolasku_lah"] == "arvato") {
         xml_add("SellersBuyerIdentifier", substr($asiakasrow["asiakasnro"], 0, 35), $tootfinvoice, 35);
       }
       elseif (trim($lasrow['asiakkaan_tilausnumero']) != "") {

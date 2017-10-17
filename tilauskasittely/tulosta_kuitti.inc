@@ -109,7 +109,7 @@ if (!function_exists('loppu')) {
 
     $pdf->draw_text(217, 45, t("Puhelin", $kieli).":",        $firstpage, $pieni);
     $pdf->draw_text(247, 45, $yhtiorow["puhelin"],          $firstpage, $pieni);
-    $pdf->draw_text(217, 35, t("Telefax", $kieli).":",        $firstpage, $pieni);
+    $pdf->draw_text(217, 35, t("Fax", $kieli).":",        $firstpage, $pieni);
     $pdf->draw_text(247, 35, $yhtiorow["fax"],            $firstpage, $pieni);
     $pdf->draw_text(217, 25, t("Sähköposti", $kieli).":",      $firstpage, $pieni);
     $pdf->draw_text(247, 25, $yhtiorow["email"],          $firstpage, $pieni);

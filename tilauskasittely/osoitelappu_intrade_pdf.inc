@@ -216,7 +216,7 @@ else {
       //luodaan viivakoodiolio kuljetusohjeelle = postino
       $nimi = "/tmp/".md5(uniqid(rand(), true)).".jpg";
 
-      imagejpeg(Image_Barcode::draw('400'.$laskurow['asiakkaan_tilausnumero'], 'code128', 'jpg', false, 3, 170), $nimi);
+      imagejpeg(Image_Barcode::draw('400'.$laskurow['asiakkaan_tilausnumero'], 'ean128', 'jpg', false, 3, 170), $nimi);
 
       $fh = fopen($nimi, "r");
       $data = fread($fh, filesize($nimi));
@@ -229,8 +229,8 @@ else {
       system("rm -f $nimi");
 
       $nimi = "/tmp/".md5(uniqid(rand(), true)).".jpg";
-
-      imagejpeg(Image_Barcode::draw($sscc, 'code128', 'jpg', false, 3, 170), $nimi);
+      //$sscc = chr(234).$sscc;
+      imagejpeg(Image_Barcode::draw($sscc, 'ean128', 'jpg', false, 3, 170), $nimi);
 
       $fh = fopen($nimi, "r");
       $data = fread($fh, filesize($nimi));
@@ -239,7 +239,7 @@ else {
       $image = $pdf->jfif_embed($data);
 
       $logoparam['scale'] = 102/282;
-      $pdf->image_place($image, mm_pt(40), mm_pt(24), $firstpage, $logoparam);
+      $pdf->image_place($image, mm_pt(40), mm_pt(22), $firstpage, $logoparam);
       system("rm -f $nimi");
     }
 

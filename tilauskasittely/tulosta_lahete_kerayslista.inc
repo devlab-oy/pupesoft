@@ -648,6 +648,7 @@ if (!function_exists('rivi_otsikot_kerayslista')) {
 
       if ($kerayslistatyyppi == 'EXCEL3') {
         $thispage->writeString($kala, 5, "Price", $boldi);
+        $thispage->writeString($kala, 6, "Row price", $boldi);
       }
 
       $kala++;
@@ -721,7 +722,8 @@ if (!function_exists('rivi_kerayslista')) {
 
       if ($kerayslistatyyppi == 'EXCEL3') {
         if ($row["var"] == "" or  $row["var"] == "H") {
-          $thispage->writeString($kala, 5, (float) round($row['rivihinta'], 2));
+          $thispage->writeString($kala, 5, (float) round($row['kplhinta'], 2));
+          $thispage->writeString($kala, 6, (float) round($row['rivihinta'], 2));
         }
       }
 
@@ -1241,16 +1243,16 @@ if (!function_exists('loppu_kerayslista')) {
     }
     else {
       // yhtiötiedot
-      $y_tiedot_ok  = FALSE;
-      $y_nimi     = $laskurow["yhtio_nimi"];
-      $y_osoite     = $laskurow["yhtio_osoite"];
-      $y_postino     = $laskurow["yhtio_postino"];
-      $y_postitp     = $laskurow["yhtio_postitp"];
-      $y_maa       = $laskurow["yhtio_maa"];
-      $y_kotipaikka  = $laskurow["yhtio_kotipaikka"];
-      $y_vatnumero  = preg_replace("/^0037/", "", $laskurow["yhtio_ovttunnus"]);
-      $y_iban     = $yhtiorow['pankkiiban1'];
-      $y_swift     = $yhtiorow['pankkiswift1'];
+      $y_tiedot_ok = FALSE;
+      $y_nimi = $laskurow["yhtio_nimi"];
+      $y_osoite = $laskurow["yhtio_osoite"];
+      $y_postino = $laskurow["yhtio_postino"];
+      $y_postitp = $laskurow["yhtio_postitp"];
+      $y_maa = $laskurow["yhtio_maa"];
+      $y_kotipaikka = $laskurow["yhtio_kotipaikka"];
+      $y_vatnumero = preg_replace("/^0037/", "", $laskurow["yhtio_ovttunnus"]);
+      $y_iban = $yhtiorow['pankkiiban1'];
+      $y_swift = $yhtiorow['pankkiswift1'];
 
       if ((int) $laskurow["yhtio_toimipaikka"] != 0) {
         // haetaan toimipaikan tiedot
@@ -1313,7 +1315,7 @@ if (!function_exists('loppu_kerayslista')) {
         }
       }
 
-      //Alimmat kolme laatikkoa, yhtiötietoja
+      // Alimmat kolme laatikkoa, yhtiötietoja
       $pdf->draw_rectangle(70, 20, 20, 580,  $thispage, $rectparam);
       $pdf->draw_rectangle(70, 207, 20, 580,  $thispage, $rectparam);
       $pdf->draw_rectangle(70, 394, 20, 580,  $thispage, $rectparam);
@@ -1325,7 +1327,7 @@ if (!function_exists('loppu_kerayslista')) {
 
       $pdf->draw_text(217, 55, t("Puhelin", $kieli).":",      $thispage, $pieni);
       $pdf->draw_text(257, 55, $y_puhelin,            $thispage, $pieni);
-      $pdf->draw_text(217, 45, t("Telefax", $kieli).":",      $thispage, $pieni);
+      $pdf->draw_text(217, 45, t("Fax", $kieli).":",      $thispage, $pieni);
       $pdf->draw_text(257, 45, $y_fax,              $thispage, $pieni);
       $pdf->draw_text(217, 35, t("Sähköposti", $kieli).":",    $thispage, $pieni);
       $pdf->draw_text(257, 35, $y_email,              $thispage, $pieni);
@@ -1356,7 +1358,16 @@ if (!function_exists('loppu_kerayslista')) {
         $pdf->draw_line($x, $y, $thispage, $rectparam);
 
         for ($pp=1; $pp<=$sivu; $pp++) {
-          $pdf->draw_text(330, 803, "$pp / $sivu", $page[$pp], $norm);
+          $pp_print = $pp;
+          $sivu_print = $sivu;
+
+          # Jos tulostetetaan monta keräyslistaa samaan PDF-dokkariin
+          if (!empty($tama_lista_sivu)) {
+            $pp_print = $pp-$tama_lista_sivu+1;
+            $sivu_print = $sivu-$tama_lista_sivu+1;
+          }
+
+          $pdf->draw_text(330, 803, "$pp_print / $sivu_print", $page[$pp], $norm);
         }
       }
     }

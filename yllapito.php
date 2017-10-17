@@ -254,7 +254,13 @@ if ($del == 1) {
       $result = pupe_query($query);
     }
   }
-
+  if ($toim == "hinnasto") {
+        $query = "UPDATE tuote
+                  SET muuttaja = '$kukarow[kuka]', muutospvm=now()
+                  WHERE yhtio = '$kukarow[yhtio]'
+                  and tuoteno = '$trow[tuoteno]'";
+        $result = pupe_query($query);
+  }
   synkronoi($kukarow["yhtio"], $toim, $tunnus, $trow, "");
 
   //  Jos poistetaan perheen osa palataan perheelle
@@ -277,6 +283,13 @@ if ($del == 2) {
                 WHERE tunnus='$poista_tunnus'";
       $result = pupe_query($query);
 
+      if ($toim == "hinnasto") {
+        $query = "UPDATE tuote
+                  SET muuttaja = '$kukarow[kuka]', muutospvm=now()
+                  WHERE yhtio = '$kukarow[yhtio]'
+                  and tuoteno = '$trow[tuoteno]'";
+        $result = pupe_query($query);
+      }
       synkronoi($kukarow["yhtio"], $toim, $tunnus, $trow, "");
     }
   }
@@ -816,7 +829,7 @@ if ($upd == 1) {
         $query = "SELECT *
                   FROM lasku use index (yhtio_tila_liitostunnus_tapvm)
                   WHERE yhtio       = '$kukarow[yhtio]'
-                  and tila          IN ('H','M')
+                  and tila          IN ('H','M','P')
                   and liitostunnus  = '$otsikrow[tunnus]'
                   and tapvm        != '0000-00-00'";
         $laskuores = pupe_query($query);
@@ -851,8 +864,8 @@ if ($upd == 1) {
 
           $komm = "";
 
-          // Jos lasku on hyväksytty ja muutetaan hyvöksyntään liittyviä tietoja
-          if ($laskuorow["hyvak1"] != "" and $laskuorow["hyvak1"] != "verkkolas" and $laskuorow["h1time"] != "0000-00-00 00:00:00" and (
+          // Jos lasku on hyväksytty ja muutetaan hyväksyntään liittyviä tietoja
+          if ($laskuorow["hyvak1"] != "" and $laskuorow["hyvak1"] != "verkkolas" and laskun_hyvaksyjia() and $laskuorow["h1time"] != "0000-00-00 00:00:00" and (
               ($oletus_erapvm > 0 and $laskuorow["erpcm"] != $oletus_erapvm) or
               ($oletus_erapvm > 0 and $laskuorow["kapvm"] != $oletus_kapvm) or
               ($laskuorow["kasumma"] != $otsikrow["oletus_kasumma"]) or
@@ -1817,6 +1830,9 @@ if ($tunnus == 0 and $uusi == 0 and $errori == '') {
           elseif (mysql_field_name($result, $i) == 'koko') {
             echo "<td>$fontlisa1 ".size_readable($trow[$i])." $fontlisa2</td>";
           }
+          elseif (mysql_field_name($result, $i) == 'toim_tuoteno') {
+            echo "<td>$fontlisa1 $trow[$i] $fontlisa2</td>";
+          }
           else {
 
             if (!function_exists("ps_callback")) {
@@ -2358,6 +2374,10 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
       echo "<iframe id='asiakkaan_avainsanat_iframe' name='asiakkaan_avainsanat_iframe' src='yllapito.php?toim=$toikrow[alanimi]&from=yllapito&ohje=off&haku[5]=@$trow[tunnus]&lukitse_avaimeen=$trow[tunnus]' style='width: 600px; border: 0px; display: block;' frameborder='0'></iFrame>";
     }
 
+    if (($toikrow = tarkista_oikeus("yllapito.php", "directdebit_asiakas%", "", "OK", $toimi_array)) !== FALSE) {
+      echo "<iframe id='directdebit_asiakas_iframe' name='directdebit_asiakas_iframe' src='yllapito.php?toim=$toikrow[alanimi]&from=yllapito&ohje=off&haku[1]=@$trow[tunnus]&lukitse_avaimeen=$trow[tunnus]' style='width: 600px; border: 0px; display: block;' frameborder='0'></iFrame>";
+    }
+
     if (($toikrow = tarkista_oikeus("yllapito.php", "puun_alkio&laji=asiakas%", "", "OK", $toimi_array)) !== FALSE) {
       echo "<iframe id='puun_alkio_iframe' name='puun_alkio_iframe' src='yllapito.php?toim=$toikrow[alanimi]&lukitse_laji=asiakas&from=yllapito&ohje=off&haku[1]=@$trow[tunnus]&lukitse_avaimeen=$trow[tunnus]&lopetus_muut=$lopetus_muut' style='width: 600px; border: 0px; display: block;' frameborder='0'></iFrame>";
     }
@@ -2544,6 +2564,7 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
     $toim == "tuotteen_toimittajat_tuotenumerot" or
     $toim == "extranet_kayttajan_lisatiedot" or
     $toim == "asiakkaan_avainsanat" or
+    $toim == "directdebit_asiakas" or
     $toim == "rahtisopimukset" or
     $toim == "hyvityssaannot" or
     $toim == "varaston_hyllypaikat" or

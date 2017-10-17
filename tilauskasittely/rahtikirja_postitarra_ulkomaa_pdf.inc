@@ -102,7 +102,7 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
     $query = "SELECT rahtikirjanro
               FROM rahtikirjat
               WHERE yhtio       = '$kukarow[yhtio]'
-              AND rahtikirjanro LIKE 'CE%FI%'
+              AND rahtikirjanro LIKE '%CE%FI%'
               ORDER BY tunnus desc
               LIMIT 1";
     $ranres = pupe_query($query);
@@ -110,7 +110,8 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 
     $edmax = array_pop(explode(" ", trim($ranrow["rahtikirjanro"])));
 
-    $juokseva = sprintf("%04d", $tulostuskpl + (int) substr($edmax, 6, 4));
+    $_koodipos = strpos($edmax, "CE") + 6;
+    $juokseva = sprintf("%04d", $tulostuskpl + (int) substr($edmax, $_koodipos, 4));
   }
 
   if (substr($juokseva, 0, 2) != "CE" or substr($juokseva, -2, 2) != "FI") {

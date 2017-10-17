@@ -59,7 +59,12 @@ if (isset($isizelogo) and is_array($isizelogo)) {
 }
 
 echo "<td style='width: 1px; padding: 0; margin: 0; padding-left: 15px;'><img src='{$palvelin2}pics/facelift/divider.png'></td>";
-echo "<td style='padding-left: 15px;'><div id='firmadiv'><span id='firmaspan' style='white-space: nowrap;'>$yhtiorow[nimi]<br>$kukarow[nimi]</span></div></td>";
+if ($kukarow['extranet'] == '') {
+  echo "<td style='padding-left: 15px;'><div id='firmadiv'><span id='firmaspan' style='white-space: nowrap;'>$yhtiorow[nimi]<br>$kukarow[nimi]</span></div></td>";
+}
+else {
+  echo "<td style='padding-left: 15px;'><div id='firmadiv'><span id='firmaspan' style='white-space: nowrap;'>$kukarow[nimi]</span></div></td>";
+}
 echo "<td class='ylapalkki'><a class='puhdas' target='_top' href='{$palvelin2}'><img src='{$palvelin2}pics/facelift/icons/icon-home.png'><br>".t("Etusivu")."</a></td>";
 
 $query = "SELECT *
@@ -114,8 +119,10 @@ if ($row = mysql_fetch_assoc($result)) {
   }
 }
 
-echo "<td style='padding: 0px; text-align: center;'><img src='{$palvelin2}pics/facelift/divider.png'></td>";
-echo "<td class='ylapalkki'><a class='puhdas' target='mainframe' href='{$palvelin2}pikavalinnat.php'><img src='{$palvelin2}pics/facelift/plussa.png'><br>".t("Lis‰‰")."</a></td>";
+if ($kukarow['extranet'] == '') {
+  echo "<td style='padding: 0px; text-align: center;'><img src='{$palvelin2}pics/facelift/divider.png'></td>";
+  echo "<td class='ylapalkki'><a class='puhdas' target='mainframe' href='{$palvelin2}pikavalinnat.php'><img src='{$palvelin2}pics/facelift/plussa.png'><br>".t("Lis‰‰")."</a></td>";
+}
 echo "<td style='padding: 0px; text-align: center;'><img src='{$palvelin2}pics/facelift/divider.png'></td>";
 echo "<td class='ylapalkki'><a class='puhdas' target='mainframe' href='{$palvelin2}logout.php'><img src='{$palvelin2}pics/facelift/icon-exit.gif'><br>Exit</a></td>";
 echo "</tr>";

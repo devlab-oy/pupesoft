@@ -1122,7 +1122,8 @@ if ($tee == 'DM') {
                 and tila    = 'M'
                 and summa   < 0
                 and ultilno = '$trow[ultilno]'
-                and swift   = '$trow[swift]'";
+                and swift   = '$trow[swift]'
+                AND ytunnus = '{$trow["ytunnus"]}'";
       $hyvitysresult = pupe_query($query);
       $hyvitysrow = mysql_fetch_assoc($hyvitysresult);
 
@@ -1354,7 +1355,8 @@ if ($tee == 'S') {
                 and tila    = 'M'
                 and summa   < 0
                 and ultilno = '$trow[ultilno]'
-                and swift   = '$trow[swift]'";
+                and swift   = '$trow[swift]'
+                AND ytunnus = '{$trow["ytunnus"]}'";
       $hyvitysresult = pupe_query($query);
       $hyvitysrow = mysql_fetch_assoc($hyvitysresult);
 

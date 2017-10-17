@@ -113,6 +113,7 @@ function tuote_export_hae_tuotetiedot($params) {
   global $kukarow, $yhtiorow;
 
   $ajetaanko_kaikki                     = $params['ajetaanko_kaikki'];
+  $kieliversiot                         = $params['kieliversiot']; //tulee muodossa array(fi,en,ee) ja vähintään aina fi
   $datetime_checkpoint                  = tuote_export_checkpoint('TEX_TUOTTEET');
   $magento_asiakaskohtaiset_tuotehinnat = $params['magento_asiakaskohtaiset_tuotehinnat'];
   $tuotteiden_asiakashinnat_magentoon   = $params['tuotteiden_asiakashinnat_magentoon'];
@@ -201,6 +202,7 @@ function tuote_export_hae_tuotetiedot($params) {
 
     // Haetaan kaikki tuotteen atribuutit
     $parametritquery = "SELECT
+                        tuotteen_avainsanat.kieli,
                         tuotteen_avainsanat.selite,
                         avainsana.selitetark,
                         avainsana.selite as option_name
@@ -208,15 +210,24 @@ function tuote_export_hae_tuotetiedot($params) {
                         JOIN avainsana USE INDEX (yhtio_laji_selite) ON (avainsana.yhtio = tuotteen_avainsanat.yhtio
                           AND avainsana.laji = 'PARAMETRI'
                           AND avainsana.selite = SUBSTRING(tuotteen_avainsanat.laji, 11))
+                          AND avainsana.kieli = tuotteen_avainsanat.kieli
                         WHERE tuotteen_avainsanat.yhtio = '{$kukarow['yhtio']}'
                         AND tuotteen_avainsanat.laji != 'parametri_variaatio'
                         AND tuotteen_avainsanat.laji != 'parametri_variaatio_jako'
                         AND tuotteen_avainsanat.laji like 'parametri_%'
                         AND tuotteen_avainsanat.tuoteno = '{$row['tuoteno']}'
-                        AND tuotteen_avainsanat.kieli = 'fi'
+                        AND tuotteen_avainsanat.kieli in ('".implode("','", $kieliversiot)."')
                         ORDER by tuotteen_avainsanat.jarjestys, tuotteen_avainsanat.laji";
     $parametritres = pupe_query($parametritquery);
     $tuotteen_parametrit = array();
+
+    while ($parametrirow = mysql_fetch_assoc($parametritres)) {
+      $tuotteen_parametrit[$parametrirow["kieli"]][] = array(
+        "nimi"        => $parametrirow["selitetark"],
+        "option_name" => $parametrirow["option_name"],
+        "arvo"        => $parametrirow["selite"]
+      );
+    }
 
     // Jos tuote kuuluu tuotepuuhun niin etsitään kategoria_idt myös kaikille tuotepuun kategorioille
     $query = "SELECT t0.nimi node, t0.lft,
@@ -258,14 +269,6 @@ function tuote_export_hae_tuotetiedot($params) {
       }
 
       $tuotepuun_nodet[] = $breadcrumbs;
-    }
-
-    while ($parametrirow = mysql_fetch_assoc($parametritres)) {
-      $tuotteen_parametrit[] = array(
-        "nimi"        => $parametrirow["selitetark"],
-        "option_name" => $parametrirow["option_name"],
-        "arvo"        => $parametrirow["selite"]
-      );
     }
 
     // Katsotaan onko tuotteelle voimassaolevaa hinnastohintaa
@@ -371,6 +374,7 @@ function tuote_export_hae_saldot($params) {
   $datetime_checkpoint        = tuote_export_checkpoint('TEX_SALDOT');
   $vaihtoehtoiset_saldot      = $params['vaihtoehtoiset_saldot'];
   $verkkokauppa_saldo_varasto = $params['verkkokauppa_saldo_varasto'];
+  $tehdas_saldot              = $params['tehdas_saldot'];
 
   $dnstock = array();
 
@@ -436,6 +440,23 @@ function tuote_export_hae_saldot($params) {
               AND tuote.nakyvyys      != ''
               $muutoslisa3)
 
+              UNION
+
+              (SELECT tuote.tuoteno,
+              tuote.eankoodi
+              FROM tuote
+              JOIN tuotteen_toimittajat AS tt ON (
+                tt.yhtio = tuote.yhtio AND
+                tt.tuoteno = tuote.tuoteno
+              )
+              JOIN toimi on (toimi.yhtio = tt.yhtio and toimi.tunnus = tt.liitostunnus)
+              WHERE tuote.yhtio        = '{$kukarow["yhtio"]}'
+              AND tuote.status        != 'P'
+              AND tuote.tuotetyyppi    NOT in ('A','B')
+              AND tuote.tuoteno       != ''
+              AND tuote.nakyvyys      != ''
+              AND tt.tehdas_saldo_paivitetty >= '{$datetime_checkpoint}')
+
               ORDER BY 1";
   $result = pupe_query($query);
 
@@ -450,6 +471,12 @@ function tuote_export_hae_saldot($params) {
     }
 
     $myytavissa = tuote_export_saldo_myytavissa($row["tuoteno"], $verkkokauppa_saldo_varasto);
+
+    if ($tehdas_saldot) {
+      $tehdas_saldo = magento_tuote_export_tehdas_saldot($row['tuoteno']);
+
+      $myytavissa += $tehdas_saldo;
+    }
 
     $dnstock[] = array(
       'ean'                   => $row["eankoodi"],
@@ -471,6 +498,25 @@ function tuote_export_saldo_myytavissa($tuoteno, Array $varastot) {
   $saldo = ($myytavissa === false) ? 0 : $myytavissa;
 
   return $saldo;
+}
+
+function magento_tuote_export_tehdas_saldot($tuoteno) {
+  global $kukarow, $yhtiorow;
+
+  $query = "SELECT tt.tehdas_saldo
+            FROM tuotteen_toimittajat AS tt
+            JOIN toimi on (toimi.yhtio = tt.yhtio and toimi.tunnus = tt.liitostunnus)
+            WHERE tt.yhtio = '{$kukarow['yhtio']}'
+            and tt.tuoteno = '{$tuoteno}'
+            ORDER BY IF(tt.jarjestys = 0, 9999, tt.jarjestys), tt.tunnus
+            LIMIT 1";
+  $ttres = pupe_query($query);
+
+  if (mysql_num_rows($ttres) == 0) return 0;
+
+  $ttrow = mysql_fetch_assoc($ttres);
+
+  return $ttrow['tehdas_saldo'];
 }
 
 function tuote_export_hae_tuoteryhmat($params) {
@@ -624,7 +670,9 @@ function tuote_export_hae_asiakkaat($params) {
 function tuote_export_hae_lajitelmatuotteet($params) {
   global $kukarow, $yhtiorow;
 
-  $ajetaanko_kaikki    = $params['ajetaanko_kaikki'];
+  $ajetaanko_kaikki = $params['ajetaanko_kaikki'];
+  $kieliversiot = $params['kieliversiot']; //tulee muodossa array(fi,en,ee) ja vähintään aina fi
+
   $datetime_checkpoint = tuote_export_checkpoint('TEX_LAJITELMAT');
 
   $dnslajitelma = array();
@@ -689,7 +737,11 @@ function tuote_export_hae_lajitelmatuotteet($params) {
 
     while ($alirow = mysql_fetch_assoc($alires)) {
       // Haetaan kaikki tuotteen atribuutit
+
+      $properties = array();
+
       $alinselect = "SELECT
+                     tuotteen_avainsanat.kieli,
                      tuotteen_avainsanat.selite,
                      avainsana.selitetark,
                      avainsana.selite option_name
@@ -697,18 +749,18 @@ function tuote_export_hae_lajitelmatuotteet($params) {
                      JOIN avainsana USE INDEX (yhtio_laji_selite) ON (avainsana.yhtio = tuotteen_avainsanat.yhtio
                        AND avainsana.laji = 'PARAMETRI'
                        AND avainsana.selite = SUBSTRING(tuotteen_avainsanat.laji, 11))
+                       AND avainsana.kieli = tuotteen_avainsanat.kieli
                      WHERE tuotteen_avainsanat.yhtio = '{$kukarow['yhtio']}'
                      AND tuotteen_avainsanat.laji != 'parametri_variaatio'
                      AND tuotteen_avainsanat.laji != 'parametri_variaatio_jako'
                      AND tuotteen_avainsanat.laji like 'parametri_%'
                      AND tuotteen_avainsanat.tuoteno = '{$alirow['tuoteno']}'
-                     AND tuotteen_avainsanat.kieli = 'fi'
+                     AND tuotteen_avainsanat.kieli in ('".implode("','", $kieliversiot)."')
                      ORDER by tuotteen_avainsanat.jarjestys, tuotteen_avainsanat.laji";
       $alinres = pupe_query($alinselect);
-      $properties = array();
 
       while ($syvinrow = mysql_fetch_assoc($alinres)) {
-        $properties[] = array(
+        $properties[$syvinrow["kieli"]][] = array(
           "nimi"        => $syvinrow["selitetark"],
           "option_name" => $syvinrow["option_name"],
           "arvo"        => $syvinrow["selite"],

@@ -9,6 +9,8 @@ if ($livesearch_tee == "TUOTEHAKU") {
 
 echo "<font class='head'>".t("Etiketin tulostus")."</font><hr>";
 
+if (!isset($malli)) $malli = '';
+
 // Vakio lomake
 $formi  = 'formi';
 $kentta = 'tuoteno';
@@ -18,12 +20,14 @@ enable_ajax();
 echo "<form method='post' name='formi' autocomplete='off'>";
 echo "<input type='hidden' name='tee' value='hae'>";
 echo "<input type='hidden' name='toim' value='$toim'>";
+echo "<input type='hidden' name='malli' value='$malli'>";
 
 echo "<table>";
 echo "<tr>";
 echo "<th>".t("Tuotenumero")."</th>";
 echo "<th>".t("KPL")."</th>";
 echo "<th>".t("Kirjoitin")."</th>";
+echo "<th>".t("Malli") . "</th>";
 
 echo "<tr>";
 echo "<td>".livesearch_kentta("formi", "TUOTEHAKU", "tuoteno", 150, $tuoteno)."</td>";
@@ -46,7 +50,20 @@ while ($kirow = mysql_fetch_array($kires)) {
 
 echo "</select></td>";
 
+
+$selmalli = "";
+
+if (!empty($malli)) {
+  $selmalli = "SELECTED";
+}
+
+echo "<td><select name='malli'>";
+echo "<option value=''>" . t("Ei mallia") . "</option>";
+echo "<option value='zebra' $selmalli>" . t("Zebra") . "</option>";
+echo "</select></td>";
+
 echo "<td class='back'><input name='submit' type='submit' value='".t("Tulosta")."'></td>";
+
 echo "</tr>";
 echo "</table>";
 echo "</form>";
@@ -83,8 +100,7 @@ if ($tee == "hae") {
   }
 }
 
-if ($tee == "jatka") {
-
+if ($tee == "jatka" and $malli == '') {
   $filenimi = "/tmp/sahantera_tulostus.txt";
   $hammastus = t_tuotteen_avainsanat($trow, 'HAMMASTUS');
 
@@ -115,6 +131,65 @@ if ($tee == "jatka") {
   else {
     $tee = "tulosta";
   }
+}
+
+if ($tee == "jatka" and $malli == 'zebra') {
+  // tämä haara on zebra tarralle
+  // Toimii ja suunniteltu mallille GX420t
+  // Tarrankoko 254 mm x 25,4 mm
+
+  // Ohjelmointimanuaali löytyy : http://www.zebra.com/id/zebra/na/en/index/products/printers/desktop/gx420t.4.tabs.html
+  // "Programmin guide"
+  $hammastus = t_tuotteen_avainsanat($trow, 'HAMMASTUS');
+
+  // Mitat tulee olla millimetrejä, metreinä kannassa. Syvyys yhdellä desimaalilla, muut ilman desimaalia.
+  $mitat = round($trow["tuotekorkeus"] * 1000, 0)." x ".round($trow["tuoteleveys"] * 1000, 0)." x ".round($trow["tuotesyvyys"] * 1000, 1);
+
+  // Splitataan tuotteen nimitys spacesta
+
+  $nimitys = split(" ", $trow["nimitys"]);
+
+  $sivu  = "^XA\n";    // vakio alku, pakollinen
+  $sivu .= "^LH000\n";  // offset vasemmasta
+  $sivu .= "^LT200\n";  // offset ylhäältä
+  // $sivu .= "^POI\n";  // offset ylhäältä
+
+  $sivu .= "^FO015,350^XGE:LENOX.GRF,1,1^FS";
+  $sivu .= "^FO095,420^XGE:HANSKAT.GRF,1,1^FS";
+  $sivu .= "^FO015,420^XGE:LASIT.GRF,1,1^FS";
+  $sivu .= "^FO015,1750^XGE:TKP.GRF,1,1^FS";
+
+  $sivu .= "^FO150,520\n^AQR,18,8\n^FDVAROITUS: VANNESAHANTERÄ JÄNNITYKSESSÄ. KÄYTÄ SUOJALASEJA JA -KÄSINEITÄ, KUN KÄSITTELET TERÄÄ,\n^FS";  // Tulostetaan varoitusteksti
+  $sivu .= "^FO120,680\n^AQR,18,8\n^FDASENNA TERÄ SAHAVALMISTAJAN OHJEIDEN MUKAISESTI\n^FS";  // Tulostetaan Firma
+  $sivu .= "^FO95,520\n^AQR,18,8\n^FDTuote ja koodi\n^FS";
+  $sivu .= "^FO75,520\n^ADR,18,8\n^FD$nimitys[1]\n^FS";
+  $sivu .= "^FO50,520\n^ADR,20,12\n^FD$tuoteno\n^FS";
+  $sivu .= "^FO95,1000\n^AQR,18,8\n^FDpituus x leveys x paksuus\n^FS";
+  $sivu .= "^FO75,1000\n^ADR,18,8\n^FD$mitat\n^FS";
+  $sivu .= "^MD10";                        // TUMMUUS, vakio on 8 mutta se ei riitä viivakoodille.
+  $sivu .= "^PQ$tkpl";                    // Tulostettavien lukumäärä
+  $sivu .= "^FO95,1500\n^AQR,18,8\n^FDHammastus:\n^FS";    // hammastus
+  $sivu .= "^FO75,1500\n^ADR,18,8\n^FD$hammastus\n^FS";    // hammastus
+  $sivu .= "^FO20,520\n^ADR,18,8\n^FD$yhtiorow[nimi]\n^FS";  // Tulostetaan Firma
+  $sivu .= "^FO20,1000\n^ADR,18,8\n^FD$yhtiorow[www]\n^FS";  // Tulostetaan Firma
+  $sivu .= "^FO20,1500\n^ADR,18,8\n^FDpuh: $yhtiorow[puhelin]\n^FS";  // Tulostetaan Firma
+  $sivu .= "\n^XZ";  // pakollinen lopetus
+
+  //konvertoidaan ääkköset printterin ymmärtämään muotoon
+  $from = array('ä', 'å', 'ö', 'Ä', 'Å', 'Ö', '|');
+  $to  = array(chr(132), chr(134), chr(148), chr(142), chr(143), chr(153), chr(179));      // DOS charset
+
+  $sivu = str_replace($from, $to, $sivu);                  // Tehdään käännös
+
+  // zebra blokki
+
+  list($usec, $sec) = explode(' ', microtime());
+  mt_srand((float) $sec + ((float) $usec * 100000));
+  $filenimi = "/tmp/Zebra-tarrat-".md5(uniqid(mt_rand(), true)).".txt";
+  $fh = file_put_contents($filenimi, $sivu);
+
+  $tee = "tulosta";
+
 }
 
 if ($tee == "tulosta") {

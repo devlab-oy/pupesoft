@@ -280,6 +280,7 @@ if (mysql_field_name($result, $i) == "kommentoitava") {
   $ulos  = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
   $ulos .= "<option value = '' $sela>".t("Normaalikäsittely")."</option>";
   $ulos .= "<option value = 'o' $sel>".t("Tuotteelle on annettava rivikommentti")."</option>";
+  $ulos .= "<option value = 'r' $sel>".t("Tuotteelle on annettava reklamaatiolla rivikommentti")."</option>";
   $ulos .= "</select></td>";
   $jatko = 0;
 }

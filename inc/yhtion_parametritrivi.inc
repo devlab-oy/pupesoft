@@ -37,6 +37,7 @@ if ($fieldname == "verkkolasku_lah") {
   $sel8 = "";
   $sel9 = "";
   $selA = "";
+  $selB = "";
 
   if ($trow[$i] == 'iPost') {
     $sel3 = "selected";
@@ -65,6 +66,9 @@ if ($fieldname == "verkkolasku_lah") {
   elseif ($trow[$i] == 'talenom') {
     $selA = "selected";
   }
+  elseif ($trow[$i] == 'arvato') {
+    $selB = "selected";
+  }
   else {
     $sel1 = "selected";
   }
@@ -79,6 +83,7 @@ if ($fieldname == "verkkolasku_lah") {
   $ulos .= "<option value = 'ppg' $sel8>".t("PPG Laskutuspalvelu");
   $ulos .= "<option value = 'sepa' $sel9>".t("SEPA-pankkiyhteys");
   $ulos .= "<option value = 'talenom' $selA>".t("Talenom Myyntilaskutuspalvelu");
+  $ulos .= "<option value = 'arvato' $selB>".t("Arvato Laskutuspalvelu");
   $ulos .= "</select></td>";
 
   $jatko = 0;
@@ -1028,6 +1033,23 @@ if ($fieldname == "rahtikirjojen_esisyotto") {
   $jatko = 0;
 }
 
+if ($fieldname == "saldottomat_rahtikirjansyottoon") {
+
+  $sel = $trow[$i] == 'K' ? 'selected' : '';
+
+  $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+  $ulos .= "<option value=''>".t("Rahtikirjansyˆtˆss‰ ei n‰ytet‰ saldottomia tuotteita")."</option>";
+
+  $ulos .= "<option value='K' {$sel}>";
+  $ulos .= t("Rahtikirjansyˆtˆss‰ n‰ytet‰‰n myˆs tilauksia jotka sis‰lt‰v‰t vain saldottomia tuotteita");
+  $ulos .= "</option>";
+
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
 if ($fieldname == "rahtikirjan_kollit_ja_lajit") {
 
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
@@ -1508,6 +1530,7 @@ if ($fieldname == "kerayspoikkeamaviestin_lahetys") {
   $sel[$trow[$i]]  = " selected";
 
   $ulos .= "<option value='0' $sel[0]>".t("Ker‰yspoikkeamaviesti l‰hetet‰‰n asiakkaalle ja myyj‰lle")."</option>";
+  $ulos .= "<option value='3' $sel[3]>".t("Ker‰yspoikkeamaviesti l‰hetet‰‰n asiakkaalle ja myyj‰lle (vaikka ei olisi poikkeamia)")."</option>";
   $ulos .= "<option value='2' $sel[2]>".t("Ker‰yspoikkeamaviesti l‰hetet‰‰n vain myyj‰lle")."</option>";
   $ulos .= "<option value='1' $sel[1]>".t("Ker‰yspoikkeamaviesti‰ ei l‰hetet‰ ollenkaan")."</option>";
   $ulos .= "</select></td>";
@@ -2182,6 +2205,21 @@ if ($fieldname == "vienti_erittelyn_tulostus") {
   $ulos .= "<option value='P' $sel5>".t("Vientierittely tulostetaan ilman alkuper‰maatietoja tullinimikkeell‰ ryhmiteltyn‰")."</option>";
   $ulos .= "<option value='E' $sel3>".t("Vientierittely‰ ei tulosteta")."</option>";
   $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
+if ($fieldname == "vientierittelyn_painot") {
+  $value = $trow[$i];
+  $sel_values = array('' => '', 'T' => '');
+  $sel = array($value => 'selected') + $sel_values;
+
+  $ulos  = "<td>";
+  $ulos .= "<select name = '$nimi'>";
+  $ulos .= "<option value = ''>".t("Vientierittelyn painot lasketaan rahtikirjan painosta")."</option>";
+  $ulos .= "<option value = 'T' {$sel['T']}>".t("Vientierittelyn painot lasketaan tuotteiden painoista")."</option>";
+  $ulos .= "</select>";
+  $ulos .= "</td>";
 
   $jatko = 0;
 }
@@ -2956,6 +2994,21 @@ if ($fieldname == "kalenterimerkinnat") {
   $jatko = 0;
 }
 
+if ($fieldname == "kalenteri_aikavali") {
+
+  $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+  $sel = array();
+  $apu = $trow[$i];
+  $sel[$apu] = "selected";
+
+  $ulos .= "<option value = ''>".t("Kalenterissa on 30 minuutin aikav‰li")."</option>";
+  $ulos .= "<option value = '15' $sel[15]>".t("Kalenterissa on 15 minuutin aikav‰li")."</option>";
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
 if ($fieldname == "tuntikirjausten_erittely") {
 
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
@@ -3192,7 +3245,7 @@ if ($fieldname == "poistetut_lisays") {
   $jatko = 0;
 }
 
-if ($fieldname == "livetuotehaku_hakutapa") {
+if ($fieldname == "livetuotehaku_hakutapa" or $fieldname == "livetuotehaku_hakutapa_extranet") {
 
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
 
@@ -3208,6 +3261,9 @@ if ($fieldname == "livetuotehaku_hakutapa") {
   $ulos .= "<option value = 'K' {$sel['K']}>".t("Livetuotehaku hakee tuotenumeron, nimityksen ja EAN-koodin mill‰ tahansa osalla. Tehd‰‰n myˆs saldokysely. (Todella hidas tapa)")."</option>";
   $ulos .= "<option value = 'L' {$sel['L']}>".t("Livetuotehaku hakee tuotenumeron, nimityksen, lempinimen ja EAN-koodin mill‰ tahansa osalla. (Hidas tapa)")."</option>";
   $ulos .= "<option value = 'M' {$sel['M']}>".t("Livetuotehaku hakee tuotenumeron, nimityksen, lempinimen ja EAN-koodin mill‰ tahansa osalla. Tehd‰‰n myˆs saldokysely. (Todella hidas tapa)")."</option>";
+  $ulos .= "<option value = 'N' {$sel['N']}>".t("Livetuotehaku hakee tuotenumeron ja nimityksen mill‰ tahansa osalla. N‰ytet‰‰n saatavuus kyll‰/ei. (Todella hidas tapa)")."</option>";
+  $ulos .= "<option value = 'O' {$sel['O']}>".t("Livetuotehaku hakee tuotenumeron, nimityksen, EAN-koodin ja lyhytkuvauksen mill‰ tahansa osalla. (Hidas tapa)")."</option>";
+  $ulos .= "<option value = 'P' {$sel['P']}>".t("Livetuotehaku hakee tuotenumeron, nimityksen, EAN-koodin ja lyhytkuvauksen mill‰ tahansa osalla. Tehd‰‰n myˆs saldokysely. (Todella hidas tapa)")."</option>";
 
   $ulos .= "</select></td>";
 
@@ -3335,6 +3391,18 @@ if ($fieldname == "extranet_nayta_saldo") {
 
   $ulos .= "<option value = ''>" . t("Ei n‰ytet‰ saldoa extranetiss‰");
   $ulos .= "<option value = 'Y' $sel>" . t("N‰ytet‰‰n saldo extranetiss‰");
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
+if ($fieldname == "extranet_nayta_kuvaus") {
+  $ulos = "<td><select name='$nimi' " . js_alasvetoMaxWidth($nimi, 400) . ">";
+
+  $sel = $trow[$i] == 'Y' ? ' selected' : '';
+
+  $ulos .= "<option value = ''>" . t("Ei n‰ytet‰ tuotteen kuvausta extranetiss‰");
+  $ulos .= "<option value = 'Y' $sel>" . t("N‰ytet‰‰n tuotteen kuvaus extranetiss‰");
   $ulos .= "</select></td>";
 
   $jatko = 0;
@@ -3718,6 +3786,7 @@ if ($fieldname == "pakollinen_varasto") {
 
   $ulos .= "<option value = ''>".t("Varaston valinta ei pakollinen. Tilaukselle voidaan lis‰t‰ rivej‰ useasta varastosta")."</option>";
   $ulos .= "<option value = 'K'{$sel}>".t("Varaston valinta on pakollinen. Tilaukselle voidaan lis‰t‰ rivej‰ vain yhdest‰ varastosta: myyntitilauksella, ostotilauksella, tarjouksella ja reklamaatiolla")."</option>";
+  $ulos .= "</select></td>";
 
   $jatko = 0;
 }
@@ -3731,6 +3800,18 @@ if ($fieldname == "ulkoinen_jarjestelma") {
   $ulos .= "<option value = ''>".t("Varaston ulkoinen j‰rjestelm‰ toimii ker‰yksen ja saapumisen yhteydess‰")."</option>";
   $ulos .= "<option value = 'K'{$sel['K']}>".t("Varaston ulkoinen j‰rjestelm‰ toimii vain ker‰yksen yhteydess‰")."</option>";
   $ulos .= "<option value = 'S'{$sel['S']}>".t("Varaston ulkoinen j‰rjestelm‰ toimii vain saapumisen yhteydess‰")."</option>";
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
+if ($fieldname == "ulkoinen_jarjestelma_lukko") {
+  $sel = array($trow[$i] => 'selected') + array('K' => '');
+
+  $ulos  = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+  $ulos .= "<option value = ''>".t("Ulkoinen j‰rjestelm‰‰n l‰hetettyj‰ tilauksia ei saa muokata")."</option>";
+  $ulos .= "<option value = 'K'{$sel['K']}>".t("Ulkoinen j‰rjestelm‰‰n l‰hetettyj‰ tilauksia saa muokata")."</option>";
+  $ulos .= "</select></td>";
 
   $jatko = 0;
 }
@@ -3765,16 +3846,26 @@ if ($fieldname == "kerayserat") {
 }
 
 if ($fieldname == "myyntiera_pyoristys" ) {
-
-  $sela = $selb = "";
-
   $sel = array($trow[$i] => 'selected') + array('', 'K', 'S');
 
   $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">
-        <option value = ' '>".t("Myyntirivin m‰‰r‰‰ ei pyˆristet‰ seuraavaan t‰yteen myyntier‰‰n")."</option>
-        <option value = 'K' {$sel['K']}>".t("Myyntirivin m‰‰r‰ pyˆristet‰‰n seuraavaan t‰yteen myyntier‰‰n")."</option>
-        <option value = 'S' {$sel['S']}>".t("Myyntirivin ja siirtorivin m‰‰r‰ pyˆristet‰‰n seuraavaan t‰yteen myyntier‰‰n")."</option>
+        <option value = ''>".t("M‰‰r‰‰ ei pyˆristet‰ myyntier‰‰n")."</option>
+        <option value = 'K' {$sel['K']}>".t("Myyntirivin ja ennakkotilausrivin m‰‰r‰ pyˆristet‰‰n seuraavaan t‰yteen myyntier‰‰n")."</option>
+        <option value = 'S' {$sel['S']}>".t("Myyntirivin, ennakkotilausrivin ja siirtorivin m‰‰r‰ pyˆristet‰‰n seuraavaan t‰yteen myyntier‰‰n")."</option>
       </select></td>";
+
+  $jatko = 0;
+}
+
+if ($fieldname == "minimimaara_pyoristys" ) {
+  $sel = array($trow[$i] => 'selected') + array('', 'K', 'S', 'E');
+
+  $ulos  = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+  $ulos .= "<option value=''>".t("M‰‰r‰‰ ei pyˆristet‰ minimim‰‰r‰‰n")."</option>";
+  $ulos .= "<option value='K' {$sel['K']}>".t("Myyntirivin ja ennakkotilausrivin m‰‰r‰ pyˆristet‰‰n minimim‰‰r‰‰n, jos tilataan alle minimim‰r‰n")."</option>";
+  $ulos .= "<option value='S' {$sel['S']}>".t("Myyntirivin, ennakkotilausrivin ja siirtorivin m‰‰r‰ pyˆristet‰‰n minimim‰‰r‰‰n, jos tilataan alle minimim‰r‰n")."</option>";
+  $ulos .= "<option value='E' {$sel['E']}>".t("Myyntirivin m‰‰r‰ pyˆristet‰‰n minimim‰‰r‰‰n ainoastaan Extranetiss‰, jos tilataan alle minimim‰r‰n")."</option>";
+  $ulos .= "</select></td>";
 
   $jatko = 0;
 }
@@ -3987,16 +4078,13 @@ if ($fieldname == "intrastat_pvm") {
 }
 
 if ($fieldname == "myynti_asiakhin_tallenna") {
+  $sel = array($trow[$i] => 'selected') + array('', 'K', 'V');
 
-  $apu = $trow[$i];
-  $sel = array($apu => "selected");
-
-  $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">
-        <option value = ''>".t("Myyntitilauksella ei voi tallentaa asiakashintoja")."</option>
-        <option value = 'K' {$sel["K"]}>".t("Myyntitilauksen hinnat voi tallentaa asiakkaalle asiakashinnoiksi")."</option>
-        <option value='V' {$sel["V"]}>" . t("Myyntitilauksen hinnat voi tallentaa asiakkaalle " .
-    "asiakashinnoiksi valitulla tavalla") . "</option>
-      </select></td>";
+  $ulos  = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+  $ulos .= "<option value=''>".t("Myyntitilauksella ei voi tallentaa asiakashintoja/-alennuksia")."</option>";
+  $ulos .= "<option value='K' {$sel["K"]}>".t("Myyntitilauksen hinnat voi tallentaa asiakkaalle asiakashinnoiksi/-alennuksiksi")."</option>";
+  $ulos .= "<option value='V' {$sel["V"]}>" . t("Myyntitilauksen hinnat voi tallentaa asiakkaalle asiakashinnoiksi/-alennuksiksi valitulla tavalla") . "</option>";
+  $ulos .= "</select></td>";
 
   $jatko = 0;
 }
@@ -4554,6 +4642,23 @@ if ($fieldname == 'matkalaskun_tarkastus') {
 
   $ulos .= "<option value = ''>".t("Matkalaskun tarkastaja ei voi muokata matkalaskua")."</option>";
   $ulos .= "<option value = 'Z' {$sel["Z"]}>".t("Matkalaskun tarkastaja voi muokata matkalaskua")."</option>";
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
+if ($fieldname == 'editilaus_suoratoimitus') {
+  $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+  $sel = array();
+  $sel = $trow[$i] == 'K' ? 'selected' : '';
+
+  $ulos .= "<option value = ''>";
+  $ulos .= t("EDI-tilauksen sis‰‰nluvussa ei yritet‰ luoda suoratoimitusrivi‰ jos tuotteella ei riit‰ saldo");
+  $ulos .= "</option>";
+  $ulos .= "<option value = 'K' {$sel}>";
+  $ulos .= t("EDI-tilauksen sis‰‰nluvussa yritet‰‰n luoda suoratoimitusrivej‰ jos tuotteella ei riit‰ saldo ja se on tuotteen ja p‰‰toimittajan takana sallittu");
+  $ulos .= "</option>";
   $ulos .= "</select></td>";
 
   $jatko = 0;

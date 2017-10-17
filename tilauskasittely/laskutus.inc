@@ -1106,7 +1106,7 @@ else {
   // katotaan mikä viivästyskorko laitetaan
   $viivastyskorko = $orow['viikorkopros'] == 0 ? 0 : $yhtiorow['viivastyskorko'];
 
-  if (isset($korkolasku) and $korkolasku == "kylla") {
+  if ($orow["clearing"] == "KORKOLASKU") {
     $viivastyskorko = 0;
   }
 

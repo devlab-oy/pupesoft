@@ -394,7 +394,9 @@ while ($row = mysql_fetch_assoc($suorires)) {
 
     // Merkit‰‰n lasku maksetuksi
     $query = "UPDATE lasku
-              SET mapvm = '$row[kirjpvm]'
+              SET mapvm = '$row[kirjpvm]',
+              saldo_maksettu = 0,
+              saldo_maksettu_valuutassa = 0
               WHERE yhtio = '$kukarow[yhtio]'
               and tunnus  = '$row[laskutunnus]'";
     pupe_query($query);
@@ -453,6 +455,7 @@ $query = "SELECT
           yhtio.myyntisaamiset,
           yhtio.valkoodi yhtiovaluutta,
           yhtio.factoringsaamiset,
+          yhtio.selvittelytili,
           yriti.factoring,
           yriti.oletus_rahatili,
           yriti.oletus_selvittelytili
@@ -496,7 +499,7 @@ while ($row = mysql_fetch_assoc($suorires)) {
     }
 
     // Jos meill‰ on oletus selvittelytili niin pistet‰‰n aina sinne tilille
-    if ($row["oletus_selvittelytili"] != "") {
+    if (!empty($row["oletus_selvittelytili"]) and $row["oletus_selvittelytili"] != $row["selvittelytili"]) {
       $row["myyntisaamiset"] = $row["oletus_selvittelytili"];
     }
 

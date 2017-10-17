@@ -2286,6 +2286,32 @@ if ($kasitellaan_tiedosto) {
           }
         }
 
+        // Laitetaan oletuksena tuotteen toimittajalle toimittajan valuutta ja maa,
+        // jos saraketta exceliss‰ ei ole
+        if ($table_mysql == "tuotteen_toimittajat" and $taulunrivit[$taulu][$eriviindex][$postoiminto] == "LISAA" and isset($toimi_liitostunnus)) {
+          if (stripos($query, ", valuutta = ") === FALSE) {
+            $toimi_val_query = "SELECT oletus_valkoodi
+                                FROM toimi
+                                WHERE yhtio  = '{$kukarow["yhtio"]}'
+                                AND tyyppi  != 'P'
+                                AND tunnus   = '{$toimi_liitostunnus}'";
+            $toimi_valuutta = mysql_fetch_assoc(pupe_query($toimi_val_query));
+
+            $query .= ", valuutta = '{$toimi_valuutta["oletus_valkoodi"]}'";
+          }
+
+          if (stripos($query, ", alkuperamaa = ") === FALSE) {
+            $toimi_maa_query = "SELECT maa
+                                FROM toimi
+                                WHERE yhtio  = '{$kukarow["yhtio"]}'
+                                AND tyyppi  != 'P'
+                                AND tunnus   = '{$toimi_liitostunnus}'";
+            $toimi_maa = mysql_fetch_assoc(pupe_query($toimi_maa_query));
+
+            $query .= ", alkuperamaa = '{$toimi_maa["maa"]}'";
+          }
+        }
+
         if ($taulunrivit[$taulu][$eriviindex][$postoiminto] == 'MUUTA') {
           if (($table_mysql == 'asiakasalennus' or $table_mysql == 'asiakashinta' or $table_mysql == 'toimittajahinta' or $table_mysql == 'toimittajaalennus') and $and != "") {
             $query .= " WHERE yhtio = '$kukarow[yhtio]'";
@@ -2369,6 +2395,23 @@ if ($kasitellaan_tiedosto) {
           $tarkrow["luedata_from"] = "LUEDATA";
           $tarkrow["luedata_toiminto"] = $taulunrivit[$taulu][$eriviindex][$postoiminto];
 
+          // M‰‰ritell‰‰n tarkistusfunktio
+          // Joudutaan tekem‰‰n random-niminen tarkistusfunktio per rivi, koska tarkista-funktioissa
+          // k‰ytet‰‰n static muuttujia sarakkeiden arvojen muistamiseen. M‰‰riteltyj‰ funktioita
+          // ei voi unsetata, joten tehd‰‰n aina uusi funktio, ja tehd‰‰n tarkistus siell‰ sis‰ll‰
+          // ett‰ staticit nollaantuu.
+          $wrapper_funktio = "{$table_mysql}_wrapper_".md5(uniqid());
+          $funktio = "{$table_mysql}tarkista";
+
+          // funktion nimi on muuttujan arvo. parametrit tulee olla samat kun tarkista-funktioissa
+          $$wrapper_funktio = function(&$t, $i, $result, $tunnus, &$virhe, $tarkrow) {
+            global $funktio;
+
+            include "inc/{$funktio}.inc";
+
+            $funktio($t, $i, $result, $tunnus, $virhe, $tarkrow);
+          };
+
           // Tehd‰‰n oikeellisuustsekit
           for ($i=1; $i < mysql_num_fields($result); $i++) {
 
@@ -2393,18 +2436,10 @@ if ($kasitellaan_tiedosto) {
 
             // Tarkistetaan vain ne kent‰t jotka on t‰ss‰ exceliss‰.
             if ($tassafailissa) {
-
-              $funktio = $table_mysql."tarkista";
-
-              if (!function_exists($funktio)) {
-                @include "inc/$funktio.inc";
-              }
-
               unset($virhe);
 
-              if (function_exists($funktio)) {
-                $funktio($t, $i, $result, $tunnus, $virhe, $tarkrow);
-              }
+              // Kutustaan wrapper funktiota, joka kutsuu oikeaa tarkista funktiota
+              $$wrapper_funktio($t, $i, $result, $tunnus, $virhe, $tarkrow);
 
               if (isset($virhe[$i]) and $virhe[$i] != "") {
                 switch ($table_mysql) {

@@ -149,6 +149,7 @@ if (empty($verkkokauppatuotteet_erikoisparametrit)) {
   $verkkokauppatuotteet_erikoisparametrit = array(
     // array('nimi' => 'manufacturer', 'arvo' => 'tuotemerkki'),
     // array('nimi' => 'description',  'arvo' => 'lyhytkuvaus'),
+    // array('nimi' => 'kieliversiot', 'arvo' => array('en' => array(4, 13))),
   );
 }
 
@@ -194,8 +195,10 @@ if (empty($magento_asiakas_aktivointi)) {
 }
 
 // Aktivoidaanko asiakaskohtaiset tuotehinnat
+// Tähän tulee antaa Magenton 'websiteCode', johon asiakashinnat liitetään
 // HUOM! Vaatii Magenton customointia
 if (empty($magento_asiakaskohtaiset_tuotehinnat)) {
+  // $magento_asiakaskohtaiset_tuotehinnat = 'pro_shop';
   $magento_asiakaskohtaiset_tuotehinnat = false;
 }
 
@@ -239,9 +242,11 @@ if (empty($verkkokauppa_erikoiskasittely)) {
   // 4 = Vaihtoehtoinen ovttunnus OSTOTIL.OT_TOIMITTAJANRO -kenttään EDI tiedostossa
   // 5 = Rahtivapaus, jos 'E', niin käytetään asiakkaan 'rahtivapaa' -oletusta
   // 6 = Tyhjennetäänkö OSTOTIL.OT_MAKSETTU EDI tiedostossa (tyhjä ei, kaikki muut arvot kyllä)
+  // 7 = Vaihtoehtoinen asiakasnro
   $verkkokauppa_erikoiskasittely = array(
     // array('Suomi',  'K', '2', '100', '',      'E', ''     ),
     // array('Ruotsi', 'E', 'E', '',    'SE123', '',  'kylla'),
+    // array('Norja', '', '', '',    '', '',  '', '123'),
   );
 }
 
@@ -294,6 +299,10 @@ if (empty($magento_saldot_tuotekenttaan)) {
 // Näytetäänkö Magentossa tuotteet aina tilassa "varastossa" saldosta riippumatta
 if (empty($magento_tuote_aina_varastossa)) {
   $magento_tuote_aina_varastossa = false;
+}
+
+if (empty($magento_tehdas_saldot)) {
+  $magento_tehdas_saldot = false;
 }
 
 // Tehdään lukkofile riippuen siitä, mitä ajetaan. Tilauksien haulla pitää olla oma lukko.
@@ -350,11 +359,35 @@ if ($magento_client->getErrorCount() > 0) {
   exit;
 }
 
+foreach ($verkkokauppatuotteet_erikoisparametrit as $erikoisparametri) {
+  $key = $erikoisparametri['nimi'];
+
+  // Kieliversiot
+  // poimitaan talteen koska niitä käytetään toisaalla
+  if ($key == 'kieliversiot') {
+    $tuetut_kieliversiot = $erikoisparametri['arvo'];
+    break;
+  }
+}
+
+$kieliversiot = array("fi"); //oletuskieli
+
+if (isset($tuetut_kieliversiot)) {
+  $magento_client->setTuetutKieliversiot($tuetut_kieliversiot);
+    
+  // tuotteiden hakuun tehdään valmis taulukko kielistä
+
+  foreach ($tuetut_kieliversiot as $kieli => $bar) {
+    $kieliversiot[] = $kieli;
+  }
+}
+
 if (in_array('tuotteet', $magento_ajolista)) {
   tuote_export_echo("Haetaan tuotetiedot.");
 
   $params = array(
     "ajetaanko_kaikki"                     => $ajetaanko_kaikki,
+    "kieliversiot"                         => $kieliversiot, //parametrien muut kielikäännökset, oletus fi haetaan aina
     "magento_asiakaskohtaiset_tuotehinnat" => $magento_asiakaskohtaiset_tuotehinnat,
     "tuotteiden_asiakashinnat_magentoon"   => $tuotteiden_asiakashinnat_magentoon,
   );
@@ -382,6 +415,7 @@ if (in_array('saldot', $magento_ajolista)) {
     "ajetaanko_kaikki"           => $ajetaanko_kaikki,
     "verkkokauppa_saldo_varasto" => $verkkokauppa_saldo_varasto,
     "vaihtoehtoiset_saldot"      => $magento_saldot_tuotekenttaan,
+    "tehdas_saldot"              => $magento_tehdas_saldot,
   );
 
   $dnstock = tuote_export_hae_saldot($params);
@@ -423,6 +457,7 @@ if (in_array('lajitelmatuotteet', $magento_ajolista)) {
 
   $params = array(
     "ajetaanko_kaikki" => $ajetaanko_kaikki,
+    "kieliversiot" => $kieliversiot, //parametrien muut kielikäännökset, oletus fi haetaan aina
   );
 
   $dnslajitelma = tuote_export_hae_lajitelmatuotteet($params);

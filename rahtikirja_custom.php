@@ -386,6 +386,9 @@ if ((isset($tulosta) or isset($tulostakopio)) and $otsikkonro > 0) {
       if ($toitarow['osoitelappu'] == 'intrade') {
         require 'tilauskasittely/osoitelappu_intrade_pdf.inc';
       }
+      elseif ($toitarow['osoitelappu'] == 'osoitelappu_kesko') {
+        require 'tilauskasittely/osoitelappu_kesko_pdf.inc';
+      }
       elseif ($toitarow['osoitelappu'] == 'hornbach') {
         require 'tilauskasittely/osoitelappu_hornbach_pdf.inc';
       }
@@ -1008,7 +1011,7 @@ function pupe_toimitustapa_fetch_all() {
   $query  = "SELECT *
              FROM toimitustapa
              WHERE yhtio    = '{$GLOBALS['kukarow']['yhtio']}'
-             and rahtikirja not in ('rahtikirja_ups_siirto.inc','rahtikirja_dpd_siirto.inc','rahtikirja_unifaun_ps_siirto.inc','rahtikirja_unifaun_uo_siirto.inc','rahtikirja_hrx_siirto.inc', 'rahtikirja_tyhja.inc')
+             and rahtikirja not in ('rahtikirja_ups_siirto.inc','rahtikirja_dpd_siirto.inc','rahtikirja_unifaun_ps_siirto.inc','rahtikirja_unifaun_uo_siirto.inc','rahtikirja_unifaun_xp_siirto.inc','rahtikirja_hrx_siirto.inc', 'rahtikirja_tyhja.inc')
              order by jarjestys,selite";
   $result = pupe_query($query);
 

@@ -18,9 +18,13 @@ require_once "barcode/c128cobject.php";
 
 
 function tulosta_hintalaput($tuotteet, $params = array()) {
-  $kpl           = isset($params["kpl"])           ? $params["kpl"]           : false;
-  $koko          = isset($params["koko"])          ? $params["koko"]          :'4.9x3cm';
-  $barcode_field = isset($params["barcode_field"]) ? $params["barcode_field"] :'tuoteno';
+  global $yhtiorow;
+
+  $kpl           = isset($params["kpl"])             ? $params["kpl"]           : false;
+  $koko          = isset($params["koko"])            ? $params["koko"]          : '4.9x3cm';
+  $barcode_field = isset($params["barcode_field"])   ? $params["barcode_field"] : 'tuoteno';
+  $default_tax   = empty($yhtiorow['alv_kasittely']) ? 'verollinen'             : 'veroton';
+  $tax_field     = isset($params["tax_field"])       ? $params["tax_field"]     : $default_tax;
 
   $barcode_map = array(
     'tuoteno'  => 'code128',
@@ -77,6 +81,15 @@ function tulosta_hintalaput($tuotteet, $params = array()) {
     $viivakoodi         = viivakoodi($tuote[$barcode_field], $barcode_map[$barcode_field], $viivakoodi_leveys, 60);
     $viivakoodin_teksti = $tuote[$barcode_field];
     $kuva               = $pdf->jfif_embed($viivakoodi);
+    $alv_prosentti      = 1 + ($tuote['alv'] / 100);
+
+    // Lasketaan hinta uusiksi, jos pyydetty eri kun default
+    if ($default_tax == 'verollinen' and $tax_field == 'veroton') {
+      $hinta = hintapyoristys($tuote['myyntihinta'] / $alv_prosentti);
+    }
+    elseif ($default_tax == 'veroton' and $tax_field == 'verollinen') {
+      $hinta = hintapyoristys($tuote['myyntihinta'] * $alv_prosentti);
+    }
 
     if ($kpl) {
       $montako_tulostetaan = $kpl;

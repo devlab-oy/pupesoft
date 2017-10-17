@@ -9,6 +9,55 @@ if (!function_exists("pupe_strtoupper")) {
 $DAY_ARRAY = array(1 => t("Ma"), t("Ti"), t("Ke"), t("To"), t("Pe"), t("La"), t("Su"));
 
 if (php_sapi_name() != 'cli' and (!isset($ei_kayttoliittymaa) or $ei_kayttoliittymaa != "kylla")) {
+
+  if (($yhtiorow["kayttoliittyma"] == "U" and $kukarow["kayttoliittyma"] == "") or $kukarow["kayttoliittyma"] == "U") {
+    $_laa_src = "{$palvelin2}pics/facelift/nuolet_alas.png";
+    $_sup_src = "{$palvelin2}pics/facelift/nuolet_ylos.png";
+    $_kuv_sty = "height:20px;";
+  }
+  else {
+    $_laa_src = "{$palvelin2}pics/lullacons/arrow-single-down-green.png";
+    $_sup_src = "{$palvelin2}pics/lullacons/arrow-single-up-green.png";
+    $_kuv_sty = "height:15px;";
+  }
+
+  $hiddenlisa1 = "";
+  $hiddenimg1  = $_sup_src;
+  $hiddenlisa2 = "";
+  $hiddenimg2  = $_sup_src;
+
+  if (!empty($_COOKIE["sol_ostikkotiedot"])) {
+    $hiddenlisa1 = " style='display: none;'";
+    $hiddenimg1 = $_laa_src;
+  }
+
+  if (!empty($_COOKIE["sol_kommentit"])) {
+    $hiddenlisa2 = " style='display: none;'";
+    $hiddenimg2 = $_laa_src;
+  }
+
+  echo "
+    <script>
+        $(document).ready(function(){
+          $('.sol').click(function(){
+            butid = this.id
+
+            if ($('.otsik_laaja_'+butid).is(':visible')) {
+              $('.otsik_laaja_'+butid).hide();
+              $('#'+butid).attr('src', '$_laa_src');
+              document.cookie = \"sol_\"+butid+\"=hidden;7\";
+            }
+            else {
+              $('.otsik_laaja_'+butid).show();
+              $('#'+butid).attr('src', '$_sup_src');
+              document.cookie = \"sol_\"+butid+\"=;7\";
+            }
+          });
+        });
+        </script>";
+
+
+
   // ToimehtoTarkenne javascript funktio
   js_toimehtoTarkenne();
 
@@ -423,7 +472,7 @@ default:
 }
 
 //  Tarkastetaan käsinsyötetty viite
-if (isset($jatka) and $kasinsyotetty_viite != "" and $viitten_kasinsyotto_sallittu) {
+if (isset($jatka) and !empty($kasinsyotetty_viite) and $viitten_kasinsyotto_sallittu) {
   if (substr($kasinsyotetty_viite, 0, 2) != "RF" and tarkista_viite($kasinsyotetty_viite) === FALSE) {
     echo "<font class='error'>".t("VIRHE: Syötetty viite '%s' on väärin", $kieli, $kasinsyotetty_viite)."!</font><br>";
     $tee  = "OTSIK";
@@ -788,6 +837,10 @@ if ($tila == "" and !isset($jatka)) {
       $tiedot_laskulta = "YES";
     }
 
+    if (strtolower($from) == 'asiakasyllapito' and !empty($asiakasid) and !empty($kukarow["kesken"])) {
+      $tiedot_laskulta = "YES";
+    }
+
     if (substr($asiakasid, 0, 1) == "£") {
 
       $asiakasid = substr($asiakasid, 1);
@@ -802,7 +855,7 @@ if ($tila == "" and !isset($jatka)) {
 
       $srow_from = "LASKU";
     }
-    elseif ($asiakasid != "" and $tiedot_laskulta == "") {
+    elseif (($asiakasid != "" and $tiedot_laskulta == "") or ($tiedot_laskulta == "YES" and isset($uusiasiakas) and $uusiasiakas == "uusiasiakas")) {
       // asiakashaussa pitää olla vakio columni kohdistettu, jonka arvo on O että saadaan OLETUS toimitustapa haettua asiakashaunkin yhteydessä
       if ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA") {
         $puhlisa = " if (asiakas.puhelin!='', asiakas.puhelin, asiakas.gsm) kotipuh, asiakas.tyopuhelin tyopuh,";
@@ -1181,12 +1234,15 @@ if ($tila == "" and !isset($jatka)) {
     );
   }
 
+  // Kehystaulukko
+  echo "<table class='pnopad'><tr><td class='pnopad ptop back'>";
+
   echo "<table>";
   echo "<tr><td class='pnopad ptop'>";
 
   echo "<table>";
   echo "<tr>
-      <th colspan='2'>".t("Ostaja").":</td>
+      <td colspan='2'>&nbsp;".t("Ostaja").":</td>
     </tr>";
   echo "<tr>
       <td valign='top'>".t("Nimi").": </td>
@@ -1333,7 +1389,7 @@ if ($tila == "" and !isset($jatka)) {
     echo "<td class='pnopad ptop'>";
     echo "<table>";
     echo "<tr>
-        <th colspan='2'>".t("Toimitusosoite").":</td></tr>";
+        <td colspan='2'>&nbsp;".t("Toimitusosoite").":</td></tr>";
 
     /* jos asiakkaalle ei ole tallennettu kohteita, ei piirretä kenttää */
     $kohde_ui = "";
@@ -1409,7 +1465,7 @@ if ($tila == "" and !isset($jatka)) {
     echo "<td class='pnopad ptop'>";
     echo "<table>";
     echo "<tr>
-        <th colspan='2'>&nbsp; ".t("Laskun postitusosoite").":</td></tr>";
+        <td colspan='2'>&nbsp;".t("Laskun postitusosoite").":</td></tr>";
     echo "<tr>
         <td valign='top'> ".t("Nimi").": </td>
         <td><input type='text' name='laskutus_nimi' size='35' value='$srow[laskutus_nimi]'></td></tr>";
@@ -1505,46 +1561,48 @@ if ($tila == "" and !isset($jatka)) {
       echo "</tr></table><br>";
     }
 
-    echo "<table>";
+    // Kehystaulukko
+    echo "</td></tr><tr><td class='pnopad ptop back'>";
+
+    echo "<table width='100%'>";
 
     if ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA") {
-      echo "<tr><th colspan='4'>".t("Työmääräyksen tiedot").":</th></tr>";
+      echo "<tr><th colspan='4'>".t("Työmääräyksen tiedot").": ";
     }
     elseif ($toim == "REKLAMAATIO" and $tilaustyyppi == 'U') {
-      echo "<tr><th colspan='4'>".t("Takuun tiedot").":</th></tr>";
+      echo "<tr><th colspan='4'>".t("Takuun tiedot").": ";
     }
     elseif ($toim == "REKLAMAATIO") {
-      echo "<tr><th colspan='4'>".t("Reklamaation tiedot").":</th></tr>";
+      echo "<tr><th colspan='4'>".t("Reklamaation tiedot").": ";
     }
     elseif ($toim == "EXTRANET_REKLAMAATIO") {
-      echo "<tr><th colspan='4'>".t("EXtranet-Reklamaation tiedot").":</th></tr>";
+      echo "<tr><th colspan='4'>".t("EXtranet-Reklamaation tiedot").": ";
     }
     elseif ($toim == "VALMISTAVARASTOON" or $toim == "VALMISTAASIAKKAALLE") {
-      echo "<tr><th colspan='4'>".t("Valmistuksen tiedot").":</th></tr>";
-
+      echo "<tr><th colspan='4'>".t("Valmistuksen tiedot").": ";
     }
     elseif ($toim == "SIIRTOLISTA") {
-      echo "<tr><th colspan='4'>".t("Siirtolistan tiedot").":</th></tr>";
-
+      echo "<tr><th colspan='4'>".t("Siirtolistan tiedot").": ";
     }
     elseif ($toim == "MYYNTITILI") {
-      echo "<tr><th colspan='4'>".t("Myyntitilin tiedot").":</th></tr>";
-
+      echo "<tr><th colspan='4'>".t("Myyntitilin tiedot").": ";
     }
     elseif ($toim == "TARJOUS") {
-      echo "<tr><th colspan='4'>".t("Tarjouksen tiedot").":</th></tr>";
-
+      echo "<tr><th colspan='4'>".t("Tarjouksen tiedot").": ";
     }
     elseif ($toim == 'EXTTARJOUS') {
-      echo "<tr><th colspan='4'>".t("Ext-Tarjouksen tiedot").":</th></tr>";
+      echo "<tr><th colspan='4'>".t("Ext-Tarjouksen tiedot").": ";
     }
     elseif ($toim == "PROJEKTI") {
-      echo "<tr><th colspan='4'>".t("Projektin tiedot").":</th></tr>";
-
+      echo "<tr><th colspan='4'>".t("Projektin tiedot").": ";
     }
     else {
-      echo "<tr><th colspan='4'>".t("Tilauksen tiedot").":</th></tr>";
+      echo "<tr><th colspan='4'>".t("Tilauksen tiedot").": ";
     }
+
+    echo "<div style='float:right;'><img class='sol' id='ostikkotiedot' style='{$_kuv_sty}' src='{$hiddenimg1}'></div>";
+
+    echo "</th></tr>";
 
     //Tutkitaan onko laskulla maksupositioita
     $query = "SELECT *
@@ -1855,7 +1913,7 @@ if ($tila == "" and !isset($jatka)) {
       $kervv = date("Y");
     }
 
-    $vasen_sarake[$vasen] = "<td>".t("Keräysajankohta").": </td><td valign='middle'>";
+    $vasen_sarake[$vasen] = "<td class='NAYTAAINA'>".t("Keräysajankohta").": </td><td>";
 
     if ($toim == "YLLAPITO") {
       $vasen_sarake[$vasen] .= t("Ei käytössä");
@@ -1939,7 +1997,7 @@ if ($tila == "" and !isset($jatka)) {
     $oikea_sarake[$oikea] .= "</td>";
     $oikea++;
 
-    $vasen_sarake[$vasen] = "<td>".t("Toimitusajankohta").": </td><td valign='middle'>";
+    $vasen_sarake[$vasen] = "<td class='NAYTAAINA'>".t("Toimitusajankohta").": </td><td>";
 
     if (($toim == 'TARJOUS' or $toim == 'EXTTARJOUS')) {
       if (!checkdate($toimkk, $toimpp, $toimvv)) {
@@ -2809,11 +2867,27 @@ if ($tila == "" and !isset($jatka)) {
     for ($rc = 0; $rc < $rivicount; $rc++) {
       echo "<tr>";
 
-      if (isset($vasen_sarake[$rc])) echo $vasen_sarake[$rc];
-      else echo "<td></td><td></td>";
+      if (isset($vasen_sarake[$rc])) {
+        if (strpos($vasen_sarake[$rc], "NAYTAAINA") === FALSE) {
+          $vasen_sarake[$rc] = str_replace("<td>", "<td class='otsik_laaja_ostikkotiedot' $hiddenlisa1>", $vasen_sarake[$rc]);
+        }
+        echo $vasen_sarake[$rc];
+      }
+      else {
+        echo "<td class='otsik_laaja_ostikkotiedot'></td>
+              <td class='otsik_laaja_ostikkotiedot'></td>";
+      }
 
-      if (isset($oikea_sarake[$rc])) echo $oikea_sarake[$rc];
-      else echo "<td></td><td></td>";
+      if (isset($oikea_sarake[$rc])) {
+        if (strpos($oikea_sarake[$rc], "NAYTAAINA") === FALSE) {
+          $oikea_sarake[$rc] = str_replace("<td>", "<td class='otsik_laaja_ostikkotiedot' $hiddenlisa1>", $oikea_sarake[$rc]);
+        }
+        echo $oikea_sarake[$rc];
+      }
+      else {
+        echo "<td class='otsik_laaja_ostikkotiedot' $hiddenlisa1></td>
+              <td class='otsik_laaja_ostikkotiedot' $hiddenlisa1></td>";
+      }
 
       echo "</tr>";
     }
@@ -3194,6 +3268,9 @@ if ($tila == "" and !isset($jatka)) {
 
     echo "</table><br>";
 
+    // Kehystaulukko
+    echo "</td></tr><tr><td class='pnopad ptop back'>";
+
     // Työmääräyksen tapahtumahistoria
     if ($toim == "TYOMAARAYS" and $yhtiorow['laiterekisteri_kaytossa'] != '') {
 
@@ -3236,6 +3313,12 @@ if ($tila == "" and !isset($jatka)) {
         }
       }
 
+      if ($kukarow['kieli'] != '') {
+        $kieli = $kukarow['kieli'];
+      }
+      else {
+        $kieli = $yhtiorow['kieli'];
+      }
       $query = "SELECT tyomaarayksen_tapahtumat.*,
                 ifnull(tilataulu.selitetark, '') tilassa,
                 ifnull(jonotaulu.selitetark, '') jonossa
@@ -3243,9 +3326,11 @@ if ($tila == "" and !isset($jatka)) {
                 LEFT JOIN avainsana tilataulu ON tilataulu.yhtio = tyomaarayksen_tapahtumat.yhtio
                   AND tilataulu.laji                           = 'TYOM_TYOSTATUS'
                   AND tilataulu.selite                         = tyomaarayksen_tapahtumat.tyostatus_selite
+                  AND tilataulu.kieli                           = '$kieli'
                 LEFT JOIN avainsana jonotaulu ON jonotaulu.yhtio = tyomaarayksen_tapahtumat.yhtio
                   AND jonotaulu.laji                           = 'TYOM_TYOJONO'
                   AND jonotaulu.selite                         = tyomaarayksen_tapahtumat.tyojono_selite
+                  AND jonotaulu.kieli                           = '$kieli'
                 WHERE tyomaarayksen_tapahtumat.yhtio           = '{$kukarow['yhtio']}'
                 AND tyomaarayksen_tapahtumat.tyomaarays_tunnus = '$tilausnumero'
                 ORDER BY tyomaarayksen_tapahtumat.luontiaika desc";
@@ -3456,38 +3541,46 @@ if ($tila == "" and !isset($jatka)) {
 
     }
 
-    echo "<table>";
+    // Kehystaulukko
+    echo "</td></tr><tr><td class='pnopad ptop back'>";
+
+    echo "<table width='100%'>";
 
     if ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA") {
-      echo "<tr><th colspan='3'>".t("Työmääräyksen kommentit").":</th></tr>";
+      echo "<tr><th colspan='3'>".t("Työmääräyksen kommentit").": ";
     }
     elseif ($toim == "REKLAMAATIO") {
-      echo "<tr><th colspan='3'>".t("Valmistuksen kommentit").":</th></tr>";
+      echo "<tr><th colspan='3'>".t("Valmistuksen kommentit").": ";
     }
     elseif ($toim == "EXTRANET_REKLAMAATIO") {
-      echo "<tr><th colspan='3'>".t("Reklamaation kommentit").":</th></tr>";
+      echo "<tr><th colspan='3'>".t("Reklamaation kommentit").": ";
     }
     elseif ($toim == "VALMISTAVARASTOON" or $toim == "VALMISTAASIAKKAALLE") {
-      echo "<tr><th colspan='3'>".t("Valmistuksen kommentit").":</th></tr>";
+      echo "<tr><th colspan='3'>".t("Valmistuksen kommentit").": ";
     }
     elseif ($toim == "SIIRTOLISTA") {
-      echo "<tr><th colspan='3'>".t("Siirtolistan kommentit").":</th></tr>";
+      echo "<tr><th colspan='3'>".t("Siirtolistan kommentit").": ";
     }
     elseif ($toim == "MYYNTITILI") {
-      echo "<tr><th colspan='3'>".t("Myyntitilin kommentit").":</th></tr>";
+      echo "<tr><th colspan='3'>".t("Myyntitilin kommentit").": ";
     }
     elseif ($toim == "TARJOUS") {
-      echo "<tr><th colspan='3'>".t("Tarjouksen kommentit").":</th></tr>";
+      echo "<tr><th colspan='3'>".t("Tarjouksen kommentit").": ";
     }
     elseif ($toim == "EXTTARJOUS") {
-      echo "<tr><th colspan='3'>".t("Ext-Tarjouksen kommentit").":</th></tr>";
+      echo "<tr><th colspan='3'>".t("Ext-Tarjouksen kommentit").": ";
     }
     elseif ($toim == "PROJEKTI") {
-      echo "<tr><th colspan='3'>".t("Projektin kommentit").":</th></tr>";
+      echo "<tr><th colspan='3'>".t("Projektin kommentit").": ";
     }
     else {
-      echo "<tr><th colspan='3'>".t("Tilauksen kommentit").":</th></tr>";
+      echo "<tr><th colspan='3'>".t("Tilauksen kommentit").": ";
     }
+
+    echo "<div style='float:right;'><img class='sol' id='kommentit' style='{$_kuv_sty}' src='{$hiddenimg2}'></div>";
+
+    echo "</th></tr>";
+
 
     echo "<tr><td>".t("Tilausyhteyshenkilö").":</td>";
 
@@ -3528,25 +3621,28 @@ if ($tila == "" and !isset($jatka)) {
 
     echo "<tr><td>".t("Asiakkaan tilausnumero").":</td><td colspan = '1'><input type='text' size='43' name='asiakkaan_tilausnumero' value='$srow[asiakkaan_tilausnumero]'><td>".t("tilausvahvistus")." + ".t("keräyslista")." + ".t("valmistus")." + ".t("työmääräys")." + ".t("lähete")." + ".t("lasku")."</td></tr>";
 
-    echo "<tr><td>".t("Kohde").":</td><td colspan = '1'><input type='text' size='43' name='kohde' value='$srow[kohde]'></td><td>".t("tilausvahvistus")." + ".t("keräyslista")." + ".t("valmistus")." + ".t("työmääräys")." + ".t("lähete")." + ".t("lasku")."</td></tr>";
+    echo "<tr class='otsik_laaja_kommentit' $hiddenlisa2><td>".t("Kohde").":</td><td colspan = '1'><input type='text' size='43' name='kohde' value='$srow[kohde]'></td><td>".t("tilausvahvistus")." + ".t("keräyslista")." + ".t("valmistus")." + ".t("työmääräys")." + ".t("lähete")." + ".t("lasku")."</td></tr>";
 
     echo "<tr><td>".t("Tilausviite").":</td><td><input type='text' size='43' name='viesti' value='$srow[viesti]'></td><td>".t("tilausvahvistus")." + ".t("keräyslista")." + ".t("valmistus")." + ".t("työmääräys")." + ".t("lähete")." + ".t("lasku")." + ".t("tarjous")."</td></tr>";
 
-    echo "<tr><td>".t("Ohjausmerkki").":</td><td><input type='text' size='43' name='ohjausmerkki' value='$srow[ohjausmerkki]'></td><td>".t("tilausvahvistus")." + ".t("keräyslista")." + ".t("lähete")."</td></tr>";
+    echo "<tr class='otsik_laaja_kommentit' $hiddenlisa2><td>".t("Ohjausmerkki").":</td><td><input type='text' size='43' name='ohjausmerkki' value='$srow[ohjausmerkki]'></td><td>".t("tilausvahvistus")." + ".t("keräyslista")." + ".t("lähete")."</td></tr>";
 
-    echo "<tr><td>".t("Puhelin toimitukseen").":</td><td><input type='text' size='43' name='tpuh' value='$srow[toim_puh]'</td><td>".t("rahtikirja")." + ".t("osoitelappu")."</td></tr>";
+    echo "<tr class='otsik_laaja_kommentit' $hiddenlisa2><td>".t("Puhelin toimitukseen").":</td><td><input type='text' size='43' name='tpuh' value='$srow[toim_puh]'</td><td>".t("rahtikirja")." + ".t("osoitelappu")."</td></tr>";
 
-    if ($yhtiorow["vahvistusviesti_asiakkaalle"] or !empty($kukarow["kassamyyja"])) {
-      echo "<tr><td>".t("Email toimitukseen").":</td><td><input type='text' size='43' name='temail' value='$srow[toim_email]'</td><td></td></tr>";
+    if ($yhtiorow["vahvistusviesti_asiakkaalle"] == "Y") {
+      $_vahvistusviesti_asiakkaalle = " + ".t("vahvistusviesti asiakkaalle");
     }
 
-    echo "<tr><td>".t("Kommentti")." 1:</td><td><textarea name='comments'   rows='2' cols='40'>$srow[comments]</textarea></td><td>".t("tilausvahvistus")." + ".t("keräyslista")." + ".t("valmistus")." + ".t("työmääräys")." + ".t("lähete")." + ".t("tarjous")."</td></tr>";
+    echo "<tr class='otsik_laaja_kommentit' $hiddenlisa2><td>".t("Email toimitukseen").":</td><td><input type='text' size='43' name='temail' value='$srow[toim_email]'</td><td>".t("toimitusvahvistus").$_vahvistusviesti_asiakkaalle."</td></tr>";
 
-    echo "<tr><td>".t("Kommentti")." 2:</td><td><textarea name='sisviesti2' rows='2' cols='40'>$srow[sisviesti2]</textarea></td><td>".t("keräyslista")." + ".t("valmistus")."</td></tr>";
-    echo "<tr><td>".t("Kommentti")." 3:</td><td><textarea name='sisviesti1' rows='2' cols='40'>$srow[sisviesti1]</textarea></td><td>".t("lasku")."</td></tr>";
-    echo "<tr><td>".t("Sisäinen viesti").":</td><td><textarea name='sisviesti3' rows='2' cols='40'>$srow[sisviesti3]</textarea></td><td></td></tr>";
+    echo "<tr class='otsik_laaja_kommentit' $hiddenlisa2><td>".t("Kommentti")." 1:</td><td><textarea name='comments'   rows='2' cols='40'>$srow[comments]</textarea></td><td>".t("tilausvahvistus")." + ".t("keräyslista")." + ".t("valmistus")." + ".t("työmääräys")." + ".t("lähete")." + ".t("tarjous")."</td></tr>";
+
+    echo "<tr class='otsik_laaja_kommentit' $hiddenlisa2><td>".t("Kommentti")." 2:</td><td><textarea name='sisviesti2' rows='2' cols='40'>$srow[sisviesti2]</textarea></td><td>".t("keräyslista")." + ".t("valmistus")."</td></tr>";
+    echo "<tr class='otsik_laaja_kommentit' $hiddenlisa2><td>".t("Kommentti")." 3:</td><td><textarea name='sisviesti1' rows='2' cols='40'>$srow[sisviesti1]</textarea></td><td>".t("lasku")."</td></tr>";
+    echo "<tr class='otsik_laaja_kommentit' $hiddenlisa2><td>".t("Sisäinen viesti").":</td><td><textarea name='sisviesti3' rows='2' cols='40'>$srow[sisviesti3]</textarea></td><td></td></tr>";
+
     if ($toim == "TARJOUS" or $toim == "EXTTARJOUS" or $toim == "EXTENNAKKO") {
-      echo "<tr><td>".t("Saateteksti").":</td><td><textarea name='saate' rows='2' cols='40'>$srow[saate]</textarea></td><td></td></tr>";
+      echo "<tr class='otsik_laaja_kommentit' $hiddenlisa2><td>".t("Saateteksti").":</td><td><textarea name='saate' rows='2' cols='40'>$srow[saate]</textarea></td><td></td></tr>";
     }
 
     $mainostxt_res = t_avainsana('MAINOSTXT_LASKU');
@@ -3559,10 +3655,13 @@ if ($tila == "" and !isset($jatka)) {
         $srow['mainosteksti'] = trim($mainostxt_row['selite']."\n".$mainostxt_row['selitetark']);
       }
 
-      echo "<tr><td>".t("Mainosteksti").":</td><td><textarea name='mainosteksti' rows='2' cols='40'>{$srow['mainosteksti']}</textarea></td><td>".t("lasku")."</td></tr>";
+      echo "<tr class='otsik_laaja_kommentit' $hiddenlisa2><td>".t("Mainosteksti").":</td><td><textarea name='mainosteksti' rows='2' cols='40'>{$srow['mainosteksti']}</textarea></td><td>".t("lasku")."</td></tr>";
     }
 
     echo "</table><br>";
+
+    // Kehystaulukko
+    echo "</td></tr></table>";
 
     echo "<table>";
     echo "<tr><td class='back'>";
@@ -3642,8 +3741,19 @@ if (isset($jatka)) {
       }
     }
 
-    if (!isset($eilahe) and $srow['eilahetetta'] != '' or (!isset($srow['eilahetetta']) and $yhtiorow["kerataanko_valmistukset"] == "E" and $toim == "VALMISTAASIAKKAALLE") or (!isset($srow['eilahetetta']) and $yhtiorow['lahetteen_tulostustapa'] == 'I') or (!isset($srow['eilahetetta']) and $toimtapa_apuro['nouto'] != '' and $yhtiorow['nouto_suoraan_laskutukseen'] == 'K')) $eilahe = 'o';
-    if (!isset($osatoimitus) and $srow['osatoimitus'] != '' or ((in_array($toim, array("TARJOUS", "EXTTARJOUS", "PROJEKTI")) or $oletus["osatoimitus"] != "") and $kukarow["kesken"] == 0) or ($yhtiorow['myyntitilaus_osatoimitus'] == 'E' and $kukarow['kesken'] == 0)) $osatoimitus = 'o';
+    if (!isset($eilahe) and $srow['eilahetetta'] != '' or
+      (!isset($srow['eilahetetta']) and $yhtiorow["kerataanko_valmistukset"] == "E" and $toim == "VALMISTAASIAKKAALLE")
+      or (!isset($srow['eilahetetta']) and $yhtiorow['lahetteen_tulostustapa'] == 'I')
+      or (!isset($srow['eilahetetta']) and $toimtapa_apuro['nouto'] != '' and $yhtiorow['nouto_suoraan_laskutukseen'] == 'K'))
+    {
+        $eilahe = 'o';
+    }
+
+    if (!isset($osatoimitus) and $srow['osatoimitus'] != '' or
+      ((in_array($toim, array("TARJOUS", "EXTTARJOUS", "PROJEKTI")) or $oletus["osatoimitus"] != "") and $kukarow["kesken"] == 0)
+      or ($yhtiorow['myyntitilaus_osatoimitus'] == 'E' and $kukarow['kesken'] == 0)) {
+      $osatoimitus = 'o';
+    }
 
     $yhtiorow = $_yhtiorow_talteen;
   }
@@ -3903,6 +4013,10 @@ if (isset($jatka)) {
     //Kun tehdään uusi tilaus niin nollataan aina tilat ja alatilat
     $alatila = "";
     $ylatila = "";
+
+    if ($toim == "TYOMAARAYS") {
+      $luontitapa = "tyomaarays";
+    }
   }
   else {
     // Jos ollaan piilottamassa tarjouksen toimitusaikaa niin pitää nollata nämä tiedot myös tilausriveiltä
@@ -3987,6 +4101,9 @@ if (isset($jatka)) {
 
   $kassalipas = "";
 
+  // Etukäteen maksetut tilaukset, ei sörkitä maksuehtoa/toimitustapaa enää
+  $_etukateen_maksettu = ($laskurow['mapvm'] != '0000-00-00' and $laskurow['chn'] == '999');
+
   // jos kyseessä oli käteinen
   if ($meapurow["kateinen"] != "") {
     // haetaan toimitustavan tiedot tarkastuksia varten
@@ -3998,7 +4115,7 @@ if (isset($jatka)) {
     $meapu2row = mysql_fetch_assoc($meapu2);
 
     // ja toimitustapa ei ole nouto eikä kyseessä ole verkkokauppatilaus laitetaan toimitustavaksi nouto... hakee järjestyksessä ekan
-    if ($meapu2row["nouto"] == "" and $tilaustyyppi != "W") {
+    if ($meapu2row["nouto"] == "" and ($tilaustyyppi != "W" and !$_etukateen_maksettu)) {
       $apuqu = "SELECT *
                 FROM toimitustapa
                 WHERE yhtio  = '$kukarow[yhtio]'
@@ -4015,7 +4132,7 @@ if (isset($jatka)) {
   }
 
   // jos kyseessä oli käsin syötetty eräpäivä ja maksuehto on väärin laitetaan oikea maksuehto... hakee järjestyksessä ekan
-  if ($erpcm_kasin == "KYLLA" and $meapurow["erapvmkasin"] == "" and $meapurow["jaksotettu"] == "") {
+  if ($erpcm_kasin == "KYLLA" and $meapurow["erapvmkasin"] == "" and $meapurow["jaksotettu"] == "" and !$_etukateen_maksettu) {
 
     $erpquery = "SELECT * from maksuehto where yhtio = '$kukarow[yhtio]' and erapvmkasin != '' and kaytossa = '' order by tunnus limit 1";
     $erpres = pupe_query($erpquery);
@@ -4238,7 +4355,15 @@ if (isset($jatka)) {
 
     $kassalipas = $kassalipas_row['kassalipas'];
     $maksuehto  = $kassalipas_row['maksuehto'];
-    $sisainen   = "o";
+
+    // Siäsinen täppä tulee laittaa vain jos tilaus on vielä kesken,
+    // muuten se saa tilauksen menemään toimitettu tilaan
+    if ($alatila == "") {
+      $sisainen = "o";
+    }
+    else {
+      $sisainen = "";
+    }
   }
 
   if (!isset($campaign_id)) {
@@ -4722,8 +4847,15 @@ if (isset($jatka)) {
                          sopimus_numero           = '$sopimus_numero', ";
       }
 
+      $luontitapa_arraylisa = "";
+
+      if (isset($luontitapa)) {
+        $luontitapa_arraylisa = "luontitapa = '{$luontitapa}',";
+      }
+
       $query3 .= "laskun_lisatiedot SET
             yhtio            = '$kukarow[yhtio]',
+            {$luontitapa_arraylisa}
             sopimus_kk          = '$sopimus_kk',
             sopimus_pp          = '$sopimus_pp',
             yllapito_kuukausihinnoittelu = '{$kuukausihinnoittelu}',

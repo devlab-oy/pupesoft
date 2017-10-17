@@ -54,12 +54,16 @@ if (!function_exists('finvoice_otsik')) {
     case '003709227412':
       $tulostuspalvelu  = "TULOSTUSPALVELU";
       break;
+    case 'ARVATO':
+      $tulostuspalvelu  = "TULOSTUSPALVELU";
+      break;
     case 'ITELFIHH':
       $tulostuspalvelu  = "TULOSTUSPALVELU";
       break;
     default:
-      $tulostuspalvelu  = "";
-      break;
+      // Katsotaan löytyykö avainsanoista sopivaa, muuten laitetaan tyhjäksi
+      $avainsana       = t_avainsana("FINV_TULPALVELU", '', "AND selite = '{$senderintermediator}'", '', '', "selitetark");
+      $tulostuspalvelu = $avainsana ? $avainsana : "";
     }
 
     //  Aloitellaan aineiston luontia. Kaikki tiedot pitää olla kunnossa, tai chn 112 "Pupesoft-Finvoice: Verkkolasku Pupesoftista-Pupesoftiin"

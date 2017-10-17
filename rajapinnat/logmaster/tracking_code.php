@@ -25,6 +25,8 @@ error_reporting(E_ALL);
 require "inc/connect.inc";
 require "inc/functions.inc";
 require "rajapinnat/logmaster/logmaster-functions.php";
+require "rajapinnat/woo/woo-functions.php";
+require "rajapinnat/mycashflow/mycf_toimita_tilaus.php";
 
 // Logitetaan ajo
 cron_log();
@@ -135,6 +137,22 @@ while (false !== ($file = readdir($handle))) {
 
     pupesoft_log('logmaster_tracking_code', "Tilauksen {$tilausnumero} seurantakoodisanoma käsitelty");
 
+    // Merkaatan woo-commerce tilaukset toimitetuiksi kauppaan
+    $woo_params = array(
+      "pupesoft_tunnukset" => array($tilausnumero),
+      "tracking_code" => $seurantakoodi,
+    );
+
+    woo_commerce_toimita_tilaus($woo_params);
+
+    // Merkaatan MyCashflow tilaukset toimitetuiksi kauppaan
+    $mycf_params = array(
+      "pupesoft_tunnukset" => array($tilausnumero),
+      "tracking_code" => $seurantakoodi,
+    );
+
+    mycf_toimita_tilaus($mycf_params);
+
     // Jos Magento on käytössä, merkataan tilaus toimitetuksi Magentoon kun rahtikirja tulostetaan
     if ($_magento_kaytossa) {
       pupesoft_log('logmaster_tracking_code', "Päivitetään toimitetuksi Magentoon");
@@ -155,18 +173,19 @@ while (false !== ($file = readdir($handle))) {
         $toitares = pupe_query($query);
         $toitarow = mysql_fetch_assoc($toitares);
 
-        $query = "SELECT asiakkaan_tilausnumero
+        $query = "SELECT asiakkaan_tilausnumero, tunnus
                   FROM lasku
                   WHERE yhtio                 = '{$kukarow['yhtio']}'
                   AND tunnus                  = '{$tilausnumero}'
-                  AND laatija                 = 'Magento'
-                  AND asiakkaan_tilausnumero != ''";
+                  AND ohjelma_moduli          = 'MAGENTO'
+                  AND asiakkaan_tilausnumero  != ''";
         $mageres = pupe_query($query);
 
         while ($magerow = mysql_fetch_assoc($mageres)) {
           $magento_api_met = $toitarow['virallinen_selite'] != '' ? $toitarow['virallinen_selite'] : $toitarow['selite'];
           $magento_api_rak = $seurantakoodi;
           $magento_api_ord = $magerow["asiakkaan_tilausnumero"];
+          $magento_api_laskutunnus = $magerow["tunnus"];
 
           require "magento_toimita_tilaus.php";
         }

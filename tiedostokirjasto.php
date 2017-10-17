@@ -28,6 +28,14 @@ elseif ($toim == "LUVAT_JA_LISENSSIT") {
   $aihealueet  = hae_aihealueet($toim);
   $toimittajat = "";
 }
+elseif ($toim == "ASIAKKAAN_TIEDOSTOT") {
+  $otsikko        = "Asiakkaan tiedostot";
+  $ylaotsikko     = null;
+  $aihealueet     = null;
+  $toimittajat    = null;
+  $tee            = "hae_tiedostot";
+  $tiedostotyyppi = "extranet";
+}
 else {
   $otsikko     = "Tiedostokirjasto";
   $ylaotsikko  = "Toimittajat";
@@ -52,7 +60,10 @@ $params = array(
 if ($tee == 'hae_tiedostot' and !empty($tiedostotyyppi)) {
   $tiedostot = hae_tiedostot($params);
 
-  piirra_formi($params);
+  if ($toim != "ASIAKKAAN_TIEDOSTOT") {
+    piirra_formi($params);
+  }
+
   piirra_tiedostolista($tiedostot);
 }
 else {
@@ -179,9 +190,16 @@ function piirra_tiedostolista($tiedostot) {
   global $extranet, $toim;
 
   if (empty($tiedostot)) {
-    echo "<font class='error'>";
-    echo t("Valitulle toimittajalle ei löytynyt valitun tyyppisiä liitetiedostoja");
-    echo "</font>";
+    if ($toim == "ASIAKKAAN_TIEDOSTOT") {
+      echo "<font class='error'>";
+      echo t("Asiakkaan tiedostoja ei löytynyt");
+      echo "</font>";
+    }
+    else {
+      echo "<font class='error'>";
+      echo t("Valitulle toimittajalle ei löytynyt valitun tyyppisiä liitetiedostoja");
+      echo "</font>";
+    }
 
     return;
   }

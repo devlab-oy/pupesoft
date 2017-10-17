@@ -75,7 +75,7 @@ if (!function_exists('alku')) {
           $pdf_lasku->draw_text(310, 815, t("Maksutosite", $kieli), $page_lasku[$sivu], $iso);
         }
         elseif ($laskurow["kateistyyppi"] != '') {
-          $pdf_lasku->draw_text(310, 815, t("Käteiskuitti", $kieli), $page_lasku[$sivu], $iso);
+          $pdf_lasku->draw_text(310, 815, t("Kuitti", $kieli), $page_lasku[$sivu], $iso);
         }
         else {
           $pdf_lasku->draw_text(310, 815, t("Lasku", $kieli), $page_lasku[$sivu], $iso);
@@ -96,7 +96,7 @@ if (!function_exists('alku')) {
         $pdf_lasku->draw_text(310, 815, t("Maksutosite", $kieli), $page_lasku[$sivu], $iso);
       }
       elseif ($laskurow["kateistyyppi"] != '') {
-        $pdf_lasku->draw_text(310, 815, t("Käteiskuitti", $kieli), $page_lasku[$sivu], $iso);
+        $pdf_lasku->draw_text(310, 815, t("Kuitti", $kieli), $page_lasku[$sivu], $iso);
       }
       elseif ($laskurow["maa"] == "IN") {
         // Jos lasku menee Intiaan, niin laiitetaan hieman eri otsikko
@@ -716,7 +716,7 @@ if (!function_exists('uusi_sivu')) {
           $pdf_lasku->draw_text(310, 815, t("Maksutosite", $kieli), $thispage, $iso);
         }
         elseif ($laskurow["kateistyyppi"] != '') {
-          $pdf_lasku->draw_text(310, 815, t("Käteiskuitti", $kieli), $thispage, $iso);
+          $pdf_lasku->draw_text(310, 815, t("Kuitti", $kieli), $thispage, $iso);
         }
         else {
           $pdf_lasku->draw_text(310, 815, t("Lasku", $kieli), $thispage);
@@ -737,7 +737,7 @@ if (!function_exists('uusi_sivu')) {
         $pdf_lasku->draw_text(310, 815, t("Maksutosite", $kieli), $thispage);
       }
       elseif ($laskurow["kateistyyppi"] != '') {
-        $pdf_lasku->draw_text(310, 815, t("Käteiskuitti", $kieli), $thispage);
+        $pdf_lasku->draw_text(310, 815, t("Kuitti", $kieli), $thispage);
       }
       elseif ($laskurow["summa"] >= 0) {
         $pdf_lasku->draw_text(310, 815, t("Vientilasku", $kieli), $thispage);
@@ -1098,8 +1098,12 @@ if (!function_exists('rivi_otsikot')) {
         $pdf_lasku->draw_text(340, $kala-9, t("Yksikkö", $kieli), $thispage, $pieni);
       }
 
-      if (!in_array($laskutyyppi, array('6', '21', '22'))) {
+      if (!in_array($laskutyyppi, array('6', '21', '22', '24'))) {
         $pdf_lasku->draw_text(390, $kala-9, t("Toimituspvm", $kieli), $thispage, $pieni);
+      }
+
+      if ($laskutyyppi == 24) {
+        $pdf_lasku->draw_text(390, $kala-9, t("A-hinta, verollinen", $kieli), $thispage, $pieni);
       }
 
       if ($laskutyyppi != 5 and !(($laskutyyppi == 21 or $laskutyyppi == 22) and $laskurow['vienti'] != "")) {
@@ -1312,10 +1316,39 @@ if (!function_exists('rivi_original')) {
       $pdf_lasku->draw_text(365-$oikpos, $kala, $_yks, $thispage, $pieni);
     }
 
-    //Toimitusaika
-    if (substr($row["toimitettuaika"], 0, 10) != "0000-00-00" and !in_array($laskutyyppi, array(6, 21, 22))) {
-      $oikpos = $pdf_lasku->strlen(tv1dateconv(substr($row["toimitettuaika"], 0, 10)), $pieni);
-      $pdf_lasku->draw_text(435-$oikpos, $kala, tv1dateconv(substr($row["toimitettuaika"], 0, 10)), $thispage, $pieni);
+    // Jos on
+    if ($laskutyyppi == 24) {
+      // yksikköhinta pitää olla verollinen tässä
+      if ($yhtiorow["alv_kasittely"] == '') {
+        $verollinen_hinta = $row["hinta"];
+      }
+      else {
+        // Onko marginaaliverotusta
+        $laskalv = $row["alv"];
+
+        // Jos meillä on marginaalimyyntiä/käänteinen alv
+        if ($row["alv"] >= 500) {
+          $laskalv = 0;
+        }
+
+        if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
+          $verollinen_hinta = $row["hinta"] * (1 + $laskalv / 100);
+        }
+        else {
+          $verollinen_hinta = round($row["hinta"] * (1 + $laskalv / 100), 2);
+        }
+      }
+
+      // A-hinta verollisena
+      $oikpos = $pdf_lasku->strlen(hintapyoristys(laskuval($verollinen_hinta, $kurssi), 0, $laskurow['_loppunollat']), $norm);
+      $pdf_lasku->draw_text(435-$oikpos, $kala, hintapyoristys(laskuval($verollinen_hinta, $kurssi), 0, $laskurow['_loppunollat']), $thispage, $norm);
+
+    } else {
+      //Toimitusaika
+      if (substr($row["toimitettuaika"], 0, 10) != "0000-00-00" and !in_array($laskutyyppi, array(6, 21, 22))) {
+        $oikpos = $pdf_lasku->strlen(tv1dateconv(substr($row["toimitettuaika"], 0, 10)), $pieni);
+        $pdf_lasku->draw_text(435-$oikpos, $kala, tv1dateconv(substr($row["toimitettuaika"], 0, 10)), $thispage, $pieni);
+      }
     }
 
     // Näytetäänkö verollinen rivihinta
@@ -1895,9 +1928,10 @@ if (!function_exists('rivi_perhe')) {
         $query = "SELECT
                   $lisa
                   round(sum(tilausrivi.hinta * if ('$yhtiorow[alv_kasittely]' != '' AND tilausrivi.alv < 500, (1 + tilausrivi.alv / 100), 1) * (tilausrivi.varattu + tilausrivi.kpl) * {$query_ale_lisa}), $yhtiorow[hintapyoristys]) rivihinta_verollinen,
-                  sum((tilausrivi.hinta / {$laskurow["vienti_kurssi"]}) / if ('$yhtiorow[alv_kasittely]'  = '' AND tilausrivi.alv < 500, (1 + tilausrivi.alv / 100), 1) * (tilausrivi.varattu + tilausrivi.kpl) * {$query_ale_lisa}) rivihinta_valuutassa,
-                  sum((tilausrivi.hinta / {$laskurow["vienti_kurssi"]}) * if ('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1 + tilausrivi.alv / 100), 1) * (tilausrivi.varattu + tilausrivi.kpl) * {$query_ale_lisa}) rivihinta_valuutassa_verollinen
+                  sum((tilausrivi.hinta / lasku.vienti_kurssi) / if ('$yhtiorow[alv_kasittely]'  = '' AND tilausrivi.alv < 500, (1 + tilausrivi.alv / 100), 1) * (tilausrivi.varattu + tilausrivi.kpl) * {$query_ale_lisa}) rivihinta_valuutassa,
+                  sum((tilausrivi.hinta / lasku.vienti_kurssi) * if ('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1 + tilausrivi.alv / 100), 1) * (tilausrivi.varattu + tilausrivi.kpl) * {$query_ale_lisa}) rivihinta_valuutassa_verollinen
                   FROM tilausrivi
+                  JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus)
                   WHERE tilausrivi.yhtio     = '$kukarow[yhtio]'
                   AND tilausrivi.uusiotunnus = '$row[uusiotunnus]'
                   AND tilausrivi.perheid     IN ($row[perheideet])
@@ -2332,7 +2366,7 @@ if (!function_exists('loppu')) {
     $pdf_lasku->draw_text(217, 55 + $tileja + $barcode_korkeus, t("Puhelin", $kieli).": $y_puhelin", $thispage, $pieni);
     $pdf_lasku->draw_text(217, 45 + $tileja + $barcode_korkeus, t("Sähköposti", $kieli).": $y_email", $thispage, $pieni);
     $pdf_lasku->draw_text(217, 35 + $tileja + $barcode_korkeus, t("Web", $kieli).": $y_www", $thispage, $pieni);
-    if (!empty($y_fax)) $pdf_lasku->draw_text(217, 25 + $tileja + $barcode_korkeus, t("Telefax", $kieli).": $y_fax", $thispage, $pieni);
+    if (!empty($y_fax)) $pdf_lasku->draw_text(217, 25 + $tileja + $barcode_korkeus, t("Fax", $kieli).": $y_fax", $thispage, $pieni);
 
     $pdf_lasku->draw_text(404, 55 + $tileja + $barcode_korkeus, t("Y-tunnus", $kieli).": ".tulosta_ytunnus($y_vatnumero, $y_maa, $laskurow["vienti"]), $thispage, $pieni);
     $pdf_lasku->draw_text(404, 45 + $tileja + $barcode_korkeus, t("Kotipaikka", $kieli).": $y_kotipaikka", $thispage, $pieni);
@@ -2427,6 +2461,40 @@ if (!function_exists('alvierittely')) {
 
     //loppusummat vain vikalle sivulle
 
+    if ($toim == 'PROFORMA') {
+      $where = " tilausrivi.otunnus='$laskurow[tunnus]' and tilausrivi.tyyppi in ('L','W','E') and ((tilausrivi.varattu+tilausrivi.jt != 0 and tilausrivi.laskutettuaika = '0000-00-00') or (tilausrivi.kpl != 0 and tilausrivi.laskutettuaika != '0000-00-00'))";
+    }
+    else {
+      $where = " tilausrivi.uusiotunnus = '$laskurow[tunnus]' and tilausrivi.tyyppi='L' ";
+    }
+
+    //Haetaan kaikki alvikannat riveiltä
+    $alvquery = "SELECT distinct alv
+                 FROM tilausrivi
+                 WHERE $where
+                 and yhtio = '$kukarow[yhtio]'
+                 ORDER BY alv";
+    $alvresult = pupe_query($alvquery);
+
+    // Haluataanko näytätä yhteensäsumma ilman alennuksia
+    // 23 = "Normaali laskupohja (Näytetään myös yhteensä ilman alennuksia)",
+    if ($laskutyyppi == '23') {
+      $alequery = "SELECT sum(kpl * hinta) as hinta_ilman_alennuksia
+                   FROM tilausrivi
+                   WHERE {$where}
+                   and yhtio = '{$kukarow['yhtio']}'";
+      $ilman_ale_result = pupe_query($alequery);
+      $ilman_ale_row = mysql_fetch_assoc($ilman_ale_result);
+      $yhteensa_ilman_aleja = $ilman_ale_row['hinta_ilman_alennuksia'];
+
+      $pdf_lasku->draw_text(360, $kala, t("Yhteensä ilman alennuksia", $kieli).":", $thispage, $norm);
+      $oikpos = $pdf_lasku->strlen(sprintf('%.2f', $yhteensa_ilman_aleja), $norm);
+      $pdf_lasku->draw_text(535-$oikpos, $kala, sprintf('%.2f', $yhteensa_ilman_aleja), $thispage, $norm);
+      $pdf_lasku->draw_text(550, $kala, $laskurow["valkoodi"], $thispage, $norm);
+
+      $kala -= 10;
+    }
+
     if (!(($laskutyyppi == 21 or $laskutyyppi == 22) and $laskurow['vienti'] != "")) {
       $pdf_lasku->draw_text(360, $kala, t("Veroton arvo yhteensä", $kieli).":", $thispage, $norm);
 
@@ -2451,20 +2519,6 @@ if (!function_exists('alvierittely')) {
 
       $pdf_lasku->draw_text(550, $kala, $laskurow["valkoodi"], $thispage, $norm);
 
-      if ($toim == 'PROFORMA') {
-        $where = " tilausrivi.otunnus='$laskurow[tunnus]' and tilausrivi.tyyppi in ('L','W','E') and ((tilausrivi.varattu+tilausrivi.jt != 0 and tilausrivi.laskutettuaika = '0000-00-00') or (tilausrivi.kpl != 0 and tilausrivi.laskutettuaika != '0000-00-00'))";
-      }
-      else {
-        $where = " tilausrivi.uusiotunnus = '$laskurow[tunnus]' and tilausrivi.tyyppi='L' ";
-      }
-
-      //Haetaan kaikki alvikannat riveiltä
-      $alvquery = "SELECT distinct alv
-                   FROM tilausrivi
-                   WHERE $where
-                   and yhtio = '$kukarow[yhtio]'
-                   ORDER BY alv";
-      $alvresult = pupe_query($alvquery);
       $kala -= 10;
 
       $query_ale_lisa = generoi_alekentta('M');
@@ -2793,7 +2847,7 @@ if (!function_exists('alvierittely')) {
 }
 
 if (!function_exists('PalautaPankkiviivakoodi')) {
-  function PalautaPankkiviivakoodi($tilinumero, $laskun_summa = 0, $erapv = "00.00.0000", $viitenumero = 0, $versio = 2) {
+  function PalautaPankkiviivakoodi($tilinumero, $laskun_summa = 0, $erapv = "00.00.00", $viitenumero = 0, $versio = 2) {
 
     // Fonttimuuttujat
     extract(lasku_fontit($laskutyyppi));
@@ -2837,7 +2891,7 @@ if (!function_exists('PalautaPankkiviivakoodi')) {
     // Erapaiva
     $pp = substr($erapv, 8, 2);
     $kk = substr($erapv, 5, 2);
-    $vv = substr($erapv, 0, 4);
+    $vv = substr($erapv, 2, 2);
 
     $konekielinen_erapv = $vv.$kk.$pp;
 
@@ -3096,8 +3150,8 @@ if (!function_exists("tulosta_lasku")) {
               min(tilausrivin_lisatiedot.tiliointirivitunnus) tiliointirivitunnus,
               sum(tilausrivi.tilkpl) tilkpl,
               sum(round(tilausrivi.hinta * if ('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.kpl) * {$query_ale_lisa}, $yhtiorow[hintapyoristys])) rivihinta_verollinen,
-              sum((tilausrivi.hinta / {$laskurow["vienti_kurssi"]}) / if ('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.kpl) * {$query_ale_lisa}) rivihinta_valuutassa,
-              sum((tilausrivi.hinta / {$laskurow["vienti_kurssi"]}) * if ('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.kpl) * {$query_ale_lisa}) rivihinta_valuutassa_verollinen,
+              sum((tilausrivi.hinta / lasku.vienti_kurssi) / if ('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.kpl) * {$query_ale_lisa}) rivihinta_valuutassa,
+              sum((tilausrivi.hinta / lasku.vienti_kurssi) * if ('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.kpl) * {$query_ale_lisa}) rivihinta_valuutassa_verollinen,
               group_concat(tilausrivi.tunnus) rivitunnukset,
               group_concat(distinct tilausrivi.perheid) perheideet,
               count(*) rivigroup_maara,
@@ -3293,7 +3347,7 @@ if (!function_exists("tulosta_lasku")) {
       //Työnnetään tuo pdf vaan putkeen!
       echo file_get_contents($pdf_laskufilenimi);
     }
-    elseif ($tee == 'VERKKOLASKU_APIX' or $tee == 'VERKKOLASKU_PPG' or $tee == 'VERKKOLASKU_TALENOM') {
+    elseif ($tee == 'VERKKOLASKU_APIX' or $tee == 'VERKKOLASKU_PPG' or $tee == 'VERKKOLASKU_TALENOM' or $tee == 'VERKKOLASKU_ARVATO') {
       // Palautetaan laskunumero ja $pdf_laskufilenimi jotta apixkoodi saa sen zipattua jne.
       return $pdf_laskufilenimi;
     }

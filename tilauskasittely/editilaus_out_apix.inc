@@ -255,11 +255,14 @@ while ($laskurow = mysql_fetch_assoc($laskures)) {
 
     if (in_array($tilausrivi_row['tuoteno'], $_rivi_check)) {
 
+      // nollarivi skipataan jos sama tuoteno/rivinro on jo lisätty
       if ($tilausrivi_row['tilaajanrivinro'] == $_rivi_check[$tilausrivi_row['tuoteno']] and empty($tilausrivi_row['varattu'])) {
         continue;
       }
-      $_rivi_check[$tilausrivi_row['tuoteno']] = $tilausrivi_row['tilaajanrivinro'];
     }
+
+    // otetaan tuoteno ja rivinumero talteen
+    $_rivi_check[$tilausrivi_row['tuoteno']] = $tilausrivi_row['tilaajanrivinro'];
 
     $kpl = $tilausrivi_row['varattu'];
 

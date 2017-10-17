@@ -180,7 +180,7 @@ if ($id != 0) {
       $tapares2 = pupe_query($query);
       $taparow2 = mysql_fetch_array($tapares2);
 
-      if ($rivirow["tyyppi"] == "W" or $rivirow["tyyppi"] == "L" or $rivirow["tyyppi"] == "M") {
+      if ($rivirow["tyyppi"] == "W" or $rivirow["tyyppi"] == "L" or $rivirow["tyyppi"] == "M" or $rivirow["tyyppi"] == "V") {
         $voidaankopoistaa = "";
 
         if ($isa_voidaankopoistaa == "EI") {

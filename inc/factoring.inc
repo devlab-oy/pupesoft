@@ -1,6 +1,6 @@
 <?php
-$otsikko = 'Factoringsopimukset';
-$otsikko_nappi = 'factoringsopimus';
+$otsikko = 'Factoring-sopimukset';
+$otsikko_nappi = 'sopimus';
 
 $kentat = 'tunnus, nimitys, sopimusnumero, valkoodi';
 $jarjestys = 'nimitys, sopimusnumero, valkoodi';

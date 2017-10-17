@@ -354,6 +354,8 @@ else {
               asiakasalennus READ,
               asiakasalennus as asale1 READ,
               asiakasalennus as asale2 READ,
+              asiakasalennus as asale3 READ,
+              asiakasalennus as asale4 READ,
               asiakashinta READ,
               asiakashinta as ashin1 READ,
               asiakashinta as ashin2 READ,
@@ -362,6 +364,7 @@ else {
               avainsana as avainsana_kieli READ,
               avainsana as b READ,
               avainsana READ,
+              directdebit READ,
               dynaaminen_puu AS node READ,
               dynaaminen_puu AS parent READ,
               etaisyydet READ,
@@ -535,7 +538,7 @@ else {
         }
 
         // Mikäli laskutuksessa tuotteen varastosaldo vähenee negatiiviseksi, hylätään KAIKKI tilaukset, joilla on kyseistä tuotetta
-        if ($yhtiorow['saldovirhe_esto_laskutus'] == 'H') {
+        if (empty($editil_cli) and $yhtiorow['saldovirhe_esto_laskutus'] == 'H') {
           $query = "SELECT sum(saldo) saldo
                     FROM tuotepaikat
                     WHERE yhtio = '$kukarow[yhtio]'
@@ -614,7 +617,7 @@ else {
       }
 
       // SALLITTAAN FIFO PERIAATTELLA SALDOJA
-      if ($yhtiorow['saldovirhe_esto_laskutus'] == 'K') {
+      if (empty($editil_cli) and $yhtiorow['saldovirhe_esto_laskutus'] == 'K') {
 
         // haetaan tilausriveiltä tuotenumero ja summataan varatut kappaleet
         $query = "SELECT tilausrivi.tuoteno, sum(tilausrivi.varattu) varattu
@@ -1978,6 +1981,9 @@ else {
           }
           elseif ($frow["sopimusnumero"] > 0 and $frow["factoringyhtio"] == 'SAMPO' and $frow["viitetyyppi"] == '') {
             $viite = $frow["sopimusnumero"]."1".sprintf('%09d', $lasno);
+          }
+          elseif ($frow["sopimusnumero"] > 0 and $frow["factoringyhtio"] == 'AKTIA' and $frow["viitetyyppi"] == '') {
+            $viite = str_pad($frow["sopimusnumero"], 6, '0', STR_PAD_RIGHT).sprintf("%010d", $lasno);
           }
           else {
             $viite = $lasno;

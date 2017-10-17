@@ -15,12 +15,14 @@ function unifaun_tilauksen_vak_koodit($tilausnumero) {
             tuote.tuoteno,
             tuote.nimitys,
             tilausrivi.varattu as kpl,
-            tilausrivi.varattu * tuote.tuotemassa AS kpl_paino
+            tuote.tuotemassa AS kpl_paino
             FROM tilausrivi
             JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio
               AND tuote.tuoteno = tilausrivi.tuoteno)
             WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
             AND tilausrivi.otunnus = '{$tilausnumero}'
+            AND tilausrivi.tyyppi != 'D'
+            AND tilausrivi.var not in ('P','J','O','S')
             AND tuote.vakkoodi != ''";
   $vak_chk_res = pupe_query($query);
 
@@ -28,9 +30,6 @@ function unifaun_tilauksen_vak_koodit($tilausnumero) {
   if (mysql_num_rows($vak_chk_res) == 0) {
     return $vak_koodit;
   }
-
-  // haetaan tilauksen paino
-  $tilauksen_paino = unifaun_tilauksen_paino($tilausnumero);
 
   while ($vak_chk_row = mysql_fetch_assoc($vak_chk_res)) {
     $vak_tiedot = unifaun_vak_tiedot($vak_chk_row['vakkoodi'], $vak_chk_row['vakmaara']);
@@ -43,11 +42,12 @@ function unifaun_tilauksen_vak_koodit($tilausnumero) {
       'luokituskoodi'  => $vak_tiedot['luokituskoodi'],
       'luokka'         => $vak_tiedot['luokka'],
       'nimi_ja_kuvaus' => $vak_tiedot['nimi_ja_kuvaus'],
-      'paino'          => $tilauksen_paino,
+      'paino'          => $vak_chk_row['kpl_paino'],
       'pakkausryhma'   => $vak_tiedot['pakkausryhma'],
       'tuotenimitys'   => $vak_chk_row['nimitys'],
       'tuoteno'        => $vak_chk_row['tuoteno'],
       'yk_nro'         => $vak_tiedot['yk_nro'],
+      'kuljetus_kategoria' => $vak_tiedot['kuljetus_kategoria'],
     );
   }
 
@@ -67,6 +67,8 @@ function unifaun_tilauksen_paino($tilausnumero) {
               AND tuote.tuoteno = tilausrivi.tuoteno)
             WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
             AND tilausrivi.otunnus = '{$tilausnumero}'
+            AND tilausrivi.tyyppi != 'D'
+            AND tilausrivi.var not in ('P','J','O','S')
             AND tuote.vakkoodi != ''";
   $result = pupe_query($query);
   $row = mysql_fetch_assoc($result);
@@ -165,6 +167,7 @@ function unifaun_vak_tiedot($tuote_vak, $tuote_vakmaara, $type = 'vak') {
       'nimi_ja_kuvaus' => '',
       'pakkausryhma'   => '',
       'yk_nro'         => $tuote_vak,
+      'kuljetus_kategoria' => '',
     );
 
     return $vak_tiedot;
@@ -189,6 +192,7 @@ function unifaun_vak_tiedot($tuote_vak, $tuote_vakmaara, $type = 'vak') {
     'nimi_ja_kuvaus' => $vakkoodi_row['nimi_ja_kuvaus'],
     'pakkausryhma'   => $vakkoodi_row['pakkausryhma'],
     'yk_nro'         => $vakkoodi_row['yk_nro'],
+    'kuljetus_kategoria' => $vakkoodi_row['kuljetus_kategoria'],
   );
 
   return $vak_tiedot;

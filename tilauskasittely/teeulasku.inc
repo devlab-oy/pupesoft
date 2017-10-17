@@ -218,6 +218,25 @@ if (isset($mehtorow["factoring_id"])) {
     elseif (stripos($sisviestit1, $frow["teksti_fi"]) === FALSE) $lisa_comments .= trim($frow["teksti_fi"])." \n\n";
   }
 }
+
+// Jos kyseessä on direct_debit niin laitetaan laskun kommenttiin infoteksti
+if (isset($mehtorow["directdebit_id"])) {
+  $query = "SELECT *
+            FROM directdebit
+            WHERE yhtio  = '$kukarow[yhtio]'
+            and tunnus   = '$mehtorow[directdebit_id]'";
+  $ddres = pupe_query($query);
+
+  if (mysql_num_rows($ddres) > 0) {
+    $ddrow = mysql_fetch_assoc($ddres);
+
+    $kieliind = "teksti_".$kielirow["kieli"];
+
+    if (trim($ddrow[$kieliind]) != "" and stripos($sisviestit1, $ddrow[$kieliind]) === FALSE) $lisa_comments .= trim($ddrow[$kieliind])." \n\n";
+    elseif (stripos($sisviestit1, $ddrow["teksti_fi"]) === FALSE) $lisa_comments .= trim($ddrow["teksti_fi"])." \n\n";
+  }
+}
+
 if ($lasrow["vienti"] == 'E') {
 
   if ($lasrow['kolmikantakauppa'] != "") {

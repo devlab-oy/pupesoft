@@ -1,4 +1,5 @@
 <?php
+
 //sisään halutaan $laskurow jossa on tulostettavan tilauksen tiedot
 //jos tilauksia on useita $laskurow muuttujassa on jonkun tilauksen tiedot
 
@@ -443,6 +444,10 @@ if ((int) $chk_row["ok"] == (int) $chk_row["kaikki"] and (int) $chk_row["ok"] !=
   $kerayseran_numero = !isset($kerayseran_numero) ? 0 : $kerayseran_numero;
 
   if ($yhtiorow["lahetteen_tulostustapa"] != "X") {
+
+    $pdfdoc = isset($pdf_kaikki_tul) ? $pdf_kaikki_tul : NULL;
+    $ekasivu = !empty($vikasivu) ? $vikasivu : 1;
+
     $params_kerayslista = array(
       'asrow'             => $asrow,
       'boldi'             => $boldi,
@@ -455,7 +460,7 @@ if ((int) $chk_row["ok"] == (int) $chk_row["kaikki"] and (int) $chk_row["ok"] !=
       'norm'              => $norm,
       'page'              => '',
       'paino'             => 0,
-      'pdf'               => NULL,
+      'pdf'               => $pdfdoc,
       'perheid'           => 0,
       'perheid2'          => 0,
       'pieni'             => $pieni,
@@ -464,7 +469,7 @@ if ((int) $chk_row["ok"] == (int) $chk_row["kaikki"] and (int) $chk_row["ok"] !=
       'rivinkorkeus'      => $rivinkorkeus,
       'rivinumerot'       => $rivinumerot,
       'row'               => NULL,
-      'sivu'              => 1,
+      'sivu'              => $ekasivu,
       'tee'               => $tee,
       'thispage'          => NULL,
       'tilausnumeroita'   => $tilausnumeroita,
@@ -483,8 +488,12 @@ if ((int) $chk_row["ok"] == (int) $chk_row["kaikki"] and (int) $chk_row["ok"] !=
       $params_kerayslista = rivi_kerayslista($params_kerayslista);
     }
 
+    $params_kerayslista["tama_lista_sivu"] = $vikasivu;
+
     $params_kerayslista["tots"] = 1;
     $params_kerayslista = loppu_kerayslista($params_kerayslista);
+
+    $vikasivu = $params_kerayslista["sivu"];
 
     $valittu_tulostin = !isset($valittu_tulostin) ? '' : $valittu_tulostin;
 
@@ -502,8 +511,9 @@ if ((int) $chk_row["ok"] == (int) $chk_row["kaikki"] and (int) $chk_row["ok"] !=
     }
   }
 
-  if ($komento != "" and $yhtiorow["lahetteen_tulostustapa"] != "X") {
-    //tulostetaan sivu
+  # Tulostetaan lista kerrallaan vain jos ei tulosteta kaikkia listoja kerrallaan
+  if ($komento != "" and $yhtiorow["lahetteen_tulostustapa"] != "X" and empty($pdf_kaikki_tul)) {
+    // tulostetaan sivu
     $params_kerayslista["komento"] = $komento;
 
     print_pdf_kerayslista($params_kerayslista);
@@ -519,15 +529,15 @@ if ((int) $chk_row["ok"] == (int) $chk_row["kaikki"] and (int) $chk_row["ok"] !=
       // Loopataan kaikki keräyslistan tilaukset ja tulostetaan lähete
       while ($lahetteen_tulostustapa_row = mysql_fetch_assoc($lahetteen_tulostustapa_result)) {
         $params = array(
-          'laskurow'          => $lahetteen_tulostustapa_row,
-          'sellahetetyyppi'       => "",
-          'extranet_tilausvahvistus'   => "",
-          'naytetaanko_rivihinta'    => "",
-          'tee'            => "",
-          'toim'            => $toim,
-          'komento'           => $komento,
-          'lahetekpl'          => "",
-          'kieli'           => ""
+          'laskurow' => $lahetteen_tulostustapa_row,
+          'sellahetetyyppi' => "",
+          'extranet_tilausvahvistus' => "",
+          'naytetaanko_rivihinta' => "",
+          'tee' => "",
+          'toim' => $toim,
+          'komento' => $komento,
+          'lahetekpl' => "",
+          'kieli' => ""
         );
 
         pupesoft_tulosta_lahete($params);
@@ -537,6 +547,9 @@ if ((int) $chk_row["ok"] == (int) $chk_row["kaikki"] and (int) $chk_row["ok"] !=
     $returnvalue = 0;
   }
   elseif ($yhtiorow["lahetteen_tulostustapa"] == "X") {
+    $returnvalue = 0;
+  }
+  elseif (!empty($pdf_kaikki_tul)) {
     $returnvalue = 0;
   }
   else {

@@ -169,6 +169,11 @@ if (!function_exists("pankkitiedot")) {
         $pankki["pankkilaitos"] = "Citibank";
         $pankki["swift"] = "CITIFIHX";
         break;
+      case (799) : // Holvi
+        $pankki["rahalaitos"] = '  ';
+        $pankki["pankkilaitos"] = "Holvi";
+        $pankki["swift"] = "HOLVFIHH";
+        break;
       }
       break;
     case (8) : // Sampo Pankki

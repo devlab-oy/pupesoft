@@ -121,6 +121,26 @@ if (isset($teerappari)) {
           echo "<font class='ok'>", t("Pupevoice Servinet"), "</font>";
           $operaattorille++;
         }
+        elseif ($yhtiorow['verkkolasku_lah'] == 'trustpoint') {
+          echo "<font class='ok'>", t("Trustpoint-verkkolaskut"), "</font>";
+          $operaattorille++;
+        }
+        elseif ($yhtiorow['verkkolasku_lah'] == 'ppg') {
+          echo "<font class='ok'>", t("PPG Laskutuspalvelu"), "</font>";
+          $operaattorille++;
+        }
+        elseif ($yhtiorow['verkkolasku_lah'] == 'sepa') {
+          echo "<font class='ok'>", t("SEPA-pankkiyhteys"), "</font>";
+          $operaattorille++;
+        }
+        elseif ($yhtiorow['verkkolasku_lah'] == 'talenom') {
+          echo "<font class='ok'>", t("Talenom Myyntilaskutuspalvelu"), "</font>";
+          $operaattorille++;
+        }
+        elseif ($yhtiorow['verkkolasku_lah'] == 'arvato') {
+          echo "<font class='ok'>", t("Arvato Laskutuspalvelu"), "</font>";
+          $operaattorille++;
+        }  
         else {
           echo "<font class='ok'>", t("Pupevoice Itella"), "</font>";
           $operaattorille++;

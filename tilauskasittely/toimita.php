@@ -2,6 +2,8 @@
 
 require "../inc/parametrit.inc";
 
+require_once 'rajapinnat/woo/woo-functions.php';
+
 $logistiikka_yhtio = '';
 $logistiikka_yhtiolisa = '';
 
@@ -148,7 +150,7 @@ if ($tee=='P') {
       laskuta_magentojt($otunnus);
     }
     elseif ($tilrow['kateinen']!='' and $tilrow["vienti"]=='') {
-      
+
       // jos kyseessä on käteiskauppaa ja EI vientiä, laskutetaan ja tulostetaan tilaus..
 
       //tulostetaan käteislasku...
@@ -167,6 +169,14 @@ if ($tee=='P') {
 
       require "verkkolasku.php";
     }
+
+    // Merkaatan woo-commerce tilaukset toimitetuiksi kauppaan
+    $woo_params = array(
+      "pupesoft_tunnukset" => explode(",", $otunnus),
+      "tracking_code" => "NOUDETTU / PICKED UP",
+    );
+
+    woo_commerce_toimita_tilaus($woo_params);
 
     //Tulostetaan uusi lähete jos käyttäjä valitsi drop-downista printterin
     //Paitsi jos tilauksen tila päivitettiin sellaiseksi, että lähetettä ei kuulu tulostaa

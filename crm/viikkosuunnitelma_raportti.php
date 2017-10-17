@@ -475,6 +475,7 @@ if ($tee == '') {
                 AND kalenteri.pvmalku <= '{$vvl}-{$kkl}-{$ppl} 23:59:59'
                 AND kalenteri.tyyppi  IN ('kalenteri','memo')
                 AND kalenteri.tapa    = avainsana.selitetark
+                AND (kalenteri.perheid=0 or kalenteri.tunnus=kalenteri.perheid)
                 {$lisa}
                 ORDER BY pvmalku, kalenteri.tunnus, kukanimi, aselitetark";
       $ressu = pupe_query($query);

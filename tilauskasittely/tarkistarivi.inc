@@ -280,7 +280,11 @@ if ($row["var"] == "J" and $row["tyyppi"] == "E") {
 }
 
 //  Pakkokommentoitava tuote
-if ($trow["kommentoitava"] != "" and $row["kommentti"] == "") {
+$_kommentoitava_kaikki = ($trow["kommentoitava"] == "o");
+$_kommentoitava_rekla  = ($trow["kommentoitava"] == "r" and in_array($toim, array("REKLAMAATIO", "EXTRANET_REKLAMAATIO")));
+$_kommentoitava = ($_kommentoitava_kaikki or $_kommentoitava_rekla);
+
+if ($_kommentoitava and $row["kommentti"] == "") {
   $varaosavirhe .= t("VIRHE: Tuotetta on kommentoitava!")."<br>";
   $riviok++;
   $tilausok++;

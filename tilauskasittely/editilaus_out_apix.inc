@@ -246,16 +246,16 @@ while ($laskurow = mysql_fetch_assoc($laskures)) {
             AND tilausrivi.otunnus = '{$laskurow['tunnus']}'
             AND tilausrivi.var     not in ('O','S')
             AND tilausrivi.tyyppi = 'L'
-            ORDER BY tilausrivi.tilaajanrivinro";
+            ORDER BY if(tilausrivi.varattu <> 0, 1, 0) desc, tilausrivi.tilaajanrivinro";
   $tilausrivi_res = pupe_query($query);
 
   $_rivi_check = array();
 
   while ($tilausrivi_row = mysql_fetch_assoc($tilausrivi_res)) {
 
-    if (in_array($tilausrivi_row['tuoteno'], $_rivi_check) and empty($tilausrivi_row['varattu'])) {
+    if (in_array($tilausrivi_row['tuoteno'], $_rivi_check)) {
 
-      if ($tilausrivi_row['tilaajanrivinro'] == $_rivi_check[$tilausrivi_row['tuoteno']]) {
+      if ($tilausrivi_row['tilaajanrivinro'] == $_rivi_check[$tilausrivi_row['tuoteno']] and empty($tilausrivi_row['varattu'])) {
         continue;
       }
       $_rivi_check[$tilausrivi_row['tuoteno']] = $tilausrivi_row['tilaajanrivinro'];

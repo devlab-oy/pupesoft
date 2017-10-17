@@ -19,6 +19,13 @@ elseif (@include "ostoskori.inc") {
 }
 else exit;
 
+enable_ajax();
+
+if ($livesearch_tee == "TUOTEHAKU") {
+  livesearch_tuotehaku();
+  exit;
+}
+
 // Liitetiedostot popup
 if (isset($liite_popup_toiminto) and $liite_popup_toiminto == "AK") {
   liite_popup("AK", $tuotetunnus, $width, $height);
@@ -121,6 +128,9 @@ $query    = "SELECT *
 $result   = pupe_query($query);
 $laskurow = mysql_fetch_assoc($result);
 
+// Etuk‰teen maksetut tilaukset, ei sˆrkit‰ toimitustapaa en‰‰
+$_etukateen_maksettu = (!empty($laskurow['tunnus']) and $laskurow['mapvm'] != '0000-00-00' and $laskurow['chn'] == '999');
+
 // vientikieltok‰sittely:
 // +maa tarkoittaa ett‰ myynti on kielletty t‰h‰n maahan ja sallittu kaikkiin muihin
 // -maa tarkoittaa ett‰ ainoastaan t‰h‰n maahan saa myyd‰
@@ -136,7 +146,8 @@ if ($kukarow["kesken"] > 0) {
              if (toim_maa != '', toim_maa, maa) maa,
              tila,
              liitostunnus,
-             tilaustyyppi
+             tilaustyyppi,
+             clearing
              FROM lasku
              WHERE yhtio = '$kukarow[yhtio]'
              and tunnus  = '$kukarow[kesken]'";
@@ -164,8 +175,11 @@ elseif ($kukarow["extranet"] != "") {
 
 // Katsotaan t‰ss‰, ett‰ vied‰‰n k‰ytt‰j‰ oikeaan paikaan sen mukaan millainen tilaus h‰nell‰ on kesken
 if (isset($vierow)) {
-  if ($vierow["tila"] == "G") {
+  if ($vierow["tila"] == "G" and $vierow['tilaustyyppi'] != 'M') {
     $toim_kutsu = "SIIRTOLISTA";
+  }
+  elseif ($vierow["tila"] == "G" and $vierow['tilaustyyppi'] == 'M') {
+    $toim_kutsu = "MYYNTITILI";
   }
   elseif ($vierow["tila"] == "V") {
     if ($vierow["liitostunnus"] == "999999999") {
@@ -180,6 +194,9 @@ if (isset($vierow)) {
   }
   elseif ($vierow["tila"] == "C") {
     $toim_kutsu = "REKLAMAATIO";
+  }
+  elseif ($vierow["tilaustyyppi"] == "E" and $vierow["clearing"]  == 'EXTENNAKKO') {
+      $toim_kutsu = "EXTENNAKKO";
   }
   elseif ($vierow["tilaustyyppi"] == "E") {
     $toim_kutsu = "ENNAKKO";
@@ -645,7 +662,7 @@ if ($verkkokauppa == "") {
     echo "<div>";
   }
 
-  echo "<form action = '?toim_kutsu=$toim_kutsu' method = 'post'>";
+  echo "<form action = '?toim_kutsu=$toim_kutsu' method = 'post' name='hakuformi'>";
   echo "<input type='hidden' name='tilausnumero' value='$kukarow[kesken]'>";
   echo "<input type='hidden' name='ostoskori' value='$ostoskori'>";
   echo "<input type='hidden' name='valittu_tarjous_tunnus' value='$valittu_tarjous_tunnus'>";
@@ -667,8 +684,11 @@ if ($verkkokauppa == "") {
 
   echo "<table style='display:inline-table; padding-right:4px; padding-top:4px;' valign='top'>";
 
+  echo "<tr>";
+  echo "<th>".t("Tuotenumero")."</th>";
+  echo "<td>".livesearch_kentta("hakuformi", "TUOTEHAKU", "tuotenumero", 200, $tuotenumero)."</td>";
+
   if ($hae_ja_selaa_row['selite'] == 'B') {
-    echo "<tr><th>".t("Tuotenumero")."</th><td><input type='text' size='25' name='tuotenumero' id='tuotenumero' value = '$tuotenumero'></td>";
     echo "<th>".t("Toim tuoteno")."</th><td><input type='text' size='25' name = 'toim_tuoteno' id='toim_tuoteno' value = '$toim_tuoteno'></td>";
 
     if ($kukarow["extranet"] != "") {
@@ -698,7 +718,7 @@ if ($verkkokauppa == "") {
     echo "</tr>";
   }
   else {
-    echo "<tr><th>".t("Tuotenumero")."</th><td><input type='text' size='25' name='tuotenumero' id='tuotenumero' value = '$tuotenumero'></td></tr>";
+    echo "</tr>";
     echo "<tr><th>".t("Toim tuoteno")."</th><td><input type='text' size='25' name = 'toim_tuoteno' id='toim_tuoteno' value = '$toim_tuoteno'></td></tr>";
 
     if ($orginaaalit) {
@@ -768,7 +788,7 @@ if ($verkkokauppa == "") {
     echo "</fieldset>";
   }
 
-  echo "<input type='submit' name='submit_button' id='submit_button' class='hae_btn' value = '".t("Etsi")."'></form>";
+  echo "<input type='submit' name='submit_button' class='hae_btn' value = '".t("Etsi")."'></form>";
   echo "&nbsp;<form action = '?toim_kutsu=$toim_kutsu' method = 'post'>
       <input type='hidden' name='tilausnumero' value='$kukarow[kesken]'>
       <input type='hidden' name='valittu_tarjous_tunnus' value='$valittu_tarjous_tunnus'>
@@ -868,6 +888,7 @@ if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
                 tuote.epakurantti50pvm,
                 tuote.epakurantti75pvm,
                 tuote.epakurantti100pvm,
+                tuote.alv,
                 (SELECT group_concat(distinct tuotteen_toimittajat.toim_tuoteno ORDER BY tuotteen_toimittajat.tunnus separator '<br>') FROM tuotteen_toimittajat use index (yhtio_tuoteno) WHERE tuote.yhtio = tuotteen_toimittajat.yhtio and tuote.tuoteno = tuotteen_toimittajat.tuoteno) toim_tuoteno,
                 tuote.sarjanumeroseuranta
                 FROM {$tvk_taulu}
@@ -912,6 +933,7 @@ if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
                   tuote.epakurantti50pvm,
                   tuote.epakurantti75pvm,
                   tuote.epakurantti100pvm,
+                  tuote.alv,
                   (SELECT group_concat(distinct tuotteen_toimittajat.toim_tuoteno order by tuotteen_toimittajat.tunnus separator '<br>') FROM tuotteen_toimittajat use index (yhtio_tuoteno) WHERE tuote.yhtio = tuotteen_toimittajat.yhtio and tuote.tuoteno = tuotteen_toimittajat.tuoteno) toim_tuoteno,
                   tuote.sarjanumeroseuranta,
                   tuoteperhe.tyyppi
@@ -947,6 +969,7 @@ if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
             ifnull((SELECT group_concat(id) FROM vastaavat use index (yhtio_tuoteno) where vastaavat.yhtio=tuote.yhtio and vastaavat.tuoteno=tuote.tuoteno LIMIT 1), tuote.tuoteno) vastaavat,
             tuote.tuoteno,
             tuote.nimitys,
+            tuote.kuvaus,
             tuote.osasto,
             tuote.try,
             tuote.myyntihinta,
@@ -961,6 +984,7 @@ if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
             tuote.epakurantti50pvm,
             tuote.epakurantti75pvm,
             tuote.epakurantti100pvm,
+            tuote.lyhytkuvaus,
             tuote.alv,
             (SELECT group_concat(distinct tuotteen_toimittajat.toim_tuoteno order by tuotteen_toimittajat.tunnus separator '<br>') FROM tuotteen_toimittajat use index (yhtio_tuoteno) WHERE tuote.yhtio = tuotteen_toimittajat.yhtio and tuote.tuoteno = tuotteen_toimittajat.tuoteno) toim_tuoteno,
             tuote.sarjanumeroseuranta,
@@ -979,6 +1003,20 @@ if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) > 0) {
+
+    $kuvaus_htmlfrom = array(
+        '[LIHAVOITU]', '[/LIHAVOITU]',
+        '[LISTA]',     '[/LISTA]',
+        '[lihavoitu]', '[/lihavoitu]',
+        '[lista]',     '[/lista]',
+    );
+
+    $kuvaus_htmlto = array(
+        '<strong>', '</strong>',
+        '<ul>',     '</ul>',
+        '<strong>', '</strong>',
+        '<ul>',     '</ul>',
+    );
 
     $rows = array();
     $haetaan_perheet = ($piilota_tuoteperheen_lapset == "") ? TRUE : FALSE;
@@ -1506,6 +1544,15 @@ if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
         $row["nimitys"] .= "</ul>";
       }
 
+      if (in_array($yhtiorow['livetuotehaku_hakutapa'], array('O', 'P'))) {
+
+        if (strlen($row['lyhytkuvaus']) > 100) {
+          $row['lyhytkuvaus'] = substr($row['lyhytkuvaus'],0, 100)."..";
+        }
+
+        $row["nimitys"] .= "<br><i>{$row['lyhytkuvaus']}</i>";
+      }
+
       // Peek ahead
       $row_seuraava = current($rows);
 
@@ -1641,6 +1688,34 @@ if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
       }
       elseif ($kukarow["extranet"] != "" or $tuotekyslinkki == "") {
         echo "<td valign='top' class='$vari' $classleft>$row[tuoteno] $linkkilisa ";
+
+        // tehd‰‰n extranetiss‰ pop-up divi jos tuoteella kuvaus...
+        if ($kukarow["extranet"] != "" and $row["kuvaus"] != "" and $yhtiorow["extranet_nayta_kuvaus"] == "Y") {
+
+          $kuvaus = str_replace($kuvaus_htmlfrom, $kuvaus_htmlto, t_tuotteen_avainsanat($row, 'kuvaus'));
+
+          if ($kuvaus != $row['kuvaus'] and strpos($kuvaus, "*") !== FALSE) {
+            $kuvausarray   = explode('*', str_replace(array('<ul>', '</ul>'), ' ', $kuvaus));
+            $lit           = '<ul>';
+
+            foreach ($kuvausarray as $liarvo) {
+              if (trim($liarvo) != '') {
+                $lit .= '<li>' . trim($liarvo) . '</li>';
+              }
+            }
+
+            $lit .= '</ul>';
+
+            $row['kuvaus'] = $lit;
+          }
+
+          $_title = t("N‰yt‰ kuvaus");
+          echo "<img id='$row[tuoteno]' class='tooltip' src='$palvelin2/pics/lullacons/info.png'>";
+          echo "<div id='div_$row[tuoteno]' class='popup' style='width: 900px;'>";
+          echo  $row['kuvaus'];
+          echo "</div>";
+        }
+
       }
       else {
         echo "<td valign='top' class='$vari' $classleft><a href='../$tuotekyslinkki?tuoteno=".urlencode($row["tuoteno"])."&tee=Z&lopetus=$PHP_SELF////submit_button=1//toim_kutsu=$toim_kutsu//sort=$edsort//ojarj=$ojarj".str_replace("&", "//", $ulisa)."'>$row[tuoteno]</a>$linkkilisa ";
@@ -1823,7 +1898,7 @@ function hae_oletusasiakas($laskurow) {
   global $kukarow;
 
   $query = "SELECT *,
-                   toimipaikka AS yhtio_toimipaikka
+            toimipaikka AS yhtio_toimipaikka
             FROM asiakas
             WHERE yhtio='$kukarow[yhtio]'
             AND tunnus='$kukarow[oletus_asiakas]'";
@@ -1855,19 +1930,19 @@ function hae_oletusasiakas($laskurow) {
 }
 
 function piirra_ostoskoriin_lisays($row) {
-  global $oikeurow, $kukarow, $ostoskori, $vari, $yht_i, $hae_ja_selaa_row;
+  global $oikeurow, $kukarow, $ostoskori, $vari, $yht_i, $hae_ja_selaa_row, $_etukateen_maksettu;
 
-  if ($oikeurow["paivitys"] == 1 and ($kukarow["kuka"] != "" or is_numeric($ostoskori))) {
+  if (empty($_etukateen_maksettu) and $oikeurow["paivitys"] == 1 and ($kukarow["kuka"] != "" or is_numeric($ostoskori))) {
     if (($row["tuoteperhe"] == "" or $row["tuoteperhe"] == $row["tuoteno"] or $row["tyyppi"] == "V") and $row["osaluettelo"] == "") {
       echo "<td align='right' class='$vari' style='vertical-align: top;' nowrap>";
       echo "<input type='hidden' name='tiltuoteno[$yht_i]' value = '$row[tuoteno]'>";
       echo "<table>";
-      echo "<tr><th>".t('Kpl')."</th><td><input type='text' size='3' name='tilkpl[$yht_i]'>";
+      echo "<tr><td>".t('Kpl')."</td><td><input type='text' size='3' name='tilkpl[$yht_i]'>";
       echo "<a id='anchor_{$yht_i}' href='#' name='{$yht_i}'><input class='tuote_submit' id='{$yht_i}' type='submit' value = '" . t("Lis‰‰") . "'></a>";
       echo "</td></tr>";
 
       if (empty($kukarow['extranet']) and empty($verkkokauppa) and $hae_ja_selaa_row['selitetark_2'] == 'K') {
-        echo "<tr><th>".t('Ale1')."</th><td><input type='text' size='3' name='ale1[$yht_i]'></td></tr>";
+        echo "<tr><td>".t('Ale1')."</td><td><input type='text' size='3' name='ale1[$yht_i]'></td></tr>";
       }
 
       echo "</table>";
@@ -2071,15 +2146,10 @@ function tarkista_tilausrivi() {
 
             $mimyhuom = "HUOM: Rivin m‰‰r‰ on pyˆristetty";
 
-            if ($trow["minimi_era"] > 0) {
+            if ($trow["minimi_era"] == $kpl_st and in_array($yhtiorow['minimimaara_pyoristys'], array('K', 'E'))) {
               $mimyhuom .= " minimier‰‰n";
             }
-
-            if ($trow['myynti_era'] > 0 and $yhtiorow['myyntiera_pyoristys'] == 'K') {
-              if ($trow["minimi_era"] > 0) {
-                $mimyhuom .= " tai";
-              }
-
+            elseif ($trow['myynti_era'] > 0 and in_array($yhtiorow['myyntiera_pyoristys'], array('K', 'S'))) {
               $mimyhuom .= " t‰yteen myyntier‰‰n";
             }
 
@@ -2381,6 +2451,14 @@ function hae_ja_piirra_saldo($row, $yhtiot, $oleasrow) {
 
       foreach ($tulossalisat as $tulossalisa) {
         list($o, $v) = explode("!°!", $tulossalisa);
+        $o = strip_tags($o);
+        $v = strip_tags($v);
+        $t = t('TILAUSTUOTE');
+
+        if ($o == $t) {
+          $o = "<font color='orange'>{$t}</font>";
+        }
+
         echo "<tr><td>$o</td><td>$v</td></tr>";
       }
 
@@ -2519,14 +2597,12 @@ function piirra_hinta($row, $oleasrow, $valuurow, $vari, $classmidl, $hinta_raja
       $myyntihinta         = hintapyoristys($myyntihinta_echotus / $laskurow["vienti_kurssi"]) . " $laskurow[valkoodi]";
     }
     else {
-      $query = "SELECT DISTINCT valkoodi,
-                maa
+      $query = "SELECT DISTINCT valkoodi, maa
                 FROM hinnasto
                 WHERE yhtio = '$kukarow[yhtio]'
                 AND tuoteno = '$row[tuoteno]'
                 AND laji    = ''
                 ORDER BY maa, valkoodi";
-
       $hintavalresult = pupe_query($query);
 
       while ($hintavalrow = mysql_fetch_assoc($hintavalresult)) {
@@ -2545,13 +2621,19 @@ function piirra_hinta($row, $oleasrow, $valuurow, $vari, $classmidl, $hinta_raja
                     or (alkupvm = '0000-00-00' and loppupvm = '0000-00-00'))
                   ORDER BY ifnull(to_days(current_date) - to_days(alkupvm), 9999999999999)
                   LIMIT 1";
-
         $hintaresult = pupe_query($query);
 
         while ($hintarow = mysql_fetch_assoc($hintaresult)) {
-          $myyntihinta .= "<br>$hintarow[maa]: " .
-            hintapyoristys($hintarow["hinta"]) .
-            " $hintarow[valkoodi]";
+          $maa      = $hintarow['maa'];
+          $hinta    = hintapyoristys($hintarow['hinta']);
+          $valkoodi = $hintarow['valkoodi'];
+
+          if (empty($maa)) {
+            $myyntihinta .= "<br>{$hinta} {$valkoodi}";
+          }
+          else {
+            $myyntihinta .= "<br>{$maa}: {$hinta} {$valkoodi}";
+          }
         }
       }
     }
@@ -2578,9 +2660,16 @@ function piirra_hinta($row, $oleasrow, $valuurow, $vari, $classmidl, $hinta_raja
       $hintaresult = pupe_query($query);
 
       while ($hintarow = mysql_fetch_assoc($hintaresult)) {
-        $as_myymalahinta .= "<br>$hintarow[maa]: " .
-          hintapyoristys($hintarow["hinta"]) .
-          " $hintarow[valkoodi]";
+        $maa      = $hintarow['maa'];
+        $hinta    = hintapyoristys($hintarow['hinta']);
+        $valkoodi = $hintarow['valkoodi'];
+
+        if (empty($maa)) {
+          $as_myymalahinta .= "<br>{$hinta} {$valkoodi}";
+        }
+        else {
+          $as_myymalahinta .= "<br>{$maa}: {$hinta} {$valkoodi}";
+        }
       }
 
       if ($laskurow["valkoodi"] != $yhtiorow["valkoodi"]) {

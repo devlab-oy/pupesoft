@@ -70,9 +70,16 @@ if (!function_exists("luo_myyntitilausotsikko")) {
 
       $kohde  = "";
       $eilahe = "";
+      $sisainen = "";
 
-      if (($kukarow['extranet'] != '' and $kukarow['hyvaksyja'] != "") or $yhtiorow['lahetteen_tulostustapa'] == 'I') {
+      if (($kukarow['extranet'] != '' and $kukarow['hyvaksyja'] != "") or $yhtiorow['lahetteen_tulostustapa'] == 'I'
+        or $kukarow['eilahetetta'] == 'o') {
         $eilahe = "o";
+      }
+
+      // Luodaan suoraan sisäinen lasku, jos asiakkaan taakse on näin valittu
+      if ($asiakasrow['chn'] == "888") {
+        $sisainen = "o";
       }
 
       if (isset($asiakasrow["spec_ytunnus"]) and $asiakasrow["spec_ytunnus"] != '') {

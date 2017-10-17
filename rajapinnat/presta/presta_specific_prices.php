@@ -8,6 +8,7 @@ class PrestaSpecificPrices extends PrestaClient {
   private $already_removed_product = array();
   private $currency_codes = null;
   private $presta_products = null;
+  private $presta_static_customer_group = null;
   private $product_ids = array();
   private $shop = null;
 
@@ -27,7 +28,6 @@ class PrestaSpecificPrices extends PrestaClient {
    * @param SimpleXMLElement $existing_specific_price
    * @return \SimpleXMLElement
    */
-
   protected function generate_xml($specific_price, SimpleXMLElement $existing_specific_price = null) {
     if (is_null($existing_specific_price)) {
       $xml = $this->empty_xml();
@@ -132,9 +132,16 @@ class PrestaSpecificPrices extends PrestaClient {
             continue;
           }
 
-          if ($price['tyyppi'] !== 'hinnastohinta' and empty($price['presta_customer_id']) and empty($price['presta_customergroup_id'])) {
+          if ($price['tyyppi'] !== 'hinnastohinta' and $price['tyyppi'] !== 'informatiivinen_hinta' and empty($price['presta_customer_id']) and empty($price['presta_customergroup_id'])) {
             $this->logger->log("Ohitettu {$price['tyyppi']} tuotteelle '{$price['tuoteno']}' koska sillä ei ole asiakastunnusta eikä asiakasryhmää");
             continue;
+          }
+
+          // jos meillä on static customer group, niin lisätään kaikki hinnastohinnat siihen
+          if ($price['tyyppi'] == 'hinnastohinta' and !empty($this->presta_static_customer_group)) {
+            $price['presta_customergroup_id'] = $this->presta_static_customer_group;
+
+            $this->logger->log("Lisätään hinnastohintaan asiakasryhmä {$this->presta_static_customer_group}");
           }
 
           $this->create($price, null, $shop_group_id);
@@ -190,7 +197,11 @@ class PrestaSpecificPrices extends PrestaClient {
    * @throws Exception
    */
   private function find_presta_product_id($tuoteno) {
-    $presta_product_id = array_search($tuoteno, $this->product_ids);
+    // lowercase all Presta SKU:s and the search term
+    $all_products = array_map('strtolower', $this->product_ids);
+    $search = strtolower($tuoteno);
+
+    $presta_product_id = array_search($search, $all_products);
 
     if ($presta_product_id === false) {
       $msg = "Tuotetta {$tuoteno} ei löytynyt";
@@ -263,5 +274,9 @@ class PrestaSpecificPrices extends PrestaClient {
     if (is_array($value)) {
       $this->currency_codes = $value;
     }
+  }
+
+  public function set_presta_static_customer_group($value) {
+    $this->presta_static_customer_group = $value;
   }
 }

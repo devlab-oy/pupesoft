@@ -165,11 +165,11 @@ if ($ytunnus != '') {
     if ($tee == "PAIVITARIVI") {
       foreach ($toimaikarivi as $tunnus => $toimaika) {
         if (strpos($toimaika, ".") !== false) {
-           $_aika = explode(".", $toimaika);
+          $_aika = explode(".", $toimaika);
 
-           if (count($_aika) == 3) {
-             $toimaika = "{$_aika["2"]}-{$_aika["1"]}-{$_aika["0"]}";
-           }
+          if (count($_aika) == 3) {
+            $toimaika = "{$_aika["2"]}-{$_aika["1"]}-{$_aika["0"]}";
+          }
         }
 
         $query = "UPDATE tilausrivi SET toimaika = '{$toimaika}' WHERE yhtio = '{$kukarow['yhtio']}' and tunnus = '{$tunnus}' and tyyppi = 'O'";

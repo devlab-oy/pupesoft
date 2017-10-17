@@ -28,19 +28,7 @@ if (mysql_field_name($result, $i) == "lauantai") {
 
   $ulos  = "<td><select name='$nimi'>";
   $ulos .= "<option value=''>".t("Ei lauantaijakelua")."</option>";
-  $ulos .= "<option value='o' $sel>".t("Itella lisäpalvelu: Lauantaijakelu")."</option>";
-  $ulos .= "</select></td>";
-  $jatko = 0;
-}
-
-if (mysql_field_name($result, $i) == "kuljyksikko") {
-
-  $sel='';
-  if ($trow[$i]!='') $sel = 'SELECTED';
-
-  $ulos  = "<td><select name='$nimi'>";
-  $ulos .= "<option value=''>".t("Ei kuljetusyksikkökuljetusta")."</option>";
-  $ulos .= "<option value='o' $sel>".t("Itella lisäpalvelu: Kuljetusyksikkökuljetus")."</option>";
+  $ulos .= "<option value='o' $sel>".t("Posti lisäpalvelu: Lauantaijakelu")."</option>";
   $ulos .= "</select></td>";
   $jatko = 0;
 }
@@ -53,39 +41,54 @@ if (mysql_field_name($result, $i) == "virallinen_selite") {
   $ulos  = "<td><select name='$nimi'>";
   $ulos .= "<option value=''>".t("Ei valintaa")."</option>";
 
-  $ulos .= "<optgroup label='Pupesoft / Itella'>";
-  $ulos .= "<option value='Express City 00' {$sel["Express City 00"]}>Itella Express City 00</option>";
-  $ulos .= "<option value='Express Morning 9' {$sel["Express Morning 9"]}>Itella Express Morning 9</option>";
-  $ulos .= "<option value='Express Business Day 14' {$sel["Express Business Day 14"]}>Itella Express Business Day 14</option>";
-  $ulos .= "<option value='Express Point 00/16' {$sel["Express Point 00/16"]}>Itella Express Point 00/16</option>";
-  $ulos .= "<option value='Express Flex 21' {$sel["Express Flex 21"]}>Itella Express Flex 21</option>";
-  $ulos .= "<option value='Economy 16' {$sel["Economy 16"]}>Itella Economy 16</option>";
-  $ulos .= "<option value='Customer Return' {$sel["Customer Return"]}>Itella Customer Return</option>";
-  $ulos .= "<option value='Undelivered Shipment' {$sel["Undelivered Shipment"]}>Itella Undelivered Shipment</option>";
-  $ulos .= "<option value='Lisäarvokuljetus' {$sel["Lisäarvokuljetus"]}>Itella Lisäarvokuljetus</option>";
-  $ulos .= "<option value='Priority Ulkomaa' {$sel["Priority Ulkomaa"]}>Itella Priority Ulkomaan lähetys</option>";
+  $pupesoft_posti = array(
+    // Pakettipalvelut
+    'Pikkupaketti',
+    'Postipaketti',
+    'Kotipaketti',
+    'Palautus',
+    'Express-paketti',
+    'Express-paketti Aamuksi 09',
+    'Express-paketti Samana Päivänä 00',
+    // Kuljetusyksikkö palvelut
+    'Express-rahti',
+    'Express-rahti Aamuksi 09',
+    'Express-rahti Illaksi 21',
+    'Express-rahti Samana Päivänä 00',
+    'Priority',
+  );
+
+  $ulos .= "<optgroup label='Posti'>";
+
+  foreach ($pupesoft_posti as $value) {
+    $ulos .= "<option value='{$value}' {$sel[$value]}>{$value}</option>";
+  }
+
   $ulos .= "</optgroup>";
 
-  $ulos .= "<optgroup label='Unifaun / Itella'>";
-  $ulos .= "<option value='ITELLAMAILEC' {$sel["ITELLAMAILEC"]}>Itella Economy Letter</option>";
-  $ulos .= "<option value='IT16' {$sel["IT16"]}>Itella Economy Parcel</option>";
-  $ulos .= "<option value='IT14' {$sel["IT14"]}>Itella Express Business Day</option>";
-  $ulos .= "<option value='ITKY14' {$sel["ITKY14"]}>Itella Express Business Day kuljetusyksikkö</option>";
-  $ulos .= "<option value='ITKY14I' {$sel["ITKY14I"]}>Itella Express Business Day pallet (Ulkomaa)</option>";
-  $ulos .= "<option value='IT14I' {$sel["IT14I"]}>Itella Express Business Day parcel (Ulkomaa)</option>";
-  $ulos .= "<option value='ITEXPC' {$sel["ITEXPC"]}>Itella Express City</option>";
-  $ulos .= "<option value='ITKYEXPC' {$sel["ITKYEXPC"]}>Itella Express City kuljetusyksikkö</option>";
-  $ulos .= "<option value='IT21' {$sel["IT21"]}>Itella Express Flex</option>";
-  $ulos .= "<option value='ITKY21' {$sel["ITKY21"]}>Itella Express Flex kuljetusyksikkö</option>";
-  $ulos .= "<option value='IT09' {$sel["IT09"]}>Itella Express Morning</option>";
-  $ulos .= "<option value='ITKY09' {$sel["ITKY09"]}>Itella Express Morning kuljetusyksikkö</option>";
-  $ulos .= "<option value='TPSTD' {$sel["TPSTD"]}>Itella Logistics Oy, Kappaletavara</option>";
-  $ulos .= "<option value='ITELLALOGKR' {$sel["ITELLALOGKR"]}>Itella Logistics Oy, Kotimaan Rahti</option>";
-  $ulos .= "<option value='ITELLAMAILPR' {$sel["ITELLAMAILPR"]}>Itella Priority Letter</option>";
-  $ulos .= "<option value='ITPR' {$sel["ITPR"]}>Itella Priority Parcel</option>";
-  $ulos .= "<option value='ITSP' {$sel["ITSP"]}>Itella SmartPOST</option>";
-  $ulos .= "<option value='ITVAK' {$sel["ITVAK"]}>Itella VAK/ADR</option>";
-  $ulos .= "<option value='ITKYVAK' {$sel["ITKYVAK"]}>Itella VAK/ADR kuljetusyksikkö</option>";
+  $ulos .= "<optgroup label='Unifaun / Posti'>";
+  $ulos .= "<option value='PO2103'    {$sel["PO2103"]}    >Postipaketti</option>";
+  $ulos .= "<option value='PO2461'    {$sel["PO2461"]}    >Posti Pikkupaketti</option>";
+  $ulos .= "<option value='PO2104'    {$sel["PO2104"]}    >Posti Kotipaketti</option>";
+  $ulos .= "<option value='PO2102'    {$sel["PO2102"]}    >Posti Express-paketti</option>";
+  $ulos .= "<option value='PO2102_09' {$sel["PO2102_09"]} >Posti Express-paketti 09</option>";
+  $ulos .= "<option value='PO2102_00' {$sel["PO2102_00"]} >Posti Express-paketti 00</option>";
+  $ulos .= "<option value='PO2144'    {$sel["PO2144"]}    >Posti Express-rahti</option>";
+  $ulos .= "<option value='PO2144_09' {$sel["PO2144_09"]} >Posti Express-rahti 09</option>";
+  $ulos .= "<option value='PO2144_21' {$sel["PO2144_21"]} >Posti Express-rahti 21</option>";
+  $ulos .= "<option value='PO2144_00' {$sel["PO2144_00"]} >Posti Express-rahti 00</option>";
+  $ulos .= "<option value='PO2711'    {$sel["PO2711"]}    >Posti Parcel Connect</option>";
+  $ulos .= "<option value='ITKY14I'   {$sel["ITKY14I"]}   >Itella Express Business Day pallet (Ulkomaa)</option>";
+  $ulos .= "<option value='IT14I'     {$sel["IT14I"]}     >Itella Express Business Day parcel (Ulkomaa)</option>";
+  $ulos .= "<option value='ITPR'      {$sel["ITPR"]}      >Itella Priority Parcel</option>";
+  $ulos .= "</optgroup>";
+
+  $ulos .= "<optgroup label='Unifaun / Posti kappaletavara'>";
+  $ulos .= "<option value='TPSTD'     {$sel["TPSTD"]}     >Posti - Logistics Oy, Kappaletavara </option>";
+  $ulos .= "</optgroup>";
+
+  $ulos .= "<optgroup label='Unifaun / Posti Kotimaan rahti'>";
+  $ulos .= "<option value='POF1'      {$sel["POF1"]}      >Posti Rahti</option>";
   $ulos .= "</optgroup>";
 
   $ulos .= "<optgroup label='Unifaun / Bring'>";
@@ -131,9 +134,19 @@ if (mysql_field_name($result, $i) == "virallinen_selite") {
   $ulos .= "<option value='DANXSTD' {$sel["DANXSTD"]}>DANX</option>";
   $ulos .= "</optgroup>";
 
+  $ulos .= "<optgroup label='Unifaun / DB SCHENKER kotimaankuljetukset'>";
+  $ulos .= "<option value='KLGRP' {$sel["KLGRP"]}>DB SCHENKER kotimaankuljetukset</option>";
+  $ulos .= "</optgroup>";
+
+  $ulos .= "<optgroup label='Unifaun / DB SCHENKER Parcel - kotimaan pakettikuljetukset'>";
+  $ulos .= "<option value='SBTLFIEXP' {$sel["SBTLFIEXP"]}>DB SCHENKERparcel (Suomi)</option>";
+  $ulos .= "</optgroup>";
+
+  $ulos .= "<optgroup label='Unifaun / DB SCHENKER Vientikuljetukset'>";
+  $ulos .= "<option value='SBTLFISY' {$sel["SBTLFISY"]}>DB SCHENKER Vientikuljetukset</option>";
+  $ulos .= "</optgroup>";
+
   $ulos .= "<optgroup label='Unifaun / DB Schenker'>";
-  $ulos .= "<option value='SBTLFIEXP' {$sel["SBTLFIEXP"]}>DB SCHENKER Express (Finland)</option>";
-  $ulos .= "<option value='SBTLFISY' {$sel["SBTLFISY"]}>DB SCHENKER Finland System</option>";
   $ulos .= "<option value='BBU' {$sel["BBU"]}>DB SCHENKERbudget</option>";
   $ulos .= "<option value='BCSI' {$sel["BCSI"]}>DB SCHENKERcoldsped - Europa</option>";
   $ulos .= "<option value='BCS' {$sel["BCS"]}>DB SCHENKERcoldsped - Sverige</option>";
@@ -184,6 +197,13 @@ if (mysql_field_name($result, $i) == "virallinen_selite") {
   $ulos .= "<option value='DSVFIFULL' {$sel["DSVFIFULL"]}>DSV Road Osakuorma</option>";
   $ulos .= "</optgroup>";
 
+  $ulos .= "<optgroup label='Unifaun / FedEx'>";
+  $ulos .= "<option value='FDXIEP' {$sel["FDXIEP"]}>FedEx International Economy (Non Docs)</option>";
+  $ulos .= "<option value='FDXIPP' {$sel["FDXIPP"]}>FedEx International Priority (Non Docs)</option>";
+  $ulos .= "<option value='FDXIED' {$sel["FDXIED"]}>FedEx International Economy (Docs)</option>";
+  $ulos .= "<option value='FDXIPD' {$sel["FDXIPD"]}>FedEx International Priority (Docs)</option>";
+  $ulos .= "</optgroup>";
+
   $ulos .= "<optgroup label='Unifaun / Fennoway'>";
   $ulos .= "<option value='FENNORAHTI' {$sel["FENNORAHTI"]}>Fennoway Fennorahti</option>";
   $ulos .= "</optgroup>";
@@ -196,10 +216,6 @@ if (mysql_field_name($result, $i) == "virallinen_selite") {
   $ulos .= "<option value='KKSTD' {$sel["KKSTD"]}>Kaukokiito</option>";
   $ulos .= "</optgroup>";
 
-  $ulos .= "<optgroup label='Unifaun / Kiitolinja'>";
-  $ulos .= "<option value='KLGRP' {$sel["KLGRP"]}>KIITOLINJA kappaletavara</option>";
-  $ulos .= "</optgroup>";
-
   $ulos .= "<optgroup label='Unifaun / KN Road'>";
   $ulos .= "<option value='KUEHNENAGELROAD' {$sel["KUEHNENAGELROAD"]}>KN Road</option>";
   $ulos .= "</optgroup>";
@@ -209,21 +225,24 @@ if (mysql_field_name($result, $i) == "virallinen_selite") {
   $ulos .= "</optgroup>";
 
   $ulos .= "<optgroup label='Unifaun / Matkahuolto'>";
-  $ulos .= "<option value='MH68' {$sel["MH68"]}>Matkahuolto Ahvenanmaan Jakopaketti</option>";
-  $ulos .= "<option value='MH63' {$sel["MH63"]}>Matkahuolto Baltian Paketti</option>";
-  $ulos .= "<option value='MH10' {$sel["MH10"]}>Matkahuolto Bussipaketti</option>";
-  $ulos .= "<option value='MH43' {$sel["MH43"]}>Matkahuolto Dokumenttikuori</option>";
-  $ulos .= "<option value='MH3050' {$sel["MH3050"]}>Matkahuolto Jakopaketti/Paikallispaketti</option>";
-  $ulos .= "<option value='MH57' {$sel["MH57"]}>Matkahuolto Lavarahti</option>";
-  $ulos .= "<option value='MH81' {$sel["MH81"]}>Matkahuolto Lähellä-paketin palautus</option>";
-  $ulos .= "<option value='MH80' {$sel["MH80"]}>Matkahuolto Lähellä-paketti</option>";
-  $ulos .= "<option value='MH75' {$sel["MH75"]}>Matkahuolto Mannermaan Jakopaketti</option>";
-  $ulos .= "<option value='MH74' {$sel["MH74"]}>Matkahuolto Mannermaan Paketti</option>";
-  $ulos .= "<option value='MH20' {$sel["MH20"]}>Matkahuolto Pikapaketti</option>";
-  $ulos .= "<option value='MH82' {$sel["MH82"]}>Matkahuolto Postaalipaketti</option>";
-  $ulos .= "<option value='MH83' {$sel["MH83"]}>Matkahuolto Postaalipaketti palautus</option>";
-  $ulos .= "<option value='MH40' {$sel["MH40"]}>Matkahuolto Rahtipussi</option>";
-  $ulos .= "<option value='MH42' {$sel["MH42"]}>Matkahuolto Rahtipussi jakopaketti</option>";
+  $ulos .= "<option value='MH68'        {$sel["MH68"]}       >Matkahuolto Ahvenanmaan Jakopaketti</option>";
+  $ulos .= "<option value='MH63'        {$sel["MH63"]}       >Matkahuolto Baltian Paketti</option>";
+  $ulos .= "<option value='MH10'        {$sel["MH10"]}       >Matkahuolto Bussipaketti</option>";
+  $ulos .= "<option value='MH10_SPTR'   {$sel["MH10_SPTR"]}  >Matkahuolto Bussipaketti (Tankomainen)</option>";
+  $ulos .= "<option value='MH43'        {$sel["MH43"]}       >Matkahuolto Dokumenttikuori</option>";
+  $ulos .= "<option value='MH3050'      {$sel["MH3050"]}     >Matkahuolto Jakopaketti/Paikallispaketti</option>";
+  $ulos .= "<option value='MH3050_SPTR' {$sel["MH3050_SPTR"]}>Matkahuolto Jakopaketti/Paikallispaketti (Tankomainen)</option>";
+  $ulos .= "<option value='MH57'        {$sel["MH57"]}       >Matkahuolto Lavarahti</option>";
+  $ulos .= "<option value='MH81'        {$sel["MH81"]}       >Matkahuolto Lähellä-paketin palautus</option>";
+  $ulos .= "<option value='MH80'        {$sel["MH80"]}       >Matkahuolto Lähellä-paketti</option>";
+  $ulos .= "<option value='MH75'        {$sel["MH75"]}       >Matkahuolto Mannermaan Jakopaketti</option>";
+  $ulos .= "<option value='MH74'        {$sel["MH74"]}       >Matkahuolto Mannermaan Paketti</option>";
+  $ulos .= "<option value='MH20'        {$sel["MH20"]}       >Matkahuolto Pikapaketti</option>";
+  $ulos .= "<option value='MH20_SPTR'   {$sel["MH20_SPTR"]}  >Matkahuolto Pikapaketti (Tankomainen)</option>";
+  $ulos .= "<option value='MH82'        {$sel["MH82"]}       >Matkahuolto Postaalipaketti</option>";
+  $ulos .= "<option value='MH83'        {$sel["MH83"]}       >Matkahuolto Postaalipaketti palautus</option>";
+  $ulos .= "<option value='MH40'        {$sel["MH40"]}       >Matkahuolto Rahtipussi</option>";
+  $ulos .= "<option value='MH42'        {$sel["MH42"]}       >Matkahuolto Rahtipussi jakopaketti</option>";
   $ulos .= "</optgroup>";
 
   $ulos .= "<optgroup label='Unifaun / Neutraali'>";
@@ -247,6 +266,7 @@ if (mysql_field_name($result, $i) == "virallinen_selite") {
   $ulos .= "</optgroup>";
 
   $ulos .= "<optgroup label='Unifaun / PostNord'>";
+  $ulos .= "<option value='DOMROAD' {$sel["DOMROAD"]}>PostNord Domestic Road</option>";
   $ulos .= "<option value='DPDFI' {$sel["DPDFI"]}>PostNord DPD Classic (Suomi)</option>";
   $ulos .= "<option value='P15' {$sel["P15"]}>PostNord Logistics DPD Företagspaket</option>";
   $ulos .= "<option value='P14' {$sel["P14"]}>PostNord Logistics DPD Företagspaket 12.00</option>";
@@ -425,6 +445,7 @@ if (mysql_field_name($result, $i) == "osoitelappu") {
   $sel3 = '';
   $sel4 = '';
   $sel5 = '';
+  $sel6 = '';
 
   if ($trow[$i] == 'intrade') {
     $sel2 = 'selected';
@@ -438,6 +459,9 @@ if (mysql_field_name($result, $i) == "osoitelappu") {
   elseif ($trow[$i] == 'hornbach') {
     $sel5 = 'selected';
   }
+  elseif ($trow[$i] == 'osoitelappu_kesko') {
+    $sel6 = 'selected';
+  }
   else {
     $sel1 = 'selected';
   }
@@ -446,6 +470,7 @@ if (mysql_field_name($result, $i) == "osoitelappu") {
   $ulos .= "<option value=''       $sel1>".t("Normaali")."</option>";
   $ulos .= "<option value='intrade' $sel2>".t("Intrade")."</option>";
   $ulos .= "<option value='hornbach' $sel5>".t("Hornbach")."</option>";
+  $ulos .= "<option value='osoitelappu_kesko' $sel6>".t("Normaali")." (".t("kesko").")</option>";
   $ulos .= "<option value='tiivistetty' $sel3>".t("Tiivistetty")."</option>";
   if ($yhtiorow['kerayserat'] == 'K') $ulos .= "<option value='oslap_mg' $sel4>".t("Yksinkertainen, tulostusmedia valitaan kirjoittimen takaa")."</option>";
   $ulos .= "</select></td>";
@@ -603,7 +628,7 @@ if (mysql_field_name($result, $i) == "vaihtoehtoinen_vak_toimitustapa") {
 
   while ($row = mysql_fetch_assoc($toimitustapa_result)) {
     $ulos .= "<option value='{$row["selite"]}' {$sel[$row['selite']]}>" .
-      t("VAK-tuotteet siirretään omalle tilaukselleen toimitustavalla") .
+      t("VAK-tuotteet siirretään (rahtivapaasti) omalle tilaukselleen toimitustavalla") .
       " {$row["selite"]}</option>";
   }
 
@@ -714,5 +739,31 @@ if (mysql_field_name($result, $i) == "kuljetusvakuutus_tyyppi") {
   $ulos .= "<option value = 'G' $sel[G]>".t("Prosentuaalinen kuljetusvakuutus lisätään. Käytetään kuljetusvakuutustuotteen asiakasalennusta")."</option>";
   $ulos .= "</select></td>";
 
+  $jatko = 0;
+}
+
+if (mysql_field_name($result, $i) == "toim_maa" or
+  mysql_field_name($result, $i) == "maa_maara") {
+
+  $query = "SELECT distinct koodi, nimi
+            FROM maat
+            WHERE nimi != ''
+            ORDER BY koodi";
+  $vresult = pupe_query($query);
+
+  $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
+  $ulos .= "<option value = '' ></option>";
+
+  while ($vrow = mysql_fetch_array($vresult)) {
+    $sel = "";
+
+    if ($trow[$i] == $vrow[0] and $vrow[0] != "") {
+      $sel = "selected";
+    }
+
+    $ulos .= "<option value = '$vrow[0]' $sel>$vrow[1]</option>";
+  }
+
+  $ulos .= "</select></td>";
   $jatko = 0;
 }

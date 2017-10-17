@@ -11,6 +11,15 @@ if ($tee == "lataa_tiedosto") {
   exit;
 }
 
+// Luodaan lähetettävä tiedosto ja siirrytään lähetysohjelmaan
+if ($tee == "lahetasepa") {
+  $filenimi = preg_replace("/^(.*?)siirto\-([0-9]*).txt/", "Factoringsiirto-\\1-\\2.txt", $pankkiyhteys_filenimi);
+  rename("dataout/{$pankkiyhteys_filenimi}", "dataout/{$pankkiyhteys_pankki}_error/{$filenimi}");
+
+  lopetus("{$palvelin2}pankkiyhteys.php////toim=laheta//tee=//pankkiyhteys_tunnus=$pankkiyhteys_tunnus", "META");
+  exit;
+}
+
 if ($toim == "OKO") {
   echo "<font class='head'>".t("OKO Saatavarahoitus siirtotiedosto").":</font><hr><br>";
   $factoringyhtio = "OKO";
@@ -18,6 +27,10 @@ if ($toim == "OKO") {
 elseif ($toim == 'SAMPO') {
   echo "<font class='head'>".t("Sampo Factoring siirtotiedosto").":</font><hr><br>";
   $factoringyhtio = "SAMPO";
+}
+elseif ($toim == 'AKTIA') {
+  echo "<font class='head'>".t("Aktia Factoring siirtotiedosto").":</font><hr><br>";
+  $factoringyhtio = "AKTIA";
 }
 else {
   echo "<font class='head'>".t("Nordea Factoring siirtotiedosto").":</font><hr><br>";
@@ -40,7 +53,7 @@ if ($tee == 'TARKISTA') {
 
 $query = "SELECT *
           FROM factoring
-          WHERE yhtio = '{$kukarow["yhtio"]}'
+          WHERE yhtio        = '{$kukarow["yhtio"]}'
           and factoringyhtio = '{$factoringyhtio}'
           {$factoring_tarkista_lisa}";
 $factoring_result = pupe_query($query);
@@ -102,8 +115,8 @@ if ($tee == 'TOIMINNOT') {
   $query = "SELECT min(laskunro) eka, max(laskunro) vika
             FROM lasku use index (yhtio_tila_tapvm)
             JOIN maksuehto ON (lasku.yhtio = maksuehto.yhtio
-              and lasku.maksuehto = maksuehto.tunnus
-              and maksuehto.factoring_id = '$factoring_id')
+              and lasku.maksuehto            = maksuehto.tunnus
+              and maksuehto.factoring_id     = '$factoring_id')
             WHERE lasku.yhtio                = '$kukarow[yhtio]'
             and lasku.tila                   = 'U'
             and lasku.tapvm                  > date_sub(CURDATE(), interval 6 month)
@@ -206,7 +219,7 @@ if ($tee == 'TOIMINNOT') {
   echo "<tr><th>Siirtoluettelon numero:</th>
       <td><input type='text' name='factoringsiirtonumero' value='$factoringsiirtonumero' size='6'></td>";
 
-  echo "<td class='back'><input type='submit' value='Uudeleenluo siirtoaineisto'></td></tr></form></table><br><br>";
+  echo "<td class='back'><input type='submit' value='Uudelleenluo siirtoaineisto'></td></tr></form></table><br><br>";
 }
 
 if ($tee == 'TULOSTA') {
@@ -238,13 +251,16 @@ if ($tee == 'TULOSTA') {
   elseif ($toim == "SAMPO") {
     $ulos  = sprintf('%-4.4s', "SAFA"); //sovellustunnus, SAMPO factoring
   }
+  elseif ($toim == "AKTIA") {
+    $ulos  = sprintf('%-4.4s', "AKF1"); //sovellustunnus, AKTIA factoring
+  }
   else {
     $ulos  = sprintf('%-4.4s', "KRFL"); //sovellustunnus
   }
 
   $ulos .= sprintf('%01.1s', 0); //tietuetunnus
 
-  if ($toim == 'SAMPO') {
+  if (in_array($toim, array("SAMPO", "AKTIA"))) {
     $ulos .= sprintf('%017.17s', str_replace('-', '', $yhtiorow["ytunnus"])); //myyjän ytunnus etunollilla SAMPO!
   }
   else {
@@ -262,11 +278,14 @@ if ($tee == 'TULOSTA') {
   elseif ($toim == "SAMPO") {
     $ulos .= sprintf('%-2.2s', "PR"); //rahoitusyhtiön tunnus SAMPO
   }
+  elseif ($toim == "AKTIA") {
+    $ulos .= sprintf('%-2.2s', "AF"); //rahoitusyhtiön tunnus AKTIA
+  }
   else {
     $ulos .= sprintf('%-2.2s', "MR"); //rahoitusyhtiön tunnus
   }
 
-  if ($toim == "OKO") {
+  if (in_array($toim, array("OKO", "AKTIA"))) {
     $ulos .= sprintf('%-30.30s', $yhtiorow["nimi"]); //siirtäjän nimi
   }
   else {
@@ -301,13 +320,13 @@ if ($tee == 'TULOSTA') {
   $dquery = "SELECT lasku.yhtio
              FROM lasku
              JOIN maksuehto ON (lasku.yhtio = maksuehto.yhtio
-              and lasku.maksuehto = maksuehto.tunnus
-              and maksuehto.factoring_id = '$factoring_id')
-             WHERE lasku.yhtio   = '$kukarow[yhtio]'
-             and lasku.tila      = 'U'
-             and lasku.alatila   = 'X'
-             and lasku.summa    != 0
-             and lasku.valkoodi  = '$valkoodi'
+              and lasku.maksuehto         = maksuehto.tunnus
+              and maksuehto.factoring_id  = '$factoring_id')
+             WHERE lasku.yhtio            = '$kukarow[yhtio]'
+             and lasku.tila               = 'U'
+             and lasku.alatila            = 'X'
+             and lasku.summa             != 0
+             and lasku.valkoodi           = '$valkoodi'
              $where";
   $dresult = pupe_query($dquery);
 
@@ -346,13 +365,13 @@ if ($tee == 'TULOSTA') {
             lasku.liitostunnus
             FROM lasku
             JOIN maksuehto ON (lasku.yhtio = maksuehto.yhtio
-              and lasku.maksuehto = maksuehto.tunnus
-              and maksuehto.factoring_id = '$factoring_id')
-            WHERE lasku.yhtio   = '$kukarow[yhtio]'
-            and lasku.tila      = 'U'
-            and lasku.alatila   = 'X'
-            and lasku.summa    != 0
-            and lasku.valkoodi  = '$valkoodi'
+              and lasku.maksuehto         = maksuehto.tunnus
+              and maksuehto.factoring_id  = '$factoring_id')
+            WHERE lasku.yhtio             = '$kukarow[yhtio]'
+            and lasku.tila                = 'U'
+            and lasku.alatila             = 'X'
+            and lasku.summa              != 0
+            and lasku.valkoodi            = '$valkoodi'
             $where
             ORDER BY laskunro";
   $laskures = pupe_query($query);
@@ -421,6 +440,9 @@ if ($tee == 'TULOSTA') {
       elseif ($toim == 'SAMPO') {
         $ulos .= sprintf('%-4.4s', "SAFA"); //sovellustunnus SAMPO
       }
+      elseif ($toim == 'AKTIA') {
+        $ulos .= sprintf('%-4.4s', "AKF1"); //sovellustunnus AKTIA
+      }
       else {
         $ulos .= sprintf('%-4.4s', "KRFL"); //sovellustunnus
       }
@@ -436,7 +458,13 @@ if ($tee == 'TULOSTA') {
         $ulos .= sprintf('%-4.4s', "");
       }
 
-      $ulos .= sprintf('%-10.10s', str_replace('-', '', $laskurow["ytunnus"])); //ostajan ytunnus
+      if ($toim == "AKTIA") {
+        $ulos .= sprintf('%010.10s', str_replace('-', '', $laskurow["ytunnus"]));
+      }
+      else {
+        $ulos .= sprintf('%-10.10s', str_replace('-', '', $laskurow["ytunnus"])); //ostajan ytunnus
+
+      }
 
       if ($toim == "OKO") {
         $ulos .= sprintf('%-30.30s', strtoupper($laskurow["nimi"])); //ostajan nimi
@@ -469,7 +497,11 @@ if ($tee == 'TULOSTA') {
       $ulos .= sprintf('%-13.13s', "");
       $ulos .= sprintf('%-30.30s', "");
       $ulos .= sprintf('%-13.13s', "");
-      $ulos .= sprintf('%-13.13s', "");
+
+      if ($toim != "AKTIA") {
+        $ulos .= sprintf('%-13.13s', "");
+      }
+
       $ulos .= sprintf('%-2.2s', "FI"); //kieli
       $ulos .= sprintf('%-3.3s', $laskurow["valkoodi"]); //valuutta
 
@@ -477,7 +509,7 @@ if ($tee == 'TULOSTA') {
         $ulos .= sprintf('%04.4s', ""); //viivastyskorko (Ei käytössä)
       }
       else {
-        $ulos .= sprintf('%04.4s', $laskurow["viikorkopros"]); //viivastyskorko
+        $ulos .= sprintf('%04.4s', $laskurow["viikorkopros"]);
       }
 
       $ulos .= sprintf('%03.3s', 0);
@@ -501,6 +533,10 @@ if ($tee == 'TULOSTA') {
         $ulos .= sprintf('%-172.172s', "");
       }
 
+      if ($toim == "AKTIA") {
+        $ulos .= sprintf('%-13.13s', "");
+      }
+
       $ulos .= "\r\n";
 
       //luodaan laskutietue
@@ -509,6 +545,9 @@ if ($tee == 'TULOSTA') {
       }
       elseif ($toim == 'SAMPO') {
         $ulos .= sprintf('%-4.4s', "SAFA"); //sovellustunnus SAMPO
+      }
+      elseif ($toim == 'AKTIA') {
+        $ulos .= sprintf('%-4.4s', "AKF1"); //sovellustunnus AKTIA
       }
       else {
         $ulos .= sprintf('%-4.4s', "KRFL"); //sovellustunnus
@@ -554,6 +593,9 @@ if ($tee == 'TULOSTA') {
         $ulos .= sprintf('%06.6s', 0);
         $ulos .= sprintf('%06.6s', 0); // Kassa-ale 6
       }
+      elseif ($toim == 'AKTIA') {
+        $ulos .= sprintf('%-12.12s', "");
+      }
       else {
         $ulos .= sprintf('%012.12s', 0);
       }
@@ -573,6 +615,9 @@ if ($tee == 'TULOSTA') {
         $ulos .= sprintf('%012.12s', 0);
         $ulos .= sprintf('%012.12s', 0); // Ale6 valuutta
       }
+      elseif ($toim == 'AKTIA') {
+        $ulos .= sprintf('%-24.24s', "");
+      }
       else {
         $ulos .= sprintf('%024.24s', 0);
       }
@@ -591,6 +636,9 @@ if ($tee == 'TULOSTA') {
       if ($toim == 'SAMPO') {
         $ulos .= sprintf('%01.1s', 0);
         $ulos .= sprintf('%01.1s', 0); // Koodi 6 ...
+      }
+      elseif ($toim == 'AKTIA') {
+        $ulos .= sprintf('%-2.2s', "");
       }
       else {
         $ulos .= sprintf('%02.2s', 0);
@@ -620,7 +668,14 @@ if ($tee == 'TULOSTA') {
         $ulos .= sprintf('%-20.20s', $laskurow["toim_osoite"]); //toim osoite
         $ulos .= sprintf('%-20.20s', $laskurow["toim_postino"]." ".$laskurow["toim_postitp"]); //toim postitp ja postino
         $ulos .= sprintf('%-30.30s', "");
-        $ulos .= sprintf('%013.13s', 0);
+
+        if ($toim == 'AKTIA') {
+          $ulos .= sprintf('%-13.13s', "");
+        }
+        else {
+          $ulos .= sprintf('%013.13s', 0);
+        }
+
         $ulos .= sprintf('%-30.30s', "");
         $ulos .= sprintf('%06.6s', 0);
 
@@ -635,9 +690,15 @@ if ($tee == 'TULOSTA') {
             $ulos .= sprintf('%-10.10s', "");
           }
 
-          $ulos .= sprintf('%03.3s', 0);
-          $ulos .= sprintf('%020.20s', $laskurow["viite"]);
-          $ulos .= sprintf('%-8.8s', "");
+          if ($toim == 'AKTIA') {
+            $ulos .= sprintf('%-6.6s', ""); // Aktia Yritysrahoituksen ostajanumero, ei käytössä kotimaisilla asiakkailla
+            $ulos .= sprintf('%-25.25s', "");
+          }
+          else {
+            $ulos .= sprintf('%03.3s', 0);
+            $ulos .= sprintf('%020.20s', $laskurow["viite"]);
+            $ulos .= sprintf('%-8.8s', "");
+          }
         }
       }
 
@@ -700,13 +761,16 @@ if ($tee == 'TULOSTA') {
       elseif ($toim == 'SAMPO') {
         $ulos .= sprintf('%-4.4s', "SAFA"); //sovellustunnus
       }
+      elseif ($toim == 'AKTIA') {
+        $ulos .= sprintf('%-4.4s', "AKF1"); //sovellustunnus
+      }
       else {
         $ulos .= sprintf('%-4.4s', "KRFL"); //sovellustunnus
       }
 
       $ulos .= sprintf('%01.1s', 9);
 
-      if ($toim == 'SAMPO') {
+      if (in_array($toim, array("SAMPO", "AKTIA"))) {
         $ulos .= sprintf('%017.17s', str_replace('-', '', $yhtiorow["ytunnus"]));
       }
       else {
@@ -728,7 +792,7 @@ if ($tee == 'TULOSTA') {
       if ($toim == "OKO") {
         $ulos .= sprintf('%-286.286s', "");
       }
-      elseif ($toim == 'SAMPO') {
+      elseif (in_array($toim, array("SAMPO", "AKTIA"))) {
         $ulos .= sprintf('%-286.286s', "");
       }
       else {
@@ -738,6 +802,9 @@ if ($tee == 'TULOSTA') {
 
       $ulos .= "\r\n";
 
+      $sepayhteys = 0;
+      $sepanimi = "";
+
       //keksitään uudelle failille joku hyvä nimi:
       if ($toim == "OKO") {
         $filenimi = "OKOsiirto-$factoringsiirtonumero.txt";
@@ -745,7 +812,38 @@ if ($tee == 'TULOSTA') {
       elseif ($toim == 'SAMPO') {
         $filenimi = "Samposiirto-$factoringsiirtonumero.txt";
       }
+      elseif ($toim == 'AKTIA') {
+        // Lähetetäänkö facotringaineisto Aktiaan?
+        $pankkiyhteydet = hae_pankkiyhteydet();
+        $tuetut_pankit = tuetut_pankit();
+
+        foreach ($pankkiyhteydet as $pankkiyhteys) {
+          if ($pankkiyhteys['pankki'] == "HELSFIHH") {
+            $pankki = $tuetut_pankit[$pankkiyhteys['pankki']];
+
+            $sepayhteys = $pankkiyhteys["tunnus"];
+            $sepanimi = $pankki['lyhyt_nimi'];
+            break;
+          }
+        }
+
+        $filenimi = "Aktiasiirto-$factoringsiirtonumero.txt";
+      }
       else {
+        // Lähetetäänkö facotringaineisto Nordeaan?
+        $pankkiyhteydet = hae_pankkiyhteydet();
+        $tuetut_pankit = tuetut_pankit();
+
+        foreach ($pankkiyhteydet as $pankkiyhteys) {
+          if ($pankkiyhteys['pankki'] == "NDEAFIHH") {
+            $pankki = $tuetut_pankit[$pankkiyhteys['pankki']];
+
+            $sepayhteys = $pankkiyhteys["tunnus"];
+            $sepanimi = $pankki['lyhyt_nimi'];
+            break;
+          }
+        }
+
         $filenimi = "Nordeasiirto-$factoringsiirtonumero.txt";
       }
 
@@ -770,6 +868,9 @@ if ($tee == 'TULOSTA') {
       if ($toim == "OKO") {
         echo "<input type='hidden' name='kaunisnimi' value='OKOMYSA.DAT'>";
       }
+      elseif ($toim == "AKTIA") {
+        echo "<input type='hidden' name='kaunisnimi' value='AKTIAMYSA.TXT'>";
+      }
       else {
         echo "<input type='hidden' name='kaunisnimi' value='SOLOMYSA.DAT'>";
       }
@@ -778,6 +879,19 @@ if ($tee == 'TULOSTA') {
       echo "<input type='hidden' name='toim' value='$toim'>";
       echo "<td><input type='submit' value='Tallenna'></td></form>";
       echo "</tr></table>";
+
+      if ($sepayhteys and in_array($toim, array("", "AKTIA"))) {
+        echo "<br><br><table>";
+        echo "<tr><th>Siirrä aineisto pankkiin:</th>";
+        echo "<form method='post' action=''>";
+        echo "<input type='hidden' name='toim' value='$toim'/>";
+        echo "<input type='hidden' name='tee' value='lahetasepa'/>";
+        echo "<input type='hidden' name='pankkiyhteys_filenimi' value='$filenimi'>";
+        echo "<input type='hidden' name='pankkiyhteys_pankki' value='$sepanimi'/>";
+        echo "<input type='hidden' name='pankkiyhteys_tunnus' value='$sepayhteys'/>";
+        echo "<td><input type='submit' value='Lähetä'></td></form>";
+        echo "</tr></table>";
+      }
     }
   }
   else {

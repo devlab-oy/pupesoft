@@ -1,4 +1,7 @@
 inc/salasanat.php
 datain/lue-data*
+datain/magento-order*
+datain/presta-order*
 dataout/*
 pupenext
+/.PUPE_UNICODE

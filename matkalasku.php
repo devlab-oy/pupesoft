@@ -30,6 +30,10 @@ if ($tee == "VALMIS") {
     $tee = "";
     $tunnus = 0;
     $tilausnumero = 0;
+
+    # Refreshataan
+    echo "<script>setTimeout(\"window.location.href='{$palvelin2}matkalasku.php?toim=$toim'\", 0);</script>";
+    exit;
   }
 }
 
@@ -1680,6 +1684,12 @@ if ($tee == "") {
     echo "</table>";
   }
 
+  $super_kuka = "and lasku.toim_ovttunnus = '$kukarow[kuka]'";
+
+  if ($toim == "SUPER") {
+    $super_kuka = "and (lasku.toim_ovttunnus = '$kukarow[kuka]' or lasku.laatija = '$kukarow[kuka]')";
+  }
+
   $query = "SELECT lasku.*,
             laskun_lisatiedot.laskutus_nimi, laskun_lisatiedot.laskutus_nimitark, laskun_lisatiedot.laskutus_osoite, laskun_lisatiedot.laskutus_postino, laskun_lisatiedot.laskutus_postitp, laskun_lisatiedot.laskutus_maa
             FROM lasku
@@ -1687,7 +1697,7 @@ if ($tee == "") {
             WHERE lasku.yhtio        = '$kukarow[yhtio]'
             and lasku.tila           = 'H'
             and lasku.mapvm          = '0000-00-00'
-            and lasku.toim_ovttunnus = '$kukarow[kuka]'
+            $super_kuka
             and lasku.h1time         = '0000-00-00 00:00:00'
             and lasku.tilaustyyppi   = 'M'";
   $result = pupe_query($query);
@@ -2626,22 +2636,22 @@ function lisaa_kulurivi($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilino
               $jaljellaoleva_maara = $kokonaiskappalemaara - $ins_kpl;
               // Jos normihinnalla jää vielä lisättävää
               if ($ins_kpl > 0) {
-                tee_matkalaskurivin_kirjaukset(get_defined_vars());
+                list ($perhe_id, $perheid2, $rivitunnus) = tee_matkalaskurivin_kirjaukset(get_defined_vars());
               }
 
               // Jos erikoishinnalla on lisättävää
               if ($jaljellaoleva_maara > 0 and $trow['myymalahinta'] > 0) {
                 $ins_kpl = $jaljellaoleva_maara;
                 $hinta = $trow['myymalahinta'];
-                tee_matkalaskurivin_kirjaukset(get_defined_vars());
+                list ($perhe_id, $perheid2, $rivitunnus) = tee_matkalaskurivin_kirjaukset(get_defined_vars());
               }
             }
             else {
-              tee_matkalaskurivin_kirjaukset(get_defined_vars());
+              list ($perhe_id, $perheid2, $rivitunnus) = tee_matkalaskurivin_kirjaukset(get_defined_vars());
             }
           }
           else {
-            tee_matkalaskurivin_kirjaukset(get_defined_vars());
+            list ($perhe_id, $perheid2, $rivitunnus) = tee_matkalaskurivin_kirjaukset(get_defined_vars());
           }
         }
       }
@@ -3013,9 +3023,9 @@ function hae_matkustajan_kilometrit($tuoteno, $kuka) {
   $query = "SELECT sum(tilausrivi.kpl) yhteensa
             FROM tilausrivi
             JOIN lasku ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus AND lasku.tila in ('H','Y','M','P','Q'))
-            WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-              AND tilausrivi.tyyppi = 'M'
-              AND tilausrivi.tuoteno = 'km-16'
+            WHERE lasku.yhtio          = '{$kukarow['yhtio']}'
+              AND tilausrivi.tyyppi    = 'M'
+              AND tilausrivi.tuoteno   = '{$tuoteno}'
               AND lasku.toim_ovttunnus = '{$kuka}'";
   $result = pupe_query($query);
   $row = mysql_fetch_assoc($result);
@@ -3164,7 +3174,13 @@ function tee_matkalaskurivin_kirjaukset($variables) {
             muuttaja            = '$kukarow[kuka]'";
   $updres = pupe_query($query);
 
-  return true;
+  if (strpos($lisaa_tuoteno, "PR") === false) {
+    $perheid = 0;
+    $perheid2 = 0;
+  }
+
+  return array ($perhe_id, $perheid2, $rivitunnus);
+
 }
 
 require "inc/footer.inc";

@@ -102,13 +102,13 @@ if ($kukarow['taso'] != 1) {
 
     require "inc/pankkitilinoikeellisuus.php";
 
-    if ($pankkitili == '') {
+    if ($pankkitili == '' and $ultilno == '') {
       echo "<font class='error'>".t("Pankkitili on virheellinen")."</font><br>";
       $tee='E';
       $tila='';
     }
     else {
-      $tili=$pankkitili;
+      $tili = $pankkitili;
     }
 
     if ($trow['ultilno_maa'] != "") $ibanmaa = $trow['ultilno_maa'];
@@ -135,9 +135,16 @@ if ($kukarow['taso'] != 1) {
 
     $kommentti = "(" . $kukarow['nimi'] . "@" . date('Y-m-d') .") ".t('Laskun maksutili muutettiin. Vanha oli %s.', '', $ultilno)."<br>" . $trow['comments'];
 
-    //Päivitetään lasku
+    if ($ibanmaa == "FI" or substr($ultilno, 0, 2) == "FI") {
+      // Haetaan uuden tilinumeron mukainen swift koodi
+      include "inc/pankkitiedot.inc";
+      $vastaus = pankkitiedot($ultilno, '');
+      $swift = $vastaus['swift'];
+    }
+
+    // Päivitetään lasku
     $query = "UPDATE lasku
-              SET tilinumero = '$tili',
+              SET tilinumero = '',
               ultilno      = '$ultilno',
               swift        = '$swift',
               comments     = '$kommentti'
@@ -201,6 +208,13 @@ if ($kukarow['taso'] != 1) {
     $trow = mysql_fetch_assoc($result);
 
     $kommentti = "($kukarow[nimi]@".date('Y-m-d').") ".t("Laskun maksutili muutettiin. Vanha oli").": $trow[pankki_haltija], $trow[ultilno], $trow[swift], $trow[pankki1], $trow[pankki2], $trow[pankki3], $trow[pankki4], $trow[sisviesti1].<br>$trow[comments]";
+
+    if ($ibanmaa == "FI" or substr($ultilno, 0, 2) == "FI") {
+      // Haetaan uuden tilinumeron mukainen swift koodi
+      include "inc/pankkitiedot.inc";
+      $vastaus = pankkitiedot($ultilno, '');
+      $swift = $vastaus['swift'];
+    }
 
     //Päivitetään lasku
     $query = "UPDATE lasku SET
@@ -730,6 +744,13 @@ if ($tila == 'Q') {
       $oletusalv = $xrow['vero'];
       break;
     }
+  }
+
+  // Katsotaan onko kyseessä valuuttalasku
+  // ja jos on niin muutetaan laskun summa yhtiön valuuttaan
+  // koska tiliöinnit on joka tapauksessa yhtiön valuutassa
+  if ($lasrow["vienti_kurssi"] != 1) {
+    $lasrow["summa"] = round($lasrow["summa"] * $lasrow["vienti_kurssi"], 2);
   }
 
   mysql_data_seek($xres, 0);

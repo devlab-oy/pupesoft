@@ -28,7 +28,7 @@ if (mysql_field_name($result, $i) == "pakkaus") {
 
   $ulos .= "</select></td>";
   $jatko = 0;
-  
+
 }
 
 if (mysql_field_name($result, $i) == "rahdinkuljettaja") {

@@ -14,7 +14,11 @@ $norm["height"] = 8;
 $norm["font"] = "Helvetica";
 
 // tehdään pdf:n uusi sivu
-if ($malli != 'PDF') {
+if ($malli == 'PDFBRO') {
+  $firstpage = $pdf ->new_page('6.2x2.9cm');
+  $norm["height"] = 12;
+}
+elseif ($malli != 'PDF') {
   $firstpage = $pdf->new_page("a4");
 }
 else {
@@ -22,8 +26,15 @@ else {
 }
 
 // A4 pointteina 595x842
-
-if ($malli == 'PDF40') {
+if ($malli == 'PDFBRO') {
+  $x = 1;
+  $riville = 3;
+  $leveys = 500;
+  $kappalemaara = 10;
+  $mm_pt = 300;
+  $y = 25;
+}
+elseif ($malli == 'PDF40') {
   $x = 10;
   $riville = 4;
   $leveys = 315;
@@ -97,7 +108,11 @@ for ($i = 1; $i < $kappalemaara; $i++) {
   }
 
   if (isset($viivakoodityyppi) and $viivakoodityyppi == "viivakoodi") {
-    if ($koodi == 'eankoodi' and tarkista_ean13($eankoodirow['eankoodi']) !== false) {
+    if ($malli == 'PDFBRO') {
+      $tieto = empty($eankoodirow["eankoodi"]) ? $eankoodirow['tuoteno'] : $eankoodirow['eankoodi'];
+      $data = viivakoodi($tieto, "codabar", $leveys, 100, "");
+    }
+    elseif ($koodi == 'eankoodi' and tarkista_ean13($eankoodirow['eankoodi']) !== false) {
       $data = viivakoodi($eankoodirow['eankoodi'], "ean", $leveys, 100, "zz");
     }
     elseif ($koodi == "sarjanumero") {

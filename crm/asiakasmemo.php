@@ -5,7 +5,7 @@ if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") !== FALSE) {
 
   //Jos ylläpidossa on luotu uusi asiakas
   if ($yllapidossa == "asiakas" and $yllapidontunnus != '') {
-    $asiakasid   = $yllapidontunnus;
+    $asiakasid = $yllapidontunnus;
   }
 }
 
@@ -18,7 +18,7 @@ if (!isset($nayta_kaikki_merkinnat)) {
 }
 
 if (!isset($haas_call_type))        $haas_call_type = '';
-if (!isset($haas_call_type_ed))    $haas_call_type_ed = '';
+if (!isset($haas_call_type_ed))     $haas_call_type_ed = '';
 if (!isset($haas_opportunity))      $haas_opportunity = '';
 if (!isset($haas_qty))              $haas_qty = '';
 if (!isset($haas_opp_proj_date_dd)) $haas_opp_proj_date_dd = '';
@@ -58,17 +58,20 @@ if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") !== FALSE) {
     echo "<br><table>";
     echo "<tr>
         <th>".t("Asiakas").":</th>
-        <form method = 'post'>
+        <form action='{$palvelin2}crm/asiakasmemo.php' name='asiakasformi' method = 'post'>
         <td><input type='text' size='30' name='ytunnus'> ", asiakashakuohje(), "</td>
         <td class='back'><input type='submit' value='".t("Jatka")."'></td>
         </tr>";
     echo "</form>";
     echo "</table>";
+
+    $formi = "asiakasformi";
+    $kentta = "ytunnus";
   }
 
   if ($ytunnus != '' or $asiakasid > 0) {
-    $kutsuja   = "asiakasemo.php";
-    $ahlopetus   = "{$palvelin2}crm/asiakasmemo.php////";
+    $kutsuja = "asiakasemo.php";
+    $ahlopetus = "{$palvelin2}crm/asiakasmemo.php////";
 
     require "inc/asiakashaku.inc";
   }
@@ -111,7 +114,7 @@ if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") !== FALSE and $ytunnus !=
       $meili .= t("Viesti").":\n".str_replace("\r\n", "\n", $row["kentta01"])."\n\n";
       $meili .= "-----------------------\n\n";
 
-      $tulos = mail($email, mb_encode_mimeheader(t("Asiakasmemo")." $yhtiorow[nimi]", "ISO-8859-1", "Q"), $meili, "From: ".mb_encode_mimeheader($kukarow["nimi"], "ISO-8859-1", "Q")." <$kukarow[eposti]>\nReply-To: ".mb_encode_mimeheader($kukarow["nimi"], "ISO-8859-1", "Q")." <".$kukarow["eposti"].">\n", "-f $yhtiorow[postittaja_email]");
+      $tulos = mail($email, mb_encode_mimeheader(t("Asiakasmemo")." $yhtiorow[nimi]", "ISO-8859-1", "Q"), $meili, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
 
       if ($row["tyyppi"] == "Lead") {
         $eviesti = "$kukarow[nimi] lähetti leadin käyttäjälle: $enimi / $email";
@@ -121,80 +124,53 @@ if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") !== FALSE and $ytunnus !=
       }
 
       $kysely = "INSERT INTO kalenteri
-                 SET tapa     = '$row[tapa]',
-                 asiakas      = '$row[asiakas]',
+                 SET tapa = '$row[tapa]',
+                 asiakas = '$row[asiakas]',
                  liitostunnus = '$row[liitostunnus]',
-                 henkilo      = '$row[henkilo]',
-                 kuka         = '$kukarow[kuka]',
-                 yhtio        = '$kukarow[yhtio]',
-                 tyyppi       = 'Memo',
-                 pvmalku      = now(),
-                 kentta01     = '$eviesti',
+                 henkilo = '$row[henkilo]',
+                 kuka = '$kukarow[kuka]',
+                 yhtio = '$kukarow[yhtio]',
+                 tyyppi = 'Memo',
+                 pvmalku = now(),
+                 kentta01 = '$eviesti',
                  {$crm_haas_lisa}
-                 perheid      = '$row[tunnus]',
-                 laatija      = '$kukarow[kuka]',
-                 luontiaika   = now()";
+                 perheid = '$row[tunnus]',
+                 laatija = '$kukarow[kuka]',
+                 luontiaika = now()";
       $result = pupe_query($kysely);
 
       if ($row["tyyppi"] == "Lead") {
         $kysely = "INSERT INTO kalenteri
-                   SET tapa     = '$row[tapa]',
-                   asiakas         = '$row[asiakas]',
-                   liitostunnus    = '$row[liitostunnus]',
-                   henkilo         = '$row[henkilo]',
-                   kuka            = '$ekuka',
+                   SET tapa = '$row[tapa]',
+                   asiakas = '$row[asiakas]',
+                   liitostunnus = '$row[liitostunnus]',
+                   henkilo = '$row[henkilo]',
+                   kuka = '$ekuka',
                    myyntipaallikko = '$row[myyntipaallikko]',
-                   yhtio           = '$kukarow[yhtio]',
-                   tyyppi          = '$row[tyyppi]',
-                   pvmalku         = '$row[pvmalku]',
-                   kentta01        = '$row[kentta01]',
+                   yhtio = '$kukarow[yhtio]',
+                   tyyppi = '$row[tyyppi]',
+                   pvmalku = '$row[pvmalku]',
+                   kentta01 = '$row[kentta01]',
                    {$crm_haas_lisa}
-                   kuittaus        = '$row[kuittaus]',
-                   laatija         = '$kukarow[kuka]',
-                   luontiaika      = now()";
+                   kuittaus = '$row[kuittaus]',
+                   laatija = '$kukarow[kuka]',
+                   luontiaika = now()";
         $result = pupe_query($kysely);
       }
-      //echo "<br>Sähköposti lähetetty osoitteeseen: $email<br><br>";
     }
 
     $tunnus = "";
-    $tee   = "";
-    $meili   = "";
-  }
-
-  ///* Allrightin asiakasanalyysi*///
-  if ($tee == "ASANALYYSI") {
-
-    echo "<table>";
-    echo "<form method='POST'>
-        <input type='hidden' name='tee' value='LISAAASANALYYSI'>
-        <input type='hidden' name='ytunnus' value='$ytunnus'>
-        <input type='hidden' name='lopetus' value='$lopetus'>
-        <input type='hidden' name='asiakasid' value='$asiakasid'>
-        <input type='hidden' name='yhtunnus' value='$yhtunnus'>";
-
-    echo "<tr><th colspan='2' align='left'><br>".t("Asiakasvertailu").":</th></tr>";
-    echo "<tr><td>".t("Miten tuotteet esillä").":</td><td><textarea name='esilla' cols='40' rows=5' wrap='hard'></textarea></td></tr>";
-    echo "<tr><td>".t("Myymälän ileisilme").":</td><td><textarea name='yleisilme' cols='40' rows='5' wrap='hard'></textarea></td></tr>";
-    echo "<tr><th colspan='2' align='left'><br>".t("Tuotteiden jakauma merkeittäin").":</th></tr>";
-    echo "<tr><td>".t("Puvut").":</td><td><textarea name='puvut'       cols='40' rows='2' wrap='hard'></textarea></td></tr>";
-    echo "<tr><td>".t("Kypärät").":</td><td><textarea name='kyparat'     cols='40' rows='2' wrap='hard'></textarea></td></tr>";
-    echo "<tr><td>".t("Saappaat").":</td><td><textarea name='saappaat'     cols='40' rows='2' wrap='hard'></textarea></td></tr>";
-    echo "<tr><td>".t("Hanskat").":</td><td><textarea name='hanskat'    cols='40' rows='2' wrap='hard'></textarea></td></tr>";
-    echo "<tr><th><br></th><th></th></tr>";
-    echo "<tr><td>".t("Muut huomiot").":</td><td><textarea name='muuta'   cols='40' rows='5' wrap='hard'></textarea></td></tr>";
-    echo "<tr><td>".t("Keskustelut/sovitut extrat").":</td><td><textarea name='extrat'   cols='40' rows='5' wrap='hard'></textarea></td></tr>";
-    echo "<tr><th align='left'><input type='submit' name='submit' value='".t("Tallenna")."'></th></tr>";
-    echo "</form></table>";
+    $tee = "";
+    $meili = "";
   }
 
   ///* Lisätään uusi memeotietue*///
   if ($tee == "UUSIMEMO" and $tyyppi == "Muistutus" and $muistutusko == "") {
-    $muistutusko   = "Muistutus";
-    $tee       = "";
+    $muistutusko = "Muistutus";
+    $tee = "";
   }
   else {
-    $muistutusko   = "";
+    $muistutusko = "";
   }
 
   if ($tee == "UUSIMEMO" and $crm_haas_check) {
@@ -209,45 +185,45 @@ if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") !== FALSE and $ytunnus !=
 
     if (!empty($haas_call_type) and $haas_call_type != 'Prospecting Call') {
       if (empty($haas_opportunity)) {
-        echo "<font class='error'>",t("%s on pakollinen.", '', 'OPPORTUNITY'),"</font><br>";
+        echo "<font class='error'>", t("%s on pakollinen.", '', 'OPPORTUNITY'), "</font><br>";
         $tee = '';
       }
 
       if (empty($haas_qty)) {
-        echo "<font class='error'>",t("%s on pakollinen.", '', 'QTY'),"</font><br>";
+        echo "<font class='error'>", t("%s on pakollinen.", '', 'QTY'), "</font><br>";
         $tee = '';
       }
 
       if (empty($_dd) or empty($_mm) or empty($_yy)) {
-        echo "<font class='error'>",t("%s on pakollinen.", '', 'OPP_PROJ_DATE'),"</font><br>";
+        echo "<font class='error'>", t("%s on pakollinen.", '', 'OPP_PROJ_DATE'), "</font><br>";
         $tee = '';
       }
 
       if (in_array($haas_call_type, array('Won Call', 'Lost Call', 'Dead Call')) and empty($haas_end_reason)) {
-        echo "<font class='error'>",t("%s on pakollinen.", '', 'END_REASON'),"</font><br>";
+        echo "<font class='error'>", t("%s on pakollinen.", '', 'END_REASON'), "</font><br>";
         $tee = '';
       }
 
       if (!empty($haas_qty)) {
 
         if (!is_numeric($haas_qty)) {
-          echo "<font class='error'>",t("Kappalemäärän täytyy olla numero."),"</font><br>";
+          echo "<font class='error'>", t("Kappalemäärän täytyy olla numero."), "</font><br>";
           $tee = '';
         }
 
         if (strlen($haas_qty) > 2) {
-          echo "<font class='error'>",t("Liian suuri kappalemäärä. Määrän maksimipituus on 2."),"</font><br>";
+          echo "<font class='error'>", t("Liian suuri kappalemäärä. Määrän maksimipituus on 2."), "</font><br>";
           $tee = '';
         }
       }
 
       if ((!empty($_dd) or !empty($_mm) or !empty($_yy))) {
         if (!checkdate($_mm, $_dd, $_yy)) {
-          echo "<font class='error'>",t("Virheellinen päivämäärä."),"</font><br>";
+          echo "<font class='error'>", t("Virheellinen päivämäärä."), "</font><br>";
           $tee = '';
         }
         if (checkdate($_mm, $_dd, $_yy) and mktime(0, 0, 0, $_mm, $_dd, $_yy) < mktime(0, 0, 0, date("m"), date("d"), date("Y"))) {
-          echo "<font class='error'>",t("Päivämäärä ei saa olla menneisyydessä."),"</font><br>";
+          echo "<font class='error'>", t("Päivämäärä ei saa olla menneisyydessä."), "</font><br>";
           $tee = '';
         }
       }
@@ -257,10 +233,10 @@ if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") !== FALSE and $ytunnus !=
   if ($tee == "UUSIMEMO") {
 
     if (checkdate($mkka, $mppa, $mvva)) {
-      $pvmalku  = "'$mvva-$mkka-$mppa $mhh:$mmm:00'";
+      $pvmalku = "'$mvva-$mkka-$mppa $mhh:$mmm:00'";
     }
     else {
-      $pvmalku  = "'".date("Y-m-d H:i:s")."'";
+      $pvmalku = "'".date("Y-m-d H:i:s")."'";
     }
 
     if ($kuittaus == '' and ($tyyppi == "Muistutus" or $tyyppi == "Lead")) {
@@ -276,33 +252,34 @@ if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") !== FALSE and $ytunnus !=
 
         if ($kukarow["kieli"] != 'fi') {
           $query = "SELECT selite from avainsana
-              where yhtio = '$kukarow[yhtio]'
-              and laji       = 'KALETAPA'
-              and selitetark = '$tapa'
-              and kieli      = '$kukarow[kieli]'";
+                    where yhtio = '$kukarow[yhtio]'
+                    and laji = 'KALETAPA'
+                    and selitetark = '$tapa'
+                    and kieli = '$kukarow[kieli]'";
           $tapa_res = pupe_query($query);
           $tapa_row = mysql_fetch_assoc($tapa_res);
 
-          $tapa_res = t_avainsana("KALETAPA","fi","and avainsana.selite = '{$tapa_row['selite']}'");
+          $tapa_res = t_avainsana("KALETAPA", "fi", "and avainsana.selite = '{$tapa_row['selite']}'");
           $tapa_row = mysql_fetch_assoc($tapa_res);
 
           if (!empty($tapa_row['selitetark'])) $tapa = $tapa_row['selitetark'];
         }
         $kysely = "INSERT INTO kalenteri
-                   SET tapa        = '$tapa',
-                   asiakas         = '$ytunnus',
-                   liitostunnus    = '$asiakasid',
-                   henkilo         = '$yhtunnus',
-                   kuka            = '$kuka',
+                   SET tapa = '$tapa',
+                   asiakas = '$ytunnus',
+                   liitostunnus = '$asiakasid',
+                   henkilo = '$yhtunnus',
+                   kuka = '$kuka',
                    myyntipaallikko = '$myyntipaallikko',
-                   yhtio           = '$kukarow[yhtio]',
-                   tyyppi          = '$tyyppi',
-                   pvmalku         = $pvmalku,
-                   kentta01        = '$viesti',
+                   yhtio = '$kukarow[yhtio]',
+                   tyyppi = '$tyyppi',
+                   pvmalku = $pvmalku,
+                   pvmloppu = date_add($pvmalku, INTERVAL 30 MINUTE),
+                   kentta01 = '$viesti',
                    {$crm_haas_lisa}
-                   kuittaus        = '$kuittaus',
-                   laatija         = '$kukarow[kuka]',
-                   luontiaika      = now()";
+                   kuittaus = '$kuittaus',
+                   laatija = '$kukarow[kuka]',
+                   luontiaika = now()";
         $result = pupe_query($kysely);
         $muist = mysql_insert_id($GLOBALS["masterlink"]);
 
@@ -311,13 +288,12 @@ if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") !== FALSE and $ytunnus !=
           $query = "SELECT *
                     FROM kuka
                     WHERE yhtio = '$kukarow[yhtio]'
-                    and kuka    = '$kuka'";
+                    and kuka = '$kuka'";
           $result = pupe_query($query);
           $row = mysql_fetch_array($result);
 
           // Käyttäjälle lähetetään tekstiviestimuistutus
           if ($row["puhno"] != '' and strlen($viesti) > 0 and $sms_palvelin != "" and $sms_user != "" and $sms_pass != "") {
-
             $ok = 1;
 
             $teksti = substr("Muistutus $yhtiorow[nimi]. $tapa. ".$viesti, 0, 160);
@@ -336,53 +312,54 @@ if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") !== FALSE and $ytunnus !=
             }
           }
         }
-        $aputyyppi       = $tyyppi;
-        $tapa           = "";
-        $viesti         = "";
-        $tunnus         = "";
-        $tyyppi           = "";
-        $mvva         = "";
-        $mkka         = "";
-        $mppa         = "";
-        $mhh         = "";
-        $mmm        = "";
-        $kuka        = "";
-        $kuittaus       = "";
-        $myyntipaallikko   = "";
+        $aputyyppi = $tyyppi;
+        $tapa = "";
+        $viesti = "";
+        $tunnus = "";
+        $tyyppi = "";
+        $mvva = "";
+        $mkka = "";
+        $mppa = "";
+        $mhh = "";
+        $mmm = "";
+        $kuka = "";
+        $kuittaus = "";
+        $myyntipaallikko = "";
       }
     }
     else {
       $kysely = "UPDATE kalenteri
-                 SET tapa        = '$tapa',
-                 asiakas         = '$ytunnus',
-                 liitostunnus    = '$asiakasid',
-                 henkilo         = '$yhtunnus',
-                 kuka            = '$kuka',
+                 SET tapa = '$tapa',
+                 asiakas = '$ytunnus',
+                 liitostunnus = '$asiakasid',
+                 henkilo = '$yhtunnus',
+                 kuka = '$kuka',
                  myyntipaallikko = '$myyntipaallikko',
-                 yhtio           = '$kukarow[yhtio]',
-                 tyyppi          = '$tyyppi',
-                 pvmalku         = $pvmalku,
-                 kentta01        = '$viesti',
+                 yhtio = '$kukarow[yhtio]',
+                 tyyppi = '$tyyppi',
+                 pvmalku = $pvmalku,
+                 pvmloppu = date_add($pvmalku, INTERVAL 30 MINUTE),
+                 kentta01 = '$viesti',
                  {$crm_haas_lisa}
-                 kuittaus        = '$kuittaus',
-                 muuttaja        = '$kukarow[kuka]',
-                 muutospvm       = now()
-                 WHERE tunnus    = '$korjaus'";
+                 kuittaus = '$kuittaus',
+                 muuttaja = '$kukarow[kuka]',
+                 muutospvm = now()
+                 WHERE tunnus = '$korjaus'";
       $result = pupe_query($kysely);
 
-      $aputyyppi       = $tyyppi;
-      $tapa           = "";
-      $viesti         = "";
-      $tunnus         = "";
-      $tyyppi           = "";
-      $mvva         = "";
-      $mkka         = "";
-      $mppa         = "";
-      $mhh         = "";
-      $mmm        = "";
-      $kuka        = "";
-      $kuittaus       = "";
-      $myyntipaallikko   = "";
+      $aputyyppi = $tyyppi;
+      $tapa = "";
+      $viesti = "";
+      $tunnus = "";
+      $tyyppi = "";
+      $mvva = "";
+      $mkka = "";
+      $mppa = "";
+      $mhh = "";
+      $mmm = "";
+      $kuka = "";
+      $kuittaus = "";
+      $myyntipaallikko = "";
     }
 
     $tee = "";
@@ -413,45 +390,21 @@ if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") !== FALSE and $ytunnus !=
     $id = tallenna_liite("userfile", $aputyyppi, $liitostunnus, $tallennustring);
   }
 
-  if ($tee == "LISAAASANALYYSI") {
-    if ($esilla != '' || $yleisilme != '') {
-      $kysely = "INSERT INTO kalenteri
-                 SET tapa     = 'asiakasanalyysi',
-                 asiakas      = '$ytunnus',
-                 liitostunnus = '$asiakasid',
-                 henkilo      = '$yhtunnus',
-                 kuka         = '$kukarow[kuka]',
-                 yhtio        = '$kukarow[yhtio]',
-                 kentta01     = '$esilla',
-                 kentta02     = '$yleisilme',
-                 kentta03     = '$puvut',
-                 kentta04     = '$kyparat',
-                 kentta05     = '$saappaat',
-                 kentta06     = '$hanskat',
-                 kentta07     = '$muuta',
-                 kentta08     = '$extrat',
-                 tyyppi       = 'Memo',
-                 pvmalku      = now()";
-      $result = pupe_query($kysely);
-    }
-    $tee = '';
-  }
-
   if ($tee == "POISTAMEMO") {
     $kysely = "UPDATE kalenteri
                SET
-               tyyppi           = concat('DELETED ',tyyppi)
-               WHERE tunnus     = '$tunnus'
-               and yhtio        = '$kukarow[yhtio]'
-               and asiakas      = '$ytunnus'
+               tyyppi = concat('DELETED ',tyyppi)
+               WHERE tunnus = '$tunnus'
+               and yhtio = '$kukarow[yhtio]'
+               and asiakas = '$ytunnus'
                and liitostunnus = '$asiakasid'";
     $result = pupe_query($kysely);
 
     $kysely = "UPDATE liitetiedostot
                SET liitos = concat('DELETED ',liitos)
                WHERE liitostunnus = '$tunnus'
-               AND liitos         = '$liitostyyppi'
-               and yhtio          = '$kukarow[yhtio]'";
+               AND liitos = '$liitostyyppi'
+               and yhtio = '$kukarow[yhtio]'";
 
     $result = pupe_query($kysely);
 
@@ -463,31 +416,30 @@ if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") !== FALSE and $ytunnus !=
     // Haetaan viimeisin muistiinpano
     $query = "SELECT *
               FROM kalenteri
-              WHERE liitostunnus  = '$asiakasid'
-              and tyyppi          in ('Memo','Muistutus','Kuittaus','Lead','Myyntireskontraviesti')
-              and tapa           != 'asiakasanalyysi'
-              and yhtio           = '$kukarow[yhtio]'
+              WHERE liitostunnus = '$asiakasid'
+              and tyyppi in ('Memo','Muistutus','Kuittaus','Lead','Myyntireskontraviesti')
+              and yhtio = '$kukarow[yhtio]'
               and (perheid=0 or tunnus=perheid)
               ORDER BY tunnus desc
               LIMIT 1";
     $res = pupe_query($query);
     $korjrow = mysql_fetch_array($res);
 
-    $tapa           = $korjrow["tapa"];
-    $viesti         = $korjrow["kentta01"];
-    $yhtunnus       = $korjrow["henkilo"];
-    $tunnus         = $korjrow["tunnus"];
-    $tyyppi           = $korjrow["tyyppi"];
-    $mvva         = substr($korjrow["pvmalku"], 0, 4);
-    $mkka         = substr($korjrow["pvmalku"], 5, 2);
-    $mppa         = substr($korjrow["pvmalku"], 8, 2);
+    $tapa = $korjrow["tapa"];
+    $viesti = $korjrow["kentta01"];
+    $yhtunnus = $korjrow["henkilo"];
+    $tunnus = $korjrow["tunnus"];
+    $tyyppi = $korjrow["tyyppi"];
+    $mvva = substr($korjrow["pvmalku"], 0, 4);
+    $mkka = substr($korjrow["pvmalku"], 5, 2);
+    $mppa = substr($korjrow["pvmalku"], 8, 2);
 
-    $mhh         = substr($korjrow["pvmalku"], 11, 2);
-    $mmm         = substr($korjrow["pvmalku"], 14, 2);
+    $mhh = substr($korjrow["pvmalku"], 11, 2);
+    $mmm = substr($korjrow["pvmalku"], 14, 2);
 
-    $kuka        = $korjrow["kuka"];
-    $kuittaus       = $korjrow["kuittaus"];
-    $myyntipaallikko   = $korjrow["myyntipaallikko"];
+    $kuka = $korjrow["kuka"];
+    $kuittaus = $korjrow["kuittaus"];
+    $myyntipaallikko = $korjrow["myyntipaallikko"];
 
     if ($crm_haas_check) {
       $haas_call_type = $korjrow['kentta02'];
@@ -500,7 +452,7 @@ if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") !== FALSE and $ytunnus !=
     }
 
     if ($tyyppi == "Muistutus") {
-      $muistutusko   = 'Muistutus';
+      $muistutusko = 'Muistutus';
     }
 
     $tee = "";
@@ -514,7 +466,7 @@ if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") !== FALSE and $ytunnus !=
                      SET tila = '$astila'
                      WHERE yhtio = '$kukarow[yhtio]'
                      and ytunnus = '$ytunnus'
-                     and tunnus  = '$asiakasid'";
+                     and tunnus = '$asiakasid'";
     $result_update = pupe_query($query_update);
 
     echo t("Vaihdettiin asiakkaan tila")."<br/>";
@@ -529,13 +481,13 @@ if ($ytunnus != '' and $tee == '') {
 
     $query = "SELECT tunnus, filename
               FROM liitetiedostot
-              WHERE yhtio      = '$kukarow[yhtio]'
+              WHERE yhtio = '$kukarow[yhtio]'
               AND liitostunnus = '$kalenteritunnus'
-              AND liitos       = '$tyyppi'";
+              AND liitos = '$tyyppi'";
     $res = pupe_query($query);
 
     while ($row = mysql_fetch_array($res)) {
-      $out .= "<a href='{$palvelin2}view.php?id=$row[tunnus]' target='Attachment'>".t('Näytä liite')."</a> ".$row['filename']."<br>\n";
+      $out .= js_openUrlNewWindow("{$palvelin2}view.php?id=$row[tunnus]", t('Näytä liite'), NULL, 800, 600)." $row[filename]<br>\n ";
     }
 
     return $out;
@@ -545,13 +497,13 @@ if ($ytunnus != '' and $tee == '') {
   if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") !== FALSE) {
     $query = "SELECT *
               FROM yhteyshenkilo
-              WHERE yhtio      = '$kukarow[yhtio]'
+              WHERE yhtio = '$kukarow[yhtio]'
               and liitostunnus = '$asiakasid'
-              and tyyppi       = 'A'
+              and tyyppi = 'A'
               ORDER BY nimi";
     $result = pupe_query($query);
 
-    $yhenkilo = "<form method='POST'>
+    $yhenkilo = "<form action='{$palvelin2}crm/asiakasmemo.php' method='POST'>
           <input type='hidden' name='ytunnus' value='$ytunnus'>
           <input type='hidden' name='lopetus' value='$lopetus'>
           <input type='hidden' name='asiakasid' value='$asiakasid'>
@@ -561,15 +513,15 @@ if ($ytunnus != '' and $tee == '') {
     while ($row = mysql_fetch_array($result)) {
 
       if ($yhtunnus == $row["tunnus"]) {
-        $sel      = 'SELECTED';
-        $yemail   = $row["email"];
-        $ynimi    = $row["nimi"];
-        $yfax     = $row["fax"];
-        $ygsm     = $row["gsm"];
-        $ypuh     = $row["puh"];
-        $ywww     = $row["www"];
+        $sel = 'SELECTED';
+        $yemail = $row["email"];
+        $ynimi = $row["nimi"];
+        $yfax = $row["fax"];
+        $ygsm = $row["gsm"];
+        $ypuh = $row["puh"];
+        $ywww = $row["www"];
         $ytitteli = $row["titteli"];
-        $yfakta   = $row["fakta"];
+        $yfakta = $row["fakta"];
       }
       else {
         $sel = '';
@@ -581,14 +533,14 @@ if ($ytunnus != '' and $tee == '') {
 
     //Näytetään asiakkaan tietoja jos yhteyshenkilöä ei olla valittu
     if ($yhtunnus == "kaikki" or $yhtunnus == '') {
-      $yemail   = $asiakasrow["email"];
-      $ynimi    = "";
-      $ygsm     = $asiakasrow["gsm"];
-      $ypuh     = $asiakasrow["puhelin"];
-      $yfax     = $asiakasrow["fax"];
-      $ywww     = "";
+      $yemail = $asiakasrow["email"];
+      $ynimi = "";
+      $ygsm = $asiakasrow["gsm"];
+      $ypuh = $asiakasrow["puhelin"];
+      $yfax = $asiakasrow["fax"];
+      $ywww = "";
       $ytitteli = "";
-      $yfakta   = $asiakasrow["fakta"];
+      $yfakta = $asiakasrow["fakta"];
     }
 
     ///* Asiakaan tiedot ja yhteyshenkilön tiedot *///
@@ -612,6 +564,7 @@ if ($ytunnus != '' and $tee == '') {
     }
 
     $asylloik = tarkista_oikeus("yllapito.php", "asiakas%", "X", TRUE);
+    $yhylloik = tarkista_oikeus("yllapito.php", "yhteyshenkilo%", "X");
 
     echo "<tr>";
     echo "<td>$asiakasrow[nimi]";
@@ -623,28 +576,62 @@ if ($ytunnus != '' and $tee == '') {
     echo "</td>";
     echo "<td>$asiakasrow[toim_nimi]</td><td>$yhenkilo</td>";
 
-    if ($asylloik and tarkista_oikeus("yllapito.php", "yhteyshenkilo", "X")) {
-      echo "<td><a href='{$palvelin2}yllapito.php?toim=asiakas&tunnus=$asiakasid&lopetus=$asmemo_lopetus'>".t("Luo uusi yhteyshenkilö")."</a></td>";
-    }
-    else {
-      echo "<td>".t("(Luo uusi yhteyshenkilö)")."</td>";
+    echo "<td rowspan='6' class='ptop'><ul>";
+
+    if ($asylloik and $yhylloik) {
+      echo "<li><a href='{$palvelin2}yllapito.php?toim={$asylloik["alanimi"]}&tunnus=$asiakasid&lopetus=$asmemo_lopetus'>".t("Luo uusi yhteyshenkilö")."</a></li>";
     }
 
+    if (tarkista_oikeus("crm/kalenteri.php", "", "X")) {
+      echo "<li><a href='{$palvelin2}crm/kalenteri.php?viikkonakyma=".date("W")."&lopetus=$asmemo_lopetus'>".t("Kalenteri")."</a></li>";
+    }
+
+    if (tarkista_oikeus("raportit/myyntiseuranta.php")) {
+      echo "<li><a href='{$palvelin2}raportit/asiakasinfo.php?ytunnus=$ytunnus&asiakasid={$asiakasrow["tunnus"]}&rajaus=MYYNTI&tee=go&ppa=$ppa&kka=$kka&vva=$vva&ppl=$ppl&kkl=$kkl&vvl=$vvl&tuoteosasto2=kaikki&yhtiot[]=$kukarow[yhtio]&jarjestys[]=&lopetus=$asmemo_lopetus'>".t("Myynninseuranta")."</a></li>";
+    }
+
+    if (tarkista_oikeus("raportit/asiakasinfo.php")) {
+      echo "<li><a href='{$palvelin2}raportit/asiakasinfo.php?ytunnus=$ytunnus&asiakasid={$asiakasrow["tunnus"]}&rajaus=ALENNUKSET&lopetus=$asmemo_lopetus'>".t("Alennustaulukko")."</a></li>";
+    }
+
+    if (tarkista_oikeus("budjetinyllapito_tat.php", "ASIAKAS")) {
+      echo "<li><a href='{$palvelin2}budjetinyllapito_tat.php?toim=ASIAKAS&ytunnus=$ytunnus&asiakasid={$asiakasrow["tunnus"]}&submit_button=joo&alkuvv=".date("Y")."&alkukk=01&loppuvv=".date("Y")."&loppukk=12&lopetus=$asmemo_lopetus'>".t("Asiakkaan myyntitavoitteet")."</a></li>";
+    }
+
+    if (tarkista_oikeus("raportit/asiakkaantilaukset.php", "TARJOUS")) {
+      $tkka = date("m", mktime(0, 0, 0, date("m")-6, date("d"), date("Y")));
+      $tvva = date("Y", mktime(0, 0, 0, date("m")-6, date("d"), date("Y")));
+      $tppa = date("d", mktime(0, 0, 0, date("m")-6, date("d"), date("Y")));
+
+      $out = js_openUrlNewWindow("{$palvelin2}raportit/asiakkaantilaukset.php?toim=TARJOUS&kka=$tkka&vva=$tvva&ppa=$tppa&ytunnus=$ytunnus&asiakasid={$asiakasrow["tunnus"]}", t('Asiakkaan tarjoukset'), NULL, 1000, 800);
+      echo "<li>$out</li>";
+    }
+
+    if (tarkista_oikeus("raportit/sarjanumerohistoria.php")) {
+      $out = js_openUrlNewWindow("{$palvelin2}raportit/sarjanumerohistoria.php?tee=hae_tilaukset&indexvas=1&asiakastunnus={$asiakasrow["tunnus"]}", t('Asiakkaan laitteet'), NULL, 1000, 800);
+      echo "<li>$out</li>";
+    }
+
+    if ($asylloik and $yhylloik) {
+      echo "<li><a href='{$palvelin2}yllapito.php?toim={$asylloik["alanimi"]}&tunnus=$asiakasid&lopetus=$asmemo_lopetus'>".t("Muuta yhteyshenkilön tietoja")."</a></li>";
+    }
+
+    echo "</td>";
     echo "</tr>";
     echo "<tr>";
     echo "<td>$asiakasrow[nimitark]</td><td>$asiakasrow[toim_nimitark]</td><td>".t("Puh").": $ypuh</td>";
-
-
-    if (mysql_num_rows($result) > 0 and $yhtunnus != '') {
-      echo "<td><a href='{$palvelin2}yllapito.php?toim=asiakas&tunnus=$asiakasid&lopetus=$asmemo_lopetus'>".t("Muuta yhteyshenkilön tietoja")."</a></td>";
-    }
-    else {
-      echo "<td></td>";
-    }
-
     echo "</tr>";
     echo "<tr>";
-    echo "<td>$asiakasrow[osoite]</td><td>$asiakasrow[toim_osoite]</td><td>".t("Fax").": $yfax</td>";
+    echo "<td>";
+
+    $gurl = utf8_encode($asiakasrow["osoite"].", ".$asiakasrow["postitp"]);
+    echo js_openUrlNewWindow("http://maps.google.com/?q=$gurl", $asiakasrow["osoite"], "", 1200);
+    echo "</td><td>";
+
+    $gurl = utf8_encode($asiakasrow["toim_osoite"].", ".$asiakasrow["toim_postitp"]);
+    echo js_openUrlNewWindow("http://maps.google.com/?q=$gurl", $asiakasrow["toim_osoite"], "", 1200);
+
+    echo "</td><td>".t("Fax").": $yfax</td>";
 
     // Päivämäärät rappareita varten
     $kka = date("m", mktime(0, 0, 0, date("m")-3, date("d"), date("Y")));
@@ -654,24 +641,10 @@ if ($ytunnus != '' and $tee == '') {
     $vvl = date("Y");
     $ppl = date("d");
 
-    if (tarkista_oikeus("crm/kalenteri.php", "", "X")) {
-      echo "<td><a href='{$palvelin2}crm/kalenteri.php?lopetus=$asmemo_lopetus'>".t("Kalenteri")."</a></td>";
-    }
-    else {
-      echo "<td>".t("Kalenteri")."</td>";
-    }
-
     echo "</tr>";
+
     echo "<tr>";
     echo "<td>$asiakasrow[postino] $asiakasrow[postitp]</td><td>$asiakasrow[toim_postino] $asiakasrow[toim_postitp]</td><td>".t("Gsm").": $ygsm</td>";
-
-    if (tarkista_oikeus("raportit/myyntiseuranta.php")) {
-      echo "<td><a href='{$palvelin2}raportit/asiakasinfo.php?ytunnus=$ytunnus&asiakasid={$asiakasrow["tunnus"]}&rajaus=MYYNTI&tee=go&ppa=$ppa&kka=$kka&vva=$vva&ppl=$ppl&kkl=$kkl&vvl=$vvl&tuoteosasto2=kaikki&yhtiot[]=$kukarow[yhtio]&jarjestys[]=&lopetus=$asmemo_lopetus'>".t("Myynninseuranta")."</a></td>";
-    }
-    else {
-      echo "<td>".t("Myynninseuranta")."</td>";
-    }
-
     echo "</tr>";
     echo "<tr>";
     echo "<td>$asiakasrow[fakta]</td><td></td><td>".t("Email").": $yemail";
@@ -681,24 +654,16 @@ if ($ytunnus != '' and $tee == '') {
     }
 
     echo "</td>";
-
-    if (tarkista_oikeus("raportit/asiakasinfo.php")) {
-      echo "<td><a href='{$palvelin2}raportit/asiakasinfo.php?ytunnus=$ytunnus&asiakasid={$asiakasrow["tunnus"]}&rajaus=ALENNUKSET&lopetus=$asmemo_lopetus'>".t("Alennustaulukko")."</a></td>";
-    }
-    else {
-      echo "<td><u>".t("Alennustaulukko")."</u></td>";
-    }
-
     echo "</tr>";
+
     echo "<tr><td colspan='2'></td><td>".t("Tila").": ";
-    echo "<form method='POST'>";
+    echo "<form action='{$palvelin2}crm/asiakasmemo.php' method='POST'>";
     echo "<input type='hidden' name='ytunnus' value='$ytunnus'>
         <input type='hidden' name='lopetus' value='$lopetus'>
         <input type='hidden' name='asiakasid' value='$asiakasid'>
         <input type='hidden' name='tee' value='paivita_tila'>";
     echo "<select name='astila' Onchange='submit();'>";
     echo "<option value=''>".t("Ei tilaa")."</option>";
-
 
     $asosresult = t_avainsana("ASIAKASTILA");
 
@@ -714,7 +679,8 @@ if ($ytunnus != '' and $tee == '') {
     }
 
     echo "</select></form>";
-    echo "</td><td><a href='{$palvelin2}budjetinyllapito_tat.php?toim=ASIAKAS&ytunnus=$ytunnus&asiakasid={$asiakasrow["tunnus"]}&submit_button=joo&alkuvv=".date("Y")."&alkukk=01&loppuvv=".date("Y")."&loppukk=12&lopetus=$asmemo_lopetus'>".t("Asiakkaan myyntitavoitteet")."</a></td></tr>";
+    echo "</td>";
+    echo "</tr>";
 
     if ($yfakta != '' or $ytitteli != '' or $ynimi != '') {
       echo "<tr><td colspan='2'><b>".t("Valittu yhteyshenkilö").": $ytitteli $ynimi</b></td><td colspan='2'>$yfakta</td></tr>";
@@ -727,7 +693,7 @@ if ($ytunnus != '' and $tee == '') {
   if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") !== FALSE) {
     echo "<table width='620'>";
 
-    echo "  <form method='POST' enctype='multipart/form-data'>
+    echo "  <form action='{$palvelin2}crm/asiakasmemo.php' method='POST' enctype='multipart/form-data'>
         <input type='hidden' name='tee'     value='UUSIMEMO'>
         <input type='hidden' name='korjaus'   value='$tunnus'>
         <input type='hidden' name='yhtunnus'   value='$yhtunnus'>
@@ -775,7 +741,7 @@ if ($ytunnus != '' and $tee == '') {
       echo "<th>CALL_TYPE</th>";
       echo "<td>";
       echo "<select name='haas_call_type' onchange='submit();'>";
-      echo "<option value=''>",t("Valitse"),"</option>";
+      echo "<option value=''>", t("Valitse"), "</option>";
 
       foreach ($call_types as $key => $value) {
         echo "<option value='{$key}' {$call_type_sel[$key]}>{$key}</th>";
@@ -791,9 +757,9 @@ if ($ytunnus != '' and $tee == '') {
           'OMs'           => '',
           'TMs'           => '',
           'MMs'           => '',
-          'VF-1/2s'        => '',
-          'VF-3/4/5'        => '',
-          'VF-6+'          => '',
+          'VF-1/2s'       => '',
+          'VF-3/4/5'      => '',
+          'VF-6+'         => '',
           'GRs'           => '',
           'DT/DMs'        => '',
           'UMCs'          => '',
@@ -816,7 +782,7 @@ if ($ytunnus != '' and $tee == '') {
         echo "<th>OPPORTUNITY</th>";
         echo "<td>";
         echo "<select name='haas_opportunity'>";
-        echo "<option value=''>",t("Valitse"),"</option>";
+        echo "<option value=''>", t("Valitse"), "</option>";
 
         foreach ($opportunities as $key => $value) {
           echo "<option value='{$key}' {$opportunity_sel[$key]}>{$key}</th>";
@@ -862,7 +828,7 @@ if ($ytunnus != '' and $tee == '') {
           echo "<th>END_REASON</th>";
           echo "<td>";
           echo "<select name='haas_end_reason'>";
-          echo "<option value=''>",t("Valitse"),"</option>";
+          echo "<option value=''>", t("Valitse"), "</option>";
 
           foreach ($end_reasons as $key => $value) {
             echo "<option value='{$key}' {$end_reason_sel[$key]}>{$key}</th>";
@@ -894,8 +860,8 @@ if ($ytunnus != '' and $tee == '') {
       $query = "SELECT DISTINCT kuka.tunnus, kuka.nimi, kuka.kuka
                 FROM kuka
                 JOIN oikeu ON (oikeu.yhtio = kuka.yhtio and oikeu.kuka = kuka.kuka and oikeu.nimi = 'crm/kalenteri.php')
-                WHERE kuka.yhtio     = '$kukarow[yhtio]'
-                AND kuka.aktiivinen  = 1
+                WHERE kuka.yhtio = '$kukarow[yhtio]'
+                AND kuka.aktiivinen = 1
                 and kuka.kuka       != '$kukarow[kuka]'
                 ORDER BY kuka.nimi";
       $result = pupe_query($query);
@@ -952,7 +918,7 @@ if ($ytunnus != '' and $tee == '') {
       $query = "SELECT DISTINCT kuka.tunnus, kuka.nimi, kuka.kuka
                 FROM kuka
                 JOIN oikeu ON (oikeu.yhtio = kuka.yhtio and oikeu.kuka = kuka.kuka and oikeu.nimi = 'crm/kalenteri.php')
-                WHERE kuka.yhtio    = '$kukarow[yhtio]'
+                WHERE kuka.yhtio = '$kukarow[yhtio]'
                 AND kuka.aktiivinen = 1
                 and kuka.asema      like '%MP%'
                 ORDER BY kuka.nimi";
@@ -979,8 +945,8 @@ if ($ytunnus != '' and $tee == '') {
       $query = "SELECT DISTINCT kuka.tunnus, kuka.nimi, kuka.kuka
                 FROM kuka
                 JOIN oikeu ON (oikeu.yhtio = kuka.yhtio and oikeu.kuka = kuka.kuka and oikeu.nimi = 'crm/kalenteri.php')
-                WHERE kuka.yhtio     = '$kukarow[yhtio]'
-                AND kuka.aktiivinen  = 1
+                WHERE kuka.yhtio = '$kukarow[yhtio]'
+                AND kuka.aktiivinen = 1
                 and kuka.kuka       != '$kukarow[kuka]'
                 ORDER BY kuka.nimi";
       $result = pupe_query($query);
@@ -1034,27 +1000,14 @@ if ($ytunnus != '' and $tee == '') {
         <input type='submit' value='".t("Tallenna")."'>
         </form>
         </td></tr>";
-
-    echo "  <td colspan='2' align='right' class='back'>
-        <form method='POST'>
-        <input type='hidden' name='tee'     value='KORJAAMEMO'>
-        <input type='hidden' name='yhtunnus'   value='$yhtunnus'>
-        <input type='hidden' name='ytunnus'   value='$ytunnus'>
-        <input type='hidden' name='lopetus'   value='$lopetus'>
-        <input type='hidden' name='asiakasid'   value='$asiakasid'>
-        <input type='submit' name='submit' value='".t("Korjaa viimeisintä")."'>
-        </form>
-        </td></tr>";
-
     echo "</table>";
-    echo "<br>";
   }
 
   $_chk_if = (!empty($nayta_kaikki_merkinnat) and is_array($nayta_kaikki_merkinnat));
   $_merkinnat_chk = ($_chk_if and count($nayta_kaikki_merkinnat) > 1) ? 'checked' : '';
 
   if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") !== FALSE) {
-    echo "<form method='POST'>";
+    echo "<form action='{$palvelin2}crm/asiakasmemo.php' method='POST'>";
     echo "<input type='hidden' name='tee' value=''>";
     echo "<input type='hidden' name='yhtunnus'   value='$yhtunnus'>";
     echo "<input type='hidden' name='ytunnus'   value='$ytunnus'>";
@@ -1071,6 +1024,10 @@ if ($ytunnus != '' and $tee == '') {
 
   if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") !== FALSE) {
     echo "</form>";
+
+    echo "<span class='nopad ptop' style='padding-left:40px;'>";
+    echo "<a href='{$palvelin2}crm/asiakasmemo.php?tee=KORJAAMEMO&yhtunnus=$yhtunnus&ytunnus=$ytunnus&lopetus=$lopetus&asiakasid=$asiakasid'>";
+    echo t("Korjaa viimeisintä merkintää")."</a></span>";
   }
 
   echo "<br><br>";
@@ -1090,144 +1047,156 @@ if ($ytunnus != '' and $tee == '') {
             lasku.tunnus laskutunnus, lasku.tila laskutila, lasku.alatila laskualatila, kuka2.nimi laskumyyja, lasku.muutospvm laskumpvm,
             kalenteri.tunnus, kalenteri.perheid, if(kalenteri.perheid!=0, kalenteri.perheid, kalenteri.tunnus) sorttauskentta
             FROM kalenteri
-            LEFT JOIN yhteyshenkilo ON kalenteri.yhtio=yhteyshenkilo.yhtio and kalenteri.henkilo=yhteyshenkilo.tunnus and yhteyshenkilo.tyyppi = 'A'
-            LEFT JOIN kuka ON kalenteri.yhtio=kuka.yhtio and kalenteri.kuka=kuka.kuka
-            LEFT JOIN lasku ON kalenteri.yhtio=lasku.yhtio and kalenteri.otunnus=lasku.tunnus
+            LEFT JOIN yhteyshenkilo ON (kalenteri.yhtio=yhteyshenkilo.yhtio and kalenteri.henkilo=yhteyshenkilo.tunnus and yhteyshenkilo.tyyppi = 'A')
+            LEFT JOIN kuka ON (kalenteri.yhtio=kuka.yhtio and kalenteri.kuka=kuka.kuka)
+            LEFT JOIN lasku ON (kalenteri.yhtio=lasku.yhtio and kalenteri.otunnus=lasku.tunnus)
             LEFT JOIN kuka kuka2 ON (kuka2.yhtio = lasku.yhtio and kuka2.tunnus = lasku.myyja)
             WHERE kalenteri.liitostunnus = '$asiakasid'
             $lisadel
             {$kayttajalisa}
-            and kalenteri.yhtio          = '$kukarow[yhtio]' ";
+            and kalenteri.yhtio = '$kukarow[yhtio]' ";
 
   if ($yhtunnus > 0) {
     $query .= " and henkilo='$yhtunnus'";
   }
 
-  $query .= "  ORDER by sorttauskentta desc, kalenteri.tunnus";
+  $query .= "ORDER by sorttauskentta desc, tunnus";
 
   if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") === FALSE) {
     $query .= "  LIMIT 5 ";
   }
+
   $res = pupe_query($query);
 
-  while ($memorow = mysql_fetch_array($res)) {
-    if ($memorow["tapa"] == "asiakasanalyysi") {
-      echo "<tr>
-        <th>$memorow[tyyppi]</th><th>$memorow[laatija]</th><th>$memorow[laatija]@$memorow[paivamaara]
-        </th><th>".t("Tapa").": $memorow[tapa]</th><th>".t("Yhteyshenkilö").": $memorow[yhteyshenkilo]</th>
-        </tr>
-        <tr>
-        <td colspan='4'><pre>".t("Miten tuotteet esillä").":<br>$memorow[viesti]<br><br>".t("Myymälän yleisilme").":<br>$memorow[kentta02]<br><br>".t("Tuotteiden jakauma merkeittäin").":<br>".t("Puvut").":<br>$memorow[kentta03]<br>".t("Kypärät").":<br>$memorow[kentta04]<br>".t("Saappaat").":<br>$memorow[kentta05]<br>".t("Hanskat").":<br>$memorow[kentta06]<br>".t("Muut huomiot").":<br>$memorow[kentta07]<br><br>".t("Keskustelut/sovitut extrat").":<br>$memorow[kentta08]<br></pre></td>
-        </tr>";
+  while ($memorow = mysql_fetch_assoc($res)) {
+
+    if ($memorow["laskutunnus"] > 0) {
+      $laskutyyppi = $memorow["laskutila"];
+      $alatila = $memorow["laskualatila"];
+
+      //tehdään selväkielinen tila/alatila
+      require "inc/laskutyyppi.inc";
     }
-    else {
-      if ($memorow["perheid"] == 0) {
-        echo "<tr>";
-        echo "  <th>$memorow[tyyppi]</th>
-            <th>$memorow[laatija]</th>
-            <th>".tv1dateconv($memorow["paivamaara"])."</th>
-            <th>".t("Tapa").": $memorow[tapa]</th>
-            <th>".t("Yhteyshenkilö").": $memorow[yhteyshenkilo]</th>";
 
-        if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") !== FALSE and substr($memorow['tyyppi'], 0, 7) != 'DELETED') {
-          echo "<th><a href='$PHP_SELF?tunnus=$memorow[tunnus]&ytunnus=$ytunnus&asiakasid=$asiakasid&yhtunnus=$yhtunnus&tee=POISTAMEMO&liitostyyppi=$memorow[tyyppi]&lopetus=$lopetus'>".t("Poista")."</a></th>";
-        }
-        else {
-          echo "<th></th>";
-        }
-        echo "</tr>";
+    // Onko tämä lasku?
+    if ($memorow["tyyppi"] == "TILAUS") {
+      $memorow["LASKURIVI"] = TRUE;
+      $memorow["tyyppi"] = t("$laskutyyppi");
+      $memorow["tapa"] = t("$laskutyyppi")." ".t("$alatila");
+    }
+
+    if ($memorow["perheid"] == 0) {
+      echo "<tr><td class='back pnopad' style='height:10px;'></td></tr>";
+      echo "<tr>";
+      echo "<td>".ucfirst($memorow["tyyppi"])."</td>
+            <td>$memorow[laatija]</td>
+            <td>".tv1dateconv($memorow["paivamaara"])."</td>
+            <td>$memorow[tapa]</td>
+            <td>$memorow[yhteyshenkilo]</td>";
+
+      if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") !== FALSE and substr($memorow['tyyppi'], 0, 7) != 'DELETED' and empty($memorow["LASKURIVI"])) {
+        echo "<td><a href='{$palvelin2}crm/asiakasmemo.php?tunnus=$memorow[tunnus]&ytunnus=$ytunnus&asiakasid=$asiakasid&yhtunnus=$yhtunnus&tee=POISTAMEMO&liitostyyppi=$memorow[tyyppi]&lopetus=$lopetus'>".t("Poista")."</a></td>";
+      }
+      else {
+        echo "<td></td>";
+      }
+      echo "</tr>";
+    }
+
+    echo "<tr><td colspan='6'><strong style='font-weight:bold'>".str_replace("\n", "<br>", trim($memorow["viesti"]))."</strong>";
+
+    if ($memorow["laskutunnus"] > 0 and in_array($memorow["laskutila"], array('N', 'L', 'T'))) {
+
+      if ($memorow["laskutila"] == "T") {
+        $koptoim = "TARJOUS";
+      }
+      elseif ($memorow["laskualatila"] == "X") {
+        $koptoim = "LASKU";
+      }
+      else {
+        $koptoim = "TILAUSVAHVISTUS";
       }
 
-      echo "<tr><td colspan='6'>".str_replace("\n", "<br>", trim($memorow["viesti"]));
+      $url = js_openUrlNewWindow("{$palvelin2}tilauskasittely/tulostakopio.php?toim=$koptoim&tee=NAYTATILAUS&otunnus=$memorow[laskutunnus]", "$memorow[laskutunnus]");
 
-      if ($memorow["laskutunnus"] > 0) {
-        $laskutyyppi = $memorow["laskutila"];
-        $alatila   = $memorow["laskualatila"];
+      echo "<br><br>".t("$laskutyyppi")." ".t("$alatila").": $url / ".tv1dateconv($memorow["laskumpvm"])."  ($memorow[laskumyyja])";
+    }
 
-        //tehdään selväkielinen tila/alatila
-        require "inc/laskutyyppi.inc";
-
-        echo "<br><br>".t("$laskutyyppi")." ".t("$alatila").":  <a href='{$palvelin2}raportit/asiakkaantilaukset.php?toim=MYYNTI&tee=NAYTATILAUS&tunnus=$memorow[laskutunnus]&lopetus=$asmemo_lopetus'>$memorow[laskutunnus]</a> / ".tv1dateconv($memorow["laskumpvm"])."  ($memorow[laskumyyja])";
-      }
-
-      if ($memorow["laskutunnus"] == 0 and $memorow["tyyppi"] == "Lead") {
-        echo "<br><br><a href='{$palvelin2}tilauskasittely/tilaus_myynti.php?toim=TARJOUS&from=CRM&asiakasid=$asiakasid&lead=$memorow[tunnus]'>".t("Tee tarjous")."</a>";
-      }
-
-      $crm_haas_column_check = !empty($memorow['kentta02']);
-      $crm_haas_column_check = (!empty($memorow['kentta03']) or $crm_haas_column_check);
-      $crm_haas_column_check = (!empty($memorow['kentta04']) or $crm_haas_column_check);
-      $crm_haas_column_check = (!empty($memorow['kentta05']) or $crm_haas_column_check);
-      $crm_haas_column_check = (!empty($memorow['kentta06']) or $crm_haas_column_check);
-
-      if ($crm_haas_check and $crm_haas_column_check) {
-        echo "<tr>";
-        echo "<th colspan='2'>CALL_TYPE</th>";
-        echo "<td colspan='4'>{$memorow['kentta02']}</td>";
-        echo "</tr>";
-
-        echo "<tr>";
-        echo "<th colspan='2'>OPPORTUNITY</th>";
-        echo "<td colspan='4'>{$memorow['kentta03']}</td>";
-        echo "</tr>";
-
-        echo "<tr>";
-        echo "<th colspan='2'>QTY</th>";
-        echo "<td colspan='4'>{$memorow['kentta04']}</td>";
-        echo "</tr>";
-
-
-        echo "<tr>";
-        echo "<th colspan='2'>OPP_PROJ_DATE</th>";
-        echo "<td colspan='4'>".tv1dateconv($memorow['kentta05'])."</td>";
-        echo "</tr>";
-
-        echo "<tr>";
-        echo "<th colspan='2'>END_REASON</th>";
-        echo "<td colspan='4'>{$memorow['kentta06']}</td>";
-        echo "</tr>";
-      }
-
-      if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") !== FALSE and $memorow["perheid"] == 0 and ($memorow["tyyppi"] == "Memo" or $memorow["tyyppi"] == "Lead")) {
-        echo "<tr><td colspan='3' align='right'>".t("Lähetä käyttäjälle").":</td><td colspan='3'>";
-        echo "<form method='POST'>";
-        echo "<input type='hidden' name='tee' value='SAHKOPOSTI'>";
-        echo "<input type='hidden' name='tunnus' value='$memorow[tunnus]'>";
-        echo "<input type='hidden' name='yhtunnus' value='$yhtunnus'>";
-        echo "<input type='hidden' name='ytunnus' value='$ytunnus'>";
-        echo "<input type='hidden' name='lopetus' value='$lopetus'>";
-        echo "<input type='hidden' name='asiakasid' value='$asiakasid'>";
-        echo "<select name='email'><option value=''>".t("Valitse käyttäjä")."</option>";
-
-        $query  = "SELECT kuka.nimi, kuka.eposti, min(kuka.kuka) kuka
-                   FROM kuka
-                   WHERE kuka.yhtio     = '$kukarow[yhtio]'
-                   AND kuka.aktiivinen  = 1
-                   and kuka.extranet    = ''
-                   and kuka.eposti     != ''
-                   GROUP BY 1,2
-                   ORDER BY kuka.nimi";
-        $vares = pupe_query($query);
-
-        while ($varow = mysql_fetch_array($vares)) {
-          echo "<option value='$varow[eposti]###$varow[kuka]###$varow[nimi]'>$varow[nimi]</option>";
-        }
-
-        echo "</select>";
-        echo "<input type='submit' value='".t("Lähetä viesti")."'>";
-        echo "</form>";
-        echo "</td></tr>";
-
-        echo "<tr><td colspan='6' class='back'>&nbsp;</td></tr>";
-      }
+    if ($memorow["laskutunnus"] == 0 and $memorow["tyyppi"] == "Lead") {
+      echo "<br><br><a href='{$palvelin2}tilauskasittely/tilaus_myynti.php?toim=TARJOUS&from=CRM&asiakasid=$asiakasid&lead=$memorow[tunnus]'>".t("Tee tarjous")."</a>";
     }
 
     echo "</td></tr>";
 
+    $crm_haas_column_check = !empty($memorow['kentta02']);
+    $crm_haas_column_check = (!empty($memorow['kentta03']) or $crm_haas_column_check);
+    $crm_haas_column_check = (!empty($memorow['kentta04']) or $crm_haas_column_check);
+    $crm_haas_column_check = (!empty($memorow['kentta05']) or $crm_haas_column_check);
+    $crm_haas_column_check = (!empty($memorow['kentta06']) or $crm_haas_column_check);
+
+    if ($crm_haas_check and $crm_haas_column_check) {
+      echo "<tr>";
+      echo "<th colspan='2'>CALL_TYPE</th>";
+      echo "<td colspan='4'>{$memorow['kentta02']}</td>";
+      echo "</tr>";
+
+      echo "<tr>";
+      echo "<th colspan='2'>OPPORTUNITY</th>";
+      echo "<td colspan='4'>{$memorow['kentta03']}</td>";
+      echo "</tr>";
+
+      echo "<tr>";
+      echo "<th colspan='2'>QTY</th>";
+      echo "<td colspan='4'>{$memorow['kentta04']}</td>";
+      echo "</tr>";
+
+
+      echo "<tr>";
+      echo "<th colspan='2'>OPP_PROJ_DATE</th>";
+      echo "<td colspan='4'>".tv1dateconv($memorow['kentta05'])."</td>";
+      echo "</tr>";
+
+      echo "<tr>";
+      echo "<th colspan='2'>END_REASON</th>";
+      echo "<td colspan='4'>{$memorow['kentta06']}</td>";
+      echo "</tr>";
+    }
+
     $liitetiedostot = listaaliitetiedostot($memorow['tunnus'], $memorow['tyyppi']);
 
     if ($liitetiedostot != '') {
-      echo "<tr><th colspan='2'>".t("Liitetiedosto")."</th><td colspan='4'>".$liitetiedostot."</td></tr>";
+      echo "<tr><td colspan='2'>".t("Liitetiedosto")."</th><td colspan='4'>".$liitetiedostot."</td></tr>";
+    }
+
+    if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") !== FALSE and $memorow["perheid"] == 0 and ($memorow["tyyppi"] == "Memo" or $memorow["tyyppi"] == "Lead")) {
+      echo "<tr><td colspan='2'>".t("Lähetä käyttäjälle").":</td><td colspan='4'>";
+      echo "<form action='{$palvelin2}crm/asiakasmemo.php' method='POST'>";
+      echo "<input type='hidden' name='tee' value='SAHKOPOSTI'>";
+      echo "<input type='hidden' name='tunnus' value='$memorow[tunnus]'>";
+      echo "<input type='hidden' name='yhtunnus' value='$yhtunnus'>";
+      echo "<input type='hidden' name='ytunnus' value='$ytunnus'>";
+      echo "<input type='hidden' name='lopetus' value='$lopetus'>";
+      echo "<input type='hidden' name='asiakasid' value='$asiakasid'>";
+      echo "<select name='email'><option value=''>".t("Valitse käyttäjä")."</option>";
+
+      $query = "SELECT kuka.nimi, kuka.eposti, min(kuka.kuka) kuka
+                 FROM kuka
+                 WHERE kuka.yhtio = '$kukarow[yhtio]'
+                 AND kuka.aktiivinen = 1
+                 and kuka.extranet = ''
+                 and kuka.eposti     != ''
+                 GROUP BY 1,2
+                 ORDER BY kuka.nimi";
+      $vares = pupe_query($query);
+
+      while ($varow = mysql_fetch_array($vares)) {
+        echo "<option value='$varow[eposti]###$varow[kuka]###$varow[nimi]'>$varow[nimi]</option>";
+      }
+
+      echo "</select>";
+      echo "<input type='submit' value='".t("Lähetä viesti")."'>";
+      echo "</form>";
+      echo "</td></tr>";
     }
   }
 
@@ -1236,11 +1205,11 @@ if ($ytunnus != '' and $tee == '') {
   if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") !== FALSE ) {
     if ($naytapoistetut == "") {
       echo "<br>";
-      echo "<a href='$PHP_SELF?naytapoistetut=OK&ytunnus=$ytunnus&asiakasid=$asiakasid&yhtunnus=$yhtunnus&lopetus=$lopetus'>".t("Näytä poistetut muistiinpanot")."</a>";
+      echo "<a href='{$palvelin2}crm/asiakasmemo.php?naytapoistetut=OK&ytunnus=$ytunnus&asiakasid=$asiakasid&yhtunnus=$yhtunnus&lopetus=$lopetus'>".t("Näytä poistetut muistiinpanot")."</a>";
     }
     else {
       echo "<br>";
-      echo "<a href='$PHP_SELF?naytapoistetut=&ytunnus=$ytunnus&asiakasid=$asiakasid&yhtunnus=$yhtunnus&lopetus=$lopetus'>".t("Näytä aktiiviset muistiinpanot"). "</a>";
+      echo "<a href='{$palvelin2}crm/asiakasmemo.php?naytapoistetut=&ytunnus=$ytunnus&asiakasid=$asiakasid&yhtunnus=$yhtunnus&lopetus=$lopetus'>".t("Näytä aktiiviset muistiinpanot"). "</a>";
     }
   }
 

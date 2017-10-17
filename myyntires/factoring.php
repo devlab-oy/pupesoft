@@ -9,15 +9,15 @@ if (isset($maksuehto) and isset($tunnus)) {
   // tutkaillaan maksuehtoa
   $query = "SELECT *
             from maksuehto
-            where yhtio    = '$kukarow[yhtio]'
-            and tunnus     = '$maksuehto'
+            where yhtio = '$kukarow[yhtio]'
+            and tunnus  = '$maksuehto'
             and factoring_id is not null";
 
   if ($laji == 'pois') {
     $query = "SELECT *
               FROM maksuehto
-              WHERE yhtio   = '$kukarow[yhtio]'
-              and tunnus    = '$maksuehto'
+              WHERE yhtio = '$kukarow[yhtio]'
+              and tunnus  = '$maksuehto'
               and factoring_id is null";
   }
 
@@ -155,11 +155,11 @@ if (isset($laskuno)) {
             JOIN maksuehto ON (lasku.yhtio = maksuehto.yhtio
               and lasku.maksuehto = maksuehto.tunnus
               and maksuehto.factoring_id is null)
-            where lasku.yhtio  = '$kukarow[yhtio]'
-            and lasku.laskunro = '$laskuno'
-            and lasku.tila     = 'U'
-            and lasku.alatila  = 'X'
-            and lasku.mapvm    = '0000-00-00'";
+            where lasku.yhtio     = '$kukarow[yhtio]'
+            and lasku.laskunro    = '$laskuno'
+            and lasku.tila        = 'U'
+            and lasku.alatila     = 'X'
+            and lasku.mapvm       = '0000-00-00'";
 
   if ($laji == 'pois') {
     $query = "SELECT lasku.*, lasku.tunnus ltunnus, maksuehto.tunnus, maksuehto.teksti
@@ -167,11 +167,11 @@ if (isset($laskuno)) {
               JOIN maksuehto ON (lasku.yhtio = maksuehto.yhtio
                 and lasku.maksuehto = maksuehto.tunnus
                 and maksuehto.factoring_id is not null)
-              where lasku.yhtio  = '$kukarow[yhtio]'
-              and lasku.laskunro = '$laskuno'
-              and lasku.tila     = 'U'
-              and lasku.alatila  = 'X'
-              and lasku.mapvm    = '0000-00-00'";
+              where lasku.yhtio     = '$kukarow[yhtio]'
+              and lasku.laskunro    = '$laskuno'
+              and lasku.tila        = 'U'
+              and lasku.alatila     = 'X'
+              and lasku.mapvm       = '0000-00-00'";
   }
   $result = pupe_query($query);
 

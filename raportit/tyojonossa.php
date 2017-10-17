@@ -26,6 +26,13 @@ echo "</form>";
 echo "<br>";
 echo "<table>";
 
+if ($kukarow['kieli'] != '') {
+  $kieli = $kukarow['kieli'];
+}
+else {
+  $kieli = $yhtiorow['kieli'];
+}
+
 if ($peruste == "suorittaja") {
   $query = "SELECT
             ifnull(a3.nimi, 'N/A') tyojono1,
@@ -33,9 +40,9 @@ if ($peruste == "suorittaja") {
             count(*) maara
             FROM lasku
             JOIN tyomaarays ON (tyomaarays.yhtio = lasku.yhtio and tyomaarays.otunnus=lasku.tunnus and tyomaarays.tyojono != '')
-            LEFT JOIN avainsana a1 ON (a1.yhtio = tyomaarays.yhtio and a1.laji = 'TYOM_TYOJONO' and a1.selite = tyomaarays.tyojono )
-            LEFT JOIN avainsana a2 ON (a2.yhtio = tyomaarays.yhtio and a2.laji = 'TYOM_TYOSTATUS' and a2.selite = tyomaarays.tyostatus)
-            LEFT JOIN avainsana a5 ON (a5.yhtio=tyomaarays.yhtio and a5.laji='TYOM_PRIORIT' and a5.selite=tyomaarays.prioriteetti)
+            LEFT JOIN avainsana a1 ON (a1.yhtio = tyomaarays.yhtio and a1.laji = 'TYOM_TYOJONO' and a1.selite = tyomaarays.tyojono  and a1.kieli = '$kieli')
+            LEFT JOIN avainsana a2 ON (a2.yhtio = tyomaarays.yhtio and a2.laji = 'TYOM_TYOSTATUS' and a2.selite = tyomaarays.tyostatus and a2.kieli = '$kieli')
+            LEFT JOIN avainsana a5 ON (a5.yhtio=tyomaarays.yhtio and a5.laji='TYOM_PRIORIT' and a5.selite=tyomaarays.prioriteetti and a5.kieli = '$kieli')
             LEFT JOIN kuka a3 ON (a3.yhtio = tyomaarays.yhtio and a3.kuka = tyomaarays.suorittaja)
             WHERE lasku.yhtio  = '{$kukarow["yhtio"]}'
             AND lasku.tila     in ('A','L','N','S','C')
@@ -50,9 +57,9 @@ else {
             count(*) maara
             FROM lasku
             JOIN tyomaarays ON (tyomaarays.yhtio = lasku.yhtio and tyomaarays.otunnus = lasku.tunnus and tyomaarays.tyojono != '')
-            LEFT JOIN avainsana a1 ON (a1.yhtio = tyomaarays.yhtio and a1.laji = 'TYOM_TYOJONO' and a1.selite = tyomaarays.tyojono)
-            LEFT JOIN avainsana a2 ON (a2.yhtio = tyomaarays.yhtio and a2.laji = 'TYOM_TYOSTATUS' and a2.selite = tyomaarays.tyostatus)
-            LEFT JOIN avainsana a5 ON (a5.yhtio=tyomaarays.yhtio and a5.laji='TYOM_PRIORIT' and a5.selite=tyomaarays.prioriteetti)
+            LEFT JOIN avainsana a1 ON (a1.yhtio = tyomaarays.yhtio and a1.laji = 'TYOM_TYOJONO' and a1.selite = tyomaarays.tyojono and a1.kieli = '$kieli')
+            LEFT JOIN avainsana a2 ON (a2.yhtio = tyomaarays.yhtio and a2.laji = 'TYOM_TYOSTATUS' and a2.selite = tyomaarays.tyostatus and a2.kieli = '$kieli')
+            LEFT JOIN avainsana a5 ON (a5.yhtio=tyomaarays.yhtio and a5.laji='TYOM_PRIORIT' and a5.selite=tyomaarays.prioriteetti and a5.kieli = '$kieli')
             WHERE lasku.yhtio  = '{$kukarow["yhtio"]}'
             AND lasku.tila     in ('A','L','N','S','C')
             AND lasku.alatila != 'X'

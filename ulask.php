@@ -619,7 +619,7 @@ if ($tee == 'I') {
     $tee = 'E';
   }
 
-  if (trim($hyvak[1]) == "") {
+  if (trim($hyvak[1]) == "" and laskun_hyvaksyjia()) {
     $errormsg .= "<font class='error'>".t("Laskulla on pakko olla ensimmäinen hyväksyjä")."!</font><br>";
     $tee = 'E';
   }
@@ -806,12 +806,29 @@ if ($tee == 'I') {
 
   // IBAN / BBAN
   if ($trow['ultilno'] != "") {
+    $swift_ok = TRUE;
+
+    if (strtoupper($ibanmaa) == "FI") {
+      // Haetaan swift tarkistusta varten tai jos sitä ei ole syötetty ollenkaan
+      include "inc/pankkitiedot.inc";
+      $vastaus = pankkitiedot($trow['ultilno'], '');
+
+      // Jos swift on tyhjä niin laitetaan haettu tilalle
+      if (empty($trow["swift"])) {
+        $trow["swift"] = $vastaus['swift'];
+      }
+
+      if ($trow["swift"] != $vastaus['swift']) {
+        $swift_ok = FALSE;
+      }
+    }
+
     // Vaaditaan isot kirjaimet
     $trow['ultilno'] = strtoupper($trow['ultilno']);
     $trow['swift']   = strtoupper($trow['swift']);
 
-    // Jos SEPA-maa, tarkistetaan IBAN
-    if (tarkista_sepa($ibanmaa) and tarkista_iban($trow['ultilno']) == $trow['ultilno']) {
+    // Jos SEPA-maa, tarkistetaan IBAN ja SWIFT-koodi
+    if (tarkista_sepa($ibanmaa) and tarkista_iban($trow['ultilno']) == $trow['ultilno'] and $swift_ok) {
       $pankkitiliok = TRUE;
     }
     elseif (!tarkista_sepa($ibanmaa) and tarkista_bban($trow['ultilno']) !== FALSE) {
@@ -821,6 +838,7 @@ if ($tee == 'I') {
 
   if (!$pankkitiliok) {
     $errormsg .= "<font class='error'>".t("Pankkitili puuttuu tai on virheellinen")."!</font><br>";
+    $errormsg .= "<font class='error'>".t("Tarkista myös SWIFT-koodi")."!</font><br>";
     $tee = 'E';
   }
 }
@@ -1663,51 +1681,54 @@ if ($tee == 'P' or $tee == 'E') {
 
   echo "</tr>";
 
-  echo "<tr><td colspan='2'><hr></td></tr>";
+  if (laskun_hyvaksyjia()) {
+    
+    echo "<tr><td colspan='2'><hr></td></tr>";
+    echo "<tr><td valign='top'>".t("Hyväksyjät")."</td><td>";
 
-  echo "<tr><td valign='top'>".t("Hyväksyjät")."</td><td>";
+    $query = "SELECT DISTINCT kuka.kuka, kuka.nimi
+              FROM kuka
+              JOIN oikeu ON oikeu.yhtio = kuka.yhtio and oikeu.kuka = kuka.kuka and oikeu.nimi like '%hyvak.php'
+              WHERE kuka.yhtio    = '$kukarow[yhtio]'
+              AND kuka.aktiivinen = 1
+              AND kuka.extranet   = ''
+              and kuka.hyvaksyja  = 'o'
+              ORDER BY kuka.nimi";
+    $vresult = pupe_query($query);
 
-  $query = "SELECT DISTINCT kuka.kuka, kuka.nimi
-            FROM kuka
-            JOIN oikeu ON oikeu.yhtio = kuka.yhtio and oikeu.kuka = kuka.kuka and oikeu.nimi like '%hyvak.php'
-            WHERE kuka.yhtio    = '$kukarow[yhtio]'
-            AND kuka.aktiivinen = 1
-            AND kuka.extranet   = ''
-            and kuka.hyvaksyja  = 'o'
-            ORDER BY kuka.nimi";
-  $vresult = pupe_query($query);
+    $ulos = '';
+    // Täytetään 5 hyväksyntäkenttää
+    for ($i=1; $i<6; $i++) {
 
-  $ulos = '';
-  // Täytetään 5 hyväksyntäkenttää
-  for ($i=1; $i<6; $i++) {
-
-    while ($vrow = mysql_fetch_assoc($vresult)) {
-      $sel = "";
-      if ($hyvak[$i] == $vrow['kuka']) {
-        $sel = "selected";
+      while ($vrow = mysql_fetch_assoc($vresult)) {
+        $sel = "";
+        if ($hyvak[$i] == $vrow['kuka']) {
+          $sel = "selected";
+        }
+        $ulos .= "<option value ='$vrow[kuka]' $sel>$vrow[nimi]";
       }
-      $ulos .= "<option value ='$vrow[kuka]' $sel>$vrow[nimi]";
+
+      // Käydään sama data läpi uudestaan
+      if (!mysql_data_seek($vresult, 0)) {
+        echo "mysql_data_seek failed!";
+        exit;
+      }
+
+      echo "<select name='hyvak[$i]' tabindex='24'>
+          <option value = ' '>".t("Ei kukaan")."
+          $ulos
+          </select>";
+      $ulos="";
+
+      // Tehdään checkbox, jolla annetaan lupa muuttaa hyväksyntälistaa myöhemmin
+      if ($i == 1) {
+        echo " ".t("Listaa saa muuttaa")." <input type='checkbox' name='ohyvaksynnanmuutos' $ohyvaksynnanmuutos tabindex='-1'>";
+      }
+      echo "<br>";
     }
 
-    // Käydään sama data läpi uudestaan
-    if (!mysql_data_seek($vresult, 0)) {
-      echo "mysql_data_seek failed!";
-      exit;
-    }
-    echo "<select name='hyvak[$i]' tabindex='24'>
-        <option value = ' '>".t("Ei kukaan")."
-        $ulos
-        </select>";
-    $ulos="";
-
-    // Tehdään checkbox, jolla annetaan lupa muuttaa hyväksyntälistaa myöhemmin
-    if ($i == 1) {
-      echo " ".t("Listaa saa muuttaa")." <input type='checkbox' name='ohyvaksynnanmuutos' $ohyvaksynnanmuutos tabindex='-1'>";
-    }
-    echo "<br>";
+    echo "</td></tr>";
   }
-
-  echo "</td></tr>";
 
   echo "<tr><td colspan='2'>";
 

@@ -398,18 +398,19 @@ if ($virexx == 0 and strpos($laskurow['tilausvahvistus'], 'P') === FALSE) {
     }
 
   } // end rivejä löytyi
+  if (strpos($laskurow['tilausvahvistus'], 'S') !== FALSE) {
+    // Sähköpostin lähetykseen parametrit
+    $parametri = array(
+      "to"           => $tilvahasiakas['email'],
+      "cc"           => "",
+      "subject"      => $yhtiorow['nimi']." - ".t("Tilausvahvistus", $kieli)." $tulostettava_tunnus",
+      "ctype"        => "text",
+      "body"         => $ulos,
+      "attachements" => $_attachments
+    );
 
-  // Sähköpostin lähetykseen parametrit
-  $parametri = array(
-    "to"           => $tilvahasiakas['email'],
-    "cc"           => "",
-    "subject"      => $yhtiorow['nimi']." - ".t("Tilausvahvistus", $kieli)." $tulostettava_tunnus",
-    "ctype"        => "text",
-    "body"         => $ulos,
-    "attachements" => $_attachments
-  );
-
-  pupesoft_sahkoposti($parametri);
+    pupesoft_sahkoposti($parametri);
+  }
 
 
   if (strpos($laskurow['tilausvahvistus'], 'O') !== FALSE) {

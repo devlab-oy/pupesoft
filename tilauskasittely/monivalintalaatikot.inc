@@ -1196,6 +1196,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
         if (isset($monivalinta_tuotteet)) {
           $query = "SELECT avainsana.selite as malli,
                     $kieli_selite,
+                    $kieli_selitetark,
                     sum(if(tuote.status not in ('P','X'), 1, (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0))) naytetaanko
                     FROM tuote
                     JOIN avainsana ON (avainsana.yhtio = tuote.yhtio and tuote.malli = avainsana.selite and avainsana.laji = 'MALLI' and avainsana.kieli in ('$yhtiorow[kieli]', '') $avainlisa)
@@ -1215,18 +1216,20 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
         }
         elseif ($lisa_haku_try == "" and $lisa_haku_tme == "") {
           $query = "SELECT avainsana.selite as malli,
-                    $kieli_selite
-                          FROM avainsana
-                          WHERE avainsana.yhtio = '$kukarow[yhtio]'
-                          and avainsana.laji    = 'MALLI'
+                    $kieli_selite,
+                    $kieli_selitetark
+                    FROM avainsana
+                    WHERE avainsana.yhtio = '$kukarow[yhtio]'
+                    and avainsana.laji    = 'MALLI'
                     and avainsana.kieli         in ('$yhtiorow[kieli]', '')
-                          $avainlisa
-                          ORDER BY avainsana.jarjestys, avainsana.selite";
+                    $avainlisa
+                    ORDER BY avainsana.jarjestys, avainsana.selite";
           $sxresult = pupe_query($query);
         }
         elseif ($lisa_haku_try != "" or $lisa_haku_tme != "") {
           $query = "SELECT distinct avainsana.selite as malli,
-                    $kieli_selite
+                    $kieli_selite,
+                    $kieli_selitetark
                     FROM tuote
                     $lisa_parametri
                     JOIN avainsana ON (avainsana.yhtio = tuote.yhtio and tuote.malli = avainsana.selite and avainsana.laji = 'MALLI' and avainsana.kieli in ('$yhtiorow[kieli]', '') $avainlisa)
@@ -1286,7 +1289,18 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
               $sel = 'SELECTED';
             }
 
-            echo "<option value='".strtolower($mallirow['malli'])."' $sel>$mallirow[selite]</option>";
+
+            $_mallie = "";
+
+            if ($yhtiorow['naytetaanko_osaston_ja_tryn_selite'] == '' or empty($mallirow["selitetark"])) {
+              $_mallie = $mallirow["selite"];
+            }
+
+            if (!empty($mallirow["selitetark"]) and $_mallie != $mallirow["selitetark"]) {
+              $_mallie .= " {$mallirow["selitetark"]}";
+            }
+
+            echo "<option value='".strtolower($mallirow['malli'])."' $sel>$_mallie</option>";
           }
 
           echo "</select></td>";

@@ -4,6 +4,7 @@ require_once 'rajapinnat/presta/presta_client.php';
 require_once 'rajapinnat/presta/presta_addresses.php';
 
 class PrestaCustomers extends PrestaClient {
+  private $customer_handling = null;
   private $default_groups = array();
   private $presta_addresses = null;
 
@@ -24,6 +25,7 @@ class PrestaCustomers extends PrestaClient {
    * @return \SimpleXMLElement
    */
 
+
   protected function generate_xml($customer, SimpleXMLElement $existing_customer = null) {
     if (is_null($existing_customer)) {
       $xml = $this->empty_xml();
@@ -34,12 +36,8 @@ class PrestaCustomers extends PrestaClient {
 
     $_email = empty($customer['email']) ? 'test@example.com' : $customer['email'];
 
-    // max 32, numbers and special characters not allowed
-    $_nimi = preg_replace("/[^a-zA-ZäöåÄÖÅ ]+/", "", substr($customer['nimi'], 0, 32));
-    $_nimi = empty($_nimi) ? '-' : $_nimi;
-
     $xml->customer->firstname = "-";
-    $xml->customer->lastname = $this->xml_value($_nimi);
+    $xml->customer->lastname = $this->clean_name($customer['nimi']);
     $xml->customer->email = $this->xml_value($_email);
 
     if (!empty($customer['verkkokauppa_salasana'])) {
@@ -48,6 +46,9 @@ class PrestaCustomers extends PrestaClient {
     }
 
     $xml->customer->active = 1;
+
+    // Assign dynamic customer parameters
+    $this->assign_dynamic_fields($xml->customer, $customer);
 
     $group_id = $customer['presta_customergroup_id'];
     $xml->customer->id_default_group = $group_id;
@@ -113,18 +114,17 @@ class PrestaCustomers extends PrestaClient {
 
           if (in_array($id, $existing_customers)) {
             $this->update($id, $customer, $id_shop);
-
-            $customer['presta_customer_id'] = $id;
-            $this->presta_addresses->update_with_customer_id($customer, $id_shop);
           }
           else {
             $response = $this->create($customer, $id_shop);
             $id = (string) $response['customer']['id'];
-
-            $customer['presta_customer_id'] = $id;
-            $this->presta_addresses->create($customer, $id_shop);
           }
 
+          // set customer handling here, and add addresses
+          $this->presta_addresses->set_customer_handling($this->customer_handling);
+          $this->presta_addresses->add_addresses_for_customer($id, $customer['osoitteet'], $id_shop);
+
+          // update presta customer id to pupesoft
           $this->update_to_pupesoft($id, $customer['tunnus'], $customer['yhtio']);
         }
         catch (Exception $e) {
@@ -192,5 +192,9 @@ class PrestaCustomers extends PrestaClient {
     if (is_array($value)) {
       $this->default_groups = $value;
     }
+  }
+
+  public function set_customer_handling($value) {
+    $this->customer_handling = $value;
   }
 }

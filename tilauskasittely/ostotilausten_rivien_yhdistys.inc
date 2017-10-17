@@ -32,7 +32,7 @@ if ($tee == "teeyhdistys") {
 
           if (trim($suuntalava_row['suuntalavat']) != '') {
             foreach (explode(",", $suuntalava_row['suuntalavat']) as $_suuntalava) {
-              
+
               // Tsekataan ettei jo ole
               $query = "SELECT tunnus
                         FROM suuntalavat_saapuminen
@@ -40,7 +40,7 @@ if ($tee == "teeyhdistys") {
                         AND suuntalava = '{$_suuntalava}'
                         AND saapuminen = '{$otunnus}'";
               $check_res = pupe_query($query);
-              
+
               // Jos relaatiota ei ole niin luodaan se, muuten poistetaan
               // koska suuntalavat_saapuminen relaatiota ei saa olla kuin kerran
               // per saapuminen ja suuntalava

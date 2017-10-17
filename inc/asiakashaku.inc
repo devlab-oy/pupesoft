@@ -41,12 +41,13 @@ else {
   $toimipaikkalisa = " and asiakas.toimipaikka = {$tp} ";
 }
 
-$ytunnus     = addslashes(trim($ytunnus));
+$ytunnus = addslashes(trim($ytunnus));
 $ytunnus_talteen = $ytunnus;
 
-$limit      = 1000; // montako riviä on maksimi
-$monta       = 0;
-$asiakasrajaus   = "";
+$limit = 1000; // montako riviä on maksimi
+$monta = 0;
+$force_selaus = FALSE;
+$asiakasrajaus = "";
 
 if (in_array($kutsuja, array("asiakasemo.php", "kalenteri.php"))) {
   // Tässä haarassa myös prospektit näytetään
@@ -135,7 +136,10 @@ elseif ($ytunnus != '') {
     $result = pupe_query($query);
     $monta  = mysql_num_rows($result);
 
-    if ($monta != 0) $monta  = 2; // aina selailuun niin menee liitostunnukset ja ytunnukset oikein
+    // aina selailuun niin menee liitostunnukset ja ytunnukset oikein
+    if ($monta > 0) {
+      $force_selaus = TRUE;
+    }
   }
 
   if ($monta == 0  and substr($ytunnus, 0, 1) == "#") {
@@ -158,7 +162,10 @@ elseif ($ytunnus != '') {
     $result = pupe_query($query);
     $monta  = mysql_num_rows($result);
 
-    if ($monta != 0) $monta  = 2; // aina selailuun niin menee liitostunnukset ja ytunnukset oikein
+    // aina selailuun niin menee liitostunnukset ja ytunnukset oikein
+    if ($monta > 0) {
+      $force_selaus = TRUE;
+    }
   }
 
   if ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA") {
@@ -300,9 +307,31 @@ elseif ($ytunnus != '') {
     }
 
     // arvailuhaku
-    $query  = "(SELECT asiakas.*, yhtio.nimi yhtionimi,
+    $query = "";
+
+    if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") !== FALSE) {
+      $query .= "(SELECT asiakas.*, yhtio.nimi yhtionimi,
+                 if (yht.nimi = '{$ytunnus2}', 1, if(left(yht.nimi, length('{$ytunnus2}')) = '{$ytunnus2}', 2, 3)) apujarjestys,
+                 '0' apujarjestys2,
+                 yht.nimi yhteyshenkilo
+                 FROM asiakas
+                 JOIN yhtio on (asiakas.yhtio=yhtio.yhtio)
+                 JOIN yhteyshenkilo yht ON (yht.yhtio = asiakas.yhtio and yht.liitostunnus = asiakas.tunnus and yht.tyyppi = 'A')
+                 WHERE asiakas.$konsyhtiot
+                 and yht.nimi like '%$ytunnus2%'
+                 and yht.nimi != ''
+                 $toimipaikkalisa
+                 $osoitelisa
+                 $postitplisa
+                 $postinolisa
+                 $lajilisa $asiakasrajaus)
+                 UNION ";
+    }
+
+    $query .= "(SELECT asiakas.*, yhtio.nimi yhtionimi,
                 if (asiakas.nimi = '{$ytunnus2}', 1, if(left(asiakas.nimi, length('{$ytunnus2}')) = '{$ytunnus2}', 2, 3)) apujarjestys,
-                '1' apujarjestys2
+                '1' apujarjestys2,
+                '' yhteyshenkilo
                 FROM asiakas
                 JOIN yhtio on asiakas.yhtio=yhtio.yhtio
                 WHERE asiakas.$konsyhtiot
@@ -316,7 +345,8 @@ elseif ($ytunnus != '') {
                 UNION
                 (SELECT asiakas.*, yhtio.nimi yhtionimi,
                 if (asiakas.nimitark = '{$ytunnus2}', 1, if(left(asiakas.nimitark, length('{$ytunnus2}')) = '{$ytunnus2}', 2, 3)) apujarjestys,
-                '2' apujarjestys2
+                '2' apujarjestys2,
+                '' yhteyshenkilo
                 FROM asiakas
                 JOIN yhtio on asiakas.yhtio=yhtio.yhtio
                 WHERE asiakas.$konsyhtiot
@@ -330,7 +360,8 @@ elseif ($ytunnus != '') {
                 UNION
                 (SELECT asiakas.*, yhtio.nimi yhtionimi,
                 if (asiakas.toim_nimi = '{$ytunnus2}', 1, if(left(asiakas.toim_nimi, length('{$ytunnus2}')) = '{$ytunnus2}', 2, 3)) apujarjestys,
-                '3' apujarjestys2
+                '3' apujarjestys2,
+                '' yhteyshenkilo
                 FROM asiakas
                 JOIN yhtio on asiakas.yhtio=yhtio.yhtio
                 WHERE asiakas.$konsyhtiot
@@ -344,7 +375,8 @@ elseif ($ytunnus != '') {
                 UNION
                 (SELECT asiakas.*, yhtio.nimi yhtionimi,
                 if (asiakas.toim_nimitark = '{$ytunnus2}', 1, if(left(asiakas.toim_nimitark, length('{$ytunnus2}')) = '{$ytunnus2}', 2, 3)) apujarjestys,
-                '4' apujarjestys2
+                '4' apujarjestys2,
+                '' yhteyshenkilo
                 FROM asiakas
                 JOIN yhtio on asiakas.yhtio=yhtio.yhtio
                 WHERE asiakas.$konsyhtiot
@@ -358,7 +390,8 @@ elseif ($ytunnus != '') {
                 UNION
                 (SELECT asiakas.*, yhtio.nimi yhtionimi,
                 if (asiakas.asiakasnro = '{$ytunnus2}', 1, if(left(asiakas.asiakasnro, length('{$ytunnus2}')) = '{$ytunnus2}', 2, 3)) apujarjestys,
-                '5' apujarjestys2
+                '5' apujarjestys2,
+                '' yhteyshenkilo
                 FROM asiakas
                 JOIN yhtio on asiakas.yhtio=yhtio.yhtio
                 WHERE asiakas.$konsyhtiot
@@ -372,7 +405,8 @@ elseif ($ytunnus != '') {
                 UNION
                 (SELECT asiakas.*, yhtio.nimi yhtionimi,
                 if (asiakas.ovttunnus = '{$ytunnus2}', 1, if(left(asiakas.ovttunnus, length('{$ytunnus2}')) = '{$ytunnus2}', 2, 3)) apujarjestys,
-                '6' apujarjestys2
+                '6' apujarjestys2,
+                '' yhteyshenkilo
                 FROM asiakas
                 JOIN yhtio on asiakas.yhtio=yhtio.yhtio
                 WHERE asiakas.$konsyhtiot
@@ -388,7 +422,8 @@ elseif ($ytunnus != '') {
       $query .= "  UNION
             (SELECT asiakas.*, yhtio.nimi yhtionimi,
               if (asiakas.postitp = '{$ytunnus2}', 1, if(left(asiakas.postitp, length('{$ytunnus2}')) = '{$ytunnus2}', 2, 3)) apujarjestys,
-              '7' apujarjestys2
+              '7' apujarjestys2,
+              '' yhteyshenkilo
               FROM asiakas
               JOIN yhtio on asiakas.yhtio=yhtio.yhtio
               WHERE asiakas.$konsyhtiot
@@ -399,6 +434,7 @@ elseif ($ytunnus != '') {
               $postinolisa
               $lajilisa $asiakasrajaus)";
     }
+
     $query .= "ORDER BY apujarjestys2, apujarjestys, nimi";
     $result = pupe_query($query);
     $monta  = mysql_num_rows($result);
@@ -415,6 +451,9 @@ elseif ($asiakasnro != '') {
   $monta  = mysql_num_rows($result);
 }
 
+// Putsattu resultti
+$_asiakas_tunnukset = array();
+
 if ($monta == 0) {
   if ($ytunnus and strpos($_SERVER["PHP_SELF"], "lue_data.php") === FALSE) {
     echo "<font class='error'>".t("Asiakas")." ". tarkistahetu($ytunnus)." ".t("ei löydy")."!</font> ";
@@ -430,10 +469,30 @@ if ($monta == 0) {
   $ytunnus = "";
   $asiakasnro = "";
 }
+else {
+  // talteen tunnukset, näytetään asiakas vain kerran
+  // UNIONista saataa tulla sama asiakas monta kertaa resultiin...
 
-if ($monta == 1) {
-  $asiakasrow  = mysql_fetch_array($result);
-  $ytunnus  = $asiakasrow['ytunnus'];
+  // Osuiko yhteyshenkilön nimellä?
+  $yh_match = FALSE;
+
+  while ($asiakas_loop = mysql_fetch_array($result)) {
+    if (!isset($_asiakas_tunnukset[$asiakas_loop['tunnus']])) {
+
+      if (!empty($asiakas_loop['yhteyshenkilo'])) {
+        $yh_match = TRUE;
+      }
+
+      $_asiakas_tunnukset[$asiakas_loop['tunnus']] = $asiakas_loop;
+    }
+  }
+
+  $monta = count($_asiakas_tunnukset);
+}
+
+if ($monta == 1 and !$force_selaus) {
+  $asiakasrow = array_shift($_asiakas_tunnukset);
+  $ytunnus = $asiakasrow['ytunnus'];
 
   if ($asiakasnro != "") {
     $asiakasnro  = $asiakasrow['asiakasnro'];
@@ -453,8 +512,7 @@ if ($monta == 1) {
     $kantaasiakastunnus = $kantaasiakastunnus_row['avainsana'];
   }
 }
-
-if ($monta > 1 and $monta <= $limit) {
+elseif ($monta > 1 and $monta <= $limit) {
 
   if ($kutsuja != "yllapito.php") {
     $piiri_result = t_avainsana('PIIRI');
@@ -485,6 +543,10 @@ if ($monta > 1 and $monta <= $limit) {
 
     if ($on_piireja) {
       echo "<th>" . t("piiri") . "</th>";
+    }
+
+    if ($yh_match) {
+      echo "<th>" . t("yhteyshenkilö") . "</th>";
     }
 
     if ($yhtiorow['toimipaikkakasittely'] == 'L') {
@@ -554,17 +616,7 @@ if ($monta > 1 and $monta <= $limit) {
     echo "<td class='back'></td></tr>";
   }
 
-  // talteen tunnukset, näytetään asiakas vain kerran
-  $_asiakas_tunnukset = array();
-
-  while ($asiakas = mysql_fetch_array($result)) {
-
-    if (isset($_asiakas_tunnukset[$asiakas['tunnus']])) {
-      continue;
-    }
-
-    $_asiakas_tunnukset[$asiakas['tunnus']] = TRUE;
-
+  foreach ($_asiakas_tunnukset as $asiakas) {
     if     ($asiakas['ytunnus']    != '') $numero = trim($asiakas['ytunnus']);
     elseif ($asiakas['asiakasnro'] != '') $numero = trim($asiakas['asiakasnro']);
 
@@ -603,7 +655,7 @@ if ($monta > 1 and $monta <= $limit) {
         $brnim .= "<br><font class='error'>".t("HUOM: Tämä on korjaamo-asiakas")."</font>";
       }
 
-      echo "<td>",tarkistahetu($asiakas['ytunnus']),"</td>";
+      echo "<td>", tarkistahetu($asiakas['ytunnus']), "</td>";
       echo "<td>{$asiakas['asiakasnro']}</td>";
       echo "<td>{$asiakas['nimi']} {$asiakas['nimitark']} {$brnim}</td>";
       echo "<td>{$asiakas['osoite']} {$bros}</td>";
@@ -630,6 +682,10 @@ if ($monta > 1 and $monta <= $limit) {
 
 
         echo "</td>";
+      }
+
+      if ($yh_match) {
+        echo "<td>{$asiakas['yhteyshenkilo']}</td>";
       }
 
       if ($on_piireja) {
@@ -861,41 +917,31 @@ if ($monta != 1) {
   echo "</form>";
 
   if ($kutsuja == "otsik.inc" or $kutsuja == "asiakasemo.php" or $kutsuja == "kalenteri.php") {
-    $query = "SELECT yhtio
-              FROM oikeu
-              WHERE yhtio   = '$kukarow[yhtio]'
-              and kuka      = '$kukarow[kuka]'
-              and nimi      = 'yllapito.php'
-              and alanimi   = 'asiakas!!!VAHITTAISMYYNTI!!!true&laji=H'
-              and paivitys != ''";
-    $oikeuresult1 = pupe_query($query);
 
-    $query = "SELECT yhtio
-              FROM oikeu
-              WHERE yhtio   = '$kukarow[yhtio]'
-              and kuka      = '$kukarow[kuka]'
-              and nimi      = 'yllapito.php'
-              and alanimi   = 'asiakas'
-              and paivitys != ''";
-    $oikeuresult2 = pupe_query($query);
+    $asylloik1 = tarkista_oikeus("yllapito.php", "asiakas!!!VAHITTAISMYYNTI!!!true&laji=H", "X", TRUE);
+    $asylloik2 = tarkista_oikeus("yllapito.php", "asiakas%", "X", TRUE);
 
-    if ($monta != 1 and (mysql_num_rows($oikeuresult1) > 0 or mysql_num_rows($oikeuresult2) > 0)) {
+    $uusiasiakas = "uusiasiakas";
+
+    $ahlopetus .= "//uusiasiakas=$uusiasiakas";
+
+    if ($monta != 1 and ($asylloik1 or $asylloik2)) {
 
       //Annetaan mahdollisuus perustaa uusi asiakas
-      if (mysql_num_rows($oikeuresult1) > 0) {
+      if ($asylloik1) {
         echo "<form action='{$palvelin2}yllapito.php' method='post'>";
         echo "<input type='hidden' name='lopetus'   value='$ahlopetus'>";
-        echo "<input type='hidden' name='toim'    value='asiakas!!!VAHITTAISMYYNTI!!!true'>";
+        echo "<input type='hidden' name='toim'    value='{$asylloik2["alanimi"]}'>";
         echo "<input type='hidden' name='laji'    value='H'>";
         echo "<input type='hidden' name='uusi'    value='1'>";
         echo "<input type='submit' value='".t("Uusi henkilöasiakas")."'>";
         echo "</form>";
       }
 
-      if (mysql_num_rows($oikeuresult2) > 0) {
+      if ($asylloik2) {
         echo "<form action='{$palvelin2}yllapito.php' method='post'>";
         echo "<input type='hidden' name='lopetus'   value='$ahlopetus'>";
-        echo "<input type='hidden' name='toim'    value='asiakas'>";
+        echo "<input type='hidden' name='toim'    value='{$asylloik2["alanimi"]}'>";
         echo "<input type='hidden' name='laji'    value='Y'>";
         echo "<input type='hidden' name='uusi'    value='1'>";
         echo "<input type='submit' value='".t("Uusi yritysasiakas")."'>";

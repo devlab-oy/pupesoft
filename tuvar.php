@@ -121,52 +121,55 @@ echo "<td class='back'>";
 echo "<input type='submit' class='hae_btn' value='".t("Hae")."'></form></td>";
 echo "</tr>";
 
-echo "<tr>";
-echo "<form method='post' name='formi2' autocomplete='off'>";
-echo "<input type='hidden' name='toim' value='$toim'>";
-echo "<input type='hidden' name='lopetus' value='$lopetus'>";
-echo "<input type='hidden' name='tee' value='Z'>";
-
-echo "<th style='vertical-align:middle;'>";
-echo "<input type='hidden' name='tyyppi' value='TOIMTUOTENO'>";
-echo t("Toimittajan tuotenumero");
-echo "</th>";
-
-echo "<td>";
-echo "<input type='text' name='tuoteno' value='' style='width:300px;'>";
-echo "</td>";
-
-echo "<td class='back'>";
-echo "<input type='submit' class='hae_btn' value='".t("Hae")."'>";
-echo "</form>";
-echo "</td>";
-
-//Jos ei haettu, annetaan 'edellinen' & 'seuraava'-nappi
-if ($ulos == '' and $tee == 'Z') {
-  echo "<form method='post'>";
+if ($toim != "KASSA") {
+  echo "<tr>";
+  echo "<form method='post' name='formi2' autocomplete='off'>";
   echo "<input type='hidden' name='toim' value='$toim'>";
   echo "<input type='hidden' name='lopetus' value='$lopetus'>";
-  echo "<input type='hidden' name='tee' value='E'>";
-  echo "<input type='hidden' name='tyyppi' value=''>";
-  echo "<input type='hidden' name='tuoteno' value='$tuoteno'>";
-  echo "<td class='back'>";
-  echo "<input type='submit' value='".t("Edellinen")."'>";
-  echo "</td>";
-  echo "</form>";
+  echo "<input type='hidden' name='tee' value='Z'>";
 
-  echo "<form method='post'>";
-  echo "<input type='hidden' name='toim' value='$toim'>";
-  echo "<input type='hidden' name='lopetus' value='$lopetus'>";
-  echo "<input type='hidden' name='tyyppi' value=''>";
-  echo "<input type='hidden' name='tee' value='N'>";
-  echo "<input type='hidden' name='tuoteno' value='$tuoteno'>";
-  echo "<td class='back'>";
-  echo "<input type='submit' value='".t("Seuraava")."'>";
+  echo "<th style='vertical-align:middle;'>";
+  echo "<input type='hidden' name='tyyppi' value='TOIMTUOTENO'>";
+  echo t("Toimittajan tuotenumero");
+  echo "</th>";
+
+  echo "<td>";
+  echo "<input type='text' name='tuoteno' value='' style='width:300px;'>";
   echo "</td>";
+
+  echo "<td class='back'>";
+  echo "<input type='submit' class='hae_btn' value='".t("Hae")."'>";
   echo "</form>";
+  echo "</td>";
+
+  //Jos ei haettu, annetaan 'edellinen' & 'seuraava'-nappi
+  if ($ulos == '' and $tee == 'Z') {
+    echo "<form method='post'>";
+    echo "<input type='hidden' name='toim' value='$toim'>";
+    echo "<input type='hidden' name='lopetus' value='$lopetus'>";
+    echo "<input type='hidden' name='tee' value='E'>";
+    echo "<input type='hidden' name='tyyppi' value=''>";
+    echo "<input type='hidden' name='tuoteno' value='$tuoteno'>";
+    echo "<td class='back'>";
+    echo "<input type='submit' value='".t("Edellinen")."'>";
+    echo "</td>";
+    echo "</form>";
+
+    echo "<form method='post'>";
+    echo "<input type='hidden' name='toim' value='$toim'>";
+    echo "<input type='hidden' name='lopetus' value='$lopetus'>";
+    echo "<input type='hidden' name='tyyppi' value=''>";
+    echo "<input type='hidden' name='tee' value='N'>";
+    echo "<input type='hidden' name='tuoteno' value='$tuoteno'>";
+    echo "<td class='back'>";
+    echo "<input type='submit' value='".t("Seuraava")."'>";
+    echo "</td>";
+    echo "</form>";
+  }
+  echo "</tr>";
 }
 
-echo "</tr></table><br>";
+echo "</table><br>";
 
 //tuotteen varastostatus
 if ($tee == 'Z') {
@@ -205,35 +208,56 @@ if ($tee == 'Z') {
     echo "<tr><th>".t("Tuoteno")."</th><th colspan='5'>".t("Nimitys")."</th>";
     echo "<tr><td>$tuoterow[tuoteno]</td><td colspan='5'>".t_tuotteen_avainsanat($tuoterow, 'nimitys')."</td></tr>";
 
-    echo "<tr><th>".t("Osasto/Try")."</th><th>".t("Toimittaja")."</th><th>".t("Aleryhm‰")."</th><th>".t("T‰hti")."</th><th colspan='2'>".t("VAK")."</th></tr>";
-    echo "<td>$tuoterow[osasto] - ".t_avainsana("OSASTO", "", "and avainsana.selite='$tuoterow[osasto]'", "", "", "selitetark")."<br>$tuoterow[try] - ".t_avainsana("TRY", "", "and avainsana.selite='$tuoterow[try]'", "", "", "selitetark")."</td>";
+    echo "<tr><th>".t("Osasto/Try")."</th><th>".t("Toimittaja")."</th>";
 
-    if ($yhtiorow["vak_kasittely"] != "" and $tuoterow["vakkoodi"] != "" and $tuoterow["vakkoodi"] != "0") {
-      $query = "SELECT tunnus, concat_ws(' / ', concat('UN',yk_nro), nimi_ja_kuvaus, luokka, luokituskoodi, pakkausryhma, lipukkeet, rajoitetut_maarat_ja_poikkeusmaarat_1) vakkoodi
-                FROM vak
-                WHERE yhtio = '{$kukarow['yhtio']}'
-                and tunnus  = '{$tuoterow['vakkoodi']}'";
-      $vak_res = pupe_query($query);
-      $vak_row = mysql_fetch_assoc($vak_res);
-
-      $tuoterow["vakkoodi"] = $vak_row["vakkoodi"];
+    if ($toim != "KASSA") {
+      echo "<th>".t("Aleryhm‰")."</th><th>".t("T‰hti")."</th><th colspan='2'>".t("VAK")."</th>";
+    }
+    elseif ($kukarow['hinnat'] >= 0) {
+      echo "<th colspan='4'>".t("Myyntihinta")."</th>";
     }
 
-    echo "<td>$tuoterow[toimittaja]</td><td>$tuoterow[aleryhma]</td><td>$tuoterow[tahtituote]</td><td colspan='2'>$tuoterow[vakkoodi]</td></tr>";
+    echo "</tr>";
 
-    echo "<tr><th>".t("Toimtuoteno")."</th><th>".t("Myyntihinta")."</th><th>".t("Nettohinta")."</th><th colspan='3'>".t("Viimeksi tullut")."</th>";
-    echo "<tr><td>$tuoterow[toim_tuoteno]</td><td>";
+    echo "<td>$tuoterow[osasto] - ".t_avainsana("OSASTO", "", "and avainsana.selite='$tuoterow[osasto]'", "", "", "selitetark")."<br>$tuoterow[try] - ".t_avainsana("TRY", "", "and avainsana.selite='$tuoterow[try]'", "", "", "selitetark")."</td>";
+    echo "<td>$tuoterow[toimittaja]</td>";
 
-    if ($kukarow['hinnat'] >= 0) echo $tuoterow["myyntihinta"];
+    if ($toim != "KASSA") {
+      if ($yhtiorow["vak_kasittely"] != "" and $tuoterow["vakkoodi"] != "" and $tuoterow["vakkoodi"] != "0") {
+        $query = "SELECT tunnus, concat_ws(' / ', concat('UN',yk_nro), nimi_ja_kuvaus, luokka, luokituskoodi, pakkausryhma, lipukkeet, rajoitetut_maarat_ja_poikkeusmaarat_1) vakkoodi
+                  FROM vak
+                  WHERE yhtio = '{$kukarow['yhtio']}'
+                  and tunnus  = '{$tuoterow['vakkoodi']}'";
+        $vak_res = pupe_query($query);
+        $vak_row = mysql_fetch_assoc($vak_res);
 
-    echo "</td><td>";
+        $tuoterow["vakkoodi"] = $vak_row["vakkoodi"];
+      }
 
-    if ($kukarow['hinnat'] >= 0 and $tuoterow["nettohinta"] != 0) echo $tuoterow["nettohinta"];
+      echo "<td>$tuoterow[aleryhma]</td><td>$tuoterow[tahtituote]</td><td colspan='2'>$tuoterow[vakkoodi]</td>";
+    }
+    elseif ($kukarow['hinnat'] >= 0) {
+      echo "<td colspan='4'>".hintapyoristys($tuoterow["myyntihinta"])." $yhtiorow[valkoodi]</td>";
+    }
 
-    echo "</td><td colspan='3'>".tv1dateconv($tuoterow["vihapvm"])."</td></tr>";
+    echo "</tr>";
 
-    echo "<tr><th>".t("H‰lyraja")."</th><th>".t("Tiler‰")."</th><th>".t("Toier‰")."</th><th>".t("Kerroin")."</th><th>".t("Tarrakerroin")."</th><th>".t("Tarrakpl")."</th>";
-    echo "<tr><td>$tuoterow[halytysraja]</td><td>$tuoterow[osto_era]</td><td>$tuoterow[myynti_era]</td><td>$tuoterow[tuotekerroin]</td><td>$tuoterow[tarrakerroin]</td><td>$tuoterow[tarrakpl]</td></tr>";
+    if ($toim != "KASSA") {
+      echo "<tr><th>".t("Toimtuoteno")."</th><th>".t("Myyntihinta")."</th><th>".t("Nettohinta")."</th><th colspan='3'>".t("Viimeksi tullut")."</th>";
+      echo "<tr><td>$tuoterow[toim_tuoteno]</td><td>";
+
+      if ($kukarow['hinnat'] >= 0) echo $tuoterow["myyntihinta"];
+
+      echo "</td><td>";
+
+      if ($kukarow['hinnat'] >= 0 and $tuoterow["nettohinta"] != 0) echo $tuoterow["nettohinta"];
+
+      echo "</td><td colspan='3'>".tv1dateconv($tuoterow["vihapvm"])."</td></tr>";
+
+      echo "<tr><th>".t("H‰lyraja")."</th><th>".t("Tiler‰")."</th><th>".t("Toier‰")."</th><th>".t("Kerroin")."</th><th>".t("Tarrakerroin")."</th><th>".t("Tarrakpl")."</th>";
+      echo "<tr><td>$tuoterow[halytysraja]</td><td>$tuoterow[osto_era]</td><td>$tuoterow[myynti_era]</td><td>$tuoterow[tuotekerroin]</td><td>$tuoterow[tarrakerroin]</td><td>$tuoterow[tarrakpl]</td></tr>";
+    }
+
     echo "</table><br>";
 
     // Onko liitetiedostoja
@@ -457,7 +481,7 @@ if ($tee == 'Z') {
 
     $ale_query_lisa = generoi_alekentta('M');
 
-    $tyyppilisa = ($toim == "EDUSTAJA") ? "  and tilausrivi.tyyppi in ('L','E','O','G','V','W','M') " : " and tilausrivi.tyyppi = 'G' ";
+    $tyyppilisa = ($toim == "EDUSTAJA" or $toim == "KASSA") ? "  and tilausrivi.tyyppi in ('L','E','O','G','V','W','M') " : " and tilausrivi.tyyppi = 'G' ";
 
     // Tilausrivit t‰lle tuotteelle
     $query = "SELECT if (asiakas.ryhma != '', concat(lasku.nimi,' (',asiakas.ryhma,')'), lasku.nimi) nimi, lasku.tunnus, (tilausrivi.varattu+tilausrivi.jt) kpl,
@@ -600,6 +624,8 @@ if ($tee == 'Z') {
     }
 
     echo "</td></tr><tr><td class='back' valign='top'><br>";
+
+    echo "<font class='message'>".t("Tuotteen tapahtumat")."</font><hr>";
     echo "<table>";
     echo "<form action='$PHP_SELF#Tapahtumat' method='post'>";
 
@@ -613,7 +639,7 @@ if ($tee == 'Z') {
     echo "<a href='#' name='Tapahtumat'>";
 
     echo "<tr>";
-    echo "<th colspan='2'>".t("N‰yt‰ tapahtumat").": ";
+    echo "<th colspan='3'>".t("N‰yt‰ tapahtumat").": ";
     echo "<select name='historia' onchange='submit();'>'";
     echo "<option value='1' $chk[1]> ".t("20 viimeisint‰")."</option>";
     echo "<option value='2' $chk[2]> ".t("Tilivuoden alusta")."</option>";
@@ -623,7 +649,8 @@ if ($tee == 'Z') {
     echo "<th colspan='2'></th></tr>";
 
     echo "<tr>";
-    echo "<th>".t("K‰ytt‰j‰@Pvm")."</th>";
+    echo "<th>".t("Laatija")."</th>";
+    echo "<th>".t("Pvm")."</th>";
     echo "<th>".t("Tyyppi")."</th>";
     echo "<th>".t("M‰‰r‰")."</th>";
     echo "<th>".t("Selite");
@@ -646,13 +673,14 @@ if ($tee == 'Z') {
       $ehto = "";
     }
 
-    $lajilisa = ($toim == "EDUSTAJA") ? "" : " and tapahtuma.laji = 'siirto' ";
+    $lajilisa = ($toim == "EDUSTAJA" or $toim == "KASSA") ? " and tapahtuma.laji not in ('poistettupaikka','uusipaikka') " : " and tapahtuma.laji = 'siirto' ";
 
-    $query = "SELECT concat_ws('@', tapahtuma.laatija, tapahtuma.laadittu) kuka, tapahtuma.laji, tapahtuma.kpl, tapahtuma.kplhinta, tapahtuma.hinta,
+    $query = "SELECT ifnull(kuka.nimi, tapahtuma.laatija) laatija, tapahtuma.laadittu, tapahtuma.laji, tapahtuma.kpl, tapahtuma.kplhinta, tapahtuma.hinta,
               if(tapahtuma.laji in ('tulo','valmistus'), tapahtuma.kplhinta, tapahtuma.hinta)*tapahtuma.kpl arvo, tapahtuma.selite, lasku.tunnus laskutunnus
               FROM tapahtuma use index (yhtio_tuote_laadittu)
-              LEFT JOIN tilausrivi use index (primary) ON tilausrivi.yhtio=tapahtuma.yhtio and tilausrivi.tunnus=tapahtuma.rivitunnus
-              LEFT JOIN lasku use index (primary) ON lasku.yhtio=tilausrivi.yhtio and lasku.tunnus=tilausrivi.otunnus
+              LEFT JOIN kuka ON (kuka.yhtio = tapahtuma.yhtio AND kuka.kuka = tapahtuma.laatija)
+              LEFT JOIN tilausrivi use index (primary) ON (tilausrivi.yhtio=tapahtuma.yhtio and tilausrivi.tunnus=tapahtuma.rivitunnus)
+              LEFT JOIN lasku use index (primary) ON (lasku.yhtio=tilausrivi.yhtio and lasku.tunnus=tilausrivi.otunnus)
               WHERE tapahtuma.yhtio  = '$kukarow[yhtio]'
               and tapahtuma.tuoteno  = '$tuoteno'
               and tapahtuma.laadittu > '0000-00-00 00:00:00'
@@ -663,13 +691,25 @@ if ($tee == 'Z') {
 
     while ($prow = mysql_fetch_assoc($qresult)) {
       echo "<tr>";
-      echo "<td nowrap>$prow[kuka]</td>";
+      echo "<td nowrap>$prow[laatija]</td>";
+      echo "<td>".tv1dateconv($prow["laadittu"], "PITKA")."</td>";
       echo "<td nowrap>";
       echo t("$prow[laji]");
       echo "</td>";
       echo "<td nowrap align='right'>$prow[kpl]</td>";
 
-      $selite = preg_replace("/(\([0-9\.]*\)|\[[0-9\.]*\])/", "", $prow["selite"]);
+      // siivotaan selitteest‰ kaikki hintoihin liittyv‰ veke,
+      // yhtiˆn kielell‰ ja k‰ytt‰j‰n kielell‰
+      $_jl_text = t("J‰lkilaskennan ostohinta");
+      $_ot_text = t("Ostohinta");
+      $_jl_text2 = t("J‰lkilaskennan ostohinta", $yhtiorow['kieli']);
+      $_ot_text2 = t("Ostohinta", $yhtiorow['kieli']);
+
+      $selite = preg_replace("/({$_jl_text}: [0-9\.]*|, {$_ot_text}:[0-9\. ]*)/", "", $prow["selite"]);
+      $selite = preg_replace("/({$_jl_text2}: [0-9\.]*|, {$_ot_text2}:[0-9\. ]*)/", "", $selite);
+      $selite = preg_replace("/(\([0-9\.\-\> ]*\)|\[[0-9\.\-]*\])/", "", $selite);
+      $selite = preg_replace("/(,<br>|<br><br>)/", "", $selite);
+      $selite = trim($selite);
 
       echo "<td>$selite</td>";
       echo "</tr>";

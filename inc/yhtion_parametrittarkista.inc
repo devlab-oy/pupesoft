@@ -113,7 +113,7 @@ if (!function_exists("yhtion_parametrittarkista")) {
       }
     }
 
-    if ($fieldname == "syncronoi") {
+    if ($fieldname == "synkronoi") {
 
       if ($t[$i]!="") {
         $t[$i]=str_replace("'", "", $t[$i]);
@@ -124,8 +124,28 @@ if (!function_exists("yhtion_parametrittarkista")) {
           $taulut=array($t[$i]);
         }
 
-        $sallitut=array("asiakas", "toimi", "avainsana", "tuote", "tuotteen_toimittajat");
-        $sallitut_avainsana=array("TRY", "OSASTO");
+        $sallitut = array(
+          'asiakas',
+          'asiakasalennus',
+          'asiakashinta',
+          'avainsana',
+          'dynaaminen_puu',
+          'perusalennus',
+          'puun_alkio',
+          'rahtisopimukset',
+          'toimi',
+          'tuote',
+          'tuoteperhe',
+          'tuotteen_toimittajat',
+          'yhteyshenkilo',
+        );
+
+        $sallitut_avainsana = array(
+          'ASAVAINSANA',
+          'OSASTO',
+          'TRY',
+          'Y',
+        );
 
         if (count($taulut)>0) {
           foreach ($taulut as $taulu) {
@@ -139,7 +159,7 @@ if (!function_exists("yhtion_parametrittarkista")) {
                     if ($virhe[$i]!="") {
                       $virhe[$i] .= "<br>";
                     }
-                    $virhe[$i] .= t("Lis‰tieto ei kelpaa")." '$lisa' ".t("sallitut lisat ovat")." ".implode("|", $sallitut_avainsana);
+                    $virhe[$i] .= t("Lis‰tieto ei kelpaa")." '$taululisa'. ".t("Sallitut lisat ovat")." ".implode(", ", $sallitut_avainsana);
                   }
                 }
               }
@@ -147,7 +167,7 @@ if (!function_exists("yhtion_parametrittarkista")) {
                 if ($virhe[$i]!="") {
                   $virhe[$i] .= "<br>";
                 }
-                $virhe[$i] .= t("Lis‰tiedot vaaditaan")." '$lisa' ".t("sallitut lisat ovat")." ".implode("|", $sallitut_avainsana);
+                $virhe[$i] .= t("Lis‰tiedot vaaditaan").". ".t("Sallitut lisat ovat")." ".implode(", ", $sallitut_avainsana);
               }
             }
 
@@ -157,7 +177,11 @@ if (!function_exists("yhtion_parametrittarkista")) {
               if ($virhe[$i]!="") {
                 $virhe[$i] .= "<br>";
               }
-              $virhe[$i] .= t("Taulu ei kelpaa")." '$taulu' ".t("sallitut kent‰t ovat")." ".implode(",", $sallitut);
+              $virhe[$i] .= t("Taulu ei kelpaa")." '$taulu' ".t("sallitut taulut ovat")." ".implode(", ", $sallitut);
+            }
+
+            if (synkronoi_tarkista_pakolliset($taulu) === false) {
+              $virhe[$i] .= "VIRHE: '$taulu' -taulun synkronoi_ainoastaan virheellinen. Pakolliset kent‰t on pakko synkronoida!";
             }
           }
         }
@@ -170,6 +194,11 @@ if (!function_exists("yhtion_parametrittarkista")) {
 
     if ($fieldname == "logo") {
       $tiedostopaate = array("JPG", "PNG", "GIF");
+    }
+
+    // Talenom, SEPA ja PPG aina v‰hint‰‰n Finvoice 2.01-veriota
+    if ($fieldname == "finvoice_versio" and empty($t[$i]) and in_array($verkkolasku_lah_talteen, array("ppg","sepa","talenom"))) {
+      $t[$i] = "2";
     }
 
     if ($fieldname == "maventa_api_avain") {

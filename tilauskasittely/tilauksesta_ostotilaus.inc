@@ -5,7 +5,7 @@
 
 if (!function_exists("tilauksesta_ostotilaus")) {
   function tilauksesta_ostotilaus($otunnus, $tyyppi) {
-    global $yhtiorow, $kukarow, $toim, $pupe_root_polku;
+    global $yhtiorow, $kukarow, $toim, $pupe_root_polku, $komento;
 
     $tilauksesta_ostotilaus = "";
     $lisa_varattusiirto = "";
@@ -569,13 +569,51 @@ if (!function_exists("tilauksesta_ostotilaus")) {
 
         foreach ($tunnukset as $otunnus) {
 
-          $komento['Ostotilaus'] = 'edi';
+          $query = "SELECT lasku.*,
+                    toimi.edi_palvelin,
+                    toimi.edi_kayttaja,
+                    toimi.edi_salasana,
+                    toimi.edi_kuvaus,
+                    toimi.edi_polku,
+                    toimi.email
+                    FROM lasku
+                    JOIN toimi ON (toimi.yhtio = lasku.yhtio AND toimi.tunnus = lasku.liitostunnus)
+                    WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+                    AND lasku.tunnus = '{$otunnus}'";
+          $ostotilaus_res = pupe_query($query);
+          $laskurow = mysql_fetch_assoc($ostotilaus_res);
 
-          require 'tilauskasittely/tulosta_ostotilaus.inc';
+          $edi_array = array(
+            $laskurow['edi_palvelin'],
+            $laskurow['edi_kayttaja'],
+            $laskurow['edi_salasana'],
+            $laskurow['edi_kuvaus'],
+            $laskurow['edi_polku']
+          );
+
+          if (count(array_filter($edi_array)) > 0) {
+            $komento['Ostotilaus'] = 'edi';
+          }
+          elseif (!empty($laskurow['email'])) {
+            $komento['Ostotilaus'] = "toimittajaemail{$laskurow['email']}";
+            $luodaan_aineisto = true;
+          }
+          else {
+            $komento['Ostotilaus'] = '';
+          }
+
+          if (!empty($komento['Ostotilaus'])) {
+            require 'tilauskasittely/tulosta_ostotilaus.inc';
+          }
 
           if (isset($luodaan_aineisto) and $luodaan_aineisto) {
             // p‰ivitet‰‰n t‰ss‰ tilaus tulostetuksi
-            $query = "UPDATE lasku SET lahetepvm = now(), alatila = 'A' WHERE tunnus='{$otunnus}'";
+            $query = "UPDATE lasku SET
+                      h1time    = now(),
+                      hyvak1    = '{$kukarow['kuka']}',
+                      lahetepvm = now(),
+                      alatila   = 'A'
+                      WHERE tunnus = '{$otunnus}'";
             $result = pupe_query($query);
           }
         }

@@ -3,21 +3,22 @@
 /*
   Ylläpidetään taulujen pakollisia saraketietoja
 
-  list($pakolliset, $kielletyt, $wherelliset, $eiyhtiota, $joinattavat, $saakopoistaa, $oletukset) = pakolliset_sarakkeet($table);
+  list($pakolliset, $kielletyt, $wherelliset, $eiyhtiota, $joinattavat, $saakopoistaa, $oletukset, $eisaaollatyhja) = pakolliset_sarakkeet($table);
 */
 
 // määritellään pakolliset sarakkeet
 if (!function_exists("pakolliset_sarakkeet")) {
-  function pakolliset_sarakkeet($table, $otsikot = "", $synkronointi = '') {
+  function pakolliset_sarakkeet($table, $otsikot = "") {
     global $kukarow, $yhtiorow;
 
-    $pakolliset   = array();
-    $kielletyt    = array();
-    $wherelliset  = array();
-    $eiyhtiota    = "";
-    $joinattavat  = array();
-    $saakopoistaa = FALSE;
-    $oletukset    = array();
+    $pakolliset     = array();
+    $kielletyt      = array();
+    $wherelliset    = array();
+    $eiyhtiota      = "";
+    $joinattavat    = array();
+    $saakopoistaa   = FALSE;
+    $oletukset      = array();
+    $eisaaollatyhja = array();
 
     switch ($table) {
     case "tuote" :
@@ -331,11 +332,11 @@ if (!function_exists("pakolliset_sarakkeet")) {
     case "asiakkaan_avainsanat" :
       if (is_array($otsikot) and in_array("YTUNNUS", $otsikot) and !in_array("LIITOSTUNNUS", $otsikot)) {
         $pakolliset  = array("LAJI", "AVAINSANA");
-        $wherelliset = array("LAJI", "AVAINSANA","KIELI");
+        $wherelliset = array("LAJI", "AVAINSANA", "KIELI");
       }
       else {
         $pakolliset  = array("LIITOSTUNNUS", "LAJI", "AVAINSANA");
-        $wherelliset = array("LIITOSTUNNUS", "LAJI", "AVAINSANA","KIELI");
+        $wherelliset = array("LIITOSTUNNUS", "LAJI", "AVAINSANA", "KIELI");
       }
 
       $joinattavat  = array("LIITOSTUNNUS" => "asiakas");
@@ -441,35 +442,33 @@ if (!function_exists("pakolliset_sarakkeet")) {
       $kielletyt    = array();
     }
 
-    if ($synkronointi != 'ALA_YHDISTA_MYSQLALIAKSIA') {
-      // Haetaan kenttien pakollisuudet sekä oletukset MySQL aliaksista. Selitetark_2 on profiilin nimi, joten haetaan vain "oletusprofiilista"
-      $query = "SELECT selite, selitetark_3, selitetark_4
-                FROM avainsana use index (yhtio_laji_selite)
-                WHERE yhtio      = '{$kukarow["yhtio"]}'
-                AND laji         = 'MYSQLALIAS'
-                AND selite       LIKE '$table.%'
-                AND selitetark_2 = 'Default'";
-      $result = pupe_query($query);
+    // Haetaan kenttien pakollisuudet sekä oletukset MySQL aliaksista. Selitetark_2 on profiilin nimi, joten haetaan vain "oletusprofiilista"
+    $query = "SELECT selite, selitetark_3, selitetark_4
+              FROM avainsana use index (yhtio_laji_selite)
+              WHERE yhtio      = '{$kukarow["yhtio"]}'
+              AND laji         = 'MYSQLALIAS'
+              AND selite       LIKE '$table.%'
+              AND selitetark_2 = 'Default'";
+    $result = pupe_query($query);
 
-      while ($row = mysql_fetch_assoc($result)) {
-        // Selitteessä on tietokannan sarakkeen nimi muodossa asiakas.luottoraja
-        if (strpos($row["selite"], ".") !== FALSE) {
-          list($taulu, $sarake) = explode(".", $row["selite"]);
-          $sarake = strtoupper(trim($sarake));
+    while ($row = mysql_fetch_assoc($result)) {
+      // Selitteessä on tietokannan sarakkeen nimi muodossa asiakas.luottoraja
+      if (strpos($row["selite"], ".") !== FALSE) {
+        list($taulu, $sarake) = explode(".", $row["selite"]);
+        $sarake = strtoupper(trim($sarake));
 
-          // Pakollisuus
-          if ($row["selitetark_3"] == "PAKOLLINEN" and !in_array($sarake, $pakolliset)) {
-            $pakolliset[] = $sarake;
-          }
+        // Pakollisuus
+        if ($row["selitetark_3"] == "PAKOLLINEN" and !in_array($sarake, $pakolliset)) {
+          $eisaaollatyhja[] = $sarake;
+        }
 
-          // Oletusarvo
-          if ($row["selitetark_4"] != "") {
-            $oletukset[$sarake] = $row["selitetark_4"];
-          }
+        // Oletusarvo
+        if ($row["selitetark_4"] != "") {
+          $oletukset[$sarake] = $row["selitetark_4"];
         }
       }
     }
 
-    return array($pakolliset, $kielletyt, $wherelliset, $eiyhtiota, $joinattavat, $saakopoistaa, $oletukset);
+    return array($pakolliset, $kielletyt, $wherelliset, $eiyhtiota, $joinattavat, $saakopoistaa, $oletukset, $eisaaollatyhja);
   }
 }

@@ -131,7 +131,7 @@ else {
   }
 
   // Etsit‰‰n tilausrivit
-  $laskutuksen_tilausrivi_query = "SELECT tilausrivi.*, tilausrivin_lisatiedot.osto_vai_hyvitys
+  $laskutuksen_tilausrivi_query = "SELECT tilausrivi.*, tilausrivin_lisatiedot.osto_vai_hyvitys, tilausrivin_lisatiedot.tunnus lisatietotunnus
                                    FROM tilausrivi
                                    LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
                                    WHERE tilausrivi.otunnus = '$kukarow[kesken]'
@@ -449,6 +449,17 @@ else {
   $katesumma        = 0;
 
   while ($trow = mysql_fetch_assoc($presult)) {
+
+    // Lis‰t‰‰n tilausrivin_lisatiedot, jos ne puuttuu, kaikilla myyntiriveill‰ on oltava ne
+    if (empty($trow['lisatietotunnus'])) {
+      $lisaq = "INSERT INTO tilausrivin_lisatiedot
+                SET yhtio        = '{$kukarow['yhtio']}',
+                tilausrivitunnus = '{$trow['tunnus']}',
+                vanha_otunnus    = '{$trow['otunnus']}',
+                luontiaika       = now(),
+                laatija          = '{$kukarow['kuka']}'";
+      pupe_query($lisaq);
+    }
 
     // Nollataan loopin muuttujat
     $hinta          = 0;
@@ -1095,7 +1106,7 @@ else {
   // katotaan mik‰ viiv‰styskorko laitetaan
   $viivastyskorko = $orow['viikorkopros'] == 0 ? 0 : $yhtiorow['viivastyskorko'];
 
-  if (isset($korkolasku) and $korkolasku == "kylla") {
+  if ($orow["clearing"] == "KORKOLASKU") {
     $viivastyskorko = 0;
   }
 

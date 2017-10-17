@@ -135,6 +135,10 @@ if (!function_exists("avainsanatarkista")) {
         }
       }
 
+      if (strtoupper($tem_laji) == "HUOLTOP_EMAIL" and trim($tem_selite) == '') {
+        $virhe[$i] = t("Selite on pakollinen");
+      }
+
       if ($tem_selite != '' and ($tem_laji == 'TRY' or $tem_laji == 'OSASTO' or $tem_laji == 'DPAVAINSANALAJI' or $tem_laji == 'LITETY_TKIRJAST')) {
         $query = "SELECT tunnus
                   FROM avainsana
@@ -164,6 +168,30 @@ if (!function_exists("avainsanatarkista")) {
         }
       }
 
+      if ($tem_laji == "VEHT_RAHTI") {
+        $query = "SELECT avainsana.*
+                  FROM avainsana
+                  WHERE avainsana.yhtio  = '{$kukarow['yhtio']}'
+                  AND avainsana.laji = '{$tem_laji}'
+                  AND avainsana.selite = '{$tem_selite}'
+                  AND avainsana.tunnus != '{$tunnus}'";
+        $result = pupe_query($query);
+
+        if (mysql_num_rows($result) > 0) {
+          $virhe[$i] = t("Vaihtoehtoisen rahtituotenumeron pitää olla uniikki");
+        }
+
+        $query = "SELECT tuote.*
+                  FROM tuote
+                  WHERE tuote.yhtio = '{$kukarow['yhtio']}'
+                  AND tuote.tuoteno = '{$tem_selite}'";
+        $result = pupe_query($query);
+
+        if (mysql_num_rows($result) == 0) {
+          $virhe[$i] = t("Vaihtoehtoisen rahtituotenumeron tulee löytyä järjestelmästä");
+        }
+      }
+
       if ($tem_laji == "ASIAKASHINNASTO") {
         $query = "SELECT *
                   FROM avainsana
@@ -176,6 +204,26 @@ if (!function_exists("avainsanatarkista")) {
         if (mysql_num_rows($result) > 0) {
           $virhe[$i] = t("Asiakashinnaston parametri löytyy jo");
         }
+      }
+    }
+
+    if ($tem_laji == 'POSTEN_TKOODI') {
+      if (mysql_field_name($result, $i) == "selite" and trim($t[$i]) != '') {
+        $query = "SELECT *
+                  FROM avainsana
+                  WHERE avainsana.yhtio = '{$kukarow['yhtio']}'
+                  AND avainsana.selite  = '{$tem_selite}'
+                  AND avainsana.laji    = '{$tem_laji}'
+                  AND tunnus           != '{$tunnus}'";
+        $result = pupe_query($query);
+
+        if (mysql_num_rows($result) > 0) {
+          $virhe[$i] = t("Sinulla voi olla vain yksi tämän lajinen avainsana per selite");
+        }
+      }
+
+      if ((mysql_field_name($result, $i) == "selite" or mysql_field_name($result, $i) == "selitetark") and trim($t[$i]) == '') {
+        $virhe[$i] = t("Tieto sarakkeessa on pakollinen");
       }
     }
 
@@ -197,7 +245,7 @@ if (!function_exists("avainsanatarkista")) {
         }
       }
 
-      if ($seliteerrori == 1 and trim($t[$i]) == '' and $tem_laji != 'VAKIOVIESTI' and $tem_laji != 'MAINOSTXT_LASKU' and $tem_laji != 'VAKIOVIESTI_TIL' and $tem_laji != 'HINNAT_CRON' and $tem_laji != 'TUOTE_EXP_CRON') {
+      if ($seliteerrori == 1 and trim($t[$i]) == '' and $tem_laji != 'VAKIOVIESTI' and $tem_laji != 'MAINOSTXT_LASKU' and $tem_laji != 'VAKIOVIESTI_TIL' and $tem_laji != 'HINNAT_CRON' and $tem_laji != 'TUOTE_EXP_CRON' and $tem_laji != 'UNIFAUN_REF') {
         $virhe[$i] = t("Selite ja selitetark ei voi olla tyhjiä")."!";
       }
 
@@ -256,6 +304,17 @@ if (!function_exists("avainsanatarkista")) {
 
     if (mysql_field_name($result, $i) == 'tunnus') {
 
+      $st2lisa = "selitetark_2  = '$tem_selitetark_2'";
+      $st3lisa = "selitetark_3  = '$tem_selitetark_3'";
+
+      if (empty($tem_selitetark_2)) {
+        $st2lisa .= " OR selitetark_2 IS NULL";
+      }
+
+      if (empty($tem_selitetark_3)) {
+        $st3lisa .= " OR selitetark_3 IS NULL";
+      }
+
       $query = "SELECT kieli, selite, laji
                 FROM avainsana
                 WHERE yhtio       = '$kukarow[yhtio]'
@@ -264,8 +323,8 @@ if (!function_exists("avainsanatarkista")) {
                 AND nakyvyys      = '$tem_nakyvyys'
                 AND selite        = '$tem_selite'
                 AND selitetark    = '$tem_selitetark'
-                AND selitetark_2  = '$tem_selitetark_2'
-                AND selitetark_3  = '$tem_selitetark_3'
+                AND ({$st2lisa})
+                AND ({$st3lisa})
                 and tunnus       != '$tunnus'";
       $results = pupe_query($query);
 
@@ -275,10 +334,30 @@ if (!function_exists("avainsanatarkista")) {
 
       if (empty($virhe) and $tem_laji == 'MAARYHMA' and $tem_selite != $trow['selite'] and $trow['selite'] != '') {
         $query = "UPDATE tuote SET
-                  vienti = '{$tem_selite}'
+                  vienti      = '{$tem_selite}'
                   WHERE yhtio = '{$kukarow['yhtio']}'
-                  AND vienti = '{$trow['selite']}'";
+                  AND vienti  = '{$trow['selite']}'";
         $updres = pupe_query($query);
+      }
+    }
+
+    if ($tem_laji == 'EXTRANET_H') {
+      if (mysql_field_name($result, $i) == "laji") {
+        $query = "SELECT *
+                  FROM avainsana
+                  WHERE avainsana.yhtio = '{$kukarow['yhtio']}'
+                  AND avainsana.laji    = '{$tem_laji}'
+                  AND kieli             = '$tem_kieli'
+                  AND tunnus           != '{$tunnus}'";
+        $result = pupe_query($query);
+
+        if (mysql_num_rows($result) > 0) {
+          $virhe[$i] = t("Sinulla voi olla vain yksi tämän lajinen avainsana");
+        }
+      }
+
+      if ((mysql_field_name($result, $i) == "selite") and trim($t[$i]) == '') {
+        $virhe[$i] = t("Tieto sarakkeessa on pakollinen");
       }
     }
 

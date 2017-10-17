@@ -15,6 +15,7 @@ $customer_id = empty($customer_id) ? '' : $customer_id;
 $pin = empty($pin) ? '' : $pin;
 $bank = "";
 $virheet_count = 0;
+$pankki = isset($pankki) ? $pankki : null;
 
 // Debug moodissa, voidaan upata suoraan key/cert käyttöliittymästä
 $debug = empty($debug) ? 0 : 1;
@@ -37,9 +38,21 @@ if ($tee == 'paivita_hae_factoring') {
   $hae_factoring = isset($hae_factoring) ? 1 : 0;
 
   $query = "UPDATE pankkiyhteys SET
-            hae_factoring   = {$hae_factoring}
-            WHERE yhtio = '{$kukarow['yhtio']}'
-            AND tunnus  = {$pankkiyhteys_tunnus}";
+            hae_factoring = {$hae_factoring}
+            WHERE yhtio   = '{$kukarow['yhtio']}'
+            AND tunnus    = {$pankkiyhteys_tunnus}";
+  pupe_query($query);
+
+  $tee = "";
+}
+
+if ($tee == 'paivita_hae_laskut') {
+  $hae_laskut = isset($hae_laskut) ? 1 : 0;
+
+  $query = "UPDATE pankkiyhteys SET
+            hae_laskut    = {$hae_laskut}
+            WHERE yhtio   = '{$kukarow['yhtio']}'
+            AND tunnus    = {$pankkiyhteys_tunnus}";
   pupe_query($query);
 
   $tee = "";
@@ -319,18 +332,44 @@ if ($tee == "uusi_sertifikaatti_hae") {
   }
   else {
     // Salataan sertifikaatit
-    $oss = salaa($uudet_tunnukset["own_signing_certificate"], $salasana);
-    $sk  = salaa($uudet_tunnukset["signing_private_key"],     $salasana);
+    $osc = salaa($uudet_tunnukset["own_signing_certificate"],     $salasana);
+    $oec = salaa($uudet_tunnukset["own_encryption_certificate"],  $salasana);
+    $cac = salaa($uudet_tunnukset["ca_certificate"],              $salasana);
+    $bec = salaa($uudet_tunnukset["bank_encryption_certificate"], $salasana);
+    $brc = salaa($uudet_tunnukset["bank_root_certificate"],       $salasana);
+    $spk = salaa($uudet_tunnukset["signing_private_key"],         $salasana);
+    $epk = salaa($uudet_tunnukset["encryption_private_key"],      $salasana);
 
-    // Haetaan sertifikaatin expire date
+    // Haetaan sertifikaattien expire datet
     $_temp    = parse_sertificate($uudet_tunnukset["own_signing_certificate"]);
-    $oss_time = $_temp['valid_to'];
+    $osc_time = $_temp['valid_to'];
+
+    $_temp    = parse_sertificate($uudet_tunnukset["own_encryption_certificate"]);
+    $oec_time = $_temp['valid_to'];
+
+    $_temp    = parse_sertificate($uudet_tunnukset["ca_certificate"]);
+    $cac_time = $_temp['valid_to'];
+
+    $_temp    = parse_sertificate($uudet_tunnukset["bank_encryption_certificate"]);
+    $bec_time = $_temp['valid_to'];
+
+    $_temp    = parse_sertificate($uudet_tunnukset["bank_root_certificate"]);
+    $brc_time = $_temp['valid_to'];
 
     $query = "UPDATE pankkiyhteys
-              SET signing_certificate          = '{$oss}',
-                  signing_private_key          = '{$sk}',
-                  signing_certificate_valid_to = '{$oss_time}'
-              WHERE yhtio = '{$kukarow['yhtio']}'
+              SET signing_certificate                  = '{$osc}',
+                  encryption_certificate               = '{$oec}',
+                  ca_certificate                       = '{$cac}',
+                  bank_encryption_certificate          = '{$bec}',
+                  bank_root_certificate                = '{$brc}',
+                  signing_private_key                  = '{$spk}',
+                  encryption_private_key               = '{$epk}',
+                  signing_certificate_valid_to         = '{$osc_time}',
+                  encryption_certificate_valid_to      = '{$oec_time}',
+                  ca_certificate_valid_to              = '{$cac_time}',
+                  bank_encryption_certificate_valid_to = '{$bec_time}',
+                  bank_root_certificate_valid_to       = '{$brc_time}'
+              WHERE yhtio  = '{$kukarow['yhtio']}'
                 AND tunnus = {$pankkiyhteys_tunnus}";
     $result = pupe_query($query);
 
@@ -603,11 +642,8 @@ if ($tee == "") {
     echo "<tr>";
     echo "<th>" . t("Pankki") . "</th>";
     echo "<th>" . t("Asiakastunnus") . "</th>";
-    echo "<th>" . t("Hae saldo") . "</th>";
-    echo "<th>" . t("Hae factoring-aineistot") . "</th>";
+    echo "<th>" . t("Toiminnot") . "</th>";
     echo "<th>" . t("Sertifikaattien voimassaolo") . "</th>";
-    echo "<th></th>";
-    echo "<th></th>";
     echo "<td class='back'></td>";
     echo "</tr>";
 
@@ -624,23 +660,38 @@ if ($tee == "") {
       echo "<td>{$pankkiyhteys["customer_id"]}</td>";
 
       echo "<td>";
-      echo "<form>";
-      echo "<input type='hidden' name='tee' value='paivita_hae_saldo'>";
-      echo "<input type='hidden' name='pankkiyhteys_tunnus' value='{$pankkiyhteys["tunnus"]}'/>";
-      $checked = $pankkiyhteys['hae_saldo'] == 1 ? ' checked' : '';
-      $disabled = $pankkiyhteys['pankki'] != 'OKOYFIHH' ? ' disabled' : '';
-      echo "<input type='checkbox' name='hae_saldo' value='1'{$checked} onchange='this.form.submit()'{$disabled}>";
-      echo "</form>";
-      echo "</td>";
+      echo "<ul class='list-unstyled'>";
 
-      echo "<td>";
-      echo "<form>";
-      echo "<input type='hidden' name='tee' value='paivita_hae_factoring'>";
-      echo "<input type='hidden' name='pankkiyhteys_tunnus' value='{$pankkiyhteys["tunnus"]}'/>";
-      $checked = $pankkiyhteys['hae_factoring'] == 1 ? ' checked' : '';
-      $disabled = !in_array($pankkiyhteys['pankki'], array('DABAFIHH','NDEAFIHH')) ? ' disabled' : '';
-      echo "<input type='checkbox' name='hae_factoring' value='1'{$checked} onchange='this.form.submit()'{$disabled}>";
-      echo "</form>";
+      $toiminnot = array(
+        'hae_saldo' => array(
+          'nimi'        => 'Hae saldo',
+          'disable_for' => array('NDEAFIHH', 'DABAFIHH', 'HELSFIHH', 'ITELFIHH', 'POPFFI22', 'HANDFIHH'),
+        ),
+        'hae_factoring' => array(
+          'nimi'        => 'Hae factoring',
+          'disable_for' => array('OKOYFIHH', 'HELSFIHH', 'ITELFIHH', 'POPFFI22', 'HANDFIHH'),
+        ),
+        'hae_laskut' => array(
+          'nimi' =>'Hae laskut',
+        ),
+      );
+
+      foreach ($toiminnot as $toiminto => $options) {
+        echo "<li class='nowrap'>";
+        echo "<form>";
+        echo "<input type='hidden' name='tee' value='paivita_{$toiminto}'>";
+        echo "<input type='hidden' name='pankkiyhteys_tunnus' value='{$pankkiyhteys["tunnus"]}'/>";
+
+        $checked  = $pankkiyhteys[$toiminto] == 1 ? ' checked' : '';
+        $disabled = isset($options['disable_for']) && in_array($pankkiyhteys['pankki'], $options['disable_for']) ? ' disabled' : '';
+
+        echo "<input type='checkbox' id='{$toiminto}' name='{$toiminto}' value='1'{$checked} onchange='this.form.submit()'{$disabled}>";
+        echo "<label for='{$toiminto}'>{$options['nimi']}</label>";
+        echo "</form>";
+        echo "</li>";
+      }
+
+      echo "</ul>";
       echo "</td>";
 
       echo "<td>";
@@ -668,41 +719,42 @@ if ($tee == "") {
       }
       echo "</td>";
 
-      echo "<td>";
+      echo "<td class='back'>";
+
+      echo "<div>";
       echo "<form method='post'>";
       echo "<input type='hidden' name='tee' value='vaihda_salasana_form'/>";
       echo "<input type='hidden' name='pankkiyhteys_tunnus' value='{$pankkiyhteys["tunnus"]}'/>";
-      echo "<input type='submit' value='" . t("Vaihda salasana") . "'/>";
+      echo "<input type='submit' value='" . t("Vaihda salasana") . "' class='full-width'/>";
       echo "</form>";
-      echo "</td>";
+      echo "</div>";
 
-      echo "<td>";
+      echo "<div>";
       echo "<form method='post' class='multisubmit' onsubmit='return confirm(\"{$_confirm}\");'>";
       echo "<input type='hidden' name='tee' value='poista'/>";
       echo "<input type='hidden' name='pankkiyhteys_tunnus' value='{$pankkiyhteys["tunnus"]}'/>";
-      echo "<input type='submit' value='" . t("Poista pankkiyhteys") . "'/>";
+      echo "<input type='submit' value='" . t("Poista pankkiyhteys") . "' class='full-width'/>";
       echo "</form>";
-      echo "</td>";
+      echo "</div>";
 
-      // Danskella voi hakea uuden pankin sertifikaatin
       if ($pankkiyhteys['pankki'] == "DABAFIHH") {
-        echo "<td class='back'>";
+        echo "<div>";
         echo "<form method='post'>";
         echo "<input type='hidden' name='tee' value='pankin_sertifikaatti'/>";
         echo "<input type='hidden' name='pankkiyhteys_tunnus' value='{$pankkiyhteys["tunnus"]}'/>";
-        echo "<input type='submit' value='" . t("Päivitä pankin sertifikaatit") . "'/>";
+        echo "<input type='submit' value='" . t("Päivitä pankin sertifikaatit") . "' class='full-width'/>";
         echo "</form>";
-        echo "</td>";
+        echo "</div>";
       }
 
-      if (in_array($pankkiyhteys['pankki'], array('NDEAFIHH'))) {
-        echo "<td class='back'>";
+      if (in_array($pankkiyhteys['pankki'], array('NDEAFIHH', 'OKOYFIHH', 'DABAFIHH', 'HELSFIHH', 'ITELFIHH', 'POPFFI22', 'HANDFIHH'))) {
+        echo "<div>";
         echo "<form method='post'>";
         echo "<input type='hidden' name='tee' value='uusi_sertifikaatti'/>";
         echo "<input type='hidden' name='pankkiyhteys_tunnus' value='{$pankkiyhteys["tunnus"]}'/>";
-        echo "<input type='submit' value='" . t("Uusi sertifikaatti") . "'/>";
+        echo "<input type='submit' value='" . t("Uusi sertifikaatti") . "' class='full-width'/>";
         echo "</form>";
-        echo "</td>";
+        echo "</div>";
       }
 
       echo "</tr>";

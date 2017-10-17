@@ -246,51 +246,14 @@ $laheterows = array();
 
 // tsekataan pitääkö tuote korvata osaluettelolla
 while ($row = mysql_fetch_assoc($riresult)) {
-
   if ($yhtiorow["pura_osaluettelot"] != "") {
     // Korvataanko tilauksella oleva rivi osaluettelolla
-    $query = "SELECT tuote.tuoteno, tuote.yksikko, tuote.nimitys,
-              tuoteperhe.kerroin,
-              tuoteperhe.hintakerroin myyntihinta,
-              round(tuoteperhe.hintakerroin * tuoteperhe.kerroin * ({$row['varattu']}+{$row['jt']}+{$row['kpl']}) * (1-{$row['aleyhteensa']}/100),'$yhtiorow[hintapyoristys]') rivihinta
-              FROM tuoteperhe
-              JOIN tuote ON (tuoteperhe.yhtio=tuote.yhtio and tuoteperhe.tuoteno=tuote.tuoteno)
-              WHERE tuoteperhe.yhtio    = '$kukarow[yhtio]'
-              AND tuoteperhe.isatuoteno = '$row[tuoteno]'
-              AND tuoteperhe.tyyppi     = 'O'
-              ORDER BY tuote.tuoteno";
-    $tuoteperhe_result = pupe_query($query);
-
-    if (mysql_num_rows($tuoteperhe_result) > 0) {
-      while ($tuoteperhe_row = mysql_fetch_assoc($tuoteperhe_result)) {
-
-        $lisarow = $row;
-
-        $lisarow["tuoteno"] = $tuoteperhe_row["tuoteno"];
-        $lisarow["nimitys"] = $tuoteperhe_row["nimitys"];
-        $lisarow["yksikko"] = $tuoteperhe_row["yksikko"];
-
-        $lisarow["hinta"]       = $tuoteperhe_row["myyntihinta"];
-        $lisarow["myyntihinta"] = $tuoteperhe_row["myyntihinta"];
-        $lisarow["rivihinta"]   = $tuoteperhe_row["rivihinta"];
-
-        $lisarow["tilkpl"]  = $tuoteperhe_row["kerroin"]*$row["tilkpl"];
-        $lisarow["varattu"] = $tuoteperhe_row["kerroin"]*$row["varattu"];
-        $lisarow["jt"]      = $tuoteperhe_row["kerroin"]*$row["jt"];
-        $lisarow["kpl"]     = $tuoteperhe_row["kerroin"]*$row["kpl"];
-
-        $laheterows[] = $lisarow;
-      }
-    }
-    else {
-      $laheterows[] = $row;
-    }
+    $laheterows = array_merge($laheterows, pura_osaluettelot($laskurow, $row));
   }
   else {
     $laheterows[] = $row;
   }
 }
-
 
 foreach ($laheterows as $row) {
   $params_lahete["row"] = $row;

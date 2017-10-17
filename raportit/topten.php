@@ -18,7 +18,7 @@ if (empty($aja_raportti)) {
   // Haetaan alku ja loppupäivämäärät valinnan mukaan
   $pvmrajaus = hae_rajauksen_paivamaarat($pvmvalinta);
 
-  foreach($pvmrajaus as $key => $value) {
+  foreach ($pvmrajaus as $key => $value) {
     $$key = $value;
   }
 }
@@ -77,9 +77,21 @@ echo t("Asiakasryhmät");
 echo ": <input type='checkbox' name='limitit[]' value = 'asiakasryhma' $asry_sel>";
 echo "</td>";
 echo "</tr>";
+
+echo "<tr><th>".t('Asiakkaat')."</th>";
+
+echo "<td colspan='4'><select name='asumvalinta'>";
+
+$y_sel = $asumvalinta == '' ? 'selected' : '';
+$a_sel = $asumvalinta == 'A' ? 'selected' : '';
+
+echo "<option value='' $y_sel>".t("Summataan per Y-tunnus")."</option>";
+echo "<option value='A' $a_sel>".t("Jokainen asiakas omalla rivillä")."</option>";
+echo "</select></td>";
+echo "</tr>";
 echo "</table><br>";
 
-$monivalintalaatikot = array("ASIAKASMYYJA", "ASIAKASRYHMA", "TRY");
+$monivalintalaatikot = array("ASIAKASMYYJA", "ASIAKASRYHMA", "TRY", "TUOTEMERKKI");
 $monivalintalaatikot_normaali = array();
 
 require "tilauskasittely/monivalintalaatikot.inc";
@@ -92,25 +104,45 @@ if (isset($aja_raportti) and !empty($vva) and !empty($kka) and !empty($ppa) and 
   $loppupvm = "$vvl-$kkl-$ppl";
   $rajaukset = array(
     'tuotteet' => $mul_try,
+    'tuotemerkit' => $mul_tme,
     'asiakasmyyjat' => $mul_asiakasmyyja,
     'asiakasryhmat' => $mul_asiakasryhma
   );
 
+  $kokonaismyynti = hae_kokonaismyynti();
+
   echo "<table>";
   echo "<tr><td class='ptop back'>";
-  piirra_taulukko(hae_data('tuotteet', $limitit, $rajaukset));
+  echo "<table>";
+  echo "<tr>";
+  echo "<th>".t("Kokonaismyynti")."</th>";
+  echo "<td>{$kokonaismyynti}</td>";
+  echo "</tr>";
+  echo "</table>";
+  echo "</td></tr>";
+
+  echo "<tr><td class='ptop back'>";
+  piirra_taulukko(hae_data('tuotteet', $limitit, $rajaukset, $asumvalinta));
   echo "</td>";
 
   echo "<td class='ptop back'>";
-  piirra_taulukko(hae_data('asiakkaat', $limitit, $rajaukset));
+  piirra_taulukko(hae_data('asiakkaat', $limitit, $rajaukset, $asumvalinta));
   echo "</td>";
 
   echo "<tr><td class='ptop back'>";
-  piirra_taulukko(hae_data('asiakasmyyjat', $limitit, $rajaukset));
+  piirra_taulukko(hae_data('asiakasmyyjat', $limitit, $rajaukset, $asumvalinta));
   echo "</td>";
 
   echo "<td class='ptop back'>";
-  piirra_taulukko(hae_data('asiakasryhmat', $limitit, $rajaukset));
+  piirra_taulukko(hae_data('asiakasryhmat', $limitit, $rajaukset, $asumvalinta));
+  echo "</td>";
+
+  echo "<tr><td class='ptop back'>";
+  piirra_taulukko(hae_data('asiakasosastot', $limitit, $rajaukset, $asumvalinta));
+  echo "</td>";
+
+  echo "<td class='ptop back'>";
+  piirra_taulukko(hae_data('tuotemerkit', $limitit, $rajaukset, $asumvalinta));
   echo "</td></tr></table>";
 }
 
@@ -129,18 +161,18 @@ function hae_rajauksen_paivamaarat($pvmvalinta) {
   );
 
   switch ($pvmvalinta) {
-    case "tvv":
-      $alku = date('d-m-Y', strtotime('last monday'));
-      $loppu = date('d-m-Y', strtotime('next sunday'));
-      break;
-    case "tkk":
-      $alku = date('d-m-Y', strtotime('first day of this month'));
-      $loppu = date('d-m-Y', strtotime('last day of this month'));
-      break;
-    case "tvvv":
-      $alku = date('d-m-Y', strtotime('Jan 1'));
-      $loppu = date('d-m-Y', strtotime('Dec 31'));
-      break;
+  case "tvv":
+    $alku = date('d-m-Y', strtotime('last monday'));
+    $loppu = date('d-m-Y', strtotime('next sunday'));
+    break;
+  case "tkk":
+    $alku = date('d-m-Y', strtotime('first day of this month'));
+    $loppu = date('d-m-Y', strtotime('last day of this month'));
+    break;
+  case "tvvv":
+    $alku = date('d-m-Y', strtotime('Jan 1'));
+    $loppu = date('d-m-Y', strtotime('Dec 31'));
+    break;
   }
 
   $alku = explode('-', $alku);
@@ -178,12 +210,18 @@ function piirra_taulukko($data) {
   echo "</table>";
 }
 
-function hae_data($tyyppi, $limitit, $rajaukset) {
+function palautaYhteinenOsa($array, $occurance = 3) {
+  $array = array_reduce($array, function($a,$b) { $a = array_merge($a,explode(" ", $b)); return $a; },array());
+  return implode(" ",array_keys(array_filter(array_count_values($array),function($var)use($occurance) {return $var > $occurance ;})));
+}
+
+function hae_data($tyyppi, $limitit, $rajaukset, $asumvalinta) {
   global $kukarow, $yhtiorow, $alkupvm, $loppupvm;
 
   $tuoterajaus = '';
   $ryhmarajaus = '';
   $myyjarajaus = '';
+  $tuotemerkkirajaus = '';
   $haettu_data = array();
   $nimikentta = ' tuote.nimitys ';
   $grouppauskentta = ' tuote.tunnus ';
@@ -221,29 +259,60 @@ function hae_data($tyyppi, $limitit, $rajaukset) {
     $myyjarajaus .= ") ";
   }
 
+  if (!empty($rajaukset['tuotemerkit']) and count($rajaukset['tuotemerkit']) > 0) {
+    $tuotemerkkirajaus = " AND tuote.tuotemerkki IN (";
+
+    foreach ($rajaukset['tuotemerkit'] as $value) {
+      $tuotemerkkirajaus .= "'{$value}',";
+    }
+
+    $tuotemerkkirajaus = substr($tuotemerkkirajaus, 0, -1);
+    $tuotemerkkirajaus .= ") ";
+  }
+
   switch ($tyyppi) {
-    case "tuotteet":
-      $haettu_data['otsikko'] = t('Tuotteet');
-      $limitti = in_array('tuote', $limitit) ? '' : ' LIMIT 10 ';
-      break;
-    case "asiakkaat":
-      $haettu_data['otsikko'] = t('Asiakkaat');
-      $nimikentta = " asiakas.nimi ";
+  case "tuotteet":
+    $haettu_data['otsikko'] = t('Tuotteet');
+    $limitti = in_array('tuote', $limitit) ? '' : ' LIMIT 10 ';
+    break;
+  case "asiakkaat":
+    $haettu_data['otsikko'] = t('Asiakkaat');
+
+    if ($asumvalinta == "A") {
+      $nimikentta = "asiakas.nimi ";
       $grouppauskentta = " asiakas.tunnus ";
-      $limitti = in_array('asiakas', $limitit) ? '' : ' LIMIT 10 ';
-      break;
-    case "asiakasryhmat":
-      $haettu_data['otsikko'] = t('Asiakasryhmät');
-      $nimikentta = " ifnull(avainsana.selitetark,'".t("Ei asiakasryhmää")."') ";
-      $grouppauskentta = " asiakas.ryhma ";
-      $limitti = in_array('asiakasryhma', $limitit) ? '' : ' LIMIT 10 ';
-      break;
-    case "asiakasmyyjat":
-      $haettu_data['otsikko'] = t('Asiakasmyyjät');
-      $nimikentta = " ifnull(kuka.nimi,'".t("Ei asiakasmyyjää")."') ";
-      $grouppauskentta = " asiakas.myyjanro ";
-      $limitti = in_array('asiakasmyyja', $limitit) ? '' : ' LIMIT 10 ';
-      break;
+    }
+    else {
+      $nimikentta = " group_concat(DISTINCT asiakas.nimi SEPARATOR '!¡!') ";
+      $grouppauskentta = " asiakas.ytunnus ";
+    }
+
+    $limitti = in_array('asiakas', $limitit) ? '' : ' LIMIT 10 ';
+    break;
+  case "asiakasryhmat":
+    $haettu_data['otsikko'] = t('Asiakasryhmät');
+    $nimikentta = " ifnull(ryhma.selitetark,'".t("Ei asiakasryhmää")."') ";
+    $grouppauskentta = " asiakas.ryhma ";
+    $limitti = in_array('asiakasryhma', $limitit) ? '' : ' LIMIT 10 ';
+    break;
+  case "asiakasmyyjat":
+    $haettu_data['otsikko'] = t('Asiakasmyyjät');
+    $nimikentta = " ifnull(kuka.nimi,'".t("Ei asiakasmyyjää")."') ";
+    $grouppauskentta = " asiakas.myyjanro ";
+    $limitti = in_array('asiakasmyyja', $limitit) ? '' : ' LIMIT 10 ';
+    break;
+  case "asiakasosastot":
+    $haettu_data['otsikko'] = t('Asiakasosastot');
+    $nimikentta = " ifnull(osasto.selitetark,'".t("Ei asiakasosastoa")."') ";
+    $grouppauskentta = " asiakas.osasto ";
+    $limitti = in_array('asiakasosasto', $limitit) ? '' : ' LIMIT 10 ';
+    break;
+  case "tuotemerkit":
+    $haettu_data['otsikko'] = t('Tuotemerkit');
+    $nimikentta = " ifnull(tuotemerkki.selite,'".t("Ei tuotemerkkiä")."') ";
+    $grouppauskentta = " tuote.tuotemerkki ";
+    $limitti = in_array('tuotemerkki', $limitit) ? '' : ' LIMIT 10 ';
+    break;
   }
 
   $query = "SELECT {$nimikentta} nimi,
@@ -252,29 +321,36 @@ function hae_data($tyyppi, $limitit, $rajaukset) {
             FROM lasku use index (yhtio_tila_tapvm)
             JOIN yhtio ON (yhtio.yhtio = lasku.yhtio)
             JOIN tilausrivi use index (uusiotunnus_index) ON (tilausrivi.yhtio = lasku.yhtio
-              AND tilausrivi.uusiotunnus = lasku.tunnus
-              AND tilausrivi.tyyppi = 'L'
-              AND tilausrivi.tuoteno != '{$yhtiorow['ennakkomaksu_tuotenumero']}')
+              AND tilausrivi.uusiotunnus   = lasku.tunnus
+              AND tilausrivi.tyyppi        = 'L'
+              AND tilausrivi.tuoteno      != '{$yhtiorow['ennakkomaksu_tuotenumero']}')
             JOIN tuote use index (tuoteno_index) ON (tuote.yhtio = tilausrivi.yhtio
-              AND tuote.tuoteno = tilausrivi.tuoteno
-              AND tuote.myynninseuranta = ''
-              {$tuoterajaus})
+              AND tuote.tuoteno            = tilausrivi.tuoteno
+              AND tuote.myynninseuranta    = ''
+              {$tuoterajaus}
+              {$tuotemerkkirajaus})
             JOIN asiakas use index (PRIMARY) ON (asiakas.yhtio = lasku.yhtio
-              AND asiakas.tunnus = lasku.liitostunnus
-              AND asiakas.myynninseuranta = ''
+              AND asiakas.tunnus           = lasku.liitostunnus
+              AND asiakas.myynninseuranta  = ''
               {$myyjarajaus}
               {$ryhmarajaus})
             LEFT JOIN kuka ON (kuka.yhtio = asiakas.yhtio
-              AND kuka.myyja = asiakas.myyjanro
-              AND kuka.myyja > 0)
-            LEFT JOIN avainsana ON (avainsana.yhtio = lasku.yhtio
-              AND avainsana.laji = 'ASIAKASRYHMA'
-              AND avainsana.selite = asiakas.ryhma)
-            WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-            AND lasku.tila = 'U'
-            AND lasku.alatila = 'X'
-            AND lasku.tapvm >= '{$alkupvm}'
-            AND lasku.tapvm <= '{$loppupvm}'
+              AND kuka.myyja               = asiakas.myyjanro
+              AND kuka.myyja               > 0)
+            LEFT JOIN avainsana AS ryhma ON (ryhma.yhtio = lasku.yhtio
+              AND ryhma.laji        = 'ASIAKASRYHMA'
+              AND ryhma.selite      = asiakas.ryhma)
+            LEFT JOIN avainsana AS osasto ON (osasto.yhtio = lasku.yhtio
+              AND osasto.laji        = 'ASIAKASOSASTO'
+              AND osasto.selite      = asiakas.osasto)
+            LEFT JOIN avainsana AS tuotemerkki ON (tuotemerkki.yhtio = lasku.yhtio
+              AND tuotemerkki.laji   = 'TUOTEMERKKI'
+              AND tuotemerkki.selite = tuote.tuotemerkki)
+            WHERE lasku.yhtio              = '{$kukarow['yhtio']}'
+            AND lasku.tila                 = 'U'
+            AND lasku.alatila              = 'X'
+            AND lasku.tapvm                >= '{$alkupvm}'
+            AND lasku.tapvm                <= '{$loppupvm}'
             GROUP BY {$grouppauskentta}
             ORDER BY myyntinyt DESC
             {$limitti}";
@@ -283,6 +359,18 @@ function hae_data($tyyppi, $limitit, $rajaukset) {
 
   // Haetaan rivit
   while ($row = mysql_fetch_assoc($result)) {
+
+    if (strpos($row['nimi'], "!¡!") !== FALSE) {
+      $nimet = explode("!¡!", $row['nimi']);
+      $nimi = palautaYhteinenOsa($nimet);
+
+      if (empty($nimi)) {
+        $nimi = $nimet[0];
+      }
+
+      $row['nimi'] = $nimi. " <span class='ok'>(".t("Useita").")</span>";
+    }
+
     $haettu_data['rivit'][] = $row;
     $summayhteensa += $row['myyntinyt'];
   }
@@ -290,4 +378,45 @@ function hae_data($tyyppi, $limitit, $rajaukset) {
   $haettu_data['yhteensa'] = $summayhteensa;
 
   return $haettu_data;
+}
+
+function hae_kokonaismyynti() {
+  global $kukarow, $yhtiorow, $alkupvm, $loppupvm;
+
+  # Otetaan kokonaismyynti
+  $query = "SELECT
+            sum(if(tilausrivi.laskutettuaika >= '{$alkupvm}' and tilausrivi.laskutettuaika <= '{$loppupvm}', tilausrivi.rivihinta, 0)) myyntinyt
+            FROM lasku use index (yhtio_tila_tapvm)
+            JOIN yhtio ON (yhtio.yhtio = lasku.yhtio)
+            JOIN tilausrivi use index (uusiotunnus_index) ON (tilausrivi.yhtio = lasku.yhtio
+              AND tilausrivi.uusiotunnus   = lasku.tunnus
+              AND tilausrivi.tyyppi        = 'L'
+              AND tilausrivi.tuoteno      != '{$yhtiorow['ennakkomaksu_tuotenumero']}')
+            JOIN tuote use index (tuoteno_index) ON (tuote.yhtio = tilausrivi.yhtio
+              AND tuote.tuoteno            = tilausrivi.tuoteno
+              AND tuote.myynninseuranta    = '')
+            JOIN asiakas use index (PRIMARY) ON (asiakas.yhtio = lasku.yhtio
+              AND asiakas.tunnus           = lasku.liitostunnus
+              AND asiakas.myynninseuranta  = '')
+            LEFT JOIN kuka ON (kuka.yhtio = asiakas.yhtio
+              AND kuka.myyja               = asiakas.myyjanro
+              AND kuka.myyja               > 0)
+            LEFT JOIN avainsana ON (avainsana.yhtio = lasku.yhtio
+              AND avainsana.laji           = 'ASIAKASRYHMA'
+              AND avainsana.selite         = asiakas.ryhma)
+            WHERE lasku.yhtio              = '{$kukarow['yhtio']}'
+            AND lasku.tila                 = 'U'
+            AND lasku.alatila              = 'X'
+            AND lasku.tapvm                >= '{$alkupvm}'
+            AND lasku.tapvm                <= '{$loppupvm}'
+            ORDER BY myyntinyt DESC";
+  $result = pupe_query($query);
+
+  $summayhteensa = 0;
+
+  while ($row = mysql_fetch_assoc($result)) {
+    $summayhteensa += $row['myyntinyt'];
+  }
+
+  return round($summayhteensa, 2);
 }

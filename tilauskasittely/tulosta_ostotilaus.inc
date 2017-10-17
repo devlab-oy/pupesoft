@@ -489,6 +489,50 @@ else {
         $lask++;
       }
 
+      if (!empty($asiakkaiden_nimet)) {
+        $nimetarray = array();
+
+        $query = "SELECT DISTINCT TRIM(CONCAT_WS(' ', l.nimi, l.nimitark)) nimi
+                  FROM lasku AS l
+                  JOIN tilausrivi AS t ON (
+                    t.yhtio = l.yhtio AND
+                    t.otunnus = l.tunnus AND
+                    t.tyyppi != 'D'
+                  )
+                  WHERE l.yhtio = '{$kukarow['yhtio']}'
+                  AND (
+                    (l.tila = 'N' AND l.alatila IN ('A','T')) OR
+                    (l.tila = 'L' AND l.alatila = 'A')
+                  )
+                  AND t.tuoteno = '{$row['tuoteno']}'";
+        $nimetres = pupe_query($query);
+
+        while ($nimetrow = mysql_fetch_assoc($nimetres)) {
+          $nimetarray[] = $nimetrow['nimi'];
+        }
+
+        # Haetaan JT-rivit
+        # Voi olla esim. case jossa otsikko on L X mutta osa riveistä on JT:ssä
+        $query = "SELECT DISTINCT TRIM(CONCAT_WS(' ', l.nimi, l.nimitark)) nimi
+                  FROM tilausrivi AS t
+                  JOIN lasku AS l ON (l.yhtio = t.yhtio AND l.tunnus = t.otunnus)
+                  WHERE t.yhtio = '{$kukarow['yhtio']}'
+                  AND t.tuoteno = '{$row['tuoteno']}'
+                  AND t.jt != 0
+                  AND t.tyyppi = 'L'";
+        $nimetres = pupe_query($query);
+
+        while ($nimetrow = mysql_fetch_assoc($nimetres)) {
+          $nimetarray[] = $nimetrow['nimi'];
+        }
+
+        $nimetarray = array_unique($nimetarray);
+
+        foreach ($nimetarray as $nimi) {
+          $row['kommentti'] .= "\n{$nimi}";
+        }
+      }
+
       if (trim($row["kommentti"]) != '') {
         foreach (explode("\n", wordwrap(trim($row["kommentti"]), 90, "\n")) as $kommentti) {
           $kala = $kala - 15;
@@ -541,7 +585,7 @@ else {
 
       $pdf->draw_text(217, 55, t("Puhelin", $kieli).":", $thispage, $pieni);
       $pdf->draw_text(257, 55, $yhtiorow["puhelin"], $thispage, $pieni);
-      $pdf->draw_text(217, 45, t("Telefax", $kieli).":", $thispage, $pieni);
+      $pdf->draw_text(217, 45, t("Fax", $kieli).":", $thispage, $pieni);
       $pdf->draw_text(257, 45, $yhtiorow["fax"], $thispage, $pieni);
       $pdf->draw_text(217, 35, t("Sähköposti", $kieli).":", $thispage, $pieni);
       $pdf->draw_text(257, 35, $yhtiorow["email"], $thispage, $pieni);
@@ -752,6 +796,7 @@ else {
     'sivu'                      => 1,
     'tee'                       => $tee,
     'nimitykset'                => $nimitykset,
+    'asiakkaiden_nimet'         => $asiakkaiden_nimet,
     'thispage'                  => NULL,
     'toim'                      => $toim,
     'rivinumerot'               => $rivinumerot,

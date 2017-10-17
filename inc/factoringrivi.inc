@@ -18,32 +18,17 @@ if ((mysql_field_name($result, $i) == "teksti_fi") or
 
 if (mysql_field_name($result, $i) == "factoringyhtio") {
 
-  if (strtoupper($trow[$i]) == 'NORDEA') {
-    $sel2 = "SELECTED";
-  }
-  if (strtoupper($trow[$i]) == 'SAMPO') {
-    $sel3 = "SELECTED";
-  }
-  if (strtoupper($trow[$i]) == 'SEB') {
-    $sel4 = "SELECTED";
-  }
-  if (strtoupper($trow[$i]) == 'OKO') {
-    $sel5 = "SELECTED";
-  }
-  if (strtoupper($trow[$i]) == 'SVEA') {
-    $sel6 = "SELECTED";
-  }
-  if (strtoupper($trow[$i]) == 'COLLECTOR') {
-    $sel7 = "SELECTED";
-  }
+  $sel = array_fill_keys(array($trow[$i]), " selected") +
+    array_fill_keys(array('NORDEA', 'SAMPO', 'SEB', 'OKO', 'SVEA', 'COLLECTOR', 'AKTIA'), '');
 
   $ulos  = "<td><select name='$nimi'>";
-  $ulos .= "<option value='NORDEA' $sel2> ".t("Nordea Factoring")."</option>";
-  $ulos .= "<option value='SAMPO' $sel3> ".t("Sampo Factoring")."</option>";
-  $ulos .= "<option value='SEB' $sel4> ".t("SEB Factoring")."</option>";
-  $ulos .= "<option value='OKO' $sel5> ".t("OKO Factoring")."</option>";
-  $ulos .= "<option value='SVEA' $sel6> ".t("SVEA Factoring")."</option>";
-  $ulos .= "<option value='COLLECTOR' $sel7> ".t("COLLECTOR Factoring")."</option>";
+  $ulos .= "<option value='NORDEA' {$sel['NORDEA']}>".t("Nordea Factoring")."</option>";
+  $ulos .= "<option value='SAMPO' {$sel['SAMPO']}>".t("Danske Factoring")."</option>";
+  $ulos .= "<option value='SEB' {$sel['SEB']}>".t("SEB Factoring")."</option>";
+  $ulos .= "<option value='OKO' {$sel['OKO']}>".t("OP Factoring")."</option>";
+  $ulos .= "<option value='SVEA' {$sel['SVEA']}>".t("Svea Factoring")."</option>";
+  $ulos .= "<option value='COLLECTOR' {$sel['COLLECTOR']}>".t("Collector Factoring")."</option>";
+  $ulos .= "<option value='AKTIA' {$sel['AKTIA']}>".t("Aktia Factoring")."</option>";
   $ulos .= "</select></td>";
 
   $jatko = 0;

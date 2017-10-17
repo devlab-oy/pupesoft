@@ -14,6 +14,11 @@ if (isset($_POST["tee"])) {
 
 require "inc/parametrit.inc";
 
+if ($tee == "NAYTATILAUS") {
+  readfile($filenimi);
+  exit;
+}
+
 if (strtolower($toim) == 'oletusvarasto') {
 
   if ($kukarow['oletus_varasto'] == 0) {
@@ -33,6 +38,8 @@ if (isset($tee) and $tee == "lataa_tiedosto") {
   readfile("/tmp/".$tmpfilenimi);
   exit;
 }
+
+$status = isset($status) ? $status : '';
 
 echo "<font class='head'>", t("Tulosta inventointilista"), "</font><hr>";
 
@@ -297,18 +304,14 @@ else {
   echo "<input type='hidden' name='vapaa_teksti' value='' />";
 }
 
-$sel = (!empty($status) and $status == 'EI') ? "selected" : "";
-
-$result = t_avainsana("S");
+$sel = $status == 'EI' ? 'selected' : '';
 
 echo "<tr><th>", t("Tuotteen status:"), "</th>";
 echo "<td>";
 echo "<select name='status'>";
 echo "<option value=''>", t("Kaikki tuotteet"), "</option>";
-echo "<option value='EI' {$sel}>", t("Ei listata poistettuja tuotteita"), "</option>";
-while ($_status = mysql_fetch_assoc($result)) {
-  echo "<option value='{$_status['selite']}'>{$_status['selitetark']}</option>";
-}
+echo "<option value = 'EI' {$sel['EI']}>".t("Ei listata poistettuja tuotteita")."</option>";
+echo product_status_options($status);
 echo "</select>";
 echo "</td>";
 echo "</tr>";
@@ -1471,11 +1474,29 @@ if ($tee == 'TULOSTA' and isset($tulosta)) {
       echo "filenimi = {$filenimi}<br>";
     }
     else {
-      system("a2ps -o ".$filenimi.".ps -r --medium=A4 --chars-per-line={$rivinleveys} --no-header --columns=1 --margin=0 --borders=0 {$filenimi}");
+      $params = array(
+        'chars'    => $rivinleveys,
+        'filename' => $filenimi,
+        'mode'     => 'landscape',
+      );
 
-      if ($komento["Inventointi"] == 'email') {
+      // konveroidaan postscriptiksi
+      $filenimi_ps = pupesoft_a2ps($params);
 
-        system("ps2pdf -sPAPERSIZE=a4 ".$filenimi.".ps ".$filenimi.".pdf");
+      if ($komento["Inventointi"] == "-88") {
+        system("ps2pdf -sPAPERSIZE=a4 {$filenimi_ps} ".$filenimi.".pdf");
+
+        js_openFormInNewWindow();
+
+        echo "<br><form id='inventointi_listat_{$listanro}' name='inventointi_listat_{$listanro}' method='post' action='{$palvelin2}inventointi_listat.php' autocomplete='off'>
+              <input type='hidden' name='tee' value='NAYTATILAUS'>
+              <input type='hidden' name='nayta_pdf' value='1'>
+              <input type='hidden' name='filenimi' value='{$filenimi}.pdf'>
+              <input type='submit' value='".t("Inventointilista").": {$listanro}' onClick=\"js_openFormInNewWindow('inventointi_listat_{$listanro}', ''); return false;\"></form><br>";
+      }
+      elseif ($komento["Inventointi"] == 'email') {
+
+        system("ps2pdf -sPAPERSIZE=a4 {$filenimi_ps} ".$filenimi.".pdf");
 
         $liite = $filenimi.".pdf";
         $kutsu = t("Inventointilista")."_$listanro";
@@ -1545,14 +1566,14 @@ if ($tee == 'TULOSTA' and isset($tulosta)) {
       }
       elseif ($komento["Inventointi"] != '') {
         // itse print komento...
-        $line = exec("{$komento['Inventointi']} ".$filenimi.".ps");
+        $line = exec("{$komento['Inventointi']} {$filenimi_ps}");
       }
 
       echo "<font class='message'>", t("Inventointilista tulostuu!"), "</font><br><br>";
 
       //poistetaan tmp file samantien kuleksimasta...
       unlink($filenimi);
-      unlink($filenimi.".ps");
+      unlink($filenimi_ps);
     }
 
     $tee = "";

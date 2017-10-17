@@ -246,29 +246,17 @@ if (!function_exists('tilaus_valmis_siirtolista')) {
 
 }
 
-if (!function_exists('hae_toimitustapa')) {
-  function hae_toimitustapa($toimitustapa_tunnus) {
-    global $kukarow, $yhtiorow;
-
-    if (empty($toimitustapa_tunnus)) {
-      return false;
-    }
-
-    $query = "SELECT *
-              FROM toimitustapa
-              WHERE yhtio = '{$kukarow['yhtio']}'
-              AND tunnus  = {$toimitustapa_tunnus}";
-    $result = pupe_query($query);
-
-    return mysql_fetch_assoc($result);
-  }
-}
-
 if (!function_exists('luo_varastosiirtorivi')) {
   function luo_varastosiirtorivi($laskurow, $tilausrivi, $lahdevarasto_tunnus, $varastosiirtotyyppi = 'N', $perhekielto = 1) {
     global $kukarow, $yhtiorow;
 
     $trow = hae_tuote($tilausrivi['tuoteno']);
+
+    // varastosiirtotyyppi:
+    // N = normaali
+    // K = kirjanpidollinen
+    // G = relex transfer
+    // P = palautus
 
     $tuoteno_echo     = $trow['tuoteno'];
     $yksikko_echo     = $trow['yksikko'];

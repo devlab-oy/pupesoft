@@ -366,7 +366,7 @@ if (mysql_num_rows($vetores)) {
 
         $files = unserialize($pulrow['files']);
 
-        if (count($files)) {
+        if (is_array($files) and count($files) > 0) {
           echo "<br>".t("Päivitetyt ohjelmat").":<br><table>";
 
           foreach ($files as $file) {

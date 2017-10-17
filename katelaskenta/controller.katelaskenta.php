@@ -260,40 +260,40 @@ if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
 
   // Hakukysely tuotehakuun.
   $query = "SELECT
-              if (tuote.tuoteno = '$tuotenumero', 1, if(left(tuote.tuoteno, length('$tuotenumero')) = '$tuotenumero', 2, 3)) jarjestys,
-              tuote.tuoteno,
-              tuote.nimitys,
-              tuote.osasto,
-              tuote.try,
-              tuote.myyntihinta,
-              tuote.myymalahinta,
-              tuote.nettohinta,
-              tuote.aleryhma,
-              tuote.status,
-              tuote.ei_saldoa,
-              tuote.yksikko,
-              tuote.tunnus,
-              tuote.epakurantti25pvm,
-              tuote.epakurantti50pvm,
-              tuote.epakurantti75pvm,
-              tuote.epakurantti100pvm,
-              tuote.kehahin,
-              tuote.myyntikate,
-              tuote.myymalakate,
-              tuote.nettokate,
-              (SELECT group_concat(distinct tuotteen_toimittajat.toim_tuoteno order by tuotteen_toimittajat.tunnus separator '<br>') FROM tuotteen_toimittajat use index (yhtio_tuoteno) WHERE tuote.yhtio = tuotteen_toimittajat.yhtio and tuote.tuoteno = tuotteen_toimittajat.tuoteno) toim_tuoteno,
-              tuote.sarjanumeroseuranta,
-              tuote.status
-              FROM tuote use index (tuoteno, nimitys)
-              $lisa_parametri
-              WHERE tuote.yhtio     = '$kukarow[yhtio]'
-              and tuote.tuotetyyppi NOT IN ('A', 'B')
-              $kieltolisa
-              $lisa
-              $extra_poislisa
-              $poislisa
-              ORDER BY jarjestys, $jarjestys
-              LIMIT 500";
+            if (tuote.tuoteno = '$tuotenumero', 1, if(left(tuote.tuoteno, length('$tuotenumero')) = '$tuotenumero', 2, 3)) jarjestys,
+            tuote.tuoteno,
+            tuote.nimitys,
+            tuote.osasto,
+            tuote.try,
+            tuote.myyntihinta,
+            tuote.myymalahinta,
+            tuote.nettohinta,
+            tuote.aleryhma,
+            tuote.status,
+            tuote.ei_saldoa,
+            tuote.yksikko,
+            tuote.tunnus,
+            tuote.epakurantti25pvm,
+            tuote.epakurantti50pvm,
+            tuote.epakurantti75pvm,
+            tuote.epakurantti100pvm,
+            tuote.kehahin,
+            tuote.myyntikate,
+            tuote.myymalakate,
+            tuote.nettokate,
+            (SELECT group_concat(distinct tuotteen_toimittajat.toim_tuoteno order by tuotteen_toimittajat.tunnus separator '<br>') FROM tuotteen_toimittajat use index (yhtio_tuoteno) WHERE tuote.yhtio = tuotteen_toimittajat.yhtio and tuote.tuoteno = tuotteen_toimittajat.tuoteno) toim_tuoteno,
+            tuote.sarjanumeroseuranta,
+            tuote.status
+            FROM tuote use index (tuoteno, nimitys)
+            $lisa_parametri
+            WHERE tuote.yhtio     = '$kukarow[yhtio]'
+            and tuote.tuotetyyppi NOT IN ('A', 'B')
+            $kieltolisa
+            $lisa
+            $extra_poislisa
+            $poislisa
+            ORDER BY jarjestys, $jarjestys
+            LIMIT 500";
   $result = pupe_query($query);
 
   // T‰ytet‰‰n template muuttuja tiedoilla, jotka halutaan

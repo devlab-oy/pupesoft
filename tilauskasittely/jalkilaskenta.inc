@@ -215,7 +215,6 @@ if (!function_exists("korjaalaskut")) {
         if ($jalkilaskenta_debug > 1) $jalkilaskenta_debug_text .= "$query<br>";
         $katekorjres = pupe_query($query);
 
-        return 0;
       }
 
       $muutos = 0;
@@ -267,7 +266,7 @@ if (!function_exists("korjaalaskut")) {
 
           if ($jalkilaskenta_debug > 1) $jalkilaskenta_debug_text .= "$query<br>";
 
-          return 1;
+          continue;
         }
 
         // Lasketaan muutos
@@ -446,7 +445,6 @@ if (!function_exists("korjaalaskut")) {
       }
     }
 
-    return 0;
   }
 }
 
@@ -805,6 +803,7 @@ if ($tuoteno != '') {
                     FROM tapahtuma
                     WHERE yhtio    = '{$kukarow['yhtio']}'
                     AND laji       = 'korjaus'
+                    AND tuoteno    = '$tuoteno'
                     AND rivitunnus > 0
                     AND rivitunnus = '{$trow['rivitunnus']}'
                     ORDER BY laadittu DESC, tunnus DESC
@@ -920,7 +919,7 @@ if ($tuoteno != '') {
                 // jos ollaan käsitelty jo jotain laskuja, niin nyt on sitte alkamassa uusi tulo ni korjataan laskut ja nollataan laskurit
                 if ($korjattavia_laskuja != 0) {
                   if ($jalkilaskenta_debug >= 1) $jalkilaskenta_debug_text .= "<font class='message'>Korjataan $tuoteno! Saldo: $uusisaldo Keskihinta: $uusikehahin Alku: $vlaadittu Loppu: $trow[laadittu] Case: 1</font><br>";
-                  $mitenkavi = korjaalaskut($tuoteno, $uusikehahin, $vlaadittu, $trow['laadittu'], 0);
+                  korjaalaskut($tuoteno, $uusikehahin, $vlaadittu, $trow['laadittu'], 0);
                   $korjattavia_laskuja = 0;
                 }
 
@@ -1408,7 +1407,7 @@ if ($tuoteno != '') {
             // jos meillä on jotain korjattavia laskuja, jota ei korjattu whilen sisällä ni korjataan ne ny
             if ($korjattavia_laskuja != 0 and $eka == 0) {
               if ($jalkilaskenta_debug >= 1) $jalkilaskenta_debug_text .= "<font class='message'>Korjataan! Saldo: $uusisaldo Keskihinta: $uusikehahin Alku: $vlaadittu Loppu: 3000-01-01 Case: 2</font><br>";
-              $mitenkavi = korjaalaskut($tuoteno, $uusikehahin, $vlaadittu, '3000-01-01 00:00:00', 0);
+              korjaalaskut($tuoteno, $uusikehahin, $vlaadittu, '3000-01-01 00:00:00', 0);
             }
           }
 

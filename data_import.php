@@ -406,19 +406,22 @@ if (empty($_taulu)) {
   $_taulu = array_shift($taulut);
 }
 
-list($pakolliset, $kielletyt, $wherelliset, $eiyhtiota, $joinattavat, $saakopoistaa, $oletukset) = pakolliset_sarakkeet($_taulu);
+list($pakolliset, $kielletyt, $wherelliset, $eiyhtiota, $joinattavat, $saakopoistaa, $oletukset, $eisaaollatyhja) = pakolliset_sarakkeet($_taulu);
 
-echo "  <tr><td class='tumma'>".t("Tietokantataulun pakolliset tiedot").":</td>";
-echo "  <td>".strtolower(implode(", ", $pakolliset))."</td></tr>";
+$wherelliset = array_merge($wherelliset, $eisaaollatyhja);
+$wherelliset = array_unique($wherelliset);
+
+echo "<tr><th>".t("Tietokantataulun pakolliset tiedot").":<br>".t("(N‰it‰ tietoja ei voi muuttaa)")."</th>";
+echo "<td><ul><li>".strtolower(implode("</li><li>", $pakolliset))."</li></ul></td></tr>";
 
 if (!empty($wherelliset)) {
-  echo "  <tr><td class='tumma'>".t("Sarakkeet jotka pit‰‰ aineistossa kertoa").":</td>";
-  echo "  <td>".strtolower(implode(", ", $wherelliset))."</td></tr>";
+  echo "<tr><th>".t("Sarakkeet jotka pit‰‰ aineistossa kertoa").":</td>";
+  echo "<td><ul><li>".strtolower(implode("</li><li>", $wherelliset))."</li></ul></td></tr>";
 }
 
 if (!empty($kielletyt)) {
-  echo "  <tr><td class='tumma'>".t("Sarakkeet joita ei saa aineistossa kertoa").":</td>";
-  echo "  <td>".strtolower(implode(", ", $kielletyt))."</td></tr>";
+  echo "<tr><th>".t("Sarakkeet joita ei saa aineistossa kertoa").":</th>";
+  echo "<td><ul><li>".strtolower(implode("</li><li>", $kielletyt))."</li></ul></td></tr>";
 }
 
 echo "  <tr><th>".t("Valitse tiedosto").":</th>

@@ -104,6 +104,7 @@ if (!isset($kiertoviilasku))         $kiertoviilasku = "";
 if (!isset($huomioi_varastosiirrot)) $huomioi_varastosiirrot = "";
 if (!isset($saldo_myytavissa))       $saldo_myytavissa = '';
 if (!isset($nayta_ostohinta))        $nayta_ostohinta = '';
+if (!isset($status))                 $status = '';
 
 // setataan
 $lisa = "";
@@ -158,6 +159,13 @@ if (!$php_cli) {
     $rukVchk = "";
   }
 
+  if (isset($konsernitoimittajat_rajaus) and $konsernitoimittajat_rajaus != "") {
+    $rukKon = "CHECKED";
+  }
+  else {
+    $rukKon = "";
+  }
+
   echo "<br><table>
     <tr>
     <th>".t("Listaa vain tuotteet, jotka ei kuulu mihink‰‰n osastoon")."</th>
@@ -170,6 +178,10 @@ if (!$php_cli) {
     <tr>
     <th>".t("Listaa osto ja myyntitiedot vain valituista varastoista")."</th>
     <td><input type='checkbox' name='valitut_varastot_rajaus' value='valitut' $rukVchk></td>
+    </tr>
+    <tr>
+    <th>".t("N‰yt‰ vain konsernitoimittajien tuotteita")."</th>
+    <td><input type='checkbox' name='konsernitoimittajat_rajaus' value='valitut' $rukKon></td>
     </tr></table>";
 
   echo "<br><table>";
@@ -254,6 +266,7 @@ if (!$php_cli) {
   $sel2 = "";
   $sel3 = "";
   $sel4 = "";
+  $sel5 = "";
 
   if (isset($summaustaso) and $summaustaso == "S") {
     $sel1 = "SELECTED";
@@ -267,6 +280,9 @@ if (!$php_cli) {
   elseif (isset($summaustaso) and $summaustaso == "TRY") {
     $sel4 = "SELECTED";
   }
+  elseif (isset($summaustaso) and $summaustaso == "TME") {
+    $sel5 = "SELECTED";
+  }
 
   echo "<tr>";
   echo "<th>".t("Summaustaso").":</th>";
@@ -277,6 +293,7 @@ if (!$php_cli) {
       <option value='P'   $sel2>".t("Varastonarvo varastopaikoittain")."</option>
       <option value='T'   $sel3>".t("Varastonarvo tuotteittain")."</option>
       <option value='TRY' $sel4>".t("Varastonarvo tuoteryhmitt‰in")."</option>
+      <option value='TME' $sel5>".t("Varastonarvo tuotemerkeitt‰in")."</option>
       </select>";
 
   if ($yhtiorow['tuotteiden_jarjestys_raportoinnissa'] == 'V') {
@@ -294,17 +311,9 @@ if (!$php_cli) {
 
   echo "<tr><th>", t("Statusrajaus"), ":</th>";
 
-  $result = t_avainsana("S");
-
-  echo "<td><select name='status'><option value=''>", t("Kaikki"), "</option>";
-
-  while ($statusrow = mysql_fetch_assoc($result)) {
-    $sel = '';
-    if (isset($status) and $status == $statusrow['selite']) $sel = ' SELECTED';
-
-    echo "<option value='$statusrow[selite]'$sel>$statusrow[selite] - $statusrow[selitetark]</option>";
-  }
-
+  echo "<td><select name='status'>";
+  echo "<option value=''>", t("Kaikki"), "</option>";
+  echo product_status_options($status);
   echo "</select></td></tr>";
 
   $sel = $tallennusmuoto == 'csv' ? "selected" : "";
@@ -479,7 +488,10 @@ if (isset($supertee) and $supertee == "RAPORTOI") {
     $varastontunnukset1 = " AND tapahtuma.varasto IN ($varastontunnukset)";
     $varastontunnukset2 = " AND tuotepaikat.varasto IN ($varastontunnukset)";
 
-    if ($summaustaso == "T" or $summaustaso == "TRY") {
+    if ($summaustaso == "TME") {
+      $order_lisa = "tuotemerkki, $order_extra";
+    }
+    elseif ($summaustaso == "T" or $summaustaso == "TRY") {
       $order_lisa = "osasto, try, $order_extra";
     }
     else {
@@ -572,10 +584,17 @@ if (isset($supertee) and $supertee == "RAPORTOI") {
     $where_lisa .= "AND try = '0' ";
   }
 
+  $konsernitoimittajarajausjoini = '';
+
+  if (isset($konsernitoimittajat_rajaus) and $konsernitoimittajat_rajaus != '') {
+    $konsernitoimittajarajausjoini = " JOIN tuotteen_toimittajat ON (tuote.yhtio = tuotteen_toimittajat.yhtio AND tuote.tuoteno = tuotteen_toimittajat.tuoteno)
+    JOIN toimi ON (tuotteen_toimittajat.yhtio = toimi.yhtio AND tuotteen_toimittajat.liitostunnus = toimi.tunnus AND toimi.konserniyhtio != '') ";
+  }
+
   //################# Varaston tiedot ##################
   $varastolisa1 = " varastopaikat.nimitys varastonnimi, varastopaikat.tunnus varastotunnus, ";
 
-  if ($summaustaso == 'T' or $summaustaso == 'TRY') {
+  if ($summaustaso == 'T' or $summaustaso == 'TRY' or $summaustaso == 'TME') {
     $varastolisa1 = " 'varastot' varastonnimi, 0 varastotunnus, ";
   }
 
@@ -612,6 +631,7 @@ if (isset($supertee) and $supertee == "RAPORTOI") {
                JOIN varastopaikat ON  (varastopaikat.yhtio = tapahtuma.yhtio
                  AND varastopaikat.tunnus = tapahtuma.varasto)
                $jarjestys_join
+               $konsernitoimittajarajausjoini
                WHERE tapahtuma.yhtio      = '$kukarow[yhtio]'
                AND tapahtuma.laadittu     > '$vv-$kk-$pp 23:59:59'
                $varastontunnukset1
@@ -651,6 +671,7 @@ if (isset($supertee) and $supertee == "RAPORTOI") {
         JOIN varastopaikat ON  (varastopaikat.yhtio = tuotepaikat.yhtio
           AND varastopaikat.tunnus = tuotepaikat.varasto)
         $jarjestys_join
+        $konsernitoimittajarajausjoini
         WHERE tuotepaikat.yhtio = '$kukarow[yhtio]'
         $varastontunnukset2
         $where_lisa
@@ -736,7 +757,7 @@ if (isset($supertee) and $supertee == "RAPORTOI") {
     $fh = fopen("/tmp/".$tiedostonimi, "w");
   }
 
-  if ($summaustaso != "T" and $summaustaso != "TRY") {
+  if ($summaustaso != "T" and $summaustaso != "TRY" and $summaustaso != "TME") {
     if ($tallennusmuoto_check) {
       $worksheet->writeString($excelrivi, $excelsarake, t("Varasto"),     $format_bold);
       $excelsarake++;
@@ -963,7 +984,7 @@ if (isset($supertee) and $supertee == "RAPORTOI") {
       $bar->increase();
     }
 
-    if ($summaustaso == 'T' or $summaustaso == 'TRY') {
+    if ($summaustaso == 'T' or $summaustaso == 'TRY' or $summaustaso == "TME") {
       $mistavarastosta = $varastontunnukset;
     }
     else {
@@ -1358,7 +1379,7 @@ if (isset($supertee) and $supertee == "RAPORTOI") {
         }
       }
 
-      if ($summaustaso != "T" and $summaustaso != "TRY") {
+      if ($summaustaso != "T" and $summaustaso != "TRY" and $summaustaso != "TME") {
         if ($tallennusmuoto_check) {
           $worksheet->writeString($excelrivi, $excelsarake, $row["varastonnimi"],   $format_bold);
           $excelsarake++;
@@ -1730,7 +1751,17 @@ if (isset($supertee) and $supertee == "RAPORTOI") {
 
       $excelsarake = 0;
 
-      if ($summaustaso == 'TRY') {
+      if ($summaustaso == 'TME') {
+        if (!isset($varastot2[$row["tuotemerkki"]])) {
+          $varastot2[$row["tuotemerkki"]]["netto"]  = $muutoshinta;
+          $varastot2[$row["tuotemerkki"]]["brutto"] = $bmuutoshinta;
+        }
+        else {
+          $varastot2[$row["tuotemerkki"]]["netto"]  += $muutoshinta;
+          $varastot2[$row["tuotemerkki"]]["brutto"] += $bmuutoshinta;
+        }
+      }
+      elseif ($summaustaso == 'TRY') {
         $tryosind = "$row[osasto] - ".$osasto_array[$row["osasto"]]."###$row[try] - ".$try_array[$row["try"]];
 
         if (!isset($varastot2[$tryosind])) {
@@ -1760,7 +1791,10 @@ if (isset($supertee) and $supertee == "RAPORTOI") {
     echo "<table>";
     echo "<tr>";
 
-    if ($summaustaso == 'TRY') {
+    if ($summaustaso == 'TME') {
+      echo "<th>".t("Tuotemerkki")."</th>";
+    }
+    elseif ($summaustaso == 'TRY') {
       echo "<th>".t("Osasto")."</th>";
       echo "<th>".t("Ryhm‰")."</th>";
     }
@@ -1776,7 +1810,10 @@ if (isset($supertee) and $supertee == "RAPORTOI") {
     foreach ($varastot2 as $varasto => $arvot) {
       echo "<tr>";
 
-      if ($summaustaso == 'TRY') {
+      if ($summaustaso == 'TME') {
+        echo "<td>$varasto</td>";
+      }
+      elseif ($summaustaso == 'TRY') {
         list($osai, $tryi) = explode("###", $varasto);
         echo "<td>$osai</td>";
         echo "<td>$tryi</td>";

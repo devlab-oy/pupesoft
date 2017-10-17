@@ -16,7 +16,7 @@ ini_set("log_errors", 1);
 // Tsekataan ajetaanko Pupea Latin1- vai UTF-8-moodissa
 // (Ohjataan mssql.charset-muuttujalla php.ini-tiedostossa)
 if (!defined("PUPE_UNICODE")) {
-  if (get_cfg_var('mssql.charset') == "UTF-8" or @include_once(".PUPE_UNICODE")) {
+  if (get_cfg_var('mssql.charset') == "UTF-8" or @include_once ".PUPE_UNICODE") {
     define("PUPE_UNICODE", TRUE);
   }
   else {
@@ -242,19 +242,19 @@ unset($DAY_ARRAY);
 unset($AIKA_ARRAY);
 unset($MONTH_ARRAY);
 
-unset($VOIPURL);
-
 unset($kpexport);
 
 unset($liitetaanko_editilaus_laskulle_hakemisto);
 
 unset($siirrasuoritustilille);
 unset($ohjewiki_url);
+unset($synkronoi_ainoastaan);
 unset($synkronoi_kiellot);
 unset($alv_laskelman_sallittu_erotus);
 unset($e3_params);
 unset($tee_keraysera_debugdir);
 
+unset($default_login_language);
 unset($loginkieli);
 
 unset($magento_api_tt_url);
@@ -270,15 +270,8 @@ unset($magento_api_ht_usr);
 unset($magento_api_ht_pas);
 unset($magento_api_ht_edi);
 
-unset($ftp_logmaster_host);
-unset($ftp_logmaster_user);
-unset($ftp_logmaster_pass);
-unset($ftp_logmaster_path);
-
-unset($ftp_posten_logistik_host);
-unset($ftp_posten_logistik_user);
-unset($ftp_posten_logistik_pass);
-unset($ftp_posten_logistik_path);
+unset($logmaster);
+unset($woo_config);
 
 unset($pupesoft_commandlinelog);
 
@@ -437,7 +430,10 @@ elseif ($session == '' and $login != 'yes' and (!isset($verkkokauppa) or $verkko
       //haetaan browserin oletuskieli
       $browkieli = substr($_SERVER["HTTP_ACCEPT_LANGUAGE"], 0, 2);
 
-      if ($browkieli == 'sv') {
+      if (isset($default_login_language) and $browkieli != 'fi') {
+        $browkieli = $default_login_language;
+      }
+      elseif ($browkieli == 'sv') {
         $browkieli = 'se';
       }
       elseif ($browkieli == 'ee') {
@@ -563,6 +559,19 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
       if (isset($valmiste_vai_raakaaine) and $toim == "VALMISTAVARASTOON") {
         setcookie('valmiste_vai_raakaaine', $valmiste_vai_raakaaine, time()+60*60*24*90, "/");
         $_COOKIE["valmiste_vai_raakaaine"] = urlencode(serialize($valmiste_vai_raakaaine));
+      }
+    }
+
+    if ($phpnimi == 'raportit.php' and $toim == 'avoimet') {
+      if (isset($tallenna_keksiin)) {
+        if (!empty($_POST['karhutieto'])) {
+          setcookie('karhutieto', $karhutieto, time()+60*60*24*90, "/");
+          $_COOKIE["karhutieto"] = $karhutieto;
+        }
+        else {
+          setcookie('karhutieto', '', 1, "/");
+          $_COOKIE["karhutieto"] = '';
+        }
       }
     }
 
@@ -984,4 +993,15 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
   $_sepa_pankkiyhteys &= (!empty($sepa_pankkiyhteys_token));
 
   define('SEPA_PANKKIYHTEYS', $_sepa_pankkiyhteys == 1 ? true : false);
+
+  # Katsotaan onko Pupesoftissa Logmaster-rajapinta asetettuna
+  $_logmaster_rajapinta = true;
+  $_logmaster_rajapinta &= (!empty($logmaster['host']));
+  $_logmaster_rajapinta &= (!empty($logmaster['user']));
+  $_logmaster_rajapinta &= (!empty($logmaster['pass']));
+  $_logmaster_rajapinta &= (!empty($logmaster['path']));
+  $_logmaster_rajapinta &= ($yhtiorow['lahetteen_tulostustapa'] == 'K');
+  $_logmaster_rajapinta &= ($yhtiorow['siirtolistan_tulostustapa'] == 'K');
+
+  define('LOGMASTER_RAJAPINTA', $_logmaster_rajapinta == 1 ? true : false);
 }

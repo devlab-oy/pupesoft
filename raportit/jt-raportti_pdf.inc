@@ -1,7 +1,5 @@
 <?php
 
-$kukarow["kieli"] = $kieli = strtolower($asiakasrow["kieli"]);
-
 $p["height"]     = 10;
 $p["font"]       = "Times-Roman";
 
@@ -48,11 +46,11 @@ if (!function_exists('alku')) {
       $pdf->draw_text(30, 730, $yhtiorow["maa"],     $page, $p);
     }
 
-    $title = t("JƒLKITOIMITUSRAPORTTI", $kieli);
+    $title = t("JƒLKITOIMITUSRAPORTTI", $kukarow['kieli']);
     $title = str_replace(array("‰", "ˆ", "Â"), array("ƒ", "÷", "≈"), $title);
     $title_position = 360;
 
-    $pdf->draw_text($title_position, 815, t($title, $kieli),   $page);
+    $pdf->draw_text($title_position, 815, t($title, $kukarow['kieli']),   $page);
 
     $pdf->draw_rectangle(710, 20,  690, 290, $page, $rectparam);
     $pdf->draw_rectangle(710, 290, 690, 360, $page, $rectparam);
@@ -60,11 +58,11 @@ if (!function_exists('alku')) {
     $pdf->draw_rectangle(710, 450, 690, 520, $page, $rectparam);
     $pdf->draw_rectangle(710, 520, 690, 580, $page, $rectparam);
 
-    $pdf->draw_text(25,  700, t("Nimitys", $kieli),   $page, $p);
-    $pdf->draw_text(295, 700, t("Tilausnumero", $kieli), $page, $p);
-    $pdf->draw_text(365, 700, t("Tuotenumero", $kieli),   $page, $p);
-    $pdf->draw_text(455, 700, t("Tilattu", $kieli),    $page, $p);
-    $pdf->draw_text(525, 700, t("Kpl", $kieli),        $page, $p);
+    $pdf->draw_text(25,  700, t("Nimitys", $kukarow['kieli']),   $page, $p);
+    $pdf->draw_text(295, 700, t("Tilausnumero", $kukarow['kieli']), $page, $p);
+    $pdf->draw_text(365, 700, t("Tuotenumero", $kukarow['kieli']),   $page, $p);
+    $pdf->draw_text(455, 700, t("Tilattu", $kukarow['kieli']),    $page, $p);
+    $pdf->draw_text(525, 700, t("Kpl", $kukarow['kieli']),        $page, $p);
 
     $pdf->draw_rectangle(710, 20, 20, 580, $page, $rectparam);
 
@@ -84,7 +82,7 @@ if (!function_exists('rivi')) {
     }
 
     //K‰‰nnet‰‰n nimitys
-    $jtrow['nimitys'] = t_tuotteen_avainsanat($jtrow, 'nimitys', $kieli);
+    $jtrow['nimitys'] = t_tuotteen_avainsanat($jtrow, 'nimitys', $kukarow['kieli']);
 
     if (strlen($jtrow["nimitys"]) > 60) {
       $nimitys = substr($jtrow["nimitys"], 0, 60);
@@ -124,7 +122,7 @@ if (!function_exists('print_pdf')) {
     //keksit‰‰n uudelle failille joku varmasti uniikki nimi:
     list($usec, $sec) = explode(' ', microtime());
     mt_srand((float) $sec + ((float) $usec * 100000));
-    $pdffilenimi = "/tmp/".$yhtiorow["yhtio"]."-".t("jtraportti", $kieli)."-".md5(uniqid(mt_rand(), true)).".pdf";
+    $pdffilenimi = "/tmp/".$yhtiorow["yhtio"]."-".t("jtraportti", $kukarow['kieli'])."-".md5(uniqid(mt_rand(), true)).".pdf";
 
     //kirjoitetaan pdf faili levylle..
     $fh = fopen($pdffilenimi, "w");
@@ -132,10 +130,10 @@ if (!function_exists('print_pdf')) {
     fclose($fh);
 
     $komento = 'email';
-    $kukarow = array();
+
     // itse print komento...
     $liite = $pdffilenimi;
-    $kutsu = t("J‰lkitoimitusraportti", $kieli);
+    $kutsu = t("J‰lkitoimitusraportti", $kukarow['kieli']);
 
     $kukarow["eposti"] = $asiakasrow["email"];
     require "inc/sahkoposti.inc";

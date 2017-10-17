@@ -14,6 +14,7 @@ $dirri2    = $ARGV[1]; # minne siirret‰‰n
 $dirri3    = $ARGV[2]; # minne siirret‰‰n kun erroroi
 $email     = $ARGV[3]; # kenelle meilataan jos on ongelma
 $emailfrom = $ARGV[4]; # mill‰ osoitteella meili l‰hetet‰‰n
+$lisaparametri = $ARGV[5]; # mahdolliset lis‰parametrit editilaus_in.inc:lle
 
 $pupedir = abs_path(dirname($0)) . "/tilauskasittely/"; # pupesoftin tilausk‰sittely hakemisto
 $komento = "/usr/bin/php";                              # polku php -komentoon
@@ -40,7 +41,7 @@ if (! -d $dirri3) {
 }
 
 sysopen("tmpfaili", $tmpfile, O_CREAT) or die("Failin $tmpfile avaus ep‰onnistui!");
-flock("tmpfaili", LOCK_EX) or die("Lukkoa ei saatu fileen: $tmpfile");
+flock("tmpfaili", LOCK_EX | LOCK_NB) or die("Lukkoa ei saatu fileen: $tmpfile");
 
 opendir($hakemisto, $dirri1);
 
@@ -116,7 +117,7 @@ while ($file = readdir($hakemisto)) {
         #print "pupesoft editilaus.pl v1.1\n--------------------------\n\n";
         #print "Edi-tilaus $file" . "\n";
 
-        $cmd = "cd ".$pupedir.";".$komento. " ".$pupedir."editilaus_in.inc ".$nimi.$edi_tyyppi;
+        $cmd = "cd ".$pupedir.";".$komento. " ".$pupedir."editilaus_in.inc ".$nimi.$edi_tyyppi." ".$lisaparametri;
         system($cmd);
 
         $cmd = "mv -f $nimi $dirri2";

@@ -264,6 +264,10 @@ while ((!feof($fd)) and ($error!=1)) {
         }
       }
 
+      if (!in_array($yhtiorow['tuotekommentti_tilausriville'], array('', 'M'))) {
+        $trow['tilausrivi_kommentti'] = '';
+      }
+
       $query = "INSERT into tilausrivi set
                 varattu        = '$maara',
                 tilkpl         = '$maara',

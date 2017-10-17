@@ -239,8 +239,8 @@ if ($toiminto == "LINKKAA" or $vanhatoiminto == "LINKKAA") {
             LEFT JOIN avainsana on avainsana.yhtio = tuote.yhtio
               AND avainsana.laji                          = 'TRY'
               AND avainsana.selite                        = tuote.try
-            LEFT JOIN asiakas ON laite.yhtio = asiakas.yhtio 
-              AND laite.toimipiste = asiakas.tunnus
+            LEFT JOIN asiakas ON laite.yhtio = asiakas.yhtio
+              AND laite.toimipiste                        = asiakas.tunnus
             JOIN laitteen_sopimukset on laitteen_sopimukset.laitteen_tunnus = laite.tunnus
               AND laitteen_sopimukset.sopimusrivin_tunnus = '{$tilausrivin_tunnus}'
             WHERE laite.yhtio                             = '{$kukarow['yhtio']}'
@@ -311,7 +311,7 @@ if (empty($toiminto) or $toiminto == 'LINKKAA' or $toiminto == 'NAYTALAITTEET') 
   }
   echo "</tr>";
   echo "<input type='hidden' name='tilausrivin_tunnus' value='$tilausrivin_tunnus'>";
-  
+
   echo "<input type='hidden' name='vanhatoiminto' value='$vanhatoiminto'>";
   echo "<input type='hidden' name='lopetus' value='$lopetus' />";
 }
@@ -324,13 +324,13 @@ if (empty($toiminto) or $toiminto == 'LINKKAA' or $vanhatoiminto == 'LINKKAA') {
 
 if ($toiminto == 'NAYTALAITTEET') {
   if (!empty($valmistajahaku)) {
-    $valmistajajoini = " JOIN avainsana on avainsana.yhtio = tuote.yhtio 
+    $valmistajajoini = " JOIN avainsana on avainsana.yhtio = tuote.yhtio
                          AND avainsana.laji = 'TRY'
                          AND avainsana.selite = tuote.try
                          AND avainsana.selitetark like '$valmistajahaku%' ";
   }
   else {
-    $valmistajajoini = " LEFT JOIN avainsana on avainsana.yhtio = tuote.yhtio 
+    $valmistajajoini = " LEFT JOIN avainsana on avainsana.yhtio = tuote.yhtio
                          AND avainsana.laji = 'TRY'
                          AND avainsana.selite = tuote.try ";
   }
@@ -355,7 +355,7 @@ if ($toiminto == 'NAYTALAITTEET') {
   if (!empty($sopimusasiakashaku)) {
     // Sopimusasiakashakua varten tarvitaan myös laitteen_sopimukset
     $sopimusjoinilisa = '';
-    $sopimusasiakasjoini = " JOIN tilausrivi ON (tilausrivi.yhtio = laite.yhtio and tilausrivi.tunnus = laitteen_sopimukset.sopimusrivin_tunnus)	
+    $sopimusasiakasjoini = " JOIN tilausrivi ON (tilausrivi.yhtio = laite.yhtio and tilausrivi.tunnus = laitteen_sopimukset.sopimusrivin_tunnus)
                              JOIN lasku ON (lasku.yhtio = laite.yhtio AND lasku.tunnus = tilausrivi.otunnus AND lasku.toim_nimi like '%{$sopimusasiakashaku}%') ";
   }
   elseif (!empty($sarjanumeroseurantahaku)) {
@@ -364,11 +364,11 @@ if ($toiminto == 'NAYTALAITTEET') {
                                   JOIN lasku ON (lasku.yhtio = sarjanumeroseuranta.yhtio AND lasku.tunnus = tilausrivi.otunnus AND lasku.toim_nimi like '%{$sarjanumeroseurantahaku}%') ";
   }
 
-  $asiakasjoinilisa = " LEFT JOIN asiakas ON laite.yhtio = asiakas.yhtio 
+  $asiakasjoinilisa = " LEFT JOIN asiakas ON laite.yhtio = asiakas.yhtio
     AND laite.toimipiste = asiakas.tunnus ";
   if (!empty($toimipistehaku)) {
-    $asiakasjoinilisa = " JOIN asiakas ON laite.yhtio = asiakas.yhtio 
-      AND laite.toimipiste = asiakas.tunnus AND asiakas.tunnus = '{$toimipistehaku}' ";  
+    $asiakasjoinilisa = " JOIN asiakas ON laite.yhtio = asiakas.yhtio
+      AND laite.toimipiste = asiakas.tunnus AND asiakas.tunnus = '{$toimipistehaku}' ";
   }
 
   // Haetaan kaikkien laiterekisterin laitteiden tuotteiden ja sopimusten tiedot
@@ -382,13 +382,13 @@ if ($toiminto == 'NAYTALAITTEET') {
             group_concat(laitteen_sopimukset.sopimusrivin_tunnus) sopimusrivin_tunnukset
             FROM laite
             LEFT JOIN tuote on tuote.yhtio = laite.yhtio
-              AND tuote.tuoteno    = laite.tuoteno
+              AND tuote.tuoteno = laite.tuoteno
             {$valmistajajoini}
             {$asiakasjoinilisa}
             {$sopimusjoinilisa} JOIN laitteen_sopimukset ON laitteen_sopimukset.laitteen_tunnus = laite.tunnus
             {$sopimusasiakasjoini}
             {$sarjanumeroseurantajoini}
-            WHERE laite.yhtio      = '{$kukarow['yhtio']}'
+            WHERE laite.yhtio   = '{$kukarow['yhtio']}'
             {$mallihakulisa}
             {$sarjanumerohakulisa}
             {$laiterajaus}
@@ -409,10 +409,10 @@ if ($toiminto == 'MUOKKAA' and !empty($laiterajaus)) {
             FROM laite
             LEFT JOIN tuote on tuote.yhtio = laite.yhtio
               AND tuote.tuoteno    = laite.tuoteno
-            LEFT JOIN avainsana on avainsana.yhtio = tuote.yhtio 
-              AND avainsana.laji = 'TRY'
+            LEFT JOIN avainsana on avainsana.yhtio = tuote.yhtio
+              AND avainsana.laji   = 'TRY'
               AND avainsana.selite = tuote.try
-            LEFT JOIN asiakas ON laite.yhtio = asiakas.yhtio 
+            LEFT JOIN asiakas ON laite.yhtio = asiakas.yhtio
               AND laite.toimipiste = asiakas.tunnus
             LEFT JOIN laitteen_sopimukset ON laitteen_sopimukset.laitteen_tunnus = laite.tunnus
             WHERE laite.yhtio      = '{$kukarow['yhtio']}'
@@ -431,13 +431,13 @@ if ($toiminto == 'MUOKKAA' and !empty($laiterajaus)) {
   echo "<td nowrap>{$rowi['sarjanro']}</td>";
   echo "<td nowrap>{$rowi['tuoteno']}</td>";
   echo "<td></td>";
-  
+
   $toimipistetunnus = $rowi['toimipistetunnus'];
   // Toimipistevalinta
   echo "<td>";
   echo livesearch_kentta("laiterekisteriformi", "ASIAKASHAKU", "toimipistetunnus", 140, $toimipistetunnus, 'EISUBMIT', '', '', 'ei_break_all');
   echo "</td>";
-  
+
   echo "<td></td>";
   echo "<td><input type='text' name='sla' value='{$rowi['sla']}'/></td>";
   echo "<td><input type='text' name='sd_sla' value='{$rowi['sd_sla']}'/></td>";
@@ -668,7 +668,7 @@ else {
   echo "<th>".t("Malli")."</th>";
   echo "<td><input type='text' name='mallihaku'></td>";
   echo "</tr>";
-  
+
   echo "<tr>";
   echo "<th>".t("Sarjanumero")."</th>";
   echo "<td><input type='text' name='sarjanumerohaku'></td>";
@@ -692,14 +692,14 @@ else {
   echo livesearch_kentta("laiterekisteriformi", "ASIAKASHAKU", "toimipistehaku", 140, $toimipistehaku, '', '', '', 'ei_break_all');
   echo "</td>";
   echo "</tr>";
-  
+
   echo "<tr>";
   echo "<th>".t("Vain laitteet joilla on sopimus")."</th>";
   echo "<td><input type='checkbox' name='sopimushaku' value='joo'></td>";
   echo "</tr>";
-  
+
   echo "</table>";
   echo "<br>";
   echo "<input type='submit' name='hae_laitteet' value=".t('Hae laitteet')."/>";
-  echo "</form>"; 
+  echo "</form>";
 }

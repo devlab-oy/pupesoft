@@ -29,6 +29,7 @@ $toimittajan_ostotilaus = array();
 
 $_asiakkaantilaus = (strpos($_SERVER['SCRIPT_NAME'], "asiakkaantilaukset.php") !== FALSE);
 $_tulostakopio = (strpos($_SERVER['SCRIPT_NAME'], "tulostakopio.php") !== FALSE);
+$lahetteen_tulostusjono = (strpos($_SERVER['SCRIPT_NAME'], "lahetteen_tulostusjono.php") !== FALSE);
 
 $query = "SELECT lasku.*,
           laskun_lisatiedot.laskutus_nimi,
@@ -112,7 +113,7 @@ if ($laskurow["tila"] == "O") {
 echo "</tr>";
 
 echo "<tr>
-    <td>",tarkistahetu($laskurow['ytunnus']),"</td>
+    <td>", tarkistahetu($laskurow['ytunnus']), "</td>
     <td colspan='2'>$laskurow[nimi] $laskurow[nimitark]<br> $laskurow[osoite]<br> $laskurow[postino] $laskurow[postitp]<br>".maa($laskurow["maa"])."</td>";
 
 if ($verkkokauppa != "" and $muokkaa != "") {
@@ -254,117 +255,33 @@ if ($laskurow["tila"] != "O" and $laskurow["tila"] != "K") {
   else $dpdss = "";
 
   if ($laskurow["tila"] == "U") {
-    $query = "SELECT group_concat(lasku.tunnus) tunnukset
+    $query = "SELECT lasku.tunnus
               FROM lasku
-              WHERE yhtio     = '$kukarow[yhtio]'
-              and tila        = 'L'
-              and laskunro    = '$laskurow[laskunro]'";
+              WHERE yhtio  = '$kukarow[yhtio]'
+              and tila     = 'L'
+              and laskunro = '$laskurow[laskunro]'";
     $otres = pupe_query($query);
-    $otrow = mysql_fetch_assoc($otres);
+    $otsikkonrot = array();
 
-    $otsikkonrot = $otrow["tunnukset"];
+    while ($otrow = mysql_fetch_assoc($otres)) {
+      $otsikkonrot[] = $otrow["tunnus"];
+    }
   }
   else {
-    $otsikkonrot = $laskurow["tunnus"];
+    $otsikkonrot = array($laskurow["tunnus"]);
   }
 
-  // haetaan eka rahtikirjat tietue, niin saadaan rahtikirjanumerot tietoon
-  $query = "SELECT rahtikirjat.rahtikirjanro, toimitustapa.virallinen_selite, toimitustapa.rahtikirja, rahtikirjat.sscc_ulkoinen,
-            sum(rahtikirjat.kollit) kollit
-            FROM rahtikirjat
-            JOIN toimitustapa ON (toimitustapa.yhtio=rahtikirjat.yhtio and rahtikirjat.toimitustapa=toimitustapa.selite)
-            WHERE rahtikirjat.yhtio    = '$kukarow[yhtio]'
-            AND rahtikirjat.otsikkonro in ($otsikkonrot)
-            GROUP BY 1";
-  $rakre = pupe_query($query);
+  $linkit = tilauksen_seurantalinkit($otsikkonrot);
 
-  while ($rakirrow = mysql_fetch_assoc($rakre)) {
-    // Unifaunilla on oma seuranta
-    if ($yhtiorow['kerayserat'] != 'K' and !empty($unifaun_url_key) and stripos($rakirrow["rahtikirja"], "unifaun") !== FALSE) {
-      foreach (explode("\n", $rakirrow['sscc_ulkoinen']) as $rakirno) {
-        $linkurl .= "<a class='linkki' href='https://www.unifaunonline.com/ext.uo.fi.track?key={$unifaun_url_key}&order={$laskurow['tunnus']}' target='_blank'>{$rakirno}</a><br>";
-      }
-    }
-    elseif (stripos($rakirrow["virallinen_selite"], "dpd") !== FALSE and stripos($rakirrow["rahtikirja"], "unifaun") !== FALSE) {
-      foreach (explode("\n", $rakirrow['sscc_ulkoinen']) as $rakirno) {
-        if ($kukarow["extranet"] == "" and $dpdtun != '' and $dpdss != '') {
-          $linkurl .= "<a href='#' onclick=\"window.open('https://$dpdtun:$dpdss@extranet.dpd.de/cgi-bin/delistrack?typ=2&lang=".strtolower($kukarow["kieli"])."&pknr=$rakirno', '_blank' ,'toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,left=200,top=100,width=1000,height=800'); return false;\">{$rakirno}</a><br>";
-        }
-        else {
-          $linkurl .= "<a href='#' onclick=\"window.open('https://extranet.dpd.de/cgi-bin/delistrack?typ=2&lang=".strtolower($kukarow["kieli"])."&pknr=$rakirno', '_blank' ,'toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,left=200,top=100,width=1000,height=800'); return false;\">{$rakirno}</a><br>";
-        }
-      }
-    }
-    // postin rahtikirjat alkaa JJFI, ja tehd‰‰n niille linkki suoraan postin seurantaan
-    elseif (stripos($rakirrow['rahtikirjanro'], "JJFI") !== FALSE or stripos($rakirrow['sscc_ulkoinen'], "JJFI") !== FALSE) {
-      $linkurl = "";
-      preg_match_all("/JJFI ?[0-9]{6} ?[0-9]{11}/", $rakirrow['rahtikirjanro']." ".$rakirrow['sscc_ulkoinen'], $match);
+  foreach ($linkit as $seurantalinkki) {
+    $rakirno = $seurantalinkki['id'];
+    $link    = $seurantalinkki['link'];
 
-      foreach ($match[0] as $nro) {
-        $nro = str_replace(" ", "", $nro);
-        $linkurl .= "<a target=newikkuna href='http://www.itella.fi/itemtracking/itella/search_by_shipment_id?ShipmentId={$nro}'>{$nro}</a><br>";
-      }
-
-      $linkurl = substr($linkurl, 0, -4);
-    }
-    //luodaan ups seurantalinkki
-    elseif (stripos($rakirrow['rahtikirjanro'], 'UPS') !== FALSE) {
-      $linkurl = "";
-
-      preg_match_all("/UPS:([0-9A-Z]+)/", $rakirrow['rahtikirjanro'], $match);
-
-      foreach ($match[1] as $nro) {
-        $linkurl .= "<a target=newikkuna href='http://wwwapps.ups.com/etracking/tracking.cgi?InquiryNumber1={$nro}&TypeOfInquiryNumber=T&AcceptUPSLicenseAgreement=yes&submit=Trac&loc=".strtolower($kukarow["kieli"])."_".strtoupper($kukarow["kieli"])."'>{$nro}</a><br>";
-      }
-
-      $linkurl = substr($linkurl, 0, -4);
-    }
-    elseif ($dpdtun != '' and $dpdss != '' and ($rakirrow["rahtikirja"] == 'rahtikirja_dpd_siirto.inc' or $rakirrow["rahtikirja"] == 'rahtikirja_dpd.inc') and $rakirrow['rahtikirjanro'] != '') {
-      //luodaan dpd seurantalinkki jos k‰ytˆss‰ on Delisprint
-      $linkurl = "";
-
-      for ($dpdi=1; $dpdi<$rakirrow['kollit']+1; $dpdi++) {
-        $sscc = "";
-
-        if (!function_exists('tarkiste')) {
-
-          function tarkiste($sscc) {
-
-            $kerroin = 3; // kerroin aluks 3
-            $summa   = 0; // summa nolla tietty
-
-            // loopataan luvut oikeelta vasemmalle
-            for ($i = 16; $i >= 0; $i--) {
-              $summa += $kerroin * (ord($sscc{$i})-48); // lis‰t‰‰n summaan ko. luku * kerroin (t‰‰ hanskaa kirjaimet )
-              $kerroin = 4 - $kerroin; // kerroin on vuorotellen 3 tai 1
-            }
-
-            $sscc = ceil($summa / 10) * 10 - $summa; // tarkiste on luku mik‰ pit‰‰ lis‰t‰, ett‰ p‰‰st‰‰n seuraavaan tasakymmeneen
-
-            return $sscc;
-          }
-        }
-
-        $sscc = 1;
-        $sscc .= sprintf("%08.8s", $yhtiorow["ytunnus"]);
-        $sscc .= sprintf('%06.6s', substr($rakirrow['rahtikirjanro'], -6));
-        $sscc .= sprintf('%02.2s', $dpdi);
-        $loppu = tarkiste($sscc);
-        $sscc = $sscc.$loppu;
-
-        //$linkurl .= "<a target=newikkuna href='http://extranet.dpd.de/cgi-bin/delistrack.acl?typ=4&model=web_login.gws&username=$dpdtun&password=$dpdss&pknr=$sscc'>$sscc</a><br>";
-        $linkurl .= "<a target=newikkuna href='http://$dpdtun:$dpdss@tracking.dpd.de/cgi-bin/delistrack.acl?typ=4&pknr=$sscc'>$sscc</a><br>";
-      }
-
-      $linkurl = substr($linkurl, 0, -4); // vika br pois
-    }
-    elseif (stripos(strtolower($laskurow["toimitustapa"]), "mypack") !== FALSE and !empty($rakirrow['rahtikirjanro'])) {
-      foreach(explode(" ", $rakirrow['rahtikirjanro']) as $mypnro) {
-        $linkurl .= "<a target=newikkuna href='http://www.postnord.fi/fi/yritysasiakkaat/asiakaspalvelu/sahkoinen-asiointi/Sivut/Lahetysten-seuranta.aspx?view=item&itemid={$mypnro}'>{$mypnro}</a> ";
-      }
+    if (empty($link)) {
+      $linkurl .= "{$rakirno} ";
     }
     else {
-      $linkurl = $rakirrow['rahtikirjanro'];
+      $linkurl .= "<a class='linkki' href='{$link}' target='_blank'>{$rakirno}</a> ";
     }
   }
 
@@ -393,7 +310,7 @@ if (($laskurow["tila"] == "L" or $laskurow["tila"] == "N") and $kukarow["extrane
             FROM tilausrivi
             WHERE tilausrivi.yhtio  = '{$kukarow['yhtio']}'
             AND tilausrivi.otunnus  = '{$laskurow['tunnus']}'
-            and tilausrivi.var     != 'O'
+            and tilausrivi.var      not in ('P','J','O','S')
             AND tilausrivi.tyyppi  != 'D'
             HAVING kerattyaika != '0000-00-00 00:00:00'";
   $kerattyaikares = pupe_query($query);
@@ -418,7 +335,7 @@ if (($laskurow["tila"] == "L" or $laskurow["tila"] == "N") and $kukarow["extrane
               FROM tilausrivi
               WHERE tilausrivi.yhtio  = '{$kukarow['yhtio']}'
               AND tilausrivi.otunnus  = '{$laskurow['tunnus']}'
-              and tilausrivi.var     != 'O'
+              and tilausrivi.var      not in ('P','J','O','S')
               AND tilausrivi.tyyppi  != 'D'
               HAVING toimitettuaika != '0000-00-00 00:00:00'";
     $toimitettuaikares = pupe_query($query);
@@ -841,6 +758,28 @@ if ($laskurow["tila"] == 'O' or $laskurow["tila"] == 'K') {
       $lopetus = $_lopetus_talteen;
     }
   }
+  elseif ($lahetteen_tulostusjono) {
+    $lopetus .= $palvelin2;
+    $lopetus .= "tilauskasittely/lahetteen_tulostusjono.php";
+    $lopetus .= "////tee2=NAYTATILAUS";
+    $lopetus .= "//toim=";
+    $lopetus .= "//toim=";
+    $lopetus .= "//lasku_yhtio=$row[yhtio]";
+    $lopetus .= "//ytunnus=$ytunnus";
+    $lopetus .= "//tunnus=$tunnus";
+    $lopetus .= "//ppa=$ppa";
+    $lopetus .= "//kka=$kka";
+    $lopetus .= "//vva=$vva";
+    $lopetus .= "//ppl=$ppl";
+    $lopetus .= "//kkl=$kkl";
+    $lopetus .= "//vvl=$vvl";
+    $lopetus .= "//jarj=$jarj";
+    $lopetus .= "//tuvarasto=$tuvarasto";
+    $lopetus .= "//tumaa=$tumaa";
+    $lopetus .= "//tutyyppi=$tutyyppi";
+    $lopetus .= "//tutoimtapa=$tutoimtapa";
+    $lopetus .= "//karajaus=$karajaus";
+  }
   else {
     $lopetus .= $palvelin2;
     $lopetus .= "raportit/asiakkaantilaukset.php";
@@ -1188,6 +1127,28 @@ else {
       $lopetus .= $lopetus_apu;
     }
   }
+  elseif ($lahetteen_tulostusjono) {
+    $lopetus .= $palvelin2;
+    $lopetus .= "tilauskasittely/lahetteen_tulostusjono.php";
+    $lopetus .= "////tee2=NAYTATILAUS";
+    $lopetus .= "//toim=";
+    $lopetus .= "//toim=";
+    $lopetus .= "//lasku_yhtio=$row[yhtio]";
+    $lopetus .= "//ytunnus=$ytunnus";
+    $lopetus .= "//tunnus=$tunnus";
+    $lopetus .= "//ppa=$ppa";
+    $lopetus .= "//kka=$kka";
+    $lopetus .= "//vva=$vva";
+    $lopetus .= "//ppl=$ppl";
+    $lopetus .= "//kkl=$kkl";
+    $lopetus .= "//vvl=$vvl";
+    $lopetus .= "//jarj=$jarj";
+    $lopetus .= "//tuvarasto=$tuvarasto";
+    $lopetus .= "//tumaa=$tumaa";
+    $lopetus .= "//tutyyppi=$tutyyppi";
+    $lopetus .= "//tutoimtapa=$tutoimtapa";
+    $lopetus .= "//karajaus=$karajaus";
+  }
   else {
     $lopetus_apu .= $palvelin2;
     $lopetus_apu .= "raportit/asiakkaantilaukset.php";
@@ -1231,8 +1192,8 @@ else {
     }
 
     if ($row["tuoteno"] == $yhtiorow["ennakkomaksu_tuotenumero"]) {
-      $ennas_yht += $row["summa"];
-      $ennaa_yht += $row["rivihinta"];
+      $ennas_yht += $row["summa_valuutassa"];
+      $ennaa_yht += $row["rivihinta_valuutassa"];
     }
     else {
 
@@ -1919,7 +1880,7 @@ else {
         $rivikommentti = str_replace($tilaustunnus, $linkki, $rivikommentti);
       }
 
-      echo "<td $kommclass1 colspan='$cspan' valign='top'>".t("Kommentti").":<br><font class='message'>".$rivikommentti."</font></td>";
+      echo "<td $kommclass1 colspan='$cspan' valign='top'>".t("Kommentti").":<br><font class='black'>".$rivikommentti."</font></td>";
       echo "</tr>";
     }
   }
@@ -2164,7 +2125,7 @@ if ($yhtiorow["teeostotilaus_valmistuksen_tulosjonosta"] == "K") {
       // Pyˆristet‰‰n tilattava m‰‰r‰ ylˆsp‰in seuraavaan ostoer‰‰n
       $tilattava_maara = ceil($tarve / $ostoera) * $ostoera;
 
-      // mik‰li muutat n‰iden nimityksi‰, niin nimitykset pit‰‰ korjata myˆs lahetteen_tulostujono.php kohdan "NAYTATILAUS" javascriptiin.
+      // mik‰li muutat n‰iden nimityksi‰, niin nimitykset pit‰‰ korjata myˆs lahetteen_tulostusjono.php kohdan "NAYTATILAUS" javascriptiin.
       echo "<td>";
       echo "<input type='text' size='6' id='maara_$toimittajan_ostotilaus_indeksi' name='maara' value='$tilattava_maara'>";
       echo "<input type='hidden' id='tuoteno_$toimittajan_ostotilaus_indeksi' name='tuoteno' value='$tuotenumero'>";

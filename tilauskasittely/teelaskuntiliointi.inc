@@ -41,7 +41,8 @@ $query = "SELECT tilausrivi.alv alv,
           sum(tilausrivi.rivihinta_valuutassa) summa_valuutassa,
           sum(tilausrivi.kate) kate,
           sum(if(tuote.ei_saldoa = '', tilausrivi.rivihinta - tilausrivi.kate, 0)) varmuutos,
-          GROUP_CONCAT(tilausrivi.tunnus SEPARATOR ',') tunnukset
+          GROUP_CONCAT(tilausrivi.tunnus SEPARATOR ',') tunnukset,
+          GROUP_CONCAT(tilausrivin_lisatiedot.tunnus SEPARATOR ',') tilausrivin_lisatietotunnukset
           FROM tilausrivi
           JOIN lasku on (tilausrivi.yhtio = lasku.yhtio and tilausrivi.uusiotunnus = lasku.tunnus)
           LEFT JOIN yhtio ON (yhtio.yhtio = lasku.yhtio)
@@ -61,41 +62,41 @@ if (mysql_num_rows($xresult) == 0) {
 }
 else {
 
-  $varmuutos        = 0;
-  $vastasumma       = 0;
-  $vastasumma_valuutassa   = 0;
-  $maksimisumma       = 0;
-  $maksimisumma_kustp   = 0;
-  $maksimisumma_kohde   = 0;
-  $maksimisumma_projekti   = 0;
+  $varmuutos = 0;
+  $vastasumma = 0;
+  $vastasumma_valuutassa = 0;
+  $maksimisumma = 0;
+  $maksimisumma_kustp = 0;
+  $maksimisumma_kohde = 0;
+  $maksimisumma_projekti = 0;
 
   // Tehdaan myynnin kirjaukset
   while ($xrow = mysql_fetch_assoc($xresult)) {
 
-    $lukko               = "";
-    $tunnus             = $lasku['tunnus'];
-    $tapvm              = $lasku['tapvm'];
-    $loppusumma            = $lasku['summa'];
-    $loppusumma_valuutassa      = $lasku['summa_valuutassa'];
-    $tilino              = 0;
-    $tilino_eu            = 0;
-    $tilino_ei_eu          = 0;
-    $tilino_kaanteinen        = 0;
-    $tilino_triang          = 0;
-    $onkokaanteinen          = ""; // apumuuttuja, että tiedetään onko käänteinen alvillisuus
+    $lukko = "";
+    $tunnus = $lasku['tunnus'];
+    $tapvm = $lasku['tapvm'];
+    $loppusumma = $lasku['summa'];
+    $loppusumma_valuutassa = $lasku['summa_valuutassa'];
+    $tilino = 0;
+    $tilino_eu = 0;
+    $tilino_ei_eu = 0;
+    $tilino_kaanteinen = 0;
+    $tilino_triang = 0;
+    $onkokaanteinen = ""; // apumuuttuja, että tiedetään onko käänteinen alvillisuus
 
     // kustannuspaikkaa, kohde ja projekti
-    $kustp     = $xrow["kustp"];
-    $kohde     = $xrow["kohde"];
-    $projekti   = $xrow["projekti"];
+    $kustp = $xrow["kustp"];
+    $kohde = $xrow["kohde"];
+    $projekti = $xrow["projekti"];
 
     // otetaan suurimman myynnin tiedot
     if ($yhtiorow["kirjanpidon_tarkenteet"] == "K" and (($lasku['summa'] > 0 and $xrow["summa"] > $maksimisumma) or ($lasku['summa'] < 0 and $xrow["summa"] < $maksimisumma))) {
       $maksimisumma = $xrow["summa"];
 
-      $maksimisumma_kustp   = $kustp;
-      $maksimisumma_kohde   = $kohde;
-      $maksimisumma_projekti   = $projekti;
+      $maksimisumma_kustp = $kustp;
+      $maksimisumma_kohde = $kohde;
+      $maksimisumma_projekti = $projekti;
     }
 
     // Valitaan myyntitili, jos rivillä on alv yli 500 niin kyseessä on marginaalimyyntiä
@@ -146,26 +147,37 @@ else {
                 laatija          = '$kukarow[kuka]',
                 laadittu         = now()";
       pupe_query($query);
+      $margmyynti = mysql_insert_id($GLOBALS["masterlink"]);
+
+      // Päivitetään tilausriville tieto myyntitiliöinnistä:
+      if (!empty($xrow['tilausrivin_lisatietotunnukset'])) {
+        $query = "UPDATE tilausrivin_lisatiedot
+                  SET tiliointirivitunnus = '$margmyynti'
+                  WHERE yhtio = '{$kukarow['yhtio']}'
+                  and tunnus in ({$xrow['tilausrivin_lisatietotunnukset']})
+                  and tiliointirivitunnus = 0";
+        pupe_query($query);
+      }
 
       $vastasumma += $tiliointisumma;
       $vastasumma_valuutassa += $tiliointisumma_valuutassa;
 
-      //Sitten pitää vielä tilioidä itse marginaali joka on normaalia verollista myyntiä
+      // Sitten pitää vielä tilioidä itse marginaali joka on normaalia verollista myyntiä
       $selite = t("Marginaaliverolasku/Marginaali", $yhtiorow["kieli"]).": ".$lasku['laskunro'].", ". $lasku['nimi']." ".$lasku['nimitark'];
 
-      $tilino       = (int) $xrow['tilino'];
-      $tilino_eu       = (int) $xrow['tilino_eu'];
-      $tilino_ei_eu     = (int) $xrow['tilino_ei_eu'];
-      $tilino_kaanteinen  = (int) $xrow['tilino_kaanteinen'];
-      $tilino_triang    = (int) $xrow['tilino_triang'];
+      $tilino = (int) $xrow['tilino'];
+      $tilino_eu = (int) $xrow['tilino_eu'];
+      $tilino_ei_eu = (int) $xrow['tilino_ei_eu'];
+      $tilino_kaanteinen = (int) $xrow['tilino_kaanteinen'];
+      $tilino_triang = (int) $xrow['tilino_triang'];
 
       $tiliointisumma = $marginaali_kate;
       $tiliointisumma_valuutassa = round($marginaali_kate / $lasku['vienti_kurssi'], 2); //Myynnin marginaali valuutassa (paras arvaus on kääntää kurssilla)
 
-      $lukko      = "1";
+      $lukko = "1";
       $xrow['alv']   = $xrow['alv'] - 500; //Poistetaan 500 yksikköä alvista
 
-      $alv       = round($tiliointisumma - ($tiliointisumma / (1 + $xrow['alv'] / 100)), 2);
+      $alv = round($tiliointisumma - ($tiliointisumma / (1 + $xrow['alv'] / 100)), 2);
       $alv_valuutassa = round($tiliointisumma_valuutassa - ($tiliointisumma_valuutassa / (1 + $xrow['alv'] / 100)), 2);
 
       $tiliointisumma -= $alv;
@@ -173,30 +185,30 @@ else {
     }
     elseif ($xrow["alv"] >= 500 and $xrow["alv"] < 600 and ($xrow["marginaaliostot"] == "KYLLA" or $xrow["marginaalihyvitys"] == "KYLLA")) {
       // Valitaan ostotili, tässä on marginaaliostoa
-      $selite        = t("Marginaaliverolasku/Osto", $yhtiorow["kieli"]).": ".$lasku['laskunro'].", ". $lasku['nimi']." ".$lasku['nimitark'];
+      $selite = t("Marginaaliverolasku/Osto", $yhtiorow["kieli"]).": ".$lasku['laskunro'].", ". $lasku['nimi']." ".$lasku['nimitark'];
 
-      $tilino       = (int) $xrow['osto_marginaali'];
-      $tilino_eu       = (int) $xrow['osto_marginaali'];
-      $tilino_ei_eu    = (int) $xrow['osto_marginaali'];
-      $tilino_kaanteinen  = (int) $xrow['osto_marginaali'];
-      $tilino_triang    = (int) $xrow['osto_marginaali'];
+      $tilino = (int) $xrow['osto_marginaali'];
+      $tilino_eu = (int) $xrow['osto_marginaali'];
+      $tilino_ei_eu = (int) $xrow['osto_marginaali'];
+      $tilino_kaanteinen = (int) $xrow['osto_marginaali'];
+      $tilino_triang = (int) $xrow['osto_marginaali'];
 
-      $tiliointisumma       = $xrow['summa'];
-      $tiliointisumma_valuutassa  = $xrow['summa_valuutassa'];
+      $tiliointisumma = $xrow['summa'];
+      $tiliointisumma_valuutassa = $xrow['summa_valuutassa'];
       $xrow["varmuutos"]       = $xrow["summa"];
       $xrow["alv"]         = 0;
-      $alv              = 0;
-      $alv_valuutassa        = 0;
+      $alv = 0;
+      $alv_valuutassa = 0;
     }
     else {
       // Valitaan myyntitili, tässä on normaalimyyntiä
-      $selite       = t("Lasku", $yhtiorow["kieli"]).": ".$lasku['laskunro'].", ". $lasku['nimi']." ".$lasku['nimitark'];
+      $selite = t("Lasku", $yhtiorow["kieli"]).": ".$lasku['laskunro'].", ". $lasku['nimi']." ".$lasku['nimitark'];
 
-      $tilino       = (int) $xrow['tilino'];
-      $tilino_eu       = (int) $xrow['tilino_eu'];
-      $tilino_ei_eu     = (int) $xrow['tilino_ei_eu'];
-      $tilino_kaanteinen  = (int) $xrow['tilino_kaanteinen'];
-      $tilino_triang    = (int) $xrow['tilino_triang'];
+      $tilino = (int) $xrow['tilino'];
+      $tilino_eu = (int) $xrow['tilino_eu'];
+      $tilino_ei_eu = (int) $xrow['tilino_ei_eu'];
+      $tilino_kaanteinen = (int) $xrow['tilino_kaanteinen'];
+      $tilino_triang = (int) $xrow['tilino_triang'];
 
       $tiliointisumma = $xrow['summa'];
       $tiliointisumma_valuutassa = $xrow['summa_valuutassa'];
@@ -207,8 +219,8 @@ else {
         $onkokaanteinen = "kylla";
       }
 
-      $alv       = round($xrow['alv'] / 100 * $tiliointisumma, 2);
-      $alv_valuutassa  = round($xrow['alv'] / 100 * $tiliointisumma_valuutassa, 2);
+      $alv = round($xrow['alv'] / 100 * $tiliointisumma, 2);
+      $alv_valuutassa = round($xrow['alv'] / 100 * $tiliointisumma_valuutassa, 2);
     }
 
     // Valitaan myyntitili vienin mukaan
@@ -228,7 +240,7 @@ else {
     // Tiliöidään myynti
     if ($tiliointisumma != 0) {
 
-      $tiliointisumma        = round($tiliointisumma, 2);
+      $tiliointisumma = round($tiliointisumma, 2);
       $tiliointisumma_valuutassa = round($tiliointisumma_valuutassa, 2);
 
       list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($tilino, $kustp, $kohde, $projekti);
@@ -251,6 +263,16 @@ else {
                 laadittu         = now()";
       pupe_query($query);
       $isa = mysql_insert_id($GLOBALS["masterlink"]);
+
+      // Päivitetään tilausriville tieto myyntitiliöinnistä:
+      if (!empty($xrow['tilausrivin_lisatietotunnukset'])) {
+        $query = "UPDATE tilausrivin_lisatiedot
+                  SET tiliointirivitunnus = '$isa'
+                  WHERE yhtio = '{$kukarow['yhtio']}'
+                  and tunnus in ({$xrow['tilausrivin_lisatietotunnukset']})
+                  and tiliointirivitunnus = 0";
+        pupe_query($query);
+      }
 
       $lukko = "";
 
@@ -280,7 +302,7 @@ else {
       if ($mehtorow['kateinen'] != '' and $lasku['kasumma'] != 0) {
 
         // Kuinka paljon on tämän viennin osuus
-        $kassaale        = round($tiliointisumma*$mehtorow['kassa_alepros']/100, 2);
+        $kassaale = round($tiliointisumma*$mehtorow['kassa_alepros']/100, 2);
         $kassaale_valuutassa = round($tiliointisumma_valuutassa*$mehtorow['kassa_alepros']/100, 2);
 
         $query = "INSERT into tiliointi set
@@ -346,14 +368,14 @@ else {
     if ($varmuutos != 0) {
 
       if ($xrow["marginaaliostot"] == "KYLLA" or $xrow["marginaalihyvitys"] == "KYLLA") {
-        $selite  = t("Varastoontulo", $yhtiorow["kieli"]).": ".$lasku['laskunro'].", ". $lasku['nimi'];
+        $selite = t("Varastoontulo", $yhtiorow["kieli"]).": ".$lasku['laskunro'].", ". $lasku['nimi'];
       }
       else {
-        $selite  = t("Varastostamyynti", $yhtiorow["kieli"]).": ".$lasku['laskunro'].", ". $lasku['nimi'];
+        $selite = t("Varastostamyynti", $yhtiorow["kieli"]).": ".$lasku['laskunro'].", ". $lasku['nimi'];
       }
 
-      $vero      = 0;
-      $tiliointisumma  = $varmuutos * -1;
+      $vero = 0;
+      $tiliointisumma = $varmuutos * -1;
       $tiliointisumma_valuutassa = $varmuutos_valuutassa * -1;
 
       // Tiliöidään ensisijaisesti varastonmuutos tilin oletuskustannuspaikalle
@@ -475,18 +497,18 @@ else {
     // Jos maksetaan käteisellä ja meillä on kassa-alennusta
     if ($lasku['kasumma'] != '') {
       // vähennetään loppusummasta kassa-ale
-      $apusumma         = $loppusumma - $lasku['kasumma'];
-      $apusumma_valuutassa  = $loppusumma_valuutassa - $lasku['kasumma_valuutassa'];
+      $apusumma = $loppusumma - $lasku['kasumma'];
+      $apusumma_valuutassa = $loppusumma_valuutassa - $lasku['kasumma_valuutassa'];
     }
   }
   elseif (isset($mehtorow["factoring_id"])) {
-    $myysaatili  = $yhtiorow['factoringsaamiset'];
+    $myysaatili = $yhtiorow['factoringsaamiset'];
   }
   elseif ($konsrow["konserniyhtio"] != "") {
-    $myysaatili  = $yhtiorow['konsernimyyntisaamiset'];
+    $myysaatili = $yhtiorow['konsernimyyntisaamiset'];
   }
   else {
-    $myysaatili  = $yhtiorow['myyntisaamiset'];
+    $myysaatili = $yhtiorow['myyntisaamiset'];
   }
 
   $selite = t("Lasku", $yhtiorow["kieli"]).": ".$lasku['laskunro'].", ". $lasku['nimi']." ".$lasku['nimitark'];
@@ -582,9 +604,9 @@ else {
               yhtio            = '$kukarow[yhtio]',
               ltunnus          = '$tunnus',
               tilino           = '$yhtiorow[pyoristys]',
-              kustp            = $kustp_ins,
-              kohde            = $kohde_ins,
-              projekti         = $projekti_ins,
+              kustp            = '{$kustp_ins}',
+              kohde            = '{$kohde_ins}',
+              projekti         = '{$projekti_ins}',
               tapvm            = '$tapvm',
               summa            = $vastasumma - $loppusumma,
               summa_valuutassa = $vastasumma_valuutassa - $loppusumma_valuutassa,

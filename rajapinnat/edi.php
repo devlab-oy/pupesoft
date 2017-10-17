@@ -5,10 +5,12 @@ class Edi {
   /**
    * Luo edi tilauksen
    *
-   * @param  array   $order   Tilauksen tiedot ja tilauserivit
-   * @param  array   $options Tarvittavat parametrit
+   * @param array   $order   Tilauksen tiedot ja tilauserivit
+   * @param array   $options Tarvittavat parametrit
    * @return string           Luodun tiedoston polku
    */
+
+
   static function create($order, $options) {
     $magento_api_ht_edi            = $options['edi_polku'];
     $ovt_tunnus                    = $options['ovt_tunnus'];
@@ -65,24 +67,35 @@ class Edi {
     }
 
     $vaihtoehtoinen_ovt = '';
+    $vaihtoehtoinen_asiakasnro = '';
 
     //Tarkistetaan onko tämän nimiselle verkkokaupalle asetettu erikoiskäsittelyjä
     if (isset($verkkokauppa_erikoiskasittely) and count($verkkokauppa_erikoiskasittely) > 0) {
       $edi_store = str_replace("\n", " ", $order['store_name']);
 
       foreach ($verkkokauppa_erikoiskasittely as $verkkokauppaparametrit) {
-        // $verkkokauppaparametrit[0] - Verkkokaupan nimi
-        // $verkkokauppaparametrit[1] - Editilaus_tilaustyyppi
-        // $verkkokauppaparametrit[2] - Tilaustyyppilisa
-        // $verkkokauppaparametrit[3] - Myyjanumero
-        // $verkkokauppaparametrit[4] - Vaihtoehtoinen ovttunnus
+        // Avaimet
+        // 0 = Verkkokaupan nimi
+        // 1 = Editilaus_tilaustyyppi
+        // 2 = Tilaustyyppilisa
+        // 3 = Myyjanumero
+        // 4 = Vaihtoehtoinen ovttunnus OSTOTIL.OT_TOIMITTAJANRO -kenttään EDI tiedostossa
+        // 5 = Rahtivapaus, jos 'E', niin käytetään asiakkaan 'rahtivapaa' -oletusta
+        // 6 = Tyhjennetäänkö OSTOTIL.OT_MAKSETTU EDI tiedostossa (tyhjä ei, kaikki muut arvot kyllä)
+        // 7 = Vaihtoehtoinen asiakasnro
+
         if (strpos($edi_store, $verkkokauppaparametrit[0]) !== false) {
           $vaihtoehtoinen_ovt = $verkkokauppaparametrit[4];
+        }
+
+        if (strpos($edi_store, $verkkokauppaparametrit[0]) !== false and !empty($verkkokauppaparametrit[7])) {
+          $vaihtoehtoinen_asiakasnro = $verkkokauppaparametrit[7];
         }
       }
     }
 
     $valittu_ovt_tunnus = (!empty($vaihtoehtoinen_ovt)) ? $vaihtoehtoinen_ovt : $ovt_tunnus;
+    $verkkokauppa_asiakasnro = (!empty($vaihtoehtoinen_asiakasnro)) ? $vaihtoehtoinen_asiakasnro : $verkkokauppa_asiakasnro;
 
     $maksuehto = strip_tags($order['payment']['method']);
 
@@ -124,9 +137,17 @@ class Edi {
       $noutopistetunnus = is_numeric($tunnistekoodi) ? $tunnistekoodi : '';
     }
 
+    // Noutopiste voi olla myös katuosoitteen lopussa esim "Testitie 1 [#12345]"
+    preg_match("/\[#([0-9]*)\]/", $shippingadress, $tunnistekoodi);
+    if ($noutopistetunnus == '' and !empty($tunnistekoodi[1])) {
+      $noutopistetunnus = $tunnistekoodi[1];
+      $shippingadress = str_replace($tunnistekoodi[0], "", $shippingadress);
+    }
+
     $tilausviite = '';
     $tilausnumero = '';
     $kohde = '';
+    $toimaika = '';
 
     if (!empty($order['reference_number'])) {
       $tilausviite = str_replace("\n", " ", $order['reference_number']);
@@ -140,6 +161,13 @@ class Edi {
       $kohde = str_replace("\n", " ", $order['target']);
     }
 
+    if (!empty($order['delivery_time'])) {
+      $toimaika = str_replace("\n", " ", $order['delivery_time']);
+    }
+    else {
+      $toimaika = date("Y-m-d");
+    }
+
     // tilauksen otsikko
     $edi_order  = "*IS from:721111720-1 to:IKH,ORDERS*id:{$order['increment_id']} version:AFP-1.0 *MS\n";
     $edi_order .= "*MS {$order['increment_id']}\n";
@@ -148,13 +176,13 @@ class Edi {
     $edi_order .= "OSTOTIL.OT_TOIMITTAJANRO:{$valittu_ovt_tunnus}\n";
     $edi_order .= "OSTOTIL.OT_TILAUSTYYPPI:{$pupesoft_tilaustyyppi}\n";
     $edi_order .= "OSTOTIL.VERKKOKAUPPA:{$store_name}\n";
-    $edi_order .= "OSTOTIL.OT_VERKKOKAUPPA_ASIAKASNRO:{$order['customer_id']}\n";
+    $edi_order .= "OSTOTIL.OT_VERKKOKAUPPA_ASIAKASNRO:{$order['customer_id']}\n"; //tämä tulee suoraan Magentosta
     $edi_order .= "OSTOTIL.OT_VERKKOKAUPPA_TILAUSVIITE:{$tilausviite}\n";
     $edi_order .= "OSTOTIL.OT_VERKKOKAUPPA_TILAUSNUMERO:{$tilausnumero}\n";
     $edi_order .= "OSTOTIL.OT_VERKKOKAUPPA_KOHDE:{$kohde}\n";
-    $edi_order .= "OSTOTIL.OT_TILAUSAIKA:\n";
+    $edi_order .= "OSTOTIL.OT_TILAUSAIKA:{$toimaika}\n";
     $edi_order .= "OSTOTIL.OT_KASITTELIJA:\n";
-    $edi_order .= "OSTOTIL.OT_TOIMITUSAIKA:\n";
+    $edi_order .= "OSTOTIL.OT_TOIMITUSAIKA:{$toimaika}\n";
     $edi_order .= "OSTOTIL.OT_TOIMITUSTAPA:{$order['shipping_description']}\n";
     $edi_order .= "OSTOTIL.OT_TOIMITUSEHTO:\n";
     $edi_order .= "OSTOTIL.OT_MAKSETTU:{$order['status']}\n";
@@ -276,13 +304,19 @@ class Edi {
       }
     }
 
-    // // Rahtikulu, veroton
-    if ($tyyppi == "magento" and $order['shipping_amount'] != 0) {
+    // Rahtikulu, veroton
+    $rahti_veroton = $order['shipping_amount'];
+
+    if ($rahti_veroton != 0) {
       // Rahtikulu, verollinen
       $rahti = $order['shipping_amount'] + $order['shipping_tax_amount'];
 
       // Rahtin alviprossa
       $rahti_alvpros = round((($rahti / $order['shipping_amount']) - 1) * 100);
+
+      if (!empty($order['shipping_description_line'])) {
+        $rahtikulu_nimitys .= " / {$order['shipping_description_line']}";
+      }
 
       $edi_order .= "*RS OSTOTILRIV {$i}\n";
       $edi_order .= "OSTOTILRIV.OTR_NRO:{$order['increment_id']}\n";
@@ -295,7 +329,7 @@ class Edi {
       $edi_order .= "OSTOTILRIV.OTR_OSTOHINTA:{$order['shipping_amount']}\n";
       $edi_order .= "OSTOTILRIV.OTR_ALENNUS:0\n";
       $edi_order .= "OSTOTILRIV.OTR_VEROKANTA:{$rahti_alvpros}\n";
-      $edi_order .= "OSTOTILRIV.OTR_VIITE:\n";
+      $edi_order .= "OSTOTILRIV.OTR_VIITE:{$rahtikulu_nimitys}\n";
       $edi_order .= "OSTOTILRIV.OTR_OSATOIMITUSKIELTO:\n";
       $edi_order .= "OSTOTILRIV.OTR_JALKITOIMITUSKIELTO:\n";
       $edi_order .= "OSTOTILRIV.OTR_YKSIKKO:\n";

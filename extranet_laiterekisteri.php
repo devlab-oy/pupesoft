@@ -49,7 +49,7 @@ function piirra_kayttajan_laitteet() {
   }
   else {
     echo "<br><font class='error'>".t('Laiterekisteristä ei löydy yhtään laitetta tai niillä ei ole sopimuksia')."!</font><br/>";
-  } 
+  }
 }
 
 function hae_kayttajan_laitteet() {
@@ -74,15 +74,15 @@ function hae_kayttajan_laitteet() {
             tuote.tuotemerkki malli
             FROM laite
             LEFT JOIN tuote ON (tuote.yhtio = laite.yhtio
-            AND tuote.tuoteno = laite.tuoteno)
+            AND tuote.tuoteno                           = laite.tuoteno)
             LEFT JOIN avainsana ON (avainsana.yhtio = tuote.yhtio
-            AND avainsana.laji = 'TRY'
-            AND avainsana.selite = tuote.try)
+            AND avainsana.laji                          = 'TRY'
+            AND avainsana.selite                        = tuote.try)
             JOIN laitteen_sopimukset ON (laitteen_sopimukset.laitteen_tunnus = laite.tunnus)
-            JOIN tilausrivi ON (laitteen_sopimukset.yhtio = tilausrivi.yhtio 
+            JOIN tilausrivi ON (laitteen_sopimukset.yhtio = tilausrivi.yhtio
             AND laitteen_sopimukset.sopimusrivin_tunnus = tilausrivi.tunnus)
             JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio AND lasku.tunnus = tilausrivi.otunnus)
-            WHERE laite.yhtio = '{$kukarow['yhtio']}'
+            WHERE laite.yhtio                           = '{$kukarow['yhtio']}'
             {$toimipistelisa}
             GROUP BY laite.sarjanro,laite.tuoteno";
   $result = pupe_query($query);

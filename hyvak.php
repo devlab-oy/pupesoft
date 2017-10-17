@@ -9,6 +9,10 @@ if (strpos($_SERVER['SCRIPT_NAME'], "hyvak.php")  !== FALSE) {
   require "inc/parametrit.inc";
 }
 
+if (isset($_POST['ajax_toiminto']) and trim($_POST['ajax_toiminto']) != '') {
+  require "inc/tilioinnin_toiminnot.inc";
+}
+
 enable_ajax();
 
 if (!isset($tee))            $tee = "";
@@ -197,6 +201,9 @@ if ($keikalla == "on") {
 
 if ($kutsuja != "MATKALASKU") echo "<font class='head'>".t('Hyväksyttävät laskusi')."</font><hr><br>";
 
+# Halutaan nähdä laskun kuva oikealla puolella joten tehdään table
+echo "<table><tr><td class='back ptop'>";
+
 $onko_eka_hyvaksyja = FALSE;
 
 if ((int) $tunnus != 0) {
@@ -261,13 +268,19 @@ if ($tee == 'M' or ($onko_eka_hyvaksyja === TRUE and $tee != 'H' and $tee != 'D'
 
 // Jaaha poistamme laskun!
 if ($tee == 'D' and $oikeurow['paivitys'] == '1') {
+  if ($kutsuja == "MATKALASKU" and $tee == 'D') {
+    $hyvaklisa = "(hyvaksyja_nyt = '$kukarow[kuka]' or laatija = '$kukarow[kuka]')";
+  }
+  else {
+    $hyvaklisa = "hyvaksyja_nyt = '$kukarow[kuka]'";
+  }
 
-  $query = "SELECT *
-            FROM lasku
-            WHERE hyvaksyja_nyt = '$kukarow[kuka]' and
-            yhtio               = '$kukarow[yhtio]' and
-            tunnus              = '$tunnus'";
-  $result = pupe_query($query);
+    $query = "SELECT *
+              FROM lasku
+              WHERE $hyvaklisa
+              and yhtio            = '$kukarow[yhtio]'
+              and tunnus           = '$tunnus'";
+    $result = pupe_query($query);
 
   if (mysql_num_rows($result) != 1) {
     echo "<font class = 'error'>".t('Lasku kateissa') . "$tunnus</font>";
@@ -1118,19 +1131,19 @@ if (strlen($tunnus) != 0) {
         <input type='submit' value='".t("Poista lasku")."'>
         </form></td>";
 
-    echo "  <SCRIPT LANGUAGE=JAVASCRIPT>
-          function verify(){
-            msg = '".t("Haluatko todella poistaa tämän laskun ja sen kaikki tiliöinnit?")."';
+    echo "<script type='text/javascript'>
+            function verify(){
+              msg = '".t("Haluatko todella poistaa tämän laskun ja sen kaikki tiliöinnit?")."';
 
-            if (confirm(msg)) {
-              return true;
+              if (confirm(msg)) {
+                return true;
+              }
+              else {
+                skippaa_tama_submitti = true;
+                return false;
+              }
             }
-            else {
-              skippaa_tama_submitti = true;
-              return false;
-            }
-          }
-        </SCRIPT>";
+          </script>";
   }
 
   echo "</tr>";
@@ -1337,8 +1350,6 @@ if (strlen($tunnus) != 0) {
   echo "</tr></table>";
 
   if (in_array($laskurow["vienti"], array("B", "E", "H", "C", "J", "F", "K", "I", "L"))) {
-    enable_ajax();
-
     echo "<br><table>";
     echo "<tr><th>".t("Laskusta käytetty saapumisilla")."</th><th>".t("Summa")."</th></tr>";
 
@@ -1494,11 +1505,13 @@ if (strlen($tunnus) != 0) {
     echo "</tr></table><br>";
   }
 
+  // Laskun kuva oikealle puolelle
+  echo "</td><td class='back ptop'>";
 
-  echo "<br><table><tr>";
+  echo "<table><tr>";
 
   //  Onko kuva tietokannassa?
-  $liitteet = ebid($laskurow["tunnus"], true);
+  $liitteet = ebid($laskurow["tunnus"], true, true);
 
   if (is_array($liitteet) and count($liitteet) > 0) {
     echo "<form method='post'>
@@ -1515,8 +1528,8 @@ if (strlen($tunnus) != 0) {
           <input type='submit' value='".t("Avaa")."'>";
     }
     else {
-      echo "<select name='iframe_id' onchange='submit();'>
-          <option value=''>Valitse lasku</option>";
+      echo "<select name='iframe_id' onchange='submit();'>";
+      echo "<option value=''>".t("Valitse lasku")."</option>";
 
       $liicoint = 1;
       foreach ($liitteet as $liite) {
@@ -1546,7 +1559,7 @@ if (strlen($tunnus) != 0) {
   echo "</tr></table>";
 
   if ($iframe == 'yes' and $iframe_id != '') {
-    echo "<iframe src='$iframe_id' name='alaikkuna' width='100%' height='600px' align='bottom' scrolling='auto'></iframe>";
+    echo "<iframe src='$iframe_id' name='alaikkuna' width='800px' height='1200px' align='bottom' scrolling='auto'></iframe>";
   }
 }
 elseif ($kutsuja == "") {
@@ -1801,6 +1814,9 @@ elseif ($kutsuja == "") {
       }
       </SCRIPT>";
 }
+
+# Laskun kuva taulu loppuu
+echo "</td></tr></table>";
 
 if (strpos($_SERVER['SCRIPT_NAME'], "hyvak.php") !== FALSE) {
   require "inc/footer.inc";

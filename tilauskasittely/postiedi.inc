@@ -11,7 +11,7 @@ if ($postiedihost != "" and $postiediuser != "" and $postiedipass != "" and $pos
   if (empty($postirow["ytunnus"])) {
     $postirow["ytunnus"] = '999999';
   }
-  
+
   // tehdään EDI-aineisto
   $ulos  = "";
   $ulos .= "ICHGSTART:$postirow[tunnus]\n";                    // tilauksen numero
@@ -73,7 +73,6 @@ if ($postiedihost != "" and $postiediuser != "" and $postiedipass != "" and $pos
   if (in_array("3", $x)) $ulos .= "SGIDHANPI:2Z3103\n";                // vastaanottaja maksaa lisäpalvelu
   if (in_array("4", $x)) $ulos .= "SGIDHANPI:2Z3104\n";                // erikoiskäsiteltävä
   if (in_array("6", $x)) $ulos .= "SGIDHANPI:2Z3106\n";                // lauantaijaleku
-  if (in_array("7", $x)) $ulos .= "SGIDHANPI:2Z3107\n";              // kuljetusyksikkökuljetus
 
   $ulos .= "SGIDPA_PC:$viivaedi\n";                        // viivakoodi
 

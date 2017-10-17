@@ -1,12 +1,16 @@
 <?php
 
+require_once 'rajapinnat/unifaun/unifaun-functions.php';
+
 // Pupesoft -> Unifaun Online datasiirto
 
 // jos on laitettu kollikenttään 0 niin ei yritetä luoda siirtotiedostoa
 if ($yhtiorow['kerayserat'] != 'K' and $kollityht > 0) {
 
-  if ($unifaun_uo_host != "" and $unifaun_uo_user != "" and $unifaun_uo_pass != "" and $unifaun_uo_path != "") {
+  $unifaun_online = ($unifaun_uo_host != "" and $unifaun_uo_user != "" and $unifaun_uo_pass != "" and $unifaun_uo_path != "");
+  $unifaun_xmlposting = ($unifaun_xp_devi != "" and $unifaun_xp_user != "" and $unifaun_xp_pass != "");
 
+  if ($unifaun_online or $unifaun_xmlposting) {
     require_once "inc/unifaun_send.inc";
 
     if ($phpnimi == "rahtikirja_custom.php") {
@@ -22,6 +26,12 @@ if ($yhtiorow['kerayserat'] != 'K' and $kollityht > 0) {
                 limit 1";
       $tempr = pupe_query($query);
       $postirow = mysql_fetch_assoc($tempr);
+    }
+
+    // haetaan toimipaikan avulla uusi yhtiorow,
+    // niin saadaan sanomille toimipaikan tietoja oikein
+    if (!empty($postirow["yhtio_toimipaikka"])) {
+      $yhtiorow = hae_yhtion_parametrit($yhtio, $postirow["yhtio_toimipaikka"]);
     }
 
     // Maksuehdon tiedot
@@ -50,7 +60,14 @@ if ($yhtiorow['kerayserat'] != 'K' and $kollityht > 0) {
     //$lavametri[]
     //$shipment_idt[]
 
-    $unifaun = new Unifaun($unifaun_uo_host, $unifaun_uo_user, $unifaun_uo_pass, $unifaun_uo_path, $unifaun_uo_port, $unifaun_uo_fail, $unifaun_uo_succ);
+    $vak_tiedot = unifaun_tilauksen_vak_koodit($postirow['tunnus']);
+
+    if ($unifaun_online) {
+      $unifaun = Unifaun::online($unifaun_uo_host, $unifaun_uo_user, $unifaun_uo_pass, $unifaun_uo_path, $unifaun_uo_port, $unifaun_uo_fail, $unifaun_uo_succ);
+    }
+    else {
+      $unifaun = Unifaun::xmlposting($unifaun_xp_devi, $unifaun_xp_user, $unifaun_xp_pass, $unifaun_xp_fail, $unifaun_xp_succ, $unifaun_packsoft);
+    }
 
     $postirow['shipment_unique_id'] = $postirow['tunnus'];
     $postirow['kuljetusohjeet']   = $kuljetusohjeet;
@@ -62,6 +79,7 @@ if ($yhtiorow['kerayserat'] != 'K' and $kollityht > 0) {
     $unifaun->setMehto($mehto);
     $unifaun->setRahtikirjaRow($rakir_row);
     $unifaun->setYhteensa($laskurow['summa']);
+    $unifaun->setVak($vak_tiedot);
 
     if ($rakir_row["jv"] != '' or $mehto['jv'] != '') {
       $unifaun->setViite($laskurow['viite']);
@@ -95,23 +113,29 @@ if ($yhtiorow['kerayserat'] != 'K' and $kollityht > 0) {
       }
 
       $kollitiedot = array(
-        'maara'     => $kollit[$indeksi],
-        'paino'     => $kilot[$indeksi],
+        'maara'         => $kollit[$indeksi],
+        'paino'         => $kilot[$indeksi],
         'pakkauskuvaus' => $pakkaus_row['pakkauskuvaus'],
-        'pakkauskoodi'   => $pakkaus_row['koodi'],
-        'leveys'     => $pakkaus_row['leveys'],
-        'korkeus'     => $pakkaus_row['korkeus'],
-        'syvyys'     => $pakkaus_row['syvyys'],
-        'vakkoodi'     => array(),
-        'kuutiot'     => $kuutiot[$indeksi],
-        'lavametri'    => $lavametri[$indeksi]
+        'pakkauskoodi'  => $pakkaus_row['koodi'],
+        'leveys'        => $pakkaus_row['leveys'],
+        'korkeus'       => $pakkaus_row['korkeus'],
+        'syvyys'        => $pakkaus_row['syvyys'],
+        'vakkoodi'      => $vak_tiedot,
+        'kuutiot'       => $kuutiot[$indeksi],
+        'lavametri'     => $lavametri[$indeksi],
+        'rahtikirjan_kollit_yhteensa' => $kollityht,
       );
 
       /* VOIDAAN LÄHETTÄÄ MYÖS MONTA CONTAINER-ROWTA PER SANOMA! YKSI HEADER */
       $unifaun->setContainerRow($kollitiedot);
     }
 
-    $unifaun->ftpSend();
+    if ($unifaun_online) {
+      $unifaun->ftpSend();
+    }
+    else {
+      $unifaun->xmlPost();
+    }
   }
   else {
     echo "<br><font class='error'>".t("UNIFAUN-aineiston luontiin tarvittavia parametreja puuttuu!")."</font><br>";

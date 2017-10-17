@@ -3,32 +3,39 @@
 // Kutsutaanko CLI:stä
 $php_cli = php_sapi_name() == 'cli';
 
-if (!$php_cli) {
-  echo "Tätä scriptiä voi ajaa vain komentoriviltä!";
-  exit(1);
-}
-
-if (!isset($argv[1]) or $argv[1] == '') {
-  echo "Anna yhtiö!!!\n";
-  exit(1);
-}
-else {
-  $kukarow['yhtio'] = $yhtio = $argv[1];
-}
-
 // otetaan includepath aina rootista
 ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(__FILE__));
 error_reporting(E_ALL);
 ini_set("display_errors", 1);
 
-// otetaan tietokanta connect
-require "inc/connect.inc";
-require "inc/functions.inc";
+if (!$php_cli) {
+  echo "Tätä scriptiä voi ajaa vain komentoriviltä!";
+  exit(1);
+}
+
+if (empty($argv[1])) {
+  echo "Anna yhtiö!\n";
+  exit(1);
+}
+else {
+  require "inc/connect.inc";
+  require "inc/functions.inc";
+
+  $yhtio = $argv[1];
+
+  $yhtiorow = hae_yhtion_parametrit($yhtio);
+  $kukarow = hae_kukarow('admin', $yhtiorow['yhtio']);
+
+  if (!isset($kukarow)) {
+    echo "VIRHE: admin-käyttäjää ei löydy!\n";
+    exit;
+  }
+}
 
 // Generoidaan jokaiselle yhtiön tuotteelle tuotepaikka jokaiseen yhtiön varastoon
 $query = "SELECT *
           FROM varastopaikat
-          WHERE yhtio = '$yhtio'
+          WHERE yhtio        = '$yhtio'
           AND alkuhyllyalue != '!!M'";
 $varastoresult = pupe_query($query);
 

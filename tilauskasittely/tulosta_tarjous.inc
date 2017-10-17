@@ -12,11 +12,12 @@ if (in_array("gd", get_loaded_extensions())) {
   elseif (include_once "Barcode.php");
 }
 
-if ($kieli== '') {
-  $querykiel = "SELECT kieli FROM asiakas WHERE yhtio = '$kukarow[yhtio]' and ytunnus = '$laskurow[ytunnus]'";
-  $kielresult = pupe_query($querykiel);
-  $kielnum = mysql_num_rows($kielresult);
-  $kielrow = mysql_fetch_array($kielresult);
+// Haetaan asiakkaan kieli
+$querykiel = "SELECT kieli FROM asiakas WHERE yhtio = '$kukarow[yhtio]' and ytunnus = '$laskurow[ytunnus]'";
+$kielresult = pupe_query($querykiel);
+$kielrow = mysql_fetch_array($kielresult);
+
+if ($kielrow['kieli'] != '') {
   $kieli = strtolower($kielrow['kieli']);
 }
 
@@ -1047,7 +1048,7 @@ if (!function_exists('tarjous_rivi_hinta_ale')) {
                 JOIN liitetiedostot ON (liitetiedostot.yhtio = tuote.yhtio
                   AND liitetiedostot.liitostunnus    = tuote.tunnus
                   AND liitetiedostot.liitos          = 'tuote'
-                  AND liitetiedostot.kayttotarkoitus = 'TK')
+                  AND liitetiedostot.kayttotarkoitus = 'TH')
                 WHERE tuote.yhtio                    = '{$kukarow['yhtio']}'
                 AND tuote.tuoteno                    = '{$row['tuoteno']}'";
       $kuva_res = pupe_query($query);
@@ -1216,12 +1217,15 @@ if (!function_exists('tarjous_rivi_custom')) {
 
     $rivinkorkeus = 12;
 
-    if (trim($row["perhe_kommentti"]) != '') {
+    if (trim($row["perhe_kommentti"]) != '' and $yhtiorow["tarjoustyyppi"] != 1) {
       $pohja = $pdf_tarjous->draw_paragraph($kala+$norm["height"], 150, 60, 480, $row["perhe_kommentti"],  $page_tarjous[$sivu], $norm);
       $kala = $pohja - $rivinkorkeus;
     }
 
-    if ($naytetaanko_tuoteno == '') $pdf_tarjous->draw_text(50, $kala, $row["tuoteno"], $page_tarjous[$sivu], $boldi);
+    if ($naytetaanko_tuoteno == '') {
+      list($ff_string, $ff_font) = pdf_fontfit($row["tuoteno"], 100, $pdf_tarjous, $boldi);
+      $pdf_tarjous->draw_text(50, $kala, $ff_string, $page_tarjous[$sivu], $ff_font);
+    }
 
     list($vv, $kk, $pp) = explode("-", $row["toimaika"]);
 
@@ -1324,6 +1328,11 @@ if (!function_exists('tarjous_rivi_custom')) {
 
         $ed_akey = $akey;
       }
+    }
+
+    if (trim($row["perhe_kommentti"]) != '' and $yhtiorow["tarjoustyyppi"] == 1) {
+      $pohja = $pdf_tarjous->draw_paragraph($kala+$norm["height"], 150, 60, 480, $row["perhe_kommentti"],  $page_tarjous[$sivu], $norm);
+      $kala = $pohja - $rivinkorkeus;
     }
 
     $kala = $kala - 5;
@@ -1432,7 +1441,7 @@ if (!function_exists('loppu_tarjous')) {
 
       $pdf_tarjous->draw_text(217, 55, t("Puhelin", $kieli).":",      $page_tarjous[$sivu], $pieni);
       $pdf_tarjous->draw_text(257, 55, $y_puhelin,            $page_tarjous[$sivu], $pieni);
-      $pdf_tarjous->draw_text(217, 45, t("Telefax", $kieli).":",      $page_tarjous[$sivu], $pieni);
+      $pdf_tarjous->draw_text(217, 45, t("Fax", $kieli).":",      $page_tarjous[$sivu], $pieni);
       $pdf_tarjous->draw_text(257, 45, $y_fax,              $page_tarjous[$sivu], $pieni);
       $pdf_tarjous->draw_text(217, 35, t("Sähköposti", $kieli).":",    $page_tarjous[$sivu], $pieni);
       $pdf_tarjous->draw_text(257, 35, $y_email,              $page_tarjous[$sivu], $pieni);
@@ -1707,7 +1716,7 @@ if (!function_exists('loppu_tarjous')) {
 
         $kuha -= 30;
 
-        $pdf_tarjous->draw_text(30, $kuha, t("Kunnioittavasti", $kieli) . ",",
+        $pdf_tarjous->draw_text(30, $kuha, t("Yhteistyöterveisin", $kieli) . ",",
           $page_tarjous[$sivu], $boldi);
 
         $query  = "SELECT *
@@ -1851,6 +1860,8 @@ if (!function_exists('loppu_tarjous')) {
               $pdf_tarjous->draw_text(30,  $_y, $teksi, $page_tarjous[$sivu], $norm);
               $_y = $_y - 10;
             }
+
+            $kuha = $_y;
           }
           else {
             $pdf_tarjous->draw_text(30,  $kuha-24, $vakioteksti, $page_tarjous[$sivu], $norm);
@@ -1870,9 +1881,7 @@ if (!function_exists('loppu_tarjous')) {
             t("Toivomme tarjouksemme kiinnostavan teitä ja johtavan " .
               "tilaukseen", $kieli) . "!", $page_tarjous[$sivu], $boldi);
 
-          $sanavalinta = $yhtiorow["tarjoustyyppi"] == 4 ? "Yhteistyöterveisin" : "Kunnioittavasti";
-
-          $pdf_tarjous->draw_text(30, $kuha - 80, t($sanavalinta, $kieli) . ",",
+          $pdf_tarjous->draw_text(30, $kuha - 80, t("Yhteistyöterveisin", $kieli) . ",",
             $page_tarjous[$sivu], $boldi);
         }
 
@@ -2015,11 +2024,10 @@ if (!function_exists('tulosta_tarjous')) {
 
     $laskurow['tunnus'] = $otunnus;
 
-    if ($kieli== '') {
-      $querykiel = "SELECT kieli FROM asiakas WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$laskurow[liitostunnus]'";
-      $kielresult = pupe_query($querykiel);
-      $kielnum = mysql_num_rows($kielresult);
-      $kielrow = mysql_fetch_array($kielresult);
+    $querykiel = "SELECT kieli FROM asiakas WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$laskurow[liitostunnus]'";
+    $kielresult = pupe_query($querykiel);
+    $kielrow = mysql_fetch_array($kielresult);
+    if ($kielrow['kieli'] != '') {
       $kieli = strtolower($kielrow['kieli']);
     }
 
@@ -2143,7 +2151,7 @@ if (!function_exists('tulosta_tarjous')) {
       list($kala, $devnull_1, $devnull_2) = rivi_tarjous($pdf_tarjous, $laskurow, $kala, $kieli, $devnull, $row, $hinnat, $asiakasrow, $verolliset_verottomat_hinnat, $sivu, $naytetaanko_tuoteno);
 
       // Jos on paljon rivejä tehdään uusi otsikko...
-      if ($kala <= 80) {
+      if ($kala <= 85) {
         list($page_tarjous, $sivu) =
           loppu_tarjous($pdf_tarjous, $laskurow, $kieli, $page_tarjous, $sivu, 0,
           $verolliset_verottomat_hinnat, 0, 0, 0, $naytetaanko_rivihinta,

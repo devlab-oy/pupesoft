@@ -97,12 +97,12 @@ $pdf->draw_text(50, 120, $tulostettavat_tiedot['lasku']['toim_nimi'],    $firstp
 $pdf->draw_text(50, 109, $tulostettavat_tiedot['lasku']['toim_osoite'],  $firstpage, $pieni);
 $pdf->draw_text(50, 98, $tulostettavat_tiedot['lasku']['toim_postino']."  ".$tulostettavat_tiedot['lasku']['toim_postitp'],  $firstpage, $pieni);
 $pdf->draw_text(50, 87, $tulostettavat_tiedot['lasku']['toim_maa'],    $firstpage, $pieni);
-                                                                                                   
+
 //keksit‰‰n uudelle failille joku varmasti uniikki nimi:
 list($usec, $sec) = explode(' ', microtime());
 mt_srand((float) $sec + ((float) $usec * 100000));
-$asiakasnimi = str_replace(" ","", $tulostettavat_tiedot['asiakas']['nimi']);
-$pdffilenimi = "/tmp/huoltopyynto-{$tulostettavat_tiedot['huoltopyynto']}-{$asiakasnimi}.pdf";
+$asiakasnimi = str_replace(" ", "", $tulostettavat_tiedot['asiakas']['nimi']);
+$pdffilenimi = "/tmp/".t("huoltopyynto", $kieli)."-{$tulostettavat_tiedot['huoltopyynto']}-{$asiakasnimi}.pdf";
 
 //kirjoitetaan pdf faili levylle..
 $fh = fopen($pdffilenimi, "w");
@@ -118,9 +118,9 @@ function hae_tiedot($tyomaaraystunnus) {
 
   // Haetaan asiakastiedot
   $asiakasquery = "SELECT asiakas.*
-                   FROM asiakas 
+                   FROM asiakas
                    WHERE asiakas.yhtio = '{$kukarow['yhtio']}'
-                   AND asiakas.tunnus = '{$kukarow['oletus_asiakas']}'";
+                   AND asiakas.tunnus  = '{$kukarow['oletus_asiakas']}'";
   $asiakasresult = pupe_query($asiakasquery);
   $asiakasrivi = mysql_fetch_assoc($asiakasresult);
   $tiedot['asiakas'] = $asiakasrivi;
@@ -137,20 +137,20 @@ function hae_tiedot($tyomaaraystunnus) {
   // Haetaan lasku ja laskun lis‰tiedot
   $laskuquery = "SELECT lasku.*
                  FROM lasku
-                 JOIN laskun_lisatiedot ON (lasku.yhtio = laskun_lisatiedot.yhtio 
-                   AND lasku.tunnus = laskun_lisatiedot.otunnus) 
-                 WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-                 AND lasku.tunnus = '{$tyomaaraystunnus}'";
+                 JOIN laskun_lisatiedot ON (lasku.yhtio = laskun_lisatiedot.yhtio
+                   AND lasku.tunnus = laskun_lisatiedot.otunnus)
+                 WHERE lasku.yhtio  = '{$kukarow['yhtio']}'
+                 AND lasku.tunnus   = '{$tyomaaraystunnus}'";
   $laskuresult = pupe_query($laskuquery);
   $laskurivi = mysql_fetch_assoc($laskuresult);
   $tiedot['lasku'] = $laskurivi;
 
   // Haetaan laitetiedot
-  $laitequery = "SELECT * 
+  $laitequery = "SELECT *
                  FROM laite
-                 WHERE yhtio = '{$kukarow['yhtio']}'
+                 WHERE yhtio  = '{$kukarow['yhtio']}'
                  AND sarjanro = '{$tyomaaraysrivi['valmnro']}'
-                 AND tuoteno = '{$tyomaaraysrivi['mallivari']}'";
+                 AND tuoteno  = '{$tyomaaraysrivi['mallivari']}'";
   $laiteresult = pupe_query($laitequery);
   $laiterivi = mysql_fetch_assoc($laiteresult);
   $tiedot['laite'] = $laiterivi;

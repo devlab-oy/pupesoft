@@ -45,29 +45,11 @@ else {
   // lukitse_avaimeen muuttujat
   $kentat = "tunnus,
              nimi,
-             titteli,
-             concat_ws('<br>', puh, gsm, fax) AS 'puh/gsm/fax',
-             email,
-             www,
-             liitostunnus AS HIDDEN_liitostunnus,
-             nimitarkenne,
-             osoite,
-             postino,
-             postitp,
-             maa";
+             liitostunnus AS HIDDEN_liitostunnus";
 
   $hakukentat = "tunnus,
                  nimi,
-                 titteli,
-                 puh/gsm/fax,
-                 email,
-                 www,
-                 liitostunnus,
-                 nimitarkenne,
-                 osoite,
-                 postino,
-                 postitp,
-                 maa";
+                 liitostunnus";
 }
 
 if ($laji == "T") {

@@ -18,6 +18,8 @@
  *
  * @param type    $tuotteet
  */
+
+
 function valmistele_hakutulokset($tuotteet) {
   foreach ($tuotteet as $avain => $arvo) { // $rows muuttuja tulee templaten ulkopuolelta
     // Merkit‰‰n nimitykseen "poistuva"

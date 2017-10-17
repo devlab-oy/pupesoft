@@ -290,7 +290,12 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
         7 henkilö
       */
 
+      // Haistellaan onko puolipisteerottelu tai tabierottelu
       $kentat = explode("\t", $rivi);
+
+      if (count($kentat) < 5) {
+        $kentat = explode(";", $rivi);
+      }
 
       //  Trimmataan kaikki
       foreach ($kentat as &$k) {
@@ -400,15 +405,108 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 
       // Selite
       $iselite[$maara] = "Palkkatosite $tpp.$tpk.$tpv / ".$kentat[2];
-
+      $selite = "Palkkatosite $tpp.$tpk.$tpv / ".$kentat[2];
       // Liitetään tähän henkilönumero jos se haluttiin aineistoon
-      if ($kentat[7] != "") {
+      if (!empty($kentat[7])) {
         $iselite[$maara] .= " / #".$kentat[7];
       }
+    }
+    elseif ($tiedostomuoto == "TIKON") {
+     /*
+       Aineisto puolipiste tekstitiedosto
+       00 PVM      Windows muotoinen päiväys
+       01 TOSITE   Kp:n muoto LL-TTTTTTT esim. 10-123456, 5, 10-9
+       02 TILI     6-numeroa
+       03 EUR      numeromuotoinen
+       04 KPA      8-merkkiä
+       05 KUSTLAJI 6-merkkiä
+       06 PR       8-merkkiä
+       07 PRL      6-merkkiä
+       08 R3       8-merkkiä
+       09 R3L      6-merkkiä
+       10 R4       8-merkkiä
+       11 R4L      6-merkkiä
+       12 JAKSO    VVKK 9609
+       13 MÄÄRÄ    numeromuotoinen, yksi desimaali
+       14 MÄÄRÄ2   numeromuotoinen, yksi desimaali
+       15 MÄÄRÄ3   numeromuotoinen, yksi desimaali
+       16 ASIAKAS  9-numeroa
+       17 LASKU    Tikon laskunmuoto LL-TTTTTT
+       18 SELITE   72-merkkiä
+     */
+
+      // Haistellaan onko puolipisteerottelu tai tabierottelu
+      $kentat = explode(";", $rivi);
+
+      // Trimmataan kaikki
+      foreach ($kentat as &$k) {
+        $k = pupesoft_cleanstring($k);
+      }
+
+      if ($kentat[2] == "TILI") {
+        continue;
+      }
+
+      // Tili
+      $itili[$maara] = $kentat[2];
+
+      // Poimitaan kustannuspaikka ja projekti, perustetaan jos puuttuu
+      $ikustp[$maara]   = "";
+      $iprojekti[$maara]  = "";
+
+      // Summa
+      $isumma[$maara]  = (float) str_replace(",", ".", $kentat[3]);
+
+      // Tositepvm
+      if (!isset($tpv)) {
+        list($tpp, $tpk, $tpv) = explode(".", $kentat[0]);
+      }
+
+      // Kustannuspaikka
+      $ikustp_tsk = $kentat[4];
+      $ikustp[$maara] = 0;
+
+      if ($ikustp_tsk != "") {
+        $query = "SELECT tunnus
+                  FROM kustannuspaikka
+                  WHERE yhtio   = '$kukarow[yhtio]'
+                  and tyyppi    = 'K'
+                  and kaytossa != 'E'
+                  and nimi      = '$ikustp_tsk'";
+        $ikustpres = pupe_query($query);
+
+        if (mysql_num_rows($ikustpres) == 1) {
+          $ikustprow = mysql_fetch_assoc($ikustpres);
+          $ikustp[$maara] = $ikustprow["tunnus"];
+        }
+      }
+
+      if ($ikustp_tsk != "" and $ikustp[$maara] == 0) {
+        $query = "SELECT tunnus
+                  FROM kustannuspaikka
+                  WHERE yhtio   = '$kukarow[yhtio]'
+                  and tyyppi    = 'K'
+                  and kaytossa != 'E'
+                  and koodi     = '$ikustp_tsk'";
+        $ikustpres = pupe_query($query);
+
+        if (mysql_num_rows($ikustpres) == 1) {
+          $ikustprow = mysql_fetch_assoc($ikustpres);
+          $ikustp[$maara] = $ikustprow["tunnus"];
+        }
+      }
+
+      // Selite
+      $iselite[$maara] = "Palkkatosite $tpp.$tpk.$tpv / ".$kentat[18];
+      $selite = "Palkkatosite $tpp.$tpk.$tpv / ".$kentat[18];
     }
 
     $maara++;
   }
+
+  // Tositteelle kommentti ekalta riviltä
+  $comments = $iselite[1];
+  $valkoodi = $yhtiorow["valkoodi"];
 
   // Poistetaan tyhjät päärivit välistä.
   if ($tiedostomuoto == "EMCE") {
@@ -440,6 +538,7 @@ echo "<form method='post' name='sendfile' enctype='multipart/form-data'>
     <option value ='AMMATTILAINEN'>Ammattilainen/Aboa/Heeros palkanlaskenta</option>
     <option value ='PALKKAFI'>Palkka.fi (Kirjanpidon tosite CSV)</option>
     <option value ='EMCE'>EmCe Palkkahallinto</option>
+    <option value ='TIKON'>Tikon kirjanpito</option>
     <option value ='M2MATKALASKU'>M2 Matkalasku</option>
     </select>
     </td></tr>

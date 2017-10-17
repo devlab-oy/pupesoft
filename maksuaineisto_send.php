@@ -68,7 +68,7 @@ $localdir_error = $maksuaineiston_siirto[$y]["local_dir_error"];
 $ftpsucc = $maksuaineiston_siirto[$y]["local_dir_ok"];
 $ftpfail = $localdir_error;
 
-# Lähetetään UTF-8 muodossa jos PUPE_UNICODE on true
+// Lähetetään UTF-8 muodossa jos PUPE_UNICODE on true
 $ftputf8 = PUPE_UNICODE;
 
 if (isset($maksuaineiston_siirto[$y]["port"]) and (int)$maksuaineiston_siirto[$y]["port"] > 0) {

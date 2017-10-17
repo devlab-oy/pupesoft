@@ -1,8 +1,11 @@
 <?php
 
+$_REQUEST['malli'] = isset($_REQUEST['malli']) ? $_REQUEST['malli'] : null;
+
 if ($_REQUEST['malli'] == 'PDF24' or
   $_REQUEST['malli'] == 'PDF40' or
   $_REQUEST['malli'] == 'PDF' or
+  $_REQUEST['malli'] == 'PDFBRO' or
   $_REQUEST['malli'] == 'Hintalappu PDF' and
   (!empty($_REQUEST['tuoteno']) or $_REQUEST['toim'] != 'HINTA')
 ) {
@@ -18,7 +21,7 @@ require "inc/pupenext_functions.inc";
 //
 // $toim='HINTA' tarkoittaa, että tulostetaan hintalaput
 
-$otsikko = $toim == "HINTA" ? "Tulosta hintalappuja" : "Tulosta tuotettarroja";
+$otsikko = $toim == "HINTA" ? "Tulosta hintalappuja" : "Tulosta tuotetarroja";
 
 if (!isset($nayta_pdf)) {
   echo "<font class='head'>", t($otsikko), "</font><hr>";
@@ -158,7 +161,7 @@ if (($tee == 'Z' or $tee == 'H') and $ulos == '') {
 
     require_once "pdflib/phppdflib.class.php";
 
-    if ($malli == 'PDF24' or $malli == 'PDF40' or $malli == 'PDF') {
+    if ($malli == 'PDF24' or $malli == 'PDF40' or $malli == 'PDF' or $malli == 'PDFBRO') {
       //PDF parametrit
       if (!isset($pdf)) {
         $pdf = new pdffile;
@@ -178,7 +181,7 @@ if (($tee == 'Z' or $tee == 'H') and $ulos == '') {
           elseif ($malli == 'Intermec') {
             require "inc/tulosta_tuotetarrat_intermec.inc";
           }
-          elseif ($malli == 'PDF24' or $malli == 'PDF40' or $malli == 'PDF') {
+          elseif ($malli == 'PDF24' or $malli == 'PDF40' or $malli == 'PDF' or $malli == 'PDFBRO') {
             require "inc/tulosta_tuotetarrat_pdf.inc";
           }
         }
@@ -188,7 +191,7 @@ if (($tee == 'Z' or $tee == 'H') and $ulos == '') {
       }
     }
 
-    if ($malli == 'PDF24' or $malli == 'PDF40' or $malli == 'PDF') {
+    if ($malli == 'PDF24' or $malli == 'PDF40' or $malli == 'PDF' or $malli == 'PDFBRO') {
       //keksitään uudelle failille joku varmasti uniikki nimi:
       list($usec, $sec) = explode(' ', microtime());
       mt_srand((float) $sec + ((float) $usec * 100000));
@@ -208,8 +211,12 @@ if (($tee == 'Z' or $tee == 'H') and $ulos == '') {
 
     if ($malli == "Hintalappu PDF") {
       $tuotteet = array($trow);
-      $params   = array(
-        "kpl" => $tulostakappale
+
+      $params = array(
+        "kpl"           => $tulostakappale,
+        "koko"          => $koko,
+        "barcode_field" => $barcode_field,
+        "tax_field"     => $tax_field,
       );
 
       require "tilauskasittely/tulosta_hintalaput.inc";
@@ -242,7 +249,7 @@ if (!isset($nayta_pdf)) {
 
   $tarrat = $toim == "HINTA" ? "hintalaput" : "tuotetarrat";
 
-  $colspan = $toim == 'HINTA' ? "2" : "5";
+  $colspan = $toim == 'HINTA' ? "5" : "5";
 
   echo
   "<tr><th colspan='{$colspan}'><center>" .
@@ -252,7 +259,12 @@ if (!isset($nayta_pdf)) {
   echo "<th>".t("Tuotenumero")."</th>";
   echo "<th>".t("KPL")."</th>";
 
-  if ($toim != 'HINTA') {
+  if ($toim == 'HINTA') {
+    echo "<th><label for='koko'>" . t('Koko') . "</label></th>";
+    echo "<th><label for='barcode_field'>" . t('Viivakoodikenttä') . "</label></th>";
+    echo "<th><label for='tax_field'>" . t('Hinta') . "</label></th>";
+  }
+  else {
     echo "<th>" . t("Kirjoitin") . "</th>";
     echo "<th>" . t("Malli") . "</th>";
     echo "<th><label for='viivakoodityyppi_1'>" . t("Viivakoodityyppi") . "</label></th>";
@@ -266,7 +278,31 @@ if (!isset($nayta_pdf)) {
   echo "<td><input type='text' name='tuoteno' size='20' maxlength='60' value='$tuoteno'></td>";
   echo "<td><input type='text' name='tulostakappale' size='3' value='$tulostakappale'></td>";
 
-  if ($toim != "HINTA") {
+  if ($toim == 'HINTA') {
+    echo "<td>";
+    echo "<select id='koko' name='koko'>";
+    echo "<option value='4.9x3cm'>49 x 30 mm</option>";
+    echo "<option value='6.2x2.9cm'>62 x 29 mm</option>";
+    echo "</select>";
+    echo "</td>";
+
+    echo "<td>";
+    echo "<select id='barcode_field' name='barcode_field'>";
+    echo "<option value='tuoteno'>".t("Tuoteno")."</option>";
+    echo "<option value='eankoodi'>".t("Eankoodi")."</option>";
+    echo "</select>";
+    echo "</td>";
+
+    $sel = empty($yhtiorow['alv_kasittely']) ? 'selected' : '';
+
+    echo "<td>";
+    echo "<select id='tax_field' name='tax_field'>";
+    echo "<option value='veroton'>".t("Veroton")."</option>";
+    echo "<option value='verollinen' {$sel}>".t("Verollinen")."</option>";
+    echo "</select>";
+    echo "</td>";
+  }
+  else {
     echo "<td><select name='kirjoitin'>";
     echo "<option value=''>" . t("Ei kirjoitinta") . "</option>";
 
@@ -299,6 +335,7 @@ if (!isset($nayta_pdf)) {
     $pohjat[] = 'PDF24';
     $pohjat[] = 'PDF40';
     $pohjat[] = 'PDF';
+    $pohjat[] = 'PDFBRO';
 
     echo "<td><select name='malli'>";
     echo "<option value=''>" . t("Ei mallia") . "</option>";

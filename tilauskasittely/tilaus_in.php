@@ -70,10 +70,10 @@ if (move_uploaded_file($_FILES['userfile']['tmp_name'], $filename)) {
     echo "</pre>";
   }
 
-  if ($tyyppi == 'magento') {
+  if ($tyyppi == 'magento' or $tyyppi == 'presta' or $tyyppi == 'ahkio' or $tyyppi == 'woo') {
     // tarvitaan $filename
     echo "<pre>";
-    $edi_tyyppi = "magento";
+    $edi_tyyppi = $tyyppi;
     require "editilaus_in.inc";
     echo "</pre>";
   }
@@ -126,15 +126,18 @@ else {
       <th>".t("Tiedoston tyyppi")."</th>
       <td><select name='tyyppi' id='valinta'>
          <option value='edi'>".t("Editilaus")."</option>
+         <option value='ahkio'>Ahkio</option>
          <option value='futursoft'>Futursoft</option>
          <option value='magento'>Magento</option>
          <option value='finvoice'>Finvoice</option>
+         <option value='presta'>PrestaShop</option>
+         <option value='woo'>WooCommerce</option>
          <option value='pos'>".t("Kassap‰‰te")."</option>
          <option value='yct'>Yamaha Center</option>
          <option value='edifact911'>Orders 91.1</option>
          <option value='multi'>".t("Useita asiakkaita")."</option>
          <option value='multi_asiakasnro'>".t("Useita asiakkaita asiakasnumerolla")."</option>
-        <option value='asnui'>".t("ASN-sanoma")."</option>
+         <option value='asnui'>".t("ASN-sanoma")."</option>
         </select>";
   echo "<div id='keijo' style='display: none;'>
       <br>".t("Tilaukset suoraan valmis-tilaan")." <input type='checkbox' name='tilaus_valmiiksi' >

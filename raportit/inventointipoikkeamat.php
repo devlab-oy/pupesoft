@@ -618,12 +618,19 @@ if ($tee == "TULOSTA" and mysql_num_rows($saldoresult) > 0 ) {
 
   fclose($fh);
 
-  $line = exec("a2ps -o ".$filenimi.".ps -r --medium=A4 --chars-per-line=115 --no-header --columns=1 --margin=0 --borders=0 $filenimi");
+  $params = array(
+    'chars'    => 115,
+    'filename' => $filenimi,
+    'mode'     => 'landscape',
+  );
+
+  // konveroidaan postscriptiksi
+  $filenimi_ps = pupesoft_a2ps($params);
 
   //itse print komento...
   if ($komento["Inventointipoikkeamat"] == 'email') {
 
-    $line = exec("ps2pdf -sPAPERSIZE=a4 ".$filenimi.".ps ".$filenimi.".pdf");
+    $line = exec("ps2pdf -sPAPERSIZE=a4 {$filenimi_ps} ".$filenimi.".pdf");
 
     $liite = $filenimi.".pdf";
     $ctype = "PDF";
@@ -632,13 +639,13 @@ if ($tee == "TULOSTA" and mysql_num_rows($saldoresult) > 0 ) {
   }
   else {
     //k‰‰nnet‰‰n kaunniksi
-    $line2 = exec("$komento[Inventointipoikkeamat] ".$filenimi.".ps");
+    $line2 = exec("$komento[Inventointipoikkeamat] {$filenimi_ps}");
   }
 
   echo "<br>".t("Inventointipoikkeamalista tulostuu")."!<br><br>";
 
   //poistetaan tmp file samantien kuleksimasta...
-  unlink($filenimi.".ps");
+  unlink($filenimi_ps);
   unlink($filenimi);
 }
 

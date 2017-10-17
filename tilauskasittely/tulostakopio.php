@@ -1652,7 +1652,11 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
 
     $tilausvahvistus_onkin_kerayslista = '';
     $excel_lahete_hinnoilla = '';
+
+    // Tilausvahvistus ja Tarjous ei voi olla samanaikaisesti, tutkitaan molemmat
+    // Tarjoukset käsitellään excel-tulostuksen näkökulmasta kuten tilausvahvistukset
     $komento_tilausvahvistus = empty($komento['Tilausvahvistus']) ? '' : $komento['Tilausvahvistus'];
+    $komento_tilausvahvistus = empty($komento['Tarjous']) ? $komento_tilausvahvistus : $komento['Tarjous'];
 
     $pos  = strpos($komento_tilausvahvistus, "excel_lahete_geodis_wilson");
     $pos2 = strpos($komento_tilausvahvistus, "excel_lahete_hinnoilla");
@@ -1662,9 +1666,15 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
       $tilausvahvistus_onkin_kerayslista = "JOO";
     }
 
-    if ($pos2 !== FALSE and $toim == "TILAUSVAHVISTUS") {
+    if ($pos2 !== FALSE and in_array($toim, array("TILAUSVAHVISTUS", "TARJOUS"))) {
       $toim = "KERAYSLISTA";
-      $excel_lahete_hinnoilla = "JOO";
+
+      if ($toim == "TILAUSVAHVISTUS") {
+        $excel_lahete_hinnoilla = "JOO";
+      }
+      else {
+        $excel_tarjous = "JOO";
+      }
     }
 
     if ($toim == "TILAUSVAHVISTUS" or $toim == "YLLAPITOSOPIMUS") {
@@ -2271,6 +2281,9 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
       elseif ($varastorow["ulkoinen_jarjestelma"] == "C") {
         $kerayslistatyyppi = "EXCEL1";
       }
+      elseif ($excel_tarjous != '') {
+        $kerayslistatyyppi = "EXCEL3";
+      }
 
       // keräyslistalle ei oletuksena tulosteta saldottomia tuotteita
       if ($yhtiorow["kerataanko_saldottomat"] == '') {
@@ -2311,6 +2324,7 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
         $query = "SELECT tilausrivi.*,
                   $ale_query_select_lisa_y aleyhteensa,
                   round(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * {$query_ale_lisa},'$yhtiorow[hintapyoristys]') rivihinta,
+                  round(tilausrivi.hinta * {$query_ale_lisa},'$yhtiorow[hintapyoristys]') kplhinta,
                   tuote.sarjanumeroseuranta,
                   kerayserat.kpl as tilkpl,
                   kerayserat.kpl as varattu,
@@ -2330,6 +2344,7 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
         $query = "SELECT tilausrivi.*,
                   $ale_query_select_lisa_y aleyhteensa,
                   round(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * {$query_ale_lisa},'$yhtiorow[hintapyoristys]') rivihinta,
+                  round(tilausrivi.hinta * {$query_ale_lisa},'$yhtiorow[hintapyoristys]') kplhinta,
                   $select_lisa
                   $sorttauskentta,
                   if (tuote.tuotetyyppi='K','2 Työt','1 Muut') tuotetyyppi,
@@ -2438,6 +2453,10 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
       elseif ($excel_lahete_hinnoilla != '') {
         $params_kerayslista['uusiotsikko'] = "Tilausvahvistus";
       }
+      elseif ($excel_tarjous != '') {
+        $params_kerayslista['uusiotsikko'] = "Tarjous";
+      }
+
       //tulostetaan sivu
       print_pdf_kerayslista($params_kerayslista);
 
@@ -2472,6 +2491,9 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
 
         if ($oslarow['osoitelappu'] == 'intrade') {
           require 'osoitelappu_intrade_pdf.inc';
+        }
+        elseif ($oslarow['osoitelappu'] == 'osoitelappu_kesko') {
+          require 'osoitelappu_kesko_pdf.inc';
         }
         elseif ($oslarow['osoitelappu'] == 'hornbach') {
           require 'osoitelappu_hornbach_pdf.inc';

@@ -468,6 +468,7 @@ if ($tila == 'maksuehto') {
                 jv                 = '$row[jv]',
                 kateinen           = '$row[kateinen]',
                 factoring_id       = '$row[factoring_id]',
+                directdebit_id     = '$row[directdebit_id]',
                 pankkiyhteystiedot = '$row[pankkiyhteystiedot]',
                 itsetulostus       = '$row[itsetulostus]',
                 jaksotettu         = '$row[jaksotettu]',

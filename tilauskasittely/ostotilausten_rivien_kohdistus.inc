@@ -1655,12 +1655,12 @@ if ($tila == '') {
   $viimenen_sivu = mysql_num_rows($result)+$alku-50;
 
   echo "  <td class='back' colspan='12' align='center'>
-      <a href='$PHP_SELF?toiminto=kohdista&toimittajaid=$toimittajaid&tee=K&otunnus=$otunnus&alku=0&nayta_kohdistetut=$nayta_kohdistetut&nayta_kaikki=$nayta_kaikki&tila=$tila&nayta_siirrettavat=$nayta_siirrettavat&ojarj=$ojarj$ulisa'><<<</a>
+      <a href='$PHP_SELF?toiminto=kohdista&toimittajaid=$toimittajaid&otunnus=$otunnus&alku=0&nayta_kohdistetut=$nayta_kohdistetut&nayta_kaikki=$nayta_kaikki&tila=$tila&nayta_siirrettavat=$nayta_siirrettavat&ojarj=$ojarj$ulisa'><<<</a>
       &nbsp;&nbsp;
-      <a href='$PHP_SELF?toiminto=kohdista&toimittajaid=$toimittajaid&tee=K&otunnus=$otunnus&alku=$edellinen&nayta_kohdistetut=$nayta_kohdistetut&nayta_kaikki=$nayta_kaikki&tila=$tila&nayta_siirrettavat=$nayta_siirrettavat&ojarj=$ojarj$ulisa'><< ".t("Edellinen sivu")."</a>
-      <a href='$PHP_SELF?toiminto=kohdista&toimittajaid=$toimittajaid&tee=K&otunnus=$otunnus&alku=$seuraava&nayta_kohdistetut=$nayta_kohdistetut&nayta_kaikki=$nayta_kaikki&tila=$tila&nayta_siirrettavat=$nayta_siirrettavat&ojarj=$ojarj$ulisa'>".t("Seuraava sivu")." >></a>
+      <a href='$PHP_SELF?toiminto=kohdista&toimittajaid=$toimittajaid&otunnus=$otunnus&alku=$edellinen&nayta_kohdistetut=$nayta_kohdistetut&nayta_kaikki=$nayta_kaikki&tila=$tila&nayta_siirrettavat=$nayta_siirrettavat&ojarj=$ojarj$ulisa'><< ".t("Edellinen sivu")."</a>
+      <a href='$PHP_SELF?toiminto=kohdista&toimittajaid=$toimittajaid&otunnus=$otunnus&alku=$seuraava&nayta_kohdistetut=$nayta_kohdistetut&nayta_kaikki=$nayta_kaikki&tila=$tila&nayta_siirrettavat=$nayta_siirrettavat&ojarj=$ojarj$ulisa'>".t("Seuraava sivu")." >></a>
       &nbsp;&nbsp;
-      <a href='$PHP_SELF?toiminto=kohdista&toimittajaid=$toimittajaid&tee=K&otunnus=$otunnus&alku=$viimenen_sivu&nayta_kohdistetut=$nayta_kohdistetut&nayta_kaikki=$nayta_kaikki&tila=$tila&nayta_siirrettavat=$nayta_siirrettavat&ojarj=$ojarj$ulisa'>>>></a>
+      <a href='$PHP_SELF?toiminto=kohdista&toimittajaid=$toimittajaid&otunnus=$otunnus&alku=$viimenen_sivu&nayta_kohdistetut=$nayta_kohdistetut&nayta_kaikki=$nayta_kaikki&tila=$tila&nayta_siirrettavat=$nayta_siirrettavat&ojarj=$ojarj$ulisa'>>>></a>
       </td>";
 
   echo "</tr>";
@@ -1684,7 +1684,7 @@ if ($tila == '') {
   echo "<input type='hidden' name='nayta_kaikki' value='$nayta_kaikki'>";
   echo "<input type='hidden' name='ojarj' value='$ojarj'>";
 
-  $href = "$PHP_SELF?toiminto=kohdista&toimittajaid=$toimittajaid&tee=K&otunnus=$otunnus&alku=$alku&nayta_kohdistetut=$nayta_kohdistetut&nayta_kaikki=$nayta_kaikki&tila=$tila&ojarj";
+  $href = "$PHP_SELF?toiminto=kohdista&toimittajaid=$toimittajaid&otunnus=$otunnus&alku=$alku&nayta_kohdistetut=$nayta_kohdistetut&nayta_kaikki=$nayta_kaikki&tila=$tila&ojarj";
 
   echo "<th nowrap class='ptop'>";
   if (isset($nayta_siirrettavat) and $nayta_siirrettavat == "YES") echo "<a href='$href=14".$ulisa."'>$kennim_array[14]</a><br>";
@@ -2070,10 +2070,10 @@ if ($tila == '') {
       $sarjarow2 = mysql_fetch_assoc($sarjares);
 
       if ($sarjarow2["kpl"] == abs($rivirow["siskpl"])) {
-        echo "<br>(<a href='$PHP_SELF?tila=sarjanumerot&toiminto=kohdista&toimittajaid=$toimittajaid&tuoteno=".urlencode($rivirow["tuoteno"])."&ostorivitunnus=$rivirow[rivitunnus]&from=kohdista&tee=K&otunnus=$otunnus&alku=$alku&nayta_kohdistetut=$nayta_kohdistetut&nayta_kaikki=$nayta_kaikki&ojarj=$ojarj$ulisa#$sarjarow2[sarjanumero]' class='green'>$snro_ok</font></a>)";
+        echo "<br>(<a href='$PHP_SELF?tila=sarjanumerot&toiminto=kohdista&toimittajaid=$toimittajaid&tuoteno=".urlencode($rivirow["tuoteno"])."&ostorivitunnus=$rivirow[rivitunnus]&from=kohdista&otunnus=$otunnus&alku=$alku&nayta_kohdistetut=$nayta_kohdistetut&nayta_kaikki=$nayta_kaikki&ojarj=$ojarj$ulisa#$sarjarow2[sarjanumero]' class='green'>$snro_ok</font></a>)";
       }
       else {
-        echo "<br>(<a href='$PHP_SELF?tila=sarjanumerot&toiminto=kohdista&toimittajaid=$toimittajaid&tuoteno=".urlencode($rivirow["tuoteno"])."&ostorivitunnus=$rivirow[rivitunnus]&from=kohdista&tee=K&otunnus=$otunnus&alku=$alku&nayta_kohdistetut=$nayta_kohdistetut&nayta_kaikki=$nayta_kaikki&ojarj=$ojarj$ulisa#$sarjarow2[sarjanumero]' style='color:#DD0000;'>$snro</a>)";
+        echo "<br>(<a href='$PHP_SELF?tila=sarjanumerot&toiminto=kohdista&toimittajaid=$toimittajaid&tuoteno=".urlencode($rivirow["tuoteno"])."&ostorivitunnus=$rivirow[rivitunnus]&from=kohdista&otunnus=$otunnus&alku=$alku&nayta_kohdistetut=$nayta_kohdistetut&nayta_kaikki=$nayta_kaikki&ojarj=$ojarj$ulisa#$sarjarow2[sarjanumero]' style='color:#DD0000;'>$snro</a>)";
       }
     }
     echo "</$td>";
@@ -2292,15 +2292,15 @@ if ($tila == '') {
     echo "<$td $classlisa>";
 
     if ($rivirow["varastossa_kpl"] == 0) {
-      echo "<a href='$PHP_SELF?toiminto=kohdista&toimittajaid=$toimittajaid&tee=K&otunnus=$otunnus&alku=$alku&nayta_kohdistetut=$nayta_kohdistetut&nayta_kaikki=$nayta_kaikki&ojarj=$ojarj$ulisa&riviid=$rivirow[rivitunnus]&tila=muokkaa_rivi'><img src='{$palvelin2}pics/lullacons/doc-option-edit.png'></a><br>";
+      echo "<a href='$PHP_SELF?toiminto=kohdista&toimittajaid=$toimittajaid&otunnus=$otunnus&alku=$alku&nayta_kohdistetut=$nayta_kohdistetut&nayta_kaikki=$nayta_kaikki&ojarj=$ojarj$ulisa&riviid=$rivirow[rivitunnus]&tila=muokkaa_rivi'><img src='{$palvelin2}pics/lullacons/doc-option-edit.png'></a><br>";
     }
 
     if (empty($nayta_siirrettavat) and $rivirow["rivitunnus"] == $rivirow["perheid2"] and mysql_num_rows($lisaresult) > 0) {
-      echo "<a href='$PHP_SELF?toiminto=kohdista&toimittajaid=$toimittajaid&tee=K&otunnus=$otunnus&alku=$alku&nayta_kohdistetut=$nayta_kohdistetut&nayta_kaikki=$nayta_kaikki&tila=$tila&ojarj=$ojarj$ulisa&lisaa_lisavarusteita=$rivirow[rivitunnus]'>".t("Lisävarusteet")."</a><br>";
+      echo "<a href='$PHP_SELF?toiminto=kohdista&toimittajaid=$toimittajaid&otunnus=$otunnus&alku=$alku&nayta_kohdistetut=$nayta_kohdistetut&nayta_kaikki=$nayta_kaikki&tila=$tila&ojarj=$ojarj$ulisa&lisaa_lisavarusteita=$rivirow[rivitunnus]'>".t("Lisävarusteet")."</a><br>";
     }
 
     if (empty($nayta_siirrettavat) and ($rivirow["sarjanumeroseuranta"] == "S" or $rivirow["sarjanumeroseuranta"] == "V") and ($rivirow["rivitunnus"] == $rivirow["perheid2"] or $rivirow["perheid2"] == 0)) {
-      echo "<a href='$PHP_SELF?toiminto=kohdista&toimittajaid=$toimittajaid&tee=K&otunnus=$otunnus&alku=$alku&nayta_kohdistetut=$nayta_kohdistetut&nayta_kaikki=$nayta_kaikki&tila=$tila&ojarj=$ojarj$ulisa&riviid=$rivirow[rivitunnus]&tila=uusirivi&perheid2=$rivirow[rivitunnus]'>".t("Liitä rivi")."</a>";
+      echo "<a href='$PHP_SELF?toiminto=kohdista&toimittajaid=$toimittajaid&otunnus=$otunnus&alku=$alku&nayta_kohdistetut=$nayta_kohdistetut&nayta_kaikki=$nayta_kaikki&tila=$tila&ojarj=$ojarj$ulisa&riviid=$rivirow[rivitunnus]&tila=uusirivi&perheid2=$rivirow[rivitunnus]'>".t("Liitä rivi")."</a>";
     }
 
     echo "</$td>";
@@ -2323,8 +2323,8 @@ if ($tila == '') {
   }
 
   echo "<tr><td class='back' colspan='12' align='center'>";
-  echo "<a href='$PHP_SELF?toiminto=kohdista&toimittajaid=$toimittajaid&tee=K&otunnus=$otunnus&alku=$edellinen&nayta_kohdistetut=$nayta_kohdistetut&nayta_kaikki=$nayta_kaikki&tila=$tila&nayta_siirrettavat=$nayta_siirrettavat&ojarj=$ojarj$ulisa'><< ".t("Edellinen sivu")."</a> ";
-  echo "<a href='$PHP_SELF?toiminto=kohdista&toimittajaid=$toimittajaid&tee=K&otunnus=$otunnus&alku=$seuraava&nayta_kohdistetut=$nayta_kohdistetut&nayta_kaikki=$nayta_kaikki&tila=$tila&nayta_siirrettavat=$nayta_siirrettavat&ojarj=$ojarj$ulisa'>".t("Seuraava sivu")." >></a>";
+  echo "<a href='$PHP_SELF?toiminto=kohdista&toimittajaid=$toimittajaid&otunnus=$otunnus&alku=$edellinen&nayta_kohdistetut=$nayta_kohdistetut&nayta_kaikki=$nayta_kaikki&tila=$tila&nayta_siirrettavat=$nayta_siirrettavat&ojarj=$ojarj$ulisa'><< ".t("Edellinen sivu")."</a> ";
+  echo "<a href='$PHP_SELF?toiminto=kohdista&toimittajaid=$toimittajaid&otunnus=$otunnus&alku=$seuraava&nayta_kohdistetut=$nayta_kohdistetut&nayta_kaikki=$nayta_kaikki&tila=$tila&nayta_siirrettavat=$nayta_siirrettavat&ojarj=$ojarj$ulisa'>".t("Seuraava sivu")." >></a>";
   echo "</th></tr>";
   echo "</table>";
 

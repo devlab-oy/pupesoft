@@ -40,7 +40,7 @@ if ($yhtiorow['siirtolistan_tulostustapa'] != 'K') {
   die ("Ker‰tt‰vien tilauksien l‰hett‰minen edellytt‰‰ ett‰ siirtolistojen tulostuksessa k‰ytet‰‰n tulostusjonoa!\n");
 }
 
-# Haetaan myyntitilauksia ja siirtolistoja
+# Haetaan myyntitilauksia siirtolistoja ja myyntitilej‰
 # Varaston t‰ytyy k‰ytt‰‰ ulkoista varastoa
 # Varasto ei saa olla poistettu
 # Maksuehto ei saa olla j‰lkivaatimus
@@ -80,7 +80,6 @@ $query = "SELECT DISTINCT lasku.tunnus
             (
               lasku.tila = 'G' AND
               lasku.alatila = 'J' AND
-              lasku.tilaustyyppi != 'M' AND
               lasku.toimitustavan_lahto = 0
             )
           )

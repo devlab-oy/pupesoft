@@ -1095,6 +1095,11 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
       for ($isa=0; $isa < $riikoko; $isa++) {
         list($tuoteperhe, $kaikkituotteet) = tuoteperhe_reku($isatuoteno, $isa_array[$isa], $tuoteperhe, $kaikkituotteet, $perhelisa, $kieltolisa, $lisaarivi_debug);
 
+        if (!empty($tuoteperhe)) {
+          $keratty = "";
+          $kerattyaika = "";
+        }
+
         // Ollaanko rekursiivisia vai ei
         if ($yhtiorow["rekursiiviset_tuoteperheet"] == "Y" and ($laskurow['tila'] != 'V' or $var == "W")) {
           $isa_array   = array_merge($isa_array, $tuoteperhe);
@@ -2441,6 +2446,11 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
     for ($isa=0; $isa < $riikoko; $isa++) {
       list($perherow, $isat_array, $kaikki_array, $kerroin_array, $ohita_kerays_array) = tuoteperhe_reku2($kaikki_array[$isa], $isat_array, $kaikki_array, $kerroin_array, $perhelisa, $kieltolisa, $lisaarivi_debug, $ohita_kerays_array);
       $perhearray  = array_merge($perhearray, $perherow);
+
+      if (!empty($perherow)) {
+        $keratty = "";
+        $kerattyaika = "";
+      }
 
       // Ollaanko rekursiivisia vai ei
       if ($yhtiorow["rekursiiviset_tuoteperheet"] == "Y" and ($laskurow['tila'] != 'V' or $var == "W")) {

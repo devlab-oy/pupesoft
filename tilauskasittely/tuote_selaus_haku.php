@@ -128,6 +128,9 @@ $query    = "SELECT *
 $result   = pupe_query($query);
 $laskurow = mysql_fetch_assoc($result);
 
+// Etukäteen maksetut tilaukset, ei sörkitä toimitustapaa enää
+$_etukateen_maksettu = (!empty($laskurow['tunnus']) and $laskurow['mapvm'] != '0000-00-00' and $laskurow['chn'] == '999');
+
 // vientikieltokäsittely:
 // +maa tarkoittaa että myynti on kielletty tähän maahan ja sallittu kaikkiin muihin
 // -maa tarkoittaa että ainoastaan tähän maahan saa myydä
@@ -885,6 +888,7 @@ if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
                 tuote.epakurantti50pvm,
                 tuote.epakurantti75pvm,
                 tuote.epakurantti100pvm,
+                tuote.alv,
                 (SELECT group_concat(distinct tuotteen_toimittajat.toim_tuoteno ORDER BY tuotteen_toimittajat.tunnus separator '<br>') FROM tuotteen_toimittajat use index (yhtio_tuoteno) WHERE tuote.yhtio = tuotteen_toimittajat.yhtio and tuote.tuoteno = tuotteen_toimittajat.tuoteno) toim_tuoteno,
                 tuote.sarjanumeroseuranta
                 FROM {$tvk_taulu}
@@ -929,6 +933,7 @@ if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
                   tuote.epakurantti50pvm,
                   tuote.epakurantti75pvm,
                   tuote.epakurantti100pvm,
+                  tuote.alv,
                   (SELECT group_concat(distinct tuotteen_toimittajat.toim_tuoteno order by tuotteen_toimittajat.tunnus separator '<br>') FROM tuotteen_toimittajat use index (yhtio_tuoteno) WHERE tuote.yhtio = tuotteen_toimittajat.yhtio and tuote.tuoteno = tuotteen_toimittajat.tuoteno) toim_tuoteno,
                   tuote.sarjanumeroseuranta,
                   tuoteperhe.tyyppi
@@ -964,6 +969,7 @@ if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
             ifnull((SELECT group_concat(id) FROM vastaavat use index (yhtio_tuoteno) where vastaavat.yhtio=tuote.yhtio and vastaavat.tuoteno=tuote.tuoteno LIMIT 1), tuote.tuoteno) vastaavat,
             tuote.tuoteno,
             tuote.nimitys,
+            tuote.kuvaus,
             tuote.osasto,
             tuote.try,
             tuote.myyntihinta,
@@ -978,6 +984,7 @@ if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
             tuote.epakurantti50pvm,
             tuote.epakurantti75pvm,
             tuote.epakurantti100pvm,
+            tuote.lyhytkuvaus,
             tuote.alv,
             (SELECT group_concat(distinct tuotteen_toimittajat.toim_tuoteno order by tuotteen_toimittajat.tunnus separator '<br>') FROM tuotteen_toimittajat use index (yhtio_tuoteno) WHERE tuote.yhtio = tuotteen_toimittajat.yhtio and tuote.tuoteno = tuotteen_toimittajat.tuoteno) toim_tuoteno,
             tuote.sarjanumeroseuranta,
@@ -996,6 +1003,20 @@ if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) > 0) {
+
+    $kuvaus_htmlfrom = array(
+        '[LIHAVOITU]', '[/LIHAVOITU]',
+        '[LISTA]',     '[/LISTA]',
+        '[lihavoitu]', '[/lihavoitu]',
+        '[lista]',     '[/lista]',
+    );
+
+    $kuvaus_htmlto = array(
+        '<strong>', '</strong>',
+        '<ul>',     '</ul>',
+        '<strong>', '</strong>',
+        '<ul>',     '</ul>',
+    );
 
     $rows = array();
     $haetaan_perheet = ($piilota_tuoteperheen_lapset == "") ? TRUE : FALSE;
@@ -1523,6 +1544,15 @@ if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
         $row["nimitys"] .= "</ul>";
       }
 
+      if (in_array($yhtiorow['livetuotehaku_hakutapa'], array('O', 'P'))) {
+
+        if (strlen($row['lyhytkuvaus']) > 100) {
+          $row['lyhytkuvaus'] = substr($row['lyhytkuvaus'],0, 100)."..";
+        }
+
+        $row["nimitys"] .= "<br><i>{$row['lyhytkuvaus']}</i>";
+      }
+
       // Peek ahead
       $row_seuraava = current($rows);
 
@@ -1658,6 +1688,34 @@ if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
       }
       elseif ($kukarow["extranet"] != "" or $tuotekyslinkki == "") {
         echo "<td valign='top' class='$vari' $classleft>$row[tuoteno] $linkkilisa ";
+
+        // tehdään extranetissä pop-up divi jos tuoteella kuvaus...
+        if ($kukarow["extranet"] != "" and $row["kuvaus"] != "" and $yhtiorow["extranet_nayta_kuvaus"] == "Y") {
+
+          $kuvaus = str_replace($kuvaus_htmlfrom, $kuvaus_htmlto, t_tuotteen_avainsanat($row, 'kuvaus'));
+
+          if ($kuvaus != $row['kuvaus'] and strpos($kuvaus, "*") !== FALSE) {
+            $kuvausarray   = explode('*', str_replace(array('<ul>', '</ul>'), ' ', $kuvaus));
+            $lit           = '<ul>';
+
+            foreach ($kuvausarray as $liarvo) {
+              if (trim($liarvo) != '') {
+                $lit .= '<li>' . trim($liarvo) . '</li>';
+              }
+            }
+
+            $lit .= '</ul>';
+
+            $row['kuvaus'] = $lit;
+          }
+
+          $_title = t("Näytä kuvaus");
+          echo "<img id='$row[tuoteno]' class='tooltip' src='$palvelin2/pics/lullacons/info.png'>";
+          echo "<div id='div_$row[tuoteno]' class='popup' style='width: 900px;'>";
+          echo  $row['kuvaus'];
+          echo "</div>";
+        }
+
       }
       else {
         echo "<td valign='top' class='$vari' $classleft><a href='../$tuotekyslinkki?tuoteno=".urlencode($row["tuoteno"])."&tee=Z&lopetus=$PHP_SELF////submit_button=1//toim_kutsu=$toim_kutsu//sort=$edsort//ojarj=$ojarj".str_replace("&", "//", $ulisa)."'>$row[tuoteno]</a>$linkkilisa ";
@@ -1872,9 +1930,9 @@ function hae_oletusasiakas($laskurow) {
 }
 
 function piirra_ostoskoriin_lisays($row) {
-  global $oikeurow, $kukarow, $ostoskori, $vari, $yht_i, $hae_ja_selaa_row;
+  global $oikeurow, $kukarow, $ostoskori, $vari, $yht_i, $hae_ja_selaa_row, $_etukateen_maksettu;
 
-  if ($oikeurow["paivitys"] == 1 and ($kukarow["kuka"] != "" or is_numeric($ostoskori))) {
+  if (empty($_etukateen_maksettu) and $oikeurow["paivitys"] == 1 and ($kukarow["kuka"] != "" or is_numeric($ostoskori))) {
     if (($row["tuoteperhe"] == "" or $row["tuoteperhe"] == $row["tuoteno"] or $row["tyyppi"] == "V") and $row["osaluettelo"] == "") {
       echo "<td align='right' class='$vari' style='vertical-align: top;' nowrap>";
       echo "<input type='hidden' name='tiltuoteno[$yht_i]' value = '$row[tuoteno]'>";

@@ -240,7 +240,8 @@ if (!function_exists('logmaster_outbounddelivery')) {
               tilausrivi.tunnus AS tilausrivin_tunnus,
               lasku.toimaika AS lasku_toimaika,
               asiakas.email,
-              tuote.eankoodi
+              tuote.eankoodi,
+              laskun_lisatiedot.noutopisteen_tunnus
               FROM lasku
               LEFT JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus)
               JOIN tilausrivi ON (
@@ -254,6 +255,10 @@ if (!function_exists('logmaster_outbounddelivery')) {
                 tuote.yhtio         = tilausrivi.yhtio AND
                 tuote.tuoteno       = tilausrivi.tuoteno AND
                 tuote.ei_saldoa     = ''
+              )
+              LEFT JOIN laskun_lisatiedot ON (
+                laskun_lisatiedot.yhtio         = lasku.yhtio AND
+                laskun_lisatiedot.otunnus       = lasku.tunnus
               )
               WHERE lasku.yhtio     = '{$kukarow['yhtio']}'
               AND lasku.tunnus      = '{$otunnus}'";
@@ -291,6 +296,7 @@ if (!function_exists('logmaster_outbounddelivery')) {
     $toimitustapa_chk_row = mysql_fetch_assoc($toimitustapa_chk_res);
     $toim_ta = $looprow['ohjelma_moduli'] == 'MAGENTO' ? t_avainsana('TOIM_TAPA_TA', '', '', '', '', 'selitetark') : null;
     $transport_account = $toim_ta ? $toim_ta : substr($toimitustapa_chk_row['tunnus'], 0, 10);
+    $droppoint   = $looprow['noutopisteen_tunnus'];
 
     $h1time = explode("-", substr($looprow['h1time'], 0, 10));
     $pickinglistdate = "{$h1time[2]}-{$h1time[1]}-{$h1time[0]}";
@@ -351,12 +357,20 @@ if (!function_exists('logmaster_outbounddelivery')) {
     $receiver->addChild('RecCustPostCode', xml_cleanstring($looprow['toim_postino'], 10));
     $receiver->addChild('RecCustCity',     xml_cleanstring($looprow['toim_postitp'], 30));
     $receiver->addChild('RecCustCountry',  xml_cleanstring($looprow['toim_maa'], 10));
-    $receiver->addChild('RecCustPhone',    xml_cleanstring($looprow['toim_puh'], 30));
+    $receiver->addChild('RecCustPhone',    xml_cleanstring($looprow['toim_puh'], 20));
+    if ($looprow['toim_maa'] == 'FI' or $looprow['toim_maa'] == '') {
+      $rec_lang = 'FI';
+    }
+      else {
+      $rec_lang = 'EN';
+    }
+    $receiver->addChild('RecCustLanguage',    xml_cleanstring($rec_lang, 2));
 
     $transport = $custpickinglist->addChild('Transport');
     $transport->addChild('TransportAccount',      $transport_account);
     $transport->addChild('TransportInstruction',  substr('', 0, 250));
     $transport->addChild('FreightPayer',          'sender');
+    $transport->addChild('DropPoint',      $droppoint);
 
     $lines = $custpickinglist->addChild('Lines');
 

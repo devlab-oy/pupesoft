@@ -89,6 +89,7 @@ if ($yhtiorow['tilausrivin_esisyotto'] == 'K' and isset($ajax_toiminto) and trim
     'tilausnumero' => $tilausnumero,
     'tuoteno' => $tuoteno,
     'hinta_ajax' => $hinta,
+    'hinta_esisyotetty' => $hinta_esisyotetty,
     'kpl' => $kpl,
     'ale1' => $ale1,
     'ale2' => $ale2,
@@ -114,7 +115,7 @@ if (($e1 or $e2) and $e3 and $e4) {
   exit;
 }
 
-if ($kukarow['extranet'] == '') {
+if ($kukarow['extranet'] == '' and empty($nayta_pdf)) {
   if (isset($ajax_popup)) {
     require "tuotetiedot.inc";
     exit;
@@ -214,7 +215,9 @@ if (isset($livesearch_tee) and $livesearch_tee == "TUOTEMERKKIHAKU") {
   exit;
 }
 
-enable_ajax();
+if (empty($nayta_pdf)) {
+  enable_ajax();
+}
 
 $tilauskaslisa = "";
 
@@ -222,10 +225,10 @@ $tilauskaslisa = "";
 if (strpos(dirname(__FILE__), "/tilauskasittely") !== FALSE) {
   $tilauskaslisa = "tilauskasittely/";
 }
-if (isset($liite_popup_toiminto) and $liite_popup_toiminto == "AK") {
+if (empty($nayta_pdf) and isset($liite_popup_toiminto) and $liite_popup_toiminto == "AK") {
   liite_popup("AK", $tuotetunnus, $width, $height);
 }
-else {
+elseif(empty($nayta_pdf)) {
   liite_popup("JS");
 }
 
@@ -533,9 +536,13 @@ if ($tee == 'TARKISTA') {
   $xresult = pupe_query($xquery);
 
   while ($xrow = mysql_fetch_assoc($xresult)) {
-    $tuoteno_array[]                   = $xrow['tuoteno'];
-    $kpl_array[$xrow['tuoteno']]       = $xrow['tilkpl'];
-    $kommentti_array[$xrow['tuoteno']] = $xrow['kommentti'];
+    // Lisätään tuoteno_array muttujaan vain isätuotteet,
+    // koska muuten lapset lisätää perheen mukana JA itsenäisinä tuotteina
+    if ($xrow["perheid"] == 0 or $xrow["perheid"] == $xrow["tunnus"]) {
+      $tuoteno_array[]                   = $xrow['tuoteno'];
+      $kpl_array[$xrow['tuoteno']]       = $xrow['tilkpl'];
+      $kommentti_array[$xrow['tuoteno']] = $xrow['kommentti'];
+    }
 
     $query = "UPDATE tilausrivi SET
               tyyppi      = 'D'
@@ -775,7 +782,7 @@ if (isset($liitaasiakasnappi) and $kukarow["extranet"] == "") {
 }
 
 // Jos ylläpidossa on luotu uusi asiakas
-if (isset($from) and $from == "ASIAKASYLLAPITO" and $yllapidossa == "asiakas" and $yllapidontunnus != '' and $tilausnumero == '') {
+if (isset($from) and $from == "ASIAKASYLLAPITO" and $yllapidossa == "asiakas" and $yllapidontunnus != '' and ($tilausnumero == '' or (isset($uusiasiakas) and $uusiasiakas == "uusiasiakas"))) {
   $tee = "OTSIK";
   $asiakasid = $yllapidontunnus;
 }
@@ -1102,6 +1109,16 @@ if ($kukarow["extranet"] == "" and $tee == "HYLKAATARJOUS" and $muokkauslukko ==
   if ((int) $kukarow["kesken"] == 0) {
     echo "<font class='error'> ".t("Taisit painaa takaisin tai päivitä nappia. Näin ei saa tehdä")."! </font>";
     exit;
+  }
+
+  if (isset($crm_tarjouspois)) {
+    $hylkays_kommentti = " Tarjouksen hylkäyksen syy: $crm_tarjouspois";
+
+    $query = "UPDATE lasku SET comments = CONCAT(comments, ' {$hylkays_kommentti}') where yhtio='$kukarow[yhtio]' and tunnus='$kukarow[kesken]'";
+    $result = pupe_query($query);
+
+    // Tehdään tarjouksen poistosta kommentti asiakasmemoon
+    kalenteritapahtuma("Memo", "Tarjous asiakkaalle", "Tarjouksen hylkäyksen syy: {$crm_tarjouspois}", $laskurow["liitostunnus"], "", "", $laskurow["tunnus"]);
   }
 
   $query = "UPDATE lasku SET alatila='X' where yhtio='$kukarow[yhtio]' and tunnus='$kukarow[kesken]'";
@@ -1482,7 +1499,7 @@ if (!empty($valitse_tuotteetasiakashinnastoon)) {
   $_asiakashinta_kayttooikeus  = tarkista_oikeus("yllapito.php", "asiakashinta", "x");
   $_asikasalennus_kayttooikeus = tarkista_oikeus("yllapito.php", "asiakasalennus", "x") ;
   $_checked_h = $_asiakashinta_kayttooikeus ? 'checked' : '';
-  $_checked_a = empty($_checked_h) ? 'checked' : '';
+  $_checked_1 = empty($_checked_h) ? 'checked' : '';
 
   echo "<tr>";
   echo "<th>".t("Tallenna")."</th>";
@@ -1492,16 +1509,29 @@ if (!empty($valitse_tuotteetasiakashinnastoon)) {
     echo "<label>";
     echo "<input type='checkbox' name='lisaa_asiakashinta' {$_checked_h}>";
     echo t("Lisää tilauksen hinnat asiakashintoihin");
+    echo "<input type='checkbox' name='lisaa_nettohinta'>";
+    echo t("Lisää hinta nettona");
     echo "</label>";
     echo "<br>";
   }
 
   if ($_asikasalennus_kayttooikeus) {
-    echo "<label>";
-    echo "<input type='checkbox' name='lisaa_asiakasalennus' {$_checked_a}>";
-    echo t("Lisää tilauksen alennusprosentit asiakasalennuksiin");
-    echo "</label>";
-    echo "<br>";
+    if ($yhtiorow['myynnin_alekentat'] == 1) {
+      echo "<label>";
+      echo "<input type='checkbox' name='lisaa_asiakasalennus_1' {$_checked_1}>";
+      echo t("Lisää tilauksen alennusprosentit asiakasalennuksiin");
+      echo "</label>";
+      echo "<br>";
+    }
+    else {
+      for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+        echo "<label>";
+        echo "<input type='checkbox' name='lisaa_asiakasalennus_{$alepostfix}' {${"_checked_".$alepostfix}}>";
+        echo t("Lisää tilauksen Ale %s asiakasalennuksiin", "", $alepostfix);
+        echo "</label>";
+        echo "<br>";
+      }
+    }
   }
 
   echo "</td></tr>";
@@ -1529,7 +1559,8 @@ if (!empty($valitse_tuotteetasiakashinnastoon)) {
     }
 
     echo "</select>";
-    echo "</td></tr>";
+    echo "</td>";
+    echo "</tr>";
   }
 
   echo "<tr><th>";
@@ -1683,6 +1714,7 @@ if ($tee == "VALMIS"
     echo "<form name='laskuri' id='laskuri' method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php'><table class='laskuri'>";
 
     echo "<input type='hidden' name='kassamyyja_kesken' value='ei'>";
+    echo "<input type='hidden' name='poikkeava_kpvm' value='$poikkeava_kpvm'>";
     echo "<input type='hidden' name='tilausnumero' value='$tilausnumero'>";
     echo "<input type='hidden' name='mista' value='$mista'>";
     echo "<input type='hidden' name='tee' value='VALMIS'>";
@@ -2582,9 +2614,6 @@ if ($tee == 'vakuutushakemus') {
 
 // siirretään tilauksella olevat tuotteet asiakkaan asiakashinnoiksi
 if ($tee == "tuotteetasiakashinnastoon" and in_array($toim, array("TARJOUS", "EXTTARJOUS", "PIKATILAUS", "RIVISYOTTO", "VALMISTAASIAKKAALLE", "TYOMAARAYS", "PROJEKTI"))) {
-  // katsotaan mitä halutaan lisätä
-  $lisataan_asiakasalennus = !empty($lisaa_asiakasalennus);
-  $lisataan_asiakashinta   = !empty($lisaa_asiakashinta);
 
   $query = "SELECT tilausrivi.*,
             if (tuote.myyntihinta_maara = 0, 1, tuote.myyntihinta_maara) myyntihinta_maara
@@ -2598,7 +2627,6 @@ if ($tee == "tuotteetasiakashinnastoon" and in_array($toim, array("TARJOUS", "EX
 
   while ($tilausrivi = mysql_fetch_assoc($result)) {
     $hinta = $tilausrivi["hinta"];
-    $alennus = $tilausrivi["ale1"];
 
     if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"])) and $laskurow["vienti_kurssi"] != 0) {
       $hinta = laskuval($hinta, $laskurow["vienti_kurssi"]);
@@ -2628,7 +2656,7 @@ if ($tee == "tuotteetasiakashinnastoon" and in_array($toim, array("TARJOUS", "EX
 
     $loppupaivamaaralisa = "loppupvm = '{$asiakas_hinta_loppuvv}-{$asiakas_hinta_loppukk}-$asiakas_hinta_loppupv'";
 
-    if ($lisataan_asiakashinta and $hinta != 0) {
+    if (!empty($lisaa_asiakashinta) and (float) $hinta != 0) {
       $query = "SELECT *
                 FROM asiakashinta
                 where yhtio  = '$kukarow[yhtio]'
@@ -2639,6 +2667,13 @@ if ($tee == "tuotteetasiakashinnastoon" and in_array($toim, array("TARJOUS", "EX
                 and valkoodi = '$laskurow[valkoodi]'";
       $chk_result = pupe_query($query);
 
+      if (!empty($lisaa_nettohinta)) {
+        $nettolaji='N';
+      }
+      else {
+        $nettolaji='';
+      }
+
       if (mysql_num_rows($chk_result) == 0) {
         $query = "INSERT INTO asiakashinta SET
                   yhtio      = '$kukarow[yhtio]',
@@ -2648,11 +2683,12 @@ if ($tee == "tuotteetasiakashinnastoon" and in_array($toim, array("TARJOUS", "EX
                   hinta      = round($hintapyoristys_echo * $tilausrivi[myyntihinta_maara], $yhtiorow[hintapyoristys]),
                   valkoodi   = '$laskurow[valkoodi]',
                   alkupvm    = now(),
+                  laji       = '$nettolaji',
                   laatija    = '$kukarow[kuka]',
                   luontiaika = now(),
                   muuttaja   = '$kukarow[kuka]',
                   muutospvm  = now()";
-        $insert_result = pupe_query($query);
+        pupe_query($query);
 
         echo t("Lisättin tuote")." $tilausrivi[tuoteno] ".t("asiakkaan hinnastoon hinnalla").": ".hintapyoristys($hintapyoristys_echo)." $laskurow[valkoodi]<br>";
       }
@@ -2661,34 +2697,39 @@ if ($tee == "tuotteetasiakashinnastoon" and in_array($toim, array("TARJOUS", "EX
       }
     }
 
-    if ($lisataan_asiakasalennus and $alennus != 0) {
-      $query = "SELECT *
-                FROM asiakasalennus
-                where yhtio  = '$kukarow[yhtio]'
-                and tuoteno  = '$tilausrivi[tuoteno]'
-                and {$liitoslisa}
-                and {$loppupaivamaaralisa}
-                and alennus  = $alennus";
-      $chk_result = pupe_query($query);
+    for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
 
-      if (mysql_num_rows($chk_result) == 0) {
-        $query = "INSERT INTO asiakasalennus SET
-                  yhtio      = '$kukarow[yhtio]',
-                  tuoteno    = '$tilausrivi[tuoteno]',
-                  {$liitoslisa},
-                  {$loppupaivamaaralisa},
-                  alennus    = $alennus,
-                  alkupvm    = now(),
-                  laatija    = '$kukarow[kuka]',
-                  luontiaika = now(),
-                  muuttaja   = '$kukarow[kuka]',
-                  muutospvm  = now()";
-        $insert_result = pupe_query($query);
+      if (!empty(${"lisaa_asiakasalennus_".$alepostfix}) and (float) $tilausrivi["ale".$alepostfix] != 0) {
+        $query = "SELECT *
+                  FROM asiakasalennus
+                  where yhtio     = '$kukarow[yhtio]'
+                  and tuoteno     = '$tilausrivi[tuoteno]'
+                  and alennuslaji = '$alepostfix'
+                  and {$liitoslisa}
+                  and {$loppupaivamaaralisa}
+                  and alennus  = {$tilausrivi["ale".$alepostfix]}";
+        $chk_result = pupe_query($query);
 
-        echo t("Lisättin tuote")." $tilausrivi[tuoteno] ".t("asiakkaan alennuksiin alennukselle").": {$alennus}% <br>";
-      }
-      else {
-        echo t("Tuote")." $tilausrivi[tuoteno] ".t("löytyi jo asiakasalenuksista").": {$alennus}% <br>";
+        if (mysql_num_rows($chk_result) == 0) {
+          $query = "INSERT INTO asiakasalennus SET
+                    yhtio       = '$kukarow[yhtio]',
+                    tuoteno     = '$tilausrivi[tuoteno]',
+                    alennuslaji = '$alepostfix',
+                    {$liitoslisa},
+                    {$loppupaivamaaralisa},
+                    alennus    = {$tilausrivi["ale".$alepostfix]},
+                    alkupvm    = now(),
+                    laatija    = '$kukarow[kuka]',
+                    luontiaika = now(),
+                    muuttaja   = '$kukarow[kuka]',
+                    muutospvm  = now()";
+          pupe_query($query);
+
+          echo t("Lisättin tuote")." $tilausrivi[tuoteno] ".t("asiakkaan alennuksiin alennukselle").": {$tilausrivi["ale".$alepostfix]}% <br>";
+        }
+        else {
+          echo t("Tuote")." $tilausrivi[tuoteno] ".t("löytyi jo asiakasalenuksista").": {$tilausrivi["ale".$alepostfix]}% <br>";
+        }
       }
     }
   }
@@ -2834,6 +2875,9 @@ if ($tee == '') {
     $tilausnumero = $kukarow['kesken'];
   }
 
+  // Etukäteen maksetut tilaukset, ei sörkitä toimitustapaa enää
+  $_etukateen_maksettu = ($laskurow['mapvm'] != '0000-00-00' and $laskurow['chn'] == '999');
+
   // Tässä päivitetään 'pikaotsikkoa' jos kenttiin on jotain syötetty ja arvoja vaihdettu
   if ($kukarow["kesken"] > 0 and (
       (isset($toimitustapa) and $toimitustapa != '' and $toimitustapa != $laskurow["toimitustapa"]) or
@@ -2899,7 +2943,7 @@ if ($tee == '') {
         $meapu2row = mysql_fetch_assoc($meapu2);
 
         // ja toimitustapa ei ole nouto eikä kyseessä ole verkkokauppatilaus laitetaan toimitustavaksi nouto... hakee järjestyksessä ekan
-        if ($meapu2row["nouto"] == "" and $laskurow['tilaustyyppi'] != "W") {
+        if ($meapu2row["nouto"] == "" and ($laskurow['tilaustyyppi'] != "W" and empty($_etukateen_maksettu))) {
           $apuqu = "SELECT *
                     FROM toimitustapa
                     WHERE yhtio  = '$kukarow[yhtio]'
@@ -3171,27 +3215,29 @@ if ($tee == '') {
           </form>";
     }
 
-    echo "<form method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php'>
-        <input type='hidden' name='tee' value='mikrotila'>
-        <input type='hidden' name='tilausnumero' value='$tilausnumero'>
-        <input type='hidden' name='mista' value='$mista'>
-        <input type='hidden' name='toim' value='$toim'>
-        <input type='hidden' name='lopetus' value='$lopetus'>
-        <input type='hidden' name='ruutulimit' value = '$ruutulimit'>
-        <input type='hidden' name='tyojono' value='$tyojono'>
-        <input type='hidden' name='projektilla' value='$projektilla'>
-        <input type='hidden' name='orig_tila' value='$orig_tila'>
-        <input type='hidden' name='orig_alatila' value='$orig_alatila'>
-        <input type='hidden' name='lopetus' value='$tilmyy_lopetus'>";
+    if (empty($_etukateen_maksettu)) {
+      echo "<form method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php'>
+          <input type='hidden' name='tee' value='mikrotila'>
+          <input type='hidden' name='tilausnumero' value='$tilausnumero'>
+          <input type='hidden' name='mista' value='$mista'>
+          <input type='hidden' name='toim' value='$toim'>
+          <input type='hidden' name='lopetus' value='$lopetus'>
+          <input type='hidden' name='ruutulimit' value = '$ruutulimit'>
+          <input type='hidden' name='tyojono' value='$tyojono'>
+          <input type='hidden' name='projektilla' value='$projektilla'>
+          <input type='hidden' name='orig_tila' value='$orig_tila'>
+          <input type='hidden' name='orig_alatila' value='$orig_alatila'>
+          <input type='hidden' name='lopetus' value='$tilmyy_lopetus'>";
 
-    if ($toim != "VALMISTAVARASTOON") {
-      echo "<input type='submit' value='".t("Lue tilausrivit tiedostosta")."'>";
-    }
-    else {
-      echo "<input type='submit' value='".t("Lue valmistusrivit tiedostosta")."'>";
-    }
+      if ($toim != "VALMISTAVARASTOON") {
+        echo "<input type='submit' value='".t("Lue tilausrivit tiedostosta")."'>";
+      }
+      else {
+        echo "<input type='submit' value='".t("Lue valmistusrivit tiedostosta")."'>";
+      }
 
-    echo "</form>";
+      echo "</form>";
+    }
 
     if ($kukarow["extranet"] == "" and ($toim == "PIKATILAUS" or $toim == "RIVISYOTTO") and !empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A' and $laskurow["tila"] != 'G') {
       echo "  <form method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php' name='jalkitoimita'>
@@ -4711,6 +4757,38 @@ if ($tee == '') {
           $_ei_jt_meilia = 'X';
         }
         elseif ($tapa != "POISJTSTA" and $tapa != "PUUTE" and $tapa != "JT") {
+          if ($tapa == "POISTA") {
+            // Mikäli tilausriviin liittyy ostorivi, niin poistetaan myös se
+            $query = "SELECT tilausrivilinkki
+                      FROM tilausrivin_lisatiedot
+                      WHERE yhtio = '{$kukarow['yhtio']}'
+                      AND tilausrivitunnus = '{$rivitunnus}'";
+            $result = pupe_query($query);
+            $_myyntirivi = mysql_fetch_assoc($result);
+
+            if (mysql_num_rows($result) == 1 and $_myyntirivi["tilausrivilinkki"] != 0) {
+              // Tarkistetaan, että ostotilaus on vielä kesken,
+              // koska jos ei ole kesken on jo lähetetty eteenpäin
+              $query = "DELETE tilausrivi.*
+                        FROM tilausrivi
+                          JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio AND lasku.tunnus = tilausrivi.otunnus)
+                        WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+                        AND tilausrivi.tunnus = '{$_myyntirivi["tilausrivilinkki"]}'
+                        AND lasku.tila = 'O'
+                        AND lasku.alatila = ''
+                        AND tilausrivi.tyyppi = 'O'
+                        AND tilausrivi.kpl = 0";
+              $ostotilaus_tarkistus = mysql_fetch_assoc(pupe_query($query));
+
+              if (mysql_affected_rows() > 0) {
+                echo "<font class='error'>".t("Rivi poistettiin myös ostotilaukselta")."</font><br/><br/>";
+              }
+              else {
+                echo "<font class='error'>".t("Ostotilaus ei ollut enää kesken tilassa, ei voitu poistaa riviä ostolta")."!</font><br/><br/>";
+              }
+            }
+          }
+
           // Poistetaan muokattava tilausrivi
           $query = "DELETE FROM tilausrivi
                     WHERE tunnus = '$rivitunnus'";
@@ -4952,7 +5030,7 @@ if ($tee == '') {
           $toimitettuaika = 0;
         }
 
-        if ($tila == "VARMUUTOS" and in_array($tapa, array("POISJTSTA","PUUTE","PUUTE"))) {
+        if ($tila == "VARMUUTOS" and in_array($tapa, array("POISJTSTA","PUUTE","JT"))) {
           //otetaan varattukpl ja jtkpl muuttuja käyttöön
           $varattukpl = 0;
           $jtkpl = 0;
@@ -5790,6 +5868,12 @@ if ($tee == '') {
   // Allr specific!
   if (file_exists("${pupe_root_polku}/allr_kamppikset.php")) {
     require "${pupe_root_polku}/allr_kamppikset.php";
+  }
+
+  if (!empty($_etukateen_maksettu)) {
+    $muokkauslukko = 'LUKOSSA';
+
+    echo "<br><font class='error'>",t("HUOM: Tilaus on etukäteen maksettu verkkokauppatilaus. Tilauksen rivitietoja ei voi muuttaa. Tee mahdolliset korjaukset tekemällä uusi tilaus."),"</font><br>";
   }
 
   //Syöttörivi
@@ -7324,7 +7408,7 @@ if ($tee == '') {
           $rivino--;
         }
 
-        if ($muokkauslukko_rivi == "" and $yhtiorow["tilauksen_jarjestys"] == "M" and in_array($toim, array("TARJOUS", "EXTTARJOUS", "PIKATILAUS", "RIVISYOTTO", "VALMISTAASIAKKAALLE", "SIIRTOLISTA", "TYOMAARAYS", "TYOMAARAYS_ASENTAJA", "REKLAMAATIO", "PROJEKTI"))) {
+        if ($muokkauslukko_rivi == "" and empty($_etukateen_maksettu) and $yhtiorow["tilauksen_jarjestys"] == "M" and in_array($toim, array("TARJOUS", "EXTTARJOUS", "PIKATILAUS", "RIVISYOTTO", "VALMISTAASIAKKAALLE", "SIIRTOLISTA", "TYOMAARAYS", "TYOMAARAYS_ASENTAJA", "REKLAMAATIO", "PROJEKTI"))) {
 
           $buttonit =  "<div align='center'><form action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php#rivi_$rivino' name='siirra_$rivino' method='post'>
                   <input type='hidden' name='toim' value='$toim'>
@@ -9732,7 +9816,7 @@ if ($tee == '') {
 
         $sallijyvitys = FALSE;
 
-        if ($kukarow["extranet"] == "") {
+        if ($kukarow["extranet"] == "" and empty($_etukateen_maksettu)) {
           if ($yhtiorow["salli_jyvitys_myynnissa"] == "" and ($kukarow['kassamyyja'] != '' or $kukarow['dynaaminen_kassamyynti'] != '') and $toim != 'SIIRTOLISTA') {
             $sallijyvitys = TRUE;
           }
@@ -9752,7 +9836,6 @@ if ($tee == '') {
           if ($toim == 'TARJOUS' and $yhtiorow['salli_jyvitys_tarjouksella'] != '') {
             $sallijyvitys = TRUE;
           }
-
         }
 
         //annetaan mahdollisuus antaa loppusumma joka jyvitetään riveille arvoosuuden mukaan
@@ -10335,8 +10418,22 @@ if ($tee == '') {
       if ($toim != 'EXTTARJOUS') {
         echo "  <br>
             <br>
-            <form name='hylkaa' method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php' onsubmit=\"return confirm('Oletko varma että haluat hylätä tarjouksen $kukarow[kesken]?')\">
-            <input type='hidden' name='toim' value='$toim'>
+            <form name='hylkaa' method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php' onsubmit=\"return confirm('Oletko varma että haluat hylätä tarjouksen $kukarow[kesken]?')\">";
+
+        $tresult = t_avainsana("CRM_TARJOUSPOIS");
+
+        if (mysql_num_rows($tresult) > 0) {
+          echo t("Hylkäyksen syy").":";
+
+          echo "<select name='crm_tarjouspois'>";
+
+          while ($itrow = mysql_fetch_assoc($tresult)) {
+            echo "<option value='$itrow[selitetark]' $sel>$itrow[selite]</option>";
+          }
+          echo "</select>";
+        }
+
+        echo "<input type='hidden' name='toim' value='$toim'>
             <input type='hidden' name='lopetus' value='$lopetus'>
             <input type='hidden' name='ruutulimit' value = '$ruutulimit'>
             <input type='hidden' name='projektilla' value='$projektilla'>
@@ -10617,7 +10714,7 @@ if ($tee == '') {
                     LIMIT 1";
           $jaksoresult = pupe_query($query);
 
-          if (mysql_num_rows($jaksoresult) == 0) {
+          if (mysql_num_rows($jaksoresult) == 0 and $laskelisa == '') {
             echo "<br><br>";
             echo "<input type='submit' name='tee_100_ennakkolasku' value='".t("Ennakkolasku")." & $painike_txt'>";
 
@@ -10889,7 +10986,11 @@ if ($tee == '') {
           </form> ";
     }
 
-    if (($muokkauslukko == "" or $myyntikielto != '') and ($toim != "PROJEKTI" or ($toim == "PROJEKTI" and $projektilask == 0)) and $kukarow["mitatoi_tilauksia"] == "" and ($row["laskutettuaika"] == "0000-00-00" or !isset($row["laskutettuaika"]))) {
+    $ei_laskutettu = ($row["laskutettuaika"] == "0000-00-00" or !isset($row["laskutettuaika"]));
+    $ei_valmistettu = TRUE;
+    if ($laskurow["tila"] == "V" and $row["toimitettuaika"] != "0000-00-00 00:00:00" and isset($row["toimitettuaika"])) $ei_valmistettu = FALSE;
+
+    if (($muokkauslukko == "" or $myyntikielto != '') and ($toim != "PROJEKTI" or ($toim == "PROJEKTI" and $projektilask == 0)) and $kukarow["mitatoi_tilauksia"] == "" and $ei_laskutettu and $ei_valmistettu) {
       echo "<SCRIPT LANGUAGE=JAVASCRIPT>
             function verify(){
               msg = '".t("Haluatko todella poistaa tämän tietueen?")."';

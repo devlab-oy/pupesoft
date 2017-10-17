@@ -124,9 +124,17 @@ class Edi {
       $noutopistetunnus = is_numeric($tunnistekoodi) ? $tunnistekoodi : '';
     }
 
+    // Noutopiste voi olla myös katuosoitteen lopussa esim "Testitie 1 [#12345]"
+    preg_match("/\[#([0-9]*)\]/", $shippingadress, $tunnistekoodi);
+    if ($noutopistetunnus == '' and !empty($tunnistekoodi[1])) {
+      $noutopistetunnus = $tunnistekoodi[1];
+      $shippingadress = str_replace($tunnistekoodi[0], "", $shippingadress);
+    }
+
     $tilausviite = '';
     $tilausnumero = '';
     $kohde = '';
+    $toimaika = '';
 
     if (!empty($order['reference_number'])) {
       $tilausviite = str_replace("\n", " ", $order['reference_number']);
@@ -138,6 +146,13 @@ class Edi {
 
     if (!empty($order['target'])) {
       $kohde = str_replace("\n", " ", $order['target']);
+    }
+
+    if (!empty($order['delivery_time'])) {
+      $toimaika = str_replace("\n", " ", $order['delivery_time']);
+    }
+    else {
+      $toimaika = date("Y-m-d");
     }
 
     // tilauksen otsikko
@@ -152,9 +167,9 @@ class Edi {
     $edi_order .= "OSTOTIL.OT_VERKKOKAUPPA_TILAUSVIITE:{$tilausviite}\n";
     $edi_order .= "OSTOTIL.OT_VERKKOKAUPPA_TILAUSNUMERO:{$tilausnumero}\n";
     $edi_order .= "OSTOTIL.OT_VERKKOKAUPPA_KOHDE:{$kohde}\n";
-    $edi_order .= "OSTOTIL.OT_TILAUSAIKA:\n";
+    $edi_order .= "OSTOTIL.OT_TILAUSAIKA:{$toimaika}\n";
     $edi_order .= "OSTOTIL.OT_KASITTELIJA:\n";
-    $edi_order .= "OSTOTIL.OT_TOIMITUSAIKA:\n";
+    $edi_order .= "OSTOTIL.OT_TOIMITUSAIKA:{$toimaika}\n";
     $edi_order .= "OSTOTIL.OT_TOIMITUSTAPA:{$order['shipping_description']}\n";
     $edi_order .= "OSTOTIL.OT_TOIMITUSEHTO:\n";
     $edi_order .= "OSTOTIL.OT_MAKSETTU:{$order['status']}\n";
@@ -276,7 +291,7 @@ class Edi {
       }
     }
 
-    // // Rahtikulu, veroton
+    // Rahtikulu, veroton
     $rahti_veroton = $order['shipping_amount'];
 
     if ($rahti_veroton != 0) {
@@ -285,6 +300,10 @@ class Edi {
 
       // Rahtin alviprossa
       $rahti_alvpros = round((($rahti / $rahti_veroton) - 1) * 100);
+
+      if (!empty($order['shipping_description_line'])) {
+        $rahtikulu_nimitys .= " / {$order['shipping_description_line']}";
+      }
 
       $edi_order .= "*RS OSTOTILRIV {$i}\n";
       $edi_order .= "OSTOTILRIV.OTR_NRO:{$order['increment_id']}\n";
@@ -297,7 +316,7 @@ class Edi {
       $edi_order .= "OSTOTILRIV.OTR_OSTOHINTA:{$rahti_veroton}\n";
       $edi_order .= "OSTOTILRIV.OTR_ALENNUS:0\n";
       $edi_order .= "OSTOTILRIV.OTR_VEROKANTA:{$rahti_alvpros}\n";
-      $edi_order .= "OSTOTILRIV.OTR_VIITE:\n";
+      $edi_order .= "OSTOTILRIV.OTR_VIITE:{$rahtikulu_nimitys}\n";
       $edi_order .= "OSTOTILRIV.OTR_OSATOIMITUSKIELTO:\n";
       $edi_order .= "OSTOTILRIV.OTR_JALKITOIMITUSKIELTO:\n";
       $edi_order .= "OSTOTILRIV.OTR_YKSIKKO:\n";

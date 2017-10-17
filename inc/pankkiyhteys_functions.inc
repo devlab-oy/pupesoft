@@ -333,32 +333,6 @@ function sepa_pankkiyhteys_kunnossa() {
 }
 // Pankkiyhteys tietokantafunktiot
 
-
-/**
- * Hakee kaikki yhtion pankkiyhteydet tietokannasta ja lisaa pankin nimen palautettavaan arrayhyn
- *
- * @return array
- */
-function hae_pankkiyhteydet() {
-  global $kukarow, $yhtiorow;
-
-  $luodut_pankkiyhteydet = array();
-  $tuetut_pankit = tuetut_pankit();
-
-  $query = "SELECT *
-            FROM pankkiyhteys
-            WHERE yhtio = '{$kukarow['yhtio']}'";
-  $result = pupe_query($query);
-
-  while ($rivi = mysql_fetch_assoc($result)) {
-    $rivi["pankin_nimi"] = $tuetut_pankit[$rivi["pankki"]]["nimi"];
-    array_push($luodut_pankkiyhteydet, $rivi);
-  }
-
-  return $luodut_pankkiyhteydet;
-}
-
-
 /**
  * Hakee pankkiyhteydet, joita ei ole viela luotu kyseiselle yhtiolle
  *
@@ -666,8 +640,18 @@ function sepa_renew_certificate($params) {
 
     $csr_params['customer_id']  = $customer_id;
     $csr_params['company_name'] = $old_cert_info['subject']['CN'];
+
+    break;
+  case 'op':
+    $customer_id = $old_cert_info['subject']['CN'];
+
+    $csr_params['customer_id']  = $customer_id;
+
+    break;
   case 'danske':
     $customer_id = $pankkiyhteys['customer_id'];
+
+    break;
   case 'aktia':
   case 'sp':
   case 'pop':
@@ -676,6 +660,8 @@ function sepa_renew_certificate($params) {
 
     $csr_params['company_name'] = $old_cert_info['subject']['CN'];
     $csr_params['customer_id']  = $customer_id;
+
+    break;
   }
 
   $generoidut_tunnukset1 = generoi_private_key_ja_csr($csr_params);
@@ -849,6 +835,10 @@ function sepa_file_type_check($bank, $file_type) {
     if ($file_type == 'FILL') {
       $file_type = 'LAHLASKUT';
     }
+    // Lähtevä factoringaineisto
+    if ($file_type == 'LAHFACTORING') {
+      $file_type = 'FACTORING';
+    }
   }
 
   // Danskemuunnokset
@@ -928,6 +918,9 @@ function sepa_file_type_check($bank, $file_type) {
     // Lähtevät verkkolaskut
     case 'LAHLASKUT':
       return "VL";
+    // Lähtevä factoringaineisto
+    case 'LAHFACTORING':
+      return "FC";
     }
   }
 
@@ -1313,45 +1306,6 @@ function parse_sertificate($cert) {
   $return["valid_to"] = $_valid_to;
 
   return $return;
-}
-
-
-/**
- * Palauttaa arrayn tuetuista pankeista muodossa BIC => [lyhyt_nimi, pitka_nimi]
- *
- * @return array
- */
-function tuetut_pankit() {
-  return array(
-    "NDEAFIHH" => array(
-      "nimi"       => "Nordea",
-      "lyhyt_nimi" => "nordea"
-    ),
-    "DABAFIHH" => array(
-      "nimi"       => "Danske Bank",
-      "lyhyt_nimi" => "danske"
-    ),
-    "OKOYFIHH" => array(
-      "nimi"       => "OP",
-      "lyhyt_nimi" => "op",
-    ),
-    "HELSFIHH" => array(
-      "nimi"       => "Aktia",
-      "lyhyt_nimi" => "aktia",
-    ),
-    "ITELFIHH" => array(
-      "nimi"       => "Säästöpankki",
-      "lyhyt_nimi" => "sp",
-    ),
-    "POPFFI22" => array(
-      "nimi"       => "POP Pankki",
-      "lyhyt_nimi" => "pop",
-    ),
-    "HANDFIHH" => array(
-      "nimi"       => "Handelsbanken",
-      "lyhyt_nimi" => "shb",
-    ),
-  );
 }
 
 function parameter($param) {

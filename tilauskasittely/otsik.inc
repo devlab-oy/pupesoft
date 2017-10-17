@@ -855,7 +855,7 @@ if ($tila == "" and !isset($jatka)) {
 
       $srow_from = "LASKU";
     }
-    elseif ($asiakasid != "" and $tiedot_laskulta == "") {
+    elseif (($asiakasid != "" and $tiedot_laskulta == "") or ($tiedot_laskulta == "YES" and isset($uusiasiakas) and $uusiasiakas == "uusiasiakas")) {
       // asiakashaussa pitää olla vakio columni kohdistettu, jonka arvo on O että saadaan OLETUS toimitustapa haettua asiakashaunkin yhteydessä
       if ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA") {
         $puhlisa = " if (asiakas.puhelin!='', asiakas.puhelin, asiakas.gsm) kotipuh, asiakas.tyopuhelin tyopuh,";
@@ -3629,9 +3629,11 @@ if ($tila == "" and !isset($jatka)) {
 
     echo "<tr class='otsik_laaja_kommentit' $hiddenlisa2><td>".t("Puhelin toimitukseen").":</td><td><input type='text' size='43' name='tpuh' value='$srow[toim_puh]'</td><td>".t("rahtikirja")." + ".t("osoitelappu")."</td></tr>";
 
-    if ($yhtiorow["vahvistusviesti_asiakkaalle"] or !empty($kukarow["kassamyyja"])) {
-      echo "<tr class='otsik_laaja_kommentit' $hiddenlisa2><td>".t("Email toimitukseen").":</td><td><input type='text' size='43' name='temail' value='$srow[toim_email]'</td><td></td></tr>";
+    if ($yhtiorow["vahvistusviesti_asiakkaalle"] == "Y") {
+      $_vahvistusviesti_asiakkaalle = " + ".t("vahvistusviesti asiakkaalle");
     }
+
+    echo "<tr class='otsik_laaja_kommentit' $hiddenlisa2><td>".t("Email toimitukseen").":</td><td><input type='text' size='43' name='temail' value='$srow[toim_email]'</td><td>".t("toimitusvahvistus").$_vahvistusviesti_asiakkaalle."</td></tr>";
 
     echo "<tr class='otsik_laaja_kommentit' $hiddenlisa2><td>".t("Kommentti")." 1:</td><td><textarea name='comments'   rows='2' cols='40'>$srow[comments]</textarea></td><td>".t("tilausvahvistus")." + ".t("keräyslista")." + ".t("valmistus")." + ".t("työmääräys")." + ".t("lähete")." + ".t("tarjous")."</td></tr>";
 
@@ -3739,8 +3741,19 @@ if (isset($jatka)) {
       }
     }
 
-    if (!isset($eilahe) and $srow['eilahetetta'] != '' or (!isset($srow['eilahetetta']) and $yhtiorow["kerataanko_valmistukset"] == "E" and $toim == "VALMISTAASIAKKAALLE") or (!isset($srow['eilahetetta']) and $yhtiorow['lahetteen_tulostustapa'] == 'I') or (!isset($srow['eilahetetta']) and $toimtapa_apuro['nouto'] != '' and $yhtiorow['nouto_suoraan_laskutukseen'] == 'K')) $eilahe = 'o';
-    if (!isset($osatoimitus) and $srow['osatoimitus'] != '' or ((in_array($toim, array("TARJOUS", "EXTTARJOUS", "PROJEKTI")) or $oletus["osatoimitus"] != "") and $kukarow["kesken"] == 0) or ($yhtiorow['myyntitilaus_osatoimitus'] == 'E' and $kukarow['kesken'] == 0)) $osatoimitus = 'o';
+    if (!isset($eilahe) and $srow['eilahetetta'] != '' or
+      (!isset($srow['eilahetetta']) and $yhtiorow["kerataanko_valmistukset"] == "E" and $toim == "VALMISTAASIAKKAALLE")
+      or (!isset($srow['eilahetetta']) and $yhtiorow['lahetteen_tulostustapa'] == 'I')
+      or (!isset($srow['eilahetetta']) and $toimtapa_apuro['nouto'] != '' and $yhtiorow['nouto_suoraan_laskutukseen'] == 'K'))
+    {
+        $eilahe = 'o';
+    }
+
+    if (!isset($osatoimitus) and $srow['osatoimitus'] != '' or
+      ((in_array($toim, array("TARJOUS", "EXTTARJOUS", "PROJEKTI")) or $oletus["osatoimitus"] != "") and $kukarow["kesken"] == 0)
+      or ($yhtiorow['myyntitilaus_osatoimitus'] == 'E' and $kukarow['kesken'] == 0)) {
+      $osatoimitus = 'o';
+    }
 
     $yhtiorow = $_yhtiorow_talteen;
   }
@@ -4000,6 +4013,10 @@ if (isset($jatka)) {
     //Kun tehdään uusi tilaus niin nollataan aina tilat ja alatilat
     $alatila = "";
     $ylatila = "";
+
+    if ($toim == "TYOMAARAYS") {
+      $luontitapa = "tyomaarays";
+    }
   }
   else {
     // Jos ollaan piilottamassa tarjouksen toimitusaikaa niin pitää nollata nämä tiedot myös tilausriveiltä
@@ -4084,6 +4101,9 @@ if (isset($jatka)) {
 
   $kassalipas = "";
 
+  // Etukäteen maksetut tilaukset, ei sörkitä maksuehtoa/toimitustapaa enää
+  $_etukateen_maksettu = ($laskurow['mapvm'] != '0000-00-00' and $laskurow['chn'] == '999');
+
   // jos kyseessä oli käteinen
   if ($meapurow["kateinen"] != "") {
     // haetaan toimitustavan tiedot tarkastuksia varten
@@ -4095,7 +4115,7 @@ if (isset($jatka)) {
     $meapu2row = mysql_fetch_assoc($meapu2);
 
     // ja toimitustapa ei ole nouto eikä kyseessä ole verkkokauppatilaus laitetaan toimitustavaksi nouto... hakee järjestyksessä ekan
-    if ($meapu2row["nouto"] == "" and $tilaustyyppi != "W") {
+    if ($meapu2row["nouto"] == "" and ($tilaustyyppi != "W" and !$_etukateen_maksettu)) {
       $apuqu = "SELECT *
                 FROM toimitustapa
                 WHERE yhtio  = '$kukarow[yhtio]'
@@ -4112,7 +4132,7 @@ if (isset($jatka)) {
   }
 
   // jos kyseessä oli käsin syötetty eräpäivä ja maksuehto on väärin laitetaan oikea maksuehto... hakee järjestyksessä ekan
-  if ($erpcm_kasin == "KYLLA" and $meapurow["erapvmkasin"] == "" and $meapurow["jaksotettu"] == "") {
+  if ($erpcm_kasin == "KYLLA" and $meapurow["erapvmkasin"] == "" and $meapurow["jaksotettu"] == "" and !$_etukateen_maksettu) {
 
     $erpquery = "SELECT * from maksuehto where yhtio = '$kukarow[yhtio]' and erapvmkasin != '' and kaytossa = '' order by tunnus limit 1";
     $erpres = pupe_query($erpquery);
@@ -4827,8 +4847,15 @@ if (isset($jatka)) {
                          sopimus_numero           = '$sopimus_numero', ";
       }
 
+      $luontitapa_arraylisa = "";
+
+      if (isset($luontitapa)) {
+        $luontitapa_arraylisa = "luontitapa = '{$luontitapa}',";
+      }
+
       $query3 .= "laskun_lisatiedot SET
             yhtio            = '$kukarow[yhtio]',
+            {$luontitapa_arraylisa}
             sopimus_kk          = '$sopimus_kk',
             sopimus_pp          = '$sopimus_pp',
             yllapito_kuukausihinnoittelu = '{$kuukausihinnoittelu}',

@@ -224,6 +224,26 @@ if ($tee2 == 'TULOSTA') {
   elseif (isset($tulostukseen_kaikki)) {
     $tilausnumerorypas = unserialize(urldecode($tulostukseen_kaikki));
     $tulostukseen_kaikki = "KYLLA";
+
+    // Tsekataan komento valitulle tulostimelle
+    $query = "SELECT komento
+              from kirjoittimet
+              where tunnus = '$valittu_tulostin'
+              AND yhtio    = '$kukarow[yhtio]'";
+    $pres = pupe_query($query);
+    $prow = mysql_fetch_assoc($pres);
+
+    // Kun tulostetaan kaikki kerralla ja otetaan sähköpostiin,
+    // niin laitetaan kaikki yhteen dokkariin
+    if ($prow["komento"] == "email" and $yhtiorow["lahetteen_tulostustapa"] != "X") {
+      require_once "pdflib/phppdflib.class.php";
+
+      $pdf_kaikki_tul = new pdffile;
+      $pdf_kaikki_tul->set_default('margin-top', 0);
+      $pdf_kaikki_tul->set_default('margin-bottom', 0);
+      $pdf_kaikki_tul->set_default('margin-left', 0);
+      $pdf_kaikki_tul->set_default('margin-right', 0);
+    }
   }
 
   if (is_array($tilausnumerorypas)) {
@@ -333,6 +353,13 @@ if ($tee2 == 'TULOSTA') {
         echo t("Tilaus on kesken käyttäjällä").", $keskenrow[nimi], ".t("ota yhteyttä häneen ja käske hänen laittaa vähän vauhtia tähän touhuun")."!<br>";
         $tee2 = "";
       }
+    }
+
+    if (!empty($pdf_kaikki_tul)) {
+      // Tulostetaan sivu
+      $params_kerayslista["komento"] = $komento;
+
+      print_pdf_kerayslista($params_kerayslista);
     }
   }
   else {
@@ -635,6 +662,8 @@ if ($tee2 == '') {
   /*
     Oletuksia
   */
+  $_tarkista_varastot = true;
+
   if (isset($indexvas) and $indexvas == 1 and $tuvarasto == '') {
 
     $karajaus = 1;
@@ -643,12 +672,23 @@ if ($tee2 == '') {
       $karajaus = $yhtiorow["keraysaikarajaus"];
     }
 
+    $keraakaikistares = t_avainsana("KERAAKAIKISTA");
+
+    if (mysql_num_rows($keraakaikistares) > 0) {
+
+      $keraakaikistarow = mysql_fetch_assoc($keraakaikistares);
+
+      if ($keraakaikistarow['selitetark'] == 'a') {
+        $_tarkista_varastot = false;
+      }
+    }
+
     // jos käyttäjällä on oletusvarasto, valitaan se
-    if ($kukarow['oletus_varasto'] != 0) {
+    if ($_tarkista_varastot and $kukarow['oletus_varasto'] != 0) {
       $tuvarasto = $kukarow['oletus_varasto'];
     }
     //  Varastorajaus jos käyttäjällä on joku varasto valittuna
-    elseif ($kukarow['varasto'] != '' and $kukarow['varasto'] != 0) {
+    elseif ($_tarkista_varastot and $kukarow['varasto'] != '' and $kukarow['varasto'] != 0) {
       // jos käyttäjällä on monta varastoa valittuna, valitaan ensimmäinen
       $tuvarasto   = strpos($kukarow['varasto'], ',') !== false ? array_shift(explode(",", $kukarow['varasto'])) : $kukarow['varasto'];
     }

@@ -1530,6 +1530,7 @@ if ($fieldname == "kerayspoikkeamaviestin_lahetys") {
   $sel[$trow[$i]]  = " selected";
 
   $ulos .= "<option value='0' $sel[0]>".t("Ker‰yspoikkeamaviesti l‰hetet‰‰n asiakkaalle ja myyj‰lle")."</option>";
+  $ulos .= "<option value='3' $sel[3]>".t("Ker‰yspoikkeamaviesti l‰hetet‰‰n asiakkaalle ja myyj‰lle (vaikka ei olisi poikkeamia)")."</option>";
   $ulos .= "<option value='2' $sel[2]>".t("Ker‰yspoikkeamaviesti l‰hetet‰‰n vain myyj‰lle")."</option>";
   $ulos .= "<option value='1' $sel[1]>".t("Ker‰yspoikkeamaviesti‰ ei l‰hetet‰ ollenkaan")."</option>";
   $ulos .= "</select></td>";
@@ -2993,6 +2994,21 @@ if ($fieldname == "kalenterimerkinnat") {
   $jatko = 0;
 }
 
+if ($fieldname == "kalenteri_aikavali") {
+
+  $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+  $sel = array();
+  $apu = $trow[$i];
+  $sel[$apu] = "selected";
+
+  $ulos .= "<option value = ''>".t("Kalenterissa on 30 minuutin aikav‰li")."</option>";
+  $ulos .= "<option value = '15' $sel[15]>".t("Kalenterissa on 15 minuutin aikav‰li")."</option>";
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
 if ($fieldname == "tuntikirjausten_erittely") {
 
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
@@ -3229,7 +3245,7 @@ if ($fieldname == "poistetut_lisays") {
   $jatko = 0;
 }
 
-if ($fieldname == "livetuotehaku_hakutapa") {
+if ($fieldname == "livetuotehaku_hakutapa" or $fieldname == "livetuotehaku_hakutapa_extranet") {
 
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
 
@@ -3245,6 +3261,9 @@ if ($fieldname == "livetuotehaku_hakutapa") {
   $ulos .= "<option value = 'K' {$sel['K']}>".t("Livetuotehaku hakee tuotenumeron, nimityksen ja EAN-koodin mill‰ tahansa osalla. Tehd‰‰n myˆs saldokysely. (Todella hidas tapa)")."</option>";
   $ulos .= "<option value = 'L' {$sel['L']}>".t("Livetuotehaku hakee tuotenumeron, nimityksen, lempinimen ja EAN-koodin mill‰ tahansa osalla. (Hidas tapa)")."</option>";
   $ulos .= "<option value = 'M' {$sel['M']}>".t("Livetuotehaku hakee tuotenumeron, nimityksen, lempinimen ja EAN-koodin mill‰ tahansa osalla. Tehd‰‰n myˆs saldokysely. (Todella hidas tapa)")."</option>";
+  $ulos .= "<option value = 'N' {$sel['N']}>".t("Livetuotehaku hakee tuotenumeron ja nimityksen mill‰ tahansa osalla. N‰ytet‰‰n saatavuus kyll‰/ei. (Todella hidas tapa)")."</option>";
+  $ulos .= "<option value = 'O' {$sel['O']}>".t("Livetuotehaku hakee tuotenumeron, nimityksen, EAN-koodin ja lyhytkuvauksen mill‰ tahansa osalla. (Hidas tapa)")."</option>";
+  $ulos .= "<option value = 'P' {$sel['P']}>".t("Livetuotehaku hakee tuotenumeron, nimityksen, EAN-koodin ja lyhytkuvauksen mill‰ tahansa osalla. Tehd‰‰n myˆs saldokysely. (Todella hidas tapa)")."</option>";
 
   $ulos .= "</select></td>";
 
@@ -3372,6 +3391,18 @@ if ($fieldname == "extranet_nayta_saldo") {
 
   $ulos .= "<option value = ''>" . t("Ei n‰ytet‰ saldoa extranetiss‰");
   $ulos .= "<option value = 'Y' $sel>" . t("N‰ytet‰‰n saldo extranetiss‰");
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
+if ($fieldname == "extranet_nayta_kuvaus") {
+  $ulos = "<td><select name='$nimi' " . js_alasvetoMaxWidth($nimi, 400) . ">";
+
+  $sel = $trow[$i] == 'Y' ? ' selected' : '';
+
+  $ulos .= "<option value = ''>" . t("Ei n‰ytet‰ tuotteen kuvausta extranetiss‰");
+  $ulos .= "<option value = 'Y' $sel>" . t("N‰ytet‰‰n tuotteen kuvaus extranetiss‰");
   $ulos .= "</select></td>";
 
   $jatko = 0;

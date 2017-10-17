@@ -707,7 +707,10 @@ if ($tee == 'add') {
           if (count($kiloja) > 1) {
             $kollit[$i] = 1;
           }
-
+          // Jos yhditetty tilauksia rahtikirjalle, sortataan ne sellaiseen järjestykseen, että
+          // kollit ja kilot tulee sille tilaukselle, jolla otsikkonro=rahtikijranro,
+          // niin ollaan Unifaun-yhteensopivia
+          asort($tilaukset);
           foreach ($tilaukset as $otsikkonro) {
 
             foreach ($kiloja as $yksikilo) {
@@ -1121,6 +1124,9 @@ if ($tee == 'add') {
 
           if ($toimitustaparow['osoitelappu'] == 'intrade') {
             require 'tilauskasittely/osoitelappu_intrade_pdf.inc';
+          }
+          elseif ($toimitustaparow['osoitelappu'] == 'osoitelappu_kesko') {
+            require 'tilauskasittely/osoitelappu_kesko_pdf.inc';
           }
           elseif ($toimitustaparow['osoitelappu'] == 'hornbach') {
             require 'tilauskasittely/osoitelappu_hornbach_pdf.inc';

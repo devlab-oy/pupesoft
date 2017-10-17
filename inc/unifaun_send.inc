@@ -133,6 +133,10 @@ class Unifaun {
                 and tunnus  = '{$this->postirow['liitostunnus']}'";
       $asres = pupe_query($query);
       $this->asiakasrow = mysql_fetch_assoc($asres);
+
+      if (!empty($this->postirow['toim_email'])) {
+        $this->asiakasrow['email'] = $this->postirow['toim_email'];
+      }
     }
   }
 
@@ -499,9 +503,11 @@ class Unifaun {
           or $this->toitarow['virallinen_selite'] == "PO2102"
           or $this->toitarow['virallinen_selite'] == "PO2103"
           or $this->toitarow['virallinen_selite'] == "PO2104"
+          or $this->toitarow['virallinen_selite'] == "PO2461"
           or $this->toitarow['virallinen_selite'] == "PO2711") $rahtisopimusnro = 123456;
         elseif ($this->toitarow['virallinen_selite'] == "KLGRP") $rahtisopimusnro = 1234567;
         elseif ($this->toitarow['virallinen_selite'] == "MH10" or $this->toitarow['virallinen_selite'] == "MH30") $rahtisopimusnro = 12345678;
+        elseif ($this->toitarow['virallinen_selite'] == "MH10_SPTR" or $this->toitarow['virallinen_selite'] == "MH30_SPTR") $rahtisopimusnro = 12345678;
         else $rahtisopimusnro = 123;
       }
 
@@ -512,6 +518,7 @@ class Unifaun {
             or $this->toitarow['virallinen_selite'] == "PO2102"
             or $this->toitarow['virallinen_selite'] == "PO2103"
             or $this->toitarow['virallinen_selite'] == "PO2104"
+            or $this->toitarow['virallinen_selite'] == "PO2461"
             or $this->toitarow['virallinen_selite'] == "PO2711") and strlen($rahtisopimusnro) != 6) {
           $rahtisopimusnro = 999999;
         }
@@ -547,6 +554,8 @@ class Unifaun {
         'KLGRP',
         'MH10',
         'MH30',
+        'MH10_SPTR',
+        'MH30_SPTR',
       );
 
       $allowed_opay = array(
@@ -563,6 +572,7 @@ class Unifaun {
         'ITKY14I',
         'IT14I',
         'PO2711',
+        'PO2461',
       );
     }
 
@@ -607,14 +617,24 @@ class Unifaun {
     $uni_rcv_val = $uni_receiver->addChild('val', utf8_encode($this->rakir_row["toim_postino"])); // Zipcode
     $uni_rcv_val->addAttribute('n', "zipcode");
 
-    $uni_rcv_val = $uni_receiver->addChild('val', utf8_encode($this->rakir_row["toim_postitp"])); // City
-    $uni_rcv_val->addAttribute('n', "city");
-
-    //$uni_rcv_val = $uni_receiver->addChild('val', ""); # State
-    //$uni_rcv_val->addAttribute('n', "state");
-
     // jos asiakkaan toim_maa on tyhjä niin oletetaan, että se on sama ku yhtiön maa
     $toim_maa = ($this->rakir_row['toim_maa'] != "") ? $this->rakir_row['toim_maa'] : $this->postirow["yhtio_maa"];
+
+    if ($toim_maa == "US") {
+
+      list($toim_postitp, $state) = explode(" ", $this->rakir_row["toim_postitp"]);
+
+      if ($state != '') {
+
+        $this->rakir_row["toim_postitp"] = $toim_postitp;
+        $state = $toim_maa."_".$state;
+        $uni_rcv_val = $uni_receiver->addChild('val', utf8_encode($state)); # State
+        $uni_rcv_val->addAttribute('n', "state");
+      }
+    }
+
+    $uni_rcv_val = $uni_receiver->addChild('val', utf8_encode($this->rakir_row["toim_postitp"])); // City
+    $uni_rcv_val->addAttribute('n', "city");
 
     $uni_rcv_val = $uni_receiver->addChild('val', utf8_encode($toim_maa)); // Country code according to ISO standard
     $uni_rcv_val->addAttribute('n', "country");
@@ -786,6 +806,17 @@ class Unifaun {
     $uni_shi_val = $uni_shipment->addChild('val', utf8_encode($reference)); // Receiver's reference. Any contents. Max. 17 characters.
     $uni_shi_val->addAttribute('n', "rcvreference");
 
+    // Vain tietyille palveluille sallitaan goodsdescription
+    $_goodsdescription = array(
+      'DAME',
+      'DAECX',
+    );
+
+    if (in_array($this->toitarow['virallinen_selite'], $_goodsdescription)) {
+      $uni_shi_val = $uni_shipment->addChild('val', utf8_encode($this->postirow['kuljetusohjeet'])); // Description of contents, only used for some carriers.
+      $uni_shi_val->addAttribute('n', "goodsdescription");
+    }
+
     //$uni_shi_val = $uni_shipment->addChild('val', "sisfreetext1"); # Free text field with any contents. Can be used for delivery instructions, for example. It is printed on shipping documents. 5 lines available, sisfreetext1-5. Max. 30 characters/line.
     //$uni_shi_val->addAttribute('n', "sisfreetext1");
 
@@ -854,6 +885,15 @@ class Unifaun {
       elseif (strpos($this->toitarow['virallinen_selite'], "PO2144") !== FALSE) {
         $_virallinen_selite = "PO2144";
       }
+      elseif (strpos($this->toitarow['virallinen_selite'], "MH10_") !== FALSE) {
+        $_virallinen_selite = "MH10";
+      }
+      elseif (strpos($this->toitarow['virallinen_selite'], "MH20_") !== FALSE) {
+        $_virallinen_selite = "MH20";
+      }
+      elseif (strpos($this->toitarow['virallinen_selite'], "MH3050_") !== FALSE) {
+        $_virallinen_selite = "MH3050";
+      }
       else {
         $_virallinen_selite = $this->toitarow['virallinen_selite'];
       }
@@ -872,6 +912,12 @@ class Unifaun {
       'PO2102_00',
       'PO2144_00',
     );
+    // Matkahuollon "tankomainen" lisäpalvelu
+    $_MA_SPTR = array(
+      'MH10_SPTR',
+      'MH20_SPTR',
+      'MH3050_SPTR',
+    );
 
     if (in_array($this->toitarow['virallinen_selite'], $_DLV09)) {
       $uni_ser_val = $uni_service->addChild('addon');
@@ -886,6 +932,11 @@ class Unifaun {
     if (in_array($this->toitarow['virallinen_selite'], $_DLV00)) {
       $uni_ser_val = $uni_service->addChild('addon');
       $uni_ser_val->addAttribute('adnid', "DLV00");
+    }
+
+    if (in_array($this->toitarow['virallinen_selite'], $_MA_SPTR)) {
+      $uni_ser_val = $uni_service->addChild('addon');
+      $uni_ser_val->addAttribute('adnid', "SPTR");
     }
 
     // Postin palvelukoodit, jotka tukevat lisäpalvelua FDNGPP: "LQ Prosessilupa"
@@ -1186,8 +1237,17 @@ class Unifaun {
           $uni_par_val->addAttribute('n', "count");
         }
 
+        // VAK tiedot annetaan aina lähetyskohtaisesti. Jos on useampi kolli, niin tiedot menee per kolli lähetykseen,
+        // joten painot pitää jakaa kollien määrällä, jottei painot moninkertaistu
+        if (isset($pakkaustiedot['rahtikirjan_kollit_yhteensa']) and $pakkaustiedot['rahtikirjan_kollit_yhteensa'] > 1) {
+          $_jakaja = $pakkaustiedot['rahtikirjan_kollit_yhteensa'];
+        }
+        else {
+          $_jakaja = 1;
+        }
+
         if (isset($vak['kpl_paino']) and $vak['kpl_paino'] != '') {
-          $uni_par_val = $uni_article->addChild('val', utf8_encode($vak['kpl_paino'])); // UN-number for ADR. Supplied as a 4 digit code.
+          $uni_par_val = $uni_article->addChild('val', utf8_encode($vak['kpl_paino'] / $_jakaja)); // UN-number for ADR. Supplied as a 4 digit code.
           $uni_par_val->addAttribute('n', "weight");
         }
 
@@ -1232,7 +1292,7 @@ class Unifaun {
         //$uni_par_val = $uni_article->addChild('val', ""); # Defines if the contents contaminate the marine environment, ADR only. Valid values: 1 = Toxic and 2 = Non-toxic for the marine environment
         //$uni_par_val->addAttribute('n', "dngmpcode");
 
-        if (isset($vak['limited_qty']) and $vak['limited_qty'] != '') {
+        if (isset($vak['limited_qty']) and $vak['limited_qty'] != '' and $this->onko_lq()) {
           $uni_par_val = $uni_article->addChild('val', $vak['limited_qty']); // Note for ADR goods
           $uni_par_val->addAttribute('n', "dngnote");
 
@@ -1243,11 +1303,21 @@ class Unifaun {
 
         if (isset($vak['paino']) and $vak['paino'] != '') {
 
-          $vak['paino'] = $vak['paino'] < 1 ? 1 : $vak['paino'];
+          $vak['paino'] = $vak['paino'] / $_jakaja;
+          $vak['paino'] = $vak['paino'] < 0.01 ? 0.01 : $vak['paino']; //nettopaino vakilla pitää olla vähintään 0.01
 
           // Net weight for ADR goods class I (usually explosive contents). Always mandatory for DBSchenker, regardless of class. Defined in kg.
           $uni_par_val = $uni_article->addChild('val', utf8_encode($vak['paino']));
           $uni_par_val->addAttribute('n', "dngnetweight");
+        }
+
+        if (isset($vak['kuljetus_kategoria']) and $vak['kuljetus_kategoria'] != '') {
+
+          // Tunnel restriction code, löytyy sulkujen sisältä kuljetus_kategoria kentästä
+          preg_match("/\((.*)\)/", $vak['kuljetus_kategoria'], $dngtrcode);
+
+          $uni_par_val = $uni_article->addChild('val', utf8_encode($dngtrcode[1]));
+          $uni_par_val->addAttribute('n', "dngtrcode");
         }
       }
     }

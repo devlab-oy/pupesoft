@@ -4,7 +4,7 @@ if (!function_exists("asiakashintatarkista")) {
   function asiakashintatarkista(&$t, $i, $result, $tunnus, &$virhe, $trow) {
     global $kukarow, $yhtiorow, $alias_set, $alasveto;
 
-    static $chytunnus, $chasiakas_ryhma, $chtuoteno, $chryhma, $chminkpl, $chmaxkpl, $chalkupvm, $chloppupvm, $chastunn, $chtuoteno_ind, $chsegmentti, $chpiiri, $chvalkoodi;
+    static $chytunnus, $chasiakas_ryhma, $chtuoteno, $chryhma, $chminkpl, $chalkupvm, $chloppupvm, $chastunn, $chtuoteno_ind, $chsegmentti, $chpiiri, $chvalkoodi;
 
     if (mysql_field_name($result, $i) == "hinta") {
       if (trim($t[$i]) == '') {
@@ -176,11 +176,6 @@ if (!function_exists("asiakashintatarkista")) {
       $chminkpl = (int) $t[$i];
     }
 
-    if (mysql_field_name($result, $i) == "maxkpl") {
-      $t[$i] = str_replace(",", ".", $t[$i]);
-      $chmaxkpl = (int) $t[$i];
-    }
-
     if (mysql_field_name($result, $i) == "alkupvm") {
       $chalkupvm = $t[$i];
 
@@ -245,7 +240,6 @@ if (!function_exists("asiakashintatarkista")) {
       if ($chvalkoodi != '')      $and .= " and valkoodi = '$chvalkoodi'";
 
       $chminkpl = (int) $chminkpl;
-      $chmaxkpl = (int) $chmaxkpl;
 
       $aquery = "SELECT ytunnus
                  FROM asiakashinta
@@ -254,7 +248,6 @@ if (!function_exists("asiakashintatarkista")) {
                  and alkupvm   = '$chalkupvm'
                  and loppupvm  = '$chloppupvm'
                  and minkpl    = $chminkpl
-                 and maxkpl    = $chmaxkpl
                  and tunnus   != '$trow[$i]'";
       $dsresult = pupe_query($aquery);
 

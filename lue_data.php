@@ -917,7 +917,6 @@ if ($kasitellaan_tiedosto) {
       $chsegmentti = 0;
       $chpiiri = '';
       $chminkpl = 0;
-      $chmaxkpl = 0;
       $chalennuslaji = 0;
       $chmonikerta = "";
       $chalkupvm = '0000-00-00';
@@ -1870,10 +1869,6 @@ if ($kasitellaan_tiedosto) {
                 $chminkpl = (int) $taulunrivit[$taulu][$eriviindex][$r];
               }
 
-              if ($otsikko == 'MAXKPL' and (int) $taulunrivit[$taulu][$eriviindex][$r] > 0) {
-                $chmaxkpl = (int) $taulunrivit[$taulu][$eriviindex][$r];
-              }
-
               if ($otsikko == 'ALENNUSLAJI' and (int) $taulunrivit[$taulu][$eriviindex][$r] > 0) {
                 $chalennuslaji = (int) $taulunrivit[$taulu][$eriviindex][$r];
               }
@@ -2132,12 +2127,6 @@ if ($kasitellaan_tiedosto) {
 
           if ($chtoimittaja != '') {
             $and .= " and toimittaja = '$chtoimittaja'";
-          }
-
-          if ($table_mysql == 'asiakashinta' or $table_mysql == 'toimittajahinta') {
-            if ($chmaxkpl != 0) {
-              $and .= " and maxkpl = '$chmaxkpl'";
-            }
           }
 
           if ($table_mysql == 'asiakasalennus' or $table_mysql == 'toimittajaalennus') {

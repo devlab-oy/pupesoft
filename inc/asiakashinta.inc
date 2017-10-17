@@ -34,7 +34,7 @@ if ($from == "") {
   asiakashinta.ryhma 'Alennusryhmä',
   asiakashinta.hinta,
   asiakashinta.laji,
-  concat_ws('<br>', asiakashinta.minkpl, asiakashinta.maxkpl) 'Min/Maxkpl',
+  asiakashinta.minkpl,
   concat_ws('<br>', asiakashinta.alkupvm, asiakashinta.loppupvm) 'Alku/Loppu'";
 }
 else {
@@ -48,12 +48,12 @@ else {
   , asiakashinta.ryhma) 'Tuoteno/Alennusryhmä',
   asiakashinta.hinta,
   asiakashinta.laji,
-  concat_ws('<br>', asiakashinta.minkpl, asiakashinta.maxkpl) 'Min/Maxkpl',
+  asiakashinta.minkpl,
   concat_ws('<br>', asiakashinta.alkupvm, asiakashinta.loppupvm) 'Alku/Loppu'";
 }
 
 // HUOM HUOM: ethän muuta näitä ilman, että korjaat myös yllapito.php:ssä iframen lukitse_avaimeen muuttujat
-$hakukentat = "tunnus, asiakas, ytunnus, asiakas_segmentti,asiakas_ryhma,piiri, tuoteno, ryhma, hinta, laji, minkpl/maxkpl, alkupvm/loppupvm";
+$hakukentat = "tunnus, asiakas, ytunnus, asiakas_segmentti,asiakas_ryhma,piiri, tuoteno, ryhma, hinta, laji, minkpl, alkupvm/loppupvm";
 
 $jarjestys = 'ytunnus, asiakas_ryhma, tuoteno, ryhma, laji, minkpl, alkupvm, loppupvm';
 

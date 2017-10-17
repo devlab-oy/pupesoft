@@ -2653,7 +2653,7 @@ function piirra_hinta($row, $oleasrow, $valuurow, $vari, $classmidl, $hinta_raja
                                                   '9999-12-31',
                                                   loppupvm) >= current_date)
                   or (alkupvm = '0000-00-00' and loppupvm = '0000-00-00'))
-                AND ((minkpl <= '1' and maxkpl >= '1') or (minkpl = 0 and maxkpl = 0))
+                AND (minkpl <= 1 or minkpl = 0)
                 ORDER BY ifnull(to_days(current_date) - to_days(alkupvm), 9999999999999), minkpl
                 LIMIT 1";
 

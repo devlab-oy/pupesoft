@@ -300,7 +300,6 @@ function yhdista_asiakkaita($jataminut, $yhdista) {
                       and hinta             = '$ahrow[hinta]'
                       and valkoodi          = '$ahrow[valkoodi]'
                       and minkpl            = '$ahrow[minkpl]'
-                      and maxkpl            = '$ahrow[maxkpl]'
                       and alkupvm           = '$ahrow[alkupvm]'
                       and loppupvm          = '$ahrow[loppupvm]'
                       and laji              = '$ahrow[laji]'";
@@ -320,7 +319,6 @@ function yhdista_asiakkaita($jataminut, $yhdista) {
                          hinta             = '$ahrow[hinta]',
                          valkoodi          = '$ahrow[valkoodi]',
                          minkpl            = '$ahrow[minkpl]',
-                         maxkpl            = '$ahrow[maxkpl]',
                          alkupvm           = '$ahrow[alkupvm]',
                          loppupvm          = '$ahrow[loppupvm]',
                          laji              = '$ahrow[laji]',
@@ -361,7 +359,6 @@ function yhdista_asiakkaita($jataminut, $yhdista) {
                       and hinta             = '$ahrow[hinta]'
                       and valkoodi          = '$ahrow[valkoodi]'
                       and minkpl            = '$ahrow[minkpl]'
-                      and maxkpl            = '$ahrow[maxkpl]'
                       and alkupvm           = '$ahrow[alkupvm]'
                       and loppupvm          = '$ahrow[loppupvm]'
                       and laji              = '$ahrow[laji]'";
@@ -381,7 +378,6 @@ function yhdista_asiakkaita($jataminut, $yhdista) {
                          hinta             = '$ahrow[hinta]',
                          valkoodi          = '$ahrow[valkoodi]',
                          minkpl            = '$ahrow[minkpl]',
-                         maxkpl            = '$ahrow[maxkpl]',
                          alkupvm           = '$ahrow[alkupvm]',
                          loppupvm          = '$ahrow[loppupvm]',
                          laji              = '$ahrow[laji]',

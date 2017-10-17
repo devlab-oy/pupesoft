@@ -3539,8 +3539,9 @@ if (!function_exists("tuotteen_myyntihinta")) {
     // palautetaan tuotteen SVH laskun valuutassa
     // tämä funktion on kopsattu alehinta-funktiosta sopivilta osilta
     $hinta       = 0;
-    $netto      = "";
+    $netto       = "";
     $valuutta    = "";
+    $kpl         = (float) $kpl;
 
     // 5. hinnasto.hinta tuotteen nettohinta hinnastosta laskun valuutassa
     if ($hinta == 0 and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
@@ -3554,11 +3555,12 @@ if (!function_exists("tuotteen_myyntihinta")) {
                 and valkoodi                = '$laskurow[valkoodi]'
                 and maa                     in ('$laskurow[maa]','')
                 and ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
-                and ((minkpl <= '$kpl' and maxkpl >= '$kpl') or (minkpl = 0 and maxkpl = 0))
+                and (minkpl <= $kpl or minkpl = 0)
                 AND (yhtion_toimipaikka_id IS NULL
                   OR yhtion_toimipaikka_id  = 0
                   OR yhtion_toimipaikka_id  = '{$laskurow["yhtio_toimipaikka"]}')
                 ORDER BY yhtion_toimipaikka_id DESC,
+                         minkpl desc,
                          IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999),
                          maa DESC
                 LIMIT 1";
@@ -3584,11 +3586,12 @@ if (!function_exists("tuotteen_myyntihinta")) {
                 and valkoodi                in ('$yhtiorow[valkoodi]','')
                 and maa                     in ('$laskurow[maa]','')
                 and ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
-                and ((minkpl <= '$kpl' and maxkpl >= '$kpl') or (minkpl = 0 and maxkpl = 0))
+                and (minkpl <= $kpl or minkpl = 0)
                 AND (yhtion_toimipaikka_id IS NULL
                   OR yhtion_toimipaikka_id  = 0
                   OR yhtion_toimipaikka_id  = '{$laskurow["yhtio_toimipaikka"]}')
                 ORDER BY yhtion_toimipaikka_id DESC,
+                         minkpl desc,
                          IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999),
                          valkoodi DESC
                 LIMIT 1";
@@ -3621,11 +3624,12 @@ if (!function_exists("tuotteen_myyntihinta")) {
                 and valkoodi                = '$laskurow[valkoodi]'
                 and maa                     in ('$laskurow[maa]','')
                 and ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
-                and ((minkpl <= '$kpl' and maxkpl >= '$kpl') or (minkpl = 0 and maxkpl = 0))
+                and (minkpl <= $kpl or minkpl = 0)
                 AND (yhtion_toimipaikka_id IS NULL
                   OR yhtion_toimipaikka_id  = 0
                   OR yhtion_toimipaikka_id  = '{$laskurow["yhtio_toimipaikka"]}')
                 ORDER BY yhtion_toimipaikka_id DESC,
+                         minkpl desc,
                          IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999),
                          maa DESC
                 LIMIT 1";
@@ -3651,11 +3655,12 @@ if (!function_exists("tuotteen_myyntihinta")) {
                 and valkoodi                in ('$yhtiorow[valkoodi]','')
                 and maa                     in ('$laskurow[maa]','')
                 and ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
-                and ((minkpl <= '$kpl' and maxkpl >= '$kpl') or (minkpl = 0 and maxkpl = 0))
+                and (minkpl <= $kpl or minkpl = 0)
                 AND (yhtion_toimipaikka_id IS NULL
                   OR yhtion_toimipaikka_id  = 0
                   OR yhtion_toimipaikka_id  = '{$laskurow["yhtio_toimipaikka"]}')
                 ORDER BY yhtion_toimipaikka_id DESC,
+                         minkpl desc,
                          IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999),
                          valkoodi DESC
                 LIMIT 1";
@@ -5840,11 +5845,12 @@ if (!function_exists("alehinta")) {
                   and valkoodi  = '$laskurow[valkoodi]'
                   and maa       in ('$laskurow[maa]','')
                   and ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'){$kampanjarajaus})
-                  and ((minkpl <= $kpl and maxkpl >= $kpl) or (minkpl = 0 and maxkpl = 0))
+                  and (minkpl <= $kpl or minkpl = 0)
                   AND (yhtion_toimipaikka_id IS NULL
                     OR yhtion_toimipaikka_id  = 0
                     OR yhtion_toimipaikka_id  = '{$laskurow["yhtio_toimipaikka"]}')
                   ORDER BY yhtion_toimipaikka_id DESC,
+                           minkpl desc,
                            IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999),
                            maa DESC,
                            tunnus DESC
@@ -5879,11 +5885,12 @@ if (!function_exists("alehinta")) {
                   and valkoodi  in ('$yhtiorow[valkoodi]','')
                   and maa       in ('$laskurow[maa]','')
                   and ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'){$kampanjarajaus})
-                  and ((minkpl <= $kpl and maxkpl >= $kpl) or (minkpl = 0 and maxkpl = 0))
+                  and (minkpl <= $kpl or minkpl = 0)
                   AND (yhtion_toimipaikka_id IS NULL
                     OR yhtion_toimipaikka_id  = 0
                     OR yhtion_toimipaikka_id  = '{$laskurow["yhtio_toimipaikka"]}')
                   ORDER BY yhtion_toimipaikka_id DESC,
+                           minkpl desc,
                            IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999),
                            valkoodi DESC,
                            tunnus DESC
@@ -5929,11 +5936,12 @@ if (!function_exists("alehinta")) {
                   and valkoodi  = '$laskurow[valkoodi]'
                   and maa       in ('$laskurow[maa]','')
                   and ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'){$kampanjarajaus})
-                  and ((minkpl <= $kpl and maxkpl >= $kpl) or (minkpl = 0 and maxkpl = 0))
+                  and (minkpl <= $kpl or minkpl = 0)
                   AND (yhtion_toimipaikka_id IS NULL
                     OR yhtion_toimipaikka_id  = 0
                     OR yhtion_toimipaikka_id  = '{$laskurow["yhtio_toimipaikka"]}')
                   ORDER BY yhtion_toimipaikka_id DESC,
+                           minkpl desc,
                            IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999),
                            maa DESC,
                            tunnus DESC
@@ -5968,11 +5976,12 @@ if (!function_exists("alehinta")) {
                   and valkoodi  in ('$yhtiorow[valkoodi]','')
                   and maa       in ('$laskurow[maa]','')
                   and ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'){$kampanjarajaus})
-                  and ((minkpl <= $kpl and maxkpl >= $kpl) or (minkpl = 0 and maxkpl = 0))
+                  and (minkpl <= $kpl or minkpl = 0)
                   AND (yhtion_toimipaikka_id IS NULL
                     OR yhtion_toimipaikka_id  = 0
                     OR yhtion_toimipaikka_id  = '{$laskurow["yhtio_toimipaikka"]}')
                   ORDER BY yhtion_toimipaikka_id DESC,
+                           minkpl desc,
                            IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999),
                            valkoodi DESC,
                            tunnus DESC
@@ -6912,8 +6921,8 @@ if (!function_exists("alehinta_osto")) {
                   and hinnasto.laji      = 'O'
                   and hinnasto.valkoodi  = '$laskurow[valkoodi]'
                   and ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
-                  and ((minkpl <= '$kpl' and maxkpl >= '$kpl') or (minkpl = 0 and maxkpl = 0))
-                  ORDER BY IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999), maa desc
+                  and (minkpl <= $kpl or minkpl = 0)
+                  ORDER BY minkpl desc, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999), maa desc
                   LIMIT 1";
         $hresult = pupe_query($query);
 
@@ -6938,8 +6947,8 @@ if (!function_exists("alehinta_osto")) {
                   and hinnasto.laji      = 'O'
                   and hinnasto.valkoodi  in ('$yhtiorow[valkoodi]','')
                   and ((hinnasto.alkupvm <= current_date and if (hinnasto.loppupvm = '0000-00-00','9999-12-31',hinnasto.loppupvm) >= current_date) or (hinnasto.alkupvm='0000-00-00' and hinnasto.loppupvm='0000-00-00'))
-                  and ((hinnasto.minkpl <= '$kpl' and hinnasto.maxkpl >= '$kpl') or (hinnasto.minkpl = 0 and hinnasto.maxkpl = 0))
-                  ORDER BY IFNULL(TO_DAYS(current_date)-TO_DAYS(hinnasto.alkupvm),9999999999999), hinnasto.valkoodi DESC
+                  and (hinnasto.minkpl <= $kpl or hinnasto.minkpl = 0)
+                  ORDER BY hinnasto.minkpl desc, IFNULL(TO_DAYS(current_date)-TO_DAYS(hinnasto.alkupvm),9999999999999), hinnasto.valkoodi DESC
                   LIMIT 1";
         $hresult = pupe_query($query);
 

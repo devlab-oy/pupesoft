@@ -366,6 +366,10 @@ if (!function_exists('alku_kerayslista')) {
         $laskurow['sisviesti2'] .= "\n".t("Asiakkaan puh", $kieli).": $laskurow[toim_puh]";
       }
 
+      if ($laskurow['ohjelma_moduli'] == "MAGENTO" and !empty($laskurow['toim_email'])) {
+        $laskurow['sisviesti2'] .= "\n".t("Asiakkaan email", $kieli).": $laskurow[toim_email]";
+      }
+
       if (trim($laskurow['tilausyhteyshenkilo']) != '') {
         $komm .= "\n".t("Tilaaja", $kieli).":###".$laskurow['tilausyhteyshenkilo'];
       }

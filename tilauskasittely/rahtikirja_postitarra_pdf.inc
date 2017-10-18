@@ -220,8 +220,8 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
     $pdf->draw_text(18, 234, "Säilytysaika on yksi (1) täysi kalenteriviikko * Kvarligger en (1) hel kalendervecka.", $firstpage, $pieni);
   }
   else {
-    $pdf->draw_text(18, 242, "Lähetys on noudettavissa Postistanne. Lisätietoja: 0200 77000, www.posti.fi Säilytysaika on 2 täyttä kalenteriviikkoa.", $firstpage, $pieni);
-    $pdf->draw_text(18, 234, "Ni kan hämta försändelsen på Ert postkontor. Mera information: 0200 75000, www.posti.fi Kvarligger 2 hela kalenderveckor.", $firstpage, $pieni);
+    $pdf->draw_text(18, 242, "Lähetys on noudettavissa Postistanne. Lisätietoja: 0200 77000, www.posti.fi Säilytysaika on 7 päivää.", $firstpage, $pieni);
+    $pdf->draw_text(18, 234, "Ni kan hämta försändelsen på Ert postkontor. Mera information: 0200 75000, www.posti.fi Kvarligger 7 dagar.", $firstpage, $pieni);
   }
 
   $pdf->draw_text(18, 215, "Lähettäjä Avsändare From", $firstpage, $pieni);

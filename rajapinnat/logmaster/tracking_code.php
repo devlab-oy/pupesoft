@@ -82,7 +82,6 @@ while (false !== ($file = readdir($handle))) {
 
     if ($seurantakoodi == '') {
       pupesoft_log('logmaster_tracking_code', "Seurantakoodi puuttuu riviltä");
-
       continue;
     }
 
@@ -95,13 +94,15 @@ while (false !== ($file = readdir($handle))) {
 
       if ($tilausnumero == 0) {
         pupesoft_log('logmaster_tracking_code', "Tilausnumero puuttuu riviltä");
-
         continue;
       }
 
       $seurantakoodit[$tilausnumero][] = $seurantakoodi;
     }
   }
+
+  // Löytyikö rahtikirjat?
+  $rakir_loytyi = TRUE;
 
   foreach ($seurantakoodit as $tilausnumero => $koodit) {
     $koodit        = array_unique($koodit);
@@ -117,7 +118,7 @@ while (false !== ($file = readdir($handle))) {
 
     if (mysql_affected_rows() == 0) {
       pupesoft_log('logmaster_tracking_code', "Ei löydetty rahtikirjaa tilaukselle {$tilausnumero}");
-
+      $rakir_loytyi = FALSE;
       continue;
     }
 
@@ -194,7 +195,12 @@ while (false !== ($file = readdir($handle))) {
   }
 
   // Jos rahtikirjaa ei löydetty niin ei siirretä done-kansioon
-  rename($full_filepath, $path."done/".$file);
+  // Mutta jos file on yli viikon vanha niin siirretään jokatapauksessa done-kansioon
+  $fileika = (mktime() - filemtime($full_filepath));
+
+  if ($rakir_loytyi or $fileika >= 604800) {
+    rename($full_filepath, $path."done/".$file);
+  }
 }
 
 closedir($handle);

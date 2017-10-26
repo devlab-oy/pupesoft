@@ -25,13 +25,28 @@ while ($laskurow = mysql_fetch_assoc($laskures)) {
   $maksuehtores = pupe_query($query);
   $maksuehtorow = mysql_fetch_assoc($maksuehtores);
 
+  $query  = "SELECT *
+             FROM toimitustapa
+             WHERE yhtio = '{$kukarow['yhtio']}'
+             and selite  = '{$laskurow['toimitustapa']}'";
+  $toimitustapares = pupe_query($query);
+  $toimitustaparow = mysql_fetch_assoc($toimitustapares);
+
+  $_tulostustapa_chk = (!in_array($toimitustapa_row['tulostustapa'], array('K', 'L')));
+
+  if (in_array($toimitustaparow['tulostustapa'], array('K', 'L')) and !empty($toimitustaparow['toim_ovttunnus'])) {
+    $toim_ovttunnus = $toimitustaparow['toim_ovttunnus'];
+  }
+  else {
+    $toim_ovttunnus = $laskurow['toim_ovttunnus'];
+  }
+
   $lask_yritys  = trim($laskurow['nimi'].' '.$laskurow['nimitark']);
   $lask_osoite  = $laskurow['osoite'];
   $lask_postitp = $laskurow['postitp'];
   $lask_postino = $laskurow['postino'];
   $lask_maa     = $laskurow['maa'];
 
-  $toim_ovttunnus = $laskurow['toim_ovttunnus'];
   $toim_nimi      = substr(trim($laskurow['toim_nimi'].' '.$laskurow['toim_nimitark']), 0, 30);
   $toim_osoite    = substr(trim($laskurow['toim_osoite']), 0, 25);
   $toim_postitp   = substr(trim($laskurow['toim_postitp']), 0, 25);

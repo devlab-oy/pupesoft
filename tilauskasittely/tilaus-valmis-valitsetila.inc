@@ -104,6 +104,7 @@ if ($yhtiorow["puute_jt_kerataanko"] != "" and $kutsuja != 'keraa.php') {
 }
 
 $tilaus_toimitetuksi = false;
+
 //Siirtolistat kerätään keräyserien kautta ja siihen linkattu myyntitilaus halutaan laittaa toimitetuksi kun siirtolista on vastaanotettu kohdevarastossa
 if ($yhtiorow['kerayserat'] == 'K' and $yhtiorow['siirtolistan_tulostustapa'] == 'U' and $laskurow['tila'] == 'N' and $laskurow['alatila'] == '') {
   $query = "SELECT *
@@ -439,63 +440,33 @@ elseif ($kutsuja != 'keraa.php' and !$tilaus_toimitetuksi) {
   $tilaus_valmis_message .= "<font class='message'>".sprintf(t("VIRHE: Tilausta %s ei voitu merkata valmiiksi. Aktivoi tilaus ja korjaa virheet"), $laskurow["tunnus"])."! (2)</font><br><br>\n";
 }
 
-$query = "SELECT toimitusvahvistus
-          FROM asiakas
+if ($toimitusvahvitus_laheta) {
+  $otunnukset = $laskurow["tunnus"];
+
+  // Lähetetään toimitusvahvistus
+  pupesoft_toimitusvahvistus($otunnukset);
+}
+
+// haetaan toimitustavan tiedot
+$query = "SELECT *,
+          if(virallinen_selite != '', virallinen_selite, selite) as selite_text
+          FROM toimitustapa
           WHERE yhtio = '$kukarow[yhtio]'
-          and tunnus  = '$laskurow[liitostunnus]'";
-$tresult = pupe_query($query);
-$asirow = mysql_fetch_array($tresult);
+          AND selite  = '$laskurow[toimitustapa]'";
+$toitares = pupe_query($query);
+$toitarow = mysql_fetch_assoc($toitares);
 
-if ($asirow['toimitusvahvistus'] != '') {
-  // haetaan toimitustavan tiedot
-  $query = "SELECT *,
-            if(virallinen_selite != '', virallinen_selite, selite) as selite_text
-            FROM toimitustapa
-            WHERE yhtio = '$kukarow[yhtio]'
-            AND selite  = '$laskurow[toimitustapa]'";
-  $toitares = pupe_query($query);
-  $toitarow = mysql_fetch_assoc($toitares);
+// Jos Magento on käytössä, halutaan toimitusvahvistus, tämä on noutotilaus ja tullut Magentosta
+$_magento_tv       = ($laskurow['laatija'] == 'Magento' and $toitarow['nouto'] != '' and !empty($laskurow["asiakkaan_tilausnumero"]));
+$_magento_kaytossa = (!empty($magento_api_tt_url) and !empty($magento_api_tt_usr) and !empty($magento_api_tt_pas));
 
-  // Jos Magento on käytössä, halutaan toimitusvahvistus, tämä on noutotilaus ja tullut Magentosta
-  $_magento_tv       = ($asirow['toimitusvahvistus'] == 'Magento' and $toitarow['nouto'] != '');
-  $_magento_tilaus   = ($laskurow['ohjelma_moduli'] == 'MAGENTO' OR $laskurow['ohjelma_moduli'] == 'MAGENTOJT');
-  $_magento_kaytossa = (!empty($magento_api_tt_url) and !empty($magento_api_tt_usr) and !empty($magento_api_tt_pas));
+if ($_magento_kaytossa and $_magento_tv and $kutsuja == 'keraa.php') {
+  $magento_api_met = $toitarow['selite_text'];
+  $magento_api_rak = '';
+  $magento_api_ord = $laskurow["asiakkaan_tilausnumero"];
+  $magento_api_noutokuittaus = "JOO";
 
-  if ($_magento_kaytossa and $_magento_tilaus and $_magento_tv and $kutsuja == 'keraa.php') {
-    $magento_api_met = $toitarow['selite_text'];
-    $magento_api_rak = '';
-    $magento_api_ord = $laskurow["asiakkaan_tilausnumero"];
-    $magento_api_noutokuittaus = "JOO";
-    $magento_api_laskutunnus = $laskurow["tunnus"];
-
-    require "magento_toimita_tilaus.php";
-  }
-
-  if ($toimitusvahvitus_laheta) {
-
-    $otunnukset = $laskurow["tunnus"];
-    $tunnukset = 0;
-    $rahtikirjanro = 0;
-
-    if ($asirow["toimitusvahvistus"] == "toimitusvahvistus_desadv_una.inc") {
-      $desadv_version = "una";
-      $asirow["toimitusvahvistus"] = "toimitusvahvistus_desadv.inc";
-    }
-    elseif ($asirow["toimitusvahvistus"] == "toimitusvahvistus_desadv_fi0089.inc") {
-      $desadv_version = "fi0089";
-      $asirow["toimitusvahvistus"] = "toimitusvahvistus_desadv.inc";
-    }
-    else {
-      $desadv_version = "";
-    }
-
-    @include "tilauskasittely/$asirow[toimitusvahvistus]";
-
-    if ($toimitusvahvistus_desadv_lahetys === true) {
-      $_msg = sprintf(t("Tilauksesta %s lähetettiin toimitusvahvistus."), $laskurow["tunnus"]);
-      $tilaus_valmis_message .= "<font class='message'>{$_msg}</font><br><br>\n";
-    }
-  }
+  require "magento_toimita_tilaus.php";
 }
 
 if (!isset($silent) or $silent == "") {

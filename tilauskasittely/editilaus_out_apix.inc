@@ -236,6 +236,7 @@ while ($laskurow = mysql_fetch_assoc($laskures)) {
       $edi_order .= "OSTOTILPAK.OTP_BRUTTOPAINO:{$rahtikirjarow['kilot']}\n";
       $edi_order .= "OSTOTILPAK.OTP_TILAVUUS:{$rahtikirjarow['kuutiot']}\n";
       $edi_order .= "OSTOTILPAK.OTP_TILAVUUSYKS:m3\n";
+      $edi_order .= "OSTOTILPAK.OTP_PAKKAUSLAJI:{$rahtikirjarow['pakkaus']}\n";
       $edi_order .= "*RE OSTOTILPAK {$counter}\n";
 
       $counter++;
@@ -250,6 +251,7 @@ while ($laskurow = mysql_fetch_assoc($laskures)) {
   $edi_order .= "OSTOTILPAK.OTP_KOONTI_BRUTTOPAINO:\n";
   $edi_order .= "OSTOTILPAK.OTP_KOONTI_TILAVUUS:\n";
   $edi_order .= "OSTOTILPAK.OTP_KOONTI_TILAVUUSYKS:\n";
+  $edi_order .= "OSTOTILPAK.OTP_KOONTI_PAKKAUSLAJI:{$rahtikirjarow['pakkaus']}\n";
   $edi_order .= "*RE OSTOTILPAK {$counter}\n";
 
   $i = 1;

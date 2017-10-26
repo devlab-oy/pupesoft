@@ -362,36 +362,8 @@ if ($handle = opendir($ftpget_dest[$operaattori])) {
         $_desadv = (strpos($laskurow['toimitusvahvistus'], 'desadv') !== false);
 
         if ($laskurow['toimitusvahvistus'] != '' and !$_desadv) {
-
-          if ($laskurow["toimitusvahvistus"] == "toimitusvahvistus_desadv_una.inc") {
-            $desadv_version = "una";
-            $laskurow["toimitusvahvistus"] = "toimitusvahvistus_desadv.inc";
-          }
-          elseif ($laskurow["toimitusvahvistus"] == "toimitusvahvistus_desadv_fi0089.inc") {
-            $desadv_version = "fi0089";
-            $laskurow["toimitusvahvistus"] = "toimitusvahvistus_desadv.inc";
-          }
-          else {
-            $desadv_version = "";
-          }
-
-          if (file_exists("{$pupe_root_polku}/tilauskasittely/{$laskurow['toimitusvahvistus']}")) {
-
-            $rakir_row = $laskurow;
-
-            if ($laskurow["toimitusvahvistus"] == "editilaus_out_futur.inc") {
-              // jos $laskurow on jo populoitu, otetaan se talteen ja palautetaan t‰m‰n j‰lkeen
-              $tmp_laskurow = $laskurow;
-
-              $myynti_vai_osto = 'M';
-            }
-
-            require "tilauskasittely/{$laskurow['toimitusvahvistus']}";
-
-            if ($laskurow["toimitusvahvistus"] == "editilaus_out_futur.inc") {
-              $laskurow = $tmp_laskurow;
-            }
-          }
+          // L‰hetet‰‰n toimitusvahvistus
+          pupesoft_toimitusvahvistus($otunnukset, $tunnukset);
         }
 
         // Merkaatan woo-commerce tilaukset toimitetuiksi kauppaan

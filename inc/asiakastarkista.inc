@@ -295,18 +295,23 @@ if (!function_exists("asiakastarkista")) {
       }
     }
 
-    if (mysql_field_name($result, $i) == "toimitusvahvistus" and trim($t[$i]) == 'editilaus_out_futur.inc') {
+    if (mysql_field_name($result, $i) == "toimitusvahvistus") {
 
-      $query = "SELECT *
-                FROM asiakkaan_avainsanat
-                WHERE yhtio       = '{$kukarow['yhtio']}'
-                AND liitostunnus  = '{$tunnus}'
-                AND laji          IN ('futur_host','futur_path')
-                AND avainsana    != ''";
-      $chk_res = pupe_query($query);
+      if (trim($t[$i]) == 'editilaus_out_futur.inc') {
+        $query = "SELECT *
+                  FROM asiakkaan_avainsanat
+                  WHERE yhtio       = '{$kukarow['yhtio']}'
+                  AND liitostunnus  = '{$tunnus}'
+                  AND laji          IN ('futur_host','futur_path')
+                  AND avainsana    != ''";
+        $chk_res = pupe_query($query);
 
-      if (mysql_num_rows($chk_res) != 2) {
-        $virhe[$i] = t("Tarvittavia tietoja puuttuu").". ".t("Lis‰‰ asiakkaan avainsanoihin Futur FTP -tiedot").".";
+        if (mysql_num_rows($chk_res) != 2) {
+          $virhe[$i] = t("Tarvittavia tietoja puuttuu").". ".t("Lis‰‰ asiakkaan avainsanoihin Futur FTP -tiedot").".";
+        }
+      }
+      elseif (trim($t[$i]) == 'editilaus_out_apix.inc' and $ovttunnus == "") {
+        $virhe[$i] = t("Tarvittavia tietoja puuttuu").". ".t("Lis‰‰ asiakkaalle OVT-tunnus").".";
       }
     }
 

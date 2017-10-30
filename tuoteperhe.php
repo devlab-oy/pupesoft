@@ -1283,9 +1283,6 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
         elseif ($toim == "VSUUNNITTELU") {
           echo "<td class='text-right'><input type='hidden' name='kerroin' value='1'/>1</td>";
         }
-        elseif ($toim == "SUOSITUS") {
-          echo "";
-        }
         elseif ($toim == "RESEPTI") {
           echo "<td><input type='text' name='kerroin' size='10'></td>";
           echo "<td></td>";
@@ -1644,13 +1641,7 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
         elseif ($toim == "TUOTEKOOSTE") {
           echo "<td class='back' colspan='3'></td>";
         }
-        elseif ($toim == "VSUUNNITTELU") {
-
-        }
-        elseif ($toim == "SUOSITUS") {
-
-        }
-        else {
+        elseif ($toim != "VSUUNNITTELU" and $toim != "SUOSITUS") {
           $colspan = 4;
           if (!empty($resepti_kentat)) {
             $colspan += count($resepti_kentat);

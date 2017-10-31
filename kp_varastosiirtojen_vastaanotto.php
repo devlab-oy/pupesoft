@@ -48,12 +48,12 @@ if ($php_cli) {
   }
 
   if (empty($argv[2])) {
-    echo "Anna p‰iv‰m‰‰r‰, jonka kirjanpidolliset varastosiirrot vied‰‰n loppuun!!!\n";
+    echo "Anna p‰iv‰m‰‰r‰, jota vanhemmat kirjanpidolliset varastosiirrot vied‰‰n loppuun!!!\n";
     exit(1);
   }
 
   $_pvm = pupesoft_cleanstring($argv[2]);
-  $_pvm .= '%';
+  $_pvm .= ' 99:99:99';
   $_poikkeavalaskutuspvm = '';
 
 }
@@ -65,47 +65,33 @@ $lkm = 0;
 require 'tilauskasittely/tilauksesta_varastosiirto.inc';
 
 $query = "SELECT myynti.tunnus mytunnus, myynti.laskunro mylaskunro, SUBSTRING(lasku.viesti, 38) nro, 
-          lasku.tunnus, myynti.varastosiirto_tunnus, lasku.* from lasku 
+          lasku.tunnus, myynti.varastosiirto_tunnus, lasku.* 
+          from lasku 
 	        join lasku as myynti on myynti.yhtio = lasku.yhtio 
 	        and myynti.tunnus = SUBSTRING(lasku.viesti, 38)
+          and myynti.tila = 'L'
+          and myynti.alatila = 'X'
 	        where lasku.yhtio = '{$yhtiorow['yhtio']}'
           and lasku.tila = 'G' 
 	        and lasku.alatila = ''
-          and lasku.luontiaika like '{$_pvm}'
+          and lasku.luontiaika <= '{$_pvm}'
 	        and lasku.chn='KIR'";
-
 $varres = pupe_query($query);
-$varastosiirto = mysql_fetch_assoc($varres);
+          
+while ($varastosiirto = mysql_fetch_assoc($varres)) {
 
-if (mysql_num_rows($varres) > 0) {
-  
     $query = "SELECT * from lasku 
   	        where lasku.yhtio = '{$yhtiorow['yhtio']}' 
             and lasku.tunnus = '$varastosiirto[mytunnus]'";
 
     $myyres = pupe_query($query);
     if (mysql_num_rows($myyres) > 0) {
-      $myyntitilaus = mysql_fetch_assoc($varres);
-      $toimipaikan_varastot = hae_yhtion_toimipaikan_varastot($myyntitilaus['yhtio_toimipaikka']);
-
-      $lahde_ja_kohde_varasto_yhdistelma = array(
-        'lahdevarasto_tunnus'   => $myyntitilaus['varasto'],
-        'kohdevarasto_tunnus'   => $toimipaikan_varastot[0]['tunnus'],
-      );
- 
+      $myyntitilaus = mysql_fetch_assoc($myyres);
       $varastosiirtorivit = hae_tilausrivit($varastosiirto['tunnus'], 'K', false);
-      
+ 
       $varastosiirtorivit = aseta_varastosiirto_vastaanotetuksi($varastosiirto, $varastosiirtorivit, $_poikkeavalaskutuspvm);
-      
-      paivita_myyntitilausrivien_tuotepaikat($varastosiirtorivit);
-      
-      if (mysql_num_rows($myyres) > 0) {
-          $myyntitilaus = mysql_fetch_assoc($varres);
-      
-          linkkaa_varastosiirto_myyntitilaukseen($varastosiirto, $myyntitilaus);
-      }
-      
-      echo "Varastosiirto $varastosiirto[tunnus] vastaanotettu (Myynti: $varastosiirto[mytunnus], $varastosiirto[mylaskunro])! \n\n";
+            
+      #echo "Varastosiirto $varastosiirto[tunnus] vastaanotettu (Myynti: $varastosiirto[mytunnus], $varastosiirto[mylaskunro])! \n\n";
       $lkm += 1;
     }  
 }

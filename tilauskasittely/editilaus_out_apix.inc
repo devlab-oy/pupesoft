@@ -199,15 +199,16 @@ while ($laskurow = mysql_fetch_assoc($laskures)) {
       }
       elseif ($asiakasrow['kerayserat'] == 'A') {
 
-        $query = "SELECT kerayserat.sscc_ulkoinen,
+        $query = "SELECT kerayserat.sscc_ulkoinen, pakkaus.pakkaus,
                   round(sum(tuote.tuotemassa * kerayserat.kpl_keratty),0) kilot,
                   round(sum(tuote.tuotekorkeus * tuote.tuoteleveys * tuote.tuotesyvyys * kerayserat.kpl_keratty),3) kuutiot
                   FROM kerayserat
+                  JOIN pakkaus ON (pakkaus.yhtio = kerayserat.yhtio and pakkaus.tunnus = kerayserat.pakkaus)
                   JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio and tilausrivi.tunnus = kerayserat.tilausrivi)
                   JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno)
                   WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
                   AND kerayserat.otunnus = '{$laskurow['tunnus']}'
-                  GROUP BY kerayserat.sscc_ulkoinen";
+                  GROUP BY kerayserat.sscc_ulkoinen, pakkaus.pakkaus";
         $kerayserares = pupe_query($query);
 
         if (mysql_num_rows($kerayserares) > 0) {
@@ -215,6 +216,7 @@ while ($laskurow = mysql_fetch_assoc($laskures)) {
             $sscc_array[$kerayserarow['sscc_ulkoinen']]['sscc'] = $kerayserarow['sscc_ulkoinen'];
             $sscc_array[$kerayserarow['sscc_ulkoinen']]['kilot'] = $kerayserarow['kilot'];
             $sscc_array[$kerayserarow['sscc_ulkoinen']]['kuutiot'] = $kerayserarow['kuutiot'];
+            $sscc_array[$kerayserarow['sscc_ulkoinen']]['pakkaus'] = $kerayserarow['pakkaus'];
           }
         }
       }
@@ -250,6 +252,9 @@ while ($laskurow = mysql_fetch_assoc($laskures)) {
       if (isset($sscc['kuutiot']) and $sscc['kuutiot'] != 0) {
         $rahtikirjarow['kuutiot'] = $sscc['kuutiot'];
       }
+      if (isset($sscc['pakkaus']) and $sscc['pakkaus'] != "") {
+        $rahtikirjarow['pakkaus'] = $sscc['pakkaus'];
+      }
 
       $edi_order .= "*RS OSTOTILPAK {$counter}\n";
       $edi_order .= "OSTOTILPAK.OTP_SSCC:{$sscc['sscc']}\n";
@@ -281,12 +286,22 @@ while ($laskurow = mysql_fetch_assoc($laskures)) {
             JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.ei_saldoa = '')
             WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
             AND tilausrivi.otunnus = '{$laskurow['tunnus']}'
-            AND tilausrivi.var     not in ('J','P','O','S')
+            AND tilausrivi.var not in ('O','S')
             AND tilausrivi.tyyppi = 'L'
             ORDER BY if(tilausrivi.varattu <> 0, 1, 0) desc, tilausrivi.tilaajanrivinro";
   $tilausrivi_res = pupe_query($query);
 
+  $_rivi_check = array();
+
   while ($tilausrivi_row = mysql_fetch_assoc($tilausrivi_res)) {
+
+    if (array_key_exists($tilausrivi_row['tuoteno'], $_rivi_check)) {
+
+      // nollarivi skipataan jos sama tuoteno/rivinro on jo lisätty
+      if ($tilausrivi_row['tilaajanrivinro'] == $_rivi_check[$tilausrivi_row['tuoteno']] and empty($tilausrivi_row['varattu'])) {
+        continue;
+      }
+    }
 
     // otetaan tuoteno ja rivinumero talteen
     $_rivi_check[$tilausrivi_row['tuoteno']] = $tilausrivi_row['tilaajanrivinro'];

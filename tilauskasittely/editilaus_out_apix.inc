@@ -298,7 +298,7 @@ while ($laskurow = mysql_fetch_assoc($laskures)) {
     if (array_key_exists($tilausrivi_row['tuoteno'], $_rivi_check)) {
 
       // nollarivi skipataan jos sama tuoteno/rivinro on jo lisätty
-      if ($tilausrivi_row['tilaajanrivinro'] == $_rivi_check[$tilausrivi_row['tuoteno']] and empty($tilausrivi_row['varattu'])) {
+      if ($tilausrivi_row['tilaajanrivinro'] == $_rivi_check[$tilausrivi_row['tuoteno']] and $tilausrivi_row['varattu'] == 0) {
         continue;
       }
     }

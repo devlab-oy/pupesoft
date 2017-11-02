@@ -201,7 +201,7 @@ while ($laskurow = mysql_fetch_assoc($laskures)) {
 
         $query = "SELECT kerayserat.sscc_ulkoinen,
                   round(sum(tuote.tuotemassa * kerayserat.kpl_keratty),0) kilot,
-                  round(sum(tuote.tuotekorkeus * tuote.tuoteleveys * tuote.tuotesyvyys * kerayserat.kpl_keratty),2) kuutiot
+                  round(sum(tuote.tuotekorkeus * tuote.tuoteleveys * tuote.tuotesyvyys * kerayserat.kpl_keratty),3) kuutiot
                   FROM kerayserat
                   JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio and tilausrivi.tunnus = kerayserat.tilausrivi)
                   JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno)
@@ -212,9 +212,9 @@ while ($laskurow = mysql_fetch_assoc($laskures)) {
 
         if (mysql_num_rows($kerayserares) > 0) {
           while ($kerayserarow = mysql_fetch_assoc($kerayserares)) {
-            $sscc_array[]['sscc'] = $kerayserarow['sscc_ulkoinen'];
-            $sscc_array[]['kilot'] = $kerayserarow['kilot'];
-            $sscc_array[]['kuutiot'] = $kerayserarow['kuutiot'];
+            $sscc_array[$kerayserarow['sscc_ulkoinen']]['sscc'] = $kerayserarow['sscc_ulkoinen'];
+            $sscc_array[$kerayserarow['sscc_ulkoinen']]['kilot'] = $kerayserarow['kilot'];
+            $sscc_array[$kerayserarow['sscc_ulkoinen']]['kuutiot'] = $kerayserarow['kuutiot'];
           }
         }
       }

@@ -28,7 +28,7 @@ if (isset($muutparametrit) and $muutparametrit != '') {
   $rivit       = $muut[7];
 }
 
-if ($ytunnus != '' or (int) $asiakasid > 0) {
+if ($ytunnus != '' and (int) $asiakasid == 0) {
 
   $muutparametrit = $vva."/".$kka."/".$ppa."/".$vvl."/".$kkl."/".$ppl."/".$raportointitaso."/".$rivit;
 
@@ -619,7 +619,17 @@ if ((int) $asiakasid > 0) {
   echo "<tr><th>".t("Asiakas")."</th><td colspan='3'>$asiakasrow[nimi] $asiakasrow[nimitark] $asiakasrow[toim_nimi]<input type='hidden' name='asiakasid' value='$asiakasid'></td></tr>";
 }
 else {
-  echo "<tr><th>".t("Valitse asiakas")."</th><td colspan='3'><input type='text' name='ytunnus' value='$ytunnus' size='20'></td></tr>";
+  echo "<tr><th>", t("Asiakas"), ":</th>";
+  echo "<td><input type='text' name='ytunnus'> </td>";
+  echo "<td class='back'></td></tr>";
+
+  $sel = (!empty($alatila) and $alatila == 'T') ? "selected" : "";
+  echo "<tr><th>", t("Asiakasrajaus"), ":</th>";
+  echo "<td><select name='alatila'>
+    <option value='Y'>", t("Ytunnuksella"), "</option>
+    <option value='T' {$sel}>", t("Asiakkaalla"), "</option>
+    </select></td>";
+  //echo "<td class='back'><input type='submit' class='hae_btn' value = '".t("Etsi")."'></td></tr>";
 }
 
 echo "<tr><th>".t("Raportointitaso")."</th><td colspan='3'>";

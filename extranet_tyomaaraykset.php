@@ -15,6 +15,22 @@ if (isset($livesearch_tee) and $livesearch_tee == "LAITEHAKU") {
   exit;
 }
 
+echo "  <script language=javascript>
+    function lahetys_verify(pitaako_varmistaa) {
+      msg = pitaako_varmistaa;
+
+      if (confirm(msg)) {
+        return true;
+      }
+      else {
+        skippaa_tama_submitti = true;
+        return false;
+      }
+    }
+  </script>";
+
+echo "<br>";
+
 $tyom_parametrit = array(
   'valmnro' => isset($_REQUEST['valmnro']) ? $_REQUEST['valmnro'] : '',
   'valmistaja' => isset($_REQUEST['valmistaja']) ? $_REQUEST['valmistaja'] : '',
@@ -399,8 +415,18 @@ function uusi_tyomaarays_formi($laite_tunnus) {
     $request['tyom_parametrit'] = hae_laitteen_parametrit($laite_tunnus);
   }
 
+  if ($row["alatila"] != "X") {
+    $pitaako_varmistaa = t("Laitteelle on jo avoin huoltopyyntö");
+  }
+  // tehdään alertti jos sellanen ollaan määritelty
+  $javalisa = "";
+
+  if ($pitaako_varmistaa != "") {
+    $javalisa = "onSubmit = \"return lahetys_verify('$pitaako_varmistaa')\"";
+  }
+
   $asiakasdata = hae_asiakasdata();
-  echo "<form name ='uusi_tyomaarays_form' id='tyomaarays_form' method='post' action=''>";
+  echo "<form name ='uusi_tyomaarays_form' id='tyomaarays_form' method='post' action='' $javalisa>";
   echo "<table>";
   echo "<tr>";
   piirra_tyomaaraysheaderit(true);

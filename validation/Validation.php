@@ -53,8 +53,7 @@ class FormValidator {
   );
   private $validations, $sanatations, $mandatories, $errors, $corrects, $fields;
 
-  public function __construct($validations = array(), $mandatories = array(), $sanatations = array(
-    )) {
+  public function __construct($validations = array(), $mandatories = array(), $sanatations = array()) {
     $this->validations = $validations;
     $this->sanatations = $sanatations;
     $this->mandatories = $mandatories;
@@ -85,7 +84,8 @@ class FormValidator {
         }
       }
       else {
-        $havefailures = $this->validate($val);
+        //request contains an array. We probably want to make a recursive function call here but for now it is unsupported because of validate() structure ($havefailures).
+        //What needs to be done is we need a wrapper for validate function so that we can return $havefailures to it and NOT !$havefailures. Because of this recursive function call is unsupported.
       }
     }
 

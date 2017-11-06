@@ -328,7 +328,7 @@ if (!function_exists("pupe_error")) {
 
       echo "<font class = 'error'>";
 
-      $puperror = htmlentities($puperror, ENT_IGNORE);
+      $puperror = htmlentities($puperror);
     }
 
     if ($_display == '1' or $_pupedebug !== false) {
@@ -11015,6 +11015,101 @@ if (!function_exists("livesearch_sarjanumerohaku")) {
   }
 }
 
+if (!function_exists('livesearch_kohdehaku')) {
+  function livesearch_kohdehaku() {
+    global $yhtiorow, $kukarow, $palvelin2;
+
+    $tee = $_REQUEST["livesearch_tee"];
+    $nimi = $_REQUEST["livesearch_nimi"];
+    $formi = $_REQUEST["livesearch_form"];
+    $hakuid = $_REQUEST["livesearch_hakuid"];
+    $submit = $_REQUEST["livesearch_submit"];
+    $haku = trim($_REQUEST["livesearch_haku"]);
+    $relaatio_tunnus = trim($_REQUEST["relaatio_tunnus"]);
+
+    $join = "";
+    if (!empty($relaatio_tunnus)) {
+      $join = " AND asiakas.tunnus = {$relaatio_tunnus}";
+    }
+
+    if (strlen($haku) > 2 and substr($haku, 0, 1) != "*" and substr($haku, -1) != '*' and substr($haku, 0, 1) != "?" and substr($haku, 0, 1) != "#") {
+
+      echo "
+      <script TYPE='text/javascript' LANGUAGE='JavaScript'>
+        document.getElementById('livesearch_$hakuid').style.visibility = 'visible';
+      </script>";
+
+      if (!is_numeric($relaatio_tunnus)) {
+        echo "<div style='padding:2px'><font class='message'>".t("Asiakas pitää olla numero").".</font></div>";
+        return;
+      }
+
+      if (empty($kukarow['kieli'])) {
+        $kieli = $yhtiorow['kieli'];
+      }
+      else {
+        $kieli = $kukarow['kieli'];
+      }
+
+      $query = "SELECT kohde.nimi AS kohde_nimi,
+                kohde.tunnus AS kohde_tunnus,
+                asiakas.nimi AS asiakas_nimi
+                FROM kohde
+                JOIN asiakas
+                ON ( asiakas.yhtio = kohde.yhtio
+                  AND asiakas.tunnus = kohde.asiakas
+                  {$join} )
+                WHERE kohde.yhtio = '{$kukarow['yhtio']}'
+                AND kohde.nimi LIKE '%{$haku}%'";
+      $result = pupe_query($query);
+
+      $limit = 0;
+      if (mysql_num_rows($result) > 0) {
+        while ($row = mysql_fetch_assoc($result)) {
+          echo "  <div id='kohde_valinta_$row[kohde_tunnus]'
+                name='selectOptions$hakuid'
+                onmouseover=\"this.className='liveSearchSelectedItem';
+                  keyStrokeIndex = -1;
+                  var aEls = document.getElementsByName('selectOptions$hakuid');
+                  for (var iEl = 0; iEl < aEls.length; iEl++) {
+                    if (aEls[iEl].id.substring(0,14) == 'tuoteryhma_valinta_' && aEls[iEl].id != 'kohde_valinta_$row[kohde_tunnus]') {
+                      document.getElementById(aEls[iEl].id).className='';
+                    }
+                  } \"
+                onmouseout=\"this.className='';\"
+                onclick=\"document.getElementById('$hakuid').value='{$row['kohde_tunnus']}';";
+          if ($submit == "") {
+            echo "document.$formi.submit();";
+          }
+          else {
+            echo "document.getElementById('livesearch_$hakuid').style.visibility = 'hidden';";
+          }
+          echo "\"
+                style='padding:2px;'>
+                <font style='font-weight:bold'>{$row['kohde_nimi']} - {$row['asiakas_nimi']}</font>
+              </div><div name='selectValues$hakuid' id='{$row['kohde_tunnus']}'></div>";
+          $limit++;
+
+          if ($limit > 49) {
+            break;
+          }
+        }
+
+        echo "<div style='padding-left:2px;padding-bottom:5px;padding-top:5px;'><font class='info'>", t("Haulla löytyi"), " ".mysql_num_rows($result). " ", t("kohdetta"), ", ".t("näytetään")." 50 ".t("tarkinta osumaa").".</font></div>";
+      }
+      else {
+        echo "<div style='padding:2px'><font class='message'>".t("Ei kohteita").".</font></div>";
+      }
+    }
+    else {
+      echo "
+      <script TYPE='text/javascript' LANGUAGE='JavaScript'>
+        document.getElementById('livesearch_$hakuid').style.visibility = 'hidden';
+      </script>";
+    }
+  }
+}
+
 if (!function_exists("hae_kayttajan_toimipistetunnukset")) {
   function hae_kayttajan_toimipistetunnukset() {
     global $kukarow;
@@ -11204,7 +11299,7 @@ if (!function_exists("livesearch_tullinimikehaku")) {
 }
 
 if (!function_exists("livesearch_kentta")) {
-  function livesearch_kentta($formi, $tee = 'TUOTEHAKU', $nimi = 'liveseach_hakukentta', $width = '300', $value = '', $submit = '', $vero_field = '', $class = '', $break_all_div = '') {
+  function livesearch_kentta($formi, $tee = 'TUOTEHAKU', $nimi = 'liveseach_hakukentta', $width = '300', $value = '', $submit = '', $vero_field = '', $class = '', $break_all_div = '', $relaatio_tunnus = 0) {
     global $kukarow, $toim;
 
     if (stripos($_SERVER['HTTP_USER_AGENT'], "MSIE") !== FALSE or stripos($_SERVER['HTTP_USER_AGENT'], "EXPLORER") !== FALSE) {
@@ -11218,14 +11313,32 @@ if (!function_exists("livesearch_kentta")) {
       $result_width = $width * 2;
     }
 
+    $relaatio_string = "";
+    if (!empty($relaatio_tunnus)) {
+      $relaatio_string = "&relaatio_tunnus={$relaatio_tunnus}";
+    }
+
     $hakuID = "haku".uniqid();
+
+    //Huom! &livesearch_haku=' <- ' tarvitaan jotta inputti_value ei käsitellä stringinä
+    //Vastaavasti sndReq:sta se puuttuu
+    $url = "$_SERVER[SCRIPT_NAME]?livesearch_tee=$tee"
+            ."&livesearch_form=$formi"
+            ."&livesearch_hakuid=$hakuID"
+            ."&livesearch_nimi=$nimi"
+            ."&livesearch_submit=$submit"
+            ."&livesearch_vero_field=$vero_field"
+            ."&ohje=off"
+            ."&toim=$toim"
+            ."{$relaatio_string}"
+            ."&livesearch_haku='+inputti_value";
 
     $return = "<input type='text' id='$hakuID' class='$class' name='$nimi' autocomplete='off' style='width:".$width."px;' value='$value'
           onkeydown=\"return livesearch_keyhandler(event, '$hakuID', '$formi', '$submit', '$vero_field');\"
           onkeyup=\"if ((event.keyCode < 37 || event.keyCode > 40) && event.keyCode != 13) {
               var inputti_value = this.value;
               delay_ms(function() {
-                sndReq('livesearch_$hakuID', '$_SERVER[SCRIPT_NAME]?livesearch_tee=$tee&livesearch_form=$formi&livesearch_hakuid=$hakuID&livesearch_nimi=$nimi&livesearch_submit=$submit&livesearch_vero_field=$vero_field&ohje=off&toim=$toim&livesearch_haku='+inputti_value);
+                sndReq('livesearch_$hakuID', '{$url});
               }, 500);
               keyStrokeIndex = -1;";
     if ($vero_field) {
@@ -24698,31 +24811,6 @@ if (!function_exists('_echo_ordered_table_rows')) {
   }
 }
 
-if (!function_exists('echo_tallennus_formi')) {
-
-
-  /**
-   * Echoo formin, jonka avulla voidaan ladata tiedosto palvelimelta
-   *
-   * @param string  $xls_filename
-   */
-  function echo_tallennus_formi($xls_filename, $kaunisnimi) {
-    echo "<form id='tallennus_form' method='post' class='multisubmit'>";
-    echo "<table>";
-    echo "<tr>";
-    echo "<th>".t("Tallenna excel aineisto").":</th>";
-    echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
-    echo "<input type='hidden' name='lataa_tiedosto' value='1'>";
-    echo "<input type='hidden' name='kaunisnimi' value='".t($kaunisnimi).".xlsx'>";
-    echo "<input type='hidden' name='tmpfilenimi' value='{$xls_filename}'>";
-    echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td>";
-    echo "</tr>";
-    echo "</table>";
-    echo "</form>";
-    echo "<br/>";
-  }
-}
-
 if  (!function_exists('hae_chn_teksti')) {
   function hae_chn_teksti($chn, $kieli = '') {
 
@@ -25861,6 +25949,33 @@ if (!function_exists('hae_toimittajat')) {
   }
 }
 
+if (!function_exists('echo_tallennus_formi')) {
+  function echo_tallennus_formi($filepath, $new_filename) {
+    if (empty($filepath) or empty($new_filename)) {
+      return false;
+    }
+
+    $filepath_parts = explode('.', $filepath);
+    $kpl = count($filepath_parts);
+
+    $file_extension = $filepath_parts[$kpl - 1];
+
+    echo "<form method='post' class='multisubmit'>";
+    echo "<table>";
+    echo "<tr>";
+    echo "<th>".t("Tallenna {$file_extension} aineisto").":</th>";
+    echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
+    echo "<input type='hidden' name='lataa_tiedosto' value='1'>";
+    echo "<input type='hidden' name='kaunisnimi' value='{$new_filename}.{$file_extension}'>";
+    echo "<input type='hidden' name='tmpfilenimi' value='{$filepath}'>";
+    echo "<td class='back'><input id='aineisto_tallennus_submit' type='submit' value='".t("Tallenna")."'></td>";
+    echo "</tr>";
+    echo "</table>";
+    echo "</form>";
+    echo "<br/>";
+  }
+}
+
 /*
  * Poistaa tyhjät välit vastaavat tuoteketjusta muuttamatta ketjun hallitsevaa järjestystä.
  *
@@ -26507,6 +26622,96 @@ if (!function_exists("tuotteen_toimittajat_tuotenumerot_haku")) {
     }
 
     return $chk_res;
+  }
+}
+
+if (!function_exists('array_utf8_encode')) {
+  function array_utf8_encode(&$item, $key) {
+    $item = utf8_encode($item);
+  }
+}
+
+if (!function_exists('kirjoita_json_tiedosto')) {
+
+
+  /**
+   * Kirjoittaa json-tiedoston /tmp/ -kansioon. Annettavalla array:lle ($data) ajetaan array_utf8_encode rekursiivisesti.
+   *
+   * @param array   $data
+   * @param string  $json_tiedosto_nimi
+   * @return string
+   */
+  function kirjoita_json_tiedosto($data, $json_tiedosto_nimi) {
+    $filename = "{$json_tiedosto_nimi}.json";
+    $filepath = "/tmp/{$filename}";
+
+    array_walk_recursive($data, 'array_utf8_encode');
+
+    $ok = file_put_contents($filepath, json_encode($data));
+
+    if (!$ok) {
+      return false;
+    }
+
+    return $filepath;
+  }
+}
+
+if (!function_exists('aja_ruby')) {
+
+
+  /**
+   * Tätä funktiota käytetään ruby-koodin ajamiseen, joka generoi pdf-tiedostoja. Funktio palauttaa generoidun tiedoston nimen.
+   *
+   * @global string $pupe_root_polku
+   * @param string  $json_data_filepath
+   * @param string  $ruby_tiedosto_nimi
+   * @return string
+   */
+  function aja_ruby($json_data_filepath, $ruby_tiedosto_nimi) {
+    global $pupe_root_polku;
+
+    $filepath = $pupe_root_polku . "/pdfs/ruby/{$ruby_tiedosto_nimi}.rb";
+
+    $cmd = "ruby {$filepath} {$json_data_filepath}";
+    $return = exec($cmd, $output, $return_code);
+
+    //poistetaan json tiedosto
+    unlink($json_data_filepath);
+
+    // Palautetaan ensimmäinen rivi outputista, siinä on filenimet
+    return $output[0];
+  }
+}
+
+if (!function_exists('pupesoft_require')) {
+  function pupesoft_require($filename) {
+    global $kukarow, $yhtiorow, $starttime, $aika_debug_array, $pupe_query_debug, $quer_debug_array, $alkumem;
+
+    if (file_exists($filename)) {
+      require_once $filename;
+    }
+    elseif (file_exists(basename($filename))) {
+      require_once basename($filename);
+    }
+    else {
+      die(t('Ajettavaa tiedostoa ei löytynyt'));
+    }
+  }
+}
+
+if (!function_exists('hae_yhtion_lasku_logo')) {
+  function hae_yhtion_lasku_logo() {
+    global $kukarow, $yhtiorow;
+
+    $query = "SELECT data
+              FROM liitetiedostot
+              WHERE yhtio         = '{$kukarow['yhtio']}'
+              AND kayttotarkoitus = 'yhtion_parametrit.lasku_logo'";
+    $result = pupe_query($query);
+
+    $logo = mysql_fetch_assoc($result);
+    return $logo['data'];
   }
 }
 
@@ -29473,6 +29678,24 @@ if (!function_exists('merkkaa_saldovahvistus_lahetetyksi')) {
   }
 }
 
+if (!function_exists('hae_maksuehdot')) {
+  function hae_maksuehdot() {
+    global $kukarow, $yhtiorow;
+
+    $query = "SELECT *
+              FROM maksuehto
+              WHERE yhtio = '{$kukarow['yhtio']}'";
+    $result = pupe_query($query);
+
+    $maksuehdot = array();
+    while ($maksuehto = mysql_fetch_assoc($result)) {
+      $maksuehdot[] = $maksuehto;
+    }
+
+    return $maksuehdot;
+  }
+}
+
 if (!function_exists('hae_mahdolliset_siirto_varastot')) {
   function hae_mahdolliset_siirto_varastot($kohde_varastot = array(), $tuoteno = '') {
     global $kukarow, $yhtiorow;
@@ -31839,6 +32062,103 @@ if (!function_exists("kasittele_tiliote_viite")) {
   }
 }
 
+if (!function_exists('array_column')) {
+
+
+  /**
+   * Returns the values from a single column of the input array, identified by
+   * the $columnKey.
+   *
+   * Optionally, you may provide an $indexKey to index the values in the returned
+   * array by the values from the $indexKey column in the input array.
+   *
+   * @param array   $input     A multi-dimensional array (record set) from which to pull
+   *                     a column of values.
+   * @param mixed   $columnKey The column of values to return. This value may be the
+   *                         integer key of the column you wish to retrieve, or it
+   *                         may be the string key name for an associative array.
+   * @param mixed   $indexKey  (Optional.) The column to use as the index/keys for
+   *                        the returned array. This value may be the integer key
+   *                        of the column, or it may be the string key name.
+   * @return array
+   */
+  function array_column($input = null, $columnKey = null, $indexKey = null) {
+    // Using func_get_args() in order to check for proper number of
+    // parameters and trigger errors exactly as the built-in array_column()
+    // does in PHP 5.5.
+    $argc = func_num_args();
+    $params = func_get_args();
+
+    if ($argc < 2) {
+      trigger_error("array_column() expects at least 2 parameters, {$argc} given", E_USER_WARNING);
+      return null;
+    }
+
+    if (!is_array($params[0])) {
+      trigger_error('array_column() expects parameter 1 to be array, ' . gettype($params[0]) . ' given', E_USER_WARNING);
+      return null;
+    }
+
+    if (!is_int($params[1]) && !is_float($params[1]) && !is_string($params[1]) && $params[1] !== null && !(is_object($params[1]) && method_exists($params[1], '__toString'))
+    ) {
+      trigger_error('array_column(): The column key should be either a string or an integer', E_USER_WARNING);
+      return false;
+    }
+
+    if (isset($params[2]) && !is_int($params[2]) && !is_float($params[2]) && !is_string($params[2]) && !(is_object($params[2]) && method_exists($params[2], '__toString'))
+    ) {
+      trigger_error('array_column(): The index key should be either a string or an integer', E_USER_WARNING);
+      return false;
+    }
+
+    $paramsInput = $params[0];
+    $paramsColumnKey = ($params[1] !== null) ? (string) $params[1] : null;
+
+    $paramsIndexKey = null;
+    if (isset($params[2])) {
+      if (is_float($params[2]) || is_int($params[2])) {
+        $paramsIndexKey = (int) $params[2];
+      }
+      else {
+        $paramsIndexKey = (string) $params[2];
+      }
+    }
+
+    $resultArray = array();
+
+    foreach ($paramsInput as $row) {
+
+      $key = $value = null;
+      $keySet = $valueSet = false;
+
+      if ($paramsIndexKey !== null && array_key_exists($paramsIndexKey, $row)) {
+        $keySet = true;
+        $key = (string) $row[$paramsIndexKey];
+      }
+
+      if ($paramsColumnKey === null) {
+        $valueSet = true;
+        $value = $row;
+      }
+      elseif (is_array($row) && array_key_exists($paramsColumnKey, $row)) {
+        $valueSet = true;
+        $value = $row[$paramsColumnKey];
+      }
+
+      if ($valueSet) {
+        if ($keySet) {
+          $resultArray[$key] = $value;
+        }
+        else {
+          $resultArray[] = $value;
+        }
+      }
+    }
+
+    return $resultArray;
+  }
+}
+
 if (!function_exists("cron_log")) {
   function cron_log($file = "") {
     global $argv, $pupesoft_commandlinelog;
@@ -32243,6 +32563,94 @@ if (!function_exists("hae_saldo")) {
 
       return $saldo;
     }
+  }
+}
+
+if (!function_exists('hae_tilausrivi')) {
+  function hae_tilausrivi($tilausrivi_tunnus) {
+    global $kukarow, $yhtiorow;
+
+    if (empty($tilausrivi_tunnus)) {
+      return false;
+    }
+
+    $query = "SELECT *
+              FROM tilausrivi
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND tunnus = {$tilausrivi_tunnus}";
+    $result = pupe_query($query);
+
+    return mysql_fetch_assoc($result);
+  }
+}
+
+if (!function_exists('hae_tilausrivin_lisatiedot')) {
+  function hae_tilausrivin_lisatiedot($tilausrivi_tunnus) {
+    global $kukarow, $yhtiorow;
+
+    if (empty($tilausrivi_tunnus)) {
+      return false;
+    }
+
+    $query = "SELECT *
+              FROM tilausrivin_lisatiedot
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND tilausrivitunnus = {$tilausrivi_tunnus}";
+    $result = pupe_query($query);
+
+    return mysql_fetch_assoc($result);
+  }
+}
+
+if (!function_exists('hae_tilausrivit')) {
+
+  function hae_tilausrivit($otunnus) {
+    global $kukarow, $yhtiorow;
+
+    if (empty($otunnus)) {
+      return array();
+    }
+
+    $query = "SELECT *
+              FROM tilausrivi
+              JOIN tilausrivin_lisatiedot
+              ON ( tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
+                AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus )
+              WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+              AND tilausrivi.otunnus = {$otunnus}";
+    $result = pupe_query($query);
+
+    $tilausrivit = array();
+    while ($tilausrivi = mysql_fetch_assoc($result)) {
+      $tilausrivit[] = $tilausrivi;
+    }
+
+    return $tilausrivit;
+  }
+}
+
+if (!function_exists('hae_lasku')) {
+  function hae_lasku($lasku_tunnus) {
+    global $kukarow, $yhtiorow;
+
+    if (empty($lasku_tunnus)) {
+      return false;
+    }
+
+    $query = "SELECT *
+              FROM lasku
+              WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+              AND lasku.tunnus = {$lasku_tunnus}";
+
+    $result = pupe_query($query);
+
+    return mysql_fetch_assoc($result);
+  }
+}
+
+if (!function_exists('escape_single_quotes')) {
+  function escape_single_quotes(&$item, $key) {
+    $item = str_replace("'", "\'", $item);
   }
 }
 
@@ -33291,6 +33699,22 @@ if (!function_exists("jaljella_oleva_maksupaatesumma")) {
   }
 }
 
+if (!function_exists('hae_yhtio_alv')) {
+
+  function hae_yhtio_alv() {
+    global $kukarow, $yhtiorow;
+
+    $query = "SELECT *
+              FROM avainsana
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND laji = 'ALV'
+              AND selitetark = 'o'
+              LIMIT 1";
+    $result = pupe_query($query);
+
+    return mysql_fetch_assoc($result);
+  }
+}
 if (!function_exists("hae_eka_ja_vika_tilausrivi")) {
 
 

@@ -255,6 +255,7 @@ unset($e3_params);
 unset($tee_keraysera_debugdir);
 
 unset($default_login_language);
+unset($myyntiseuranta_access_list);
 unset($loginkieli);
 
 unset($magento_api_tt_url);
@@ -837,6 +838,7 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
       echo "<script language='javascript' type='text/javascript'>
         var submitattu = false;
         var skippaa_tama_submitti = false;
+        var palvelin2 = '{$palvelin2}';
 
         $(document).ready(function(){
           $('form').submit(function(){
@@ -1004,4 +1006,8 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
   $_logmaster_rajapinta &= ($yhtiorow['siirtolistan_tulostustapa'] == 'K');
 
   define('LOGMASTER_RAJAPINTA', $_logmaster_rajapinta == 1 ? true : false);
+}
+
+if (isset($yhtiorow) and $yhtiorow['laite_huolto'] == 'X' and $kukarow['kuka'] == 'admin') {
+  $pupe_query_debug = 0.0001;
 }

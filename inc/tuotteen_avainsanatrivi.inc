@@ -28,6 +28,12 @@ if (mysql_field_name($result, $i) == "laji") {
   $ulos .= "<option value='ps_ala_try' $sel[ps_ala_try]>" . t("PupeShop alaryhmä") . "</option>";
   $ulos .= "<option value='ei_edi_ostotilaukseen' {$sel['ei_edi_ostotilaukseen']}>".t("Tuotetta ei lisätä EDI-ostotilaukselle")."</option>";
   $ulos .= "<option value='hammastus' $sel[hammastus]>".t("Tuotteen hammastus")."</option>";
+  if ($yhtiorow['laite_huolto'] == 'X') {
+    $ulos .= "<option value='sammutin_tyyppi' $sel[sammutin_tyyppi]>".t("Sammuttimen tyyppi")."</option>";
+    $ulos .= "<option value='sammutin_koko' $sel[sammutin_koko]>".t("Sammuttimen koko")."</option>";
+    $ulos .= "<option value='palo_luokka' $sel[palo_luokka]>".t("Paloluokka")."</option>";
+  }
+  $ulos .= "<option value='tyomaarayksen_ryhmittely' $sel[tyomaarayksen_ryhmittely]>".t("Työmääräyksen ryhmittely")."</option>";
   $ulos .= "<option value='laatuluokka' {$sel['laatuluokka']}>".t("Tuotteen laatuluokka")."</option>";
   $ulos .= "<option value='synkronointi' {$sel['synkronointi']}>".t("Tuotteen synkronointi")."</option>";
   $ulos .= "<option value='toimpalautus' {$sel['toimpalautus']}>".t("Palautus toimittajalle")."</option>";
@@ -176,6 +182,54 @@ if (mysql_field_name($result, $i) == "selite") {
   }
   elseif (strtolower($tem_laji) == "magento_attribute_set_id") {
     $ulos = "<td><input type='text' name='$nimi' value='{$trow[$i]}'></input></td>";
+  }
+  elseif ($trow[3] == "sammutin_koko") {
+    $sammuttimen_koot_result = t_avainsana('SAMMUTIN_KOKO');
+    $sammutin_koot = array();
+    while ($sammutin_koko_avainsana = mysql_fetch_assoc($sammuttimen_koot_result)) {
+      $sammutin_koot[] = $sammutin_koko_avainsana;
+    }
+    $sel = "";
+
+    $ulos = "<td>";
+    $ulos .= "<select name='{$nimi}'>";
+    foreach ($sammutin_koot as $sammutin_koko_avainsana) {
+      if ($trow[$i] == $sammutin_koko_avainsana['selite']) {
+        $sel = "SELECTED";
+      }
+      $ulos .= "<option value='{$sammutin_koko_avainsana['selite']}' {$sel}>{$sammutin_koko_avainsana['selite']}kg</option>";
+      $sel = "";
+    }
+    $ulos .= "</select>";
+    $ulos .= "</td>";
+  }
+  elseif ($trow[3] == "sammutin_tyyppi") {
+    $sammutin_tyypit = hae_mahdolliset_sammutin_tyypit();
+    $sel = array($trow[$i] => "SELECTED");
+
+    $ulos = "<td>";
+    $ulos .= "<select name='{$nimi}'>";
+    foreach ($sammutin_tyypit as $index => $sammutin_tyyppi) {
+      $ulos .= "<option value='{$index}' {$sel}>{$sammutin_tyyppi}</option>";
+    }
+    $ulos .= "</select>";
+    $ulos .= "</td>";
+  }
+  elseif ($trow[3] == "tyomaarayksen_ryhmittely" and $yhtiorow['laite_huolto'] == 'X') {
+    $toimenpidetuote_tyypit = array(
+      'tarkastus'     => t('Tarkastus'),
+      'huolto'     => t('Huolto'),
+      'koeponnistus'   => t('Koeponnistus'),
+    );
+    $sel = array($trow[$i] => "SELECTED");
+
+    $ulos = "<td>";
+    $ulos .= "<select name='{$nimi}'>";
+    foreach ($toimenpidetuote_tyypit as $index => $toimenpidetuote_tyyppi) {
+      $ulos .= "<option value='{$index}' {$sel}>{$toimenpidetuote_tyyppi}</option>";
+    }
+    $ulos .= "</select>";
+    $ulos .= "</td>";
   }
   else {
     $ulos = "<td><textarea rows=10 cols=50 name='$nimi'>{$trow[$i]}</textarea></td>";

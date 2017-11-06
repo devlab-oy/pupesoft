@@ -203,8 +203,8 @@ if ($tila == 'perusta') {
 
 if ($tila == 'menut') {
   if ($fromyhtio != '') {
-    $query = "INSERT into oikeu (sovellus,nimi,alanimi,paivitys,lukittu,nimitys,jarjestys,jarjestys2,yhtio,laatija,luontiaika,muutospvm,muuttaja)
-              SELECT sovellus,nimi,alanimi,paivitys,lukittu,nimitys,jarjestys,jarjestys2,'$yhtio','{$kukarow['kuka']}',now(),now(),'{$kukarow['kuka']}'
+    $query = "INSERT into oikeu (sovellus,nimi,alanimi,paivitys,lukittu,nimitys,jarjestys,jarjestys2,yhtio,hidden,laatija,luontiaika,muutospvm,muuttaja)
+              SELECT sovellus,nimi,alanimi,paivitys,lukittu,nimitys,jarjestys,jarjestys2,'$yhtio',hidden,'{$kukarow['kuka']}',now(),now(),'{$kukarow['kuka']}'
               FROM oikeu
               WHERE yhtio  = '$fromyhtio'
               and profiili = ''
@@ -402,6 +402,8 @@ if ($tila == 'avainsana') {
                   selitetark   = '$trow[selitetark]',
                   selitetark_2 = '$trow[selitetark_2]',
                   selitetark_3 = '$trow[selitetark_3]',
+                  selitetark_4 = '$trow[selitetark_4]',
+                  selitetark_5 = '$trow[selitetark_5]',
                   kieli        = '$trow[kieli]',
                   nakyvyys     = '$trow[nakyvyys]',
                   yhtio        = '$yhtio'";

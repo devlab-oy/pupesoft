@@ -119,6 +119,14 @@ if ($lopeta_body) {
     }
     echo "<hr>";
 
+    if (empty($aika_debug_array) and !empty($GLOBALS['aika_debug_array'])) {
+      $aika_debug_array = $GLOBALS['aika_debug_array'];
+    }
+
+    if (empty($quer_debug_array) and !empty($GLOBALS['quer_debug_array'])) {
+      $quer_debug_array = $GLOBALS['quer_debug_array'];
+    }
+
     if (!empty($aika_debug_array)) {
       // Sortataan kestojärjestykseen
       array_multisort($aika_debug_array, SORT_DESC, $quer_debug_array);

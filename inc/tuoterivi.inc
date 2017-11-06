@@ -817,3 +817,14 @@ if (mysql_field_name($result, $i) == "ostoehdotus") {
   $ulos .= "</select></td>";
   $jatko = 0;
 }
+
+if ($yhtiorow['laite_huolto'] == 'X' and !isset($redirect_echoed)) {
+  $redirect_echoed = 1;
+  if (!empty($valittu_asiakas)) {
+    echo "<input type='hidden' name='redirect_to' value='asiakkaan_laite_hallinta.php' />";
+    echo "<input type='hidden' name='valittu_asiakas' value='{$valittu_asiakas}' />";
+  }
+  else {
+    echo "<input type='hidden' name='redirect_to_laite_hallinta' value='0' />";
+  }
+}

@@ -7,7 +7,12 @@ $pupe_DataTables = array("etusivun_tyomaarays");
 
 require "inc/parametrit.inc";
 
-echo "<font class='head'>".t("Tervetuloa pupesoft-järjestelmään")."</font><hr><br>";
+if ($yhtiorow['laite_huolto'] == 'X') {
+  echo "<font class='head'>".t("Tervetuloa Turvanasi SafetyPupe-järjestelmään")."</font><hr><br>";
+}
+else {
+  echo "<font class='head'>".t("Tervetuloa pupesoft-järjestelmään")."</font><hr><br>";
+}
 
 if (!isset($tee) or $tee == '') {
 
@@ -110,36 +115,37 @@ if (!isset($tee) or $tee == '') {
               and tila     in ('N','L')
               and alatila != 'X'
               and chn      = '999'";
-    $result = pupe_query($query);
+    if ($yhtiorow['laite_huolto'] != 'X') {
+      $result = pupe_query($query);
 
-    if (mysql_num_rows($result) > 0) {
-      echo "<table width='100%'>";
+      if (mysql_num_rows($result) > 0) {
+        echo "<table width='100%'>";
 
-      // ei näytetä suotta firman nimeä, jos käyttäjä kuuluu vaan yhteen firmaan
-      if (mysql_num_rows($kukres) == 1) $kukrow["nimi"] = "";
+        // ei näytetä suotta firman nimeä, jos käyttäjä kuuluu vaan yhteen firmaan
+        if (mysql_num_rows($kukres) == 1) $kukrow["nimi"] = "";
 
-      echo "<tr>";
-      echo "<td colspan='3' class='back'><font class='head'>".t("Laskutuskiellossa olevat laskusi")." $kukrow[nimi]</font><hr></td>";
-      echo "</tr>";
-
-      echo "<tr>";
-      echo "<th>".t("tunnus")."</a></th>";
-      echo "<th>".t("nimi")."</th>";
-      echo "<th>".t("luontiaika")."</th>";
-      echo "</tr>";
-
-      while ($trow = mysql_fetch_array($result)) {
         echo "<tr>";
-        echo "<td><a href='muokkaatilaus.php?toim=LASKUTUSKIELTO&etsi=$trow[tunnus]'>$trow[tunnus]</a></td>";
-        echo "<td>$trow[nimi]</td>";
-        echo "<td>".tv1dateconv($trow["luontiaika"])."</td>";
+        echo "<td colspan='3' class='back'><font class='head'>".t("Laskutuskiellossa olevat laskusi")." $kukrow[nimi]</font><hr></td>";
         echo "</tr>";
+
+        echo "<tr>";
+        echo "<th>".t("tunnus")."</a></th>";
+        echo "<th>".t("nimi")."</th>";
+        echo "<th>".t("luontiaika")."</th>";
+        echo "</tr>";
+
+        while ($trow = mysql_fetch_array($result)) {
+          echo "<tr>";
+          echo "<td><a href='muokkaatilaus.php?toim=LASKUTUSKIELTO&etsi=$trow[tunnus]'>$trow[tunnus]</a></td>";
+          echo "<td>$trow[nimi]</td>";
+          echo "<td>".tv1dateconv($trow["luontiaika"])."</td>";
+          echo "</tr>";
+        }
+
+        echo "</table>";
+        echo "<br><br>";
       }
-
-      echo "</table>";
-      echo "<br><br>";
     }
-
   }
 
   ///* MUISTUTUKSET *///
@@ -225,46 +231,48 @@ if (!isset($tee) or $tee == '') {
                  AND lasku.tila     in ('A','L','N','S','C')
                  AND lasku.alatila != 'X'
                  ORDER BY ifnull(a5.jarjestys, 9999), ifnull(a2.jarjestys, 9999), lasku.toimaika asc, a2.selitetark";
-  $tyoresult = pupe_query($tyojonosql);
+  if ($yhtiorow['laite_huolto'] != 'X') {
+    $tyoresult = pupe_query($tyojonosql);
 
-  if (mysql_num_rows($tyoresult) > 0) {
+    if (mysql_num_rows($tyoresult) > 0) {
 
-    pupe_DataTables(array(array($pupe_DataTables[0], 5, 5)));
+      pupe_DataTables(array(array($pupe_DataTables[0], 5, 5)));
 
-    $padding_muuttuja = " style='padding-right:15px;'";
+      $padding_muuttuja = " style='padding-right:15px;'";
 
-    echo "<table class='display dataTable' id='$pupe_DataTables[0]'>";
-    echo "<thead>";
+      echo "<table class='display dataTable' id='$pupe_DataTables[0]'>";
+      echo "<thead>";
 
-    echo "<tr>";
-    echo "<td colspan='5' class='back'><font class='head'>".t("Omat Työmääräykset")."</font><hr></td>";
-    echo "</tr>";
-
-    echo "<tr>";
-    echo "<th $padding_muuttuja>".t("Työnumero")."</th>";
-    echo "<th $padding_muuttuja>".t("Prioriteetti")."</th>";
-    echo "<th $padding_muuttuja>".t("Status")."</th>";
-    echo "<th $padding_muuttuja>".t("Asiakas")."</th>";
-    echo "<th $padding_muuttuja>".t("Päivämäärä")."</th>";
-    echo "</tr>";
-
-    echo "</thead>";
-    echo "<tbody>";
-
-    while ($tyorow = mysql_fetch_array($tyoresult)) {
-      // Laitetetaan taustaväri jos sellainen on syötetty
-      $varilisa = ($tyorow["tyostatusvari"] != "") ? " style='background-color: {$tyorow["tyostatusvari"]};'" : "";
-
-      echo "<tr $varilisa>";
-      echo "<td><a href='{$palvelin2}tilauskasittely/tilaus_myynti.php?toim=TYOMAARAYS&tilausnumero={$tyorow['tunnus']}'>".$tyorow['tunnus']."</a></td>";
-      echo "<td>{$tyorow["tyom_prioriteetti"]}</td>";
-      echo "<td>{$tyorow["tyostatus"]}</td>";
-      echo "<td>{$tyorow["nimi"]}</td>";
-      echo "<td>{$tyorow["toimaika"]}</td>";
+      echo "<tr>";
+      echo "<td colspan='5' class='back'><font class='head'>".t("Omat Työmääräykset")."</font><hr></td>";
       echo "</tr>";
+
+      echo "<tr>";
+      echo "<th $padding_muuttuja>".t("Työnumero")."</th>";
+      echo "<th $padding_muuttuja>".t("Prioriteetti")."</th>";
+      echo "<th $padding_muuttuja>".t("Status")."</th>";
+      echo "<th $padding_muuttuja>".t("Asiakas")."</th>";
+      echo "<th $padding_muuttuja>".t("Päivämäärä")."</th>";
+      echo "</tr>";
+
+      echo "</thead>";
+      echo "<tbody>";
+
+      while ($tyorow = mysql_fetch_array($tyoresult)) {
+        // Laitetetaan taustaväri jos sellainen on syötetty
+        $varilisa = ($tyorow["tyostatusvari"] != "") ? " style='background-color: {$tyorow["tyostatusvari"]};'" : "";
+
+        echo "<tr $varilisa>";
+        echo "<td><a href='{$palvelin2}tilauskasittely/tilaus_myynti.php?toim=TYOMAARAYS&tilausnumero={$tyorow['tunnus']}'>".$tyorow['tunnus']."</a></td>";
+        echo "<td>{$tyorow["tyom_prioriteetti"]}</td>";
+        echo "<td>{$tyorow["tyostatus"]}</td>";
+        echo "<td>{$tyorow["nimi"]}</td>";
+        echo "<td>{$tyorow["toimaika"]}</td>";
+        echo "</tr>";
+      }
+      echo "</tbody>";
+      echo "</table><br>";
     }
-    echo "</tbody>";
-    echo "</table><br>";
   }
 
 

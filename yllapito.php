@@ -17,7 +17,11 @@ else {
 
 if (strpos($_SERVER['SCRIPT_NAME'], "yllapito.php")  !== FALSE) {
   require "inc/parametrit.inc";
-  echo "<script src='yllapito.js'></script>";
+}
+
+// HUOM: ennen tätä riviä ei saa olla mitään echoja!
+if (isset($ajax_request) and file_exists("inc/{$toim}_ajax.inc")) {
+  require "inc/{$toim}_ajax.inc";
 }
 
 // Rails infraan siirretyt ylläpitonäkymät, eli $pupenext_yllapitonakymat, määritellään parametrit.inc:tiedostossa.
@@ -39,8 +43,32 @@ if (array_key_exists($toim, $pupenext_yllapitonakymat)) {
   exit;
 }
 
-if (function_exists("js_popup")) {
+if (function_exists("js_popup") and !isset($ajax_request)) {
   echo js_popup(-100);
+}
+
+//onko_toim_laite muuttujaa käytetään custom näkymien takia. toim on tällöin laite!!!....
+$onko_toim_laite = false;
+if ($yhtiorow['laite_huolto'] == 'X' and stristr($toim, 'laite')) {
+  $onko_toim_laite = true;
+}
+if ($yhtiorow['laite_huolto'] == 'X' and !empty($sammutin_koko)) {
+  $matches = array();
+  preg_match('/\d+/', $sammutin_koko, $matches);
+  if (isset($matches[0])) {
+    $sammutin_koko = $matches[0];
+  }
+  else {
+    $sammutin_koko = 0;
+  }
+}
+
+if ($toim == "toimi" or $toim == "asiakas" or $toim == "tuote" or $toim == "avainsana" or $onko_toim_laite) {
+  enable_ajax();
+}
+
+if ($yhtiorow['laite_huolto'] == 'X') {
+  pupesoft_require('inc/laite_huolto_functions.inc');
 }
 
 if (isset($livesearch_tee) and $livesearch_tee == "TILIHAKU") {
@@ -51,6 +79,15 @@ if (isset($livesearch_tee) and $livesearch_tee == "TILIHAKU") {
 if (isset($livesearch_tee) and $livesearch_tee == "TUOTERYHMAHAKU") {
   livesearch_tuoteryhmahaku();
   exit;
+}
+
+if (isset($livesearch_tee) and $livesearch_tee == "TUOTEHAKU") {
+  livesearch_tuotehaku();
+  exit;
+}
+
+if ($yhtiorow['laite_huolto'] == 'X' and !empty($del) and $del != 3 and in_array($toim, array('kohde', 'tuote', 'paikka', 'laite', 'asiakas'))) {
+  die('Poistaminen kielletty');
 }
 
 //Jotta määritelty rajattu näkymä olisi myös käyttöoikeudellisesti tiukka
@@ -224,8 +261,22 @@ if ($oikeurow['paivitys'] != '1') {
   }
 }
 
+if ($del == 1 and $toim == 'huoltosykli') {
+  if (onko_huoltosyklilla_laitteita($tunnus)) {
+    echo "<font class='error'>" . t('Huoltosykliin on liitetty laitteita poistoa ei voida tehdä') . "</font>";
+    unset($del);
+  }
+}
+
 // Tietue poistetaan
 if ($del == 1) {
+
+  if (!empty($del_relaatiot)) {
+    $funktio = $toim . '_poista_relaatiot';
+    if (function_exists($funktio)) {
+      $funktio($toim, $tunnus);
+    }
+  }
 
   $query = "SELECT *
             FROM $toim
@@ -238,7 +289,7 @@ if ($del == 1) {
   $result = pupe_query($query);
 
   // Jos poistamme ifamesta tietoja niin päivitetään varsinaisen tietueen muutospvm, jotta verkkokauppasiirto huomaa, että tietoja on muutettu
-  if ($lukitse_avaimeen != "") {
+  if (!empty($lukitse_avaimeen)) {
     if ($toim == "tuotteen_avainsanat" or $toim == "tuotteen_toimittajat") {
       $query = "UPDATE tuote
                 SET muuttaja = '$kukarow[kuka]', muutospvm=now()
@@ -293,6 +344,28 @@ if ($del == 2) {
       synkronoi($kukarow["yhtio"], $toim, $tunnus, $trow, "");
     }
   }
+}
+
+if ($del == 3) {
+  if (!empty($del_relaatiot)) {
+    $funktio = $toim . '_poista_relaatiot';
+    if (function_exists($funktio)) {
+      $funktio($toim, $tunnus);
+    }
+  }
+
+  if (!$onko_toim_laite) {
+    $delete_query = "SET poistettu = 1";
+  }
+  else {
+    $delete_query = "SET tila = 'P'";
+  }
+
+  $query = "UPDATE $toim
+            {$delete_query}
+            WHERE tunnus = '{$tunnus}'";
+
+  $result = pupe_query($query);
 }
 
 // Jotain päivitetään tietokontaan
@@ -360,6 +433,10 @@ if ($upd == 1) {
       require "inc/$funktio.inc";
     }
 
+    if (!empty($kopioi_rivi)) {
+      unset($trow['tunnus']);
+    }
+
     if (function_exists($funktio)) {
       @$funktio($t, $i, $result, $tunnus, $virhe, $trow);
     }
@@ -369,7 +446,8 @@ if ($upd == 1) {
     }
 
     if (mysql_num_rows($al_res) != 0 and strtoupper($pakollisuuden_tarkistus_rivi['selitetark_3']) == "PAKOLLINEN") {
-      if (((mysql_field_type($result, $i) == 'real' or  mysql_field_type($result, $i) == 'int') and (float) str_replace(",", ".", $t[$i]) == 0) or
+      $_alv = (mysql_field_name($result, $i) == 'alv');
+      if (!$_alv and ((mysql_field_type($result, $i) == 'real' or  mysql_field_type($result, $i) == 'int') and (float) str_replace(",", ".", $t[$i]) == 0) or
         (mysql_field_type($result, $i) != 'real' and mysql_field_type($result, $i) != 'int' and trim($t[$i]) == "")) {
         $virhe[$i] .= t("Tieto on pakollinen")."!";
         $errori = 1;
@@ -399,6 +477,11 @@ if ($upd == 1) {
   // Luodaan tietue
   if ($errori == "") {
 
+    if (!empty($kopioi_rivi)) {
+      $kopioitavan_rivin_tunnus = $tunnus;
+      $tunnus = "";
+    }
+
     $onko_tama_insert = $tunnus == "" ? true : false;
 
     if ($onko_tama_insert) {
@@ -409,7 +492,12 @@ if ($upd == 1) {
       if ($toim == 'tuotteen_toimittajat' and isset($paivita_tehdas_saldo_paivitetty) and is_array($paivita_tehdas_saldo_paivitetty) and count($paivita_tehdas_saldo_paivitetty) == 2) $query .= ", tehdas_saldo_paivitetty = now() ";
 
       for ($i=1; $i < mysql_num_fields($result); $i++) {
-
+        if (mysql_field_name($result, $i) == 'tuoteno') {
+          $tuoteno_temp = $t[$i];
+        }
+        if ($yhtiorow['laite_huolto'] == 'X' and mysql_field_name($result, $i) == 'malli') {
+          $t[$i] = $malli;
+        }
         // Tuleeko tämä columni käyttöliittymästä
         if (isset($t[$i])) {
 
@@ -454,9 +542,65 @@ if ($upd == 1) {
           }
         }
       }
+
+      if ($yhtiorow['laite_huolto'] == 'X' and $toim == 'tuote') {
+        if (!empty($sammutin_tyyppi)) {
+          $query1 = "INSERT INTO tuotteen_avainsanat
+                     SET yhtio = '{$kukarow['yhtio']}',
+                     tuoteno    = '{$tuoteno_temp}',
+                     kieli      = 'fi',
+                     laji       = 'sammutin_tyyppi',
+                     selite     = '{$sammutin_tyyppi}',
+                     laatija    = '{$kukarow['kuka']}',
+                     muuttaja   = '{$kukarow['kuka']}',
+                     luontiaika = NOW(),
+                     muutospvm  = NOW()";
+          pupe_query($query1);
+    }
+        if (isset($sammutin_koko) and $sammutin_koko != '') {
+          $query1 = "INSERT INTO tuotteen_avainsanat
+                     SET yhtio = '{$kukarow['yhtio']}',
+                     tuoteno    = '{$tuoteno_temp}',
+                     kieli      = 'fi',
+                     laji       = 'sammutin_koko',
+                     selite     = '{$sammutin_koko}',
+                     laatija    = '{$kukarow['kuka']}',
+                     muuttaja   = '{$kukarow['kuka']}',
+                     luontiaika = NOW(),
+                     muutospvm  = NOW()";
+          pupe_query($query1);
+        }
+      }
     }
     // Päivitetään
     else {
+      if ($yhtiorow['laite_huolto'] == 'X' and $onko_toim_laite) {
+        $huoltovalit = huoltovali_options();
+        foreach ($laite['huoltosyklit'] as &$huoltosyklit_laitteet) {
+
+          $huoltosykli_laite_tunnus = $huoltosyklit_laitteet['huoltosykli_laite_tunnus'];
+          $huoltosykli_tunnus = $huoltosyklit_laitteet['huoltosykli_tunnus'];
+          $huoltovali = $huoltovalit[$huoltosyklit_laitteet['huoltovali']];
+
+          if ($huoltosykli_laite_tunnus != 0 and $huoltosykli_tunnus != 0) {
+            paivita_laitteen_huoltosykli($huoltosyklit_laitteet);
+          }
+          elseif ($huoltosykli_laite_tunnus == 0 and $huoltosykli_tunnus != 0) {
+            $huoltosyklit_laitteet['laite_tunnus'] = $tunnus;
+            lisaa_laitteen_huoltosykli($huoltosyklit_laitteet);
+          }
+          elseif ($huoltosykli_laite_tunnus != 0 and $huoltosykli_tunnus == 0) {
+            poista_laitteen_huoltosykli($huoltosykli_laite_tunnus);
+          }
+        }
+
+        if (empty($errori)) {
+          $asiakas = hae_paikan_asiakas($t['paikka']);
+          $laitteet = hae_laitteet_ja_niiden_huoltosyklit($asiakas['tunnus']);
+          list($huollettavien_laitteiden_huoltosyklirivit, $laitteiden_huoltosyklirivit_joita_ei_huolleta) = paata_mitka_huollot_tehdaan($laitteet);
+          $tyomaarays_kpl = generoi_tyomaaraykset_huoltosykleista($huollettavien_laitteiden_huoltosyklirivit, $laitteiden_huoltosyklirivit_joita_ei_huolleta);
+        }
+      }
 
       //  Jos poistettiin jokin liite, poistetaan se nyt
       if (isset($poista_liite) and is_array($poista_liite)) {
@@ -479,6 +623,12 @@ if ($upd == 1) {
       $tehdas_saldo_chk = 0;
 
       for ($i=1; $i < mysql_num_fields($result); $i++) {
+        if (mysql_field_name($result, $i) == 'tuoteno') {
+          $tuoteno_temp = $t[$i];
+        }
+        if ($yhtiorow['laite_huolto'] == 'X' and mysql_field_name($result, $i) == 'malli') {
+          $t[$i] = $malli;
+        }
         if (isset($t[$i]) or (isset($_FILES["liite_$i"]) and is_array($_FILES["liite_$i"]))) {
 
           if ($toim == 'tuotteen_toimittajat' and mysql_field_name($result, $i) == 'tehdas_saldo') $tehdas_saldo_chk = $t[$i];
@@ -522,8 +672,93 @@ if ($upd == 1) {
 
     $result = pupe_query($query);
 
+    if ($yhtiorow['laite_huolto'] == 'X' and $toim == 'tuote') {
+      if (!empty($sammutin_tyyppi)) {
+        $query1 = " SELECT *
+                    FROM tuotteen_avainsanat
+                    WHERE yhtio = '{$kukarow['yhtio']}'
+                    AND tuoteno = '{$tuoteno_temp}'
+                    AND laji = 'sammutin_tyyppi'";
+        $result1 = pupe_query($query1);
+        if (mysql_num_rows($result1) == 0) {
+          $query1 = " INSERT INTO tuotteen_avainsanat
+                      SET yhtio = '{$kukarow['yhtio']}',
+                      tuoteno    = '{$tuoteno_temp}',
+                      kieli      = 'fi',
+                      laji       = 'sammutin_tyyppi',
+                      selite     = '{$sammutin_tyyppi}',
+                      laatija    = '{$kukarow['kuka']}',
+                      muuttaja   = '{$kukarow['kuka']}',
+                      luontiaika = NOW(),
+                      muutospvm  = NOW()";
+        }
+        else {
+          $query1 = " UPDATE tuotteen_avainsanat
+                      SET selite = '{$sammutin_tyyppi}',
+                      muuttaja = '{$kukarow['kuka']}',
+                      muutospvm = NOW()
+                      WHERE yhtio = '{$kukarow['yhtio']}'
+                      AND tuoteno = '{$tuoteno_temp}'
+                      AND laji = 'sammutin_tyyppi'";
+        }
+
+        pupe_query($query1);
+      }
+      if (!empty($sammutin_koko)) {
+        $query1 = " SELECT *
+                    FROM tuotteen_avainsanat
+                    WHERE yhtio = '{$kukarow['yhtio']}'
+                    AND tuoteno = '{$tuoteno_temp}'
+                    AND laji = 'sammutin_koko'";
+        $result1 = pupe_query($query1);
+        if (mysql_num_rows($result1) == 0) {
+          $query1 = " INSERT INTO tuotteen_avainsanat
+                      SET yhtio = '{$kukarow['yhtio']}',
+                      tuoteno    = '{$tuoteno_temp}',
+                      kieli      = 'fi',
+                      laji       = 'sammutin_koko',
+                      selite     = '{$sammutin_koko}',
+                      laatija    = '{$kukarow['kuka']}',
+                      muuttaja   = '{$kukarow['kuka']}',
+                      luontiaika = NOW(),
+                      muutospvm  = NOW()";
+        }
+        else {
+          $query1 = " UPDATE tuotteen_avainsanat
+                      SET selite = '{$sammutin_koko}',
+                      muuttaja = '{$kukarow['kuka']}',
+                      muutospvm = NOW()
+                      WHERE yhtio = '{$kukarow['yhtio']}'
+                      AND tuoteno = '{$tuoteno_temp}'
+                      AND laji = 'sammutin_koko'";
+        }
+
+        pupe_query($query1);
+      }
+    }
+
     if ($onko_tama_insert) {
       $tunnus = mysql_insert_id($GLOBALS["masterlink"]);
+
+      //lisätään myös huoltosyklit jos on kyse laitteesta
+      if ($onko_toim_laite and $yhtiorow['laite_huolto'] == 'X') {
+
+        $huoltovalit = huoltovali_options();
+        foreach ($laite['huoltosyklit'] as &$huoltosyklit_laitteet) {
+
+          if ($huoltosyklit_laitteet['huoltosykli_tunnus'] != 0) {
+            $huoltosyklit_laitteet['laite_tunnus'] = $tunnus;
+            lisaa_laitteen_huoltosykli($huoltosyklit_laitteet);
+    }
+        }
+      }
+
+      if ($yhtiorow['laite_huolto'] == 'X' and $onko_toim_laite and empty($errori)) {
+        $asiakas = hae_paikan_asiakas($t['paikka']);
+        $laitteet = hae_laitteet_ja_niiden_huoltosyklit($asiakas['tunnus']);
+        list($huollettavien_laitteiden_huoltosyklirivit, $laitteiden_huoltosyklirivit_joita_ei_huolleta) = paata_mitka_huollot_tehdaan($laitteet);
+        $tyomaarays_kpl = generoi_tyomaaraykset_huoltosykleista($huollettavien_laitteiden_huoltosyklirivit, $laitteiden_huoltosyklirivit_joita_ei_huolleta);
+      }
     }
 
     if ($tunnus > 0 and $toim == "tuotteen_toimittajat_tuotenumerot") {
@@ -1002,8 +1237,15 @@ if ($upd == 1) {
 
     if ($lopetus != '' and (isset($yllapitonappi) or isset($paivita_myos_avoimet_tilaukset))) {
       //unohdetaan tämä jos loopatan takaisin yllapito.php:seen, eli silloin metasta ei ole mitään hyötyä
-      if (strpos($lopetus, "yllapito.php") === FALSE) {
+      //Laite huollossa Tuotteen pikaperustuksessa halutaan laitteen perustukseen ja laitteen perustuksesta
+      //asiakkaan laitehallintaan. Siksi tähän laitettu $yhtiorow['laite_huolto'] == 'X' or jotta toimii.
+      if ($yhtiorow['laite_huolto'] == 'X' or strpos($lopetus, "yllapito.php") === FALSE) {
         $lopetus .= "//yllapidossa=$toim//yllapidontunnus=$tunnus";
+
+        if ($yhtiorow['laite_huolto'] == 'X' and isset($tyomaarays_kpl)) {
+          $lopetus .= "//tyomaarays_kpl={$tyomaarays_kpl}";
+        }
+
         lopetus($lopetus, "META");
       }
     }
@@ -1341,6 +1583,24 @@ for ($i=0; $i<=$count; $i++) {
     }
     elseif (($yhtiorow['livetuotehaku_hakutapa'] == "F" or $yhtiorow['livetuotehaku_hakutapa'] == "G") and $toim == 'tuote' and ($array[$i] == "tuoteno" or $array[$i] == "nimitys") and !$tarkkahaku) {
       $lisa .= " and match ($array[$i]) against ('{$haku[$i]}*' IN BOOLEAN MODE) ";
+    }
+    elseif ($toim == 'huoltosykli' and $array[$i] == 'toimenpide') {
+      $toimenpide_query = " SELECT group_concat(tuoteno) AS tuotenumerot
+                            FROM tuote
+                            WHERE yhtio = '{$kukarow['yhtio']}'
+                            AND nimitys {$hakuehto}";
+      $toimenpide_result = pupe_query($toimenpide_query);
+      $toimenpiteet = mysql_fetch_assoc($toimenpide_result);
+      if ($toimenpiteet['tuotenumerot'] != "") {
+        $toimenpiteet = explode(',', $toimenpiteet['tuotenumerot']);
+        $lisa .= " and {$array[$i]} in ('" . implode("','", $toimenpiteet) . "')";
+      }
+    }
+    elseif ($toim == 'huoltosykli' and $array[$i] == 'huoltovali') {
+      $huoltovalit = huoltovali_options();
+      $huoltovali = search_array_key_for_value_recursive($huoltovalit, 'months', $haku[$i]);
+      $huoltovali = $huoltovali[0];
+      $lisa .= " and {$array[$i]} = '{$huoltovali['days']}'";
     }
     else {
       $lisa .= " and {$array[$i]} {$hakuehto} ";
@@ -1824,14 +2084,44 @@ if ($tunnus == 0 and $uusi == 0 and $errori == '') {
           echo "</a></td>";
         }
         else {
-          if (mysql_field_type($result, $i) == 'real' or mysql_field_type($result, $i) == 'int') {
-            echo "<td style='text-align:right'>$fontlisa1 $trow[$i] $fontlisa2</td>";
+          if ($yhtiorow['laite_huolto'] != 'X' and (mysql_field_type($result, $i) == 'real' or mysql_field_type($result, $i) == 'int')) {
+            echo "<td valign='top' style='text-align:right'>$fontlisa1 $trow[$i] $fontlisa2</td>";
           }
           elseif (mysql_field_name($result, $i) == 'koko') {
             echo "<td>$fontlisa1 ".size_readable($trow[$i])." $fontlisa2</td>";
           }
           elseif (mysql_field_name($result, $i) == 'toim_tuoteno') {
             echo "<td>$fontlisa1 $trow[$i] $fontlisa2</td>";
+          }
+          elseif ($yhtiorow['laite_huolto'] == 'X' and $toim == 'huoltosykli' and mysql_field_name($result, $i) == 'huoltovali') {
+            $huoltovalit = huoltovali_options();
+            $huoltovali = $huoltovalit[$trow[$i]];
+            echo "<td valign='top'>$fontlisa1 {$huoltovali['months']} $fontlisa2</td>";
+          }
+          else if ($yhtiorow['laite_huolto'] == 'X' and $toim == 'tuote' and mysql_field_name($result,$i) == 'liitettavat_huoltosyklit') {
+            $tuote_query = "SELECT laji,
+                            selite
+                            FROM tuotteen_avainsanat
+                            WHERE yhtio = '{$kukarow['yhtio']}'
+                            AND tuoteno = '{$trow['tuoteno']}'
+                            AND laji IN ('sammutin_tyyppi', 'sammutin_koko')";
+            $tuote_result = pupe_query($tuote_query);
+            $sammutin_parametrit = array();
+            while($sammutin_parametri = mysql_fetch_assoc($tuote_result)) {
+              $sammutin_parametrit[$sammutin_parametri['laji']] = $sammutin_parametri['selite'];
+            }
+            $huoltosykli_query = "SELECT *
+                                  FROM huoltosykli
+                                  WHERE yhtio = '{$kukarow['yhtio']}'
+                                  AND tyyppi = '{$sammutin_parametrit['sammutin_tyyppi']}'
+                                  AND koko = '{$sammutin_parametrit['sammutin_koko']}'";
+            $huoltosykli_result = pupe_query($huoltosykli_query);
+            if (mysql_num_rows($huoltosykli_result) != 0) {
+              echo "<td valign='top'>$fontlisa1 ".t('Löytyy')." $fontlisa2</td>";
+            }
+          else {
+              echo "<td valign='top'><font class='error'> ".t('Ei löydy')."</font></td>";
+            }
           }
           else {
 
@@ -1915,6 +2205,7 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
   echo "<input type = 'hidden' name = 'tunnus' value = '$tunnus'>";
   echo "<input type = 'hidden' name = 'lopetus' value = '$lopetus'>";
   echo "<input type = 'hidden' name = 'upd' value = '1'>";
+  echo "<input type = 'hidden' name = 'asiakas_tunnus' value = '$asiakas_tunnus'>";
 
   if (isset($status) and $toim == 'tuote') {
     echo "<input type = 'hidden' name = 'status' value = '$status'>";
@@ -1927,8 +2218,12 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
   $result = pupe_query($query);
   $trow = mysql_fetch_array($result);
 
+  if ($onko_toim_laite) {
+    js_laite();
+    uusi_paikka_dialog('laitehallinta');
+    uusi_paikka_dialog_css();
+  }
   echo "<table><tr><td class='back pnopad ptop'>";
-
   echo "<table>";
 
   if ($uusi == '1' and $toim == 'tuote') {
@@ -1975,9 +2270,18 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
       echo "</tr>";
     }
   }
+  elseif ($uusi == '' and $onko_toim_laite) {
+    echo "<th align='left'>".t("Kopioi")."</th>";
+    echo "<td>";
+    $checked = "";
+    if (!empty($kopioi_rivi)) {
+      $checked = "CHECKED";
+    }
+    echo "<input type='checkbox' name='kopioi_rivi' {$checked} />";
+    echo "</td>";
+  }
 
   for ($i=0; $i < mysql_num_fields($result) - 1; $i++) {
-
     // Intrastat_kurssi kenttä näytetään vain jos yrityksen maa on EE
     if ($yhtiorow['maa'] != 'EE' and mysql_field_name($result, $i) == 'intrastat_kurssi') {
       continue;
@@ -2103,6 +2407,8 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
     // $tyyppi --> 0 riviä ei näytetä ollenkaan
     // $tyyppi --> 1 rivi näytetään normaalisti
     // $tyyppi --> 1.5 rivi näytetään normaalisti ja se on päivämääräkenttä
+    // $tyyppi --> 1.6 rivi näytetään normaalisti ja se on päivämääräkenttä jossa syöttökentät on dropdowneja, $vuosi_vaihteluvali voi rajata dropdownissa näytettäviä vuosia
+    // $tyyppi --> 1.7 rivi näytetään normaalisti ja se on päivämääräkenttä jossa syöttökentät on dropdowneja ja vain kk ja vv näytetään pp on 1, $vuosi_vaihteluvali voi rajata dropdownissa näytettäviä vuosia
     // $tyyppi --> 2 rivi näytetään, mutta sitä ei voida muokata, eikä sen arvoa pävitetä (riviä ei näytetä kun tehdään uusi)
     // $tyyppi --> 3 rivi näytetään, mutta sitä ei voida muokata, mutta sen arvo päivitetään (riviä ei näytetä kun tehdään uusi)
     // $tyyppi --> 4 riviä ei näytetä ollenkaan, mutta sen arvo päivitetään
@@ -2110,9 +2416,12 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
 
     if ($tyyppi == 1 or
       $tyyppi == 1.5 or
+      $tyyppi == 1.6 or
+      $tyyppi == 1.7 or
       ($tyyppi == 2 and $tunnus!="") or
       ($tyyppi == 3 and $tunnus!="")  or
       $tyyppi == 5) {
+      $column_name = mysql_field_name($result, $i);
       echo "<tr>";
 
       $infolinkki = "";
@@ -2132,7 +2441,7 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
       echo $ulos;
     }
     elseif ($tyyppi == 1) {
-      echo "<td><input type = 'text' name = '$nimi' value = '$trow[$i]' size='$size' maxlength='$maxsize'></td>";
+      echo "<td><input type = 'text' class='$otsikko' name = '$nimi' value = '$trow[$i]' size='$size' maxlength='$maxsize'></td>";
     }
     elseif ($tyyppi == 1.5) {
       $vva = substr($trow[$i], 0, 4);
@@ -2140,9 +2449,59 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
       $ppa = substr($trow[$i], 8, 2);
 
       echo "<td>
-          <input type = 'text' name = 'tpp[$i]' value = '$ppa' size='3' maxlength='2'>
-          <input type = 'text' name = 'tkk[$i]' value = '$kka' size='3' maxlength='2'>
-          <input type = 'text' name = 'tvv[$i]' value = '$vva' size='5' maxlength='4'></td>";
+          <input type = 'text' class='{$otsikko}_tpp' name = 'tpp[$i]' value = '$ppa' size='3' maxlength='2'>
+          <input type = 'text' class='{$otsikko}_tkk' name = 'tkk[$i]' value = '$kka' size='3' maxlength='2'>
+          <input type = 'text' class='{$otsikko}_tvv' name = 'tvv[$i]' value = '$vva' size='5' maxlength='4'></td>";
+    }
+    elseif ($tyyppi == 1.6 or $tyyppi == 1.7) {
+      $vva = substr($trow[$i], 0, 4);
+      $kka = substr($trow[$i], 5, 2);
+      $ppa = substr($trow[$i], 8, 2);
+
+      echo "<td>";
+      if ($tyyppi == 1.6) {
+        echo "<select class='{$column_name}_tpp' name='tpp[{$i}]'>";
+        $sel = "";
+        foreach (range(1, 31) as $paiva) {
+          if ($ppa == $paiva) {
+            $sel = "SELECTED";
+          }
+          echo "<option value='{$paiva}' {$sel}>{$paiva}</option>";
+          $sel = "";
+        }
+        echo "</select>";
+      }
+      else {
+        echo "<input type='hidden' class='{$column_name}_tpp' name='tpp[{$i}]' value='1' />";
+      }
+      echo "<select class='{$column_name}_tkk' name='tkk[$i]'>";
+      $sel = "";
+      foreach (range(1, 12) as $kuukausi) {
+        if ($kka == $kuukausi) {
+          $sel = "SELECTED";
+        }
+        echo "<option value='{$kuukausi}' {$sel}>{$kuukausi}</option>";
+        $sel = "";
+      }
+      echo "</select>";
+      echo "<select class='{$column_name}_tvv' name='tvv[$i]'>";
+      $sel = "";
+      if (empty($vuosi_vaihteluvali)) {
+        $vuosi_vaihteluvali['min'] = 1970;
+        $vuosi_vaihteluvali['max'] = date('Y', strtotime('now + 4 years'));
+      }
+      if ($vva === false) {
+        $vva = date('Y');
+      }
+      foreach (range($vuosi_vaihteluvali['min'], $vuosi_vaihteluvali['max']) as $vuosi) {
+        if ($vva == $vuosi) {
+          $sel = "SELECTED";
+        }
+        echo "<option value='{$vuosi}' {$sel}>{$vuosi}</option>";
+        $sel = "";
+      }
+      echo "</select>";
+      echo "</td>";
     }
     elseif ($tyyppi == 2 and $tunnus != "") {
       echo "<td>$trow[$i]</td>";
@@ -2160,7 +2519,7 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
         echo "<a href='view.php?id=".$trow[$i]."' target='Attachment'>".t("Näytä liitetiedosto")."</a><input type = 'hidden' name = '$nimi' value = '$trow[$i]'> ".("Poista").": <input type = 'checkbox' name = 'poista_liite[$i]' value = '$trow[$i]'>";
       }
       else {
-        echo "<input type = 'text' name = '$nimi' value = '$trow[$i]'>";
+        echo "<input type = 'text' class='{$otsikko}' name = '$nimi' value = '$trow[$i]'>";
       }
 
       echo "<input type = 'file' name = 'liite_$i'></td>";
@@ -2178,6 +2537,88 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
       echo "</tr>";
     }
   }
+
+  if ($onko_toim_laite) {
+    echo "<tr>";
+    echo "<th>".t('Käytä kohteen suosituinta päivää')."</th>";
+    echo "<td><button id='suosituimmat_paivat' type='button'>".t('Käytä')."</button></td>";
+    echo "</tr>";
+    $toimenpide_tyypit = hae_toimenpide_tyypit();
+
+    $request = array(
+      'tuoteno'      => $t[1],
+    );
+    foreach ($toimenpide_tyypit as $toimenpide_tyyppi) {
+      $request['tapahtuman_suosituin_paiva'] = hae_suosituin_tapahtumapaiva($valittu_kohde, $toimenpide_tyyppi);
+      huoltosykli_rivi($toimenpide_tyyppi, $request);
+    }
+  }
+
+  if ($yhtiorow['laite_huolto'] == 'X' and stristr($toim, 'tuote')) {
+    $tuote_query = "SELECT selite
+                    FROM tuotteen_avainsanat
+                    WHERE yhtio = '{$kukarow['yhtio']}'
+                    AND tuoteno = '{$trow['tuoteno']}'
+                    AND laji = 'sammutin_tyyppi'
+                    LIMIT 1";
+    $tuote_result = pupe_query($tuote_query);
+    $tuote_row = mysql_fetch_assoc($tuote_result);
+    $sammutin_tyypit = hae_mahdolliset_sammutin_tyypit();
+    array_unshift($sammutin_tyypit, t("Ei tyyppiä"));
+    echo "<tr>";
+    echo "<th>".t('Tyyppi')."</th>";
+    echo "<td>";
+    echo "<select name='sammutin_tyyppi'>";
+    $sel = '';
+    foreach ($sammutin_tyypit as $key => $sammutin_tyyppi) {
+      if ($tuote_row['selite'] == $key) {
+        $sel = "SELECTED";
+      }
+      echo "<option value='{$key}' {$sel}>".ucfirst($sammutin_tyyppi)."</option>";
+      $sel = '';
+    }
+    echo "</select>";
+    echo "</td>";
+    echo "</tr>";
+
+    $tuote_query = "SELECT selite
+                    FROM tuotteen_avainsanat
+                    WHERE yhtio = '{$kukarow['yhtio']}'
+                    AND tuoteno = '{$trow['tuoteno']}'
+                    AND laji = 'sammutin_koko'
+                    LIMIT 1";
+    $tuote_result = pupe_query($tuote_query);
+    $tuote_row = mysql_fetch_assoc($tuote_result);
+
+    echo "<tr>";
+    echo "<th>".t('Koko')."</th>";
+    echo "<td>";
+    echo "<input type='text' name='sammutin_koko' value='{$tuote_row['selite']}' />";
+    echo "</td>";
+    echo "</tr>";
+
+    $erikois_tuotteet = hae_erikoistuotteet();
+    array_unshift($erikois_tuotteet, t('Ei erikoistuote'));
+    echo "<tr>";
+    echo "<th>" . t('Erikoistuote') . "</th>";
+    echo "<td>";
+    echo "<select name='malli'>";
+    $sel = "";
+    if (!isset($malli)) {
+      $malli = $trow['malli'];
+    }
+    foreach ($erikois_tuotteet as $key => $erikois_tuote) {
+      if ($malli == $key) {
+        $sel = "SELECTED";
+      }
+      echo "<option value='{$key}' {$sel}>{$erikois_tuote}</option>";
+      $sel = "";
+    }
+    echo "</select>";
+    echo "</td>";
+    echo "</tr>";
+  }
+
   echo "</table>";
 
   if ($uusi == 1) {
@@ -2529,8 +2970,19 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
 
   echo "</td></tr>";
 
+  $saako_poistaa = true;
+  if ($yhtiorow['laite_huolto'] == 'X') {
+    $poistamattomat = array('kohde', 'tuote', 'paikka', 'laite', 'asiakas');
+    $_onko_admin = stristr($kukarow['profiilit'], 'admin');
+    $_ei_saa_poistaa = (in_array($toim, $poistamattomat) or $onko_toim_laite);
+    if (!$_onko_admin and $_ei_saa_poistaa) {
+      $saako_poistaa = false;
+    }
+  }
+
   // Määritellään mitä tietueita saa poistaa
-  if ($toim == "auto_vari" or
+  if ($saako_poistaa or
+    $toim == "auto_vari" or
     $toim == "auto_vari_tuote" or
     $toim == "auto_vari_korvaavat" or
     $toim == "autoid_lisatieto" or
@@ -2569,6 +3021,8 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
     $toim == "hyvityssaannot" or
     $toim == "varaston_hyllypaikat" or
     $toim == "tuotteen_orginaalit" or
+    $toim == "huoltosykli" or
+    $toim == "huoltosyklit_laitteet" or
     $toim == "yhtion_toimipaikat_parametrit" or
     $toim == "kohde" or
     ($toim == "liitetiedostot" and $poistolukko == "") or
@@ -2654,6 +3108,21 @@ elseif ($toim != "yhtio" and $toim != "yhtion_parametrit"  and $uusilukko == "" 
       <input type = 'hidden' name = 'lopetus' value = '$lopetus'>
       <input type = 'hidden' name = 'uusi' value = '1'>
       <input type = 'submit' value = '".t("Uusi $otsikko_nappi")."'></form>";
+}
+
+//redirect funktio kutsu pitää olla tässä,
+//koska jos updatesta tulee virheitä niin ne pitää händälätä ja passata redirect funkkarille,
+//jotta osataan echottaa / jättää echottama redirecti
+$funktio = "echo_" . $toim . "_redirect";
+
+if (function_exists($funktio)) {
+  $params = array(
+    'redirect_to'     => $redirect_to,
+    'errori'          => $errori,
+    'valittu_asiakas' => $valittu_asiakas,
+  );
+
+  $funktio($params);
 }
 
 if ($from == "yllapito") {

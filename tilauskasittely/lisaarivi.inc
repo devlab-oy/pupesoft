@@ -2152,9 +2152,15 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
 
                 $autoid = !empty($autoid) ? $autoid : 0;
 
+                $asiakkaan_positio = "";
+                if (!empty($_SESSION['laite_tunnus'])) {
+                  $asiakkaan_positio = "asiakkaan_positio = '{$_SESSION['laite_tunnus']}',";
+                }
+
                 $query = "INSERT INTO tilausrivin_lisatiedot
                           SET yhtio = '{$kukarow['yhtio']}',
                           positio                = '{$positio}',
+                          {$asiakkaan_positio}
                           toimittajan_tunnus     = '{$toimittajan_tunnus}',
                           ei_nayteta             = '{$myy_lapsi_ein[$indeksi]}',
                           tilausrivitunnus       = '{$lisatty_tun}',
@@ -3513,9 +3519,15 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
 
       $autoid = !empty($autoid) ? $autoid : 0;
 
+      $asiakkaan_positio = "";
+      if (!empty($_SESSION['laite_tunnus'])) {
+        $asiakkaan_positio = "asiakkaan_positio = '{$_SESSION['laite_tunnus']}',";
+      }
+
       $query = "INSERT INTO tilausrivin_lisatiedot
                 SET yhtio      = '$kukarow[yhtio]',
                 positio            = '{$positio}',
+                {$asiakkaan_positio}
                 toimittajan_tunnus = '$toimittajan_tunnus',
                 {$kohde_varasto_update}
                 tilausrivitunnus   = '$lisatty_tun',

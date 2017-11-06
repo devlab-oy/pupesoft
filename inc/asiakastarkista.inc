@@ -58,7 +58,7 @@ if (!function_exists("asiakastarkista")) {
       $ytunnus = $t[$i];
       $ytunnus_tunnus = $i;
 
-      if ($ytunnus == "") {
+      if ($ytunnus == "" and $yhtiorow['laite_huolto'] != 'X') {
         $virhe[$i] = t("Y-tunnus puuttuu")."!";
       }
       elseif ($yhtiorow["myyntitilaus_saatavat"] == "Y") {

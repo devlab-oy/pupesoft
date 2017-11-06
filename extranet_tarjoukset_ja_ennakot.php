@@ -543,18 +543,6 @@ function hae_extranet_tarjous($tunnus, $toim) {
   return mysql_fetch_assoc($result);
 }
 
-function hae_extranet_kayttajaan_liitetty_asiakas() {
-  global $kukarow, $yhtiorow;
-
-  $query = "SELECT asiakas.*
-            FROM asiakas
-            JOIN kuka ON ( kuka.yhtio = asiakas.yhtio AND kuka.oletus_asiakas = asiakas.tunnus AND kuka.extranet = 'X' AND kuka.kuka = '{$kukarow['kuka']}' )
-            WHERE asiakas.yhtio = '{$kukarow['yhtio']}'";
-  $result = pupe_query($query);
-
-  return mysql_fetch_assoc($result);
-}
-
 function nayta_tarjous($valittu_tarjous_tunnus, $toim) {
   global $kukarow, $yhtiorow;
 

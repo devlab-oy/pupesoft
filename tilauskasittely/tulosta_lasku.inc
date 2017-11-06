@@ -3426,12 +3426,25 @@ if (!function_exists("tulosta_lasku")) {
       // otetaan tämä talteen jotta saadaan vientierittely
       $GLOBALS['vientierittelykomento'] = $komento;
 
+      // Etsitään kassalippaan email
+      $query = "SELECT email
+                FROM kassalipas
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND tunnus  = '{$laskurow['kassalipas']}'";
+
+      $result = pupe_query($query);
+      $trow = mysql_fetch_assoc($result);
+      $to_email = $trow['email'];
+
       if (($komento == "email" and $kukarow["eposti"] != '') or substr($komento, 0, 12) == 'asiakasemail') {
         // lähetetään meili
         $kutsu = $laskuvaikuitti." ".$laskurow["laskunro"];
 
         if ($yhtiorow["liitetiedostojen_nimeaminen"] == "N") {
           $kutsu .= ", ".trim($laskurow["nimi"]);
+        }
+        if (empty($to_email)) {
+          $to_email = $kukarow["eposti"];
         }
 
         $_attachments = array(0 => array(
@@ -3441,7 +3454,7 @@ if (!function_exists("tulosta_lasku")) {
         );
         // Sähköpostin lähetykseen parametrit
         $parametri = array(
-          "to"           => $kukarow["eposti"],
+          "to"           => $to_email,
           "cc"           => $sahkoposti_cc,
           "subject"      => $yhtiorow['nimi']." - ".$kutsu,
           "ctype"        => $content_body_ctype,

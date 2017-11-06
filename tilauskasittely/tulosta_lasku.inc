@@ -3434,12 +3434,22 @@ if (!function_exists("tulosta_lasku")) {
           $kutsu .= ", ".trim($laskurow["nimi"]);
         }
 
-        $liite = $pdf_laskufilenimi;
-        $sahkoposti_cc = "";
-        $content_subject = "";
-        $content_body = "";
+        $_attachments = array(0 => array(
+            "filename"        => $pdf_laskufilenimi,
+            "newfilename"     => $kutsu.".pdf",
+            "ctype"           => "pdf")
+        );
+        // Sähköpostin lähetykseen parametrit
+        $parametri = array(
+          "to"           => $kukarow["eposti"],
+          "cc"           => $sahkoposti_cc,
+          "subject"      => $yhtiorow['nimi']." - ".$kutsu,
+          "ctype"        => $content_body_ctype,
+          "body"         => $ulos,
+          "attachements" => $_attachments,
+        );
 
-        include "inc/sahkoposti.inc";
+        pupesoft_sahkoposti($parametri);
       }
       elseif ($komento != "" and $komento != "email") {
         // itse print komento...

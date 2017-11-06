@@ -55,6 +55,8 @@ $laskun_tilausviite = xml_string($xml->InvoiceDetails->AgreementIdentifier);
 $laskun_asiakkaan_tilausnumero = xml_string($xml->InvoiceDetails->OrderIdentifier);
 $kauttalaskutus = xml_string($xml->DeliveryDetails->TerminalAddressText);
 $laskun_toimitunnus = xml_string($xml->SellerPartyDetails->SellerPupesoftId);
+$tilausyhteyshenkilo = xml_string($xml->BuyerContactPersonName);
+$laskuttajan_email = xml_string($xml->SellerCommunicationDetails->SellerEmailaddressIdentifier);
 
 $toim_asiakkaantiedot = array();
 $toim_asiakkaantiedot["toim_ovttunnus"] = xml_string($xml->DeliveryOrganisationUnitNumber);
@@ -64,6 +66,17 @@ $toim_asiakkaantiedot["osoite"] = xml_string($xml->DeliveryPartyDetails->Deliver
 $toim_asiakkaantiedot["postino"] = xml_string($xml->DeliveryPartyDetails->DeliveryPostalAddressDetails->DeliveryPostCodeIdentifier);
 $toim_asiakkaantiedot["postitp"] = xml_string($xml->DeliveryPartyDetails->DeliveryPostalAddressDetails->DeliveryTownName);
 
+// Finvoicen kauttalaskutuksessa otetaan asiakasnumero toimitusasiakkaan nimen perästä
+$asiakasnumero = explode(" ", $toim_asiakkaantiedot["nimi"]);
+$asiakasnumero = end($asiakasnumero);
+
+if (substr($asiakasnumero, 0, 2) == "ET") {
+  $asiakasnumero = substr($asiakasnumero, 2);
+  $toim_asiakkaantiedot["asiakasnumero"] = $asiakasnumero;
+}
+
+unset($asiakasnumero);
+
 $ostaja_asiakkaantiedot = array();
 $ostaja_asiakkaantiedot["toim_ovttunnus"] = xml_string($xml->BuyerOrganisationUnitNumber);
 $ostaja_asiakkaantiedot["ytunnus"] = xml_string($xml->BuyerPartyDetails->BuyerPartyIdentifier);
@@ -71,6 +84,14 @@ $ostaja_asiakkaantiedot["nimi"] = xml_string($xml->BuyerPartyDetails->BuyerOrgan
 $ostaja_asiakkaantiedot["osoite"] = xml_string($xml->BuyerPartyDetails->BuyerPostalAddressDetails->BuyerStreetName);
 $ostaja_asiakkaantiedot["postino"] = xml_string($xml->BuyerPartyDetails->BuyerPostalAddressDetails->BuyerPostCodeIdentifier);
 $ostaja_asiakkaantiedot["postitp"] = xml_string($xml->BuyerPartyDetails->BuyerPostalAddressDetails->BuyerTownName);
+
+// Parsitaan mahdolliset tiedot kommenttikentästä
+$kommenttiteksti = xml_string($xml->InvoiceDetails->InvoiceFreeText);
+$matches         = array();
+
+if (preg_match('/Kohde:\s?(.*?)\s?##/', $kommenttiteksti, $matches)) {
+  $kohde = $matches[1];
+}
 
 if ($laskuttajan_vat == "" and $laskuttajan_identifier != "") {
   $laskuttajan_vat = $laskuttajan_identifier;

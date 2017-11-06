@@ -57,6 +57,19 @@ if (!function_exists('alku')) {
 
     tulosta_logo_pdf($pdf_lasku, $page_lasku[$sivu], $laskurow);
 
+    $logo_text = t_avainsana('LASKU_LOGO_TEXT', '', '', '', '', $return = "selitetark");
+
+    if ($logo_text) {
+      $logo_text      = wordwrap($logo_text, 50);
+      $logo_text      = explode("\n", $logo_text);
+      $logotekstikala = 765;
+
+      foreach ($logo_text as $tekstirivi) {
+        $pdf_lasku->draw_text(40, $logotekstikala, $tekstirivi, $page_lasku[$sivu], $norm);
+        $logotekstikala -= 10;
+      }
+    }
+
     if (!empty($laskurow['laskupohjateksti'])) {
       $redboldi["height"] = 8;
       $redboldi["font"] = "Times-Bold";

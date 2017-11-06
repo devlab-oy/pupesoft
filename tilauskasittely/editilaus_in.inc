@@ -34,10 +34,16 @@ if ($php_cli) {
   $editilaus_var_h  = trim($argv[3]);
 
   $verkkokauppa_filename = strtolower(basename($filename));
+  $verkkokauppa_filenamet = "/^(anvia|finvoice|magento|presta)\-order/";
 
   // tunnistetaan magento -tyyppinen käsittely tiedostonimestä
   if ($edi_tyyppi == 'futursoft' and preg_match("/^magento\-order/", $verkkokauppa_filename) === 1) {
     $edi_tyyppi = 'magento';
+  }
+
+  if (substr(strtolower(basename($filename)), 0, 14) == "finvoice-order") {
+    $tilauksen_lahde        = "finvoice";
+    $asiakastiedot_kannasta = true;
   }
 
   // tunnistetaan presta -tyyppinen käsittely tiedostonimestä
@@ -135,7 +141,7 @@ if (!function_exists('hae_erikoiskaupan_parametrit')) {
 
 if (!function_exists('hae_yhtiotiedot')) {
   function hae_yhtiotiedot($tieto) {
-    global $yhtiorow, $kukarow, $edi_ulos, $php_cli, $argv, $editil_cli;
+    global $yhtiorow, $kukarow, $edi_ulos, $php_cli, $argv, $editil_cli, $edi_laatija;
 
     $query = "SELECT * FROM yhtio WHERE ovttunnus = '$tieto' and ovttunnus != ''";
     $result = pupe_query($query);
@@ -308,6 +314,10 @@ $editilaus_hakemisto = dirname(realpath($filename));
 if ($edi_tyyppi == "futursoft") {
   $edi_subj = "Sisääntuleva Futursoft-tilaus";
   $edi_laatija = "FuturSoft";
+}
+elseif ($edi_tyyppi == "magento" and $tilauksen_lahde == "finvoice") {
+  $edi_subj = "Sisääntuleva Finvoice-tilaus";
+  $edi_laatija = "Finvoice";
 }
 elseif ($edi_tyyppi == "ahkio") {
   $edi_subj = "Sisääntuleva Ahkio -tilaus";
@@ -644,6 +654,8 @@ while ($tietue = fgets($fd)) {
 
   case 'OBGMINUMB' :
   case 'OSTOTIL.OT_NRO' :
+    if ($tilauksen_lahde == "finvoice") break;
+
     //Asiakkkaan tilausnumero
     $asiakkaan_tilausnumero = $tieto;
     $viite = $tieto. ' '; // laitetaan asiakkaan tilausnumero talteen myös tilausviite-kenttään
@@ -769,6 +781,19 @@ while ($tietue = fgets($fd)) {
         }
         // Koontikeississä ei haluta enää jatkaa ettei vahingossa ylikirjoiteta tilaavaa asiakasta
         break;
+      }
+    }
+
+    if ($tilauksen_lahde == "finvoice" and !empty($kukarow) and !empty($tieto)) {
+      $query = "SELECT *
+                FROM asiakas
+                WHERE yhtio = '{$kukarow["yhtio"]}'
+                AND asiakasnro = '{$tieto}'";
+      $result = pupe_query($query);
+
+      if (mysql_num_rows($result) == 1) {
+        $arow = mysql_fetch_assoc($result);
+        $edi_ulos .= "{$arow["nimi"]} {$arow["nimitark"]} {$arow["toim_nimi"]} {$arow["toim_nimitark"]} {$arow["toim_postitp"]}\n";
       }
     }
 
@@ -945,7 +970,13 @@ while ($tietue = fgets($fd)) {
     break;
 
   case 'OSTOTIL.OT_YHTEYSHENKILO':
-    $lnimi = trim($tieto);
+    if ($tilauksen_lahde == "finvoice") {
+      $tilausyhteyshenkilo = trim($tieto);
+    }
+    else {
+      $lnimi = trim($tieto);
+    }
+
     break;
 
   case 'OSTOTIL.OT_HYVAKSYTTAVA':
@@ -1086,8 +1117,16 @@ while ($tietue = fgets($fd)) {
     break;
 
   case 'OSTOTIL.OT_TOIMITUS_EMAIL' :
-    // toimitusosoitteen email
-    $ltoim_email = trim($tieto);
+    if ($tilauksen_lahde == "finvoice") {
+      // Finvoicen tapauksessa laskuttajan email otetaan toimitusemail kentästä, jotta saadaan
+      // tilausvahvistus oikeaan osoitteeseen
+      $laskuttajan_email = trim($tieto);
+    }
+    else {
+      // toimitusosoitteen email
+      $ltoim_email = trim($tieto);
+    }
+
     break;
 
   case 'OSTOTIL.OT_YHTEYSHENKILONPUH' :
@@ -1205,6 +1244,12 @@ while ($tietue = fgets($fd)) {
     break;
 
   case 'OSTOTIL.OT_VIITTEENNE':
+    // Finvoicessa halutaan tämä tieto tilausviitteeseen
+    if ($tilauksen_lahde == "finvoice") {
+      $viite = trim($tieto);
+      break;
+    }
+
     // halutaan futur ja magento-aineistoista tämä tieto sisviesti2-kenttään
     $orig_tieto = pupesoft_cleanstring($orig_tieto, array(";"));
     $lopviesti = trim($orig_tieto);
@@ -1264,7 +1309,7 @@ while ($tietue = fgets($fd)) {
       $maksaja = $apuro['merahti'];
 
       // Verkkokauppatilauksissa luotamme tiedoston laskutustietoihin
-      if ($edi_tyyppi == "magento") {
+      if ($edi_tyyppi == "magento" and $tilauksen_lahde != "finvoice") {
         $arow["nimi"]       = $lnimi;
         $arow["nimitark"]   = $lnimitark;
         $arow["osoite"]     = $losoite;
@@ -1440,14 +1485,20 @@ while ($tietue = fgets($fd)) {
 
       // katsotaan magentotilauksilta tilaustyyppi
       if ($edi_tyyppi == "magento" and $editilaus_tilaustyyppi != "") {
-        // tyyppi 9, ohitetaan aina varastoprosessi ja aina sisäinen
-        if ($editilaus_tilaustyyppi == "9") {
+        switch ($editilaus_tilaustyyppi) {
+          // tyyppi 9, ohitetaan aina varastoprosessi ja aina sisäinen
+        case "9":
           $editilaus_eilahetetta = "o";
           $editilaus_sisainen = "o";
-        }
-        elseif ($editilaus_tilaustyyppi == 'K') {
-          $editilaus_tila   = 'N';
-          $editilaus_alatila   = '';
+          break;
+        case "K":
+          $editilaus_tila = 'N';
+          $editilaus_alatila = '';
+          break;
+        case "D":
+          $editilaus_tila = "L";
+          $editilaus_alatila = "D";
+          break;
         }
       }
 
@@ -2134,6 +2185,10 @@ while ($tietue = fgets($fd)) {
     break;
 
   case 'OSTOTILRIV.OTR_OSTOHINTA' :
+    if ($tilauksen_lahde == "finvoice") {
+      $kappalehinta_edista = (float) trim(str_replace(",", ".", $tieto));
+    }
+
     // Kun tullaan magentosta ja meillä on rahtikulu, niin otetaan hinta talteeen
     // TAI kun tullaan magentosta ja me luotetaan verkkokaupan hintoihin.
     if ($edi_tyyppi == "magento" and ((isset($verkkokauppa_hinnatedifailista) and $verkkokauppa_hinnatedifailista == "JOO") or strtolower($tuoteno) == strtolower($yhtiorow['rahti_tuotenumero'])) and $tieto != '') {
@@ -2336,8 +2391,8 @@ while ($tietue = fgets($fd)) {
           }
 
           // Magento-tilauksessa katsotaan onko tilattavalla tuotteella saldoa.
-          // Jos tilattu kpl-määrä on suurempi kuin myytävissä oleva kpl-määrä, niin pakotetaan rivi hyväksytyksi tai jälkkäriksi
-          if ($edi_tyyppi == "magento" and $tuoteno != '' and $kpl > 0 and $trow["ei_saldoa"] == "") {
+          // Jos tilattu kpl-määrä on suurempi kuin myytävissä oleva kpl-määrä, niin pakotetaan rivi hyväksytyksi
+          if ($edi_tyyppi == "magento" and $tuoteno != '' and $kpl > 0 and $trow["ei_saldoa"] == "" and $tilauksen_lahde != "finvoice") {
 
             list($chk_saldo, $chk_hyllyssa, $chk_myytavissa, $chk_true) = saldo_myytavissa($tuoteno, "", $verkkokauppavarasto);
 

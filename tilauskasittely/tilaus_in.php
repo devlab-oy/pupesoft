@@ -78,6 +78,15 @@ if (move_uploaded_file($_FILES['userfile']['tmp_name'], $filename)) {
     echo "</pre>";
   }
 
+  if ($tyyppi == 'finvoice') {
+    // tarvitaan $filename
+    echo "<pre>";
+    $edi_tyyppi = "magento";
+    $tilauksen_lahde = "finvoice";
+    require "editilaus_in.inc";
+    echo "</pre>";
+  }
+
   if ($tyyppi == 'edifact911') {
     // tarvitaan $filename
     echo "<pre>";
@@ -120,6 +129,7 @@ else {
          <option value='ahkio'>Ahkio</option>
          <option value='futursoft'>Futursoft</option>
          <option value='magento'>Magento</option>
+         <option value='finvoice'>Finvoice</option>
          <option value='presta'>PrestaShop</option>
          <option value='woo'>WooCommerce</option>
          <option value='pos'>".t("Kassap‰‰te")."</option>

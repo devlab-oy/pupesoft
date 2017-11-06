@@ -21,16 +21,29 @@ class Edi {
     $rahtikulu_nimitys             = $options['rahtikulu_nimitys'];
     $verkkokauppa_erikoiskasittely = $options['erikoiskasittely'];
 
-    if (empty($magento_api_ht_edi) or empty($ovt_tunnus) or empty($pupesoft_tilaustyyppi)) {
-      die("Parametrej‰ puuttuu\n");
-    }
+    // Oletuksena "magento"
+    $tyyppi = empty($options['tyyppi']) ? "magento" : $options['tyyppi'];
 
-    if (empty($verkkokauppa_asiakasnro) or empty($rahtikulu_tuoteno) or empty($rahtikulu_nimitys)) {
-      die("Parametrej‰ puuttuu\n");
-    }
+    if ($tyyppi == "magento") {
+      if (empty($magento_api_ht_edi) or empty($ovt_tunnus) or empty($pupesoft_tilaustyyppi)) {
+        die("Parametrej‰ puuttuu\n");
+      }
 
-    if (!is_writable($magento_api_ht_edi)) {
-      die("EDI -hakemistoon ei voida kirjoittaa\n");
+      if (empty($verkkokauppa_asiakasnro) or empty($rahtikulu_tuoteno) or empty($rahtikulu_nimitys)) {
+        die("Parametrej‰ puuttuu\n");
+      }
+
+      if (!is_writable($magento_api_ht_edi)) {
+        die("EDI -hakemistoon ei voida kirjoittaa\n");
+      }
+
+      $viitteenne    = $storenimi;
+      $yhteyshenkilo = "{$order["billing_address"]["lastname"]} " .
+                       "{$order['billing_address']['firstname']}";
+    }
+    else {
+      $viitteenne    = $order["laskun_numero"];
+      $yhteyshenkilo = $order["tilausyhteyshenkilo"];
     }
 
     // Tilauksella k‰ytetyt lahjakortit ei saa vehent‰‰ myynti pupen puolella
@@ -175,7 +188,7 @@ class Edi {
     $edi_order .= "OSTOTIL.OT_MAKSETTU:{$order['status']}\n";
     $edi_order .= "OSTOTIL.OT_MAKSUEHTO:{$maksuehto}\n";
     $edi_order .= "OSTOTIL.OT_VIITTEEMME:\n";
-    $edi_order .= "OSTOTIL.OT_VIITTEENNE:\n";
+    $edi_order .= "OSTOTIL.OT_VIITTEENNE:{$viitteenne}\n";
     $edi_order .= "OSTOTIL.OT_TILAUSVIESTI:{$order['customer_note']}\n";
     $edi_order .= "OSTOTIL.OT_VEROMAARA:{$order['tax_amount']}\n";
     $edi_order .= "OSTOTIL.OT_SUMMA:{$grand_total}\n";
@@ -299,7 +312,7 @@ class Edi {
       $rahti = $order['shipping_amount'] + $order['shipping_tax_amount'];
 
       // Rahtin alviprossa
-      $rahti_alvpros = round((($rahti / $rahti_veroton) - 1) * 100);
+      $rahti_alvpros = round((($rahti / $order['shipping_amount']) - 1) * 100);
 
       if (!empty($order['shipping_description_line'])) {
         $rahtikulu_nimitys .= " / {$order['shipping_description_line']}";
@@ -312,8 +325,8 @@ class Edi {
       $edi_order .= "OSTOTILRIV.OTR_TUOTEKOODI:{$rahtikulu_tuoteno}\n";
       $edi_order .= "OSTOTILRIV.OTR_NIMI:{$rahtikulu_nimitys}\n";
       $edi_order .= "OSTOTILRIV.OTR_TILATTUMAARA:1\n";
-      $edi_order .= "OSTOTILRIV.OTR_RIVISUMMA:{$rahti_veroton}\n";
-      $edi_order .= "OSTOTILRIV.OTR_OSTOHINTA:{$rahti_veroton}\n";
+      $edi_order .= "OSTOTILRIV.OTR_RIVISUMMA:{$order['shipping_amount']}\n";
+      $edi_order .= "OSTOTILRIV.OTR_OSTOHINTA:{$order['shipping_amount']}\n";
       $edi_order .= "OSTOTILRIV.OTR_ALENNUS:0\n";
       $edi_order .= "OSTOTILRIV.OTR_VEROKANTA:{$rahti_alvpros}\n";
       $edi_order .= "OSTOTILRIV.OTR_VIITE:{$rahtikulu_nimitys}\n";
@@ -330,10 +343,17 @@ class Edi {
       $edi_order = iconv("UTF-8", "ISO-8859-1//TRANSLIT", $edi_order);
     }
 
-    $name_prefix = "magento-order-{$order['increment_id']}-".date("Ymd")."-";
-    $file_dir    = $magento_api_ht_edi;
-    $filename    = tempnam($file_dir, $name_prefix);
-    unlink($filename);
+    if ($tyyppi == "finvoice") {
+      $polku    = "{$GLOBALS["pupe_root_polku"]}/datain/finvoice-orders";
+      $filenimi = "finvoice-order-{$order['increment_id']}-".date("Ymd")."-".md5(uniqid(rand(), true));
+      $filename = "{$polku}/{$filenimi}";
+    }
+    else {
+      $name_prefix = "magento-order-{$order['increment_id']}-".date("Ymd")."-";
+      $file_dir    = $magento_api_ht_edi;
+      $filename    = tempnam($file_dir, $name_prefix);
+      unlink($filename);
+    }
 
     file_put_contents("{$filename}.txt", $edi_order);
 

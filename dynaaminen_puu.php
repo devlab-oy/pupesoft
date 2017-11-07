@@ -89,7 +89,7 @@ if (isset($_REQUEST["ajax"]) and $_REQUEST["ajax"] == "OK") {
     $query = "SELECT *
               FROM liitetiedostot
               WHERE yhtio = '{$kukarow['yhtio']}'
-              AND liitos = 'dymaaminen_puu'
+              AND liitos = 'dynaaminen_puu'
               AND liitostunnus = '$nodeid'";
     $dpliitteet_res = pupe_query($query);
 
@@ -224,7 +224,7 @@ if (isset($_REQUEST["ajax"]) and $_REQUEST["ajax"] == "OK") {
           exit;
         }
         elseif ($tee == 'lisaa_liite' and !empty($liite_selite) and !empty($toim) and empty($liitteen_tunnus)) {
-          tallenna_liite("liite_data", "dymaaminen_puu", $nodeid, $liite_selite, $liite_kayttotarkoitus);
+          tallenna_liite("liite_data", "dynaaminen_puu", $nodeid, $liite_selite, $liite_kayttotarkoitus);
           exit;
         }
         elseif ($tee == 'lisaa_liite' and !empty($liite_selite) and !empty($toim) and !empty($liitteen_tunnus)) {
@@ -232,7 +232,7 @@ if (isset($_REQUEST["ajax"]) and $_REQUEST["ajax"] == "OK") {
                     selite           = '{$liite_selite}',
                     kayttotarkoitus  = '{$liite_kayttotarkoitus}'
                     WHERE yhtio      = '{$kukarow['yhtio']}'
-                    AND liitos       = 'dymaaminen_puu'
+                    AND liitos       = 'dynaaminen_puu'
                     AND liitostunnus = '$nodeid'
                     AND tunnus       = '{$liitteen_tunnus}'";
           pupe_query($query);
@@ -741,7 +741,7 @@ if (isset($_REQUEST["ajax"]) and $_REQUEST["ajax"] == "OK") {
     $query = "SELECT *
               FROM liitetiedostot
               WHERE yhtio      = '{$kukarow['yhtio']}'
-              AND liitos       = 'dymaaminen_puu'
+              AND liitos       = 'dynaaminen_puu'
               AND liitostunnus = '{$nodeid}'";
     $dpliitteet_res = pupe_query($query);
 

@@ -124,7 +124,7 @@ function hae_tiedostot($params) {
               FROM kuka
               JOIN asiakas ON (asiakas.yhtio = kuka.yhtio and asiakas.tunnus = kuka.oletus_asiakas)
               JOIN puun_alkio ON (puun_alkio.yhtio = asiakas.yhtio and puun_alkio.liitos = asiakas.tunnus)
-              JOIN liitetiedostot ON (liitetiedostot.yhtio = puun_alkio.yhtio and liitetiedostot.liitostunnus = puun_alkio.puun_tunnus)
+              JOIN liitetiedostot ON (liitetiedostot.yhtio = puun_alkio.yhtio and liitetiedostot.liitostunnus = puun_alkio.puun_tunnus and liitetiedostot.liitos = 'dynaaminen_puu')
               WHERE kuka.yhtio = '{$kukarow["yhtio"]}' and kuka.tunnus = '{$kukarow["tunnus"]}')";
   }
 

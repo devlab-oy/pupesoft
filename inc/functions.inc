@@ -4925,7 +4925,7 @@ if (!function_exists("alehinta")) {
       // Tarkistetaan vielä luetaanko piiri asiakkaalta vaiko tilaukselta
       $piiricheck = t_avainsana("PIIRI_ALENNUS", "", "and selitetark = 'T'", "", "", "selitetark");
 
-      if ($piiricheck) {
+      if ($piiricheck and !empty($laskurow['piiri'])) {
         $alehi_asrow['piiri'] = $laskurow['piiri'];
       }
 

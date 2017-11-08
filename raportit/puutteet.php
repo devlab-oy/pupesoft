@@ -47,10 +47,26 @@ if ($tee != '') {
   $sellisa     = "";
   $rivilisa     = "";
 
-  if ((int) $asiakasid > 0) {
-    echo "<table><tr><th>".t("Asiakas")."</th><td colspan='3'>$asiakasrow[nimi] $asiakasrow[nimitark] $asiakasrow[asiakasnro]<input type='hidden' name='asiakasid' value='$asiakasid'></td></tr></table><br>";
+  if ($alatila == "T") {
+    $_grouplisa = ",lasku.liitostunnus";
+    $_orderlisa = ",asiakas.asiakasnro";
+    $_asiakasrajausinfo = $asiakasrow['asiakasnro'];
+  }
+  else {
+    $_grouplisa = ",lasku.ytunnus";
+    $_orderlisa = ",lasku.ytunnus";
+    $_asiakasrajausinfo = $asiakasrow['ytunnus'];
+  }
 
-    $lisaasiakas = " and lasku.liitostunnus='$asiakasid' ";
+  if ((int) $asiakasid > 0) {
+    echo "<table><tr><th>".t("Asiakas")."</th><td colspan='3'>$asiakasrow[nimi] $asiakasrow[nimitark] $_asiakasrajausinfo<input type='hidden' name='asiakasid' value='$asiakasid'></td></tr></table><br>";
+
+    if ($alatila == "T") {
+      $lisaasiakas = " and lasku.liitostunnus='$asiakasid' ";
+    }
+    else {
+      $lisaasiakas = " and lasku.ytunnus='{$asiakasrow['ytunnus']}' ";
+    }
   }
 
   if ($raportointitaso == 'tuote') {
@@ -81,9 +97,9 @@ if ($tee != '') {
               and tilausrivi.tyyppi  ='L'
               $lisaasiakas
               and tuote.status        NOT IN ('P','X')
-              GROUP BY tilausrivi.osasto, tilausrivi.try, tilausrivi.tuoteno, tilausrivi.nimitys, lasku.ytunnus
+              GROUP BY tilausrivi.osasto, tilausrivi.try, tilausrivi.tuoteno, tilausrivi.nimitys $_grouplisa
               HAVING puutekpl <> 0
-              ORDER BY tilausrivi.osasto, tilausrivi.try, tilausrivi.tuoteno, tilausrivi.nimitys, lasku.ytunnus";
+              ORDER BY tilausrivi.osasto, tilausrivi.try, tilausrivi.tuoteno, tilausrivi.nimitys $_orderlisa";
   }
   else {
     $query = "SELECT tilausrivi.osasto, tilausrivi.try $sellisa,
@@ -115,7 +131,7 @@ if ($tee != '') {
 
   $pvm = date("Ymd");
 
-  $worksheet->writeString($excelrivi, 0, t("Puutelistaus")." $asiakasrow[nimi]"." $asiakasrow[nimitark]".", $asiakasrow[asiakasnro]");
+  $worksheet->writeString($excelrivi, 0, t("Puutelistaus")." $asiakasrow[nimi] "."$asiakasrow[nimitark]".", $_asiakasrajausinfo");
   $worksheet->writeString($excelrivi, 3, $pvm);
 
   $excelrivi++;
@@ -621,6 +637,16 @@ if ((int) $asiakasid > 0) {
 else {
   echo "<tr><th>".t("Valitse asiakas")."</th><td colspan='3'><input type='text' name='ytunnus' value='$ytunnus' size='20'></td></tr>";
 }
+
+$sel = (!empty($alatila) and $alatila == 'Y') ? "selected" : "";
+
+echo "<tr><th>", t("Asiakasrajaus"), ":</th>";
+echo "<td colspan='3'><select name='alatila'>
+      <option value='T'>", t("Asiakkaalla"), "</option>
+      <option value='Y' {$sel}>", t("Ytunnuksella"), "</option>
+      </select></td></tr>";
+//echo "<td class='back'><input type='submit' class='hae_btn' value = '".t("Etsi")."'></td></tr>";
+
 
 echo "<tr><th>".t("Raportointitaso")."</th><td colspan='3'>";
 echo "<select name='raportointitaso'>";

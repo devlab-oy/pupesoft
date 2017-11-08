@@ -4929,8 +4929,6 @@ if (!function_exists("alehinta")) {
         $alehi_asrow['piiri'] = $laskurow['piiri'];
       }
 
-      $piiricheck = mysql_fetch_assoc($piiricheck_result);
-
       // 6A. asiakas.piiri tuote.tuoteno nettohinta (asiakaspiirin tuotteen hinta) laskun valuutassa
       if ($hinta == 0 and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
 

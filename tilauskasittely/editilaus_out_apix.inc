@@ -286,7 +286,7 @@ while ($laskurow = mysql_fetch_assoc($laskures)) {
             JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.ei_saldoa = '')
             WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
             AND tilausrivi.otunnus = '{$laskurow['tunnus']}'
-            AND tilausrivi.var not in ('O','S')
+            AND tilausrivi.var not in ('J','P','O','S')
             AND tilausrivi.tyyppi = 'L'
             ORDER BY if(tilausrivi.varattu <> 0, 1, 0) desc, tilausrivi.tilaajanrivinro";
   $tilausrivi_res = pupe_query($query);

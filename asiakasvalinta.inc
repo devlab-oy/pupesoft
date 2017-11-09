@@ -54,7 +54,7 @@ function piirra_multiasiakkuusdropdown() {
       echo "<td class='back'>".$row['nimi']."</td>";
     }
     else
-      echo "<td class='back'>".$row['nimi'].', '.$row['nimitark']."</td>";
+      echo "<td class='back'>".$row['nimitark']."</td>";
 
   }
   echo "</tr></table></form>";

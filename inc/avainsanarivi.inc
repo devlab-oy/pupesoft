@@ -333,6 +333,7 @@ if (mysql_field_name($result, $i) == "laji") {
   if ($lukitse_laji== "" or $lukitse_laji == "UNIFAUN_REF") $ulos .= "<option value='UNIFAUN_REF' {$avain_sel['UNIFAUN_REF']}>".t("Unifaun lähettäjän viite")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "KUITIN_VAKTEXT") $ulos .= "<option value='KUITIN_VAKTEXT' {$avain_sel['KUITIN_VAKTEXT']}>".t("Kuitin vakioteksti")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "STCK_LST_FLTR") $ulos .= "<option value='STCK_LST_FLTR' {$avain_sel['STCK_LST_FLTR']}>".t("Varastosaldoraportin rajaus")."</option>";
+  if ($lukitse_laji== "" or $lukitse_laji == "PIIRI_ALENNUS") $ulos .= "<option value='PIIRI_ALENNUS' {$avain_sel['PIIRI_ALENNUS']}>".t("Piiriin sidottu hinnoittelu")."</option>";
   if ($lukitse_laji== "") $ulos .= "</optgroup>";
 
   if ($lukitse_laji== "") $ulos .= "<optgroup label='".t("Verkkokaupan avainsanat")."'>";
@@ -1311,6 +1312,23 @@ if ($avain_sel["HAE_JA_SELAA"] == "SELECTED" and $_selitetark_2) {
   $ulos .= "</select></td>";
 
   $jatko = 0;
+}
+
+if ($avain_sel["PIIRI_ALENNUS"] == "SELECTED") {
+  if ($_selite || $_jarjestys) {
+    $tyyppi = 0;
+  }
+  elseif ($_selitetark) {
+    $sel = array();
+    $sel[$trow[$i]] = "SELECTED";
+
+    $ulos = "<td><select name = '$nimi'>";
+    $ulos .= "<option value = 'A'>".t("Piiri katsotaan asiakkaan takaa ")."</option>";
+    $ulos .= "<option value = 'T' {$sel['T']}>".t("Piiri katsotaan ensisijaisesti tilauksen takaa")."</option>";
+    $ulos .= "</select></td>";
+
+    $jatko = 0;
+  }
 }
 
 if (mysql_field_name($result, $i) == "jarjestys") {

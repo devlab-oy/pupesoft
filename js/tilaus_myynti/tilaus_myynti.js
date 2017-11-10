@@ -246,6 +246,39 @@ $(document).ready(function() {
   }
 
   $('.korva_dd').on("change", korvamerkitse_ajax);
+
+  var yhteyshenkilon_puhelin = function() {
+
+    var yhenkilo = $("option:selected", this).val();
+    var ltunnus = $("#y_liitostunnus").html();
+
+    $.post("",
+      {
+        tila: 'YHENKPUHELIN',
+        toim: $('#toim').val(),
+        tilausnumero: $('#tilausnumero').val(),
+        yhenkilo: yhenkilo,
+        ltunnus: ltunnus,
+        async: false,
+        no_head: 'yes',
+        ohje: 'off'
+      },
+      function(json) {
+        var message = JSON && JSON.parse(json) || $.parseJSON(json);
+
+        if (message != "") {
+          $('#tpuh').val(message);
+        }
+
+        // Nollataan käsinsyötetty yhteyshenkilö
+        $('#manual_tilausyhteyshenkilo').val('');
+      }
+    );
+
+    return false;
+  }
+
+  $('#yhteyshenkilo_tilaus').on("change", yhteyshenkilon_puhelin);
 });
 
 function bind_valitut_rivit_checkbox_click() {

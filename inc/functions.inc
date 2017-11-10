@@ -4922,6 +4922,13 @@ if (!function_exists("alehinta")) {
         }
       }
 
+      // Tarkistetaan vielä luetaanko piiri asiakkaalta vaiko tilaukselta
+      $piiricheck = t_avainsana("PIIRI_ALENNUS", "", "and selitetark = 'T'", "", "", "selitetark");
+
+      if ($piiricheck and isset($laskurow['piiri'])) {
+        $alehi_asrow['piiri'] = $laskurow['piiri'];
+      }
+
       // 6A. asiakas.piiri tuote.tuoteno nettohinta (asiakaspiirin tuotteen hinta) laskun valuutassa
       if ($hinta == 0 and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
 

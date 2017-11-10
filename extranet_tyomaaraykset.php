@@ -447,7 +447,7 @@ function uusi_tyomaarays_formi($laite_tunnus) {
   }
 
   $asiakasdata = hae_asiakasdata();
-  echo "<form name ='uusi_tyomaarays_form' id='tyomaarays_form' method='post' action='' $javalisa>";
+  echo "<form name ='uusi_tyomaarays_form' id='tyomaarays_form' method='post' action=''>";
   echo "<table>";
   echo "<tr>";
   piirra_tyomaaraysheaderit(true);

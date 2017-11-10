@@ -113,7 +113,7 @@ if ($tee == 'TOIMINNOT') {
       <td><input type='text' name='ppl' value='$arow[vika]' size='10'></td>
       </tr>";
 
-  $query = "SELECT max(SUBSTRING(lasku.directdebitsiirtonumero, 5)) + 1 seuraava
+  $query = "SELECT max(SUBSTRING(lasku.directdebitsiirtonumero, 5) + 1) seuraava
             FROM lasku use index (yhtio_tila_tapvm)
             JOIN maksuehto ON (lasku.yhtio = maksuehto.yhtio
               and lasku.maksuehto = maksuehto.tunnus

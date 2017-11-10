@@ -15,7 +15,7 @@ require "asiakasvalinta.inc";
 
 // Enabloidaan ajax kikkare
 enable_ajax();
-pupe_DataTables(array(array($pupe_DataTables, 6, 5, true, true)));
+pupe_DataTables(array(array($pupe_DataTables, 5, 4, true, true)));
 
 piirra_kayttajan_laitteet();
 
@@ -101,7 +101,6 @@ function piirra_headerit() {
     t("Valmistaja"),
     t("Malli"),
     t("Sarjanumero"),
-    t("Valmistajan sopimuksen numero"),
     t("Valmistajan sopimuksen päättymispäivä")
   );
   foreach ($headerit as $header) {
@@ -114,7 +113,6 @@ function piirra_hakuboksit() {
     'valmistaja',
     'tuotenumero',
     'sarjanumero',
-    'valmistajan_sopimusnumero',
     'valmistajan_sopimus_paattymispaiva'
   );
   foreach ($headerit as $header) {
@@ -131,7 +129,6 @@ function piirra_laiterivi($laite) {
   echo "<td>{$laite['valmistaja']}</td>";
   echo "<td>{$laite['tuoteno']}</td>";
   echo "<td>{$laite['sarjanro']}</td>";
-  echo "<td>{$laite['valmistajan_sopimusnumero']}</td>";
   echo "<td>{$laite['valmistajan_sopimus_paattymispaiva']}</td>";
   echo "<td class='back' nowrap><a href='{$palvelin2}extranet_tyomaaraykset.php?tyom_toiminto=UUSI&laite_tunnus={$laite['tunnus']}'>".t('Uusi huoltopyyntö')."</a></td>";
   echo "</tr>";

@@ -125,7 +125,7 @@ $query = "SELECT
           WHERE asiakas.yhtio = '$yhtio'
           AND asiakas.laji    not in ('P','R')
           {$asiakasrajaus}
-          ORDER BY asiakas.tunnus limit 20";
+          ORDER BY asiakas.tunnus";
 $res = pupe_query($query);
 
 // Tallennetaan aikaleima

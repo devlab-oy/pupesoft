@@ -39,22 +39,22 @@ function piirra_multiasiakkuusdropdown() {
   echo "<option value='' selected>".t("Oletusasiakkuus")."</option>";
 
   while ($multirow = mysql_fetch_assoc($multiresult)) {
-    if (empty($multirow['nimitark']))  {
+    if (empty($multirow['selaus']))  {
       echo "<option value='{$multirow['tunnus']}'>".$multirow['nimi']."</option>";
     }
     else
-      echo "<option value='{$multirow['tunnus']}'>".$multirow['nimitark']."</option>";
+      echo "<option value='{$multirow['tunnus']}'>".$multirow['selaus']."</option>";
   }
 
   echo "</select>";
   echo "</td>";
 
   if (isset($row['nimi'])) {
-    if (empty($row['nimitark'])) {
+    if (empty($row['selaus'])) {
       echo "<td class='back'>".$row['nimi']."</td>";
     }
     else
-      echo "<td class='back'>".$row['nimitark']."</td>";
+      echo "<td class='back'>".$row['selaus']."</td>";
 
   }
   echo "</tr></table></form>";

@@ -230,8 +230,6 @@ if ($tee == '') {
                   AND puun_alkio.liitos  = '{$kukarow['oletus_asiakas']}'";
         $preres = pupe_query($preq);
 
-        echo "$preq<br>";
-
         while ($puun_tunnukset = mysql_fetch_assoc($preres)) {
           if (!empty($segtunnarit[$puun_tunnukset["tunnus"]])) {
             $naytetaan = TRUE;

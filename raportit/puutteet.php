@@ -83,7 +83,8 @@ if ($tee != '') {
     $query = "SELECT tilausrivi.osasto, tilausrivi.try, tilausrivi.tuoteno, tilausrivi.nimitys, lasku.ytunnus, asiakas.asiakasnro,
               round(sum(if (tilausrivi.var='P', tilausrivi.tilkpl, 0)),2) puutekpl,
               round(sum(if (tilausrivi.var='P', tilausrivi.tilkpl*tilausrivi.hinta*{$query_ale_lisa}/(1+(tilausrivi.alv/100)), 0)),2) puuteeur,
-              round(sum(if ((tilausrivi.var='' or tilausrivi.var='H'), tilausrivi.tilkpl*tilausrivi.hinta*{$query_ale_lisa}/(1+(tilausrivi.alv/100)), 0)),2) myyeur
+              round(sum(if ((tilausrivi.var='' or tilausrivi.var='H'), (tilausrivi.kpl+tilausrivi.varattu)*tilausrivi.hinta*{$query_ale_lisa}/(1+(tilausrivi.alv/100)), 0)),2) myyeur,
+              round(sum(if (tilausrivi.var='' or tilausrivi.var='H', tilausrivi.kpl+tilausrivi.varattu, 0)),2) myykpl
               FROM tilausrivi
               LEFT JOIN lasku ON lasku.yhtio=tilausrivi.yhtio and lasku.tunnus=tilausrivi.otunnus
               LEFT JOIN asiakas ON lasku.yhtio=asiakas.yhtio and lasku.liitostunnus=asiakas.tunnus
@@ -105,7 +106,8 @@ if ($tee != '') {
     $query = "SELECT tilausrivi.osasto, tilausrivi.try $sellisa,
               round(sum(if (tilausrivi.var='P', tilausrivi.tilkpl, 0)),2) puutekpl,
               round(sum(if (tilausrivi.var='P', tilausrivi.tilkpl*tilausrivi.hinta*{$query_ale_lisa}/(1+(tilausrivi.alv/100)), 0)),2) puuteeur,
-              round(sum(if (tilausrivi.var='' or tilausrivi.var='H', tilausrivi.tilkpl*tilausrivi.hinta*{$query_ale_lisa}/(1+(tilausrivi.alv/100)), 0)),2) myyeur
+              round(sum(if (tilausrivi.var='' or tilausrivi.var='H', (tilausrivi.kpl+tilausrivi.varattu)*tilausrivi.hinta*{$query_ale_lisa}/(1+(tilausrivi.alv/100)), 0)),2) myyeur,
+              round(sum(if (tilausrivi.var='' or tilausrivi.var='H', tilausrivi.kpl+tilausrivi.varattu, 0)),2) myykpl
               FROM tilausrivi
               LEFT JOIN lasku ON lasku.yhtio=tilausrivi.yhtio and lasku.tunnus=tilausrivi.otunnus
               LEFT JOIN tuote ON tuote.yhtio=tilausrivi.yhtio and tilausrivi.tuoteno=tuote.tuoteno
@@ -164,6 +166,8 @@ if ($tee != '') {
   $excelsarake++;
   $worksheet->writeString($excelrivi, $excelsarake, t("Puute")." $yhtiorow[valkoodi]");
   $excelsarake++;
+  $worksheet->writeString($excelrivi, $excelsarake, t("Myynti Kpl"));
+  $excelsarake++;
   $worksheet->writeString($excelrivi, $excelsarake, t("Myynti")." $yhtiorow[valkoodi]");
   $excelsarake++;
   $worksheet->writeString($excelrivi, $excelsarake, t("Puute")." %");
@@ -214,6 +218,7 @@ if ($tee != '') {
 
   echo "  <th nowrap>".t("Puute kpl")."</th>
       <th nowrap>".t("Puute")." $yhtiorow[valkoodi]</th>
+      <th nowrap>".t("Myynti Kpl")."</th>
       <th nowrap>".t("Myynti")." $yhtiorow[valkoodi]</th>
       <th nowrap>".t("Puute")." %</th>";
 
@@ -234,15 +239,17 @@ if ($tee != '') {
   }
   echo "</tr>";
 
-  $puuteyht    = 0;
+  $puuteyht     = 0;
   $puutekplyht  = 0;
   $myyntiyht    = 0;
-  $puuteprosyht  = 0;
-  $edosasto    = '';
-  $lask      = 1;
-  $ospuute    = 0;
-  $ospuutekpl    = 0;
-  $osmyynti    = 0;
+  $myyntikplyht = 0;
+  $puuteprosyht = 0;
+  $edosasto     = '';
+  $lask         = 1;
+  $ospuute      = 0;
+  $ospuutekpl   = 0;
+  $osmyynti     = 0;
+  $osmyyntikpl  = 0;
 
   while ($row = mysql_fetch_array($result)) {
     $excelsarake = 0;
@@ -270,6 +277,7 @@ if ($tee != '') {
           <th colspan='$cspan'>".t("Osasto")." $edosasto ".t("yhteensä").":</th>
           <th style='text-align:right'>".sprintf("%.2f", $ospuutekpl)."</th>
           <th style='text-align:right'>".sprintf("%.2f", $ospuute)."</th>
+          <th style='text-align:right'>".sprintf("%.2f", $osmyyntikpl)."</th>
           <th style='text-align:right'>".sprintf("%.2f", $osmyynti)."</th>
           <th style='text-align:right'>".sprintf("%.2f", $ospuutepros)."</th>
           </tr>";
@@ -280,6 +288,8 @@ if ($tee != '') {
       $excelsarake++;
       $worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.2f", $ospuute));
       $excelsarake++;
+      $worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.2f", $osmyyntikpl));
+      $excelsarake++;
       $worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.2f", $osmyynti));
       $excelsarake++;
       $worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.2f", $ospuutepros));
@@ -287,14 +297,16 @@ if ($tee != '') {
       $excelrivi++;
 
       $ospuute     = 0;
-      $ospuutekpl   = 0;
+      $ospuutekpl  = 0;
       $osmyynti    = 0;
+      $osmyyntikpl = 0;
       $ospuutepros = 0;
     }
 
-    $ospuute    +=$row["puuteeur"];
-    $osmyynti   +=$row["myyeur"];
-    $ospuutekpl +=$row["puutekpl"];
+    $ospuute     +=$row["puuteeur"];
+    $osmyynti    +=$row["myyeur"];
+    $osmyyntikpl +=$row["myykpl"];
+    $ospuutekpl  +=$row["puutekpl"];
 
     if ($row["myyeur"] > 0) {
       $puutepros = round($row["puuteeur"]/($row["puuteeur"]+$row["myyeur"])*100, 2);
@@ -361,12 +373,15 @@ if ($tee != '') {
 
     echo "  <td style='text-align:right; vertical-align:top' class='$vari'>". (float) $row['puutekpl']."</td>
         <td style='text-align:right; vertical-align:top' class='$vari'>$row[puuteeur]</td>
+        <td style='text-align:right; vertical-align:top' class='$vari'>$row[myykpl]</td>
         <td style='text-align:right; vertical-align:top' class='$vari'>$row[myyeur]</td>
         <td style='text-align:right; vertical-align:top' class='$vari'>".sprintf("%.1f", $puutepros)."</td>";
 
     $worksheet->writeNumber($excelrivi, $excelsarake, (float) $row['puutekpl']);
     $excelsarake++;
     $worksheet->writeNumber($excelrivi, $excelsarake, $row['puuteeur']);
+    $excelsarake++;
+    $worksheet->writeNumber($excelrivi, $excelsarake, $row['myykpl']);
     $excelsarake++;
     $worksheet->writeNumber($excelrivi, $excelsarake, $row['myyeur']);
     $excelsarake++;
@@ -522,8 +537,9 @@ if ($tee != '') {
     $excelrivi++;
 
     $lask++;
-    $puuteyht    += $row["puuteeur"];
+    $puuteyht     += $row["puuteeur"];
     $puutekplyht  += $row["puutekpl"];
+    $myyntikplyht += $row["myykpl"];
     $myyntiyht    += $row["myyeur"];
     $puuteprosyht += $puutepros;
     $edosasto      = $row["osasto"];
@@ -540,6 +556,7 @@ if ($tee != '') {
         <th colspan='$cspan'>".t("Osasto")." $edosasto ".t("yhteensä").":</th>
         <th style='text-align:right'>".sprintf("%.2f", $ospuutekpl)."</th>
         <th style='text-align:right'>".sprintf("%.2f", $ospuute)."</th>
+        <th style='text-align:right'>".sprintf("%.2f", $osmyyntikpl)."</th>
         <th style='text-align:right'>".sprintf("%.2f", $osmyynti)."</th>
         <th style='text-align:right'>".sprintf("%.2f", $ospuutepros)."</th>
         </tr>";
@@ -551,6 +568,8 @@ if ($tee != '') {
     $worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.2f", $ospuutekpl));
     $excelsarake++;
     $worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.2f", $ospuute));
+    $excelsarake++;
+    $worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.2f", $osmyyntikpl));
     $excelsarake++;
     $worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.2f", $osmyynti));
     $excelsarake++;
@@ -565,6 +584,7 @@ if ($tee != '') {
         <th colspan='$cspan'>".t("Kaikki yhteensä").":</th>
         <th style='text-align:right'>".sprintf("%.2f", $puutekplyht)."</th>
         <th style='text-align:right'>".sprintf("%.2f", $puuteyht)."</th>
+        <th style='text-align:right'>".sprintf("%.2f", $myyntikplyht)."</th>
         <th style='text-align:right'>".sprintf("%.2f", $myyntiyht)."</th>
         <th style='text-align:right'>".sprintf("%.2f", $puuteprosyht)."</th>
         </tr>";
@@ -576,6 +596,8 @@ if ($tee != '') {
     $worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.2f", $puutekplyht));
     $excelsarake++;
     $worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.2f", $puuteyht));
+    $excelsarake++;
+    $worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.2f", $myyntikplyht));
     $excelsarake++;
     $worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.2f", $myyntiyht));
     $excelsarake++;

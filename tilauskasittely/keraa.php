@@ -3880,6 +3880,9 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
                 $selpk_JT = "SELECTED";
               }
             }
+            elseif ($yhtiorow["kerayspoikkeama_kasittely"] == 'U') {
+              $selpk_PU = "SELECTED";
+            }
             else {
               echo "<option value='' SELECTED>".t("Ei käsitellä")."</option>";
             }

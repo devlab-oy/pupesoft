@@ -42,8 +42,9 @@ function piirra_multiasiakkuusdropdown() {
     if (empty($multirow['selaus']))  {
       echo "<option value='{$multirow['tunnus']}'>".$multirow['nimi'].', '.$row['nimitark']."</option>";
     }
-    else
+    else {
       echo "<option value='{$multirow['tunnus']}'>".$multirow['selaus']."</option>";
+    }
   }
 
   echo "</select>";
@@ -53,9 +54,9 @@ function piirra_multiasiakkuusdropdown() {
     if (empty($row['selaus'])) {
       echo "<td class='back'>".$row['nimi'].', '.$row['nimitark']."</td>";
     }
-    else
+    else {
       echo "<td class='back'>".$row['selaus']."</td>";
-
+    }
   }
   echo "</tr></table></form>";
 }

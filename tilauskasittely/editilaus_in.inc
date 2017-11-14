@@ -1744,6 +1744,7 @@ while ($tietue = fgets($fd)) {
                 kuljetusmuoto           = '$arow[kuljetusmuoto]',
                 laatija                 = '$edi_laatija',
                 laskutusvkopv           = '$arow[laskutusvkopv]',
+                laskutyyppi             = '-9',
                 liitostunnus            = '$arow[tunnus]',
                 luontiaika              =  now(),
                 maa                     = '$arow[maa]',

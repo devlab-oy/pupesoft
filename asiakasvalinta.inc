@@ -12,7 +12,7 @@ function piirra_multiasiakkuusdropdown() {
   global $kukarow;
 
   // Haetaan käyttäjän asiakkuudet
-  $query = "SELECT asiakas.tunnus, asiakas.nimi, asiakas.nimitark
+  $query = "SELECT asiakas.tunnus, asiakas.nimi, asiakas.nimitark, asiakas.selaus
             FROM customers_users
             JOIN asiakas ON (customers_users.customer_id = asiakas.tunnus)
             WHERE user_id = '{$kukarow['tunnus']}'";
@@ -40,7 +40,7 @@ function piirra_multiasiakkuusdropdown() {
 
   while ($multirow = mysql_fetch_assoc($multiresult)) {
     if (empty($multirow['selaus']))  {
-      echo "<option value='{$multirow['tunnus']}'>".$multirow['nimi']."</option>";
+      echo "<option value='{$multirow['tunnus']}'>".$multirow['nimi'].', '.$row['nimitark']."</option>";
     }
     else
       echo "<option value='{$multirow['tunnus']}'>".$multirow['selaus']."</option>";
@@ -51,7 +51,7 @@ function piirra_multiasiakkuusdropdown() {
 
   if (isset($row['nimi'])) {
     if (empty($row['selaus'])) {
-      echo "<td class='back'>".$row['nimi']."</td>";
+      echo "<td class='back'>".$row['nimi'].', '.$row['nimitark']."</td>";
     }
     else
       echo "<td class='back'>".$row['selaus']."</td>";

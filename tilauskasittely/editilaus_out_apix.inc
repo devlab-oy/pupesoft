@@ -208,6 +208,7 @@ while ($laskurow = mysql_fetch_assoc($laskures)) {
                   JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno)
                   WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
                   AND kerayserat.otunnus = '{$laskurow['tunnus']}'
+                  AND kerayserat.kpl_keratty != 0
                   GROUP BY kerayserat.sscc_ulkoinen, pakkaus.pakkaus";
         $kerayserares = pupe_query($query);
 

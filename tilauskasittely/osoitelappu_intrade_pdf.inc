@@ -144,6 +144,7 @@ else {
                 FROM kerayserat
                 WHERE yhtio = '{$kukarow['yhtio']}'
                 AND otunnus = '{$laskurow['tunnus']}'
+                AND kerayserat.kpl_keratty != 0
                 ORDER BY pakkausnro";
       $pakkaus_chk_res = pupe_query($query);
 

@@ -2409,7 +2409,12 @@ if ($kasitellaan_tiedosto) {
 
             include "inc/{$funktio}.inc";
 
-            $funktio($t, $i, $result, $tunnus, $virhe, $tarkrow);
+            if (function_exists($funktio)) {
+              $funktio($t, $i, $result, $tunnus, $virhe, $tarkrow);
+            }
+            else {
+              return TRUE;
+            }
           };
 
           // Tehd‰‰n oikeellisuustsekit

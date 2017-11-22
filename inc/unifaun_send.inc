@@ -1034,7 +1034,7 @@ class Unifaun {
       $uni_add_val->addAttribute('n', "reference");
     }
 
-    if ($this->toitarow['virallinen_selite'] == "P19" and $this->postirow["toim_puh"] != "") {
+    if (($this->toitarow['virallinen_selite'] == "P19" or $this->toitarow['virallinen_selite'] == "P19FI") and $this->postirow["toim_puh"] != "") {
       $uni_addon = $uni_service->addChild('addon'); // Corresponds to add-on service. See SUP-112-Services-en.xls for valid add-on services.
       $uni_addon->addAttribute('adnid', "NOTSMS");
       $uni_add_val = $uni_addon->addChild('val', utf8_encode($this->postirow["toim_puh"])); // Defines value for misctype.
@@ -1055,7 +1055,7 @@ class Unifaun {
         $uni_add_val->addAttribute('n', "text4");
       }
     }
-    elseif ($this->toitarow['virallinen_selite'] == "P19") {
+    elseif ($this->toitarow['virallinen_selite'] == "P19" or $this->toitarow['virallinen_selite'] == "P19FI") {
       $uni_addon = $uni_service->addChild('addon'); // Corresponds to add-on service. See SUP-112-Services-en.xls for valid add-on services.
       $uni_addon->addAttribute('adnid', "NOTLTR");
     }

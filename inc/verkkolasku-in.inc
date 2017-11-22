@@ -562,7 +562,7 @@ if (!function_exists("verkkolasku_in")) {
         $valkoodi = $trow['oletus_valkoodi'];
       }
       elseif ($laskuttajan_valkoodi != "") {
-        $valkoodi = $laskuttajan_valkoodi;
+        $valkoodi = strtoupper($laskuttajan_valkoodi);
       }
       elseif ($trow['oletus_valkoodi'] != '') {
         $valkoodi = $trow['oletus_valkoodi'];

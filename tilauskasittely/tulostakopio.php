@@ -745,7 +745,7 @@ if ($tee == "ETSILASKU") {
     }
     else {
       //myyntitilaus. Tulostetaan lähete.
-      $where1 .= " lasku.tila in ('L','N','V') ";
+      $where1 .= " lasku.tila in ('L','N','V') and lasku.alatila != 'F' ";
     }
 
     if (strlen($ytunnus) > 0 and substr($ytunnus, 0, 1) == '£') {
@@ -2347,6 +2347,36 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
                   round(tilausrivi.hinta * {$query_ale_lisa},'$yhtiorow[hintapyoristys]') kplhinta,
                   $select_lisa
                   $sorttauskentta,
+                  if (tuote.mallitarkenne = '200',
+                    if (tuote.mallitarkenne = '12',
+                      if (tuote.mallitarkenne = '1000',
+                        if (tuote.mallitarkenne = '150',
+                          if (tuote.mallitarkenne = '585',
+                            if (tuote.mallitarkenne = '500',
+                              if (tuote.mallitarkenne = '400',
+                                1,
+                              2),
+                            3),
+                          4),
+                        5),
+                      6),
+                    7),
+                  8) hornsort,
+                  if (tuote.mallitarkenne = '200',
+                    if (tuote.mallitarkenne = '12',
+                      if (tuote.mallitarkenne = '1000',
+                        if (tuote.mallitarkenne = '150',
+                          if (tuote.mallitarkenne = '585',
+                            if (tuote.mallitarkenne = '500',
+                              if (tuote.mallitarkenne = '400',
+                                1,
+                              1.14),
+                            1.14),
+                          0.50),
+                        2.07),
+                      0.36),
+                    0.57),
+                  1.07) hornkoko,
                   if (tuote.tuotetyyppi='K','2 Työt','1 Muut') tuotetyyppi,
                   if (tuote.myyntihinta_maara=0, 1, tuote.myyntihinta_maara) myyntihinta_maara,
                   tuote.sarjanumeroseuranta,
@@ -2361,7 +2391,7 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
                   and tilausrivi.var       != 'O'
                   $lisa1
                   $where_lisa
-                  ORDER BY $pjat_sortlisa sorttauskentta $order_sorttaus, tilausrivi.tunnus";
+                  ORDER BY hornsort, sorttauskentta $order_sorttaus, tilausrivi.tunnus";
       }
       $riresult = pupe_query($query);
 
@@ -2405,7 +2435,7 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
         'iso_boldi'         => $iso_boldi,
         'kala'              => 0,
         'kieli'             => $kieli,
-        'komento'      => '',
+        'komento'           => '',
         'laskurow'          => $laskurow,
         'norm'              => $norm,
         'page'              => NULL,
@@ -2417,22 +2447,24 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
         'pieni_boldi'       => $pieni_boldi,
         'rectparam'         => $rectparam,
         'rivinkorkeus'      => $rivinkorkeus,
-        'rivinumerot'      => $rivinumerot,
+        'rivinumerot'       => $rivinumerot,
         'row'               => NULL,
         'sivu'              => 1,
         'tee'               => $tee,
-        'thispage'      => NULL,
+        'thispage'          => NULL,
         'tilausnumeroita'   => $tilausnumeroita,
         'toim'              => $toim,
         'tots'              => 0,
-        'tyyppi'        => $tyyppi,
+        'tyyppi'            => $tyyppi,
         'kerayseran_numero' => $kerayseran_numero,
-        'kerayslistatyyppi'  => $kerayslistatyyppi);
+        'kerayslistatyyppi' => $kerayslistatyyppi,
+        'horn_lavanumero'   => NULL,);
 
       // Aloitellaan keräyslistan teko
       $params_kerayslista = alku_kerayslista($params_kerayslista);
 
       while ($row = mysql_fetch_assoc($riresult)) {
+        $row['kommentti'] .= $row['kommentti']." ++ ".$row['hornkoko'];
         $params_kerayslista["row"] = $row;
         $params_kerayslista = rivi_kerayslista($params_kerayslista);
       }

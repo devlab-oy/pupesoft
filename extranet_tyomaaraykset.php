@@ -655,6 +655,17 @@ function hae_asiakasdata() {
             AND asiakas.tunnus  = '{$kukarow['oletus_asiakas']}'";
   $result = pupe_query($query);
   $asiakasdata = mysql_fetch_assoc($result);
+  // Haetaan ext käyttäjän osoitteet
+  $query = "SELECT selitetark
+            FROM extranet_kayttajan_lisatiedot
+            WHERE extranet_kayttajan_lisatiedot.yhtio = '{$kukarow['yhtio']}'
+            AND extranet_kayttajan_lisatiedot.laji = 'TOIMITUSOSOITE'
+            AND extranet_kayttajan_lisatiedot.liitostunnus = '{$kukarow['tunnus']}'";
+  $result2 = pupe_query($query);
+  if (mysql_num_rows($result2) == 1) {
+    echo "KALA";
+    // Tässä tapahtuu niin että explodella otetaan selitetark:ista nuo toim_osoite tiedot, eroteltuna ###
+  }
   return $asiakasdata;
 }
 

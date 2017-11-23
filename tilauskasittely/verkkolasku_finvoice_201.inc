@@ -149,7 +149,7 @@ if (!function_exists('finvoice_otsik')) {
 
         fputs($tootfinvoice, "<eb:To>\r\n");
         if ($yhtiorow["verkkolasku_lah"] == "trustpoint" and $receiverintermediator == "EMAIL") {
-          xml_add("eb:PartyId", "KALA", $tootfinvoice);
+          xml_add("eb:PartyId", $receiverintermediator , $tootfinvoice);
         }
         else {
           xml_add("eb:PartyId", $receiverpartyid, $tootfinvoice);

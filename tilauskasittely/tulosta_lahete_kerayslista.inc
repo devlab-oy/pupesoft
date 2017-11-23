@@ -744,8 +744,8 @@ if (!function_exists('rivi_kerayslista')) {
       }
 
       //jos ollaan liian pitk‰ll‰ tehd‰‰n uusi otsikko...
-      if ($kala < 95) {
-
+      if ($kala < 95 or ($horn_lavanumero >= 1488)) {
+        $horn_lavanumero = 0;
         $sivu++;
 
         // Luodaan palautettavat
@@ -861,6 +861,12 @@ if (!function_exists('rivi_kerayslista')) {
 
             $page[$sivu] = $thispage;
           }
+        }
+
+        if (empty($horn_lavanumero)) {
+          $pdf->draw_text(23,  $kala, "LAVA XXXXXXXXXXXXXXXXXXXXXXXXXX:",  $thispage, $boldi);
+          $kala = $kala - $rivinkorkeus + 5;
+          $horn_lavanumero += ($row["tilkpl"] * $row['hornkoko']);
         }
 
         if (($yhtiorow['kerayserat'] == 'K' and isset($kerayseran_numero) and $kerayseran_numero > 0) or ($yhtiorow['kerayserat'] == 'P' or ($yhtiorow['kerayserat'] == 'A' and $asrow['kerayserat'] == 'A'))) {

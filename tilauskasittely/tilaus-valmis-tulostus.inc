@@ -332,11 +332,83 @@ if ((int) $chk_row["ok"] == (int) $chk_row["kaikki"] and (int) $chk_row["ok"] !=
               ORDER BY sorttauskentta";
   }
   else {
+
+    /*
+    Pakkaauskoot:
+
+    1=400
+    2=500
+    3=585
+    4=150
+    5=1000
+    6=12
+    7=200
+    8=muut
+    */
+
+    $pjat_sortlisa = "if (tuote.mallitarkenne = '200',
+                        if (tuote.mallitarkenne = '12',
+                          if (tuote.mallitarkenne = '1000',
+                            if (tuote.mallitarkenne = '150',
+                              if (tuote.mallitarkenne = '585',
+                                if (tuote.mallitarkenne = '500',
+                                  if (tuote.mallitarkenne = '400',
+                                    1,
+                                  2),
+                                3),
+                              4),
+                            5),
+                          6),
+                        7),
+                      8) hornsort, ";
+
+    /*
+    Pakkauksen referenssikoko:
+    400  = 1488 --> 1,00
+    500  = 1302 --> 1,14
+    585  = 1302 --> 1,14
+    150  = 3168 --> 0,50
+    1000 = 720  --> 2,07
+    12   = 3960 --> 0,36
+    200  = 2604 --> 0,57
+    8    = 1392 --> 1,07
+    */
+
     $query = "SELECT tilausrivi.*,
               lasku.tila AS lasku_tila,
               lasku.alatila AS lasku_alatila,
               $select_lisa
               $sorttauskentta,
+              if (tuote.mallitarkenne = '200',
+                if (tuote.mallitarkenne = '12',
+                  if (tuote.mallitarkenne = '1000',
+                    if (tuote.mallitarkenne = '150',
+                      if (tuote.mallitarkenne = '585',
+                        if (tuote.mallitarkenne = '500',
+                          if (tuote.mallitarkenne = '400',
+                            1,
+                          2),
+                        3),
+                      4),
+                    5),
+                  6),
+                7),
+              8) hornsort,
+              if (tuote.mallitarkenne = '200',
+                if (tuote.mallitarkenne = '12',
+                  if (tuote.mallitarkenne = '1000',
+                    if (tuote.mallitarkenne = '150',
+                      if (tuote.mallitarkenne = '585',
+                        if (tuote.mallitarkenne = '500',
+                          if (tuote.mallitarkenne = '400',
+                            1,
+                          1.14),
+                        1.14),
+                      0.50),
+                    2.07),
+                  0.36),
+                0.57),
+              1.07) hornkoko,
               if (tuote.tuotetyyppi='K','2 Työt','1 Muut') tuotetyyppi,
               if (tuote.myyntihinta_maara=0, 1, tuote.myyntihinta_maara) myyntihinta_maara,
               tuote.sarjanumeroseuranta,
@@ -349,7 +421,7 @@ if ((int) $chk_row["ok"] == (int) $chk_row["kaikki"] and (int) $chk_row["ok"] !=
               and tilausrivi.tyyppi    != 'D'
               $lisa1
               $where_lisa
-              ORDER BY $pjat_sortlisa sorttauskentta $order_sorttaus, tilausrivi.tunnus";
+              ORDER BY hornsort, sorttauskentta $order_sorttaus, tilausrivi.tunnus";
   }
   $riresult = pupe_query($query);
 
@@ -484,7 +556,10 @@ if ((int) $chk_row["ok"] == (int) $chk_row["kaikki"] and (int) $chk_row["ok"] !=
     $params_kerayslista = alku_kerayslista($params_kerayslista);
 
     while ($row = mysql_fetch_assoc($riresult)) {
+      $row['kommentti'] .= $row['kommentti']." ++ ".$row['hornkoko'];
+
       $params_kerayslista["row"] = $row;
+
       $params_kerayslista = rivi_kerayslista($params_kerayslista);
     }
 

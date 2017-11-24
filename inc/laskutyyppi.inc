@@ -122,6 +122,9 @@ case "N":
   case "F":
     $alatila = "Odottaa hyv‰ksynt‰‰";
     break;
+  case "FF":
+    $alatila = "Odottaa hyv‰ksynt‰‰";
+    break;
   case "G":
     $alatila = "Odottaa asiakkaan suoritusta";
     break;

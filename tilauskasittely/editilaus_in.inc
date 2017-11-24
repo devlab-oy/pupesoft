@@ -2536,7 +2536,8 @@ while ($tietue = fgets($fd)) {
       $editilaus_otsikko_ok = "HYVAKSYTTAVAKSI";
     }
 
-    if ("HORN" == "HORN") {
+    // Asiakkaiden tilaukset menevät ensin omaan hyväksyntäjonoon
+    if ($arow['kerayserat'] == 'H') {
       $editilaus_otsikko_ok = "HYVAKJONOON";
     }
 
@@ -2688,7 +2689,7 @@ while ($tietue = fgets($fd)) {
       $edi_ulos .= "\n".t("Merkittiin tilaus hyväksyttäväksi").": {$laskurow['tunnus']}.\n\n";
 
       $query = "UPDATE lasku SET
-                alatila     = 'F'
+                alatila     = 'FF'
                 WHERE yhtio = '$kukarow[yhtio]'
                 AND tunnus  = '$id'";
       pupe_query($query);

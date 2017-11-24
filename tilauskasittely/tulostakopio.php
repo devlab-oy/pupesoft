@@ -745,7 +745,7 @@ if ($tee == "ETSILASKU") {
     }
     else {
       //myyntitilaus. Tulostetaan lähete.
-      $where1 .= " lasku.tila in ('L','N','V') and lasku.alatila != 'F' ";
+      $where1 .= " lasku.tila in ('L','N','V') and lasku.alatila not in ('F','FF') ";
     }
 
     if (strlen($ytunnus) > 0 and substr($ytunnus, 0, 1) == '£') {
@@ -2284,6 +2284,9 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
       elseif ($excel_tarjous != '') {
         $kerayslistatyyppi = "EXCEL3";
       }
+      elseif ($asrow['kerayserat'] == 'H') {
+        $kerayslistatyyppi = "LAVAKERAYS";
+      }
 
       // keräyslistalle ei oletuksena tulosteta saldottomia tuotteita
       if ($yhtiorow["kerataanko_saldottomat"] == '') {
@@ -2319,6 +2322,14 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
       $ale_query_select_lisa = generoi_alekentta_select('erikseen', 'M');
       $ale_query_select_lisa_y = generoi_alekentta_select('yhteen', 'M');
 
+      // Asiakaaalla lavakerays
+      if ($asrow['kerayserat'] == 'H') {
+        require "inc/lavakeraysparametrit.inc";
+
+        $select_lisa .= $lavakeraysparam;
+        $pjat_sortlisa = "lavasort,";
+      }
+
       // keräyslistan rivit
       if (isset($kerayseran_tilaukset) and trim($kerayseran_tilaukset) != '' and ($yhtiorow['kerayserat'] == 'K' or $yhtiorow['kerayserat'] == 'P' or ($yhtiorow['kerayserat'] == 'A' and $asrow['kerayserat'] == 'A'))) {
         $query = "SELECT tilausrivi.*,
@@ -2347,36 +2358,6 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
                   round(tilausrivi.hinta * {$query_ale_lisa},'$yhtiorow[hintapyoristys]') kplhinta,
                   $select_lisa
                   $sorttauskentta,
-                  if (tuote.mallitarkenne = '200',
-                    if (tuote.mallitarkenne = '12',
-                      if (tuote.mallitarkenne = '1000',
-                        if (tuote.mallitarkenne = '150',
-                          if (tuote.mallitarkenne = '585',
-                            if (tuote.mallitarkenne = '500',
-                              if (tuote.mallitarkenne = '400',
-                                1,
-                              2),
-                            3),
-                          4),
-                        5),
-                      6),
-                    7),
-                  8) hornsort,
-                  if (tuote.mallitarkenne = '200',
-                    if (tuote.mallitarkenne = '12',
-                      if (tuote.mallitarkenne = '1000',
-                        if (tuote.mallitarkenne = '150',
-                          if (tuote.mallitarkenne = '585',
-                            if (tuote.mallitarkenne = '500',
-                              if (tuote.mallitarkenne = '400',
-                                1,
-                              1.14),
-                            1.14),
-                          0.50),
-                        2.07),
-                      0.36),
-                    0.57),
-                  1.07) hornkoko,
                   if (tuote.tuotetyyppi='K','2 Työt','1 Muut') tuotetyyppi,
                   if (tuote.myyntihinta_maara=0, 1, tuote.myyntihinta_maara) myyntihinta_maara,
                   tuote.sarjanumeroseuranta,
@@ -2391,7 +2372,7 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
                   and tilausrivi.var       != 'O'
                   $lisa1
                   $where_lisa
-                  ORDER BY hornsort, sorttauskentta $order_sorttaus, tilausrivi.tunnus";
+                  ORDER BY $pjat_sortlisa sorttauskentta $order_sorttaus, tilausrivi.tunnus";
       }
       $riresult = pupe_query($query);
 
@@ -2457,14 +2438,12 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
         'tots'              => 0,
         'tyyppi'            => $tyyppi,
         'kerayseran_numero' => $kerayseran_numero,
-        'kerayslistatyyppi' => $kerayslistatyyppi,
-        'horn_lavanumero'   => NULL,);
+        'kerayslistatyyppi' => $kerayslistatyyppi,);
 
       // Aloitellaan keräyslistan teko
       $params_kerayslista = alku_kerayslista($params_kerayslista);
 
       while ($row = mysql_fetch_assoc($riresult)) {
-        $row['kommentti'] .= $row['kommentti']." ++ ".$row['hornkoko'];
         $params_kerayslista["row"] = $row;
         $params_kerayslista = rivi_kerayslista($params_kerayslista);
       }

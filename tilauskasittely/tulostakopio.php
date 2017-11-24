@@ -256,6 +256,7 @@ if ($kukarow["extranet"] != "") {
 
       $asiakasid   = $asiakasrow["tunnus"];
       $ytunnus  = $asiakasrow["ytunnus"];
+      $kieli = $asiakasrow["kieli"] != '' ? $asiakasrow["kieli"] : $kieli;
     }
     else {
       exit;
@@ -1432,12 +1433,11 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
 
   while ($laskurow = mysql_fetch_assoc($rrrresult)) {
 
-    if (empty($kieli)) {
-      //  Haetaan asiakkaan kieli niin hekin ymmärtävät..
-      $query = "SELECT kieli from asiakas WHERE yhtio = '$kukarow[yhtio]' and tunnus='$laskurow[liitostunnus]'";
-      $kielires = pupe_query($query);
-      $kielirow = mysql_fetch_assoc($kielires);
-
+    //  Haetaan asiakkaan kieli niin hekin ymmärtävät..
+    $query = "SELECT kieli from asiakas WHERE yhtio = '$kukarow[yhtio]' and tunnus='$laskurow[liitostunnus]'";
+    $kielires = pupe_query($query);
+    $kielirow = mysql_fetch_assoc($kielires);
+    if ($kielirow['kieli'] != '') {
       $kieli = $kielirow['kieli'];
     }
 

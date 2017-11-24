@@ -354,7 +354,7 @@ function sepa_credittransfer($laskurow, $popvm_nyt, $netotetut_rivit = '') {
       $Ustrd = $RmtInf->addChild('Ustrd', sprintf("%-1.140s", $laskurow['viite']));          // Unstructured (max 140 char)
     }
     elseif (strlen(trim($laskurow["viite"])) > 0) {
-      $Strd = $RmtInf->addChild('Strd', '');                              // Structured (Max 9 occurrences)
+      $Strd = $RmtInf->addChild('Strd', '');                              // Structured (Max 9 -> 999 occurrences)
       // $RfrdDocInf = $Strd->addChild('RfrdDocInf', '');                      // ReferredDocumentInformation
       //   $RfrdDocTp = $RfrdDocInf->addChild('RfrdDocTp', '');
       //     $Cd = $RfrdDocTp->addChild('Cd', '');
@@ -396,7 +396,7 @@ function sepa_credittransfer($laskurow, $popvm_nyt, $netotetut_rivit = '') {
         $code = "CINV";  // veloituslasku
       }
 
-      $Strd = $RmtInf->addChild('Strd', '');                                 // Structured (Max 9 occurrences)
+      $Strd = $RmtInf->addChild('Strd', '');                                 // Structured (Max 9 -> 999 occurrences)
 
       $RfrdDocInf = $Strd->addChild('RfrdDocInf', '');                         // ReferredDocumentInformation
       $RfrdDocTp = $RfrdDocInf->addChild('RfrdDocTp', '');                     // ReferredDocumentType
@@ -770,11 +770,11 @@ if ($tee == "KIRJOITA" or $tee == "KIRJOITAKOPIO") {
       exit;
     }
 
-    if ($nettolaskuja_yhteensa > 9) {
+    if ($nettolaskuja_yhteensa > 999) {
 
       echo "<tr>";
       echo "<th>".t("Virhe")."</th>";
-      echo "<td><font class='error'>Hyvityslaskujen netotus koostuu yli yhdeksästä tapahtumasta! SEPA aineisto ei tue näin isoja netotuksia! $laskurow[valkoodi] $laskurow[ultilno], $laskurow[olmapvm]</font></td>";
+      echo "<td><font class='error'>Hyvityslaskujen netotus koostuu yli 999 tapahtumasta! SEPA aineisto ei tue näin isoja netotuksia! $laskurow[valkoodi] $laskurow[ultilno], $laskurow[olmapvm]</font></td>";
       echo "</tr>";
       echo "</table>";
 

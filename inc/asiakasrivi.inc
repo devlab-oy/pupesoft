@@ -1247,10 +1247,16 @@ if ($fieldname == 'kerayserat') {
   if ($yhtiorow['kerayserat'] == 'A') {
     $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 300).">";
 
-    $sel = trim($trow[$i]) == 'A' ? ' selected' : '';
+    $sel = array_fill_keys(explode(",", $trow[$i]), " selected") + array('A' => '', 'H' => '');
+
 
     $ulos .= "<option value = ''>".t("Keräyseriä ei käytetä")."</option>";
-    $ulos .= "<option value = 'A'{$sel}>".t("Keräyserät käytössä")."</option>";
+    $ulos .= "<option value = 'A' {$sel['A']}>".t("Keräyserät käytössä")."</option>";
+
+    if ($kukarow['yhtio'] == 'mast') {
+      $ulos .= "<option value = 'H' {$sel['H']}>".t("Lavakeräys käytössä")."</option>";
+    }
+
     $ulos .= "</select></td>";
 
     $jatko = 0;

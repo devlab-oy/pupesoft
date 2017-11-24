@@ -107,7 +107,6 @@ if (strpos($_SERVER['SCRIPT_NAME'], "muokkaatilaus.php") !== FALSE) {
         });
 
         $('#horn_keraykseen').val(valitut_tilaukset.join(","));
-        $('#keraa_kaikki_horn_formi').submit();
       });
     });
   </script>
@@ -206,7 +205,7 @@ if ($toim == 'HORN' and $tee == 'KERAA_KAIKKI_HORN' and $horn_keraykseen != "") 
                WHERE tunnus in ($tilausnumeroita)
                and yhtio = '$kukarow[yhtio]'
                and tila = 'N'
-               and alatila = 'F'";
+               and alatila = 'FF'";
     pupe_query($query);
 
     // Haetaan ekan kerättävän tilauksen tiedot
@@ -1990,26 +1989,30 @@ elseif ($toim == "EXTRANET") {
   $miinus = 4;
 }
 elseif ($toim == "HORN") {
-  $query = "SELECT lasku.tunnus tilaus, $asiakasstring asiakas, asiakas.asiakasnro, lasku.toimitustapa, lasku.luontiaika, $toimaikalisa lasku.alatila, lasku.tila, lasku.tunnus, lasku.varasto
-            FROM lasku use index (tila_index)
-            JOIN asiakas ON (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus)
-            WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila = 'N' and lasku.alatila = 'F'
-            $haku
-            $mt_order_by
-            $rajaus";
 
-  // haetaan tilausten arvo
+  $query = "SELECT DISTINCT lasku.tunnus tilaus, $asiakasstring asiakas, asiakas.asiakasnro, lasku.luontiaika, count(tilausrivi.tunnus) riveja, ";
+
   if ($kukarow['hinnat'] == 0) {
-    $sumquery = "SELECT
-                 round(sum(tilausrivi.hinta / if('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}),2) arvo,
-                 round(sum(tilausrivi.hinta * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}),2) summa,
-                 count(distinct lasku.tunnus) kpl
-                 FROM lasku use index (tila_index)
-                 JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi!='D')
-                 WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila = 'N' and lasku.alatila = 'F'";
-    $sumresult = pupe_query($sumquery);
-    $sumrow = mysql_fetch_assoc($sumresult);
+    $query .= " round(sum(tilausrivi.hinta
+                  / if('$yhtiorow[alv_kasittely]'  = '' AND tilausrivi.alv < 500,
+                    (1 + tilausrivi.alv / 100),
+                    1)
+                  * (tilausrivi.varattu + tilausrivi.jt + tilausrivi.kpl)
+                  * {$query_ale_lisa}), 2) AS arvo, ";
   }
+
+  $query .= "$toimaikalisa lasku.alatila, lasku.tila, lasku.tunnus, lasku.varasto
+             FROM lasku use index (tila_index)
+             JOIN asiakas ON (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus)
+             LEFT JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi != 'D')
+             WHERE lasku.yhtio = '$kukarow[yhtio]'
+             and lasku.tila = 'N'
+             and lasku.alatila = 'FF'
+             $haku
+             GROUP BY lasku.tunnus
+             $mt_order_by
+             $rajaus";
+
 
   $miinus = 4;
 }
@@ -2386,6 +2389,12 @@ if (mysql_num_rows($result) != 0) {
   echo "<table>";
   echo "<tr>";
 
+  $tturllisa = "";
+
+  if ($toim == "HORN") {
+    $tturllisa = "&toimitustapa=$toimitustapa";
+  }
+
   if ($toim == "HORN" and !empty($toimitustapa)) {
     echo "<th></th>";
   }
@@ -2394,13 +2403,13 @@ if (mysql_num_rows($result) != 0) {
   for ($i = 0; $i < mysql_num_fields($result)-$miinus; $i++) {
 
     if (isset($mt_order[mysql_field_name($result, $i)]) and $mt_order[mysql_field_name($result, $i)] == 'ASC') {
-      echo "<th align='left'><a href='muokkaatilaus.php?toim=$toim&asiakastiedot=$asiakastiedot&limit=$limit&etsi=$etsi&toimipaikka=$toimipaikka&mt_order[".mysql_field_name($result, $i)."]=DESC'>".t(mysql_field_name($result, $i))."<img src='{$palvelin2}pics/lullacons/arrow-small-up-green.png' /></a></th>";
+      echo "<th align='left'><a href='muokkaatilaus.php?toim=$toim&asiakastiedot=$asiakastiedot&limit=$limit&etsi=$etsi&toimipaikka=$toimipaikka{}&mt_order[".mysql_field_name($result, $i)."]=DESC{$tturllisa}'>".t(mysql_field_name($result, $i))."<img src='{$palvelin2}pics/lullacons/arrow-small-up-green.png' /></a></th>";
     }
     elseif (isset($mt_order[mysql_field_name($result, $i)]) and $mt_order[mysql_field_name($result, $i)] == 'DESC') {
-      echo "<th align='left'><a href='muokkaatilaus.php?toim=$toim&asiakastiedot=$asiakastiedot&limit=$limit&etsi=$etsi&toimipaikka=$toimipaikka&mt_order[".mysql_field_name($result, $i)."]=ASC'>".t(mysql_field_name($result, $i))."<img src='{$palvelin2}pics/lullacons/arrow-small-down-green.png' /></a></th>";
+      echo "<th align='left'><a href='muokkaatilaus.php?toim=$toim&asiakastiedot=$asiakastiedot&limit=$limit&etsi=$etsi&toimipaikka=$toimipaikka&mt_order[".mysql_field_name($result, $i)."]=ASC{$tturllisa}'>".t(mysql_field_name($result, $i))."<img src='{$palvelin2}pics/lullacons/arrow-small-down-green.png' /></a></th>";
     }
     else {
-      echo "<th align='left'><a href='muokkaatilaus.php?toim=$toim&asiakastiedot=$asiakastiedot&limit=$limit&etsi=$etsi&toimipaikka=$toimipaikka&mt_order[".mysql_field_name($result, $i)."]=ASC'>".t(mysql_field_name($result, $i))."</a></th>";
+      echo "<th align='left'><a href='muokkaatilaus.php?toim=$toim&asiakastiedot=$asiakastiedot&limit=$limit&etsi=$etsi&toimipaikka=$toimipaikka&mt_order[".mysql_field_name($result, $i)."]=ASC{$tturllisa}'>".t(mysql_field_name($result, $i))."</a></th>";
     }
 
     if (isset($worksheet)) {
@@ -3240,9 +3249,6 @@ if (mysql_num_rows($result) != 0) {
       echo "<input type='hidden' name='toimitustapa' value='$toimitustapa' />";
       echo "<input type='hidden' name='tee' value='KERAA_KAIKKI_HORN' />";
       echo "<input type='hidden' id='horn_keraykseen' name='horn_keraykseen' value='' />";
-      echo "<div style='display: none;'>";
-      echo "<input type='submit'>";
-      echo "</div>";
 
       $query = "SELECT *
                 FROM kirjoittimet
@@ -3266,7 +3272,8 @@ if (mysql_num_rows($result) != 0) {
       }
 
       echo "</select><br><br>";
-      echo "<input type='button' id='horn_siirra_keraykseen_nappi' name='horn_siirra_keraykseen_nappi' value='".t("Siirrä kaikki valitut tilaukset keräykseen")."'/>";
+
+      echo "<input type='submit' id='horn_siirra_keraykseen_nappi' name='horn_siirra_keraykseen_nappi' value='".t("Siirrä kaikki valitut tilaukset keräykseen")."'/>";
       echo "</form><br>";
     }
 

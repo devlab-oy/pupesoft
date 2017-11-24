@@ -697,6 +697,17 @@ if (!function_exists('rivi_kerayslista')) {
     // Luodaan muuttujat
     extract($params);
 
+    if ($kerayslistatyyppi == 'LAVAKERAYS') {
+      if (!isset($lava_numero)) {
+        $params['lava_numero'] = 1;
+        $lava_numero = 1;
+      }
+      if (!isset($lava_referenssiluku)) {
+        $params['lava_referenssiluku'] = 0;
+        $lava_referenssiluku = 0;
+      }
+    }
+
     if ($kerayslistatyyppi == 'EXCEL1') {
       $thispage->writeString($kala, 0, $row["tuoteno"]);
       $thispage->writeString($kala, 1, $row["nimitys"]);
@@ -744,8 +755,13 @@ if (!function_exists('rivi_kerayslista')) {
       }
 
       //jos ollaan liian pitk‰ll‰ tehd‰‰n uusi otsikko...
-      if ($kala < 95 or ($horn_lavanumero >= 1488)) {
-        $horn_lavanumero = 0;
+      if ($kala < 95 or ($lava_referenssiluku >= 1488)) {
+
+        if ($lava_referenssiluku >= 1488) {
+          $lava_numero++;
+          $lava_referenssiluku=0;
+        }
+
         $sivu++;
 
         // Luodaan palautettavat
@@ -863,11 +879,12 @@ if (!function_exists('rivi_kerayslista')) {
           }
         }
 
-        if (empty($horn_lavanumero)) {
-          $pdf->draw_text(23,  $kala, "LAVA XXXXXXXXXXXXXXXXXXXXXXXXXX:",  $thispage, $boldi);
+        if ($lava_referenssiluku == 0) {
+          $pdf->draw_text(23,  $kala, "LAVA $lava_numero:",  $thispage, $boldi);
           $kala = $kala - $rivinkorkeus + 5;
-          $horn_lavanumero += ($row["tilkpl"] * $row['hornkoko']);
         }
+
+        $lava_referenssiluku += ($row["tilkpl"] * $row['lavakoko']);
 
         if (($yhtiorow['kerayserat'] == 'K' and isset($kerayseran_numero) and $kerayseran_numero > 0) or ($yhtiorow['kerayserat'] == 'P' or ($yhtiorow['kerayserat'] == 'A' and $asrow['kerayserat'] == 'A'))) {
           $pdf->draw_text(23,  $kala, $rivinumerot[$row["ker_tunnus"]],  $thispage, $pieni);
@@ -877,8 +894,8 @@ if (!function_exists('rivi_kerayslista')) {
         }
 
         list($ff_string, $ff_font) = pdf_fontfit($varastopaikka, 88, $pdf, $norm);
-        $pdf->draw_text(42,  $kala, $ff_string,           $thispage, $ff_font);
-        $pdf->draw_text(125,  $kala, $row["tuoteno"],        $thispage, $norm);
+        $pdf->draw_text(42,  $kala, $ff_string, $thispage, $ff_font);
+        $pdf->draw_text(125,  $kala, $row["tuoteno"], $thispage, $norm);
 
         $query = "SELECT tuote.*, group_concat(distinct tuotteen_toimittajat.toim_tuoteno order by tuotteen_toimittajat.tunnus separator '/') toim_tuoteno
                   FROM tuote

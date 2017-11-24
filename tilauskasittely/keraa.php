@@ -3115,9 +3115,11 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
                 lasku.*,
                 toimitustapa.tulostustapa,
                 toimitustapa.nouto,
-                toimitustapa.rahtikirja
+                toimitustapa.rahtikirja,
+                asiakas.kerayserat
                 FROM lasku
                 LEFT JOIN toimitustapa ON (lasku.yhtio = toimitustapa.yhtio and lasku.toimitustapa = toimitustapa.selite)
+                LEFT JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus)
                 WHERE lasku.tunnus in ({$tilausnumeroita})
                 and lasku.yhtio    = '{$kukarow['yhtio']}'
                 and lasku.tila     in ({$tila})
@@ -3162,7 +3164,7 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
       }
       else {
 
-        echo "<tr><td>{$tilausnumeroita}<br>{$otsik_row['clearing']}";
+        echo "<tr><td>".str_replace(",", ", ", $tilausnumeroita)."<br>{$otsik_row['clearing']}";
 
         if ($toim == 'VASTAANOTA_REKLAMAATIO') {
           echo "<br><form action='tilaus_myynti.php' method='POST'>";
@@ -3217,6 +3219,13 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
       $asiakas_join_lisa = "JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus)";
     }
 
+    if ($otsik_row['kerayserat'] == "H") {
+      require "inc/lavakeraysparametrit.inc";
+
+      $select_lisa .= $lavakeraysparam;
+      $pjat_sortlisa = "lavasort,";
+    }
+
     $query = "SELECT
               tilausrivi.tyyppi,
               tilausrivi.tuoteno,
@@ -3254,6 +3263,20 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
     $riveja = mysql_num_rows($result);
 
     if ($riveja > 0) {
+
+      if ($otsik_row['kerayserat'] == "H") {
+        //generoidaan rivinumerot
+        $rivinumerot = array();
+
+        $kal = 1;
+
+        while ($rnrow = mysql_fetch_assoc($result)) {
+          $rivinumerot[$rnrow["tunnus"]] = $kal;
+          $kal++;
+        }
+
+        mysql_data_seek($result, 0);
+      }
 
       $row_chk = mysql_fetch_assoc($result);
       mysql_data_seek($result, 0);
@@ -3378,13 +3401,18 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
       }
 
       echo "<table id='maintable'>
-          <tr>
-          <th>".t("Paikka")."</th>
-          <th>".t("Tuoteno")."</th>
-          $_toimtuoteno_otsikko
-          <th>".t("Nimitys")."</th>
-          <th>".t("M‰‰r‰")."</th>
-          <th>".t("Poikkeava m‰‰r‰")."</th>";
+          <tr>";
+
+      if (!empty($rivinumerot)) {
+        echo "<th>#</th>";
+      }
+
+      echo "<th>".t("Paikka")."</th>
+            <th>".t("Tuoteno")."</th>
+            $_toimtuoteno_otsikko
+            <th>".t("Nimitys")."</th>
+            <th>".t("M‰‰r‰")."</th>
+            <th>".t("Poikkeava m‰‰r‰")."</th>";
 
       if ($yhtiorow['kerayserat'] == 'P' or ($yhtiorow['kerayserat'] == 'A' and $row_chk['kerayserat'] == 'A')) {
         echo "<th>", t("Pakkaus"), "</th>";
@@ -3407,6 +3435,8 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
       $oslappkpl   = 0;
       $kerattavatrivit_count = 0;
       $total_rivi_count = mysql_num_rows($result);
+      $lava_numero=1;
+      $lava_referenssiluku=0;
 
       echo "<input type='hidden' id='total_rivi_count' value='{$total_rivi_count}' />";
 
@@ -3463,9 +3493,27 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
           $poikkeava_maara_disabled = "disabled";
         }
 
+        if ($otsik_row['kerayserat'] == "H") {
+          if ($lava_referenssiluku >= 1488) {
+            $lava_numero++;
+            $lava_referenssiluku=0;
+          }
+
+          if ($lava_referenssiluku == 0) {
+            echo "<tr><th class='spec' colspan='6'>".t("Lava")." $lava_numero:</td></tr>";
+          }
+
+          $lava_referenssiluku += ($row["tilkpl"] * $row['lavakoko']);
+        }
+
         if ($row['ei_saldoa'] != '') {
-          echo "  <tr class='aktiivi'>
-              <td>*</td>
+          echo "<tr class='aktiivi'>";
+
+          if (!empty($rivinumerot)) {
+            echo "<td>{$rivinumerot[$row["tunnus"]]}</td>";
+          }
+
+          echo "<td>*</td>
               <td>$row[tuoteno]</td>
               <td>$row[nimitys]</td>
               <td>$row[varattu]</td>
@@ -3493,6 +3541,11 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
         }
         else {
           echo "<tr class='aktiivi'>";
+
+          if (!empty($rivinumerot)) {
+            echo "<td>{$rivinumerot[$row["tunnus"]]}</td>";
+          }
+
           echo "<td>";
 
           // Voidaan vaihtaa tuotepaikka (VASTAANOTA_REKLAMAATIO ja kerayspoikkeama_kasittely == 'P')

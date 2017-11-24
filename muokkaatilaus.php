@@ -87,26 +87,26 @@ if (strpos($_SERVER['SCRIPT_NAME'], "muokkaatilaus.php") !== FALSE) {
         });
       });
 
-      $('#horn_valitsekaikki').on('click', function(e) {
+      $('#lavakerays_valitsekaikki').on('click', function(e) {
           if($(this).is(":checked")) {
-            $('.horn_valitse_keraykseen').prop('checked', true);
+            $('.lavakerays_valitse_keraykseen').prop('checked', true);
           }
           else {
-            $('.horn_valitse_keraykseen').prop('checked', false);
+            $('.lavakerays_valitse_keraykseen').prop('checked', false);
           }
       });
 
-      $('#horn_siirra_keraykseen_nappi').on('click', function() {
+      $('#lavakerays_siirra_keraykseen_nappi').on('click', function() {
         // Siirret‰‰n ruksatut formin mukana
         var valitut_tilaukset = []
 
-        $('.horn_valitse_keraykseen').each(function(i, obj) {
+        $('.lavakerays_valitse_keraykseen').each(function(i, obj) {
           if ($(obj).is(":checked")) {
             valitut_tilaukset.push($(obj).val());
           }
         });
 
-        $('#horn_keraykseen').val(valitut_tilaukset.join(","));
+        $('#lavakerays_keraykseen').val(valitut_tilaukset.join(","));
       });
     });
   </script>
@@ -184,11 +184,11 @@ if ($toim == 'TARJOUS' and $tee == 'MITATOI_TARJOUS_KAIKKI' and $tunnukset != ""
   pupemaster_stop();
 }
 
-if ($toim == 'HORN' and $tee == 'KERAA_KAIKKI_HORN' and $horn_keraykseen != "") {
+if ($toim == 'LAVAKERAYS' and $tee == 'KERAA_KAIKKI_LAVAKERAYS' and $lavakerays_keraykseen != "") {
   pupemaster_start();
 
-  $tilausnumeroita = $horn_keraykseen;
-  $laskuja = count(explode(",", $horn_keraykseen));
+  $tilausnumeroita = $lavakerays_keraykseen;
+  $laskuja = count(explode(",", $lavakerays_keraykseen));
 
   // katsotaan, ettei tilaus ole kenell‰k‰‰n auki ruudulla
   $query = "SELECT *
@@ -432,7 +432,7 @@ echo "  <script type='text/javascript' language='JavaScript'>
 
 $toim = strtoupper($toim);
 
-if ($toim == "" or $toim == "SUPER" or $toim == "SUPER_EITYOM" or $toim == "SUPER_EILUONTITAPATYOM" or $toim == "LASKUTUSKIELTO" or $toim == "KESKEN" or $toim == "TOSI_KESKEN" or $toim == 'KESKEN_TAI_TOIMITETTAVISSA' or $toim == "HORN") {
+if ($toim == "" or $toim == "SUPER" or $toim == "SUPER_EITYOM" or $toim == "SUPER_EILUONTITAPATYOM" or $toim == "LASKUTUSKIELTO" or $toim == "KESKEN" or $toim == "TOSI_KESKEN" or $toim == 'KESKEN_TAI_TOIMITETTAVISSA' or $toim == "LAVAKERAYS") {
   $pika_oikeu = tarkista_oikeus('tilaus_myynti.php', 'PIKATILAUS');
   $rivi_oikeu = tarkista_oikeus('tilaus_myynti.php', 'RIVISYOTTO');
 }
@@ -479,7 +479,7 @@ elseif ($toim == "LASKUTUSKIELTO") {
 elseif ($toim == "EXTRANET") {
   $otsikko = t("hyv‰ksytt‰vi‰ tilauksia");
 }
-elseif ($toim == "HORN") {
+elseif ($toim == "LAVAKERAYS") {
   $otsikko = t("HB-tilauksia");
 }
 elseif ($toim == "OSTO" or $toim == "OSTOSUPER") {
@@ -672,7 +672,7 @@ if (strpos($_SERVER['SCRIPT_NAME'], "muokkaatilaus.php") !== FALSE) {
   if ($toim != "MYYNTITILITOIMITA" and $toim != "EXTRANET" and $toim != "VALMISTUSMYYNTI" and $toim != "VALMISTUSMYYNTISUPER") {
     if (isset($eresult) and  mysql_num_rows($eresult) > 0) {
       // tehd‰‰n aktivoi nappi.. kaikki mit‰ n‰ytet‰‰n saa aktvoida, joten tarkkana queryn kanssa.
-      if ($toim == "" or $toim == "SUPER" or $toim == "SUPER_EITYOM" or $toim == "SUPER_EILUONTITAPATYOM" or $toim == "LASKUTUSKIELTO" or $toim == "KESKEN" or $toim == "TOSI_KESKEN" or $toim == 'KESKEN_TAI_TOIMITETTAVISSA' or $toim == "HORN") {
+      if ($toim == "" or $toim == "SUPER" or $toim == "SUPER_EITYOM" or $toim == "SUPER_EILUONTITAPATYOM" or $toim == "LASKUTUSKIELTO" or $toim == "KESKEN" or $toim == "TOSI_KESKEN" or $toim == 'KESKEN_TAI_TOIMITETTAVISSA' or $toim == "LAVAKERAYS") {
 
         if (isset($pika_oikeu) and $pika_oikeu and !$rivi_oikeu) {
           $aputoim1 = "PIKATILAUS";
@@ -816,7 +816,7 @@ if (strpos($_SERVER['SCRIPT_NAME'], "muokkaatilaus.php") !== FALSE) {
 
       echo "</select></td>";
 
-      if ($aputoim2 != "" and ($toim == "" or $toim == "SUPER" or $toim == "SUPER_EITYOM" or $toim == "SUPER_EILUONTITAPATYOM" or $toim == "ENNAKKO" or $toim == "LASKUTUSKIELTO" or $toim == "KESKEN" or $toim == "TOSI_KESKEN" or $toim == 'KESKEN_TAI_TOIMITETTAVISSA' or $toim == "HORN")) {
+      if ($aputoim2 != "" and ($toim == "" or $toim == "SUPER" or $toim == "SUPER_EITYOM" or $toim == "SUPER_EILUONTITAPATYOM" or $toim == "ENNAKKO" or $toim == "LASKUTUSKIELTO" or $toim == "KESKEN" or $toim == "TOSI_KESKEN" or $toim == 'KESKEN_TAI_TOIMITETTAVISSA' or $toim == "LAVAKERAYS")) {
         echo "<td class='back'><input type='submit' name='$aputoim2' value='$lisa2' $button_disabled></td>";
       }
 
@@ -990,7 +990,7 @@ if (strpos($_SERVER['SCRIPT_NAME'], "muokkaatilaus.php") !== FALSE) {
 
   echo "</tr>";
 
-  if ($toim == "HORN") {
+  if ($toim == "LAVAKERAYS") {
 
     echo "</tr><tr>";
 
@@ -1051,7 +1051,7 @@ if (strpos($_SERVER['SCRIPT_NAME'], "muokkaatilaus.php") !== FALSE) {
     $haku = " and (lasku.tunnus like '{$etsi}%' or lasku.ytunnus like '{$etsi}%' or lasku.viesti like '%{$etsi}%' {$myyntitili_haku}) ";
   }
 
-  if ($toim == "HORN" and !empty($toimitustapa)) {
+  if ($toim == "LAVAKERAYS" and !empty($toimitustapa)) {
     $haku .= " and lasku.toimitustapa = '{$toimitustapa}'";
   }
 
@@ -1149,7 +1149,7 @@ if (strpos($_SERVER['SCRIPT_NAME'], "muokkaatilaus.php") !== FALSE) {
     $toimaikalisa = ' lasku.toimaika, ';
   }
 
-  if ($limit == "" and $toim != "HORN") {
+  if ($limit == "" and $toim != "LAVAKERAYS") {
     $rajaus = "LIMIT 50";
   }
   else {
@@ -1157,7 +1157,7 @@ if (strpos($_SERVER['SCRIPT_NAME'], "muokkaatilaus.php") !== FALSE) {
   }
 }
 
-if ($toim == "HORN") {
+if ($toim == "LAVAKERAYS") {
   $asiakastiedot = "toimitus";
 }
 elseif (empty($asiakastiedot)) {
@@ -1197,7 +1197,7 @@ echo "  <script language=javascript>
 
 echo "<br>";
 
-if ($toim != "HORN") {
+if ($toim != "LAVAKERAYS") {
   // N‰ytet‰‰n asiakastiedot linkki
   if ($asiakastiedot == 'toimitus') {
     echo " <a href='muokkaatilaus.php?toim={$toim}&asiakastiedot=laskutus&limit={$limit}&etsi={$etsi}&toimipaikka={$toimipaikka}'>" .t("N‰yt‰ vain laskutustiedot") . "</a>";
@@ -1988,7 +1988,7 @@ elseif ($toim == "EXTRANET") {
 
   $miinus = 4;
 }
-elseif ($toim == "HORN") {
+elseif ($toim == "LAVAKERAYS") {
 
   $query = "SELECT DISTINCT lasku.tunnus tilaus, $asiakasstring asiakas, asiakas.asiakasnro, lasku.luontiaika, count(tilausrivi.tunnus) riveja, ";
 
@@ -2391,11 +2391,11 @@ if (mysql_num_rows($result) != 0) {
 
   $tturllisa = "";
 
-  if ($toim == "HORN") {
+  if ($toim == "LAVAKERAYS") {
     $tturllisa = "&toimitustapa=$toimitustapa";
   }
 
-  if ($toim == "HORN" and !empty($toimitustapa)) {
+  if ($toim == "LAVAKERAYS" and !empty($toimitustapa)) {
     echo "<th></th>";
   }
 
@@ -2428,7 +2428,7 @@ if (mysql_num_rows($result) != 0) {
   }
   $excelrivi++;
 
-  if ($toim != "HORN")  {
+  if ($toim != "LAVAKERAYS")  {
     echo "<th align='left'>".t("tyyppi")."</th>";
   }
 
@@ -2651,8 +2651,8 @@ if (mysql_num_rows($result) != 0) {
 
       echo "<tr class='aktiivi' {$label_color}>";
 
-      if ($toim == "HORN" and !empty($toimitustapa)) {
-        echo "<td><input type='checkbox' class='horn_valitse_keraykseen shift' name = 'keraykseen[]' value='{$row['tilaus']}'></td>";
+      if ($toim == "LAVAKERAYS" and !empty($toimitustapa)) {
+        echo "<td><input type='checkbox' class='lavakerays_valitse_keraykseen shift' name = 'keraykseen[]' value='{$row['tilaus']}'></td>";
       }
 
       $zendesk_viesti = FALSE;
@@ -2878,7 +2878,7 @@ if (mysql_num_rows($result) != 0) {
           }
         }
       }
-      elseif ($toim != "HORN")  {
+      elseif ($toim != "LAVAKERAYS")  {
 
         $laskutyyppi = $row["tila"];
         $alatila   = $row["alatila"];
@@ -2960,7 +2960,7 @@ if (mysql_num_rows($result) != 0) {
       $excelrivi++;
 
       // tehd‰‰n aktivoi nappi.. kaikki mit‰ n‰ytet‰‰n saa aktvoida, joten tarkkana queryn kanssa.
-      if ($whiletoim == "" or $whiletoim == "SUPER" or $whiletoim == "SUPER_EITYOM" or $whiletoim == "SUPER_EILUONTITAPATYOM" or $whiletoim == "KESKEN" or $toim == "KESKEN_TAI_TOIMITETTAVISSA" or $toim == "HORN" or $toim == "TOSI_KESKEN" or $whiletoim == "EXTRANET" or $whiletoim == "JTTOIMITA" or $whiletoim == "LASKUTUSKIELTO"or (($whiletoim == "VALMISTUSMYYNTI" or $whiletoim == "VALMISTUSMYYNTISUPER") and $row["tila"] != "V")) {
+      if ($whiletoim == "" or $whiletoim == "SUPER" or $whiletoim == "SUPER_EITYOM" or $whiletoim == "SUPER_EILUONTITAPATYOM" or $whiletoim == "KESKEN" or $toim == "KESKEN_TAI_TOIMITETTAVISSA" or $toim == "LAVAKERAYS" or $toim == "TOSI_KESKEN" or $whiletoim == "EXTRANET" or $whiletoim == "JTTOIMITA" or $whiletoim == "LASKUTUSKIELTO"or (($whiletoim == "VALMISTUSMYYNTI" or $whiletoim == "VALMISTUSMYYNTISUPER") and $row["tila"] != "V")) {
 
         if (isset($pika_oikeu) and $pika_oikeu and !$rivi_oikeu) {
           $aputoim1 = "PIKATILAUS";
@@ -3192,7 +3192,7 @@ if (mysql_num_rows($result) != 0) {
 
       $_class = $whiletoim == "EXTRANET" ? "check_kesken" : "";
 
-      if ($aputoim2 != "" and ($whiletoim == "" or $whiletoim == "SUPER" or $whiletoim == "SUPER_EITYOM" or $whiletoim == "SUPER_EILUONTITAPATYOM" or $whiletoim == "KESKEN" or $toim == "KESKEN_TAI_TOIMITETTAVISSA" or $toim == "HORN" or $toim == "TOSI_KESKEN" or $whiletoim == "EXTRANET" or $whiletoim == "JTTOIMITA" or $whiletoim == "LASKUTUSKIELTO" or (($whiletoim == "VALMISTUSMYYNTI" or $whiletoim == "VALMISTUSMYYNTISUPER") and $row["tila"] != "V"))) {
+      if ($aputoim2 != "" and ($whiletoim == "" or $whiletoim == "SUPER" or $whiletoim == "SUPER_EITYOM" or $whiletoim == "SUPER_EILUONTITAPATYOM" or $whiletoim == "KESKEN" or $toim == "KESKEN_TAI_TOIMITETTAVISSA" or $toim == "LAVAKERAYS" or $toim == "TOSI_KESKEN" or $whiletoim == "EXTRANET" or $whiletoim == "JTTOIMITA" or $whiletoim == "LASKUTUSKIELTO" or (($whiletoim == "VALMISTUSMYYNTI" or $whiletoim == "VALMISTUSMYYNTISUPER") and $row["tila"] != "V"))) {
         echo "<input type='submit' class='{$_class}' name='$aputoim2' value='$lisa2' $button_disabled>";
       }
 
@@ -3241,14 +3241,14 @@ if (mysql_num_rows($result) != 0) {
   echo "</table>";
 
   if (strpos($_SERVER['SCRIPT_NAME'], "muokkaatilaus.php") !== FALSE) {
-    if ($toim == "HORN" and !empty($toimitustapa)) {
-      echo "<input type='checkbox' id='horn_valitsekaikki'> ".t("Valitse kaikki");
+    if ($toim == "LAVAKERAYS" and !empty($toimitustapa)) {
+      echo "<input type='checkbox' id='lavakerays_valitsekaikki'> ".t("Valitse kaikki");
 
-      echo "<br><br><form method='POST' id='keraa_kaikki_horn_formi' name='keraa_kaikki_horn_formi' action='muokkaatilaus.php' onSubmit='return tarkista_tulostus();'>";
+      echo "<br><br><form method='POST' id='keraa_kaikki_lavakerays_formi' name='keraa_kaikki_lavakerays_formi' action='muokkaatilaus.php' onSubmit='return tarkista_tulostus();'>";
       echo "<input type='hidden' name='toim' value='$toim' />";
       echo "<input type='hidden' name='toimitustapa' value='$toimitustapa' />";
-      echo "<input type='hidden' name='tee' value='KERAA_KAIKKI_HORN' />";
-      echo "<input type='hidden' id='horn_keraykseen' name='horn_keraykseen' value='' />";
+      echo "<input type='hidden' name='tee' value='KERAA_KAIKKI_LAVAKERAYS' />";
+      echo "<input type='hidden' id='lavakerays_keraykseen' name='lavakerays_keraykseen' value='' />";
 
       $query = "SELECT *
                 FROM kirjoittimet
@@ -3273,7 +3273,7 @@ if (mysql_num_rows($result) != 0) {
 
       echo "</select><br><br>";
 
-      echo "<input type='submit' id='horn_siirra_keraykseen_nappi' name='horn_siirra_keraykseen_nappi' value='".t("Siirr‰ kaikki valitut tilaukset ker‰ykseen")."'/>";
+      echo "<input type='submit' id='lavakerays_siirra_keraykseen_nappi' name='lavakerays_siirra_keraykseen_nappi' value='".t("Siirr‰ kaikki valitut tilaukset ker‰ykseen")."'/>";
       echo "</form><br>";
     }
 

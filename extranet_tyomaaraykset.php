@@ -665,7 +665,7 @@ function hae_asiakasdata() {
   if (mysql_num_rows($result2) == 1) {
 
     $jokurow = mysql_fetch_assoc($result2);
-    // Tässä tapahtuu niin että explodella otetaan selitetark:ista nuo toim_osoite tiedot, eroteltuna ###
+    // Otetaan selitetark:ista toimitusosoitteet tiedot, eroteltuna ###
     list($toimnimi, $toimkatu, $toimpostino, $toimpostitp, $toimmaa) = explode("###", $jokurow['selitetark']);
     $asiakasdata['toim_nimi'] = $toimnimi;
     $asiakasdata['toim_osoite'] = $toimkatu;

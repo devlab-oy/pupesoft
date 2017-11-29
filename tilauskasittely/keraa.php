@@ -135,14 +135,27 @@ if (!isset($sel_oslapp))   $sel_oslapp   = array();
 $keraysvirhe = 0;
 $virherivi   = 0;
 $muuttuiko   = '';
+$_tarkista_varastot = true;
 
 if (isset($indexvas) and $indexvas == 1 and $tuvarasto == '') {
+
+  $keraakaikistares = t_avainsana("KERAAKAIKISTA");
+
+  if (mysql_num_rows($keraakaikistares) > 0) {
+
+    $keraakaikistarow = mysql_fetch_assoc($keraakaikistares);
+
+    if ($keraakaikistarow['selitetark'] == 'a') {
+      $_tarkista_varastot = false;
+    }
+  }
+
   // jos käyttäjällä on oletusvarasto, valitaan se
-  if ($kukarow['oletus_varasto'] != 0) {
+  if ($_tarkista_varastot and $kukarow['oletus_varasto'] != 0) {
     $tuvarasto = $kukarow['oletus_varasto'];
   }
   //  Varastorajaus jos käyttäjällä on joku varasto valittuna
-  elseif ($kukarow['varasto'] != '' and $kukarow['varasto'] != 0) {
+  elseif ($_tarkista_varastot and $kukarow['varasto'] != '' and $kukarow['varasto'] != 0) {
     // jos käyttäjällä on monta varastoa valittuna, valitaan ensimmäinen
     $tuvarasto   = strpos($kukarow['varasto'], ',') !== false ? array_shift(explode(",", $kukarow['varasto'])) : $kukarow['varasto'];
   }
@@ -1766,8 +1779,13 @@ if ($tee == 'P') {
       }
 
       $boob = "";
+      $_subject_lisa = "";
 
       $_ctype = $_plain_text_mail ? "text" : "html";
+
+      if ($toimtaparow['osoitelappu'] == 'osoitelappu_kesko') {
+        $_subject_lisa = " ".$laskurow['asiakkaan_tilausnumero'];
+      }
 
       // Lähetetään keräyspoikkeama asiakkaalle
       if ($laskurow["email"] != '' and $kerpoik_myyjaasiakas) {
@@ -1776,7 +1794,7 @@ if ($tee == 'P') {
         $parametri = array(
           "to"           => $laskurow["email"],
           "cc"           => "",
-          "subject"      => "{$yhtiorow['nimi']} - ".t("Keräyspoikkeamat", $kieli),
+          "subject"      => "{$yhtiorow['nimi']} - ".t("Keräyspoikkeamat", $kieli)."{$_subject_lisa}",
           "ctype"        => $_ctype,
           "body"         => $ulos,
           "attachements" => "",
@@ -1808,7 +1826,7 @@ if ($tee == 'P') {
         $parametri = array(
           "to"           => $laskurow["kukamail"],
           "cc"           => "",
-          "subject"      => "{$yhtiorow['nimi']} - ".t("Keräyspoikkeamat", $kieli),
+          "subject"      => "{$yhtiorow['nimi']} - ".t("Keräyspoikkeamat", $kieli)."{$_subject_lisa}",
           "ctype"        => $_ctype,
           "body"         => $ulos,
           "attachements" => "",
@@ -1825,7 +1843,7 @@ if ($tee == 'P') {
         $parametri = array(
           "to"           => $yhtiorow["extranet_kerayspoikkeama_email"],
           "cc"           => "",
-          "subject"      => "{$yhtiorow['nimi']} - ".t("Keräyspoikkeamat", $kieli),
+          "subject"      => "{$yhtiorow['nimi']} - ".t("Keräyspoikkeamat", $kieli)."{$_subject_lisa}",
           "ctype"        => $_ctype,
           "body"         => $ulos,
           "attachements" => "",
@@ -1946,11 +1964,11 @@ if ($tee == 'P') {
                     AND mapvm   != '0000-00-00'
                     AND chn      = '999'";
           $yoimresult  = pupe_query($query);
-          
+
           if ($laskurow['mapvm'] != '0000-00-00' and $laskurow['chn'] == '999') {
             $alatilak = "X";
           }
-          
+
           // Etukäteen maksettu Magentotilaus laskutetaan, jos ei ole jo laskuttunut
           if ($laskurow['ohjelma_moduli'] == 'MAGENTOJT') {
             laskuta_magentojt($laskurow['tunnus']);
@@ -3861,6 +3879,9 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
               else {
                 $selpk_JT = "SELECTED";
               }
+            }
+            elseif ($yhtiorow["kerayspoikkeama_kasittely"] == 'U') {
+              $selpk_PU = "SELECTED";
             }
             else {
               echo "<option value='' SELECTED>".t("Ei käsitellä")."</option>";

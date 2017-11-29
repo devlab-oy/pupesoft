@@ -1517,6 +1517,7 @@ if ($fieldname == "kerayspoikkeama_kasittely") {
   $ulos .= "<option value='o' $sel[o]>".t("Ker‰‰j‰ p‰‰tt‰‰ ker‰yspoikkeaman k‰sittelyst‰")."</option>";
   $ulos .= "<option value='P' $sel[P]>".t("Ker‰‰j‰ p‰‰tt‰‰ ker‰yspoikkeaman k‰sittelyst‰ ja voi vaihtaa ker‰yspaikkaa")."</option>";
   $ulos .= "<option value='J' $sel[J]>".t("Ker‰‰j‰ p‰‰tt‰‰ ker‰yspoikkeaman k‰sittelyst‰ (Oletuksena JT)")."</option>";
+  $ulos .= "<option value='U' $sel[U]>".t("Ker‰‰j‰ p‰‰tt‰‰ ker‰yspoikkeaman k‰sittelyst‰ (Oletuksena puute)")."</option>";
   $ulos .= "</select></td>";
 
   $jatko = 0;
@@ -3262,6 +3263,8 @@ if ($fieldname == "livetuotehaku_hakutapa" or $fieldname == "livetuotehaku_hakut
   $ulos .= "<option value = 'L' {$sel['L']}>".t("Livetuotehaku hakee tuotenumeron, nimityksen, lempinimen ja EAN-koodin mill‰ tahansa osalla. (Hidas tapa)")."</option>";
   $ulos .= "<option value = 'M' {$sel['M']}>".t("Livetuotehaku hakee tuotenumeron, nimityksen, lempinimen ja EAN-koodin mill‰ tahansa osalla. Tehd‰‰n myˆs saldokysely. (Todella hidas tapa)")."</option>";
   $ulos .= "<option value = 'N' {$sel['N']}>".t("Livetuotehaku hakee tuotenumeron ja nimityksen mill‰ tahansa osalla. N‰ytet‰‰n saatavuus kyll‰/ei. (Todella hidas tapa)")."</option>";
+  $ulos .= "<option value = 'O' {$sel['O']}>".t("Livetuotehaku hakee tuotenumeron, nimityksen, EAN-koodin ja lyhytkuvauksen mill‰ tahansa osalla. (Hidas tapa)")."</option>";
+  $ulos .= "<option value = 'P' {$sel['P']}>".t("Livetuotehaku hakee tuotenumeron, nimityksen, EAN-koodin ja lyhytkuvauksen mill‰ tahansa osalla. Tehd‰‰n myˆs saldokysely. (Todella hidas tapa)")."</option>";
 
   $ulos .= "</select></td>";
 

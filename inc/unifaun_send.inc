@@ -503,9 +503,11 @@ class Unifaun {
           or $this->toitarow['virallinen_selite'] == "PO2102"
           or $this->toitarow['virallinen_selite'] == "PO2103"
           or $this->toitarow['virallinen_selite'] == "PO2104"
+          or $this->toitarow['virallinen_selite'] == "PO2461"
           or $this->toitarow['virallinen_selite'] == "PO2711") $rahtisopimusnro = 123456;
         elseif ($this->toitarow['virallinen_selite'] == "KLGRP") $rahtisopimusnro = 1234567;
         elseif ($this->toitarow['virallinen_selite'] == "MH10" or $this->toitarow['virallinen_selite'] == "MH30") $rahtisopimusnro = 12345678;
+        elseif ($this->toitarow['virallinen_selite'] == "MH10_SPTR" or $this->toitarow['virallinen_selite'] == "MH30_SPTR") $rahtisopimusnro = 12345678;
         else $rahtisopimusnro = 123;
       }
 
@@ -516,6 +518,7 @@ class Unifaun {
             or $this->toitarow['virallinen_selite'] == "PO2102"
             or $this->toitarow['virallinen_selite'] == "PO2103"
             or $this->toitarow['virallinen_selite'] == "PO2104"
+            or $this->toitarow['virallinen_selite'] == "PO2461"
             or $this->toitarow['virallinen_selite'] == "PO2711") and strlen($rahtisopimusnro) != 6) {
           $rahtisopimusnro = 999999;
         }
@@ -551,6 +554,8 @@ class Unifaun {
         'KLGRP',
         'MH10',
         'MH30',
+        'MH10_SPTR',
+        'MH30_SPTR',
       );
 
       $allowed_opay = array(
@@ -567,6 +572,7 @@ class Unifaun {
         'ITKY14I',
         'IT14I',
         'PO2711',
+        'PO2461',
       );
     }
 
@@ -879,6 +885,15 @@ class Unifaun {
       elseif (strpos($this->toitarow['virallinen_selite'], "PO2144") !== FALSE) {
         $_virallinen_selite = "PO2144";
       }
+      elseif (strpos($this->toitarow['virallinen_selite'], "MH10_") !== FALSE) {
+        $_virallinen_selite = "MH10";
+      }
+      elseif (strpos($this->toitarow['virallinen_selite'], "MH20_") !== FALSE) {
+        $_virallinen_selite = "MH20";
+      }
+      elseif (strpos($this->toitarow['virallinen_selite'], "MH3050_") !== FALSE) {
+        $_virallinen_selite = "MH3050";
+      }
       else {
         $_virallinen_selite = $this->toitarow['virallinen_selite'];
       }
@@ -897,6 +912,12 @@ class Unifaun {
       'PO2102_00',
       'PO2144_00',
     );
+    // Matkahuollon "tankomainen" lisäpalvelu
+    $_MA_SPTR = array(
+      'MH10_SPTR',
+      'MH20_SPTR',
+      'MH3050_SPTR',
+    );
 
     if (in_array($this->toitarow['virallinen_selite'], $_DLV09)) {
       $uni_ser_val = $uni_service->addChild('addon');
@@ -911,6 +932,11 @@ class Unifaun {
     if (in_array($this->toitarow['virallinen_selite'], $_DLV00)) {
       $uni_ser_val = $uni_service->addChild('addon');
       $uni_ser_val->addAttribute('adnid', "DLV00");
+    }
+
+    if (in_array($this->toitarow['virallinen_selite'], $_MA_SPTR)) {
+      $uni_ser_val = $uni_service->addChild('addon');
+      $uni_ser_val->addAttribute('adnid', "SPTR");
     }
 
     // Postin palvelukoodit, jotka tukevat lisäpalvelua FDNGPP: "LQ Prosessilupa"
@@ -1008,7 +1034,7 @@ class Unifaun {
       $uni_add_val->addAttribute('n', "reference");
     }
 
-    if ($this->toitarow['virallinen_selite'] == "P19" and $this->postirow["toim_puh"] != "") {
+    if (($this->toitarow['virallinen_selite'] == "P19" or $this->toitarow['virallinen_selite'] == "P19FI") and $this->postirow["toim_puh"] != "") {
       $uni_addon = $uni_service->addChild('addon'); // Corresponds to add-on service. See SUP-112-Services-en.xls for valid add-on services.
       $uni_addon->addAttribute('adnid', "NOTSMS");
       $uni_add_val = $uni_addon->addChild('val', utf8_encode($this->postirow["toim_puh"])); // Defines value for misctype.
@@ -1029,7 +1055,7 @@ class Unifaun {
         $uni_add_val->addAttribute('n', "text4");
       }
     }
-    elseif ($this->toitarow['virallinen_selite'] == "P19") {
+    elseif ($this->toitarow['virallinen_selite'] == "P19" or $this->toitarow['virallinen_selite'] == "P19FI") {
       $uni_addon = $uni_service->addChild('addon'); // Corresponds to add-on service. See SUP-112-Services-en.xls for valid add-on services.
       $uni_addon->addAttribute('adnid', "NOTLTR");
     }

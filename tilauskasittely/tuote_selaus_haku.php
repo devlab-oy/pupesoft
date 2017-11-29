@@ -128,6 +128,9 @@ $query    = "SELECT *
 $result   = pupe_query($query);
 $laskurow = mysql_fetch_assoc($result);
 
+// Etukäteen maksetut tilaukset, ei sörkitä toimitustapaa enää
+$_etukateen_maksettu = (!empty($laskurow['tunnus']) and $laskurow['mapvm'] != '0000-00-00' and $laskurow['chn'] == '999');
+
 // vientikieltokäsittely:
 // +maa tarkoittaa että myynti on kielletty tähän maahan ja sallittu kaikkiin muihin
 // -maa tarkoittaa että ainoastaan tähän maahan saa myydä
@@ -981,6 +984,7 @@ if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
             tuote.epakurantti50pvm,
             tuote.epakurantti75pvm,
             tuote.epakurantti100pvm,
+            tuote.lyhytkuvaus,
             tuote.alv,
             (SELECT group_concat(distinct tuotteen_toimittajat.toim_tuoteno order by tuotteen_toimittajat.tunnus separator '<br>') FROM tuotteen_toimittajat use index (yhtio_tuoteno) WHERE tuote.yhtio = tuotteen_toimittajat.yhtio and tuote.tuoteno = tuotteen_toimittajat.tuoteno) toim_tuoteno,
             tuote.sarjanumeroseuranta,
@@ -1540,6 +1544,15 @@ if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
         $row["nimitys"] .= "</ul>";
       }
 
+      if (in_array($yhtiorow['livetuotehaku_hakutapa'], array('O', 'P'))) {
+
+        if (strlen($row['lyhytkuvaus']) > 100) {
+          $row['lyhytkuvaus'] = substr($row['lyhytkuvaus'],0, 100)."..";
+        }
+
+        $row["nimitys"] .= "<br><i>{$row['lyhytkuvaus']}</i>";
+      }
+
       // Peek ahead
       $row_seuraava = current($rows);
 
@@ -1917,9 +1930,9 @@ function hae_oletusasiakas($laskurow) {
 }
 
 function piirra_ostoskoriin_lisays($row) {
-  global $oikeurow, $kukarow, $ostoskori, $vari, $yht_i, $hae_ja_selaa_row;
+  global $oikeurow, $kukarow, $ostoskori, $vari, $yht_i, $hae_ja_selaa_row, $_etukateen_maksettu;
 
-  if ($oikeurow["paivitys"] == 1 and ($kukarow["kuka"] != "" or is_numeric($ostoskori))) {
+  if (empty($_etukateen_maksettu) and $oikeurow["paivitys"] == 1 and ($kukarow["kuka"] != "" or is_numeric($ostoskori))) {
     if (($row["tuoteperhe"] == "" or $row["tuoteperhe"] == $row["tuoteno"] or $row["tyyppi"] == "V") and $row["osaluettelo"] == "") {
       echo "<td align='right' class='$vari' style='vertical-align: top;' nowrap>";
       echo "<input type='hidden' name='tiltuoteno[$yht_i]' value = '$row[tuoteno]'>";

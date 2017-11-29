@@ -114,7 +114,7 @@ if ($tee == 'LISAA') {
     for ($i=0; $i < count($lang); $i++) {
 
       if ($tunnus != 0) {
-        $query = "  UPDATE kalenteri SET ";
+        $query = " UPDATE kalenteri SET ";
         $postquery = " WHERE tunnus = '$tunnus' ";
       }
       else {
@@ -128,8 +128,8 @@ if ($tee == 'LISAA') {
         $postquery = "";
       }
 
-      $query .= "  kentta01   = '$otsikko',
-            kentta02   = '$uutinen',";
+      $query .= "kentta01   = '$otsikko',
+                 kentta02   = '$uutinen',";
       if ($kuva != '') {
         $query .= "kentta03   = '$kuva',";
       }
@@ -139,11 +139,11 @@ if ($tee == 'LISAA') {
       }
 
       $query .=  "kentta09   = '$kentta09',
-            konserni   = '$konserni',
-            kieli     = '$lang[$i]',
-            kokopaiva  = '$kokopaiva',
-            kuittaus  = '$lukittu',
-            tapa    = '$tapa'";
+                  konserni   = '$konserni',
+                  kieli     = '$lang[$i]',
+                  kokopaiva  = '$kokopaiva',
+                  kuittaus  = '$lukittu',
+                  tapa    = '$tapa'";
       $query .= $postquery;
       $result = pupe_query($query);
       $katunnus = mysql_insert_id($GLOBALS["masterlink"]);
@@ -153,7 +153,32 @@ if ($tee == 'LISAA') {
         $query = "UPDATE liitetiedostot set liitostunnus='$katunnus' where tunnus='$liitostunnus'";
         $result = pupe_query($query);
       }
+
+      if (!empty($mul_asiakasegmentti)) {
+
+        // Poistetaan vanhat jos niitä on
+        if ($tunnus > 0) {
+          $uutistunnus = $tunnus;
+        }
+        else {
+          $uutistunnus = $katunnus;
+        }
+
+        $query  = "DELETE from uutinen_asiakassegmentti
+                   WHERE yhtio = '$kukarow[yhtio]'
+                   AND uutistunnus = $uutistunnus";
+        pupe_query($query);
+
+        foreach($mul_asiakasegmentti as $muls) {
+          $query  = "INSERT INTO uutinen_asiakassegmentti
+                     SET yhtio = '$kukarow[yhtio]',
+                     segmenttitunnus = $muls,
+                     uutistunnus = $uutistunnus";
+          pupe_query($query);
+        }
+      }
     }
+
     $tee = "";
   }
   else {
@@ -345,6 +370,7 @@ if ($tee == "SYOTA") {
         <td><input type='checkbox' name='automanual_uutinen' $check1> ".t("Näytetäänkö uutinen Automanualissa")."</td>
       </tr>";
     }
+
     if ($toim == 'EXTRANET') {
       echo "<tr>
         <th>".t("Extranet")."</th>
@@ -360,6 +386,49 @@ if ($tee == "SYOTA") {
         <th>".t("Extranet")."</th>
         <td><input type='checkbox' name='kentta08' value='X' $check3> ".t("Ei näytetä asiakkaan asiakkaille")."</td>
       </tr>";
+
+      $segtunnarit = array();
+
+      if ($tunnus > 0) {
+        $preq = "SELECT segmenttitunnus
+                 FROM uutinen_asiakassegmentti
+                 WHERE yhtio = '$kukarow[yhtio]'
+                 AND uutistunnus = $tunnus";
+        $preres = pupe_query($preq);
+
+        while ($prerow = mysql_fetch_array($preres)) {
+          $segtunnarit[$prerow["segmenttitunnus"]] = TRUE;
+        }
+      }
+      elseif (!empty($mul_asiakasegmentti)) {
+        foreach($mul_asiakasegmentti as $muls) {
+          $segtunnarit[$muls] = TRUE;
+        }
+      }
+
+      $preq = "SELECT CONCAT(REPEAT('&raquo;', COUNT(parent.tunnus) - 1), ' ', ifnull(node.koodi, ''), ' ', node.nimi) AS name, node.koodi koodi, node.tunnus
+               FROM dynaaminen_puu AS node
+               JOIN dynaaminen_puu AS parent ON (parent.yhtio = node.yhtio AND parent.laji = node.laji AND parent.lft <= node.lft AND parent.rgt >= node.lft)
+               WHERE node.yhtio = '$kukarow[yhtio]'
+               AND node.lft     > 0
+               AND node.laji    = 'asiakas'
+               GROUP BY node.tunnus
+               ORDER BY node.lft";
+      $preres = pupe_query($preq);
+
+      echo "<tr><th>".t("Extranet-uutisen segementtirajaus")."</th>";
+      echo "<td><select name='mul_asiakasegmentti[]' multiple='TRUE' size='6'";
+      echo "<option value=''>".t("Ei asiakassegmenttiä")."</option>";
+
+      while ($prerow = mysql_fetch_array($preres)) {
+        $sel = '';
+        if (!empty($segtunnarit[$prerow["tunnus"]])) {
+          $sel = "selected";
+        }
+        echo "<option value='$prerow[tunnus]' $sel>$prerow[name]</option>";
+      }
+
+      echo "</select></td></tr>\n";
     }
   }
 

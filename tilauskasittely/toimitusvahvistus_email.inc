@@ -11,6 +11,13 @@ if ($kieli == '') {
   $kieli = strtolower($kielrow['kieli']);
 }
 
+// Kutsutaanko CLI:stä
+$php_cli = FALSE;
+
+if (php_sapi_name() == 'cli') {
+  $php_cli = TRUE;
+}
+
 pupesoft_log('toimitusvahvistus_email', "Valmistellaan tilauksien {$otunnukset} toimitusvahvistuksien lähettämistä sähköpostiin");
 
 $toimitusvahvistus_email_lahetys = true;
@@ -188,12 +195,12 @@ if ($toimitusvahvistus_email_lahetys) {
 
   $body .= t("Tilauksen toimitusosoite", $kieli).":\n\n";
 
-  $maan_tiedot = hae_maa(array('maakoodi' => $rakir_row['toim_maa']));
+  $maan_tiedot = hae_maa(array('maakoodi' => $laskurow['toim_maa']));
 
-  $body .= "{$rakir_row['toim_nimi']} {$rakir_row['toim_nimitark']}\n\n";
-  $body .= "{$rakir_row['toim_osoite']}\n\n";
-  $body .= "{$rakir_row['toim_postino']} {$rakir_row['toim_postitp']}\n\n";
-  $body .= "{$maan_tiedot['nimi']}\n\n";
+  $body .= "{$laskurow['toim_nimi']} {$laskurow['toim_nimitark']}\n";
+  $body .= "{$laskurow['toim_osoite']}\n";
+  $body .= "{$laskurow['toim_postino']} {$laskurow['toim_postitp']}\n";
+  $body .= "{$maan_tiedot['nimi']}\n";
 
   foreach ($kenelle_emailataan as $key => $email_kuka) {
     // Sähköpostin lähetykseen parametrit
@@ -206,7 +213,10 @@ if ($toimitusvahvistus_email_lahetys) {
     );
 
     if (pupesoft_sahkoposti($parametri)) {
-      echo t("Sähköpostin lähetys onnistui").": {$email_kuka}<br />";
+      if (!$php_cli) {
+        echo t("Sähköpostin lähetys onnistui").": {$email_kuka}<br />";
+      }
+
       pupesoft_log('toimitusvahvistus_email', "Sähköpostin lähetys onnistui osoitteeseen {$email_kuka}.");
     }
     else {

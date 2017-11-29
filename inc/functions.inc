@@ -1266,6 +1266,98 @@ if (!function_exists("apix_invoice_put_file")) {
   }
 }
 
+if (!function_exists("apix_edi_put_file")) {
+  function apix_edi_put_file($apixzipfile, $apix_ordernum) {
+    global $kukarow, $yhtiorow, $pupe_root_polku;
+
+    // siirret‰‰n laskutiedosto operaattorille
+    // $url           = "https://test-api.apix.fi/invoices";
+    $url             = "https://api.apix.fi/invoices";
+    $transferkey     = $yhtiorow['apix_edi_avain'];
+    $transferid      = $yhtiorow['apix_edi_tunnus'];
+    $software        = "PupesoftEDI";
+    $version         = "1.0";
+
+    $timestamp       = gmdate("YmdHis");
+    $apix_ulos       = "";
+    $apixerrorreport = "";
+
+    // Filen koko ja pointteri siihen
+    $apixfilesize = filesize("{$pupe_root_polku}/dataout/apix_error/$apixzipfile");
+    $apix_fh = fopen("{$pupe_root_polku}/dataout/apix_error/$apixzipfile", 'r');
+
+    // Siirret‰‰n aineisto APIXiin
+    $digest_src = $software."+".$version."+".$transferid."+".$timestamp."+".$transferkey;
+    $dt = substr(hash('sha256', $digest_src), 0, 64);
+
+    $real_url = "$url?soft=$software&ver=$version&TraID=$transferid&t=$timestamp&d=SHA-256:$dt";
+
+    $ch = curl_init($real_url);
+    curl_setopt($ch, CURLOPT_PUT, true);
+    curl_setopt($ch, CURLOPT_INFILE, $apix_fh);
+    curl_setopt($ch, CURLOPT_INFILESIZE, $apixfilesize);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+
+    $apix_ulos .= "L‰hetet‰‰n aineisto APIX:lle...<br>\n";
+    $response = curl_exec($ch);
+
+    curl_close($ch);
+    fclose($apix_fh);
+
+    $xml = simplexml_load_string($response);
+
+    if ($xml->Status == "OK") {
+      $apix_ulos .= t("APIX-EDI %s l‰hetys onnistui", "", $apix_ordernum)."!";
+    }
+    else {
+      $apix_ulos .= "EDI $apix_ordernum l‰hetys ep‰onnistui:<br>\n";
+      $apix_ulos .= "Tila: ".$xml->Status."<br>\n";
+      $apix_ulos .= "Tilakoodi: ".$xml->StatusCode."<br>\n";
+
+      // Rakennetaan s‰hkˆpostiin l‰hetett‰v‰ virheviesti
+      $apixerrorreport .= t("APIX-EDI %s l‰hetys ep‰onnistui", "", $apix_ordernum)."!\n";
+      $apixerrorreport .= t("L‰hetetyn tiedoston nimi").": $apixzipfile \n\n";
+      $apixerrorreport .= utf8_decode($xml->FreeText[1])."\n\n";
+      $apixerrorreport .= utf8_decode($xml->Value[0])."\n\n";
+
+      // Laitetaan s‰hkˆposti admin osoitteeseen siin‰ tapauksessa,
+      // jos talhal tai alert email osoitteita ei ole kumpaakaan setattu
+      $error_email = $yhtiorow["admin_email"];
+
+      if (isset($yhtiorow["talhal_email"]) and $yhtiorow["talhal_email"] != "") {
+        $error_email = $yhtiorow["talhal_email"];
+      }
+      elseif (isset($yhtiorow["alert_email"]) and $yhtiorow["alert_email"] != "") {
+        $error_email = $yhtiorow["alert_email"];
+      }
+
+      $params = array(
+        "to"      => $error_email,
+        "subject" => t("APIX-EDI %s l‰hetys ep‰onnistui", "", $apix_ordernum),
+        "ctype"   => "text",
+        "body"    => $apixerrorreport,
+        "attachements"  => array(0 => array(
+            "filename"    => "{$pupe_root_polku}/dataout/apix_error/$apixzipfile",
+            "newfilename" => ""))
+      );
+
+      pupesoft_sahkoposti($params);
+
+      foreach ($xml->FreeText as $teksti) {
+        $apix_ulos .= "Tilaviesti: ".$teksti."<br>\n";
+      }
+    }
+
+    if (!empty($xml->Status)) {
+      // Siirret‰‰n dataout kansioon jos Apixilta on saatu jokin vastaus
+      rename("{$pupe_root_polku}/dataout/apix_error/$apixzipfile", "{$pupe_root_polku}/dataout/$apixzipfile");
+    }
+
+    return $apix_ulos;
+  }
+}
+
 if (!function_exists("hae_liitteet_verkkolaskuun")) {
   function hae_liitteet_verkkolaskuun($verkkolaskuoperaattori, $tilausnumerot) {
     global $kukarow;
@@ -4828,6 +4920,13 @@ if (!function_exists("alehinta")) {
           $hperuste  .= "Asiakasaleryhm‰n tuotteen nettohinta. ";
           $hintaperuste = 5;
         }
+      }
+
+      // Tarkistetaan viel‰ luetaanko piiri asiakkaalta vaiko tilaukselta
+      $piiricheck = t_avainsana("PIIRI_ALENNUS", "", "and selitetark = 'T'", "", "", "selitetark");
+
+      if ($piiricheck and isset($laskurow['piiri'])) {
+        $alehi_asrow['piiri'] = $laskurow['piiri'];
       }
 
       // 6A. asiakas.piiri tuote.tuoteno nettohinta (asiakaspiirin tuotteen hinta) laskun valuutassa
@@ -9705,6 +9804,7 @@ if (!function_exists("livesearch_tuotehaku")) {
       $nimitys_haku_query = "";
       $muuta_haku_query = "";
       $ean_haku_query = "";
+      $lyhytkuvaus_haku_query = "";
       $tuoteindex = "";
       $nimitindex = "";
 
@@ -9739,6 +9839,12 @@ if (!function_exists("livesearch_tuotehaku")) {
         elseif (in_array($yhtiorow['livetuotehaku_hakutapa'], array('F', 'G'))) {
           $tuoteno_haku_query .= " and match (tuote.tuoteno) against ('{$haku}*' IN BOOLEAN MODE) ";
           $nimitys_haku_query .= " and match (tuote.nimitys) against ('{$haku}*' IN BOOLEAN MODE) ";
+        }
+        elseif (in_array($yhtiorow['livetuotehaku_hakutapa'], array('O', 'P'))) {
+          $tuoteno_haku_query .= " and tuote.tuoteno like ('%{$haku}%') ";
+          $nimitys_haku_query .= " and tuote.nimitys like ('%{$haku}%') ";
+          $ean_haku_query .= " and tuote.eankoodi like ('%{$haku}%') ";
+          $lyhytkuvaus_haku_query .= " and tuote.lyhytkuvaus like ('%{$haku}%') ";
         }
         else {
           $tuoteno_haku_query .= " and tuote.tuoteno like ('%{$haku}%') ";
@@ -9811,6 +9917,7 @@ if (!function_exists("livesearch_tuotehaku")) {
         tuote.epakurantti50pvm,
         tuote.epakurantti75pvm,
         tuote.epakurantti100pvm,
+        tuote.lyhytkuvaus,
         if(tuote.tuoteno  = '{$haku}', 1,
         if(tuote.nimitys  = '{$haku}', 2,
         if(tuote.muuta    = '{$haku}', 3,
@@ -9855,6 +9962,16 @@ if (!function_exists("livesearch_tuotehaku")) {
                   {$ean_haku_query})";
       }
 
+      if (!empty($lyhytkuvaus_haku_query)) {
+        $query .= "UNION
+                  (SELECT {$query_select}
+                  FROM tuote
+                  WHERE tuote.yhtio = '{$kukarow['yhtio']}'
+                  {$naytetaanko_poistetut}
+                  {$kieltolisa}
+                  {$lyhytkuvaus_haku_query})";
+      }
+
       $query .= " ORDER BY jarjestys, tuoteno
                  LIMIT 500";
       $result = pupe_query($query);
@@ -9866,7 +9983,7 @@ if (!function_exists("livesearch_tuotehaku")) {
         $varastot_mista_saa_myyda = array();
 
         // Katsotaan mist‰ normaalivarastoista k‰ytt‰j‰ saa myyd‰
-        if (in_array($yhtiorow['livetuotehaku_hakutapa'], array('E', 'G', 'I', 'K', 'M', 'N'))) {
+        if (in_array($yhtiorow['livetuotehaku_hakutapa'], array('E', 'G', 'I', 'K', 'M', 'N', 'P'))) {
 
           if (!empty($laskurow['varasto'])) {
             $laskun_varasto = (int) $laskurow['varasto'];
@@ -9922,7 +10039,7 @@ if (!function_exists("livesearch_tuotehaku")) {
               <span class='livesearch_rivispan_{$hakuid}'>
               <font style='{$tyyli}'>{$row['tuoteno']}</font> &raquo; <font style='{$tyyli2}'>{$row['nimitys']}</font>";
 
-          if (in_array($yhtiorow['livetuotehaku_hakutapa'], array('E', 'G', 'I', 'K', 'M', 'N')) and count($varastot_mista_saa_myyda) > 0) {
+          if (in_array($yhtiorow['livetuotehaku_hakutapa'], array('E', 'G', 'I', 'K', 'M', 'N', 'P')) and count($varastot_mista_saa_myyda) > 0) {
 
             $saldo_yht = 0;
 
@@ -9942,6 +10059,15 @@ if (!function_exists("livesearch_tuotehaku")) {
             else {
               echo " &raquo; <font style='{$tyyli2}'>", t("Saldo"), " {$saldo_yht}</font>";
             }
+          }
+
+          if ($lyhytkuvaus_haku_query) {
+
+            if (strlen($row['lyhytkuvaus']) > 35) {
+              $row['lyhytkuvaus'] = substr($row['lyhytkuvaus'],0, 35)."..";
+            }
+
+            echo "<br><i><font style='{$tyyli2}'>{$row['lyhytkuvaus']}</font></i>";
           }
 
           echo "</span></div>";
@@ -23686,7 +23812,7 @@ if (!function_exists('tee_keraysera_painon_perusteella')) {
 
       $lisatty_kol_maara = 0;
 
-      while (($pakkaukset_paino > $pakkauksen_kaytetty_paino)) {
+      while (($pakkaukset_paino >= $pakkauksen_kaytetty_paino)) {
 
         if (($pakkauksen_kaytetty_paino + ($kerayseran_rivit[$i]['data']['tuotemassa'] * $kerayseran_rivit[$i]['data']['myynti_era'])) > $pakkaukset_paino) {
 
@@ -24655,7 +24781,7 @@ if  (!function_exists('verkkolaskuputkeen')) {
       }
       return TRUE;
     }
-    
+
     // Maksuehdon takaa voidaan s‰‰t‰‰, ett‰ laskut eiv‰t mene verkkolaskuputkeen
     if ($masrow["itsetulostus"] != "") {
       if ($info) {
@@ -33272,6 +33398,107 @@ if (!function_exists("hae_tuoteperhe")) {
     }
 
     return $tuoteperhe;
+  }
+}
+
+if (!function_exists('pupesoft_toimitusvahvistus')) {
+  // Tarvitaan $otunnukset jossa on tilauksien tunnukset
+  // Tarvitaan $tunnukset jossa on rahtikirjojen tunnukset
+  // Tarvitaan $rahtikirjanro jossa on rahtikirjan rahtikirjanro (desadvia varten)
+
+  function pupesoft_toimitusvahvistus($otunnukset, $tunnukset = 0, $rahtikirjanro = 0) {
+    global $kukarow, $yhtiorow, $toim, $desadv_host, $desadv_user, $desadv_pass, $desadv_path, $pupe_root_polku;
+
+    if (empty($otunnukset)) {
+      return;
+    }
+
+    // Haetaan tarvittavat tiedot
+    $query = "SELECT lasku.*, laskun_lisatiedot.*,
+              lasku.tunnus laskutunnus,
+              lasku.toim_ovttunnus asiakastoim_ovttunnus,
+              lasku.toim_nimi asiakastoim_nimi,
+              lasku.toim_nimitark asiakastoim_nimitark,
+              lasku.toim_osoite asiakastoim_osoite,
+              lasku.toim_postitp asiakastoim_postitp,
+              lasku.toim_postino asiakastoim_postino,
+              lasku.toim_maa asiakastoim_maa,
+              asiakas.nimi asiakasnimi,
+              asiakas.nimitark asiakasnimitark,
+              asiakas.osoite asiakasosoite,
+              asiakas.postitp asiakaspostitp,
+              asiakas.postino asiakaspostino,
+              asiakas.maa asiakasmaa,
+              asiakas.ovttunnus asiakasovttunnus,
+              rahtikirjat.merahti,
+              rahtikirjat.rahtisopimus,
+              if(maksuehto.jv is null,'',maksuehto.jv) jv,
+              rahtisopimukset.muumaksaja,
+              asiakas.toimitusvahvistus,
+              asiakas.kieli,
+              IF(lasku.toim_email != '', lasku.toim_email, IF(asiakas.keraysvahvistus_email != '', asiakas.keraysvahvistus_email, asiakas.email)) AS asiakas_email,
+              IF(lasku.toim_puh != '', lasku.toim_puh, IF(asiakas.gsm != '', asiakas.gsm, IF(asiakas.tyopuhelin != '', asiakas.tyopuhelin, IF(asiakas.puhelin != '', asiakas.puhelin, '')))) puhelin
+              FROM lasku
+              LEFT JOIN laskun_lisatiedot ON (lasku.yhtio=laskun_lisatiedot.yhtio and lasku.tunnus=laskun_lisatiedot.otunnus)
+              LEFT JOIN rahtikirjat ON (lasku.tunnus = rahtikirjat.otsikkonro and lasku.yhtio = rahtikirjat.yhtio)
+              LEFT JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus)
+              LEFT JOIN maksuehto ON (lasku.yhtio = maksuehto.yhtio and lasku.maksuehto = maksuehto.tunnus)
+              LEFT JOIN rahtisopimukset ON (lasku.ytunnus = rahtisopimukset.ytunnus and rahtikirjat.toimitustapa = rahtisopimukset.toimitustapa and rahtikirjat.rahtisopimus = rahtisopimukset.rahtisopimus)
+              WHERE lasku.yhtio = '$kukarow[yhtio]'
+              AND lasku.tunnus in ({$otunnukset})";
+    $toimv_laskures = pupe_query($query);
+
+    if (mysql_num_rows($toimv_laskures) == 0) {
+      return;
+    }
+
+    $laskurow = mysql_fetch_assoc($toimv_laskures);
+
+    if (empty($laskurow['toimitusvahvistus'])) {
+      return;
+    }
+
+    // haetaan toimitustavan tiedot
+    $query = "SELECT *
+              FROM toimitustapa
+              WHERE yhtio = '$kukarow[yhtio]'
+              AND selite  = '{$laskurow['toimitustapa']}'";
+    $toitares = pupe_query($query);
+    $toitarow = mysql_fetch_assoc($toitares);
+
+    if ($laskurow["toimitusvahvistus"] == "toimitusvahvistus_desadv_una.inc") {
+      $desadv_version = "una";
+      $laskurow["toimitusvahvistus"] = "toimitusvahvistus_desadv.inc";
+    }
+    elseif ($laskurow["toimitusvahvistus"] == "toimitusvahvistus_desadv_fi0089.inc") {
+      $desadv_version = "fi0089";
+      $laskurow["toimitusvahvistus"] = "toimitusvahvistus_desadv.inc";
+    }
+    else {
+      $desadv_version = "";
+    }
+
+    if ($laskurow["toimitusvahvistus"] == "editilaus_out_futur.inc") {
+      $myynti_vai_osto = 'M';
+    }
+
+    if ($laskurow['toimitusvahvistus'] == 'toimitusvahvistus_lahete') {
+      $params = array(
+        'laskurow'                 => $laskurow,
+        'sellahetetyyppi'          => "",
+        'extranet_tilausvahvistus' => "",
+        'naytetaanko_rivihinta'    => "",
+        'tee'                      => "",
+        'toim'                     => "",
+        'komento'                  => "asiakasemail".$laskurow['asiakas_email'],
+        'lahetekpl'                => "",
+        'kieli'                    => ""
+      );
+      pupesoft_tulosta_lahete($params);
+    }
+    else {
+      @include "tilauskasittely/$laskurow[toimitusvahvistus]";
+    }
   }
 }
 

@@ -6,6 +6,33 @@ if (strpos($_SERVER['SCRIPT_NAME'], "extranet_tyomaaraykset.php") !== FALSE) {
   require "parametrit.inc";
 }
 
+if (!empty($_POST['ajax_toiminto']) and $_POST['ajax_toiminto'] == 'hae_tyomaarays_sarjanumerolla') {
+  // Onko tälle sarjanumerolle avoimia työmääräyksiä:
+  $query = "SELECT
+            lasku.tunnus
+            FROM lasku
+            JOIN tyomaarays ON (tyomaarays.yhtio=lasku.yhtio and tyomaarays.otunnus=lasku.tunnus )
+            JOIN avainsana a1 ON (a1.yhtio=tyomaarays.yhtio and a1.laji='TYOM_TYOJONO' and a1.selite=tyomaarays.tyojono and a1.selite = 1)
+            LEFT JOIN laite ON (laite.yhtio = lasku.yhtio and laite.sarjanro = tyomaarays.valmnro)
+            WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+            AND lasku.tila in ('A','L','N','S','C')
+            AND lasku.alatila != 'X'
+            AND lasku.liitostunnus = '{$kukarow['oletus_asiakas']}'
+            AND tyomaarays.valmnro = '{$sarjanumero}'
+            ORDER BY lasku.tunnus DESC
+            LIMIT 1";
+  $result = pupe_query($query);
+
+  if ($row = mysql_fetch_assoc($result)) {
+    echo $row["tunnus"];
+  }
+  else {
+    echo 0;
+  }
+
+  exit;
+}
+
 if ($kukarow['extranet'] == '') die(t("Käyttäjän parametrit - Tämä ominaisuus toimii vain extranetissä"));
 
 enable_ajax();
@@ -116,7 +143,27 @@ echo t("Haluatko silti avata huoltopyynnön?");
       });
     }
     else {
-      $('#tyomaarays_form').submit();
+
+      var sarjanumero = $("#tyomaarays_form input[name=valmnro]").val();
+
+      $.ajax({
+        async: false,
+        type: 'POST',
+        data: {
+          sarjanumero: sarjanumero,
+          ajax_toiminto: 'hae_tyomaarays_sarjanumerolla',
+          no_head: 'yes',
+          ohje: 'off'
+        }
+      }).done(function(tyomaarays) {
+        if (tyomaarays > 0) {
+          var viesti = '<?php echo t("Laitteelle ei voida avata uutta huoltopyyntöä, koska laite löytyy jo avoimelta huoltopyynnöltä"); ?>: '+tyomaarays
+          alert(viesti);
+        }
+        else {
+          $('#tyomaarays_form').submit();
+        }
+      });
     }
   });
 });
@@ -608,6 +655,24 @@ function hae_asiakasdata() {
             AND asiakas.tunnus  = '{$kukarow['oletus_asiakas']}'";
   $result = pupe_query($query);
   $asiakasdata = mysql_fetch_assoc($result);
+  // Haetaan ext käyttäjän osoitteet
+  $query = "SELECT selitetark
+            FROM extranet_kayttajan_lisatiedot
+            WHERE extranet_kayttajan_lisatiedot.yhtio = '{$kukarow['yhtio']}'
+            AND extranet_kayttajan_lisatiedot.laji = 'TOIMITUSOSOITE'
+            AND extranet_kayttajan_lisatiedot.liitostunnus = '{$kukarow['tunnus']}'";
+  $result2 = pupe_query($query);
+  if (mysql_num_rows($result2) == 1) {
+
+    $jokurow = mysql_fetch_assoc($result2);
+    // Otetaan selitetark:ista toimitusosoitteet tiedot, eroteltuna ###
+    list($toimnimi, $toimkatu, $toimpostino, $toimpostitp, $toimmaa) = explode("###", $jokurow['selitetark']);
+    $asiakasdata['toim_nimi'] = $toimnimi;
+    $asiakasdata['toim_osoite'] = $toimkatu;
+    $asiakasdata['toim_postino'] = $toimpostino;
+    $asiakasdata['toim_postitp'] = $toimpostitp;
+    $asiakasdata['toim_maa'] = $toimmaa;
+  }
   return $asiakasdata;
 }
 

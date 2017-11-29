@@ -255,17 +255,28 @@ function sepa_credittransfer($laskurow, $popvm_nyt, $netotetut_rivit = '') {
   $PstlAdr = $Cdtr->addChild('PstlAdr', '');                                                // PostalAddress
   // $AdrTp = $PstlAdr->addChild('AdrTp', '');
 
-  // Danske hylkää (joskus) aineistot, jos on vaan space, laitetaan tyhjässä tapauksessa defaultteja
-  $_osoite  = trim($laskurow['osoite']) == ''  ? '-'  : $laskurow['osoite'];
-  $_postino = trim($laskurow['postino']) == '' ? '-'  : $laskurow['postino'];
-  $_postitp = trim($laskurow['postitp']) == '' ? '-'  : $laskurow['postitp'];
-  $_maa     = trim($laskurow['maa']) == ''     ? 'FI' : $laskurow['maa'];
+  if ($laskurow['yriti_bic'] == 'HELSFIHH') {
+    // Aktian kohdalla ei laiteta mitään jos tietoja puuttuu. Sama juttu erottimessa.
+    $_osoite  = trim($laskurow['osoite'])  == '' ? ''  : $laskurow['osoite'];
+    $_postino = trim($laskurow['postino']) == '' ? ''  : $laskurow['postino'];
+    $_postitp = trim($laskurow['postitp']) == '' ? ''  : $laskurow['postitp'];
+    $_erotin = "";
+  }
+  else {
+    // Danske hylkää (joskus) aineistot, jos on vaan space, laitetaan tyhjässä tapauksessa defaultteja
+    $_osoite  = trim($laskurow['osoite'])  == '' ? '-'  : $laskurow['osoite'];
+    $_postino = trim($laskurow['postino']) == '' ? '-'  : $laskurow['postino'];
+    $_postitp = trim($laskurow['postitp']) == '' ? '-'  : $laskurow['postitp'];
+    $_erotin = "-";
+  }
+
+  $_maa = trim($laskurow['maa']) == '' ? 'FI' : $laskurow['maa'];
 
   $AdrLine = $PstlAdr->addChild('AdrLine', sprintf("%-1.70s", $_osoite)); // AddressLine 1-70
-  $AdrLine = $PstlAdr->addChild('AdrLine', sprintf("%-1.70s", "{$_maa}-{$_postino}-{$_postitp}"));
+  $AdrLine = $PstlAdr->addChild('AdrLine', sprintf("%-1.70s", "{$_maa}{$_erotin}{$_postino}{$_erotin}{$_postitp}"));
   $StrtNm = $PstlAdr->addChild('StrtNm', sprintf("%-1.70s", $_osoite)); // StreetName 1-70
   // $BldgNb = $PstlAdr->addChild('BldgNb', ''); // BuildingNumber
-  $PstCd = $PstlAdr->addChild('PstCd', sprintf("%-1.16s", "{$_maa}-{$_postino}")); // PostCode 1-16
+  $PstCd = $PstlAdr->addChild('PstCd', sprintf("%-1.16s", "{$_maa}{$_erotin}{$_postino}")); // PostCode 1-16
   $TwnNm = $PstlAdr->addChild('TwnNm', sprintf("%-1.35s", $_postitp)); // TownName 1-35
   // $CtrySubDvsn = $PstlAdr->addChild('CtrySubDvsn', '');
   $Ctry = $PstlAdr->addChild('Ctry', sprintf("%-2.2s", $_maa)); // Country
@@ -343,7 +354,7 @@ function sepa_credittransfer($laskurow, $popvm_nyt, $netotetut_rivit = '') {
       $Ustrd = $RmtInf->addChild('Ustrd', sprintf("%-1.140s", $laskurow['viite']));          // Unstructured (max 140 char)
     }
     elseif (strlen(trim($laskurow["viite"])) > 0) {
-      $Strd = $RmtInf->addChild('Strd', '');                              // Structured (Max 9 occurrences)
+      $Strd = $RmtInf->addChild('Strd', '');                              // Structured (Max 9 -> 999 occurrences)
       // $RfrdDocInf = $Strd->addChild('RfrdDocInf', '');                      // ReferredDocumentInformation
       //   $RfrdDocTp = $RfrdDocInf->addChild('RfrdDocTp', '');
       //     $Cd = $RfrdDocTp->addChild('Cd', '');
@@ -385,7 +396,7 @@ function sepa_credittransfer($laskurow, $popvm_nyt, $netotetut_rivit = '') {
         $code = "CINV";  // veloituslasku
       }
 
-      $Strd = $RmtInf->addChild('Strd', '');                                 // Structured (Max 9 occurrences)
+      $Strd = $RmtInf->addChild('Strd', '');                                 // Structured (Max 9 -> 999 occurrences)
 
       $RfrdDocInf = $Strd->addChild('RfrdDocInf', '');                         // ReferredDocumentInformation
       $RfrdDocTp = $RfrdDocInf->addChild('RfrdDocTp', '');                     // ReferredDocumentType
@@ -759,11 +770,11 @@ if ($tee == "KIRJOITA" or $tee == "KIRJOITAKOPIO") {
       exit;
     }
 
-    if ($nettolaskuja_yhteensa > 9) {
+    if ($nettolaskuja_yhteensa > 999) {
 
       echo "<tr>";
       echo "<th>".t("Virhe")."</th>";
-      echo "<td><font class='error'>Hyvityslaskujen netotus koostuu yli yhdeksästä tapahtumasta! SEPA aineisto ei tue näin isoja netotuksia! $laskurow[valkoodi] $laskurow[ultilno], $laskurow[olmapvm]</font></td>";
+      echo "<td><font class='error'>Hyvityslaskujen netotus koostuu yli 999 tapahtumasta! SEPA aineisto ei tue näin isoja netotuksia! $laskurow[valkoodi] $laskurow[ultilno], $laskurow[olmapvm]</font></td>";
       echo "</tr>";
       echo "</table>";
 

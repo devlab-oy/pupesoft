@@ -483,6 +483,7 @@ if ($kasitellaan_tiedosto) {
       if ($table_apu == 'osaluettelo') $tyyppi = 'O';
       if ($table_apu == 'tuotekooste') $tyyppi = 'V';
       if ($table_apu == 'lisavaruste') $tyyppi = 'L';
+      if ($table_apu == 'suositus') $tyyppi = 'U';
 
       for ($r = 0; $r < count($headers); $r++) {
 
@@ -600,6 +601,7 @@ else {
           <option value='tuotekooste'>", t("Tuotteen koosteluettelo"), "</option>
           <option value='lisavaruste'>", t("Tuotteen lisävarusteet"), "</option>
           <option value='vsuunnittelu'>", t("Samankaltaiset valmisteet"), "</option>
+          <option value='suositus'>", t("Tuotesuositukset"), "</option>
         </select></td>
       </tr>
 

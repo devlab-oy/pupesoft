@@ -719,7 +719,8 @@ if ($tila == "" and !isset($jatka)) {
       $assresult = pupe_query($squery);
       $assrow = mysql_fetch_assoc($assresult);
 
-      $yhtquery = "SELECT nimi
+      $yhtquery = "SELECT nimi, if(gsm != '', gsm,
+                    if(puh != '', puh, '')) AS yht_puh
                    FROM yhteyshenkilo
                    WHERE yhtio              = '$kukarow[yhtio]'
                    AND liitostunnus         = '$assrow[tunnus]'
@@ -729,7 +730,11 @@ if ($tila == "" and !isset($jatka)) {
                    ORDER BY nimi
                    LIMIT 1";
       $yhtresult = pupe_query($yhtquery);
-      $yhtnimi = mysql_fetch_assoc($yhtresult);
+      $yht = mysql_fetch_assoc($yhtresult);
+
+      if (!empty($yht['yht_puh'])) {
+        $assrow['toim_puh'] = $yht['yht_puh'];
+      }
 
       if (!checkdate($toimkk, $toimpp, $toimvv)) {
         $toimpp = date("j");
@@ -802,7 +807,7 @@ if ($tila == "" and !isset($jatka)) {
                 toimaika            = '$toimpvm',
                 kerayspvm           = '$kerpvm',
                 toimitusehto        = '$assrow[toimitusehto]',
-                tilausyhteyshenkilo = '$yhtnimi[nimi]',
+                tilausyhteyshenkilo = '$yht[nimi]',
                 viesti              = '$assrow[tilaus_viesti]',
                 comments            = '$assrow[myynti_kommentti1]',
                 sisviesti2          = '$assrow[sisviesti2]',
@@ -855,7 +860,7 @@ if ($tila == "" and !isset($jatka)) {
 
       $srow_from = "LASKU";
     }
-    elseif ($asiakasid != "" and $tiedot_laskulta == "") {
+    elseif (($asiakasid != "" and $tiedot_laskulta == "") or ($tiedot_laskulta == "YES" and isset($uusiasiakas) and $uusiasiakas == "uusiasiakas")) {
       // asiakashaussa pitää olla vakio columni kohdistettu, jonka arvo on O että saadaan OLETUS toimitustapa haettua asiakashaunkin yhteydessä
       if ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA") {
         $puhlisa = " if (asiakas.puhelin!='', asiakas.puhelin, asiakas.gsm) kotipuh, asiakas.tyopuhelin tyopuh,";
@@ -3584,7 +3589,8 @@ if ($tila == "" and !isset($jatka)) {
 
     echo "<tr><td>".t("Tilausyhteyshenkilö").":</td>";
 
-    $yhteysquery = "SELECT *
+    $yhteysquery = "SELECT *, if(gsm != '', gsm,
+                    if(puh != '', puh, '')) AS yht_puh
                     FROM yhteyshenkilo
                     WHERE yhtio              = '$kukarow[yhtio]'
                     AND liitostunnus         = '$srow[liitostunnus]'
@@ -3593,10 +3599,14 @@ if ($tila == "" and !isset($jatka)) {
                     ORDER BY nimi";
     $yhteysresult = pupe_query($yhteysquery);
 
-    echo "<td><input type='text' size='30' name='tilausyhteyshenkilo' value='$srow[tilausyhteyshenkilo]'><br>";
+    echo "<td>
+          <span id='y_liitostunnus' style='display: none;'>$srow[liitostunnus]</span>
+          <input type='text' size='30' name='tilausyhteyshenkilo' id='manual_tilausyhteyshenkilo' value='$srow[tilausyhteyshenkilo]'><br>";
 
     echo "&nbsp;<select id='yhteyshenkilo_tilaus' name='yhteyshenkilo_tilaus'>";
     echo "<option value = ''>".t("Ei valintaa")."</option>";
+
+    $orig_yhteyshenkilo = "";
 
     while ($yhteysrow = mysql_fetch_assoc($yhteysresult)) {
 
@@ -3605,12 +3615,19 @@ if ($tila == "" and !isset($jatka)) {
       if ($yhteysrow["nimi"] == $srow["tilausyhteyshenkilo"] or ($kukarow["kesken"] == 0 and $yhteysrow["oletusyhteyshenkilo"] != "")) {
         $sela = "SELECTED";
         $srow["tilausyhteyshenkilo"] = "";
+        $orig_yhteyshenkilo = $yhteysrow["nimi"];
+
+        if (!empty($yhteysrow["yht_puh"])) {
+          $srow['toim_puh'] = $yhteysrow["yht_puh"];
+        }
       }
 
       echo "<option value = '$yhteysrow[nimi]' $sela>$yhteysrow[nimi]</option>";
     }
 
     echo "</select> ";
+
+    echo "<input type='hidden' name='orig_yhteyshenkilo' value='$orig_yhteyshenkilo'>";
 
     if (tarkista_oikeus("yllapito.php", "yhteyshenkilo", "X")) {
       echo " <a href='#' onclick=\"js_open_yllapito('yhteyshenkilo_tilaus','toim=yhteyshenkilo&laji=A&lukitse_avaimeen=$srow[liitostunnus]&tyhthenkilo=K');\"><img src='{$palvelin2}pics/lullacons/add.png'>".t("Uusi yhteyshenkilö")."</a>";
@@ -3627,7 +3644,7 @@ if ($tila == "" and !isset($jatka)) {
 
     echo "<tr class='otsik_laaja_kommentit' $hiddenlisa2><td>".t("Ohjausmerkki").":</td><td><input type='text' size='43' name='ohjausmerkki' value='$srow[ohjausmerkki]'></td><td>".t("tilausvahvistus")." + ".t("keräyslista")." + ".t("lähete")."</td></tr>";
 
-    echo "<tr class='otsik_laaja_kommentit' $hiddenlisa2><td>".t("Puhelin toimitukseen").":</td><td><input type='text' size='43' name='tpuh' value='$srow[toim_puh]'</td><td>".t("rahtikirja")." + ".t("osoitelappu")."</td></tr>";
+    echo "<tr class='otsik_laaja_kommentit' $hiddenlisa2><td>".t("Puhelin toimitukseen").":</td><td><input type='text' size='43' name='tpuh' id='tpuh' value='$srow[toim_puh]'</td><td>".t("rahtikirja")." + ".t("osoitelappu")."</td></tr>";
 
     if ($yhtiorow["vahvistusviesti_asiakkaalle"] == "Y") {
       $_vahvistusviesti_asiakkaalle = " + ".t("vahvistusviesti asiakkaalle");
@@ -4090,7 +4107,11 @@ if (isset($jatka)) {
     $laskutus_maa     = $maa;
   }
 
-  if ($tilausyhteyshenkilo == '' and $yhteyshenkilo_tilaus != '') {
+  $_check = ($yhteyshenkilo_tilaus != '' and $yhteyshenkilo_tilaus == $tilausyhteyshenkilo);
+  $_check = ($_check or ($orig_yhteyshenkilo and $yhteyshenkilo_tilaus == ''));
+  $_check = ($_check or (!$orig_yhteyshenkilo and $yhteyshenkilo_tilaus != ''));
+
+  if ($_check) {
     $tilausyhteyshenkilo = $yhteyshenkilo_tilaus;
   }
 

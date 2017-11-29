@@ -65,6 +65,10 @@ elseif ($toim == "VSUUNNITTELU") {
   echo t("Samankaltaisten tuotteiden määrittely");
   $hakutyyppi = "S";
 }
+elseif ($toim == "SUOSITUS") {
+  echo t("Tuotteen suositukset");
+  $hakutyyppi = "U";
+}
 elseif ($toim == "RESEPTI") {
   echo t("Tuotereseptit");
   $hakutyyppi = "R";
@@ -118,6 +122,9 @@ if ($tee == "KOPIOI") {
     }
     elseif ($toim == "VSUUNNITTELU") {
       echo t("Syötä tuote jolle samankaltaisuus kopioidaan");
+    }
+    elseif ($toim == "SUOSITUS") {
+      echo t("Syötä tuote jolle tuotesuositus kopioidaan");
     }
     else {
       echo t("Syötä valmiste jolle resepti kopioidaan");
@@ -207,6 +214,9 @@ if ($tee == "KOPIOI") {
       elseif ($toim == "VSUUNNITTELU") {
         echo t("Samankaltaisuus kopioitu");
       }
+      elseif ($toim == "SUOSITUS") {
+        echo t("Tuotesuositus kopioitu");
+      }
       else {
         echo t("Resepti kopioitu");
       }
@@ -269,6 +279,9 @@ if ($tee != "KOPIOI") {
   }
   elseif ($toim == "VSUUNNITTELU") {
     echo "<th>".t("Etsi samankaltaisia")."</th>";
+  }
+  elseif ($toim == "SUOSITUS") {
+    echo "<th>".t("Etsi tuotesuosituksia")."</th>";
   }
   else {
     echo "<th>".t("Etsi tuotereseptiä")."</th>";
@@ -690,6 +703,15 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
         echo t("Lisää samankaltaisuus tuotteelle") . ": $hakutuoteno";
         echo "</font><hr><br>";
       }
+      elseif ($toim == "SUOSITUS") {
+        echo "<br><font class='error'>";
+        echo t("Tuotesuositusta ei ole määritelty tuotteelle") . " $hakutuoteno!";
+        echo "</font><br>";
+
+        echo "<br><font class='head'>";
+        echo t("Lisää tuotesuositus tuotteelle") . ": $hakutuoteno";
+        echo "</font><hr><br>";
+      }
       else {
         echo "<br><font class='error'>";
         echo t("Tuotenumeroa") . " $hakutuoteno " . t("ei löydy mistään tuotereseptistä") . "!";
@@ -703,7 +725,10 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
       echo "<table>";
       echo "<tr>";
       echo "<th>".t("Tuoteno")."</th>";
-      echo "<th>".t("Määräkerroin")."</th>";
+
+      if ($toim != "SUOSITUS") {
+        echo "<th>".t("Määräkerroin")."</th>";
+      }
 
       if ($toim == "PERHE") {
         echo "<th>".t("Hintakerroin")."</th>";
@@ -728,7 +753,7 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
       if ($toim == "VSUUNNITTELU") {
         echo "<td class='text-right'><input type='hidden' name='kerroin' value='1'>1</td>";
       }
-      else {
+      elseif ($toim != "SUOSITUS") {
         echo "<td><input type='text' name='kerroin' size='20'></td>";
 
         if ($toim == "PERHE") {
@@ -802,6 +827,9 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
         echo "<th>".t("Tuotenumero")."</th>";
       }
       elseif ($toim == "VSUUNNITTELU") {
+        echo "<th>".t("Tuotenumero")."</th>";
+      }
+      elseif ($toim == "SUOSITUS") {
         echo "<th>".t("Tuotenumero")."</th>";
       }
       else {
@@ -932,6 +960,9 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
       elseif ($toim == "VSUUNNITTELU") {
         echo "<th colspan='2'>".t("Samankaltaisuuden faktat")."</th>";
       }
+      elseif ($toim == "SUOSITUS") {
+        echo "";
+      }
       else {
         echo "<th colspan='2'>".t("Reseptin faktat")."</th>";
       }
@@ -948,18 +979,22 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
       $faktarow = mysql_fetch_array($ressu);
 
       echo "</tr>";
-      echo "<tr>";
-      echo "<td colspan='2'>";
 
-      if ($oikeurow['paivitys'] == '1') {
-        echo "<textarea cols='80' rows='5' name='fakta'>{$faktarow["fakta"]}</textarea>";
-      }
-      else {
-        echo "$faktarow[fakta]";
-      }
+      if ($toim != "SUOSITUS") {
 
-      echo "</td>";
-      echo "</tr>";
+        echo "<tr>";
+        echo "<td colspan='2'>";
+
+        if ($oikeurow['paivitys'] == '1') {
+          echo "<textarea cols='80' rows='5' name='fakta'>{$faktarow["fakta"]}</textarea>";
+        }
+        else {
+          echo "$faktarow[fakta]";
+        }
+
+        echo "</td>";
+        echo "</tr>";
+      }
 
       if ($toim == "RESEPTI") {
         $query = "SELECT fakta2
@@ -1121,6 +1156,19 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
         $worksheet->writeString($excelrivi, $excelsarake++, t("Samankaltaisuudet"));
         $worksheet->writeString($excelrivi, $excelsarake++, t("Nimitys"));
         $worksheet->writeString($excelrivi, $excelsarake++, t("Kerroin"));
+      }
+      elseif ($toim == "SUOSITUS") {
+        echo "<th>".t("Tuotesuositukset")."</th>";
+        echo "<th>".t("Nimitys")."</th>";
+
+        $worksheet->writeString($excelrivi, $excelsarake++, t("Tuotesuositukset"));
+        $worksheet->writeString($excelrivi, $excelsarake++, t("Nimitys"));
+
+        if ($myos_tuotetiedot_exceliin) {
+          $worksheet->writeString($excelrivi, $excelsarake++, t("Malli"));
+          $worksheet->writeString($excelrivi, $excelsarake++, t("Mallitarkenne"));
+          $worksheet->writeString($excelrivi, $excelsarake++, t("Tuotemerkki"));
+        }
       }
       else {
         echo "<th>".t("Raaka-aineet")."</th>";
@@ -1317,7 +1365,7 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
             $worksheet->writeString($excelrivi, $excelsarake++, $tuoterow["tuotemerkki"], $style);
           }
 
-          if ($toim != "LISAVARUSTE") {
+          if ($toim != "LISAVARUSTE" and $toim != "SUOSITUS") {
             echo "<td class='text-right'>" . (float) $prow["kerroin"] . "</td>";
             $worksheet->writeNumber($excelrivi, $excelsarake++, $prow["kerroin"], $style);
           }
@@ -1407,7 +1455,7 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
             $worksheet->writeString($excelrivi, $excelsarake++, $valuutta, $style);
           }
 
-          if ($toim != "VSUUNNITTELU") {
+          if ($toim != "VSUUNNITTELU" and $toim != "SUOSITUS") {
             echo "<td class='text-right'>" . (float) $tuoterow["kehahin"] . "</td>";
             echo "<td class='text-right'>".round($lapsiyht, 6)."</td>";
             $worksheet->writeNumber($excelrivi, $excelsarake++, $tuoterow["kehahin"], $style);
@@ -1495,7 +1543,7 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
           echo "<td><input type='text' name='tuoteno' size='20' value='$zrow[tuoteno]'></td>";
           echo "<td>{$zrow["nimitys"]}</td>";
 
-          if ($toim != "LISAVARUSTE" and $toim != "VSUUNNITTELU") {
+          if ($toim != "LISAVARUSTE" and $toim != "VSUUNNITTELU" and $toim != "SUOSITUS") {
             echo "<td><input type='text' name='kerroin' size='10' value='$zrow[kerroin]'></td>";
           }
 
@@ -1531,7 +1579,7 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
             echo "<td class='text-right'>1</td>";
           }
 
-          if ($toim != "VSUUNNITTELU") {
+          if ($toim != "VSUUNNITTELU" and $toim != "SUOSITUS") {
             echo "<td></td>";
             echo "<td style='text-align: right;'>$tuoterow[kehahin]</td>";
             echo "<td></td>";
@@ -1593,10 +1641,7 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
         elseif ($toim == "TUOTEKOOSTE") {
           echo "<td class='back' colspan='3'></td>";
         }
-        elseif ($toim == "VSUUNNITTELU") {
-
-        }
-        else {
+        elseif ($toim != "VSUUNNITTELU" and $toim != "SUOSITUS") {
           $colspan = 4;
           if (!empty($resepti_kentat)) {
             $colspan += count($resepti_kentat);
@@ -1604,7 +1649,7 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
           echo "<td class='back' colspan='{$colspan}'></td>";
         }
 
-        if ($toim != "VSUUNNITTELU") {
+        if ($toim != "VSUUNNITTELU" and $toim != "SUOSITUS") {
 
           echo "<th colspan='2' class='text-right'>".t("Yhteensä").":</th>";
 

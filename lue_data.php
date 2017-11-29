@@ -2395,6 +2395,28 @@ if ($kasitellaan_tiedosto) {
           $tarkrow["luedata_from"] = "LUEDATA";
           $tarkrow["luedata_toiminto"] = $taulunrivit[$taulu][$eriviindex][$postoiminto];
 
+          // M‰‰ritell‰‰n tarkistusfunktio
+          // Joudutaan tekem‰‰n random-niminen tarkistusfunktio per rivi, koska tarkista-funktioissa
+          // k‰ytet‰‰n static muuttujia sarakkeiden arvojen muistamiseen. M‰‰riteltyj‰ funktioita
+          // ei voi unsetata, joten tehd‰‰n aina uusi funktio, ja tehd‰‰n tarkistus siell‰ sis‰ll‰
+          // ett‰ staticit nollaantuu.
+          $wrapper_funktio = "{$table_mysql}_wrapper_".md5(uniqid());
+          $funktio = "{$table_mysql}tarkista";
+
+          // funktion nimi on muuttujan arvo. parametrit tulee olla samat kun tarkista-funktioissa
+          $$wrapper_funktio = function(&$t, $i, $result, $tunnus, &$virhe, $tarkrow) {
+            global $funktio;
+
+            include "inc/{$funktio}.inc";
+
+            if (function_exists($funktio)) {
+              $funktio($t, $i, $result, $tunnus, $virhe, $tarkrow);
+            }
+            else {
+              return TRUE;
+            }
+          };
+
           // Tehd‰‰n oikeellisuustsekit
           for ($i=1; $i < mysql_num_fields($result); $i++) {
 
@@ -2419,18 +2441,10 @@ if ($kasitellaan_tiedosto) {
 
             // Tarkistetaan vain ne kent‰t jotka on t‰ss‰ exceliss‰.
             if ($tassafailissa) {
-
-              $funktio = $table_mysql."tarkista";
-
-              if (!function_exists($funktio)) {
-                @include "inc/$funktio.inc";
-              }
-
               unset($virhe);
 
-              if (function_exists($funktio)) {
-                $funktio($t, $i, $result, $tunnus, $virhe, $tarkrow);
-              }
+              // Kutustaan wrapper funktiota, joka kutsuu oikeaa tarkista funktiota
+              $$wrapper_funktio($t, $i, $result, $tunnus, $virhe, $tarkrow);
 
               if (isset($virhe[$i]) and $virhe[$i] != "") {
                 switch ($table_mysql) {

@@ -59,6 +59,10 @@ class PrestaAddresses extends PrestaClient {
     $xml->address->phone_mobile = $this->clean_field($address['gsm']);
     $xml->address->postcode     = $this->clean_field($address['postino']);
     $xml->address->vat_number   = $this->clean_field($address['ytunnus']);
+    
+    if ($yhtio != 'audio') {
+      $xml->address->address2 = $this->clean_field($address['asiakas_nimitark']);
+    }
 
     return $xml;
   }

@@ -689,6 +689,12 @@ while ($tietue = fgets($fd)) {
   case 'OSTOTIL.OT_VIITTEEMME' :
     //Asiakkaan viite
     $viite .= $tieto. ' ';
+
+    // laitetaan t‰m‰ myˆs kohde-kentt‰‰n jos se on ennest‰‰n tyhj‰
+    if (empty($ot_verkkokauppa_kohde)) {
+      $ot_verkkokauppa_kohde = $tieto;
+    }
+
     break;
 
   case 'OSTOTIL.OT_TILAUSVIESTI' :
@@ -1688,7 +1694,7 @@ while ($tietue = fgets($fd)) {
         // escapetaan
         $valkoodi = mysql_real_escape_string($editilaus_valuuttakoodi);
 
-        $query = "SELECT tunnus
+        $query = "SELECT tunnus, kurssi
                   FROM valuu
                   WHERE yhtio = '{$kukarow["yhtio"]}'
                   AND nimi    = '{$valkoodi}'";
@@ -1696,10 +1702,16 @@ while ($tietue = fgets($fd)) {
 
         if (mysql_num_rows($valuu_result) != 1) {
           $valkoodi = $yhtiorow['valkoodi'];
+          $valkurssi = 1;
+        }
+        else {
+          $valrow = mysql_fetch_assoc($valuu_result);
+          $valkurssi = $valrow['kurssi'];
         }
       }
       else {
         $valkoodi = $yhtiorow['valkoodi'];
+        $valkurssi = 1;
       }
 
       // Lis‰t‰‰n otsikko
@@ -1732,6 +1744,7 @@ while ($tietue = fgets($fd)) {
                 kuljetusmuoto           = '$arow[kuljetusmuoto]',
                 laatija                 = '$edi_laatija',
                 laskutusvkopv           = '$arow[laskutusvkopv]',
+                laskutyyppi             = '$arow[laskutyyppi]',
                 liitostunnus            = '$arow[tunnus]',
                 luontiaika              =  now(),
                 maa                     = '$arow[maa]',
@@ -1778,7 +1791,7 @@ while ($tietue = fgets($fd)) {
                 varasto                 = '{$insertvarasto[0]}',
                 verkkotunnus            = '$arow[verkkotunnus]',
                 vienti                  = '$til_vienti',
-                vienti_kurssi           = '1',
+                vienti_kurssi           = '{$valkurssi}',
                 viesti                  = '$viite',
                 viikorkopros            = '$yhtiorow[viivastyskorko]',
                 yhtio                   = '$kukarow[yhtio]',

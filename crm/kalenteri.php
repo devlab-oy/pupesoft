@@ -1252,6 +1252,10 @@ function piirra_kokopaivantapahtumat($kuu, $paiva, $year) {
 
       echo "<td colspan='$kpe[kesto]' style='border:1px solid $reunavari; -webkit-border-radius: 3px; border-radius: 3px;'>";
 
+      if ($kpe['kentta01'] == "") {
+        $kpe['kentta01'] = $kpe['tapa'];
+      }
+
       $url = js_openUrlNewWindow("{$palvelin2}crm/kalenteri.php?valitut=".urlencode($valitut)."&kenelle=".urlencode($kenelle)."&tee=SYOTA&kello=$kello_nyt&year=$year&kuu=$kuu&paiva=$paiva&tunnus=$kpe[tunnus]&konserni=$konserni&toim=$toim&tyomaarays=$tyomaarays&lopetus=$lopetus", "$kpe[kentta01]");
 
       echo "$url</td>";

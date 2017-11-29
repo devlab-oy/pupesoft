@@ -663,8 +663,15 @@ function hae_asiakasdata() {
             AND extranet_kayttajan_lisatiedot.liitostunnus = '{$kukarow['tunnus']}'";
   $result2 = pupe_query($query);
   if (mysql_num_rows($result2) == 1) {
-    echo "KALA";
+
+    $jokurow = mysql_fetch_assoc($result2);
     // Tässä tapahtuu niin että explodella otetaan selitetark:ista nuo toim_osoite tiedot, eroteltuna ###
+    list($toimnimi, $toimkatu, $toimpostino, $toimpostitp, $toimmaa) = explode("###", $jokurow['selitetark']);
+    $asiakasdata['toim_nimi'] = $toimnimi;
+    $asiakasdata['toim_osoite'] = $toimkatu;
+    $asiakasdata['toim_postino'] = $toimpostino;
+    $asiakasdata['toim_postitp'] = $toimpostitp;
+    $asiakasdata['toim_maa'] = $toimmaa;
   }
   return $asiakasdata;
 }

@@ -563,7 +563,7 @@ function tallenna_tyomaarays($request) {
              liitostunnus        = '{$kukarow['oletus_asiakas']}',
              tilaustyyppi        = 'A',
              tila                = 'A',
-             tilausyhteyshenkilo = '{$request['osoite_parametrit']['tilausyhteyshenkilo']}'";
+             sisviesti2          = '{$request['osoite_parametrit']['tilausyhteyshenkilo']}'";
   $result = pupe_query($query);
   $utunnus = mysql_insert_id($GLOBALS["masterlink"]);
 

@@ -255,6 +255,29 @@ if ($tee != '') {
   $osmyynti     = 0;
   $osmyyntikpl  = 0;
 
+  $try_nimi = array();
+  $try_nimi_result = t_avainsana("TRY", $kukarow['kieli']);
+
+  if (mysql_num_rows($try_nimi_result) > 0) {
+    while ($try_nimi_row = mysql_fetch_assoc($try_nimi_result)) {
+      $try_nimi[$try_nimi_row['selite']] = $try_nimi_row['selitetark'];
+    }
+  }
+
+  if ($kukarow['kieli'] != $yhtiorow['kieli']) {
+
+    $try_nimi_result = t_avainsana("TRY", $yhtiorow['kieli']);
+
+    if (mysql_num_rows($try_nimi_result) > 0) {
+
+      while ($try_nimi_row = mysql_fetch_assoc($try_nimi_result)) {
+        if (!isset($try_nimi[$try_nimi_row['selite']])) {
+          $try_nimi[$try_nimi_row['selite']] = $try_nimi_row['selitetark'];
+        }
+      }
+    }
+  }
+
   while ($row = mysql_fetch_array($result)) {
     $excelsarake = 0;
 
@@ -336,18 +359,6 @@ if ($tee != '') {
     $worksheet->writeString($excelrivi, $excelsarake, $row["osasto"]);
     $excelsarake++;
 
-    $try_nimi = "";
-    $try_nimi_result = t_avainsana("TRY", $kukarow['kieli'], " and selite = '{$row['try']}' ");
-
-    if (mysql_num_rows($try_nimi_result) == 0) {
-      $try_nimi_result = t_avainsana("TRY", "", " and selite = '{$row['try']}' ");
-    }
-
-    if (mysql_num_rows($try_nimi_result) == 1) {
-      $try_nimi_row = mysql_fetch_assoc($try_nimi_result);
-      $try_nimi = $try_nimi_row['selitetark'];
-    }
-
     if ($try == '') {
       echo "<td class='$vari' style='vertical-align:top'>";
 
@@ -360,23 +371,23 @@ if ($tee != '') {
 
       echo "</td>";
 
-      echo "<td class='$vari' style='vertical-align:top'>$try_nimi</td>";
+      echo "<td class='$vari' style='vertical-align:top'>{$try_nimi[$row['try']]}</td>";
 
       $worksheet->writeString($excelrivi, $excelsarake, $row["try"]);
       $excelsarake++;
 
-      $worksheet->writeString($excelrivi, $excelsarake, $try_nimi);
+      $worksheet->writeString($excelrivi, $excelsarake, $try_nimi[$row['try']]);
       $excelsarake++;
     }
     else {
       echo "<td class='$vari' style='vertical-align:top'>$row[try]</td>";
-      echo "<td class='$vari' style='vertical-align:top'>$try_nimi</td>";
+      echo "<td class='$vari' style='vertical-align:top'>{$try_nimi[$row['try']]}</td>";
       echo "<td class='$vari' name='A_$lask' style='vertical-align:top'><a href='asiakasinfo.php?ytunnus=$row[ytunnus]&lopetus=$PHP_SELF////tee=$tee//try=$try//ppa=$ppa//kka=$kka//osasto=$osasto//vva=$vva//ppl=$ppl//kkl=$kkl//vvl=$vvl//asiakasid=$asiakasid//raportointitaso=$raportointitaso//rivit=$rivit///A_$lask'>$row[ytunnus]</a><br>$row[asiakasnro]</td>";
       echo "<td class='$vari' name='T_$lask' style='vertical-align:top'><a href='../tuote.php?tuoteno=".urlencode($row["tuoteno"])."&tee=Z&lopetus=$PHP_SELF////tee=$tee//try=$try//osasto=$osasto//ppa=$ppa//kka=$kka//vva=$vva//ppl=$ppl//kkl=$kkl//vvl=$vvl//asiakasid=$asiakasid//raportointitaso=$raportointitaso//rivit=$rivit///T_$lask'>$row[tuoteno]</a><br>".t_tuotteen_avainsanat($row, 'nimitys')."</td>";
 
       $worksheet->writeString($excelrivi, $excelsarake, $row["try"]);
       $excelsarake++;
-      $worksheet->writeString($excelrivi, $excelsarake, $try_nimi);
+      $worksheet->writeString($excelrivi, $excelsarake, $try_nimi[$row['try']]);
       $excelsarake++;
       $worksheet->writeString($excelrivi, $excelsarake, $row["ytunnus"]);
       $excelsarake++;

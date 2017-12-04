@@ -11,7 +11,7 @@ if (isset($_POST['tiliote']) and $_POST['tiliote'] == '1') {
 $pupe_DataTables = "astilmyrerap";
 
 require "../inc/parametrit.inc";
-echo "14: $email, $asiakasemail <br><br>";
+
 if ((isset($tiliote) and $tiliote == '1') or (!empty($tee) and $tee == 'TULOSTA_EMAIL' and !empty($asiakasid))) {
 
   require 'paperitiliote.php';
@@ -19,18 +19,14 @@ if ((isset($tiliote) and $tiliote == '1') or (!empty($tee) and $tee == 'TULOSTA_
   if (!empty($tee) and $tee == 'TULOSTA_EMAIL' and !empty($email)) {
 
     $asiakasid = (int) $asiakasid;
+    $email = mysql_real_escape_string($email);
 
-    $query = "SELECT nimi, kieli, talhal_email, lasku_email, email
+    $query = "SELECT nimi, kieli
               FROM asiakas
               WHERE yhtio = '{$kukarow['yhtio']}'
               AND tunnus  = '{$asiakasid}'";
     $asiakasresult = pupe_query($query);
     $asiakasrow = mysql_fetch_assoc($asiakasresult);
-
-    $email = !empty($asiakasrow['talhal_email']) ? $asiakasrow['talhal_email'] : $asiakasrow['lasku_email'];
-    $email = (empty($email) and  !empty($asiakasrow['lasku_email'])) ? $asiakasrow['lasku_email'] : $asiakasrow['email'];
-    #$email = (empty($email) and  !empty($asiakasrow['email']) ? "";
-    $email = mysql_real_escape_string($email);
     
     $params = array(
       'to' => $email,
@@ -46,7 +42,7 @@ if ((isset($tiliote) and $tiliote == '1') or (!empty($tee) and $tee == 'TULOSTA_
         ),
       ),
     );
-echo "45: $email, $asiakasemail <br><br>";
+
     pupesoft_sahkoposti($params);
 
     echo "<font class='info'>";
@@ -552,7 +548,7 @@ if ($tee == "") {
 
       echo "</tr>";
       echo "</table>";
-echo "551: $email, $asiakasemail <br><br>";
+
       echo "<table><tr><td class='back'>";
 
       // ikäanalyysi

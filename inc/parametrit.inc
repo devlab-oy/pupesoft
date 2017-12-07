@@ -226,6 +226,7 @@ unset($verkkokauppa_saldotsk);
 unset($verkkokauppa_tuotemerkit);
 unset($verkkokauppa_hinnatedifailista);
 unset($verkkokauppa_sallitutvarastot);
+unset($verkkokauppa_nollahintaok);
 
 unset($verkkolaskut_out);
 unset($verkkolaskut_in);

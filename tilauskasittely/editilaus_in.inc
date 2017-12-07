@@ -2164,14 +2164,14 @@ while ($tietue = fgets($fd)) {
 
       $result = hae_erikoiskaupan_parametrit($verkkokauppa);
       if (count($result) > 0  and !isset($verkkokauppa_hinnatedifailista)) {
-        $editilaus_hinta = 0;
+        $editilaus_hinta = 0.00;
       }
     }
 
     $verkkokauppa_nollahintaok = (isset($verkkokauppa_nollahintaok) and $verkkokauppa_nollahintaok == 'JOO');
 
     // Jos erikseen sallitaan nollahintainen myynti, niin laitetaan riville alennus 100%
-    if ($verkkokauppa_nollahintaok and $_hinnatedifailista and empty($editilaus_hinta)) {
+    if ($verkkokauppa_nollahintaok and $_hinnatedifailista and $editilaus_hinta === 0.00) {
       $verkkokauppa_alennus100 = true;
     }
 

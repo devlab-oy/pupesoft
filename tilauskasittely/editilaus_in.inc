@@ -274,6 +274,7 @@ $sallitaanjt       = "";
 $editilaus_hinta   = "";
 $editilaus_alennus = "";
 $rivikommentti     = "";
+$verkkokauppa_alennus100 = false;
 
 // Mihin tilaan laitetaan verkkokauppatilauksen tuotteet, jos saldo on loppu Pupesta
 if (empty($verkkokauppa_oletus_loppuneet) or !in_array($verkkokauppa_oletus_loppuneet, array('H', 'J'))) {
@@ -2135,9 +2136,12 @@ while ($tietue = fgets($fd)) {
     break;
 
   case 'OSTOTILRIV.OTR_OSTOHINTA' :
+
+    $_hinnatedifailista = (isset($verkkokauppa_hinnatedifailista) and $verkkokauppa_hinnatedifailista == "JOO");
+
     // Kun tullaan magentosta ja meill‰ on rahtikulu, niin otetaan hinta talteeen
     // TAI kun tullaan magentosta ja me luotetaan verkkokaupan hintoihin.
-    if ($edi_tyyppi == "magento" and ((isset($verkkokauppa_hinnatedifailista) and $verkkokauppa_hinnatedifailista == "JOO") or strtolower($tuoteno) == strtolower($yhtiorow['rahti_tuotenumero'])) and $tieto != '') {
+    if ($edi_tyyppi == "magento" and ($_hinnatedifailista or strtolower($tuoteno) == strtolower($yhtiorow['rahti_tuotenumero'])) and $tieto != '') {
       // T‰m‰ hinta on aina veroton, joten lasketaan vero p‰‰lle jos myyntihinnat ovat verollisia
       $editilaus_hinta = (float) trim(str_replace( ",", ".", $tieto));
 
@@ -2164,6 +2168,13 @@ while ($tietue = fgets($fd)) {
       }
     }
 
+    $verkkokauppa_nollahintaok = (isset($verkkokauppa_nollahintaok) and $verkkokauppa_nollahintaok == 'JOO');
+
+    // Jos erikseen sallitaan nollahintainen myynti, niin laitetaan riville alennus 100%
+    if ($verkkokauppa_nollahintaok and $_hinnatedifailista and empty($editilaus_hinta)) {
+      $verkkokauppa_alennus100 = true;
+    }
+
     break;
 
   case 'OSTOTILRIV.OTR_ALENNUS' :
@@ -2171,6 +2182,11 @@ while ($tietue = fgets($fd)) {
     if ($edi_tyyppi == "magento" and (isset($verkkokauppa_hinnatedifailista) and $verkkokauppa_hinnatedifailista == "JOO") and $tieto != '') {
       $editilaus_alennus = (float) trim($tieto);
     }
+
+    if ($verkkokauppa_alennus100) {
+      $editilaus_alennus = 100;
+    }
+
     break;
 
   case 'OSTOTILRIV.OTR_SALLITAANJT' :
@@ -2522,6 +2538,7 @@ while ($tietue = fgets($fd)) {
     $editilaus_hinta   = "";
     $editilaus_alennus = "";
     $rivikommentti     = "";
+    $verkkokauppa_alennus100 = false;
     break;
 
   case 'OMSG__END' :

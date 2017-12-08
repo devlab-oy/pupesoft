@@ -143,11 +143,6 @@ $parametri = array(
     )),
 );
 
-$boob = pupesoft_sahkoposti($parametri);
-
-// Poistetaan lasku hakemistosta jos sähköpostin lähetys onnistui
-if ($boob) {
-  unlink($filename);
-}
+pupesoft_sahkoposti($parametri);
 
 echo date("d.m.Y @ G:i:s") . ": ".t("Tuotteen myyntihinnan muutokset -aineisto valmis").".\n\n";

@@ -54,8 +54,6 @@ else {
   $rajaus = " AND changelog.luontiaika >= date_sub(now(), interval 24 HOUR)";
 }
 
-$loppuaika = date("d.m.Y @ G:i:s");
-
 // Haetaan data
 $query = "SELECT changelog.key, max(changelog.luontiaika) AS luontiaika, tuote.nimitys, tuote.tuoteno,
           SUBSTRING_INDEX(GROUP_CONCAT(changelog.old_value_str ORDER BY changelog.luontiaika), ',', 1 ) as min_old_value_str,
@@ -74,7 +72,7 @@ $res = pupe_query($query);
 
 // Tallennetaan aikaleima
 cron_aikaleima("MYHIN_CRON", date('Y-m-d H:i:s'));
-$loppuaika = cron_aikaleima("MYHIN_CRON");
+$loppuaika = date("d.m.Y @ G:i:s");
 
 include $pupe_root_polku."/inc/pupeExcel.inc";
 

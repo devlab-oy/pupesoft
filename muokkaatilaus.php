@@ -3257,7 +3257,10 @@ if (mysql_num_rows($result) != 0) {
                 ORDER by kirjoitin";
       $kirre = pupe_query($query);
 
-      echo "<select name='valittu_tulostin'>";
+      echo "<table>";
+      echo "<tr>";
+      echo "<th>".t("Keräsylistan tulostin")."</th>";
+      echo "<td><select name='valittu_tulostin'>";
       echo "<option value=''>".t("Valitse tulostin")."</option>";
 
       while ($kirrow = mysql_fetch_array($kirre)) {
@@ -3271,7 +3274,27 @@ if (mysql_num_rows($result) != 0) {
         echo "<option value='$kirrow[tunnus]' $sel>$kirrow[kirjoitin]</option>";
       }
 
-      echo "</select><br><br>";
+      echo "</select></td></tr>";
+
+      mysql_data_seek($kirre, 0);
+
+      echo "<tr>";
+      echo "<th>".t("Keräystarrojen tulostin")."</th>";
+      echo "<td><select name='valittu_lavakeraystarra_tulostin'>";
+      echo "<option value=''>".t("Valitse tulostin")."</option>";
+
+      while ($kirrow = mysql_fetch_array($kirre)) {
+        $sel = '';
+
+        //tässä vaiheessa käyttäjän oletustulostin ylikirjaa optimaalisen varastotulostimen
+        if (($kirrow['tunnus'] == $kirjoitin and ($kukarow['kirjoitin'] == 0 or $lasku_yhtio_originaali != $kukarow["yhtio"])) or ($kirrow['tunnus'] == $kukarow['kirjoitin'])) {
+          $sel = "SELECTED";
+        }
+
+        echo "<option value='$kirrow[tunnus]' $sel>$kirrow[kirjoitin]</option>";
+      }
+
+      echo "</select></td></tr></table><br>";
 
       echo "<input type='submit' id='lavakerays_siirra_keraykseen_nappi' name='lavakerays_siirra_keraykseen_nappi' value='".t("Siirrä kaikki valitut tilaukset keräykseen")."'/>";
       echo "</form><br>";

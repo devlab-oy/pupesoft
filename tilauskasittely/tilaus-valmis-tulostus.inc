@@ -525,12 +525,21 @@ if ((int) $chk_row["ok"] == (int) $chk_row["kaikki"] and (int) $chk_row["ok"] !=
     }
   }
 
+  if (!empty($valittu_lavakeraystarra_tulostin)) {
+    $query  = "SELECT *
+               FROM kirjoittimet
+               WHERE yhtio = '$kukarow[yhtio]'
+               AND tunnus = '$valittu_lavakeraystarra_tulostin'";
+    $kirres = pupe_query($query);
+    $kirrow = mysql_fetch_assoc($kirres);
+
+    if (!empty($kirrow['komento'])) {
+      tulosta_lavakeraystarrat_tec($riresult, $rivinumerot, $kirrow['komento']);
+    }
+  }
+
   # Tulostetaan lista kerrallaan vain jos ei tulosteta kaikkia listoja kerrallaan
   if ($komento != "" and $yhtiorow["lahetteen_tulostustapa"] != "X" and empty($pdf_kaikki_tul)) {
-
-    // Lavakeraystarrat
-    tulosta_lavakeraystarrat_tec($riresult, $rivinumerot, $komento);
-
     // tulostetaan sivu
     $params_kerayslista["komento"] = $komento;
 

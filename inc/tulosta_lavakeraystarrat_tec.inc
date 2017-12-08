@@ -85,9 +85,9 @@ if (!function_exists("tulosta_lavakeraystarrat_tec")) {
       $pvm = date("d.m.Y");
 
       $viivakoodi1  = ">6";
-      $viivakoodi1 .= substr($lasrow['tunnus'], 0, 1);
+      $viivakoodi1 .= substr($lasrow['asiakkaan_tilausnumero'], 0, 1);
       $viivakoodi1 .= ">5";
-      $viivakoodi1 .= substr($lasrow['tunnus'], 1);
+      $viivakoodi1 .= substr($lasrow['asiakkaan_tilausnumero'], 1);
 
       // tässä tehdään aineisto jota TEC tulostin tajuaa
       $tarra = "
@@ -155,7 +155,6 @@ if (!function_exists("tulosta_lavakeraystarrat_tec")) {
 *** TULOSTUS  ***
 {XS;I,0001,0002C3200|}
 ";
-
 
     //konvertoidaan ääkköset printterin ymmärtämään muotoon
     $from = array ('ä', 'å', 'ö', 'Ä', 'Å', 'Ö', '`');

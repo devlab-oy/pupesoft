@@ -50,8 +50,6 @@ else {
   $rajaus = " AND luontiaika >= date_sub(now(), interval 24 HOUR)";
 }
 
-$loppuaika = date("d.m.Y @ G:i:s");
-
 // Haetaan data
 $query = "SELECT *
           FROM tuote
@@ -60,10 +58,9 @@ $query = "SELECT *
           ORDER BY tuoteno";
 $res = pupe_query($query);
 
-
 // Tallennetaan aikaleima
 cron_aikaleima("UUSITUOTE_CRON", date('Y-m-d H:i:s'));
-$loppuaika = cron_aikaleima("UUSITUOTE_CRON");
+$loppuaika = date("d.m.Y @ G:i:s");
 
 include $pupe_root_polku."/inc/pupeExcel.inc";
 
@@ -141,7 +138,7 @@ $parametri = array(
 $boob = pupesoft_sahkoposti($parametri);
 
 // Poistetaan lasku hakemistosta jos sähköpostin lähetys onnistui
-if ($boob and 1==2) {
+if ($boob) {
   unlink($filename);
 }
 

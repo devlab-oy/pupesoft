@@ -1,5 +1,7 @@
 <?php
 
+define("lavakerayskapasiteetti", 1488);
+
 $lavakeraysparam = "if (tuote.mallitarkenne = '200',
                       if (tuote.mallitarkenne = '12',
                         if (tuote.mallitarkenne = '1000',

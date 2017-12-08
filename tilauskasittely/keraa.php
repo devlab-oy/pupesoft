@@ -3435,7 +3435,7 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
       $oslappkpl   = 0;
       $kerattavatrivit_count = 0;
       $total_rivi_count = mysql_num_rows($result);
-      $lava_numero=1;
+      $lavanumero=1;
       $lava_referenssiluku=0;
 
       echo "<input type='hidden' id='total_rivi_count' value='{$total_rivi_count}' />";
@@ -3494,13 +3494,13 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
         }
 
         if ($otsik_row['kerayserat'] == "H") {
-          if ($lava_referenssiluku >= 1488) {
-            $lava_numero++;
+          if ($lava_referenssiluku >= lavakerayskapasiteetti) {
+            $lavanumero++;
             $lava_referenssiluku=0;
           }
 
           if ($lava_referenssiluku == 0) {
-            echo "<tr><th class='spec' colspan='6'>".t("Lava")." $lava_numero:</td></tr>";
+            echo "<tr><th class='spec' colspan='6'>".t("Lava")." $lavanumero:</td></tr>";
           }
 
           $lava_referenssiluku += ($row["tilkpl"] * $row['lavakoko']);

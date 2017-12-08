@@ -312,6 +312,7 @@ if ((int) $chk_row["ok"] == (int) $chk_row["kaikki"] and (int) $chk_row["ok"] !=
   // Asiakaaalla lavakerays
   if ($asrow['kerayserat'] == 'H') {
     require "inc/lavakeraysparametrit.inc";
+    require "inc/tulosta_lavakeraystarrat_tec.inc";
 
     $select_lisa .= $lavakeraysparam;
     $pjat_sortlisa = "lavasort,";
@@ -526,6 +527,10 @@ if ((int) $chk_row["ok"] == (int) $chk_row["kaikki"] and (int) $chk_row["ok"] !=
 
   # Tulostetaan lista kerrallaan vain jos ei tulosteta kaikkia listoja kerrallaan
   if ($komento != "" and $yhtiorow["lahetteen_tulostustapa"] != "X" and empty($pdf_kaikki_tul)) {
+
+    // Lavakeraystarrat
+    tulosta_lavakeraystarrat_tec($riresult, $rivinumerot, $komento);
+
     // tulostetaan sivu
     $params_kerayslista["komento"] = $komento;
 

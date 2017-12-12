@@ -3940,6 +3940,7 @@ if (isset($jatka)) {
 
   if ($toimvko != '') {
 
+    $toimvuosilaskulla = date("Y", strtotime($apuro["toimaika"]));
     $toimvkolaskulla = date("W", strtotime($apuro["toimaika"]));
     $toimvkopvalaskulla = $apuro["toimvko"];
 
@@ -3951,6 +3952,9 @@ if (isset($jatka)) {
     // muuten menneisyyden p‰iv‰m‰‰r‰ siirtyy seuraavalle vuodelle automaattisesti
     // vaika siihen ei koskisi
     if ($toimvko < $nyviikko and ($toimvkolaskulla != $toimvko or $toimvkopvalaskulla != $toimvkopva)) {
+      $nyvuosi += 1;
+    }
+    elseif ($toimvuosilaskulla > $nyvuosi) {
       $nyvuosi += 1;
     }
 
@@ -3969,6 +3973,7 @@ if (isset($jatka)) {
 
   if ($keraysvko != '') {
 
+    $keraysvvuosilaskulla = date("Y", strtotime($apuro["kerayspvm"]));
     $keraysvkolaskulla = date("W", strtotime($apuro["kerayspvm"]));
     $keraysvkopvalaskulla = $apuro["keraysvko"];
 
@@ -3980,6 +3985,9 @@ if (isset($jatka)) {
     // muuten menneisyyden p‰iv‰m‰‰r‰ siirtyy seuraavalle vuodelle automaattisesti
     // vaika siihen ei koskisi
     if ($keraysvko < $nyviikko and ($keraysvkolaskulla != $keraysvko or $keraysvkopvalaskulla != $keraysvkopva)) {
+      $nyvuosi += 1;
+    }
+    elseif ($keraysvvuosilaskulla > $nyvuosi) {
       $nyvuosi += 1;
     }
 

@@ -245,6 +245,10 @@ if ($tee2 == 'TULOSTA') {
     }
   }
 
+  var_dump($tilausnumerorypas);
+  var_dump($laskuja);
+  unset($tilausnumerorypas);
+
   if (is_array($tilausnumerorypas)) {
     foreach ($tilausnumerorypas as $tilausrypas_key => $tilausrypas_value) {
 

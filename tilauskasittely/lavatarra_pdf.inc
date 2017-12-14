@@ -41,7 +41,7 @@ if (!function_exists('sivu_lavatarra')) {
     $firstpage = $pdf->new_page("a5");
 
     // sitten aletaan piirtämään itse PDF sisältöä
-    $pdf->draw_text(30, 550, $laskurow['toimitustapa'], $firstpage, $iso_boldi);
+    $pdf->draw_text(30, 550, $toimitustapa, $firstpage, $iso_boldi);
 
     $pdf->draw_text(30, 530, "Pallet: $lavanumero", $firstpage, $iso);
 
@@ -52,6 +52,10 @@ if (!function_exists('sivu_lavatarra')) {
     $yhteensa = 0;
 
     foreach($tilaukset as $tilaus => $myyntierat) {
+      if ($myyntierat == 0) {
+        continue;
+      }
+
       $pdf->draw_text(50, $kala, $tilaus, $firstpage, $norm);
 
       $oikpos = $pdf->strlen($myyntierat, $norm);

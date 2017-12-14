@@ -2553,6 +2553,11 @@ while ($tietue = fgets($fd)) {
       $editilaus_otsikko_ok = "HYVAKSYTTAVAKSI";
     }
 
+    // Asiakkaiden tilaukset menevät ensin omaan hyväksyntäjonoon
+    if ($arow['kerayserat'] == 'H') {
+      $editilaus_otsikko_ok = "HYVAKJONOON";
+    }
+
     // jos meilla on otsikko voidaan laittaa sen valmiiksi
     if ($editilaus_otsikko_ok == "KYLLA") {
       //tarkistetaan toimitustapa vakin takia
@@ -2687,7 +2692,7 @@ while ($tietue = fgets($fd)) {
                   alatila     = 'A'
                   WHERE yhtio = '$kukarow[yhtio]'
                   AND tunnus  = '$editilaus_lasku_tunnus'";
-        $terminaali_tilaus_res = pupe_query($query);
+        pupe_query($query);
         $edi_ulos .= "\n".t("Terminaalitoimitus vastaanotettu").": $editilaus_lasku_tunnus.\n\n";
       }
       elseif ($editilaus_tilaustyyppi == 3) {
@@ -2696,6 +2701,15 @@ while ($tietue = fgets($fd)) {
     }
     elseif ($editilaus_otsikko_ok == "HYVAKSYTTAVAKSI") {
       $edi_ulos .= "\n".t("Merkittiin tilaus hyväksyttäväksi").": {$laskurow['tunnus']}.\n\n";
+    }
+    elseif ($editilaus_otsikko_ok == "HYVAKJONOON") {
+      $edi_ulos .= "\n".t("Merkittiin tilaus hyväksyttäväksi").": {$laskurow['tunnus']}.\n\n";
+
+      $query = "UPDATE lasku SET
+                alatila     = 'FF'
+                WHERE yhtio = '$kukarow[yhtio]'
+                AND tunnus  = '$id'";
+      pupe_query($query);
     }
     else {
       $edi_ulos .= "\n".t("Otsikko oli virheellinen tilausta/rivejä ei lisätty")."!\n\n";

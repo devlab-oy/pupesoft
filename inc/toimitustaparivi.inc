@@ -232,6 +232,7 @@ if (mysql_field_name($result, $i) == "virallinen_selite") {
   $ulos .= "<option value='MH43'        {$sel["MH43"]}       >Matkahuolto Dokumenttikuori</option>";
   $ulos .= "<option value='MH3050'      {$sel["MH3050"]}     >Matkahuolto Jakopaketti/Paikallispaketti</option>";
   $ulos .= "<option value='MH3050_SPTR' {$sel["MH3050_SPTR"]}>Matkahuolto Jakopaketti/Paikallispaketti (Tankomainen)</option>";
+  $ulos .= "<option value='MH96'        {$sel["MH96"]}       >Matkahuolto Jakopaketti/Ulkomaa</option>";
   $ulos .= "<option value='MH57'        {$sel["MH57"]}       >Matkahuolto Lavarahti</option>";
   $ulos .= "<option value='MH81'        {$sel["MH81"]}       >Matkahuolto Lähellä-paketin palautus</option>";
   $ulos .= "<option value='MH80'        {$sel["MH80"]}       >Matkahuolto Lähellä-paketti</option>";

@@ -111,7 +111,7 @@ if (!function_exists("tulosta_lavakeraystarrat_tec")) {
 {PC007;0890,0390,10,10,I,00,B,P3|}
 {RC007;{$tilrow['hyllyalue']} - {$tilrow['hyllynro']} - {$tilrow['hyllyvali']} - {$tilrow['hyllytaso']}|}
 {PC008;0890,0450,15,15,H,00,B,P3|}
-{RC008;{$rivinumerot[$tilrow['tunnus']]} / {$tilrow['lavanumero']}|}
+{RC008;{$rivinumerot[$tilrow['tunnus']]}|}
 *** TULOSTUS  ***
 {XS;I,0001,0002C3200|}
 ";
@@ -163,8 +163,9 @@ if (!function_exists("tulosta_lavakeraystarrat_tec")) {
 
     $tarrat .= chr(12);
 
-    #$tarrat = escapeshellarg($tarrat);
-    #$line = exec(" echo \"$tarrat\" | $komento");
-    echo "<pre>$tarrat</pre><br><br>";
+    $tarrat = escapeshellarg($tarrat);
+    $line = exec(" echo \"$tarrat\" | $komento");
+    echo t("Lavakeräystarrat tulostuu")."...<br>";
+    #echo "<pre>$tarrat</pre><br><br>";
   }
 }

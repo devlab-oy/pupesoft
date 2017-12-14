@@ -2612,7 +2612,7 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
           'iso_boldi'         => $iso_boldi,
           'rectparam'         => $rectparam,
           'komento'           => $komento["Lavatarra"],
-          'laskurow'          => $laskurow,
+          'toimitustapa'      => $laskurow['toimitustapa'],
           'pdf'               => NULL,
           'lavanumero'        => 0,
           'tilaukset'         => NULL,

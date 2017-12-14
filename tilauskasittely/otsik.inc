@@ -1078,7 +1078,7 @@ if ($tila == "" and !isset($jatka)) {
   echo "<input type='hidden' name='tee' value='OTSIK'>";
   echo "<input type='hidden' name='lopetus' value='$lopetus'>";
   echo "<input type='hidden' name='ruutulimit' value = '$ruutulimit'>";
-  echo "<input type='hidden' name='toim' value='$toim'>";
+  echo "<input type='hidden' id='toim' name='toim' value='$toim'>";
   echo "<input type='hidden' name='projektilla' value='$projektilla'>";
   echo "<input type='hidden' name='tilaustyyppi' value='$tilaustyyppi'>";
   echo "<input type='hidden' name='from' value='$from'>";
@@ -3606,8 +3606,6 @@ if ($tila == "" and !isset($jatka)) {
     echo "&nbsp;<select id='yhteyshenkilo_tilaus' name='yhteyshenkilo_tilaus'>";
     echo "<option value = ''>".t("Ei valintaa")."</option>";
 
-    $orig_yhteyshenkilo = "";
-
     while ($yhteysrow = mysql_fetch_assoc($yhteysresult)) {
 
       $sela = "";
@@ -3615,7 +3613,6 @@ if ($tila == "" and !isset($jatka)) {
       if ($yhteysrow["nimi"] == $srow["tilausyhteyshenkilo"] or ($kukarow["kesken"] == 0 and $yhteysrow["oletusyhteyshenkilo"] != "")) {
         $sela = "SELECTED";
         $srow["tilausyhteyshenkilo"] = "";
-        $orig_yhteyshenkilo = $yhteysrow["nimi"];
 
         if (!empty($yhteysrow["yht_puh"])) {
           $srow['toim_puh'] = $yhteysrow["yht_puh"];
@@ -3626,8 +3623,6 @@ if ($tila == "" and !isset($jatka)) {
     }
 
     echo "</select> ";
-
-    echo "<input type='hidden' name='orig_yhteyshenkilo' value='$orig_yhteyshenkilo'>";
 
     if (tarkista_oikeus("yllapito.php", "yhteyshenkilo", "X")) {
       echo " <a href='#' onclick=\"js_open_yllapito('yhteyshenkilo_tilaus','toim=yhteyshenkilo&laji=A&lukitse_avaimeen=$srow[liitostunnus]&tyhthenkilo=K');\"><img src='{$palvelin2}pics/lullacons/add.png'>".t("Uusi yhteyshenkilö")."</a>";
@@ -4115,11 +4110,7 @@ if (isset($jatka)) {
     $laskutus_maa     = $maa;
   }
 
-  $_check = ($yhteyshenkilo_tilaus != '' and $yhteyshenkilo_tilaus == $tilausyhteyshenkilo);
-  $_check = ($_check or ($orig_yhteyshenkilo and $yhteyshenkilo_tilaus == ''));
-  $_check = ($_check or (!$orig_yhteyshenkilo and $yhteyshenkilo_tilaus != ''));
-
-  if ($_check) {
+  if ($yhteyshenkilo_tilaus != '' and $tilausyhteyshenkilo == '') {
     $tilausyhteyshenkilo = $yhteyshenkilo_tilaus;
   }
 

@@ -85,7 +85,10 @@ class PrestaProductFeatureValues extends PrestaClient {
   }
 
   private function fetch_id_by_name($name) {
-    foreach ($this->fetch_all() as $feature_value) {
+    $display = array('id', 'value');
+    $filters = array("value" => $name);
+
+    foreach ($this->all($display, $filters) as $feature_value) {
       // Match only to default language (this is an array if multiple languages)
       $feature = $feature_value["value"]["language"];
       $presta_value = is_array($feature) ? $feature[0] : $feature;

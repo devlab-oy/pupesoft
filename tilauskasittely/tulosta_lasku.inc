@@ -3410,7 +3410,7 @@ if (!function_exists("tulosta_lasku")) {
         $komento = $valittu_tulostin;
       }
 
-      if ($komento == "" and (int) $valittu_tulostin > 0) {
+       if ($komento == "" and (int) $valittu_tulostin > 0 and $tee != 'TULOSTA_EMAIL_LASKUT') {
         $querykieli = "SELECT *
                        from kirjoittimet
                        where yhtio = '$kukarow[yhtio]'
@@ -3443,18 +3443,33 @@ if (!function_exists("tulosta_lasku")) {
         if ($yhtiorow["liitetiedostojen_nimeaminen"] == "N") {
           $kutsu .= ", ".trim($laskurow["nimi"]);
         }
+<<<<<<< HEAD
         if (empty($to_email)) {
           $to_email = $kukarow["eposti"];
         }
 
+=======
+        
+        if (substr($komento, 0, 12) == 'asiakasemail') {
+          $asiakasemail = substr($komento, 12);
+        }
+        
+>>>>>>> master
         $_attachments = array(0 => array(
             "filename"        => $pdf_laskufilenimi,
             "newfilename"     => $kutsu.".pdf",
             "ctype"           => "pdf")
         );
+        
+        $vmail = !empty($asiakasemail) ? $asiakasemail : $kukarow["eposti"];
+        
         // Sähköpostin lähetykseen parametrit
         $parametri = array(
+<<<<<<< HEAD
           "to"           => $to_email,
+=======
+          "to"           => $vmail,
+>>>>>>> master
           "cc"           => $sahkoposti_cc,
           "subject"      => $yhtiorow['nimi']." - ".$kutsu,
           "ctype"        => $content_body_ctype,

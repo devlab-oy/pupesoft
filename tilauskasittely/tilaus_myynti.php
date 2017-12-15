@@ -41,6 +41,31 @@ if (@include "rajapinnat/logmaster/logmaster-functions.php");
 elseif (@include "logmaster-functions.php");
 else exit;
 
+if ($tila == "YHENKPUHELIN") {
+
+  $yhenkilo = utf8_decode($yhenkilo);
+
+  $yhteysquery = "SELECT if(gsm != '', gsm, if(puh != '', puh, '')) AS yht_puh
+                  FROM yhteyshenkilo
+                  WHERE yhtio              = '$kukarow[yhtio]'
+                  AND liitostunnus         = '$ltunnus'
+                  AND tyyppi               = 'A'
+                  AND tilausyhteyshenkilo != ''
+                  AND nimi                 = '$yhenkilo'
+                  ORDER BY nimi
+                  LIMIT 1";
+  $yres = pupe_query($yhteysquery);
+
+  if ($yrow = mysql_fetch_assoc($yres)) {
+    echo json_encode($yrow['yht_puh']);
+  }
+  else {
+    echo json_encode("");
+  }
+
+  exit;
+}
+
 if ($tila == "KORVAMERKITSE" or $tila == "KORVAMERKITSE_AJAX") {
 
   $query = "SELECT otunnus

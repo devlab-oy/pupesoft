@@ -27,7 +27,7 @@ if ((isset($tiliote) and $tiliote == '1') or (!empty($tee) and $tee == 'TULOSTA_
               AND tunnus  = '{$asiakasid}'";
     $asiakasresult = pupe_query($query);
     $asiakasrow = mysql_fetch_assoc($asiakasresult);
-
+    
     $params = array(
       'to' => $email,
       'cc' => '',

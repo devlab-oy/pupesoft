@@ -148,7 +148,12 @@ if (!function_exists('finvoice_otsik')) {
         fputs($tootfinvoice, "</eb:From>\r\n");
 
         fputs($tootfinvoice, "<eb:To>\r\n");
-        xml_add("eb:PartyId", $receiverpartyid, $tootfinvoice);
+        if ($yhtiorow["verkkolasku_lah"] == "trustpoint" and $receiverintermediator == "EMAIL") {
+          xml_add("eb:PartyId", $receiverintermediator , $tootfinvoice);
+        }
+        else {
+          xml_add("eb:PartyId", $receiverpartyid, $tootfinvoice);
+        }
         xml_add("eb:Role", "Receiver", $tootfinvoice);
         fputs($tootfinvoice, "</eb:To>\r\n");
 
@@ -632,7 +637,7 @@ if (!function_exists('finvoice_otsikko_loput')) {
       xml_add("PaymentTermsFreeText", pp($masrow['teksti']), $tootfinvoice, 70);
       xml_add("InvoiceDueDate Format=\"CCYYMMDD\"", pp(vlas_dateconv($lasrow['erpcm'])), $tootfinvoice);
 
-      if ($lasrow['kasumma'] > 0) {
+      if ($lasrow['kasumma'] != 0) {
         xml_add("CashDiscountDate Format=\"CCYYMMDD\"", pp(vlas_dateconv($lasrow['kapvm'])), $tootfinvoice);
         xml_add("CashDiscountBaseAmount AmountCurrencyIdentifier=\"$lasrow[valkoodi]\"", pp($lasrow['summa'], 2), $tootfinvoice);
         xml_add("CashDiscountPercent", pp($masrow['kassa_alepros']), $tootfinvoice);

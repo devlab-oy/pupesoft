@@ -19,7 +19,11 @@ class PrestaShops extends PrestaClient {
 
   public function shop_by_id($value) {
     $display = array('id', 'name');
-    $filters = array("id" => $value);
+    $filters = array();
+
+    if (!empty($value)) {
+      $filters = array("id" => $value);
+    }
 
     foreach ($this->all($display, $filters) as $record) {
       if ($record['id'] == $value) {

@@ -301,9 +301,41 @@ abstract class PrestaClient {
     $kauppa .= is_null($id_shop) ? '' : "kaupasta {$id_shop} ";
     $kauppa .= is_null($id_group_shop) ? '' : "kaupparyhmästä {$id_group_shop} ";
 
+    $start = 0;
+    $response = array();
+    $fetchmore = TRUE;
+
+    do {
+        $partial_response = $this->_all_in_chunks($opt, $kauppa, $start);
+
+        if (count($partial_response)) {
+          $response = array_merge($response, $partial_response);
+        }
+
+        if (count($partial_response) < 1000) {
+          $fetchmore = FALSE;
+        }
+
+        $start += 1000;
+    } while ($fetchmore);
+
+    return $response;
+  }
+
+  /**
+   *
+   * Fetch alla data in chuks of 1000 records to avoid getting
+   * huge responses that would produce errors
+   *
+   */
+  private function _all_in_chunks($opt, $kauppa, $start) {
+    $resource = $this->resource_name();
+
+    $opt['limit'] = "{$start},1000";
+
     try {
       $response_xml = $this->ws->get($opt);
-      $msg = "Kaikki {$resource} rivit haettu {$kauppa}";
+      $msg = "Kaikki {$resource} rivit ({$opt['limit']}) haettu {$kauppa}";
       $this->logger->log($msg);
     }
     catch (Exception $e) {

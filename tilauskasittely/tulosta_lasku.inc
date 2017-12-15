@@ -3452,7 +3452,8 @@ if (!function_exists("tulosta_lasku")) {
             "newfilename"     => $kutsu.".pdf",
             "ctype"           => "pdf")
         );
-
+        
+        $vmail = $asiakasemail;
         if (empty($trow["email"])) {
           $vmail = !empty($vmail) ? $vmail : $kukarow['eposti'];
         }

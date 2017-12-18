@@ -3452,7 +3452,9 @@ if (!function_exists("tulosta_lasku")) {
             "newfilename"     => $kutsu.".pdf",
             "ctype"           => "pdf")
         );
-        
+
+        // Halutaan lähettää käteismyynnin kuitti sähköpostilla oletuksena kassalippaan sähköpostiin jos sellainen löytyy, muuten käyttäjän sähköpostiin.
+        // Asiakasraportti (myyntilaskut_asiakasraportti.php) käyttää tätä samaa koodia ja se pitäisi taas laitaa laskukopiot _aina_ asiakkaan sähköpostiin.
         $vmail = $asiakasemail;
         if (empty($trow["email"])) {
           $vmail = !empty($vmail) ? $vmail : $kukarow['eposti'];

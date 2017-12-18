@@ -3426,6 +3426,14 @@ if (!function_exists("tulosta_lasku")) {
       // otetaan tämä talteen jotta saadaan vientierittely
       $GLOBALS['vientierittelykomento'] = $komento;
 
+      // Etsitään kassalippaan email
+      $query = "SELECT email
+                FROM kassalipas
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND tunnus  = '{$laskurow['kassalipas']}'";
+      $result = pupe_query($query);
+      $trow = mysql_fetch_assoc($result);
+
       if (($komento == "email" and $kukarow["eposti"] != '') or substr($komento, 0, 12) == 'asiakasemail') {
         // lähetetään meili
         $kutsu = $laskuvaikuitti." ".$laskurow["laskunro"];
@@ -3433,30 +3441,44 @@ if (!function_exists("tulosta_lasku")) {
         if ($yhtiorow["liitetiedostojen_nimeaminen"] == "N") {
           $kutsu .= ", ".trim($laskurow["nimi"]);
         }
-        
+
         if (substr($komento, 0, 12) == 'asiakasemail') {
           $asiakasemail = substr($komento, 12);
         }
-        
+
         $_attachments = array(0 => array(
             "filename"        => $pdf_laskufilenimi,
             "newfilename"     => $kutsu.".pdf",
             "ctype"           => "pdf")
         );
-        
-        $vmail = !empty($asiakasemail) ? $asiakasemail : $kukarow["eposti"];
-        
-        // Sähköpostin lähetykseen parametrit
-        $parametri = array(
-          "to"           => $vmail,
-          "cc"           => $sahkoposti_cc,
-          "subject"      => $yhtiorow['nimi']." - ".$kutsu,
-          "ctype"        => $content_body_ctype,
-          "body"         => $ulos,
-          "attachements" => $_attachments,
-        );
 
-        pupesoft_sahkoposti($parametri);
+        // Halutaan lähettää käteismyynnin kuitti sähköpostilla oletuksena kassalippaan sähköpostiin
+        // jos sellainen löytyy, muuten käyttäjän sähköpostiin.
+        // Asiakasraportti (myyntilaskut_asiakasraportti.php) käyttää tätä samaa koodia ja se pitäisi
+        // taas laitaa laskukopiot _aina_ asiakkaan sähköpostiin.
+        if (!empty($trow["email"])) {
+          $vmail = $trow['email'];
+        }
+        elseif (!empty($asiakasemail)) {
+          $vmail = $asiakasemail;
+        }
+        else {
+          $vmail = $kukarow['eposti'];
+        }
+
+        if (!empty($vmail)) {
+          // Sähköpostin lähetykseen parametrit
+          $parametri = array(
+            "to"           => $vmail,
+            "cc"           => $sahkoposti_cc,
+            "subject"      => $yhtiorow['nimi']." - ".$kutsu,
+            "ctype"        => $content_body_ctype,
+            "body"         => $ulos,
+            "attachements" => $_attachments,
+          );
+
+          pupesoft_sahkoposti($parametri);
+        }
       }
       elseif ($komento != "" and $komento != "email") {
         // itse print komento...

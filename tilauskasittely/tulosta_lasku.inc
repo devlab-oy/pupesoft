@@ -3428,10 +3428,9 @@ if (!function_exists("tulosta_lasku")) {
 
       // Etsitään kassalippaan email
       $query = "SELECT email
-      FROM kassalipas
-      WHERE yhtio = '{$kukarow['yhtio']}'
-      AND tunnus  = '{$laskurow['kassalipas']}'";
-
+                FROM kassalipas
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND tunnus  = '{$laskurow['kassalipas']}'";
       $result = pupe_query($query);
       $trow = mysql_fetch_assoc($result);
 
@@ -3453,27 +3452,33 @@ if (!function_exists("tulosta_lasku")) {
             "ctype"           => "pdf")
         );
 
-        // Halutaan lähettää käteismyynnin kuitti sähköpostilla oletuksena kassalippaan sähköpostiin jos sellainen löytyy, muuten käyttäjän sähköpostiin.
-        // Asiakasraportti (myyntilaskut_asiakasraportti.php) käyttää tätä samaa koodia ja se pitäisi taas laitaa laskukopiot _aina_ asiakkaan sähköpostiin.
-        $vmail = $asiakasemail;
-        if (empty($trow["email"])) {
-          $vmail = !empty($vmail) ? $vmail : $kukarow['eposti'];
-        }
-        else {
+        // Halutaan lähettää käteismyynnin kuitti sähköpostilla oletuksena kassalippaan sähköpostiin
+        // jos sellainen löytyy, muuten käyttäjän sähköpostiin.
+        // Asiakasraportti (myyntilaskut_asiakasraportti.php) käyttää tätä samaa koodia ja se pitäisi
+        // taas laitaa laskukopiot _aina_ asiakkaan sähköpostiin.
+        if (!empty($trow["email"])) {
           $vmail = $trow['email'];
         }
+        elseif (!empty($asiakasemail)) {
+          $vmail = $asiakasemail;
+        }
+        else {
+          $vmail = $kukarow['eposti'];
+        }
 
-        // Sähköpostin lähetykseen parametrit
-        $parametri = array(
-          "to"           => $vmail,
-          "cc"           => $sahkoposti_cc,
-          "subject"      => $yhtiorow['nimi']." - ".$kutsu,
-          "ctype"        => $content_body_ctype,
-          "body"         => $ulos,
-          "attachements" => $_attachments,
-        );
+        if (!empty($vmail)) {
+          // Sähköpostin lähetykseen parametrit
+          $parametri = array(
+            "to"           => $vmail,
+            "cc"           => $sahkoposti_cc,
+            "subject"      => $yhtiorow['nimi']." - ".$kutsu,
+            "ctype"        => $content_body_ctype,
+            "body"         => $ulos,
+            "attachements" => $_attachments,
+          );
 
-        pupesoft_sahkoposti($parametri);
+          pupesoft_sahkoposti($parametri);
+        }
       }
       elseif ($komento != "" and $komento != "email") {
         // itse print komento...

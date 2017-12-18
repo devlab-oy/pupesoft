@@ -4620,6 +4620,19 @@ if ($fieldname == 'myyntihinta_paivitys_saapuminen') {
   $jatko = 0;
 }
 
+if ($fieldname == 'myyntihinnan_muutoksien_logitus') {
+
+  $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+  $sel = $trow[$i] == 'x' ? 'selected' : '';
+
+  $ulos .= "<option value = ''>".t("Myyntihinnan muutoksia ei logiteta")."</option>";
+  $ulos .= "<option value = 'x' {$sel}>".t("Myyntihinnan muutokset logitetaan omaan tietokantatauluun")."</option>";
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
 if ($fieldname == 'suoratoim_lisamyynti_osto') {
 
   $ulos = "<td><select name='{$nimi}' " . js_alasvetoMaxWidth($nimi, 400) . ">";

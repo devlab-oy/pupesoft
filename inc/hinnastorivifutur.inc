@@ -65,6 +65,7 @@ function hinnastorivi($tuote, $laskurow) {
   $out  .= sprintf("%-19.19s", "");                     // m‰‰r‰n minimi
   $out  .= sprintf("%-19.19s", "");                     // m‰‰r‰n maksimi
   $out  .= sprintf("%-11.11s", "");                     // alennushinta
+  $out  .= sprintf("%-35.35s", $tuote['muuta']);        // tuotteen "muuta"
   $out .= "\n";
 
   return $out;

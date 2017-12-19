@@ -314,11 +314,11 @@ if ($fieldname == "ytunnus") {
   }
 
   if ($alias_set != "VAHITTAISMYYNTI") {
-    if (strtoupper($yhtiorow['maa']) == 'EE') { 
+    $ulos .= " <a target='VIES' href='http://ec.europa.eu/taxation_customs/vies/?locale=".strtolower($kukarow["kieli"])."'>".t("Tarkista VIES")."</a>";
+    if (strtoupper($yhtiorow['maa']) == 'EE') {
       $ulos .= " <a target='inforegister' href='https://www.inforegister.ee'>".t("Tarkista Inforegister")."</a>";
     }
-    else { 
-      $ulos .= " <a target='VIES' href='http://ec.europa.eu/taxation_customs/vies/?locale=".strtolower($kukarow["kieli"])."'>".t("Tarkista VIES")."</a>";
+    else {
       $ulos .= " <a target='YTJ' href='https://tietopalvelu.ytj.fi/yrityshaku.aspx'>".t("Tarkista YTJ")."</a>";
     }
   }

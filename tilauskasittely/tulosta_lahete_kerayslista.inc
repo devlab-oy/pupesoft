@@ -755,9 +755,9 @@ if (!function_exists('rivi_kerayslista')) {
       }
 
       //jos ollaan liian pitk‰ll‰ tehd‰‰n uusi otsikko...
-      if ($kala < 95 or ($lava_referenssiluku >= lavakerayskapasiteetti)) {
+      if ($kala < 95 or ($kerayslistatyyppi == 'LAVAKERAYS' and $lava_referenssiluku >= lavakerayskapasiteetti)) {
 
-        if ($lava_referenssiluku >= lavakerayskapasiteetti) {
+        if ($kerayslistatyyppi == 'LAVAKERAYS' and $lava_referenssiluku >= lavakerayskapasiteetti) {
           $lavanumero++;
           $lava_referenssiluku=0;
         }
@@ -879,12 +879,14 @@ if (!function_exists('rivi_kerayslista')) {
           }
         }
 
-        if ($lava_referenssiluku == 0) {
+        if ($kerayslistatyyppi == 'LAVAKERAYS' and $lava_referenssiluku == 0) {
           $pdf->draw_text(23,  $kala, "LAVA $lavanumero:",  $thispage, $boldi);
           $kala = $kala - $rivinkorkeus + 5;
         }
 
-        $lava_referenssiluku += ($row["tilkpl"] * $row['lavakoko']);
+        if ($kerayslistatyyppi == 'LAVAKERAYS') {
+          $lava_referenssiluku += ($row["tilkpl"] * $row['lavakoko']);
+        }
 
         if (($yhtiorow['kerayserat'] == 'K' and isset($kerayseran_numero) and $kerayseran_numero > 0) or ($yhtiorow['kerayserat'] == 'P' or ($yhtiorow['kerayserat'] == 'A' and $asrow['kerayserat'] == 'A'))) {
           $pdf->draw_text(23,  $kala, $rivinumerot[$row["ker_tunnus"]],  $thispage, $pieni);

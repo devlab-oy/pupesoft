@@ -187,27 +187,49 @@ if ($toim == 'TARJOUS' and $tee == 'MITATOI_TARJOUS_KAIKKI' and $tunnukset != ""
 if ($toim == 'LAVAKERAYS' and $tee == 'KERAA_KAIKKI_LAVAKERAYS' and $lavakerays_keraykseen != "") {
   pupemaster_start();
 
-  $tilausnumeroita = $lavakerays_keraykseen;
+  if (!function_exists('lavakerays_valmis')) {
+    function lavakerays_valmis($tilaus) {
+      global $kukarow, $yhtiorow, $pupe_root_polku;
+
+      $query = "SELECT *
+                FROM lasku
+                WHERE tunnus = $tilaus
+                and yhtio = '$kukarow[yhtio]'
+                and tila = 'N'
+                and alatila = 'FF'";
+      $lasres = pupe_query($query);
+      $laskurow = mysql_fetch_assoc($lasres);
+
+      $kukarow['kesken'] = $tilaus;
+
+      require "tilauskasittely/tilaus-valmis.inc";
+
+      return $tilausnumerot;
+    }
+  }
+
   $laskuja = count(explode(",", $lavakerays_keraykseen));
 
   // katsotaan, ettei tilaus ole kenell‰k‰‰n auki ruudulla
   $query = "SELECT *
             FROM kuka
-            WHERE kesken in ($tilausnumeroita)
+            WHERE kesken in ($lavakerays_keraykseen)
             and yhtio = '{$kukarow['yhtio']}'";
   $keskenresult = pupe_query($query);
 
   // jos kaikki on ok...
   if (mysql_num_rows($keskenresult) == 0) {
-    // laitetaan listat "tulostusjonoon"
-    $query = " UPDATE lasku
-               SET alatila = 'A'
-               WHERE tunnus in ($tilausnumeroita)
-               and yhtio = '$kukarow[yhtio]'
-               and tila = 'N'
-               and alatila = 'FF'";
-    pupe_query($query);
+    $tilausnumeroita = array();
 
+    foreach(explode(",", $lavakerays_keraykseen) as $tilaus) {
+      $tilausnumerot = lavakerays_valmis($tilaus);
+
+      $tilausnumeroita = array_merge($tilausnumeroita, $tilausnumerot);
+    }
+
+    $tilausnumeroita = implode(",", $tilausnumeroita);
+
+    // Tulostetaan ker‰sylistat
     // Haetaan ekan ker‰tt‰v‰n tilauksen tiedot
     $query = " SELECT *
                from lasku

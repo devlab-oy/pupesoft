@@ -405,8 +405,8 @@ elseif ($kerattavia > 0 and $kutsuja != 'keraa.php' and !$tilaus_toimitetuksi) {
              alatila     = '{$alatila}'
              WHERE yhtio = '$kukarow[yhtio]'
              and tunnus  = '$laskurow[tunnus]'
-             and tila    in ('N','L')
-             and alatila in ('','A','F','U', 'G')";
+             and tila    in ('N', 'L')
+             and alatila in ('', 'A', 'F', 'FF', 'U', 'G')";
   $result = pupe_query($query);
 
   ///* T‰h‰n menn‰‰n jos l‰hete tosiaan tulostetaan *///

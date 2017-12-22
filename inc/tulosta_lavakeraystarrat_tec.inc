@@ -104,14 +104,14 @@ if (!function_exists("tulosta_lavakeraystarrat_tec")) {
 {RC004;{$lasrow['toimitustapa']}|}
 {XB00;0020,0250,A,3,04,0,0150,+0000000000,000,1,00|}
 {RB00;{$viivakoodi1}|}
-{PC005;0890,0270,10,10,H,00,B,P3|}
+{PC005;0400,0270,10,10,J,00,B|}
 {RC005;{$tilrow['tuoteno']}|}
-{PC006;0890,0300,06,06,H,00,B,P3|}
+{PC006;0400,0310,10,10,I,00,B,P5050004002|}
 {RC006;{$tilrow['nimitys']}|}
-{PC007;0890,0390,10,10,I,00,B,P3|}
+{PC007;0400,0405,10,10,J,00,B|}
 {RC007;{$tilrow['hyllyalue']} - {$tilrow['hyllynro']} - {$tilrow['hyllyvali']} - {$tilrow['hyllytaso']}|}
-{PC008;0890,0450,15,15,H,00,B,P3|}
-{RC008;{$rivinumerot[$tilrow['tunnus']]}|}
+{PC008;0400,0455,10,10,J,00,B|}
+{RC008;{$rivinumerot[$tilrow['tunnus']]} / {$tilrow['lavanumero']}|}
 *** TULOSTUS  ***
 {XS;I,0001,0002C3200|}
 ";
@@ -159,7 +159,7 @@ if (!function_exists("tulosta_lavakeraystarrat_tec")) {
     //konvertoidaan ääkköset printterin ymmärtämään muotoon
     $from = array ('ä', 'å', 'ö', 'Ä', 'Å', 'Ö', '`');
     $to   = array (chr(132), chr(134), chr(148), chr(142), chr(143), chr(153)); // DOS charset
-    $tarrat = str_replace($from, $to, $tarrat);                      // Tehdään käännös
+    $tarrat = str_replace($from, $to, $tarrat); // Tehdään käännös
 
     $tarrat .= chr(12);
 

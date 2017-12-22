@@ -56,6 +56,17 @@ if (!function_exists('sivu_lavatarra')) {
         continue;
       }
 
+      $query = "SELECT asiakkaan_tilausnumero
+                FROM lasku
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND tunnus = $tilaus";
+      $lasres = pupe_query($query);
+      $lasrow = mysql_fetch_assoc($lasres);
+
+      if (!empty($lasrow['asiakkaan_tilausnumero'])) {
+        $tilaus = $lasrow['asiakkaan_tilausnumero'];
+      }
+
       $pdf->draw_text(50, $kala, $tilaus, $firstpage, $norm);
 
       $oikpos = $pdf->strlen($myyntierat, $norm);

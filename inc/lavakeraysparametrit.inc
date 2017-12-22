@@ -2,7 +2,7 @@
 
 define("lavakerayskapasiteetti", 1488);
 
-$lavakeraysparam = "if (tuote.mallitarkenne = '200',
+$lavakeraysparam = "if ((tuote.mallitarkenne = '200' or (tuote.mallitarkenne = '400' and tuote.myynti_era='1')),
                       if (tuote.mallitarkenne = '12',
                         if (tuote.mallitarkenne = '1000',
                           if (tuote.mallitarkenne = '150',

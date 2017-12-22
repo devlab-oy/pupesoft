@@ -171,7 +171,6 @@ if (isset($_REQUEST["ajax"]) and $_REQUEST["ajax"] == "OK") {
         }
         elseif ($tee == 'lisaa' and isset($uusi_nimi) and trim($uusi_nimi) != "") {
           // lisataan lapsitaso
-
           $uusi_koodi = $uusi_koodi == '' ? '0' : $uusi_koodi;
 
           $uusirivi = LisaaLapsi($toim, $noderow['lft'], $noderow['syvyys'], $uusi_koodi, $uusi_nimi, $uusi_nimi_en);
@@ -314,9 +313,11 @@ if (isset($_REQUEST["ajax"]) and $_REQUEST["ajax"] == "OK") {
     $own_items = $row['lkm'];
 
     // lapsitasojen tuotteet
-    $qu = "SELECT count(*) lkm
+    $qu = "SELECT
+           count(distinct puu.tunnus) plkm,
+           count(alkio.tunnus) lkm
            FROM dynaaminen_puu puu
-           JOIN puun_alkio alkio ON (puu.yhtio = alkio.yhtio AND puu.laji=alkio.laji AND puu.tunnus = alkio.puun_tunnus)
+           LEFT JOIN puun_alkio alkio ON (puu.yhtio = alkio.yhtio AND puu.laji=alkio.laji AND puu.tunnus = alkio.puun_tunnus)
            WHERE puu.yhtio = '{$yhtiorow['yhtio']}'
            AND puu.laji    = '{$toim}'
            AND puu.lft     > {$noderow['lft']}
@@ -324,22 +325,28 @@ if (isset($_REQUEST["ajax"]) and $_REQUEST["ajax"] == "OK") {
     $re = pupe_query($qu);
     $row = mysql_fetch_assoc($re);
 
+    $child_nodes = $row['plkm'];
     $child_items = $row['lkm'];
 
     echo "<p>";
-    if ($own_items > 0) {
-      echo "<font class='message'>".t("Liitoksia").":</font> <a href='yllapito.php?toim=puun_alkio&laji={$toim}&haku[5]={$nodeid}'>".$own_items."</a><br />";
-    }
+
+    if ($child_nodes > 0) echo "<font class='message'>".t("Lapsitasoja").":</font>".$child_nodes."<br />";
+    if ($own_items > 0) echo "<font class='message'>".t("Liitoksia").":</font> <a href='yllapito.php?toim=puun_alkio&laji={$toim}&haku[5]={$nodeid}' target='_blank'>".$own_items."</a><br />";
     if ($child_items > 0) echo "<font class='message'>".t("Liitoksia lapsitasoilla").":</font>".$child_items;
+
     echo "</p>";
 
     echo "<hr /><div id='editbuttons'>";
     if ($saamuokata) {
       echo "  <a href='#' id='showeditbox' id='muokkaa'><img src='{$palvelin2}pics/lullacons/document-properties.png' alt='", t('Muokkaa lapsikategoriaa'), "'/> ".t('Muokkaa tason tietoja')."</a><br /><br />
           <a href='#' class='editbtn' id='ylos'><img src='{$palvelin2}pics/lullacons/arrow-single-up-green.png' alt='", t('Siirrä ylöspäin'), "'/> ".t('Siirrä tasoa ylöspäin')."</a><br />
-          <a href='#' class='editbtn' id='alas'><img src='{$palvelin2}pics/lullacons/arrow-single-down-green.png' alt='", t('Siirrä alaspäin'), "'/> ".t('Siirrä tasoa alaspäin')."</a><br /><br />
-          <a href='#' id='showmovebox'> <img src='{$palvelin2}pics/lullacons/arrow-single-right-green.png' alt='", t('Siirrä alatasoksi'), "'/> ".t('Siirrä oksa alatasoksi')."</a><br /><br />
-          <a href='#' id='showaddbox'><img src='{$palvelin2}pics/lullacons/add.png' alt='", t('Lisää'), "'/>".t('Lisää uusi lapsitaso')."</a><br /><br />";
+          <a href='#' class='editbtn' id='alas'><img src='{$palvelin2}pics/lullacons/arrow-single-down-green.png' alt='", t('Siirrä alaspäin'), "'/> ".t('Siirrä tasoa alaspäin')."</a><br /><br />";
+
+      if ($child_nodes == 0) {
+        echo "<a href='#' id='showmovebox'> <img src='{$palvelin2}pics/lullacons/arrow-single-right-green.png' alt='", t('Siirrä alatasoksi'), "'/> ".t('Siirrä oksa alatasoksi')."</a><br /><br />";
+      }
+
+      echo "<a href='#' id='showaddbox'><img src='{$palvelin2}pics/lullacons/add.png' alt='", t('Lisää'), "'/>".t('Lisää uusi lapsitaso')."</a><br /><br />";
 
       // poistonappi aktiivinen vain jos ei ole liitoksia
       if ($own_items > 0 or $child_items > 0) {

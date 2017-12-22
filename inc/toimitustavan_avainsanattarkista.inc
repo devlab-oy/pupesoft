@@ -107,10 +107,8 @@ if (!function_exists("toimitustavan_avainsanattarkista")) {
                 FROM toimitustavan_avainsanat
                 WHERE yhtio     = '$kukarow[yhtio]'
                 AND liitostunnus = '$tem_liitostunnus'
-                AND kieli       = '$tem_kieli'
                 AND laji        = '$tem_laji'
                 AND selite      = '$tem_selite'
-                AND selitetark  = '$tem_selitetark'
                 AND tunnus     != '$tunnus'";
       $results = pupe_query($query);
 

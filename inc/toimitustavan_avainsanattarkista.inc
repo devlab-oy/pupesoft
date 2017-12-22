@@ -39,7 +39,7 @@ if (!function_exists("toimitustavan_avainsanattarkista")) {
         elseif (mysql_num_rows($sresult) == 1) {
 
           $_toimitustavan_tunnus = mysql_fetch_assoc($sresult);
-          $tem_liitostunnus = $tem_liitostunnus_i = $_toimitustavan_tunnus['tunnus'];
+          $tem_liitostunnus = $_toimitustavan_tunnus['tunnus'];
 
           $alasveto[$i] = "<select name='t[$i]'>";
           $alasveto[$i] .= "<option value='{$tem_liitostunnus}'>".$_toimitustavan_tunnus['selite']."</option>";

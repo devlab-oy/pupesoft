@@ -268,24 +268,15 @@ if (mysql_field_name($result, $i) == "virallinen_selite") {
 
   $ulos .= "<optgroup label='Unifaun / PostNord'>";
   $ulos .= "<option value='DOMROAD' {$sel["DOMROAD"]}>PostNord Domestic Road</option>";
-  $ulos .= "<option value='DPDFI' {$sel["DPDFI"]}>PostNord DPD Classic (Suomi)</option>";
-  $ulos .= "<option value='P15' {$sel["P15"]}>PostNord Logistics DPD Företagspaket</option>";
-  $ulos .= "<option value='P14' {$sel["P14"]}>PostNord Logistics DPD Företagspaket 12.00</option>";
-  $ulos .= "<option value='DPD' {$sel["DPD"]}>PostNord Logistics DPD Utrikes</option>";
-  $ulos .= "<option value='P42' {$sel["P42"]}>PostNord Logistics Express - Express 07.00</option>";
-  $ulos .= "<option value='P32' {$sel["P32"]}>PostNord Logistics Hempaket</option>";
-  $ulos .= "<option value='DTPGHD' {$sel["DTPGHD"]}>PostNord Logistics Hjemlevering (Norge)</option>";
   $ulos .= "<option value='H48' {$sel["H48"]}>PostNord Logistics InNight</option>";
-  $ulos .= "<option value='P31' {$sel["P31"]}>PostNord Logistics Kundretur</option>";
-  $ulos .= "<option value='P19' {$sel["P19"]}>PostNord Logistics MyPack</option>";
   $ulos .= "<option value='P19FI' {$sel["P19FI"]}>PostNord Logistics MyPack (Suomi)</option>";
-  $ulos .= "<option value='P19NO' {$sel["P19NO"]}>PostNord Logistics MyPack (Norja)</option>";
-  $ulos .= "<option value='P24' {$sel["P24"]}>PostNord Logistics MyPack return</option>";
+  $ulos .= "<option value='P19FIDPD' {$sel["P19FIDPD"]}>PostNord MyPack Collect FI Pohjoismaiden ulkopuolella</option>";
+  $ulos .= "<option value='DPDFI' {$sel["DPDFI"]}>PostNord DPD Classic (Suomi)</option>";
+  $ulos .= "<option value='DLMAILEXP' {$sel["DLMAILEXP"]}>Direct Link Merchandise Mail Plus Express</option>";
   $ulos .= "<option value='P24FI' {$sel["P24FI"]}>PostNord Logistics MyPack return (Suomi)</option>";
   $ulos .= "<option value='P24NO' {$sel["P24NO"]}>PostNord Logistics MyPack Return (Norja)</option>";
-  $ulos .= "<option value='P52' {$sel["P52"]}>PostNord Logistics PALL.ETT</option>";
+  $ulos .= "<option value='P52FI' {$sel["P52FI"]}>PostNord PALL.ETT (Suomi)</option>";
   $ulos .= "<option value='DTPGPF' {$sel["DTPGPF"]}>PostNord Logistics Partifrakt (Norja)</option>";
-  $ulos .= "<option value='P91' {$sel["P91"]}>PostNord Logistics Postpaket Utrikes</option>";
   $ulos .= "<option value='DTPGSG' {$sel["DTPGSG"]}>PostNord Logistics Stykkgods (Norja)</option>";
   $ulos .= "</optgroup>";
 

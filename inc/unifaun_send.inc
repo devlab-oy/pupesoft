@@ -1116,6 +1116,43 @@ class Unifaun {
     //  $uni_add_val = $uni_addon->addChild('val', ""); # Min. temperature allowed. Used by DBSchenker ColdSped.
     //  $uni_add_val->addAttribute('n', "tempmin");
 
+    // Katsotaan onko sähköinen ennakkoilmoitus käytössä
+    $query = "SELECT *
+              FROM toimitustavan_avainsanat
+              WHERE yhtio = '{$this->kukarow['yhtio']}'
+              AND liitostunnus   = '{$this->toitarow['tunnus']}'
+              AND laji = 'unifaun_lisapalvelu'
+              AND selite = 'enot'
+              AND selitetark = 'k'";
+    $toimitustavan_avainsanat_res = pupe_query($query);
+
+    if (mysql_num_rows($toimitustavan_avainsanat_res) == 1) {
+
+      $uni_ufonline = $uni_shipment->addChild('ufonline');
+      $uni_option = $uni_ufonline->addChild('option');
+      $uni_option->addAttribute('optid', utf8_encode('ENOT'));
+
+      $uni_opt_val = $uni_option->addChild('val', utf8_encode($this->yhtiorow["postittaja_email"]));
+      $uni_opt_val->addAttribute('n', "from");
+
+      $uni_opt_val = $uni_option->addChild('val', utf8_encode($this->asiakasrow["email"]));
+      $uni_opt_val->addAttribute('n', "to");
+
+      $uni_opt_val = $uni_option->addChild('val', "");
+      $uni_opt_val->addAttribute('n', "cc");
+
+      $uni_opt_val = $uni_option->addChild('val', "");
+      $uni_opt_val->addAttribute('n', "bcc");
+
+      /*
+      $uni_opt_val = $uni_option->addChild('val', "messagea tähän");
+      $uni_opt_val->addAttribute('n', "message");
+
+      $uni_opt_val = $uni_option->addChild('val', "template name");
+      $uni_opt_val->addAttribute('n', "mailtemplate");
+      */
+    }
+
     $this->xml = $xml;
   }
 

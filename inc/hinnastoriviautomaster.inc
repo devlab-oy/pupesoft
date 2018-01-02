@@ -1,7 +1,8 @@
 <?php
 
 function hinnastorivi($tuote, $laskurow) {
-
+  global $kukarow;
+  
   $myyntihinta = tuotteen_myyntihinta($laskurow, $tuote, 1, "ei");
 
   // muutetaan yksiköt ISO-standardin mukaisiksi
@@ -12,6 +13,18 @@ function hinnastorivi($tuote, $laskurow) {
     $yksikko = "SET";
   if ($tuote['yksikko']=='PAR')
     $yksikko = "PAR";
+
+  // Katsotaan, mistä löytyy enari
+  if ($tuote["eankoodi"] == '') {
+    $query = "SELECT *
+              FROM tuotteen_toimittajat
+              WHERE yhtio = '$kukarow[yhtio]'
+              AND tuoteno = '$tuote[tuoteno]'
+              ORDER BY if (jarjestys = 0, 9999, jarjestys) limit 1";
+    $tuotetoim_res = pupe_query($query);
+    $tuotetoimrow = mysql_fetch_assoc($tuotetoim_res);
+    $tuote["eankoodi"] = $tuotetoimrow["viivakoodi"];
+  }
 
   // tehdään tietuetta
   $out  .= sprintf("%-35.35s", $tuote['tuoteno']);          // tuotenumero

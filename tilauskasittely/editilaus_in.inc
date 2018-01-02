@@ -2716,6 +2716,7 @@ while ($tietue = fgets($fd)) {
     }
 
     // nollataan kaikki laskun muuttujat (kaikki n‰m‰ samat pit‰‰ nollata filen alussa)
+    // Paitsi ovt_tunnusta, koska se tulee vain tiedoston ihan alussa kerran (ICHG_SNDR)
     unset($arow);
     unset($arow_viite);
     unset($arow_ostaja);
@@ -2769,7 +2770,6 @@ while ($tietue = fgets($fd)) {
     $ot_verkkokauppa_asiakasnro   = "";
     $ot_verkkokauppa_kohde        = "";
     $ot_verkkokauppa_tilausviesti = "";
-    $ovt_tunnus                   = "";
     $ovt_tunnuswhere              = "";
     $suunnistus                   = "";
     $til_vienti                   = "";

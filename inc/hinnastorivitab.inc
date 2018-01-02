@@ -61,6 +61,18 @@ function hinnastorivi($tuote, $laskurow) {
     }
   }
 
+  // Katsotaan, mistä löytyy enari
+  if ($tuote["eankoodi"] == '') {
+    $query = "SELECT *
+              FROM tuotteen_toimittajat
+              WHERE yhtio = '$kukarow[yhtio]'
+              AND tuoteno = '$tuote[tuoteno]'
+              ORDER BY if (jarjestys = 0, 9999, jarjestys) limit 1";
+    $tuotetoim_res = pupe_query($query);
+    $tuotetoimrow = mysql_fetch_assoc($tuotetoim_res);
+    $tuote["eankoodi"] = $tuotetoimrow["viivakoodi"];
+  }
+    
   $myyntihinta = tuotteen_myyntihinta($laskurow, $tuote, 1, "ei");
 
   // tehdään tietuetta

@@ -2,33 +2,29 @@
 
 define("lavakerayskapasiteetti", 1488);
 
-$lavakeraysparam = "if ((tuote.mallitarkenne = '200' or (tuote.mallitarkenne = '400' and tuote.myynti_era='1')),
-                      if (tuote.mallitarkenne = '12',
-                        if (tuote.mallitarkenne = '1000',
-                          if (tuote.mallitarkenne = '150',
-                            if (tuote.mallitarkenne = '585',
-                              if (tuote.mallitarkenne = '500',
-                                if (tuote.mallitarkenne = '400',
-                                  1,
-                                2),
-                              3),
-                            4),
-                          5),
-                        6),
-                      7),
-                    8) lavasort,
-                    if (tuote.mallitarkenne = '200',
-                      if (tuote.mallitarkenne = '12',
-                        if (tuote.mallitarkenne = '1000',
-                          if (tuote.mallitarkenne = '150',
-                            if (tuote.mallitarkenne = '585',
-                              if (tuote.mallitarkenne = '500',
-                                if (tuote.mallitarkenne = '400',
-                                  1,
-                                1.14),
-                              1.14),
-                            0.50),
-                          2.07),
-                        0.36),
-                      0.57),
-                    1.07) lavakoko, ";
+$lavakeraysparam = "if ((tuote.mallitarkenne = '200' or (tuote.mallitarkenne = '400' and tuote.myynti_era='1')), 7, 
+                      if (tuote.mallitarkenne = '12', 6, 
+                        if (tuote.mallitarkenne = '1000', 5, 
+                          if (tuote.mallitarkenne = '150', 4, 
+                            if (tuote.mallitarkenne = '585', 3, 
+                              if (tuote.mallitarkenne = '500', 2, 
+                                if (tuote.mallitarkenne = '400', 1, 8)
+                              )
+                            )
+                          )
+                        )
+                      )
+                    ) lavasort,
+                    if (tuote.mallitarkenne = '200', 0.57,
+                      if (tuote.mallitarkenne = '12', 0.36,
+                        if (tuote.mallitarkenne = '1000', 2.07,
+                          if (tuote.mallitarkenne = '150', 0.50,
+                            if (tuote.mallitarkenne = '585', 1.14,
+                              if (tuote.mallitarkenne = '500', 1.14,
+                                if (tuote.mallitarkenne = '400', 1, 1.07)
+                              )
+                            )
+                          )
+                        )
+                      )
+                    ) lavakoko, ";

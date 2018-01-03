@@ -1096,6 +1096,9 @@ if ($tee == 'tulosta') {
       }
 
       $_desadv = (strpos($rakir_row['toimitusvahvistus'], 'desadv') !== false);
+      $_rahtikirjakopio = (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") !== FALSE);
+      $_rahtikirjakopio_desadv = ($_rahtikirjakopio and isset($tulosta_desadv) and $tulosta_desadv == 'JOO');
+      $_desadv = ($_desadv and (!$_rahtikirjakopio or $_rahtikirjakopio_desadv));
 
       // L‰hetet‰‰n toimitusvahvistus
       if ($rakir_row['toimitusvahvistus'] != '' and (!$_onko_unifaun or $_onko_unifaun_xp or $_desadv)) {

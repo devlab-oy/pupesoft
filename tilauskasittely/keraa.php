@@ -3369,7 +3369,7 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
               ORDER BY $pjat_sortlisa sorttauskentta $order_sorttaus, tilausrivi.tunnus";
     $result = pupe_query($query);
     $riveja = mysql_num_rows($result);
-echo "$query<br>";
+
     if ($riveja > 0) {
 
       if ($otsik_row['kerayserat'] == "H") {

@@ -315,7 +315,7 @@ if ((int) $chk_row["ok"] == (int) $chk_row["kaikki"] and (int) $chk_row["ok"] !=
     require "inc/tulosta_lavakeraystarrat_tec.inc";
 
     $select_lisa .= $lavakeraysparam;
-    $pjat_sortlisa = "lavasort,";
+    $pjat_sortlisa = "tilausrivin_lisatiedot.alunperin_puute,lavasort,";
   }
 
   // keräyslistan rivit
@@ -354,6 +354,7 @@ if ((int) $chk_row["ok"] == (int) $chk_row["kaikki"] and (int) $chk_row["ok"] !=
               tuote.sarjanumeroseuranta,
               tuote.eankoodi
               FROM tilausrivi
+              LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
               JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
               JOIN lasku ON ( lasku.yhtio = tilausrivi.yhtio AND lasku.tunnus = tilausrivi.otunnus )
               WHERE tilausrivi.otunnus  in ($tilausnumeroita)

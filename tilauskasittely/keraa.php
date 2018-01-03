@@ -2453,7 +2453,7 @@ if ($tee == 'P') {
 
           $lisa1 = "";
           $select_lisa = $lavakeraysparam;
-          $pjat_sortlisa = "lavasort,";
+          $pjat_sortlisa = "tilausrivin_lisatiedot.alunperin_puute,lavasort,";
           $where_lisa = "";
 
           // keräyslistalle ei oletuksena tulosteta saldottomia tuotteita
@@ -3331,7 +3331,7 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
       require "inc/lavakeraysparametrit.inc";
 
       $select_lisa .= $lavakeraysparam;
-      $pjat_sortlisa = "lavasort,";
+      $pjat_sortlisa = "tilausrivin_lisatiedot.alunperin_puute,lavasort,";
     }
 
     $query = "SELECT
@@ -3369,7 +3369,7 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
               ORDER BY $pjat_sortlisa sorttauskentta $order_sorttaus, tilausrivi.tunnus";
     $result = pupe_query($query);
     $riveja = mysql_num_rows($result);
-
+echo "$query<br>";
     if ($riveja > 0) {
 
       if ($otsik_row['kerayserat'] == "H") {

@@ -2592,7 +2592,7 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
         }
 
         $lavat[$lavanumero][$row['otunnus']] += round(($row['varattu']+$row['kpl'])/$row['myynti_era'], 2);
-        $lava_referenssiluku += (($row['varattu']+$row['kpl']) * $row['lavakoko']);
+        $lava_referenssiluku += ($row['tilkpl'] * $row['lavakoko']);
 
         $rivinumerot[$row["tunnus"]] = $kal;
         $kal++;

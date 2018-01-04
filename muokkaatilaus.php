@@ -52,7 +52,6 @@ if (strpos($_SERVER['SCRIPT_NAME'], "muokkaatilaus.php") !== FALSE) {
   }
 
   ?>
-  <script type="text/javascript"></script>
   <script src="{$palvelin2}/inc/checkboxrange.js"></script>
 
   <script>

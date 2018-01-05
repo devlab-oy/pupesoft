@@ -2358,7 +2358,7 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
         require "inc/lavakeraysparametrit.inc";
 
         $select_lisa .= $lavakeraysparam;
-        $pjat_sortlisa = "lavasort,";
+        $pjat_sortlisa = "tilausrivin_lisatiedot.alunperin_puute,lavasort,";
       }
 
       // keräyslistan rivit
@@ -2538,7 +2538,7 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
 
       $lisa1 = "";
       $select_lisa = $lavakeraysparam;
-      $pjat_sortlisa = "lavasort,";
+      $pjat_sortlisa = "tilausrivin_lisatiedot.alunperin_puute,lavasort,";
       $where_lisa = "";
 
       // keräyslistalle ei oletuksena tulosteta saldottomia tuotteita

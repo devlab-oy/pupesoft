@@ -23,8 +23,8 @@ if (strpos($_SERVER['SCRIPT_NAME'], "viranomaisilmoitukset.php") === FALSE) {
 318 "Vero rakentamispalveluiden ostoista"
 319 "Rakentamispalvelun myynti"
 320 "Rakentamispalvelun ostot"
-321 "Vero tavaroiden maahantuonnista EU:n ulkop."
-322 "Tavaroiden maahantuonnit EU:n ulkop."
+304 "Vero tavaroiden maahantuonnista EU:n ulkop."
+310 "Tavaroiden maahantuonnit EU:n ulkop."
 */
 
 // suomen oletus ALV muuttui 1.7.2010
@@ -227,9 +227,9 @@ if (isset($tee) and $tee == 'VSRALVKK_UUSI_erittele') {
     // Tavaraostot muista EU-maista
     $taso = 'fi305';
   }
-  elseif ($ryhma == 'fi321') {
+  elseif ($ryhma == 'fi304') {
     // Tavaroiden maahantuonnit EU:n ulkop.
-    $taso = 'fi322';
+    $taso = 'fi310';
   }
   elseif ($ryhma == 'fi318') {
     // Rakannuspalveluiden ostot
@@ -289,7 +289,7 @@ if (isset($tee) and $tee == 'VSRALVKK_UUSI_erittele') {
               tili.nimi,
               group_concat(lasku.tunnus) ltunnus,
               sum(round(tiliointi.summa * (1 + tiliointi.vero / 100), 2)) $kerroin bruttosumma,
-              sum(round(tiliointi.summa * if (('$ryhma' = 'fi305' or '$ryhma' = 'fi306' or '$ryhma' = 'fi321' or '$ryhma' = 'fi318'), ($oletus_verokanta / 100), tiliointi.vero / 100), 2)) $kerroin verot,
+              sum(round(tiliointi.summa * if (('$ryhma' = 'fi305' or '$ryhma' = 'fi306' or '$ryhma' = 'fi304' or '$ryhma' = 'fi318'), ($oletus_verokanta / 100), tiliointi.vero / 100), 2)) $kerroin verot,
               sum(round(tiliointi.summa / if(lasku.vienti_kurssi = 0, 1, lasku.vienti_kurssi) * (1 + vero / 100), 2)) $kerroin bruttosumma_valuutassa,
               sum(round(tiliointi.summa / if(lasku.vienti_kurssi = 0, 1, lasku.vienti_kurssi) * vero / 100, 2)) $kerroin verot_valuutassa,
               count(*) kpl
@@ -495,7 +495,7 @@ if (isset($tee) and $tee == 'VSRALVKK_UUSI_erittele') {
       $query = "SELECT group_concat(concat(\"'\",tilino,\"'\")) tilit
                 FROM tili
                 WHERE yhtio  = '$kukarow[yhtio]'
-                and alv_taso in ('fi322')";
+                and alv_taso in ('fi310')";
       $tilires = pupe_query($query);
       $tilirow = mysql_fetch_assoc($tilires);
 
@@ -516,7 +516,7 @@ if (isset($tee) and $tee == 'VSRALVKK_UUSI_erittele') {
         }
 
         // Kassa-alennukset
-        list($kakerroinlisa, $ttres) = alvilmo_kassa_ale_erittely($alkupvm, $loppupvm, "", "", "fi321", $oletus_verokanta);
+        list($kakerroinlisa, $ttres) = alvilmo_kassa_ale_erittely($alkupvm, $loppupvm, "", "", "fi304", $oletus_verokanta);
 
         if (is_resource($ttres)) {
           while ($trow = mysql_fetch_assoc($ttres)) {
@@ -806,9 +806,9 @@ function laskeveroja($taso, $tulos) {
       $taso        = 'fi306';
       $cleantaso      = 'fi314';
     }
-    elseif ($taso == 'fi321') {
-      $taso        = 'fi322';
-      $cleantaso      = 'fi321';
+    elseif ($taso == 'fi304') {
+      $taso        = 'fi310';
+      $cleantaso      = 'fi304';
     }
     elseif ($taso == 'fi318') {
       $taso        = 'fi320';
@@ -868,7 +868,7 @@ function laskeveroja($taso, $tulos) {
       }
     }
 
-    if ($cleantaso == "fi305" or $cleantaso == "fi306" or $cleantaso == "fi320" or $cleantaso == "fi322") {
+    if ($cleantaso == "fi305" or $cleantaso == "fi306" or $cleantaso == "fi320" or $cleantaso == "fi310") {
       // Vähennetään kassa-alennuksien laskennaliset verot Tavara/Palveluaostot muista EU-maista
       list($kakerroinlisa, $ttres) = alvilmo_kassa_ale_erittely($startmonth, $endmonth, "", "", $cleantaso, $oletus_verokanta);
 
@@ -987,17 +987,17 @@ function alvlaskelma($kk, $vv) {
     // 306 "Vero palveluostoista muista EU maista"
     $fi306 = laskeveroja('fi306', $oletus_verokanta);
 
-    // 321 "Vero tavaraoiden maahnatuonnista EU:n ulkopuolelta"
-    $fi321 = laskeveroja('fi321', $oletus_verokanta);
+    // 304 "Vero tavaraoiden maahnatuonnista EU:n ulkopuolelta"
+    $fi304 = laskeveroja('fi304', $oletus_verokanta);
     
     // 318 "Vero rakentamispalveluiden ostoista"
     $fi318 = laskeveroja('fi318', $oletus_verokanta);
 
     // 307 sääntö fi307
-    $fi307 = laskeveroja('fi307', 'veronmaara') + $fi305 + $fi306 + $fi321 + $fi318;
+    $fi307 = laskeveroja('fi307', 'veronmaara') + $fi305 + $fi306 + $fi304 + $fi318;
 
     // 308 laskennallinen
-    $fi308 = $fi301 + $fi302 + $fi303 + $fi305 + $fi306 + $fi321 + $fi318 - $fi307;
+    $fi308 = $fi301 + $fi302 + $fi303 + $fi305 + $fi306 + $fi304 + $fi318 - $fi307;
 
     // 309 sääntö fi309
     $fi309 = laskeveroja('fi309', 'summa') * -1;
@@ -1014,8 +1014,8 @@ function alvlaskelma($kk, $vv) {
     // 314 sääntö fi314
     $fi314 = laskeveroja('fi314', 'summa');
 
-    // 322 "Tavaroiden maahantuonnit EU:n ulkop."
-    $fi322 = laskeveroja('fi322', 'summa');
+    // 310 "Tavaroiden maahantuonnit EU:n ulkop."
+    $fi310 = laskeveroja('fi310', 'summa');
 
     // 319 "Rakentamispalvelun myynnit"
     $fi319 = laskeveroja('fi319', 'summa') * -1;
@@ -1059,7 +1059,7 @@ function alvlaskelma($kk, $vv) {
     echo "<tr><th colspan='2'></th></tr>";
     echo "<tr class='aktiivi'><td><a href = '?tee=VSRALVKK_UUSI_erittele&ryhma=fi305&vv=$vv&kk=$kk&etsivirheita=$etsivirheita'>305</a> ", t("Vero tavaraostoista muista EU-maista"), "</td><td align='right'>".sprintf('%.2f', $fi305)."</td></tr>";
     echo "<tr class='aktiivi'><td><a href = '?tee=VSRALVKK_UUSI_erittele&ryhma=fi306&vv=$vv&kk=$kk&etsivirheita=$etsivirheita'>306</a> ", t("Vero palveluostoista muista EU-maista"), "</td><td align='right'>".sprintf('%.2f', $fi306)."</td></tr>";
-    echo "<tr class='aktiivi'><td><a href = '?tee=VSRALVKK_UUSI_erittele&ryhma=fi321&vv=$vv&kk=$kk&etsivirheita=$etsivirheita'>321</a> ", t("Vero tavaroiden maahantuonnista EU:n ulkop."), "</td><td align='right'>".sprintf('%.2f', $fi321)."</td></tr>";
+    echo "<tr class='aktiivi'><td><a href = '?tee=VSRALVKK_UUSI_erittele&ryhma=fi304&vv=$vv&kk=$kk&etsivirheita=$etsivirheita'>304</a> ", t("Vero tavaroiden maahantuonnista EU:n ulkop."), "</td><td align='right'>".sprintf('%.2f', $fi304)."</td></tr>";
     echo "<tr class='aktiivi'><td><a href = '?tee=VSRALVKK_UUSI_erittele&ryhma=fi318&vv=$vv&kk=$kk&etsivirheita=$etsivirheita'>318</a> ", t("Vero rakentamispalveluiden ostoista"), "</td><td align='right'>".sprintf('%.2f', $fi318)."</td></tr>";
 
     echo "<tr><th colspan='2'></th></tr>";
@@ -1079,7 +1079,7 @@ function alvlaskelma($kk, $vv) {
     echo "<tr class='aktiivi'><td><a href = '?tee=VSRALVKK_UUSI_erittele&ryhma=fi313&vv=$vv&kk=$kk&etsivirheita=$etsivirheita'>313</a> ", t("Tavaraostot muista EU-maista"), "</td><td align='right'>".sprintf('%.2f', $fi313)."</td></tr>";
     echo "<tr class='aktiivi'><td><a href = '?tee=VSRALVKK_UUSI_erittele&ryhma=fi314&vv=$vv&kk=$kk&etsivirheita=$etsivirheita'>314</a> ", t("Palveluostot muista EU-maista"), "</td><td align='right'>".sprintf('%.2f', $fi314)."</td></tr>";
 
-    echo "<tr class='aktiivi'><td><a href = '?tee=VSRALVKK_UUSI_erittele&ryhma=fi322&vv=$vv&kk=$kk&etsivirheita=$etsivirheita'>322</a> ", t("Tavaroiden maahantuonnit EU:n ulkop."), "</td><td align='right'>".sprintf('%.2f', $fi322)."</td></tr>";
+    echo "<tr class='aktiivi'><td><a href = '?tee=VSRALVKK_UUSI_erittele&ryhma=fi310&vv=$vv&kk=$kk&etsivirheita=$etsivirheita'>310</a> ", t("Tavaroiden maahantuonnit EU:n ulkop."), "</td><td align='right'>".sprintf('%.2f', $fi310)."</td></tr>";
     echo "<tr><th colspan='2'></th></tr>";
     echo "<tr class='aktiivi'><td><a href = '?tee=VSRALVKK_UUSI_erittele&ryhma=fi319&vv=$vv&kk=$kk&etsivirheita=$etsivirheita'>319</a> ", t("Rakentamispalvelun myynti"), "</td><td align='right'>".sprintf('%.2f', $fi319)."</td></tr>";
     echo "<tr class='aktiivi'><td><a href = '?tee=VSRALVKK_UUSI_erittele&ryhma=fi320&vv=$vv&kk=$kk&etsivirheita=$etsivirheita'>320</a> ", t("Rakentamispalvelun ostot"), "</td><td align='right'>".sprintf('%.2f', $fi320)."</td></tr>";

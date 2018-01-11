@@ -1862,6 +1862,8 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
                 $ale_kaikki_array['ale'.$alepostfix] = ${'ale'.$alepostfix};
               }
 
+              $trow['myynti_era'] = $trow['myynti_era'] <= 0 ? 1 : $trow['myynti_era'];
+
               // Sisääntuleva lavakeraystyyppinen tilaus
               // Ollaanko vikalla kierroksella?
               // Myytävissä oin vähemän kuin mitä tarvitaan ja halutaan myydä vain kokonaisia myyntieriä

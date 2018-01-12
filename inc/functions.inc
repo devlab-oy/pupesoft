@@ -33452,7 +33452,7 @@ if (!function_exists('pupesoft_toimitusvahvistus')) {
       return;
     }
 
-    $laskurow = mysql_fetch_assoc($toimv_laskures);
+    $rakir_row = $laskurow = mysql_fetch_assoc($toimv_laskures);
 
     if (empty($laskurow['toimitusvahvistus'])) {
       return;

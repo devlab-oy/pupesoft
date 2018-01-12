@@ -2223,7 +2223,7 @@ if ($tila == "" and !isset($jatka)) {
 
     $disabled = '';
 
-    if ($yhtiorow['pakollinen_varasto'] == 'K' and !empty($srow['tunnus'])) {
+    if ($yhtiorow['pakollinen_varasto'] == 'K' and !empty($srow['tunnus']) and $srow_from == "LASKU") {
       $query = "SELECT COUNT(*) AS tilausrivi_kpl
                 FROM tilausrivi
                 WHERE yhtio  = '{$kukarow['yhtio']}'

@@ -78,9 +78,9 @@ if (mysql_field_name($result, $i) == "virallinen_selite") {
   $ulos .= "<option value='PO2144_21' {$sel["PO2144_21"]} >Posti Express-rahti 21</option>";
   $ulos .= "<option value='PO2144_00' {$sel["PO2144_00"]} >Posti Express-rahti 00</option>";
   $ulos .= "<option value='PO2711'    {$sel["PO2711"]}    >Posti Parcel Connect</option>";
-  $ulos .= "<option value='ITKY14I'   {$sel["ITKY14I"]}   >Itella Express Business Day pallet (Ulkomaa)</option>";
-  $ulos .= "<option value='IT14I'     {$sel["IT14I"]}     >Itella Express Business Day parcel (Ulkomaa)</option>";
-  $ulos .= "<option value='ITPR'      {$sel["ITPR"]}      >Itella Priority Parcel</option>";
+  $ulos .= "<option value='ITKY14I'   {$sel["ITKY14I"]}   >Posti Express Business Day pallet (Ulkomaa)</option>";
+  $ulos .= "<option value='IT14I'     {$sel["IT14I"]}     >Posti Express Business Day parcel (Ulkomaa)</option>";
+  $ulos .= "<option value='ITPR'      {$sel["ITPR"]}      >Posti Priority Parcel</option>";
   $ulos .= "</optgroup>";
 
   $ulos .= "<optgroup label='Unifaun / Posti kappaletavara'>";

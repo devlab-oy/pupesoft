@@ -444,6 +444,7 @@ $korkieltokommi      = array();
 $korlisakommi        = array();
 $myyntierahuom       = array();
 $ostoerahuom         = array();
+$korvattiin_korvaavalla = "";
 
 // Kun tullaan jt-/ennakko-selauksesta, niin kytket‰‰n erikoistoimitus_alarajasumma-ominaisuus pois
 if (isset($from_tee_jt_tilaus) and $from_tee_jt_tilaus === TRUE) {

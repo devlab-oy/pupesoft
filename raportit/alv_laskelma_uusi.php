@@ -1168,12 +1168,14 @@ function alvlaskelma($kk, $vv) {
       $file .= "301:".round($fi301*100, 0)."\n";
       $file .= "302:".round($fi302*100, 0)."\n";
       $file .= "303:".round($fi303*100, 0)."\n";
+      $file .= "304:".round($fi304*100, 0)."\n";
       $file .= "305:".round($fi305*100, 0)."\n";
       $file .= "306:".round($fi306*100, 0)."\n";
       $file .= "318:".round($fi318*100, 0)."\n";
       $file .= "307:".round($fi307*100, 0)."\n";
       $file .= "308:".round($fi308*100, 0)."\n";
       $file .= "309:".round($fi309*100, 0)."\n";
+      $file .= "310:".round($fi310*100, 0)."\n";
       $file .= "311:".round($fi311*100, 0)."\n";
       $file .= "312:".round($fi312*100, 0)."\n";
       $file .= "313:".round($fi313*100, 0)."\n";

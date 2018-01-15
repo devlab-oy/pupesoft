@@ -164,7 +164,7 @@ if ((int) $chk_row["ok"] == (int) $chk_row["kaikki"] and (int) $chk_row["ok"] !=
     );
   }
 
-  if ($yhtiorow['saldotarkistus_tulostusjonossa'] != '' and $asrow != 'H') {
+  if ($yhtiorow['saldotarkistus_tulostusjonossa'] != '' and $asrow['kerayserat'] != 'H') {
 
     if ($yhtiorow['saldotarkistus_tulostusjonossa'] == 'P') {
       $var_wherelisa = "AND var = 'P'";

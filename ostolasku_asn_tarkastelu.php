@@ -300,7 +300,7 @@ if ($tee == 'vahvistakolli' or $tee == 'vahvistavakisinkolli') {
 
     if ($valitse == 'asn') {
       $kolli = mysql_real_escape_string($kolli);
-      $wherelisa = "AND paketintunniste != '' AND paketintunniste = '{$kolli}'";
+      $wherelisa = "AND paketintunniste != '' AND paketintunniste = '{$kolli}' AND asn_numero = '".mysql_real_escape_string($asn_numero)."'";
     }
     else {
       $wherelisa = "AND asn_numero = '".mysql_real_escape_string($lasku)."'";

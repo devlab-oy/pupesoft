@@ -535,7 +535,7 @@ if (isset($tee) and $tee == 'VSRALVKK_UUSI_erittele') {
 
         $verotot+=$vero;
       }
-      
+
       $query = "SELECT group_concat(concat(\"'\",tilino,\"'\")) tilit
                 FROM tili
                 WHERE yhtio  = '$kukarow[yhtio]'
@@ -784,7 +784,7 @@ function laskeveroja($taso, $tulos) {
       $_309lisa    = " or alv_taso like '%fi300%' ";
       $vainveroton = " and tiliointi.vero = 0 ";
     }
-    
+
     if ($taso == 'fi304' or $taso == 'fi310') {
       $alvlisa = "JOIN tili ON tili.yhtio = tiliointi.yhtio and tili.tilino = tiliointi.tilino";
     }
@@ -841,7 +841,7 @@ function laskeveroja($taso, $tulos) {
       if ($tilirow["tilit300"] != "" and $tilirow["tilitMUU"] != "") $tilinolisa .= " or ";
       if ($tilirow["tilitMUU"] != "") $tilinolisa .= " tiliointi.tilino in ($tilirow[tilitMUU])";
       if ($tilirow["tilit310"] != "") $tilinolisa .= " tiliointi.tilino in ($tilirow[tilit310])";
-     
+
       if ($tilirow['tilit310'] != '') {
         $query = "SELECT tili.alv_taso, sum(round(tiliointi.summa * substr(tili.alv_taso,7) / 100, 2)) veronmaara,
                   sum(tiliointi.summa) summa,
@@ -853,7 +853,7 @@ function laskeveroja($taso, $tulos) {
                   AND ($tilinolisa)
                   AND tiliointi.tapvm    >= '$startmonth'
                   AND tiliointi.tapvm    <= '$endmonth'";
-      }      
+      }
       elseif ($tuotetyyppilisa != '') {
         $query = "SELECT lasku.tunnus, lasku.arvo laskuarvo, round(sum(tilausrivi.rivihinta),2) summa
                   FROM lasku USE INDEX (yhtio_tila_tapvm)
@@ -889,7 +889,7 @@ function laskeveroja($taso, $tulos) {
       }
     }
 
-    if ($cleantaso == "fi305" or $cleantaso == "fi306" or $cleantaso == "fi320" or $cleantaso == "fi310") {
+    if ($cleantaso == "fi305" or $cleantaso == "fi306" or $cleantaso == "fi320") {
       // Vähennetään kassa-alennuksien laskennaliset verot Tavara/Palveluaostot muista EU-maista
       list($kakerroinlisa, $ttres) = alvilmo_kassa_ale_erittely($startmonth, $endmonth, "", "", $cleantaso, $oletus_verokanta);
 
@@ -1010,7 +1010,7 @@ function alvlaskelma($kk, $vv) {
 
     // 304 "Vero tavaraoiden maahnatuonnista EU:n ulkopuolelta"
     $fi304 = laskeveroja('fi304', $oletus_verokanta);
-    
+
     // 318 "Vero rakentamispalveluiden ostoista"
     $fi318 = laskeveroja('fi318', $oletus_verokanta);
 

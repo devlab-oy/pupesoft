@@ -255,7 +255,6 @@ if (isset($tee) and $tee == 'VSRALVKK_UUSI_erittele') {
             FROM tili
             WHERE yhtio = '$kukarow[yhtio]'
             and (alv_taso like '%$taso%' $_309lisa)";
-query_dump($query);
   $tilires = pupe_query($query);
   $tilirow = mysql_fetch_assoc($tilires);
 
@@ -293,7 +292,7 @@ query_dump($query);
               group_concat(lasku.tunnus) ltunnus,
               sum(round(tiliointi.summa * (1 + tiliointi.vero / 100), 2)) $kerroin bruttosumma,
               sum(round(tiliointi.summa * if (('$ryhma' = 'fi305' or '$ryhma' = 'fi306' or '$ryhma' = 'fi318'), ($oletus_verokanta / 100), tiliointi.vero / 100), 2)) $kerroin verot,
-              sum(round(tiliointi.summa * if(('$ryhma' = 'fi304'), substr(tili.alv_taso,7) / 100, 0), 2)) $kerroin verot,
+              sum(round(tiliointi.summa * if(('$ryhma' = 'fi304'), substr(tili.alv_taso,7) / 100, 0), 2)) $kerroin ei_EU_verot,
               sum(round(tiliointi.summa / if(lasku.vienti_kurssi = 0, 1, lasku.vienti_kurssi) * (1 + vero / 100), 2)) $kerroin bruttosumma_valuutassa,
               sum(round(tiliointi.summa / if(lasku.vienti_kurssi = 0, 1, lasku.vienti_kurssi) * vero / 100, 2)) $kerroin verot_valuutassa,
               count(*) kpl
@@ -309,7 +308,6 @@ query_dump($query);
               AND ($tilinolisa)
               GROUP BY 1, 2, 3, 4, 5
               ORDER BY maa, valuutta, vero, tilino, nimi";
-query_dump($query);
     $result = pupe_query($query);
 
     echo "<table><tr>";
@@ -333,7 +331,7 @@ query_dump($query);
     $kantatot = 0.0;
 
     while ($trow = mysql_fetch_assoc($result)) {
-echo "335: $edvero, $trow[verot], $trow[ei_EU_verot], $edmaa, $trow[maa], $verosum <br><br>";  
+  
       // Vaihtuiko verokanta?
       if (isset($edvero) and ($edvero != $trow["vero"] or $edmaa != $trow["maa"])) {
         echo "<tr>
@@ -500,7 +498,7 @@ echo "335: $edvero, $trow[verot], $trow[ei_EU_verot], $edmaa, $trow[maa], $veros
       $query = "SELECT group_concat(concat(\"'\",tilino,\"'\")) tilit
                 FROM tili
                 WHERE yhtio  = '$kukarow[yhtio]'
-                and alv_taso in ('fi310')";
+                and alv_taso like ('fi310%')";
       $tilires = pupe_query($query);
       $tilirow = mysql_fetch_assoc($tilires);
 
@@ -508,14 +506,14 @@ echo "335: $edvero, $trow[verot], $trow[ei_EU_verot], $edmaa, $trow[maa], $veros
 
       if ($tilirow['tilit'] != '') {
         $query = "SELECT sum(round(summa * ($oletus_verokanta / 100), 2)) veronmaara1,
-                  sum(round(tiliointi.summa * if (('$ryhma' = 'fi304'), substr(tili.alv_taso,7) / 100, 2))) veronmaara,
+                  sum(round(tiliointi.summa * substr(tili.alv_taso,7) / 100, 2)) veronmaara
                   FROM tiliointi
                   join tili on tili.yhtio = tiliointi.yhtio and tili.tilino = tiliointi.tilino
-                  WHERE yhtio  = '$kukarow[yhtio]'
-                  AND korjattu = ''
-                  AND tilino   in ($tilirow[tilit])
-                  AND tapvm    >= '$alkupvm'
-                  AND tapvm    <= '$loppupvm'";
+                  WHERE tiliointi.yhtio  = '$kukarow[yhtio]'
+                  AND tiliointi.korjattu = ''
+                  AND tiliointi.tilino   in ($tilirow[tilit])
+                  AND tiliointi.tapvm    >= '$alkupvm'
+                  AND tiliointi.tapvm    <= '$loppupvm'";
         $verores = pupe_query($query);
 
         while ($verorow = mysql_fetch_assoc($verores)) {
@@ -792,7 +790,7 @@ function laskeveroja($taso, $tulos) {
     if ($taso == 'fi304' or $taso == 'fi310') {
       $alvlisa = "JOIN tili ON tili.yhtio = tiliointi.yhtio and tili.tilino = tiliointi.tilino";
     }
-echo "791: $taso, $alvlisa <br><br>";
+
     if ($taso == 'fi312') {
       $tuotetyyppilisa = " AND tuote.tuotetyyppi = 'K' ";
       $taso        = 'fi311';
@@ -832,7 +830,6 @@ echo "791: $taso, $alvlisa <br><br>";
               FROM tili
               WHERE yhtio = '$kukarow[yhtio]'
               and (alv_taso like '%$taso%' $_309lisa)";
-query_dump($query);
     $tilires = pupe_query($query);
     $tilirow = mysql_fetch_assoc($tilires);
 
@@ -846,7 +843,7 @@ query_dump($query);
       if ($tilirow["tilit300"] != "" and $tilirow["tilitMUU"] != "") $tilinolisa .= " or ";
       if ($tilirow["tilitMUU"] != "") $tilinolisa .= " tiliointi.tilino in ($tilirow[tilitMUU])";
       if ($tilirow["tilit310"] != "") $tilinolisa .= " tiliointi.tilino in ($tilirow[tilit310])";
- echo "845: $tilinolisa, $alvlisa, $tilirow[tilit310] <br><br>";     
+     
       if ($tilirow['tilit310'] != '') {
         $query = "SELECT tili.alv_taso, sum(round(tiliointi.summa * substr(tili.alv_taso,7) / 100, 2)) veronmaara,
                   sum(tiliointi.summa) summa,
@@ -885,7 +882,6 @@ query_dump($query);
                   AND tiliointi.tapvm    >= '$startmonth'
                   AND tiliointi.tapvm    <= '$endmonth'";
       }
-query_dump($query);
 
       $verores = pupe_query($query);
 
@@ -1022,7 +1018,7 @@ function alvlaskelma($kk, $vv) {
 
     // 307 sääntö fi307
     $fi307 = laskeveroja('fi307', 'veronmaara') + $fi305 + $fi306 + $fi304 + $fi318;
-echo "1025: $fi307, $fi305, $fi306, $fi304, $fi318 <br><br>";
+
     // 308 laskennallinen
     $fi308 = $fi301 + $fi302 + $fi303 + $fi305 + $fi306 + $fi304 + $fi318 - $fi307;
 

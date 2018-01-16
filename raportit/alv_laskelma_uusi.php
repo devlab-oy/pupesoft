@@ -292,7 +292,7 @@ if (isset($tee) and $tee == 'VSRALVKK_UUSI_erittele') {
               group_concat(lasku.tunnus) ltunnus,
               sum(round(tiliointi.summa * (1 + tiliointi.vero / 100), 2)) $kerroin bruttosumma,
               sum(round(tiliointi.summa * if (('$ryhma' = 'fi305' or '$ryhma' = 'fi306' or '$ryhma' = 'fi318'), ($oletus_verokanta / 100), tiliointi.vero / 100), 2)) $kerroin verot,
-              sum(round(tiliointi.summa * if(('$ryhma' = 'fi304'), substr(tili.alv_taso,7) / 100, 0), 2)) $kerroin ei_EU_verot,
+              sum(round(tiliointi.summa * if(('$ryhma' = 'fi304'), substr(tili.alv_taso,7) / 100, 0), 2)) $kerroin verot,
               sum(round(tiliointi.summa / if(lasku.vienti_kurssi = 0, 1, lasku.vienti_kurssi) * (1 + vero / 100), 2)) $kerroin bruttosumma_valuutassa,
               sum(round(tiliointi.summa / if(lasku.vienti_kurssi = 0, 1, lasku.vienti_kurssi) * vero / 100, 2)) $kerroin verot_valuutassa,
               count(*) kpl
@@ -331,7 +331,7 @@ if (isset($tee) and $tee == 'VSRALVKK_UUSI_erittele') {
     $kantatot = 0.0;
 
     while ($trow = mysql_fetch_assoc($result)) {
-  
+
       // Vaihtuiko verokanta?
       if (isset($edvero) and ($edvero != $trow["vero"] or $edmaa != $trow["maa"])) {
         echo "<tr>
@@ -366,7 +366,7 @@ if (isset($tee) and $tee == 'VSRALVKK_UUSI_erittele') {
 
       echo "<td valign='top' align='right' nowrap>$trow[kpl]</td>";
       echo "</tr>";
-      
+
       $verosum  += $trow['verot'];
       $kplsum   += $trow['kpl'];
       $verotot  += $trow['verot'];

@@ -291,8 +291,7 @@ if (isset($tee) and $tee == 'VSRALVKK_UUSI_erittele') {
               tili.nimi,
               group_concat(lasku.tunnus) ltunnus,
               sum(round(tiliointi.summa * (1 + tiliointi.vero / 100), 2)) $kerroin bruttosumma,
-              sum(round(tiliointi.summa * if (('$ryhma' = 'fi305' or '$ryhma' = 'fi306' or '$ryhma' = 'fi318'), ($oletus_verokanta / 100), tiliointi.vero / 100), 2)) $kerroin verot,
-              sum(round(tiliointi.summa * if(('$ryhma' = 'fi304'), substr(tili.alv_taso,7) / 100, 0), 2)) $kerroin verot,
+              sum(round(tiliointi.summa * if(('$ryhma' = 'fi305' or '$ryhma' = 'fi306' or '$ryhma' = 'fi318'), ($oletus_verokanta / 100), if('$ryhma' = 'fi304', (substr(tili.alv_taso,7) / 100), (tiliointi.vero / 100))), 2)) $kerroin verot,
               sum(round(tiliointi.summa / if(lasku.vienti_kurssi = 0, 1, lasku.vienti_kurssi) * (1 + vero / 100), 2)) $kerroin bruttosumma_valuutassa,
               sum(round(tiliointi.summa / if(lasku.vienti_kurssi = 0, 1, lasku.vienti_kurssi) * vero / 100, 2)) $kerroin verot_valuutassa,
               count(*) kpl
@@ -505,8 +504,7 @@ if (isset($tee) and $tee == 'VSRALVKK_UUSI_erittele') {
       $vero = 0.0;
 
       if ($tilirow['tilit'] != '') {
-        $query = "SELECT sum(round(summa * ($oletus_verokanta / 100), 2)) veronmaara1,
-                  sum(round(tiliointi.summa * substr(tili.alv_taso,7) / 100, 2)) veronmaara
+        $query = "SELECT sum(round(tiliointi.summa * substr(tili.alv_taso,7) / 100, 2)) veronmaara
                   FROM tiliointi
                   join tili on tili.yhtio = tiliointi.yhtio and tili.tilino = tiliointi.tilino
                   WHERE tiliointi.yhtio  = '$kukarow[yhtio]'

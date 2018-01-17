@@ -51,38 +51,70 @@ if (strpos($_SERVER['SCRIPT_NAME'], "muokkaatilaus.php") !== FALSE) {
     exit;
   }
 
-  echo "  <script type='text/javascript'>
-        $(function() {
+  if ($toim == "LAVAKERAYS") {
+     echo "<script src='inc/checkboxrange.js'></script>";
+   }
 
-          $.ajaxSetup({
-            url: '{$palvelin2}/muokkaatilaus.php?toim=EXTRANET&indexvas=1&ajax=OK',
-            type: 'POST',
-            cache: false
-          });
+  ?>
 
-          $('.myyntiformi').on('click', '.check_kesken', function(e) {
 
-            e.preventDefault();
+  <script>
+    $(document).ready(function(){
+      $(".shift").shiftcheckbox();
+    });
 
-            var otunnus = $(this).siblings('.tilausnumero').val();
+    $(function() {
+      $.ajaxSetup({
+        url: '{$palvelin2}/muokkaatilaus.php?toim=EXTRANET&indexvas=1&ajax=OK',
+        type: 'POST',
+        cache: false
+      });
 
-            $.ajax({
-              data: {
-                otunnus: otunnus
-              },
-              success: function(retval) {
-                if (retval) {
-                  alert(retval);
-                  window.location.replace('{$palvelin2}/muokkaatilaus.php?toim=EXTRANET&indexvas=1');
-                }
-                else {
-                  $('#myyntiformi_'+otunnus).submit();
-                }
-              }
-            });
-          });
+      $('.myyntiformi').on('click', '.check_kesken', function(e) {
+        e.preventDefault();
+
+        var otunnus = $(this).siblings('.tilausnumero').val();
+
+        $.ajax({
+          data: {
+            otunnus: otunnus
+          },
+          success: function(retval) {
+            if (retval) {
+              alert(retval);
+              window.location.replace('{$palvelin2}/muokkaatilaus.php?toim=EXTRANET&indexvas=1');
+            }
+            else {
+              $('#myyntiformi_'+otunnus).submit();
+            }
+          }
         });
-      </script>";
+      });
+
+      $('#lavakerays_valitsekaikki').on('click', function(e) {
+          if($(this).is(":checked")) {
+            $('.lavakerays_valitse_keraykseen').prop('checked', true);
+          }
+          else {
+            $('.lavakerays_valitse_keraykseen').prop('checked', false);
+          }
+      });
+
+      $('#lavakerays_siirra_keraykseen_nappi').on('click', function() {
+        // Siirretään ruksatut formin mukana
+        var valitut_tilaukset = []
+
+        $('.lavakerays_valitse_keraykseen').each(function(i, obj) {
+          if ($(obj).is(":checked")) {
+            valitut_tilaukset.push($(obj).val());
+          }
+        });
+
+        $('#lavakerays_keraykseen').val(valitut_tilaukset.join(","));
+      });
+    });
+  </script>
+  <?php
 }
 
 if (!isset($toim)) $toim = '';
@@ -154,6 +186,82 @@ if ($toim == 'TARJOUS' and $tee == 'MITATOI_TARJOUS_KAIKKI' and $tunnukset != ""
   }
 
   pupemaster_stop();
+}
+
+if ($toim == 'LAVAKERAYS' and $tee == 'KERAA_KAIKKI_LAVAKERAYS' and $lavakerays_keraykseen != "") {
+  pupemaster_start();
+
+  if (!function_exists('lavakerays_valmis')) {
+    function lavakerays_valmis($tilaus) {
+      global $kukarow, $yhtiorow, $pupe_root_polku;
+
+      $query = "SELECT *
+                FROM lasku
+                WHERE tunnus = $tilaus
+                and yhtio = '$kukarow[yhtio]'
+                and tila = 'N'
+                and alatila = 'FF'";
+      $lasres = pupe_query($query);
+      $laskurow = mysql_fetch_assoc($lasres);
+
+      $kukarow['kesken'] = $tilaus;
+
+      require "tilauskasittely/tilaus-valmis.inc";
+
+      return $tilausnumerot;
+    }
+  }
+
+  $laskuja = count(explode(",", $lavakerays_keraykseen));
+
+  // katsotaan, ettei tilaus ole kenelläkään auki ruudulla
+  $query = "SELECT *
+            FROM kuka
+            WHERE kesken in ($lavakerays_keraykseen)
+            and yhtio = '{$kukarow['yhtio']}'";
+  $keskenresult = pupe_query($query);
+
+  // jos kaikki on ok...
+  if (mysql_num_rows($keskenresult) == 0) {
+    $tilausnumeroita = array();
+
+    foreach(explode(",", $lavakerays_keraykseen) as $tilaus) {
+      $tilausnumerot = lavakerays_valmis($tilaus);
+
+      $tilausnumeroita = array_merge($tilausnumeroita, $tilausnumerot);
+    }
+
+    $tilausnumeroita = implode(",", $tilausnumeroita);
+
+    // Tulostetaan keräsylistat
+    // Haetaan ekan kerättävän tilauksen tiedot
+    $query = " SELECT *
+               from lasku
+               where tunnus in ($tilausnumeroita)
+               and yhtio = '$kukarow[yhtio]'
+               and tila = 'N'
+               and alatila = 'A'
+               ORDER BY clearing DESC
+               LIMIT 1";
+    $result = pupe_query($query);
+
+    if (mysql_num_rows($result) > 0) {
+      $laskurow = mysql_fetch_array($result);
+
+      require "tilauskasittely/tilaus-valmis-tulostus.inc";
+    }
+    else {
+      echo "<font class='error'>".t("Keräyslista on jo tulostettu")."! ($tilausnumeroita)</font><br>";
+    }
+  }
+  else {
+    $keskenrow = mysql_fetch_array($keskenresult);
+    echo t("Tilaus on kesken käyttäjällä").", $keskenrow[nimi], ".t("ota yhteyttä häneen ja käske hänen laittaa vähän vauhtia tähän touhuun")."!<br>";
+    $tee2 = "";
+  }
+
+  pupemaster_stop();
+  unset($tee);
 }
 
 if (isset($tee) and $tee == 'TOIMITA_ENNAKKO' and in_array($yhtiorow["ennakkotilausten_toimitus"], array('M','K'))) {
@@ -333,12 +441,24 @@ echo "  <script type='text/javascript' language='JavaScript'>
           return false;
         }
       }
+
+      function tarkista_tulostus() {
+        msg = '".t("Oletko varma, että haluat siirtää vaitut tilaukset keräykseen?")."';
+
+        if (confirm(msg)) {
+          return true;
+        }
+        else {
+          skippaa_tama_submitti = true;
+          return false;
+        }
+      }
     -->
     </script>";
 
 $toim = strtoupper($toim);
 
-if ($toim == "" or $toim == "SUPER" or $toim == "SUPER_EITYOM" or $toim == "SUPER_EILUONTITAPATYOM" or $toim == "LASKUTUSKIELTO" or $toim == "KESKEN" or $toim == "TOSI_KESKEN" or $toim == 'KESKEN_TAI_TOIMITETTAVISSA') {
+if ($toim == "" or $toim == "SUPER" or $toim == "SUPER_EITYOM" or $toim == "SUPER_EILUONTITAPATYOM" or $toim == "LASKUTUSKIELTO" or $toim == "KESKEN" or $toim == "TOSI_KESKEN" or $toim == 'KESKEN_TAI_TOIMITETTAVISSA' or $toim == "LAVAKERAYS") {
   $pika_oikeu = tarkista_oikeus('tilaus_myynti.php', 'PIKATILAUS');
   $rivi_oikeu = tarkista_oikeus('tilaus_myynti.php', 'RIVISYOTTO');
 }
@@ -384,6 +504,9 @@ elseif ($toim == "LASKUTUSKIELTO") {
 }
 elseif ($toim == "EXTRANET") {
   $otsikko = t("hyväksyttäviä tilauksia");
+}
+elseif ($toim == "LAVAKERAYS") {
+  $otsikko = t("HB-tilauksia");
 }
 elseif ($toim == "OSTO" or $toim == "OSTOSUPER") {
   $otsikko = t("osto-tilausta");
@@ -575,7 +698,7 @@ if (strpos($_SERVER['SCRIPT_NAME'], "muokkaatilaus.php") !== FALSE) {
   if ($toim != "MYYNTITILITOIMITA" and $toim != "EXTRANET" and $toim != "VALMISTUSMYYNTI" and $toim != "VALMISTUSMYYNTISUPER") {
     if (isset($eresult) and  mysql_num_rows($eresult) > 0) {
       // tehdään aktivoi nappi.. kaikki mitä näytetään saa aktvoida, joten tarkkana queryn kanssa.
-      if ($toim == "" or $toim == "SUPER" or $toim == "SUPER_EITYOM" or $toim == "SUPER_EILUONTITAPATYOM" or $toim == "LASKUTUSKIELTO" or $toim == "KESKEN" or $toim == "TOSI_KESKEN" or $toim == 'KESKEN_TAI_TOIMITETTAVISSA') {
+      if ($toim == "" or $toim == "SUPER" or $toim == "SUPER_EITYOM" or $toim == "SUPER_EILUONTITAPATYOM" or $toim == "LASKUTUSKIELTO" or $toim == "KESKEN" or $toim == "TOSI_KESKEN" or $toim == 'KESKEN_TAI_TOIMITETTAVISSA' or $toim == "LAVAKERAYS") {
 
         if (isset($pika_oikeu) and $pika_oikeu and !$rivi_oikeu) {
           $aputoim1 = "PIKATILAUS";
@@ -719,7 +842,7 @@ if (strpos($_SERVER['SCRIPT_NAME'], "muokkaatilaus.php") !== FALSE) {
 
       echo "</select></td>";
 
-      if ($aputoim2 != "" and ($toim == "" or $toim == "SUPER" or $toim == "SUPER_EITYOM" or $toim == "SUPER_EILUONTITAPATYOM" or $toim == "ENNAKKO" or $toim == "LASKUTUSKIELTO" or $toim == "KESKEN" or $toim == "TOSI_KESKEN" or $toim == 'KESKEN_TAI_TOIMITETTAVISSA')) {
+      if ($aputoim2 != "" and ($toim == "" or $toim == "SUPER" or $toim == "SUPER_EITYOM" or $toim == "SUPER_EILUONTITAPATYOM" or $toim == "ENNAKKO" or $toim == "LASKUTUSKIELTO" or $toim == "KESKEN" or $toim == "TOSI_KESKEN" or $toim == 'KESKEN_TAI_TOIMITETTAVISSA' or $toim == "LAVAKERAYS")) {
         echo "<td class='back'><input type='submit' name='$aputoim2' value='$lisa2' $button_disabled></td>";
       }
 
@@ -892,6 +1015,36 @@ if (strpos($_SERVER['SCRIPT_NAME'], "muokkaatilaus.php") !== FALSE) {
   echo "</td>";
 
   echo "</tr>";
+
+  if ($toim == "LAVAKERAYS") {
+
+    echo "</tr><tr>";
+
+    echo "<th>", t("Toimitustapa"), "</th>";
+
+    echo "<td><select name='toimitustapa' onchange='submit();'>";
+    echo "<option value='kaikki'>", t("Kaikki toimitustavat"), "</option>";
+
+    $toimitustavat = hae_kaikki_toimitustavat();
+
+    foreach ($toimitustavat as $ttapa) {
+      if (stripos($ttapa['selite'], "HORN") === FALSE) {
+        continue;
+      }
+
+      $sel = '';
+
+      if (isset($toimitustapa) and $toimitustapa == $ttapa['selite']) {
+        $sel = ' selected';
+      }
+
+      echo "<option value='{$ttapa['selite']}'{$sel}>{$ttapa['selite']}</option>";
+    }
+
+    echo "</select></td><td class='back'>&nbsp;</td>";
+    echo "</tr>";
+  }
+
   echo "<tr>";
 
   echo "<td class='back'><input type='submit' class='hae_btn' value='".t("Etsi")."'></td></tr>";
@@ -922,6 +1075,10 @@ if (strpos($_SERVER['SCRIPT_NAME'], "muokkaatilaus.php") !== FALSE) {
 
   if (is_numeric($etsi)) {
     $haku = " and (lasku.tunnus like '{$etsi}%' or lasku.ytunnus like '{$etsi}%' or lasku.viesti like '%{$etsi}%' {$myyntitili_haku}) ";
+  }
+
+  if ($toim == "LAVAKERAYS" and !empty($toimitustapa)) {
+    $haku .= " and lasku.toimitustapa = '{$toimitustapa}'";
   }
 
   if ($toim == 'YLLAPITO' and $etsi != "" and $haku != "") {
@@ -1018,7 +1175,7 @@ if (strpos($_SERVER['SCRIPT_NAME'], "muokkaatilaus.php") !== FALSE) {
     $toimaikalisa = ' lasku.toimaika, ';
   }
 
-  if ($limit == "") {
+  if ($limit == "" and $toim != "LAVAKERAYS") {
     $rajaus = "LIMIT 50";
   }
   else {
@@ -1026,9 +1183,13 @@ if (strpos($_SERVER['SCRIPT_NAME'], "muokkaatilaus.php") !== FALSE) {
   }
 }
 
-if (empty($asiakastiedot)) {
+if ($toim == "LAVAKERAYS") {
+  $asiakastiedot = "toimitus";
+}
+elseif (empty($asiakastiedot)) {
   $asiakastiedot = isset($_COOKIE["pupesoft_muokkaatilaus"]) ? $_COOKIE["pupesoft_muokkaatilaus"] : "";
 }
+
 
 if ($asiakastiedot == "toimitus") {
   $asiakasstring = "  concat_ws('<br>', lasku.ytunnus, concat_ws(' ', lasku.nimi, lasku.nimitark),
@@ -1062,23 +1223,25 @@ echo "  <script language=javascript>
 
 echo "<br>";
 
-// Näytetään asiakastiedot linkki
-if ($asiakastiedot == 'toimitus') {
-  echo " <a href='muokkaatilaus.php?toim={$toim}&asiakastiedot=laskutus&limit={$limit}&etsi={$etsi}&toimipaikka={$toimipaikka}'>" .t("Näytä vain laskutustiedot") . "</a>";
-}
-else {
-  echo " <a href='muokkaatilaus.php?toim={$toim}&asiakastiedot=toimitus&limit={$limit}&etsi={$etsi}&toimipaikka={$toimipaikka}'>" . t("Näytä myös toimitusasiakkaan tiedot") . "</a>";
-}
+if ($toim != "LAVAKERAYS") {
+  // Näytetään asiakastiedot linkki
+  if ($asiakastiedot == 'toimitus') {
+    echo " <a href='muokkaatilaus.php?toim={$toim}&asiakastiedot=laskutus&limit={$limit}&etsi={$etsi}&toimipaikka={$toimipaikka}'>" .t("Näytä vain laskutustiedot") . "</a>";
+  }
+  else {
+    echo " <a href='muokkaatilaus.php?toim={$toim}&asiakastiedot=toimitus&limit={$limit}&etsi={$etsi}&toimipaikka={$toimipaikka}'>" . t("Näytä myös toimitusasiakkaan tiedot") . "</a>";
+  }
 
-// Näytetäänkö saldot linkki
-if ($toim == '' and $naytetaanko_saldot == 'kylla') {
-  echo " <a href='muokkaatilaus.php?toim={$toim}&limit={$limit}&etsi={$etsi}&naytetaanko_saldot=ei&toimipaikka={$toimipaikka}'>" . t("Piilota saldot keräypäivänä") . "</a>";
-}
-elseif (!empty($yhtiorow["saldo_kasittely"]) and $toim == '') {
-  echo " <a href='muokkaatilaus.php?toim={$toim}&limit={$limit}&etsi={$etsi}&naytetaanko_saldot=kylla&toimipaikka={$toimipaikka}'>" .t("Näytä saldot keräyspäivänä") . "</a>";
-}
+  // Näytetäänkö saldot linkki
+  if ($toim == '' and $naytetaanko_saldot == 'kylla') {
+    echo " <a href='muokkaatilaus.php?toim={$toim}&limit={$limit}&etsi={$etsi}&naytetaanko_saldot=ei&toimipaikka={$toimipaikka}'>" . t("Piilota saldot keräypäivänä") . "</a>";
+  }
+  elseif (!empty($yhtiorow["saldo_kasittely"]) and $toim == '') {
+    echo " <a href='muokkaatilaus.php?toim={$toim}&limit={$limit}&etsi={$etsi}&naytetaanko_saldot=kylla&toimipaikka={$toimipaikka}'>" .t("Näytä saldot keräyspäivänä") . "</a>";
+  }
 
-echo "<br><br>";
+  echo "<br><br>";
+}
 
 $query_ale_lisa = generoi_alekentta('M');
 
@@ -1851,6 +2014,34 @@ elseif ($toim == "EXTRANET") {
 
   $miinus = 4;
 }
+elseif ($toim == "LAVAKERAYS") {
+
+  $query = "SELECT DISTINCT lasku.tunnus tilaus, $asiakasstring asiakas, asiakas.asiakasnro, lasku.luontiaika, count(tilausrivi.tunnus) riveja, ";
+
+  if ($kukarow['hinnat'] == 0) {
+    $query .= " round(sum(tilausrivi.hinta
+                  / if('$yhtiorow[alv_kasittely]'  = '' AND tilausrivi.alv < 500,
+                    (1 + tilausrivi.alv / 100),
+                    1)
+                  * (tilausrivi.varattu + tilausrivi.jt + tilausrivi.kpl)
+                  * {$query_ale_lisa}), 2) AS arvo, ";
+  }
+
+  $query .= "$toimaikalisa lasku.alatila, lasku.tila, lasku.tunnus, lasku.varasto
+             FROM lasku use index (tila_index)
+             JOIN asiakas ON (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus)
+             LEFT JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi != 'D')
+             WHERE lasku.yhtio = '$kukarow[yhtio]'
+             and lasku.tila = 'N'
+             and lasku.alatila = 'FF'
+             $haku
+             GROUP BY lasku.tunnus
+             $mt_order_by
+             $rajaus";
+
+
+  $miinus = 4;
+}
 elseif ($toim == "LASKUTUSKIELTO") {
   $query = "SELECT lasku.tunnus tilaus, $asiakasstring asiakas, lasku.luontiaika, if(kuka1.kuka is null, lasku.laatija, if (kuka1.kuka!=kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi)) laatija, $toimaikalisa lasku.mapvm, lasku.alatila, lasku.tila, lasku.tunnus, lasku.varasto
             FROM lasku use index (tila_index)
@@ -2224,17 +2415,27 @@ if (mysql_num_rows($result) != 0) {
   echo "<table>";
   echo "<tr>";
 
+  $tturllisa = "";
+
+  if ($toim == "LAVAKERAYS") {
+    $tturllisa = "&toimitustapa=$toimitustapa";
+  }
+
+  if ($toim == "LAVAKERAYS" and !empty($toimitustapa)) {
+    echo "<th></th>";
+  }
+
   $ii = 0;
   for ($i = 0; $i < mysql_num_fields($result)-$miinus; $i++) {
 
     if (isset($mt_order[mysql_field_name($result, $i)]) and $mt_order[mysql_field_name($result, $i)] == 'ASC') {
-      echo "<th align='left'><a href='muokkaatilaus.php?toim=$toim&asiakastiedot=$asiakastiedot&limit=$limit&etsi=$etsi&toimipaikka=$toimipaikka&mt_order[".mysql_field_name($result, $i)."]=DESC'>".t(mysql_field_name($result, $i))."<img src='{$palvelin2}pics/lullacons/arrow-small-up-green.png' /></a></th>";
+      echo "<th align='left'><a href='muokkaatilaus.php?toim=$toim&asiakastiedot=$asiakastiedot&limit=$limit&etsi=$etsi&toimipaikka=$toimipaikka{}&mt_order[".mysql_field_name($result, $i)."]=DESC{$tturllisa}'>".t(mysql_field_name($result, $i))."<img src='{$palvelin2}pics/lullacons/arrow-small-up-green.png' /></a></th>";
     }
     elseif (isset($mt_order[mysql_field_name($result, $i)]) and $mt_order[mysql_field_name($result, $i)] == 'DESC') {
-      echo "<th align='left'><a href='muokkaatilaus.php?toim=$toim&asiakastiedot=$asiakastiedot&limit=$limit&etsi=$etsi&toimipaikka=$toimipaikka&mt_order[".mysql_field_name($result, $i)."]=ASC'>".t(mysql_field_name($result, $i))."<img src='{$palvelin2}pics/lullacons/arrow-small-down-green.png' /></a></th>";
+      echo "<th align='left'><a href='muokkaatilaus.php?toim=$toim&asiakastiedot=$asiakastiedot&limit=$limit&etsi=$etsi&toimipaikka=$toimipaikka&mt_order[".mysql_field_name($result, $i)."]=ASC{$tturllisa}'>".t(mysql_field_name($result, $i))."<img src='{$palvelin2}pics/lullacons/arrow-small-down-green.png' /></a></th>";
     }
     else {
-      echo "<th align='left'><a href='muokkaatilaus.php?toim=$toim&asiakastiedot=$asiakastiedot&limit=$limit&etsi=$etsi&toimipaikka=$toimipaikka&mt_order[".mysql_field_name($result, $i)."]=ASC'>".t(mysql_field_name($result, $i))."</a></th>";
+      echo "<th align='left'><a href='muokkaatilaus.php?toim=$toim&asiakastiedot=$asiakastiedot&limit=$limit&etsi=$etsi&toimipaikka=$toimipaikka&mt_order[".mysql_field_name($result, $i)."]=ASC{$tturllisa}'>".t(mysql_field_name($result, $i))."</a></th>";
     }
 
     if (isset($worksheet)) {
@@ -2253,7 +2454,9 @@ if (mysql_num_rows($result) != 0) {
   }
   $excelrivi++;
 
-  echo "<th align='left'>".t("tyyppi")."</th>";
+  if ($toim != "LAVAKERAYS")  {
+    echo "<th align='left'>".t("tyyppi")."</th>";
+  }
 
   // Jos yhtiönparametri saldo_kasittely on asetettu tilaan
   // "myytävissä-kpl lasketaan keräyspäivän mukaan", näytetään onko tuotteita saldoilla
@@ -2473,6 +2676,10 @@ if (mysql_num_rows($result) != 0) {
       }
 
       echo "<tr class='aktiivi' {$label_color}>";
+
+      if ($toim == "LAVAKERAYS" and !empty($toimitustapa)) {
+        echo "<td><input type='checkbox' class='lavakerays_valitse_keraykseen shift' name = 'keraykseen[]' value='{$row['tilaus']}'></td>";
+      }
 
       $zendesk_viesti = FALSE;
       $ii = 0;
@@ -2697,7 +2904,7 @@ if (mysql_num_rows($result) != 0) {
           }
         }
       }
-      else {
+      elseif ($toim != "LAVAKERAYS")  {
 
         $laskutyyppi = $row["tila"];
         $alatila   = $row["alatila"];
@@ -2779,7 +2986,7 @@ if (mysql_num_rows($result) != 0) {
       $excelrivi++;
 
       // tehdään aktivoi nappi.. kaikki mitä näytetään saa aktvoida, joten tarkkana queryn kanssa.
-      if ($whiletoim == "" or $whiletoim == "SUPER" or $whiletoim == "SUPER_EITYOM" or $whiletoim == "SUPER_EILUONTITAPATYOM" or $whiletoim == "KESKEN" or $toim == "KESKEN_TAI_TOIMITETTAVISSA" or $toim == "TOSI_KESKEN" or $whiletoim == "EXTRANET" or $whiletoim == "JTTOIMITA" or $whiletoim == "LASKUTUSKIELTO"or (($whiletoim == "VALMISTUSMYYNTI" or $whiletoim == "VALMISTUSMYYNTISUPER") and $row["tila"] != "V")) {
+      if ($whiletoim == "" or $whiletoim == "SUPER" or $whiletoim == "SUPER_EITYOM" or $whiletoim == "SUPER_EILUONTITAPATYOM" or $whiletoim == "KESKEN" or $toim == "KESKEN_TAI_TOIMITETTAVISSA" or $toim == "LAVAKERAYS" or $toim == "TOSI_KESKEN" or $whiletoim == "EXTRANET" or $whiletoim == "JTTOIMITA" or $whiletoim == "LASKUTUSKIELTO"or (($whiletoim == "VALMISTUSMYYNTI" or $whiletoim == "VALMISTUSMYYNTISUPER") and $row["tila"] != "V")) {
 
         if (isset($pika_oikeu) and $pika_oikeu and !$rivi_oikeu) {
           $aputoim1 = "PIKATILAUS";
@@ -3011,7 +3218,7 @@ if (mysql_num_rows($result) != 0) {
 
       $_class = $whiletoim == "EXTRANET" ? "check_kesken" : "";
 
-      if ($aputoim2 != "" and ($whiletoim == "" or $whiletoim == "SUPER" or $whiletoim == "SUPER_EITYOM" or $whiletoim == "SUPER_EILUONTITAPATYOM" or $whiletoim == "KESKEN" or $toim == "KESKEN_TAI_TOIMITETTAVISSA" or $toim == "TOSI_KESKEN" or $whiletoim == "EXTRANET" or $whiletoim == "JTTOIMITA" or $whiletoim == "LASKUTUSKIELTO" or (($whiletoim == "VALMISTUSMYYNTI" or $whiletoim == "VALMISTUSMYYNTISUPER") and $row["tila"] != "V"))) {
+      if ($aputoim2 != "" and ($whiletoim == "" or $whiletoim == "SUPER" or $whiletoim == "SUPER_EITYOM" or $whiletoim == "SUPER_EILUONTITAPATYOM" or $whiletoim == "KESKEN" or $toim == "KESKEN_TAI_TOIMITETTAVISSA" or $toim == "LAVAKERAYS" or $toim == "TOSI_KESKEN" or $whiletoim == "EXTRANET" or $whiletoim == "JTTOIMITA" or $whiletoim == "LASKUTUSKIELTO" or (($whiletoim == "VALMISTUSMYYNTI" or $whiletoim == "VALMISTUSMYYNTISUPER") and $row["tila"] != "V"))) {
         echo "<input type='submit' class='{$_class}' name='$aputoim2' value='$lisa2' $button_disabled>";
       }
 
@@ -3060,6 +3267,65 @@ if (mysql_num_rows($result) != 0) {
   echo "</table>";
 
   if (strpos($_SERVER['SCRIPT_NAME'], "muokkaatilaus.php") !== FALSE) {
+    if ($toim == "LAVAKERAYS" and !empty($toimitustapa)) {
+      echo "<input type='checkbox' id='lavakerays_valitsekaikki'> ".t("Valitse kaikki");
+
+      echo "<br><br><form method='POST' id='keraa_kaikki_lavakerays_formi' name='keraa_kaikki_lavakerays_formi' action='muokkaatilaus.php' onSubmit='return tarkista_tulostus();'>";
+      echo "<input type='hidden' name='toim' value='$toim' />";
+      echo "<input type='hidden' name='toimitustapa' value='$toimitustapa' />";
+      echo "<input type='hidden' name='tee' value='KERAA_KAIKKI_LAVAKERAYS' />";
+      echo "<input type='hidden' id='lavakerays_keraykseen' name='lavakerays_keraykseen' value='' />";
+
+      $query = "SELECT *
+                FROM kirjoittimet
+                WHERE yhtio  = '$kukarow[yhtio]'
+                AND komento != 'EDI'
+                ORDER by kirjoitin";
+      $kirre = pupe_query($query);
+
+      echo "<table>";
+      echo "<tr>";
+      echo "<th>".t("Keräsylistan tulostin")."</th>";
+      echo "<td><select name='valittu_tulostin'>";
+      echo "<option value=''>".t("Valitse tulostin")."</option>";
+
+      while ($kirrow = mysql_fetch_array($kirre)) {
+        $sel = '';
+
+        //tässä vaiheessa käyttäjän oletustulostin ylikirjaa optimaalisen varastotulostimen
+        if (($kirrow['tunnus'] == $kirjoitin and ($kukarow['kirjoitin'] == 0 or $lasku_yhtio_originaali != $kukarow["yhtio"])) or ($kirrow['tunnus'] == $kukarow['kirjoitin'])) {
+          $sel = "SELECTED";
+        }
+
+        echo "<option value='$kirrow[tunnus]' $sel>$kirrow[kirjoitin]</option>";
+      }
+
+      echo "</select></td></tr>";
+
+      mysql_data_seek($kirre, 0);
+
+      echo "<tr>";
+      echo "<th>".t("Keräystarrojen tulostin")."</th>";
+      echo "<td><select name='valittu_lavakeraystarra_tulostin'>";
+      echo "<option value=''>".t("Valitse tulostin")."</option>";
+
+      while ($kirrow = mysql_fetch_array($kirre)) {
+        $sel = '';
+
+        //tässä vaiheessa käyttäjän oletustulostin ylikirjaa optimaalisen varastotulostimen
+        if (($kirrow['tunnus'] == $kirjoitin and ($kukarow['kirjoitin'] == 0 or $lasku_yhtio_originaali != $kukarow["yhtio"])) or ($kirrow['tunnus'] == $kukarow['kirjoitin'])) {
+          $sel = "SELECTED";
+        }
+
+        echo "<option value='$kirrow[tunnus]' $sel>$kirrow[kirjoitin]</option>";
+      }
+
+      echo "</select></td></tr></table><br>";
+
+      echo "<input type='submit' id='lavakerays_siirra_keraykseen_nappi' name='lavakerays_siirra_keraykseen_nappi' value='".t("Siirrä kaikki valitut tilaukset keräykseen")."'/>";
+      echo "</form><br>";
+    }
+
     if (is_array($sumrow)) {
       echo "<br><table>";
       echo "<tr><th>".t("Arvo yhteensä")." ($sumrow[kpl] ".t("kpl")."): </th><td align='right'>$sumrow[arvo] $yhtiorow[valkoodi]</td></tr>";

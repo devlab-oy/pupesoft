@@ -33452,7 +33452,7 @@ if (!function_exists('pupesoft_toimitusvahvistus')) {
       return;
     }
 
-    $laskurow = mysql_fetch_assoc($toimv_laskures);
+    $rakir_row = $laskurow = mysql_fetch_assoc($toimv_laskures);
 
     if (empty($laskurow['toimitusvahvistus'])) {
       return;
@@ -34731,6 +34731,7 @@ if (!function_exists("tilauksen_seurantalinkit")) {
       $schenker   = (stripos($virallinen_selite, "klgrp") !== false);
       $unifaun    = (stripos($rahtikirja, "unifaun") !== false and !empty($unifaun_url_key));
       $ups        = (stripos($rahtikirjanro, 'ups') !== false);
+      $kaukokiito = (strtoupper($virallinen_selite) == "KKSTD");
 
       // dpd unifaunin kautta
       if ($dpd and $unifaun) {
@@ -34805,6 +34806,20 @@ if (!function_exists("tilauksen_seurantalinkit")) {
           $seurantakoodit[] = array(
             "id" => $nro,
             "link" => "https://was.schenker.nu/ctts-a/com.dcs.servicebroker.http.HttpXSLTServlet?request.service=CTTSTYPEA&request.method=search&clientid=&language={$kieli}&country=FI&reference_type=*PKG&reference_number={$nro}"
+          );
+        }
+      }
+      elseif ($kaukokiito) {
+        $_i = 0;
+        foreach (explode("\n", $row['rahtikirjanro']) as $nro) {
+
+          $_i++;
+          // skipataan ensimmäinen (Pupen generoima numero)
+          if ($_i == 1) continue;
+
+          $seurantakoodit[] = array(
+            "id" => $nro,
+            "link" => "http://kaukoputki.kaukokiito.fi/kaukokiito/ordermonitor?findOrders=&searchId={$nro}"
           );
         }
       }

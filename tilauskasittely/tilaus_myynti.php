@@ -42,6 +42,9 @@ elseif (@include "logmaster-functions.php");
 else exit;
 
 if ($tila == "YHENKPUHELIN") {
+
+  $yhenkilo = utf8_decode($yhenkilo);
+
   $yhteysquery = "SELECT if(gsm != '', gsm, if(puh != '', puh, '')) AS yht_puh
                   FROM yhteyshenkilo
                   WHERE yhtio              = '$kukarow[yhtio]'
@@ -57,7 +60,7 @@ if ($tila == "YHENKPUHELIN") {
     echo json_encode($yrow['yht_puh']);
   }
   else {
-    echo "";
+    echo json_encode("");
   }
 
   exit;
@@ -10036,7 +10039,10 @@ if ($tee == '') {
 
             if (!$loytyy_maksutapahtumia) {
               echo "<td class='back' colspan='2'><input type='submit' value='" . t("Pyöristä") .
-                "' $state></form></td>";
+              "' onclick='return confirm(\"" .
+              t("Oletko varma, että haluat muuttaa koko tilauksen katteita?") .
+              "\")' $state>
+                </form></td>";
             }
             else {
               echo "</form>";

@@ -1078,7 +1078,7 @@ if ($tila == "" and !isset($jatka)) {
   echo "<input type='hidden' name='tee' value='OTSIK'>";
   echo "<input type='hidden' name='lopetus' value='$lopetus'>";
   echo "<input type='hidden' name='ruutulimit' value = '$ruutulimit'>";
-  echo "<input type='hidden' name='toim' value='$toim'>";
+  echo "<input type='hidden' id='toim' name='toim' value='$toim'>";
   echo "<input type='hidden' name='projektilla' value='$projektilla'>";
   echo "<input type='hidden' name='tilaustyyppi' value='$tilaustyyppi'>";
   echo "<input type='hidden' name='from' value='$from'>";
@@ -2223,7 +2223,7 @@ if ($tila == "" and !isset($jatka)) {
 
     $disabled = '';
 
-    if ($yhtiorow['pakollinen_varasto'] == 'K' and !empty($srow['tunnus'])) {
+    if ($yhtiorow['pakollinen_varasto'] == 'K' and !empty($srow['tunnus']) and $srow_from == "LASKU") {
       $query = "SELECT COUNT(*) AS tilausrivi_kpl
                 FROM tilausrivi
                 WHERE yhtio  = '{$kukarow['yhtio']}'
@@ -3606,8 +3606,6 @@ if ($tila == "" and !isset($jatka)) {
     echo "&nbsp;<select id='yhteyshenkilo_tilaus' name='yhteyshenkilo_tilaus'>";
     echo "<option value = ''>".t("Ei valintaa")."</option>";
 
-    $orig_yhteyshenkilo = "";
-
     while ($yhteysrow = mysql_fetch_assoc($yhteysresult)) {
 
       $sela = "";
@@ -3615,7 +3613,6 @@ if ($tila == "" and !isset($jatka)) {
       if ($yhteysrow["nimi"] == $srow["tilausyhteyshenkilo"] or ($kukarow["kesken"] == 0 and $yhteysrow["oletusyhteyshenkilo"] != "")) {
         $sela = "SELECTED";
         $srow["tilausyhteyshenkilo"] = "";
-        $orig_yhteyshenkilo = $yhteysrow["nimi"];
 
         if (!empty($yhteysrow["yht_puh"])) {
           $srow['toim_puh'] = $yhteysrow["yht_puh"];
@@ -3626,8 +3623,6 @@ if ($tila == "" and !isset($jatka)) {
     }
 
     echo "</select> ";
-
-    echo "<input type='hidden' name='orig_yhteyshenkilo' value='$orig_yhteyshenkilo'>";
 
     if (tarkista_oikeus("yllapito.php", "yhteyshenkilo", "X")) {
       echo " <a href='#' onclick=\"js_open_yllapito('yhteyshenkilo_tilaus','toim=yhteyshenkilo&laji=A&lukitse_avaimeen=$srow[liitostunnus]&tyhthenkilo=K');\"><img src='{$palvelin2}pics/lullacons/add.png'>".t("Uusi yhteyshenkilö")."</a>";
@@ -3940,6 +3935,7 @@ if (isset($jatka)) {
 
   if ($toimvko != '') {
 
+    $toimvuosilaskulla = date("Y", strtotime($apuro["toimaika"]));
     $toimvkolaskulla = date("W", strtotime($apuro["toimaika"]));
     $toimvkopvalaskulla = $apuro["toimvko"];
 
@@ -3951,6 +3947,9 @@ if (isset($jatka)) {
     // muuten menneisyyden päivämäärä siirtyy seuraavalle vuodelle automaattisesti
     // vaika siihen ei koskisi
     if ($toimvko < $nyviikko and ($toimvkolaskulla != $toimvko or $toimvkopvalaskulla != $toimvkopva)) {
+      $nyvuosi += 1;
+    }
+    elseif ($toimvuosilaskulla > $nyvuosi) {
       $nyvuosi += 1;
     }
 
@@ -3969,6 +3968,7 @@ if (isset($jatka)) {
 
   if ($keraysvko != '') {
 
+    $keraysvvuosilaskulla = date("Y", strtotime($apuro["kerayspvm"]));
     $keraysvkolaskulla = date("W", strtotime($apuro["kerayspvm"]));
     $keraysvkopvalaskulla = $apuro["keraysvko"];
 
@@ -3980,6 +3980,9 @@ if (isset($jatka)) {
     // muuten menneisyyden päivämäärä siirtyy seuraavalle vuodelle automaattisesti
     // vaika siihen ei koskisi
     if ($keraysvko < $nyviikko and ($keraysvkolaskulla != $keraysvko or $keraysvkopvalaskulla != $keraysvkopva)) {
+      $nyvuosi += 1;
+    }
+    elseif ($keraysvvuosilaskulla > $nyvuosi) {
       $nyvuosi += 1;
     }
 
@@ -4107,11 +4110,7 @@ if (isset($jatka)) {
     $laskutus_maa     = $maa;
   }
 
-  $_check = ($yhteyshenkilo_tilaus != '' and $yhteyshenkilo_tilaus == $tilausyhteyshenkilo);
-  $_check = ($_check or ($orig_yhteyshenkilo and $yhteyshenkilo_tilaus == ''));
-  $_check = ($_check or (!$orig_yhteyshenkilo and $yhteyshenkilo_tilaus != ''));
-
-  if ($_check) {
+  if ($yhteyshenkilo_tilaus != '' and $tilausyhteyshenkilo == '') {
     $tilausyhteyshenkilo = $yhteyshenkilo_tilaus;
   }
 

@@ -1096,9 +1096,12 @@ if ($tee == 'tulosta') {
       }
 
       $_desadv = (strpos($rakir_row['toimitusvahvistus'], 'desadv') !== false);
+      $_ra_kopio_check = (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") !== false);
+      $_ra_kopio_desadv = ($_ra_kopio_check and isset($tulosta_desadv) and $tulosta_desadv == 'JOO');
+      $_ra_kopio = (!$_ra_kopio_check or $_ra_kopio_desadv);
 
       // L‰hetet‰‰n toimitusvahvistus
-      if ($rakir_row['toimitusvahvistus'] != '' and (!$_onko_unifaun or $_onko_unifaun_xp or $_desadv)) {
+      if ($rakir_row['toimitusvahvistus'] != '' and (!$_onko_unifaun or $_onko_unifaun_xp or $_desadv) and $_ra_kopio) {
         pupesoft_toimitusvahvistus($otunnukset, $tunnukset, $rahtikirjanro);
       }
 

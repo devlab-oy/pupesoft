@@ -144,6 +144,9 @@ if ($tee != '') {
   $worksheet->writeString($excelrivi, $excelsarake, t("Tuoteryhmä"));
   $excelsarake++;
 
+  $worksheet->writeString($excelrivi, $excelsarake, t("Tuoteryhmän nimi"));
+  $excelsarake++;
+
   if ($raportointitaso == 'tuote') {
     $worksheet->writeString($excelrivi, $excelsarake, t("Tuotenumero"));
     $excelsarake++;
@@ -204,7 +207,8 @@ if ($tee != '') {
 
   echo "<table><tr>
       <th>".t("Osasto")."</th>
-      <th>".t("Tuoteryhmä")."</th>";
+      <th>".t("Tuoteryhmä")."</th>
+      <th>".t("Tuoteryhmän nimi")."</th>";
 
   if ($raportointitaso == 'tuote') {
     echo "<th>".t("Tuotenumero")."</th>
@@ -251,6 +255,29 @@ if ($tee != '') {
   $osmyynti     = 0;
   $osmyyntikpl  = 0;
 
+  $try_nimi = array();
+  $try_nimi_result = t_avainsana("TRY", $kukarow['kieli']);
+
+  if (mysql_num_rows($try_nimi_result) > 0) {
+    while ($try_nimi_row = mysql_fetch_assoc($try_nimi_result)) {
+      $try_nimi[$try_nimi_row['selite']] = $try_nimi_row['selitetark'];
+    }
+  }
+
+  if ($kukarow['kieli'] != $yhtiorow['kieli']) {
+
+    $try_nimi_result = t_avainsana("TRY", $yhtiorow['kieli']);
+
+    if (mysql_num_rows($try_nimi_result) > 0) {
+
+      while ($try_nimi_row = mysql_fetch_assoc($try_nimi_result)) {
+        if (!isset($try_nimi[$try_nimi_row['selite']])) {
+          $try_nimi[$try_nimi_row['selite']] = $try_nimi_row['selitetark'];
+        }
+      }
+    }
+  }
+
   while ($row = mysql_fetch_array($result)) {
     $excelsarake = 0;
 
@@ -275,6 +302,7 @@ if ($tee != '') {
 
       echo "<tr>
           <th colspan='$cspan'>".t("Osasto")." $edosasto ".t("yhteensä").":</th>
+          <th></th>
           <th style='text-align:right'>".sprintf("%.2f", $ospuutekpl)."</th>
           <th style='text-align:right'>".sprintf("%.2f", $ospuute)."</th>
           <th style='text-align:right'>".sprintf("%.2f", $osmyyntikpl)."</th>
@@ -284,6 +312,7 @@ if ($tee != '') {
 
       $worksheet->writeString($excelrivi, $excelsarake, t("Osasto")." $edosasto ".t("yhteensä").":");
       $excelsarake+=$cspan;
+      $excelsarake++;
       $worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.2f", $ospuutekpl));
       $excelsarake++;
       $worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.2f", $ospuute));
@@ -342,15 +371,23 @@ if ($tee != '') {
 
       echo "</td>";
 
+      echo "<td class='$vari' style='vertical-align:top'>{$try_nimi[$row['try']]}</td>";
+
       $worksheet->writeString($excelrivi, $excelsarake, $row["try"]);
+      $excelsarake++;
+
+      $worksheet->writeString($excelrivi, $excelsarake, $try_nimi[$row['try']]);
       $excelsarake++;
     }
     else {
       echo "<td class='$vari' style='vertical-align:top'>$row[try]</td>";
+      echo "<td class='$vari' style='vertical-align:top'>{$try_nimi[$row['try']]}</td>";
       echo "<td class='$vari' name='A_$lask' style='vertical-align:top'><a href='asiakasinfo.php?ytunnus=$row[ytunnus]&lopetus=$PHP_SELF////tee=$tee//try=$try//ppa=$ppa//kka=$kka//osasto=$osasto//vva=$vva//ppl=$ppl//kkl=$kkl//vvl=$vvl//asiakasid=$asiakasid//raportointitaso=$raportointitaso//rivit=$rivit///A_$lask'>$row[ytunnus]</a><br>$row[asiakasnro]</td>";
       echo "<td class='$vari' name='T_$lask' style='vertical-align:top'><a href='../tuote.php?tuoteno=".urlencode($row["tuoteno"])."&tee=Z&lopetus=$PHP_SELF////tee=$tee//try=$try//osasto=$osasto//ppa=$ppa//kka=$kka//vva=$vva//ppl=$ppl//kkl=$kkl//vvl=$vvl//asiakasid=$asiakasid//raportointitaso=$raportointitaso//rivit=$rivit///T_$lask'>$row[tuoteno]</a><br>".t_tuotteen_avainsanat($row, 'nimitys')."</td>";
 
       $worksheet->writeString($excelrivi, $excelsarake, $row["try"]);
+      $excelsarake++;
+      $worksheet->writeString($excelrivi, $excelsarake, $try_nimi[$row['try']]);
       $excelsarake++;
       $worksheet->writeString($excelrivi, $excelsarake, $row["ytunnus"]);
       $excelsarake++;
@@ -554,6 +591,7 @@ if ($tee != '') {
 
     echo "<tr>
         <th colspan='$cspan'>".t("Osasto")." $edosasto ".t("yhteensä").":</th>
+        <th></th>
         <th style='text-align:right'>".sprintf("%.2f", $ospuutekpl)."</th>
         <th style='text-align:right'>".sprintf("%.2f", $ospuute)."</th>
         <th style='text-align:right'>".sprintf("%.2f", $osmyyntikpl)."</th>
@@ -563,6 +601,7 @@ if ($tee != '') {
 
     $excelsarake = 0;
     $worksheet->writeString($excelrivi, $excelsarake, t("Osasto")." $edosasto ".t("yhteensä").":");
+    $excelsarake++;
     $excelsarake++;
     $excelsarake++;
     $worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.2f", $ospuutekpl));
@@ -582,6 +621,7 @@ if ($tee != '') {
 
     echo "<tr>
         <th colspan='$cspan'>".t("Kaikki yhteensä").":</th>
+        <th></th>
         <th style='text-align:right'>".sprintf("%.2f", $puutekplyht)."</th>
         <th style='text-align:right'>".sprintf("%.2f", $puuteyht)."</th>
         <th style='text-align:right'>".sprintf("%.2f", $myyntikplyht)."</th>
@@ -591,6 +631,7 @@ if ($tee != '') {
 
     $excelsarake = 0;
     $worksheet->writeString($excelrivi, $excelsarake, t("Kaikki yhteensä").":");
+    $excelsarake++;
     $excelsarake++;
     $excelsarake++;
     $worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.2f", $puutekplyht));

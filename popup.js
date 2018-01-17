@@ -1,3 +1,4 @@
+
 function bind_tooltip() {
   $('.tooltip').tooltip({
     items: 'a, img, td',

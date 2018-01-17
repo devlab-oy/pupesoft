@@ -272,6 +272,7 @@ $(document).ready(function() {
 
         // Nollataan käsinsyötetty yhteyshenkilö
         $('#manual_tilausyhteyshenkilo').val('');
+
       }
     );
 

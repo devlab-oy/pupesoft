@@ -221,6 +221,7 @@ $sarakkeet["SARAKE18F"] = t("tuoteleveys")."\t";
 $sarakkeet["SARAKE18G"] = t("tuotesyvyys")."\t";
 $sarakkeet["SARAKE18H"] = t("tuotemassa")."\t";
 $sarakkeet["SARAKE18I"] = t("hinnastoon")."\t";
+$sarakkeet["SARAKE18J"]  = t("EANkoodi")."\t";
 
 $sarakkeet["SARAKE19"]  = t("ostohinta")."\t";
 $sarakkeet["SARAKE20"]  = t("myyntihinta")."\t";
@@ -699,7 +700,8 @@ if ($tee == "RAPORTOI" and isset($RAPORTOI)) {
               tuote.lyhytkuvaus,
               tuote.hinnastoon,
               tuote.ostoehdotus,
-              tuote.vihapvm
+              tuote.vihapvm,
+              tuote.eankoodi
               FROM tuote
               LEFT JOIN korvaavat ON tuote.yhtio = korvaavat.yhtio and tuote.tuoteno = korvaavat.tuoteno
               $lisaa2
@@ -748,7 +750,8 @@ if ($tee == "RAPORTOI" and isset($RAPORTOI)) {
               concat_ws(' ',tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali,tuotepaikat.hyllytaso) varastopaikka,
               varastopaikat.tunnus,
               tuote.ostoehdotus,
-              tuote.vihapvm
+              tuote.vihapvm,
+              tuote.eankoodi
               FROM tuote
               $lisaa2
               $abcjoin
@@ -911,7 +914,8 @@ if ($tee == "RAPORTOI" and isset($RAPORTOI)) {
                     tuotteen_toimittajat.toim_tuoteno,
                     tuotteen_toimittajat.toim_nimitys,
                     tuotteen_toimittajat.ostohinta,
-                    tuotteen_toimittajat.tuotekerroin
+                    tuotteen_toimittajat.tuotekerroin,
+                    tuotteen_toimittajat.viivakoodi
                     FROM tuotteen_toimittajat
                     JOIN toimi ON toimi.yhtio = tuotteen_toimittajat.yhtio AND toimi.tunnus = tuotteen_toimittajat.liitostunnus
                     WHERE tuotteen_toimittajat.yhtio = '$row[yhtio]'
@@ -925,7 +929,8 @@ if ($tee == "RAPORTOI" and isset($RAPORTOI)) {
                     group_concat(distinct tuotteen_toimittajat.toim_tuoteno order by tuotteen_toimittajat.tunnus separator '/') toim_tuoteno,
                     group_concat(distinct tuotteen_toimittajat.toim_nimitys order by tuotteen_toimittajat.tunnus separator '/') toim_nimitys,
                     group_concat(distinct tuotteen_toimittajat.ostohinta   order by tuotteen_toimittajat.tunnus separator '/') ostohinta,
-                    group_concat(distinct tuotteen_toimittajat.tuotekerroin order by tuotteen_toimittajat.tunnus separator '/') tuotekerroin
+                    group_concat(distinct tuotteen_toimittajat.tuotekerroin order by tuotteen_toimittajat.tunnus separator '/') tuotekerroin,
+                    group_concat(distinct tuotteen_toimittajat.viivakoodi order by tuotteen_toimittajat.tunnus separator '/') viivakoodi
                     FROM tuotteen_toimittajat
                     JOIN toimi ON toimi.yhtio = tuotteen_toimittajat.yhtio AND toimi.tunnus = tuotteen_toimittajat.liitostunnus
                     WHERE tuotteen_toimittajat.yhtio = '$row[yhtio]'
@@ -940,7 +945,8 @@ if ($tee == "RAPORTOI" and isset($RAPORTOI)) {
                   tuotteen_toimittajat.toim_tuoteno,
                   tuotteen_toimittajat.toim_nimitys,
                   tuotteen_toimittajat.ostohinta,
-                  tuotteen_toimittajat.tuotekerroin
+                  tuotteen_toimittajat.tuotekerroin,
+                  tuotteen_toimittajat.viivakoodi
                   FROM tuotteen_toimittajat
                   JOIN toimi ON toimi.yhtio = tuotteen_toimittajat.yhtio AND toimi.tunnus = tuotteen_toimittajat.liitostunnus
                   WHERE tuotteen_toimittajat.yhtio      = '$row[yhtio]'
@@ -958,6 +964,10 @@ if ($tee == "RAPORTOI" and isset($RAPORTOI)) {
       $row['toim_nimitys']   = $toimirow['toim_nimitys'];
       $row['ostohinta']     = $toimirow['ostohinta'];
       $row['tuotekerroin']   = $toimirow['tuotekerroin'];
+      
+      if ($row['eankoodi'] == '') {
+        $row['eankoodi']  = $toimirow['viivakoodi'];
+      } 
 
       ///* Myydyt kappaleet *///
       $query = "SELECT
@@ -1509,6 +1519,13 @@ if ($tee == "RAPORTOI" and isset($RAPORTOI)) {
           $excelsarake++;
         }
 
+        if ($valitut["SARAKE18J"] != '') {
+          $rivi .= "\"$row[eankoodi]\"\t";
+
+          $worksheet->writeString($excelrivi, $excelsarake, $row["eankoodi"]);
+          $excelsarake++;
+        }
+        
         if ($valitut["SARAKE19"] != '') {
           $rivi .= str_replace(".", ",", $row['ostohinta'])."\t";
 

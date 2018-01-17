@@ -167,12 +167,12 @@ if (!isset($keratty)) {
 }
 
 // Haetaan asiakkaan kieli erilaisten systeemikommenttien kääntämistä varten
-$query = "SELECT kieli
+$query = "SELECT kieli, kerayserat
           FROM asiakas
           WHERE yhtio = '{$kukarow['yhtio']}'
           AND tunnus  = '{$laskurow['liitostunnus']}'";
-$kielirow = mysql_fetch_assoc(pupe_query($query));
-$kieli = $kielirow["kieli"];
+$askielirow = mysql_fetch_assoc(pupe_query($query));
+$kieli = $askielirow["kieli"];
 
 if ($rekisterinumero == '') {
   //Kun yhtion_parametri myyntitilausrivi_rekisterinumero == K, käyttöliittymästä on mahdollisuus syöttää tilausriville rekisterinumero.
@@ -444,6 +444,7 @@ $korkieltokommi      = array();
 $korlisakommi        = array();
 $myyntierahuom       = array();
 $ostoerahuom         = array();
+$korvattiin_korvaavalla = "";
 
 // Kun tullaan jt-/ennakko-selauksesta, niin kytketään erikoistoimitus_alarajasumma-ominaisuus pois
 if (isset($from_tee_jt_tilaus) and $from_tee_jt_tilaus === TRUE) {
@@ -1701,8 +1702,9 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
       }
 
       // Jos paikkaa ei löytynytkään tai jos sen saldo ei riittänyt, niin forgetaboutit.
-      if (!$paikkakelpasi) $paikka = "";
-
+      if (!$paikkakelpasi) {
+        $paikka = "";
+      }
     }
 
     // Myydään tietystä varastosta
@@ -1833,7 +1835,9 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
 
           // Jos homma on ok niin lisätään rivi
           if ($perheok == 0) {
-            foreach ($myynama as $indeksi) {
+            $_myytavat_paikat = count($myynama)-1;
+
+            foreach ($myynama as $_indeksiluku => $indeksi) {
               //Käsinsyötetyt hinnat ja alennukset eivät päde korvaaviin tuotteisiin, eikä tuoteperheiden lapsiin
               if (strtoupper($myy_tuoteno[$indeksi]) != strtoupper($alkupera_trow["tuoteno"])) {
                 $hinta  = "";
@@ -1857,6 +1861,32 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
 
               for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
                 $ale_kaikki_array['ale'.$alepostfix] = ${'ale'.$alepostfix};
+              }
+
+              $trow['myynti_era'] = $trow['myynti_era'] <= 0 ? 1 : $trow['myynti_era'];
+
+              // Sisääntuleva lavakeraystyyppinen tilaus
+              // Ollaanko vikalla kierroksella?
+              // Myytävissä oin vähemän kuin mitä tarvitaan ja halutaan myydä vain kokonaisia myyntieriä
+              if ($askielirow['kerayserat'] == 'H' and $myyntieran_pyoristys and $_indeksiluku == $_myytavat_paikat and $toimittamatta > $myy_kpl[$indeksi]) {
+                // Pyöristetään lähimpään myytävissä olevaan täyteen myyntierään
+                $_myyerkpl = 0;
+                $_myyerkpl_loop = TRUE;
+
+                while ($_myyerkpl_loop) {
+                  if ($_myyerkpl + $trow['myynti_era'] <= $myy_kpl[$indeksi]) {
+                    $_myyerkpl += $trow['myynti_era'];
+                  }
+                  else {
+                    $_myyerkpl_loop = FALSE;
+                  }
+                }
+
+                $myy_kpl[$indeksi] = $_myyerkpl;
+
+                if ($myy_kpl[$indeksi] == 0) {
+                  continue;
+                }
               }
 
               list($lis_hinta, $lis_netto, $lis_ale_kaikki, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $trow, $myy_kpl[$indeksi], $netto, $hinta, $ale_kaikki_array, '', '', ($myy_tyyppi[$indeksi] == 'LAPSITUOTE' ? 'X' : ''));
@@ -3512,6 +3542,7 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
       }
 
       $autoid = !empty($autoid) ? $autoid : 0;
+      $alunperin_puute = $var == 'P' ? '1' : '0';
 
       $query = "INSERT INTO tilausrivin_lisatiedot
                 SET yhtio      = '$kukarow[yhtio]',
@@ -3523,6 +3554,7 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
                 vanha_otunnus      = '$kukarow[kesken]',
                 ei_nayteta         = '{$puu_ein[$i]}',
                 ohita_kerays       = '{$puu_ohiker[$i]}',
+                alunperin_puute    = '{$alunperin_puute}',
                 rekisterinumero    = '{$rekisterinumero}',
                 autoid             = '{$autoid}',
                 luontiaika         = now(),

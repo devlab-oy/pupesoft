@@ -274,6 +274,7 @@ $sallitaanjt       = "";
 $editilaus_hinta   = "";
 $editilaus_alennus = "";
 $rivikommentti     = "";
+$verkkokauppa_alennus100 = false;
 
 // Mihin tilaan laitetaan verkkokauppatilauksen tuotteet, jos saldo on loppu Pupesta
 if (empty($verkkokauppa_oletus_loppuneet) or !in_array($verkkokauppa_oletus_loppuneet, array('H', 'J'))) {
@@ -2135,9 +2136,12 @@ while ($tietue = fgets($fd)) {
     break;
 
   case 'OSTOTILRIV.OTR_OSTOHINTA' :
+
+    $_hinnatedifailista = (isset($verkkokauppa_hinnatedifailista) and $verkkokauppa_hinnatedifailista == "JOO");
+
     // Kun tullaan magentosta ja meill‰ on rahtikulu, niin otetaan hinta talteeen
     // TAI kun tullaan magentosta ja me luotetaan verkkokaupan hintoihin.
-    if ($edi_tyyppi == "magento" and ((isset($verkkokauppa_hinnatedifailista) and $verkkokauppa_hinnatedifailista == "JOO") or strtolower($tuoteno) == strtolower($yhtiorow['rahti_tuotenumero'])) and $tieto != '') {
+    if ($edi_tyyppi == "magento" and ($_hinnatedifailista or strtolower($tuoteno) == strtolower($yhtiorow['rahti_tuotenumero'])) and $tieto != '') {
       // T‰m‰ hinta on aina veroton, joten lasketaan vero p‰‰lle jos myyntihinnat ovat verollisia
       $editilaus_hinta = (float) trim(str_replace( ",", ".", $tieto));
 
@@ -2160,8 +2164,15 @@ while ($tietue = fgets($fd)) {
 
       $result = hae_erikoiskaupan_parametrit($verkkokauppa);
       if (count($result) > 0  and !isset($verkkokauppa_hinnatedifailista)) {
-        $editilaus_hinta = 0;
+        $editilaus_hinta = 0.00;
       }
+    }
+
+    $verkkokauppa_nollahintaok = (isset($verkkokauppa_nollahintaok) and $verkkokauppa_nollahintaok == 'JOO');
+
+    // Jos erikseen sallitaan nollahintainen myynti, niin laitetaan riville alennus 100%
+    if ($verkkokauppa_nollahintaok and $_hinnatedifailista and $editilaus_hinta === 0.00) {
+      $verkkokauppa_alennus100 = true;
     }
 
     break;
@@ -2171,6 +2182,11 @@ while ($tietue = fgets($fd)) {
     if ($edi_tyyppi == "magento" and (isset($verkkokauppa_hinnatedifailista) and $verkkokauppa_hinnatedifailista == "JOO") and $tieto != '') {
       $editilaus_alennus = (float) trim($tieto);
     }
+
+    if ($verkkokauppa_alennus100) {
+      $editilaus_alennus = 100;
+    }
+
     break;
 
   case 'OSTOTILRIV.OTR_SALLITAANJT' :
@@ -2522,6 +2538,7 @@ while ($tietue = fgets($fd)) {
     $editilaus_hinta   = "";
     $editilaus_alennus = "";
     $rivikommentti     = "";
+    $verkkokauppa_alennus100 = false;
     break;
 
   case 'OMSG__END' :
@@ -2534,6 +2551,11 @@ while ($tietue = fgets($fd)) {
 
     if ($editilaus_hyvaksyttava != "") {
       $editilaus_otsikko_ok = "HYVAKSYTTAVAKSI";
+    }
+
+    // Asiakkaiden tilaukset menev‰t ensin omaan hyv‰ksynt‰jonoon
+    if ($arow['kerayserat'] == 'H') {
+      $editilaus_otsikko_ok = "HYVAKJONOON";
     }
 
     // jos meilla on otsikko voidaan laittaa sen valmiiksi
@@ -2670,7 +2692,7 @@ while ($tietue = fgets($fd)) {
                   alatila     = 'A'
                   WHERE yhtio = '$kukarow[yhtio]'
                   AND tunnus  = '$editilaus_lasku_tunnus'";
-        $terminaali_tilaus_res = pupe_query($query);
+        pupe_query($query);
         $edi_ulos .= "\n".t("Terminaalitoimitus vastaanotettu").": $editilaus_lasku_tunnus.\n\n";
       }
       elseif ($editilaus_tilaustyyppi == 3) {
@@ -2680,11 +2702,21 @@ while ($tietue = fgets($fd)) {
     elseif ($editilaus_otsikko_ok == "HYVAKSYTTAVAKSI") {
       $edi_ulos .= "\n".t("Merkittiin tilaus hyv‰ksytt‰v‰ksi").": {$laskurow['tunnus']}.\n\n";
     }
+    elseif ($editilaus_otsikko_ok == "HYVAKJONOON") {
+      $edi_ulos .= "\n".t("Merkittiin tilaus hyv‰ksytt‰v‰ksi").": {$laskurow['tunnus']}.\n\n";
+
+      $query = "UPDATE lasku SET
+                alatila     = 'FF'
+                WHERE yhtio = '$kukarow[yhtio]'
+                AND tunnus  = '$id'";
+      pupe_query($query);
+    }
     else {
       $edi_ulos .= "\n".t("Otsikko oli virheellinen tilausta/rivej‰ ei lis‰tty")."!\n\n";
     }
 
     // nollataan kaikki laskun muuttujat (kaikki n‰m‰ samat pit‰‰ nollata filen alussa)
+    // Paitsi ovt_tunnusta, koska se tulee vain tiedoston ihan alussa kerran (ICHG_SNDR)
     unset($arow);
     unset($arow_viite);
     unset($arow_ostaja);
@@ -2738,7 +2770,6 @@ while ($tietue = fgets($fd)) {
     $ot_verkkokauppa_asiakasnro   = "";
     $ot_verkkokauppa_kohde        = "";
     $ot_verkkokauppa_tilausviesti = "";
-    $ovt_tunnus                   = "";
     $ovt_tunnuswhere              = "";
     $suunnistus                   = "";
     $til_vienti                   = "";

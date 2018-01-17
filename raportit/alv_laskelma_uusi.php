@@ -518,15 +518,6 @@ if (isset($tee) and $tee == 'VSRALVKK_UUSI_erittele') {
           $vero += $verorow['veronmaara'];
         }
 
-        // Kassa-alennukset
-        list($kakerroinlisa, $ttres) = alvilmo_kassa_ale_erittely($alkupvm, $loppupvm, "", "", "fi304", $oletus_verokanta);
-
-        if (is_resource($ttres)) {
-          while ($trow = mysql_fetch_assoc($ttres)) {
-            $vero += $trow['verot'];
-          }
-        }
-
         echo "<tr><td colspan='5' align='right' class='spec'>".t("Vero tavaroiden maahantuonnista EU:n ulkop.").":</td>
             <td class='spec'></td>
             <td align = 'right' class='spec'>".sprintf('%.2f', $vero)."</td>

@@ -240,8 +240,10 @@ if (!function_exists('logmaster_outbounddelivery')) {
               tilausrivi.tunnus AS tilausrivin_tunnus,
               lasku.toimaika AS lasku_toimaika,
               asiakas.email,
+              asiakas.asiakasnro,
               tuote.eankoodi,
-              laskun_lisatiedot.noutopisteen_tunnus
+              laskun_lisatiedot.noutopisteen_tunnus,
+              tuote.tullinimike1
               FROM lasku
               LEFT JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus)
               JOIN tilausrivi ON (
@@ -276,7 +278,7 @@ if (!function_exists('logmaster_outbounddelivery')) {
 
     switch ($varastorow['ulkoinen_jarjestelma']) {
     case 'L':
-      $uj_nimi = "Helsingin Hyllyvarasto";
+      $uj_nimi = "Velox";
       break;
     case 'P':
       $uj_nimi = "PostNord";
@@ -349,6 +351,10 @@ if (!function_exists('logmaster_outbounddelivery')) {
     $orderedby->addChild('CustCountry',  xml_cleanstring($looprow['maa'], 10));
     $orderedby->addChild('Email',        xml_cleanstring($looprow['email']));
 
+    if ($uj_nimi == "Velox") {
+      $orderedby->addChild('Custnr',        xml_cleanstring($looprow['asiakasnro']));
+    }
+
     $receiver = $custpickinglist->addChild('Receiver');
     $receiver->addChild('RecCustAccount',  0);
     $receiver->addChild('RecCustName',     xml_cleanstring($rec_cust_name, 50));
@@ -396,11 +402,23 @@ if (!function_exists('logmaster_outbounddelivery')) {
       $line->addChild('BBDate',            0);
       $line->addChild('OrderedQuantity',   $looprow['kpl']);
       $line->addChild('DeliveredQuantity', $looprow['kpl']);
-      $line->addChild('Unit',              0);
-      $line->addChild('Price',             0);
-      $line->addChild('DiscountPercent',   0);
-      $line->addChild('CurrencyCode',      0);
-      $line->addChild('TaxCode',           0);
+
+      if ($uj_nimi == "PostNord") {
+        $line->addChild('Unit',              0);
+        $line->addChild('Price',             0);
+        $line->addChild('DiscountPercent',   0);
+        $line->addChild('CurrencyCode',      0);
+        $line->addChild('TaxCode',           0);
+      }
+
+      if ($uj_nimi == "Velox") {
+        $line->addChild('Unit',              xml_cleanstring($looprow['yksikko']));
+        $line->addChild('Price',             $looprow['hinta']);
+        $line->addChild('DiscountPercent',   $looprow['ale1']);
+        $line->addChild('CurrencyCode',      $looprow['valkoodi']);
+        $line->addChild('TaxCode',           xml_cleanstring($looprow['tullinimike1'], 14));
+      }
+
       $line->addChild('LineInfo',          xml_cleanstring($looprow['kommentti'], 92));
 
       $_line_i++;

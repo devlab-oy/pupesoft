@@ -49,6 +49,8 @@ $laskuttajan_vat = xml_string($xml->SellerPartyDetails->SellerOrganisationTaxCod
 $laskuttajan_identifier = xml_string($xml->SellerPartyDetails->SellerPartyIdentifier);
 $laskuttajan_valkoodi = xml_string($xml->EpiDetails->EpiPaymentInstructionDetails->EpiInstructedAmount->attributes()->AmountCurrencyIdentifier);
 $laskun_pankkiviite = xml_string($xml->EpiDetails->EpiPaymentInstructionDetails->EpiRemittanceInfoIdentifier);
+$laskun_iban = "";
+$laskun_bic = "";
 
 if (xml_string($xml->EpiDetails->EpiPartyDetails->EpiBeneficiaryPartyDetails->EpiAccountID->attributes()->IdentificationSchemeName) == "IBAN") {
   $laskun_iban = xml_string($xml->EpiDetails->EpiPartyDetails->EpiBeneficiaryPartyDetails->EpiAccountID);

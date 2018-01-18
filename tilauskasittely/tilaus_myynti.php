@@ -9513,7 +9513,8 @@ if ($tee == '') {
           $kaikkiyhteensa = 0;
         }
 
-        if ((($kaikkiyhteensa > $rahtivapaa_alarajasumma or $etayhtio_totaalisumma > $rahtivapaa_alarajasumma) and $rahtivapaa_alarajasumma != 0) or $laskurow["rahtivapaa"] != "") {
+        // Rahtimaksun alarajaa verrataan verottomaan summaan
+        if ((($kotiarvo > $rahtivapaa_alarajasumma or $etayhtio_totaalisumma > $rahtivapaa_alarajasumma) and $rahtivapaa_alarajasumma != 0) or $laskurow["rahtivapaa"] != "") {
           echo "<tr>$jarjlisa<td class='back' colspan='".($sarakkeet_alku-5)."'>&nbsp;</td><th colspan='5' align='right'>".t("Rahtikulu").":</th><td class='spec' align='right'>0.00</td>";
           if ($kukarow['extranet'] == '' and $naytetaanko_kate) {
             echo "<td class='spec' align='right'>&nbsp;</td>";

@@ -403,20 +403,19 @@ if (!function_exists('logmaster_outbounddelivery')) {
       $line->addChild('OrderedQuantity',   $looprow['kpl']);
       $line->addChild('DeliveredQuantity', $looprow['kpl']);
 
-      if ($uj_nimi == "PostNord") {
-        $line->addChild('Unit',              0);
-        $line->addChild('Price',             0);
-        $line->addChild('DiscountPercent',   0);
-        $line->addChild('CurrencyCode',      0);
-        $line->addChild('TaxCode',           0);
-      }
-
       if ($uj_nimi == "Velox") {
         $line->addChild('Unit',              xml_cleanstring($looprow['yksikko']));
         $line->addChild('Price',             $looprow['hinta']);
         $line->addChild('DiscountPercent',   $looprow['ale1']);
         $line->addChild('CurrencyCode',      $looprow['valkoodi']);
         $line->addChild('TaxCode',           xml_cleanstring($looprow['tullinimike1'], 14));
+      }
+      else {
+        $line->addChild('Unit',              0);
+        $line->addChild('Price',             0);
+        $line->addChild('DiscountPercent',   0);
+        $line->addChild('CurrencyCode',      0);
+        $line->addChild('TaxCode',           0);
       }
 
       $line->addChild('LineInfo',          xml_cleanstring($looprow['kommentti'], 92));

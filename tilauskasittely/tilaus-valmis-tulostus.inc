@@ -140,7 +140,31 @@ if ((int) $chk_row["ok"] == (int) $chk_row["kaikki"] and (int) $chk_row["ok"] !=
     pupe_query($query);
   }
 
-  if ($yhtiorow['saldotarkistus_tulostusjonossa'] != '') {
+  if ($laskurow['liitostunnus'] != 999999999) {
+    //haetaan asiakkaan tiedot
+    $query = "SELECT luokka,
+              puhelin,
+              if (asiakasnro!='', asiakasnro, ytunnus) asiakasnro,
+              asiakasnro as asiakasnro_aito,
+              kerayserat,
+              kieli
+              FROM asiakas
+              WHERE tunnus='$laskurow[liitostunnus]' and yhtio='$kukarow[yhtio]'";
+    $riresult = pupe_query($query);
+    $asrow = mysql_fetch_assoc($riresult);
+  }
+  else {
+    $asrow = array(
+      'luokka' => '',
+      'puhelin' => '',
+      'asiakasnro' => '',
+      'asiakasnro_aito' => '',
+      'kerayserat' => '',
+      'kieli' => '',
+    );
+  }
+
+  if ($yhtiorow['saldotarkistus_tulostusjonossa'] != '' and $asrow['kerayserat'] != 'H') {
 
     if ($yhtiorow['saldotarkistus_tulostusjonossa'] == 'P') {
       $var_wherelisa = "AND var = 'P'";
@@ -207,30 +231,6 @@ if ((int) $chk_row["ok"] == (int) $chk_row["kaikki"] and (int) $chk_row["ok"] !=
 
   //keräyslistan tulostusta varten
   require_once "tulosta_lahete_kerayslista.inc";
-
-  if ($laskurow['liitostunnus'] != 999999999) {
-    //haetaan asiakkaan tiedot
-    $query = "SELECT luokka,
-              puhelin,
-              if (asiakasnro!='', asiakasnro, ytunnus) asiakasnro,
-              asiakasnro as asiakasnro_aito,
-              kerayserat,
-              kieli
-              FROM asiakas
-              WHERE tunnus='$laskurow[liitostunnus]' and yhtio='$kukarow[yhtio]'";
-    $riresult = pupe_query($query);
-    $asrow = mysql_fetch_assoc($riresult);
-  }
-  else {
-    $asrow = array(
-      'luokka' => '',
-      'puhelin' => '',
-      'asiakasnro' => '',
-      'asiakasnro_aito' => '',
-      'kerayserat' => '',
-      'kieli' => '',
-    );
-  }
 
   if ($yhtiorow['kerayserat'] == 'P' or ($yhtiorow['kerayserat'] == 'A' and $asrow['kerayserat'] == 'A')) {
     $kerayseran_numero = tee_keraysera_painon_perusteella($laskurow, $tilausnumeroita);

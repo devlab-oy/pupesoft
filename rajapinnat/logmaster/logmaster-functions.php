@@ -408,7 +408,7 @@ if (!function_exists('logmaster_outbounddelivery')) {
         $line->addChild('Price',             $looprow['hinta']);
         $line->addChild('DiscountPercent',   $looprow['ale1']);
         $line->addChild('CurrencyCode',      $looprow['valkoodi']);
-        $line->addChild('TaxCode',           xml_cleanstring($looprow['tullinimike1'], 14));
+        $line->addChild('TaxCode',           $looprow['alv']);
       }
       else {
         $line->addChild('Unit',              0);

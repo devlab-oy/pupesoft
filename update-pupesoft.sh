@@ -382,7 +382,7 @@ if [[ ${bundle} = true ]]; then
 
   # Päivitetään bundler oikeaan versioon
   if [[ -n "${bundled_with}" && "${bundler_version}" != "${bundled_with}" ]]; then
-    gem install bundler -v ${bundled_with}
+    gem install bundler --force -v ${bundled_with}
     gem cleanup bundler
     rbenv rehash
   fi

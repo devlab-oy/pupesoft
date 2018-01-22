@@ -52,17 +52,12 @@ if (strpos($_SERVER['SCRIPT_NAME'], "muokkaatilaus.php") !== FALSE) {
   }
 
   if ($toim == "LAVAKERAYS") {
-     echo "<script src='inc/checkboxrange.js'></script>";
-   }
+    echo "<script src='inc/checkboxrange.js'></script>";
+  }
 
   ?>
 
-
-  <script>
-    $(document).ready(function(){
-      $(".shift").shiftcheckbox();
-    });
-
+ <script type='text/javascript' language='javascript'>
     $(function() {
       $.ajaxSetup({
         url: '{$palvelin2}/muokkaatilaus.php?toim=EXTRANET&indexvas=1&ajax=OK',
@@ -114,6 +109,7 @@ if (strpos($_SERVER['SCRIPT_NAME'], "muokkaatilaus.php") !== FALSE) {
       });
     });
   </script>
+
   <?php
 }
 

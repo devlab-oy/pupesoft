@@ -84,7 +84,7 @@ if ($extra_asiakastiedot) {
   $header = "code;name;customer_group;custnro;sellerid\n";
 }
 if ($crm_asiakastiedot) {
-  $header = "y-tunnus;nimi;katuosoite;postinumero;postitoimipaikka;maa;sähköpostiosoite;puhelin;asiakasnumero;asiakasryhmä ja ryhmän selitys;maksuehto;toimitusehto;myyjän nimi tai myyjän numero;toimitusosoittee postitoimipaikka\n";
+  $header = "y-tunnus;nimi;katuosoite;postinumero;postitoimipaikka;maa;sähköpostiosoite;puhelin;asiakasnumero;asiakasryhmä ja ryhmän selitys;maksuehto;toimitusehto;myyjän nimi tai myyjän numero;toimitusosoitteen postitoimipaikka\n";
 }
 else {
   $header = "code;name;customer_group\n";

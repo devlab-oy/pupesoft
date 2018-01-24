@@ -60,7 +60,7 @@ if (strpos($_SERVER['SCRIPT_NAME'], "muokkaatilaus.php") !== FALSE) {
  <script type='text/javascript' language='javascript'>
     $(function() {
       $.ajaxSetup({
-        url: '{$palvelin2}/muokkaatilaus.php?toim=EXTRANET&indexvas=1&ajax=OK',
+        url: '<?php echo $palvelin2 ?>muokkaatilaus.php?toim=EXTRANET&indexvas=1&ajax=OK',
         type: 'POST',
         cache: false
       });
@@ -77,7 +77,7 @@ if (strpos($_SERVER['SCRIPT_NAME'], "muokkaatilaus.php") !== FALSE) {
           success: function(retval) {
             if (retval) {
               alert(retval);
-              window.location.replace('{$palvelin2}/muokkaatilaus.php?toim=EXTRANET&indexvas=1');
+              window.location.replace('<?php echo $palvelin2 ?>muokkaatilaus.php?toim=EXTRANET&indexvas=1');
             }
             else {
               $('#myyntiformi_'+otunnus).submit();

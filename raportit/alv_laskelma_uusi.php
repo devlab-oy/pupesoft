@@ -291,7 +291,7 @@ if (isset($tee) and $tee == 'VSRALVKK_UUSI_erittele') {
               tili.nimi,
               group_concat(lasku.tunnus) ltunnus,
               sum(round(tiliointi.summa * (1 + tiliointi.vero / 100), 2)) $kerroin bruttosumma,
-              sum(round(tiliointi.summa * if(('$ryhma' = 'fi305' or '$ryhma' = 'fi306' or '$ryhma' = 'fi318'), ($oletus_verokanta / 100), if('$ryhma' = 'fi304', (substr(tili.alv_taso,7) / 100), (tiliointi.vero / 100))), 2)) $kerroin verot,
+              sum(round(tiliointi.summa * if(('$ryhma' = 'fi305' or '$ryhma' = 'fi306' or '$ryhma' = 'fi318'), ($oletus_verokanta / 100), if('$ryhma' = 'fi304', (substring(tili.alv_taso,7) / 100), (tiliointi.vero / 100))), 2)) $kerroin verot,
               sum(round(tiliointi.summa / if(lasku.vienti_kurssi = 0, 1, lasku.vienti_kurssi) * (1 + vero / 100), 2)) $kerroin bruttosumma_valuutassa,
               sum(round(tiliointi.summa / if(lasku.vienti_kurssi = 0, 1, lasku.vienti_kurssi) * vero / 100, 2)) $kerroin verot_valuutassa,
               count(*) kpl
@@ -504,7 +504,7 @@ if (isset($tee) and $tee == 'VSRALVKK_UUSI_erittele') {
       $vero = 0.0;
 
       if ($tilirow['tilit'] != '') {
-        $query = "SELECT sum(round(tiliointi.summa * substr(tili.alv_taso,7) / 100, 2)) veronmaara
+        $query = "SELECT sum(round(tiliointi.summa * substring(tili.alv_taso,7) / 100, 2)) veronmaara
                   FROM tiliointi
                   join tili on tili.yhtio = tiliointi.yhtio and tili.tilino = tiliointi.tilino
                   WHERE tiliointi.yhtio  = '$kukarow[yhtio]'
@@ -834,7 +834,7 @@ function laskeveroja($taso, $tulos) {
       if ($tilirow["tilit310"] != "") $tilinolisa .= " tiliointi.tilino in ($tilirow[tilit310])";
 
       if ($tilirow['tilit310'] != '') {
-        $query = "SELECT tili.alv_taso, sum(round(tiliointi.summa * substr(tili.alv_taso,7) / 100, 2)) veronmaara,
+        $query = "SELECT tili.alv_taso, sum(round(tiliointi.summa * substring(tili.alv_taso,7) / 100, 2)) veronmaara,
                   sum(tiliointi.summa) summa,
                    count(*) kpl
                   FROM tiliointi

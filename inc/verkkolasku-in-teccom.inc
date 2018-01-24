@@ -11,6 +11,8 @@ $laskun_tyyppi       = "380";
 $laskun_numero       = $xml->InvoiceHeader->InvoiceId; // Tämä on lähettäjän laskunnumero
 $laskun_ebid       = "TECCOM-INVOICE";
 $laskun_tilausviite    = "";
+$laskun_iban = "";
+$laskun_bic = "";
 
 if (isset($xml->InvoiceHeader->InvoiceIssueDate->Date)) {
   $laskun_tapvm   = $xml->InvoiceHeader->InvoiceIssueDate->Date;

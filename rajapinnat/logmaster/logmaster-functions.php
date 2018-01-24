@@ -353,6 +353,8 @@ if (!function_exists('logmaster_outbounddelivery')) {
 
     if ($uj_nimi == "Velox") {
       $orderedby->addChild('Custnr',        xml_cleanstring($looprow['asiakasnro']));
+      $orderedby->addChild('PaymentTerm',   xml_cleanstring($looprow['maksuehto']));
+      $orderedby->addChild('Seller',        xml_cleanstring($looprow['myyja']));
     }
 
     $receiver = $custpickinglist->addChild('Receiver');

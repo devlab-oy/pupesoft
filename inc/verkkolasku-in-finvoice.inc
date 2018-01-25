@@ -32,7 +32,7 @@ if (strpos($file, "maventa") !== false) {
 }
 
 // parseroidaan xml
-$yhtio = xml_string($xml->BuyerOrganisationUnitNumber);
+$yhtio = xml_string($xml->InvoiceRecipientOrganisationUnitNumber);
 $verkkotunnus_vas = xml_string($xml->BuyerPartyDetails->BuyerOrganisationTaxCode);
 $verkkotunnus_vas_inv = xml_string($xml->InvoiceRecipientPartyDetails->InvoiceRecipientOrganisationTaxCode);
 $laskun_tyyppi = xml_string($xml->InvoiceDetails->InvoiceTypeCode);
@@ -97,9 +97,12 @@ if (strpos($file, "maventa") !== false and $laskuttajan_identifier != "") {
 }
 
 if ($yhtio == "") {
-  $yhtio = xml_string($xml->BuyerPartyDetails->BuyerPartyIdentifier);
+  $yhtio = xml_string($xml->BuyerOrganisationUnitNumber);
 }
 
+if ($yhtio == "") {
+  $yhtio = xml_string($xml->BuyerPartyDetails->BuyerPartyIdentifier);
+}
 if ($yhtio == "") {
   $yhtio = xml_string($xml->BuyerPartyDetails->BuyerOrganisationTaxCode);
 }

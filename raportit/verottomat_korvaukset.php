@@ -253,6 +253,10 @@ if ($tee == "NAYTA") {
 
     $filenimi = "VSPSERIE-$kukarow[yhtio]-".date("dmy-His").".txt";
     file_put_contents("/tmp/".$filenimi, $file);
+    
+    if (PUPE_UNICODE) {
+         exec("recode -f UTF8..ISO-8859-15 '/tmp/{$filenimi}'");
+    }
 
     echo "<br><form method='post' class='multisubmit'>
           <input type='hidden' name='tee' value='lataa_tiedosto'>

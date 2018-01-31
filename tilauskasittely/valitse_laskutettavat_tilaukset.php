@@ -1024,9 +1024,6 @@ if ($tee == "VALITSE") {
 
               // Laitetaan yksi ylim‰‰r‰inen kuukausi niin saadaan tulostukseen oikea kk n‰kyviin
               var tanaanoikeakk = $tanaankk+1;
-              if (tanaanoikeakk <10) {
-                tanaanoikeakk = '0'+tanaanoikeakk;
-              }
               var paivamaara = tanaanpp+'.'+tanaanoikeakk+'.'+tanaanvv;
 
             }

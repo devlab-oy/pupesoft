@@ -578,7 +578,7 @@ if (!function_exists("verkkolasku_in")) {
       }
 
       // tsekataan halutaanko laskun iban/bic käyttöön
-      if ($yhtiorow['ostolaskujen_oletusiban'] == 'T') {
+      if (in_array($yhtiorow['ostolaskujen_oletusiban'], array('1','2'))) {
 
         $laskun_iban  = str_replace(" ", "", $laskun_iban);
         $laskun_bic  = str_replace(" ", "", $laskun_bic);
@@ -586,6 +586,15 @@ if (!function_exists("verkkolasku_in")) {
         if (!empty($laskun_iban) and !empty($laskun_bic)) {
           $trow['ultilno'] = $laskun_iban;
           $trow['swift'] = $laskun_bic;
+
+          // halutaanko päivittää nämä myös toimittajan taakse
+          if ($yhtiorow['ostolaskujen_oletusiban'] == '2') {
+            $query = "  UPDATE toimi SET
+                        ultilno = '{$trow['ultilno']}',
+                        swift = '{$trow['swift']}'
+                        WHERE tunnus = {$trow['tunnus']}";
+            $result = pupe_query($query);
+          }
         }
       }
 

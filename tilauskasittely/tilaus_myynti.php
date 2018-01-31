@@ -10038,11 +10038,17 @@ if ($tee == '') {
             }
 
             if (!$loytyy_maksutapahtumia) {
-              echo "<td class='back' colspan='2'><input type='submit' value='" . t("Pyöristä") .
-              "' onclick='return confirm(\"" .
-              t("Oletko varma, että haluat muuttaa koko tilauksen katteita?") .
-              "\")' $state>
-                </form></td>";
+              if ($toim == 'TARJOUS') {
+                echo "<td class='back' colspan='2'><input type='submit' value='" . t("Pyöristä") .
+                "' onclick='return confirm(\"" .
+                t("Oletko varma, että haluat muuttaa koko tilauksen katteita?") .
+                "\")' $state>
+                  </form></td>";
+              }
+              else {
+                echo "<td class='back' colspan='2'><input type='submit' value='" . t("Pyöristä") .
+                  "' $state></form></td>";
+              }
             }
             else {
               echo "</form>";

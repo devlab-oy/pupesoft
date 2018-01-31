@@ -10041,7 +10041,7 @@ if ($tee == '') {
               if ($toim == 'TARJOUS') {
                 echo "<td class='back' colspan='2'><input type='submit' value='" . t("Pyöristä") .
                 "' onclick='return confirm(\"" .
-                t("Oletko varma, että haluat muuttaa koko tilauksen katteita?") .
+                t("Oletko varma, että haluat muuttaa koko tarjouksen katteita?") .
                 "\")' $state>
                   </form></td>";
               }

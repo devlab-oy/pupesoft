@@ -238,10 +238,12 @@ if (!function_exists('logmaster_outbounddelivery')) {
               lasku.varasto AS otsikon_varasto,
               tilausrivi.kpl + tilausrivi.varattu AS kpl,
               tilausrivi.tunnus AS tilausrivin_tunnus,
+              tilausrivi.keratty,
               lasku.toimaika AS lasku_toimaika,
               asiakas.email,
               asiakas.asiakasnro,
               tuote.eankoodi,
+              tuote.ei_saldoa,
               laskun_lisatiedot.noutopisteen_tunnus,
               tuote.tullinimike1
               FROM lasku
@@ -255,8 +257,7 @@ if (!function_exists('logmaster_outbounddelivery')) {
               )
               JOIN tuote ON (
                 tuote.yhtio         = tilausrivi.yhtio AND
-                tuote.tuoteno       = tilausrivi.tuoteno AND
-                tuote.ei_saldoa     = ''
+                tuote.tuoteno       = tilausrivi.tuoteno
               )
               LEFT JOIN laskun_lisatiedot ON (
                 laskun_lisatiedot.yhtio         = lasku.yhtio AND
@@ -391,6 +392,8 @@ if (!function_exists('logmaster_outbounddelivery')) {
       // Laitetaan kappalemäärät kuntoon
       $looprow['kpl'] = $looprow['var'] == 'J' ? 0 : $looprow['kpl'];
 
+      if ($uj_nimi == 'PostNord' and $looprow['ei_saldoa'] == 'o') continue;
+
       $line = $lines->addChild('Line');
       $line->addAttribute('No', $_line_i);
       $line->addChild('TransId',           xml_cleanstring($looprow['tilausrivin_tunnus'], 20));
@@ -411,6 +414,7 @@ if (!function_exists('logmaster_outbounddelivery')) {
         $line->addChild('DiscountPercent',   $looprow['ale1']);
         $line->addChild('CurrencyCode',      $looprow['valkoodi']);
         $line->addChild('TaxCode',           $looprow['alv']);
+        $line->addChild('Stockable',         $looprow['keratty']);
       }
       else {
         $line->addChild('Unit',              0);

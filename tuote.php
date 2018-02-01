@@ -523,9 +523,8 @@ if (isset($ajax)) {
               $ehto
               ORDER BY tapahtuma.laadittu desc, tapahtuma.tunnus desc
               $maara";
-#$satu = query_dump($query);
     $qresult = pupe_query($query);
-#pupesoft_log("tapahtuma_haku", $satu);
+
     $yhteensa_maara = 0.0;
     $yhteensa_arvo  = 0.0;
 

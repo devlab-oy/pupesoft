@@ -432,7 +432,7 @@ if (isset($ajax)) {
       $tkrow = mysql_fetch_assoc($tkresult);
 
       $maara = "";
-      $ehto  = " and tapahtuma.laadittu >= '$tkrow[tilikausi_alku]' and tapahtuma.laadittu <= '$tkrow[tilikausi_loppu]' ";
+      $ehto  = " and tapahtuma.laadittu >= '$tkrow[tilikausi_alku] 00:00:00' and tapahtuma.laadittu <= '$tkrow[tilikausi_loppu] 23:59:59' ";
     }
     else {
       $maara = "LIMIT 20";

@@ -413,6 +413,7 @@ if (!function_exists('logmaster_outbounddelivery')) {
         $line->addChild('DiscountPercent',   $looprow['ale1']);
         $line->addChild('CurrencyCode',      $looprow['valkoodi']);
         $line->addChild('TaxCode',           $looprow['alv']);
+        $line->addChild('Stockable',         $looprow['keratty']);
       }
       else {
         $line->addChild('Unit',              0);

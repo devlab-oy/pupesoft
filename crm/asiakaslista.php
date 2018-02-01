@@ -513,8 +513,9 @@ if ($tee == 'laheta' or $tee == 'lahetalista') {
   $content .= "Content-Transfer-Encoding: base64\n" ;
   $content .= "Content-Disposition: inline; filename=\"".basename($tiednimi)."\"\n\n";
 
-  $handle  = fopen($liite, "r");
-  $sisalto = fread($handle, filesize($liite));
+  $handle  = fopen('/tmp/'.$liite, "r");
+
+  $sisalto = fread($handle, filesize('/tmp/'.$liite));
   fclose($handle);
 
   $content .= chunk_split(base64_encode($sisalto));

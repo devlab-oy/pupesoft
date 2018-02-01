@@ -238,6 +238,7 @@ if (!function_exists('logmaster_outbounddelivery')) {
               lasku.varasto AS otsikon_varasto,
               tilausrivi.kpl + tilausrivi.varattu AS kpl,
               tilausrivi.tunnus AS tilausrivin_tunnus,
+              tilausrivi.keratty,
               lasku.toimaika AS lasku_toimaika,
               asiakas.email,
               asiakas.asiakasnro,

@@ -432,7 +432,7 @@ if (isset($ajax)) {
       $tkrow = mysql_fetch_assoc($tkresult);
 
       $maara = "";
-      $ehto  = " and tapahtuma.laadittu >= '$tkrow[tilikausi_alku]' and tapahtuma.laadittu <= '$tkrow[tilikausi_loppu]' ";
+      $ehto  = " and tapahtuma.laadittu >= '$tkrow[tilikausi_alku] 00:00:00' and tapahtuma.laadittu <= '$tkrow[tilikausi_loppu] 23:59:59' ";
     }
     else {
       $maara = "LIMIT 20";
@@ -523,8 +523,9 @@ if (isset($ajax)) {
               $ehto
               ORDER BY tapahtuma.laadittu desc, tapahtuma.tunnus desc
               $maara";
+#$satu = query_dump($query);
     $qresult = pupe_query($query);
-
+#pupesoft_log("tapahtuma_haku", $satu);
     $yhteensa_maara = 0.0;
     $yhteensa_arvo  = 0.0;
 

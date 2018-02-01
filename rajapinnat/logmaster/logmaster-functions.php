@@ -242,6 +242,7 @@ if (!function_exists('logmaster_outbounddelivery')) {
               asiakas.email,
               asiakas.asiakasnro,
               tuote.eankoodi,
+              tuote.ei_saldoa,
               laskun_lisatiedot.noutopisteen_tunnus,
               tuote.tullinimike1
               FROM lasku
@@ -255,8 +256,7 @@ if (!function_exists('logmaster_outbounddelivery')) {
               )
               JOIN tuote ON (
                 tuote.yhtio         = tilausrivi.yhtio AND
-                tuote.tuoteno       = tilausrivi.tuoteno AND
-                tuote.ei_saldoa     = ''
+                tuote.tuoteno       = tilausrivi.tuoteno
               )
               LEFT JOIN laskun_lisatiedot ON (
                 laskun_lisatiedot.yhtio         = lasku.yhtio AND
@@ -390,6 +390,8 @@ if (!function_exists('logmaster_outbounddelivery')) {
     while ($looprow = mysql_fetch_assoc($loopres)) {
       // Laitetaan kappalemäärät kuntoon
       $looprow['kpl'] = $looprow['var'] == 'J' ? 0 : $looprow['kpl'];
+
+      if ($uj_nimi == 'PostNord' and $looprow['ei_saldoa'] == 'o') continue;
 
       $line = $lines->addChild('Line');
       $line->addAttribute('No', $_line_i);

@@ -15,6 +15,18 @@ if (isset($tee) and $tee == "lataa_tiedosto") {
   exit;
 }
 
+// Liitetiedostot popup
+if (isset($liite_popup_toiminto) and $liite_popup_toiminto == "AK") {
+  liite_popup("AK", $tuotetunnus, $width, $height, $litety_id);
+}
+else {
+  liite_popup("JS");
+}
+
+if (function_exists("js_popup")) {
+  echo js_popup();
+}
+
 echo " <SCRIPT TYPE=\"text/javascript\" LANGUAGE=\"JavaScript\">
   <!--
 
@@ -211,11 +223,16 @@ echo "<tr>";
 echo "<td><input type='text' name='tuoteno' size='15' value='{$tuoteno}'></td>";
 echo "</tr>";
 echo "</table>";
-echo "</td>";
-echo "</tr>";
 
+################ Haku liitetiedoston nimellä
+echo "<table width='100%'>";
 echo "<tr>";
-echo "<td valign='top' class='back'>";
+echo "<th colspan='3'>", t("Liitetiedostohaku"), ":</th>";
+echo "</tr>";
+echo "<tr>";
+echo "<td><input type='text' name='liitetiedosto' size='15' value='{$liitetiedosto}'></td>";
+echo "</tr>";
+echo "</table>";
 
 //############## KÄYTTÖTARKOITUS (onko thumbnail vai tuotekuva)
 echo "<table width='100%'>";
@@ -230,41 +247,18 @@ if (isset($kayt) and $kayt != '') {
   $mul_kay = explode(",", $kayt);
 }
 
-$mul_check = '';
-if (count($mul_kay) > 0) {
-  if (in_array('th', $mul_kay)) {
-    $mul_check = 'CHECKED';
+$res = t_avainsana("LITETY");
+
+while ($rows = mysql_fetch_assoc($res)) {
+
+  $mul_check = '';
+  if (count($mul_kay) > 0) {
+    if (in_array($rows['selite'], $mul_kay)) {
+      $mul_check = 'CHECKED';
+    }
   }
+  echo "<tr><td><input type='checkbox' name='mul_kay[]' value='{$rows['selite']}' {$mul_check}></td><td nowrap>{$rows['selitetark']}</td></tr>";
 }
-
-echo "<tr><td><input type='checkbox' name='mul_kay[]' value='th' {$mul_check}></td><td nowrap>", t("Thumbnail"), "</td></tr>";
-
-$mul_check = '';
-if (count($mul_kay) > 0) {
-  if (in_array('tk', $mul_kay)) {
-    $mul_check = 'CHECKED';
-  }
-}
-
-echo "<tr><td><input type='checkbox' name='mul_kay[]' value='tk' {$mul_check}></td><td nowrap>", t("Tuotekuva"), "</td></tr>";
-
-$mul_check = '';
-if (count($mul_kay) > 0) {
-  if (in_array('hr', $mul_kay)) {
-    $mul_check = 'CHECKED';
-  }
-}
-
-echo "<tr><td><input type='checkbox' name='mul_kay[]' value='hr' {$mul_check}></td><td nowrap>", t("Painokuva"), "</td></tr>";
-
-$mul_check = '';
-if (count($mul_kay) > 0) {
-  if (in_array('mu', $mul_kay)) {
-    $mul_check = 'CHECKED';
-  }
-}
-
-echo "<tr><td><input type='checkbox' name='mul_kay[]' value='mu' {$mul_check}></td><td nowrap>", t("Muu"), "</td></tr>";
 
 echo "</table>";
 
@@ -577,10 +571,9 @@ if ($tee == '' and count($mul_del) > 0) {
   echo t('Poistettiin kuvat tuotteista: '), "<br />";
 
   foreach ($mul_del as $key => $val) {
-    list($tunnus, $ltunnus, $ltiedtunnus, $kayttotarkoitus, $filetype) = explode('_', $val);
+    list($tunnus, $ltiedtunnus, $kayttotarkoitus, $filetype) = explode('_', $val);
 
     $tunnus = mysql_real_escape_string($tunnus);
-    $ltunnus = mysql_real_escape_string($ltunnus);
     $ltiedtunnus = mysql_real_escape_string($ltiedtunnus);
     $kayttotarkoitus = mysql_real_escape_string($kayttotarkoitus);
     $filetype = mysql_real_escape_string($filetype);
@@ -591,7 +584,7 @@ if ($tee == '' and count($mul_del) > 0) {
               FROM liitetiedostot
               WHERE yhtio          = '$kukarow[yhtio]'
               AND tunnus           = '$ltiedtunnus'
-              AND liitostunnus     = '$ltunnus'
+              AND liitostunnus     = '$tunnus'
               AND kayttotarkoitus  = '$kayttotarkoitus'
               AND liitos           = 'tuote'
               AND filename        != ''
@@ -639,6 +632,17 @@ if ($tee == 'LISTAA') {
   elseif (count($mul_tmr) > 0) {
     $sel_tuotemerkki = "('".str_replace(',', '\',\'', implode(",", $mul_tmr))."')";
     $lisa .= " and tuote.tuotemerkki in $sel_tuotemerkki ";
+  }
+
+  if ($liitetiedosto != '' and $lisa != '') {
+    $liitetiedosto = mysql_real_escape_string(trim($liitetiedosto));
+    $lisa .= " and liitetiedostot.filename like '%{$liitetiedosto}%' ";
+  }
+  elseif ($liitetiedosto != '') {
+    echo "<font class='error'>";
+    echo t("Liitetiedostohaku yksinään on liian hidas. Lisää rajauksia joko osastoon, try tai / ja tuotemerkkiin.");
+    echo "</font>";
+    die;
   }
 
   if ($kayt != '') {
@@ -714,6 +718,15 @@ if ($tee == 'LISTAA') {
     $lisa .= " and tuote.tuoteno like '$tuoteno%' ";
   }
 
+  if ($liitetiedosto != '' and $lisa != '') {
+    $liitetiedosto = mysql_real_escape_string(trim($liitetiedosto));
+    $lisa .= " and liitetiedostot.filename like '%{$liitetiedosto}%' ";
+  }
+  elseif ($liitetiedosto != '') {
+    echo "<br>Ei kyl ny jätkä onnistu, kokeileppas uusiks<br>";
+    die;
+  }
+
   $orderlisa = "tuote.osasto, tuote.try, tuote.tuoteno";
 
   // haetaan halutut tuotteet
@@ -726,7 +739,6 @@ if ($tee == 'LISTAA') {
              tuote.tunnus,
              tuote.status,
              liitetiedostot.tunnus ltiedtunnus,
-             liitetiedostot.liitostunnus ltunnus,
              liitetiedostot.filename,
              liitetiedostot.filetype,
              liitetiedostot.kayttotarkoitus,
@@ -734,7 +746,8 @@ if ($tee == 'LISTAA') {
              liitetiedostot.image_height korkeus,
              liitetiedostot.image_width leveys,
              liitetiedostot.selite,
-             liitetiedostot.liitos
+             liitetiedostot.liitos,
+             if(liitetiedostot.muutospvm = '0000-00-00 00:00:00', liitetiedostot.luontiaika, liitetiedostot.muutospvm) muutospvm
              FROM tuote
              INNER JOIN liitetiedostot ON (liitetiedostot.yhtio = tuote.yhtio
               AND liitetiedostot.liitos        = 'tuote'
@@ -803,7 +816,6 @@ if ($tee == 'LISTAA') {
     if (count($mul_sta) > 0 or $status != '') {
       echo "<th>", t('Status'), "</th>";
     }
-    echo "<th>", t('Liitostunnus'), "</th>";
     echo "<th>", t('Tiedostonnimi'), "</th>";
     if (count($mul_siz) > 0) {
       if (in_array('korkeus', $mul_siz)) {
@@ -814,6 +826,7 @@ if ($tee == 'LISTAA') {
       }
     }
     echo "<th>", t('Käyttötarkoitus'), "</th>";
+    echo "<th>", t('Muutospäivä'), "</th>";
     echo "<th>", t('Selite'), "</th>";
     if ($mul_exl != 'tallennetaan') {
       echo "<th>", t('Ruksaa'), "<br />".t('kaikki')." <input type='checkbox' name='mul_del' onclick='toggleAll(this);'></th>";
@@ -837,13 +850,13 @@ if ($tee == 'LISTAA') {
 
       $worksheet->writeString($excelrivi, $excelsarake, t("Tuoteno"),       $format_bold);
       $excelsarake++;
-      $worksheet->writeString($excelrivi, $excelsarake, t("Liitostunnus"),     $format_bold);
-      $excelsarake++;
       $worksheet->writeString($excelrivi, $excelsarake, t("Liitos"),         $format_bold);
       $excelsarake++;
       $worksheet->writeString($excelrivi, $excelsarake, t("Filename"),       $format_bold);
       $excelsarake++;
       $worksheet->writeString($excelrivi, $excelsarake, t("Kayttotarkoitus"),     $format_bold);
+      $excelsarake++;
+      $worksheet->writeString($excelrivi, $excelsarake, t("Muutospäivä"),     $format_bold);
       $excelsarake++;
       $worksheet->writeString($excelrivi, $excelsarake, t("Selite"),     $format_bold);
       $excelsarake++;
@@ -851,6 +864,8 @@ if ($tee == 'LISTAA') {
       $excelsarake = 0;
     }
     while ($row = mysql_fetch_array($result)) {
+
+      $row['muutospvm'] = substr($row['muutospvm'], 0, 10);
 
       echo "<tr class='aktiivi'>";
       echo "<td valign='top'>", $row['tunnus'], "</td>";
@@ -883,12 +898,9 @@ if ($tee == 'LISTAA') {
       if (count($mul_sta) > 0 or $status != '') {
         echo "<td valign='top'>", $row['status'], "</td>";
       }
-      echo "<td valign='top'>", $row['ltunnus'], "</td>";
       echo "<td valign='top'>", $row['filename'], "</td>";
 
       if (isset($workbook) and $mul_exl == 'tallennetaan') {
-        $worksheet->writeString($excelrivi, $excelsarake, $row['ltunnus'],     $format_bold);
-        $excelsarake++;
         $worksheet->writeString($excelrivi, $excelsarake, $row['liitos'],     $format_bold);
         $excelsarake++;
         $worksheet->writeString($excelrivi, $excelsarake, $row['filename'],     $format_bold);
@@ -906,14 +918,24 @@ if ($tee == 'LISTAA') {
       }
 
       echo "<td valign='top' align='right'>", $row['kayttotarkoitus'], "</td>";
+      echo "<td valign='top' align='right'>", $row['muutospvm'], "</td>";
       echo "<td valign='top'>", $row['selite'], "</td>";
 
       if ($mul_exl != 'tallennetaan') {
-        echo "<td valign='top'><input type='checkbox' name='mul_del[]' value='", $row['tunnus'], "_", $row['ltunnus'], "_", $row['ltiedtunnus'], "_", $row['kayttotarkoitus'], "_", $row['filetype'], "'></td>";
+        echo "<td valign='top'><input type='checkbox' name='mul_del[]' value='", $row['tunnus'], "_", $row['ltiedtunnus'], "_", $row['kayttotarkoitus'], "_", $row['filetype'], "'></td>";
+      }
+
+      // Onko liitetiedostoja
+      $liitteet = liite_popup("TN", $row["tunnus"], "", "", $row['id']);
+
+      if ($liitteet != "") {
+        echo "<td valign='top'>", $liitteet, "</td>";
       }
 
       if (isset($workbook) and $mul_exl == 'tallennetaan') {
         $worksheet->writeString($excelrivi, $excelsarake, $row['kayttotarkoitus'],     $format_bold);
+        $excelsarake++;
+        $worksheet->writeString($excelrivi, $excelsarake, date("Y-m-d", $row['muutospvm']),     $format_bold);
         $excelsarake++;
         $worksheet->writeString($excelrivi, $excelsarake, $row['selite'],     $format_bold);
         $excelsarake = 0;
@@ -1021,11 +1043,11 @@ if ($tee == 'LISTAA') {
 
       $limitx = (($sivu - 1) * 50) - 50;
       if ($limitx >= 0) {
-        $alkuun = "<a href='$PHP_SELF?tee=LISTAA&sivu=1&limit=0&tuoteno=".urlencode($tuoteno)."&osasto=$osasto&try=$try&tmr=$tmr&kayt=$kayt&sel=$sel&nayta_tk=$nayta_tk&nayta_hr=$nayta_hr&nayta_th=$nayta_th&korkeus=$korkeus&leveys=$leveys&status=$status'>";
+        $alkuun = "<a href='$PHP_SELF?tee=LISTAA&sivu=1&limit=0&tuoteno=".urlencode($tuoteno)."&liitetiedosto=".urlencode($liitetiedosto)."&osasto=$osasto&try=$try&tmr=$tmr&kayt=$kayt&sel=$sel&nayta_tk=$nayta_tk&nayta_hr=$nayta_hr&nayta_th=$nayta_th&korkeus=$korkeus&leveys=$leveys&status=$status'>";
         echo $alkuun, "&lt;&lt; ", t('Ensimmäinen'), "</a>&nbsp;&nbsp;";
 
         $y = $sivu - 1;
-        $edellinen = "<a href='$PHP_SELF?tee=LISTAA&sivu=".(int)$y."&limit=$limitx&tuoteno=".urlencode($tuoteno)."&osasto=$osasto&try=$try&tmr=$tmr&kayt=$kayt&sel=$sel&nayta_tk=$nayta_tk&nayta_hr=$nayta_hr&nayta_th=$nayta_th&korkeus=$korkeus&leveys=$leveys&status=$status'>";
+        $edellinen = "<a href='$PHP_SELF?tee=LISTAA&sivu=".(int)$y."&limit=$limitx&tuoteno=".urlencode($tuoteno)."&liitetiedosto=".urlencode($liitetiedosto)."&osasto=$osasto&try=$try&tmr=$tmr&kayt=$kayt&sel=$sel&nayta_tk=$nayta_tk&nayta_hr=$nayta_hr&nayta_th=$nayta_th&korkeus=$korkeus&leveys=$leveys&status=$status'>";
         echo $edellinen, "&lt;&lt; ", t('Edellinen'), "</a>&nbsp;&nbsp;";
       }
 
@@ -1037,15 +1059,15 @@ if ($tee == 'LISTAA') {
         }
         elseif ($sivu == '' and (int)$y == '1') {
           echo "<font style='font-weight: bold;'>", $y, "</font>";
-          $edellinen = "<a href='$PHP_SELF?tee=LISTAA&sivu=".(int)$y."&limit=$limit&tuoteno=".urlencode($tuoteno)."&osasto=$osasto&try=$try&tmr=$tmr&kayt=$kayt&sel=$sel&nayta_tk=$nayta_tk&nayta_hr=$nayta_hr&nayta_th=$nayta_th&korkeus=$korkeus&leveys=$leveys&status=$status'>";
+          $edellinen = "<a href='$PHP_SELF?tee=LISTAA&sivu=".(int)$y."&limit=$limit&tuoteno=".urlencode($tuoteno)."&liitetiedosto=".urlencode($liitetiedosto)."&osasto=$osasto&try=$try&tmr=$tmr&kayt=$kayt&sel=$sel&nayta_tk=$nayta_tk&nayta_hr=$nayta_hr&nayta_th=$nayta_th&korkeus=$korkeus&leveys=$leveys&status=$status'>";
           $seuraava = "ok";
         }
         else {
           if ($seuraava == "ok") {
-            $seuraava = "<a href='$PHP_SELF?tee=LISTAA&sivu=".(int)$y."&limit=$limit&tuoteno=".urlencode($tuoteno)."&osasto=$osasto&try=$try&tmr=$tmr&kayt=$kayt&sel=$sel&nayta_tk=$nayta_tk&nayta_hr=$nayta_hr&nayta_th=$nayta_th&korkeus=$korkeus&leveys=$leveys&status=$status'>";
+            $seuraava = "<a href='$PHP_SELF?tee=LISTAA&sivu=".(int)$y."&limit=$limit&tuoteno=".urlencode($tuoteno)."&liitetiedosto=".urlencode($liitetiedosto)."&osasto=$osasto&try=$try&tmr=$tmr&kayt=$kayt&sel=$sel&nayta_tk=$nayta_tk&nayta_hr=$nayta_hr&nayta_th=$nayta_th&korkeus=$korkeus&leveys=$leveys&status=$status'>";
           }
 
-          echo "<a href='$PHP_SELF?tee=LISTAA&sivu=".(int)$y."&limit=$limit&tuoteno=".urlencode($tuoteno)."&osasto=$osasto&try=$try&tmr=$tmr&kayt=$kayt&sel=$sel&nayta_tk=$nayta_tk&nayta_hr=$nayta_hr&nayta_th=$nayta_th&korkeus=$korkeus&leveys=$leveys&status=$status'>$y</a>";
+          echo "<a href='$PHP_SELF?tee=LISTAA&sivu=".(int)$y."&limit=$limit&tuoteno=".urlencode($tuoteno)."&liitetiedosto=".urlencode($liitetiedosto)."&osasto=$osasto&try=$try&tmr=$tmr&kayt=$kayt&sel=$sel&nayta_tk=$nayta_tk&nayta_hr=$nayta_hr&nayta_th=$nayta_th&korkeus=$korkeus&leveys=$leveys&status=$status'>$y</a>";
         }
         $limit += 50;
         if (($y % '40') == 0) {
@@ -1059,7 +1081,7 @@ if ($tee == 'LISTAA') {
         echo $seuraava, " ", t('Seuraava'), " &gt;&gt;</a>&nbsp;&nbsp;";
 
         $limit -= 50;
-        $loppuun = "<a href='$PHP_SELF?tee=LISTAA&sivu=".(int)$i."&limit=$limit&tuoteno=".urlencode($tuoteno)."&osasto=$osasto&try=$try&tmr=$tmr&kayt=$kayt&sel=$sel&nayta_tk=$nayta_tk&nayta_hr=$nayta_hr&nayta_th=$nayta_th&korkeus=$korkeus&leveys=$leveys&status=$status'>";
+        $loppuun = "<a href='$PHP_SELF?tee=LISTAA&sivu=".(int)$i."&limit=$limit&tuoteno=".urlencode($tuoteno)."&liitetiedosto=".urlencode($liitetiedosto)."&osasto=$osasto&try=$try&tmr=$tmr&kayt=$kayt&sel=$sel&nayta_tk=$nayta_tk&nayta_hr=$nayta_hr&nayta_th=$nayta_th&korkeus=$korkeus&leveys=$leveys&status=$status'>";
         echo $loppuun, " ", t('Viimeinen'), " &gt;&gt;</a>";
       }
       echo "</td>";

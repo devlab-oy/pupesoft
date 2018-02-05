@@ -12530,13 +12530,13 @@ if (!function_exists("hae_yhtion_parametrit")) {
 }
 
 if (!function_exists("liite_popup")) {
-  function liite_popup($toiminto, $tuotetunnus = 0, $width=0, $height=0) {
+  function liite_popup($toiminto, $tuotetunnus = 0, $width=0, $height=0, $litety_id = FALSE) {
     global $kukarow, $yhtiorow, $PHP_SELF, $palvelin2, $pupe_root_polku, $toim;
 
     if ($toiminto == "JS") {
       echo "<SCRIPT type='text/javascript'>
           <!--
-            function liite_popup_js(tuotetunnus, maxwidth, totalheight) {
+            function liite_popup_js(tuotetunnus, maxwidth, totalheight, litety_id) {
               var myWidth = 0, myHeight = 0;
 
               if (typeof(window.innerWidth ) == 'number') {
@@ -12554,10 +12554,10 @@ if (!function_exists("liite_popup")) {
               }
 
               if (maxwidth == '0' && totalheight == '0') {
-                window.open('$PHP_SELF?ohje=off&toim=$toim&liite_popup_toiminto=AK&tuotetunnus='+tuotetunnus, '_blank' ,'toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,left=25,top=25, width='+myWidth+', height='+myHeight);
+                window.open('$PHP_SELF?ohje=off&toim=$toim&liite_popup_toiminto=AK&litety_id='+litety_id+'&tuotetunnus='+tuotetunnus, '_blank' ,'toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,left=25,top=25, width='+myWidth+', height='+myHeight);
               }
               else {
-                window.open('$PHP_SELF?ohje=off&toim=$toim&liite_popup_toiminto=AK&tuotetunnus='+tuotetunnus+'&width='+maxwidth, '_blank' ,'toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,left=25,top=25, width='+maxwidth+', height='+totalheight);
+                window.open('$PHP_SELF?ohje=off&toim=$toim&liite_popup_toiminto=AK&litety_id='+litety_id+'&tuotetunnus='+tuotetunnus+'&width='+maxwidth, '_blank' ,'toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,left=25,top=25, width='+maxwidth+', height='+totalheight);
               }
             }
           //-->
@@ -12567,6 +12567,13 @@ if (!function_exists("liite_popup")) {
 
       if ($width > 0) {
         $maxi = " width='".($width-30)."' ";
+      }
+
+      if ($litety_id) {
+        $_lisa = " AND liitetiedostot.tunnus = $litety_id";
+      }
+      else {
+        $_lisa = " AND kayttotarkoitus != 'TH'";
       }
 
       $query = "SELECT
@@ -12585,7 +12592,7 @@ if (!function_exists("liite_popup")) {
                 WHERE yhtio          = '$kukarow[yhtio]'
                 AND liitos           = 'tuote'
                 AND liitostunnus     = '$tuotetunnus'
-                AND kayttotarkoitus != 'TH'
+                $_lisa
                 ORDER BY sorttaus, jarjestys, filename";
       $kuvares = pupe_query($query);
 
@@ -12595,7 +12602,7 @@ if (!function_exists("liite_popup")) {
         echo "<tr><th style='text-align: center;'>$kuvarow[selite]</th></tr>";
         echo "<tr><td align='center'>";
 
-        if ($kuvarow["kayttotarkoitus"] == "TK" and in_array($kuvarow["filetype"], array("image/jpeg", "image/jpg", "image/gif", "image/png", "image/bmp"))) {
+        if (in_array($kuvarow["kayttotarkoitus"], array("TK", "TH")) and in_array($kuvarow["filetype"], array("image/jpeg", "image/jpg", "image/gif", "image/png", "image/bmp"))) {
 
           echo "<img $maxi src='".$palvelin2."view.php?id=$kuvarow[tunnus]'>";
 
@@ -12637,6 +12644,13 @@ if (!function_exists("liite_popup")) {
       unset($pdf_exist);
       unset($filetype);
 
+      if ($litety_id) {
+        $_lisa = " AND liitetiedostot.tunnus = $litety_id";
+      }
+      else {
+        $_lisa = " AND kayttotarkoitus != 'TH'";
+      }
+
       $filetype_query = "SELECT
                          yhtio,
                          selite,
@@ -12653,7 +12667,7 @@ if (!function_exists("liite_popup")) {
                          WHERE yhtio          = '$kukarow[yhtio]'
                          and liitos           = 'tuote'
                          and liitostunnus     = '$tuotetunnus'
-                         AND kayttotarkoitus != 'TH'
+                         $_lisa
                          ORDER BY sorttaus, jarjestys, filename";
       $filetype_result = pupe_query($filetype_query);
 
@@ -12696,7 +12710,8 @@ if (!function_exists("liite_popup")) {
         else {
           $liitteet .= t("Kuva");
         }
-        $liitteet .= "' onClick=\"javascript:liite_popup_js($tuotetunnus, $maxwidth, $totalheight)\">";
+
+        $liitteet .= "' onClick=\"javascript:liite_popup_js($tuotetunnus, $maxwidth, $totalheight, $litety_id)\">";
 
         return $liitteet;
       }
@@ -12706,6 +12721,13 @@ if (!function_exists("liite_popup")) {
       unset($images_exist);
       unset($pdf_exist);
       unset($filetype);
+
+      if ($litety_id) {
+        $_lisa = " AND liitetiedostot.tunnus = $litety_id";
+      }
+      else {
+        $_lisa = " AND kayttotarkoitus != 'TH'";
+      }
 
       $filetype_query = "SELECT
                          yhtio,

@@ -67,15 +67,31 @@ if (php_sapi_name() != 'cli' and (!isset($ei_kayttoliittymaa) or $ei_kayttoliitt
   echo " <SCRIPT TYPE=\"text/javascript\" LANGUAGE=\"JavaScript\">
       <!--
 
-      function merahti_oletus(kentta) {
+      function merahti_oletus() {
+
         // Toimitustapa alasvetovalikon id
-        var ttdd_id = document.getElementById(kentta);
+        var ttdd_id = document.getElementById('toimitustapa');
 
         // Valitun toimitustavan tunnus
         var val = ttdd_id.options[ttdd_id.selectedIndex].id;
 
         // Haetaan valitun toimitustavan oletus merahti
         var merahti = document.getElementById('merahti_'+val).innerHTML;
+
+        // Toimitusehdon alasvetovalikon id
+        var tedd_id = document.getElementById('toimitusehto');
+
+        // Valitun toimitusehdon tunnus
+        var val_te = tedd_id.options[tedd_id.selectedIndex].id;
+
+        // Haetaan valitun toimitusehdon oletus merahti
+        var merahti_te = '';
+
+        var merahti_check = document.getElementById('merahti_'+val_te);
+
+        if (merahti_check && merahti_check !== 'undefined' && merahti_check !== 'null') {
+          merahti_te = merahti_check.innerHTML;
+        }
 
         //Selectöidään oikea rahtisopparivalinta toisesta alasvetovalikosta
         var mrdd_id = document.getElementById('merahti');
@@ -86,6 +102,13 @@ if (php_sapi_name() != 'cli' and (!isset($ei_kayttoliittymaa) or $ei_kayttoliitt
 
         // katotaan onks iPadkäyttäjä
         var isiPad = navigator.userAgent.match(/iPad/i) != null;
+
+        if (merahti_te == 'K') {
+          merahti = 'K';
+        }
+        else if (merahti_te == 'V') {
+          merahti = '';
+        }
 
         if (merahti == 'K' && mrdd_sel != 1) {
           mrdd_id.options[1].selected = '1';
@@ -1775,8 +1798,11 @@ if ($tila == "" and !isset($jatka)) {
       if ($row["selitetark_3"] == "LAHETTAJAN_SOPIMUS") {
         echo "<div style='display: none; visibility: hidden;' id='merahti_toimitusehto_$row[tunnus]'>K</div>";
       }
+      elseif ($row["selitetark_3"] == "VASTAANOTTAJAN_SOPIMUS") {
+        echo "<div style='display: none; visibility: hidden;' id='merahti_toimitusehto_$row[tunnus]'>V</div>";
+      }
       else {
-        echo "<div style='display: none; visibility: hidden;' id='merahti_toimitusehto_$row[tunnus]'></div>";
+        echo "<div style='display: none; visibility: hidden;' id='merahti_toimitusehto_$row[tunnus]'>T</div>";
       }
     }
 
@@ -2466,7 +2492,7 @@ if ($tila == "" and !isset($jatka)) {
     }
 
     $vasen_sarake[$vasen] = "<td>".t("Toimitusehto").":</td><td>";
-    $vasen_sarake[$vasen] .= "<select name='toimitusehto' id = 'toimitusehto' onchange='toimehtoTarkenne(\"toimitusehto\"); merahti_oletus(\"toimitusehto\");' ".js_alasvetoMaxWidth("toimitusehto", 60).">";
+    $vasen_sarake[$vasen] .= "<select name='toimitusehto' id = 'toimitusehto' onchange='toimehtoTarkenne(\"toimitusehto\"); merahti_oletus();' ".js_alasvetoMaxWidth("toimitusehto", 60).">";
 
     mysql_data_seek($toimehto_tresult, 0);
 
@@ -2814,7 +2840,7 @@ if ($tila == "" and !isset($jatka)) {
     }
 
     $string = "<td>".t("Toimitustapa").":</td>";
-    $string .= "<td><select id='toimitustapa' name='toimitustapa' onchange='merahti_oletus(\"toimitustapa\");' {$state_chk}>";
+    $string .= "<td><select id='toimitustapa' name='toimitustapa' onchange='merahti_oletus();' {$state_chk}>";
 
     $params = array(
       'asiakas_tunnus' => $srow['liitostunnus'],

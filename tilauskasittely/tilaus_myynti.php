@@ -3007,6 +3007,21 @@ if ($tee == '') {
 
         $meapu2row["merahti"] = "K";
       }
+      else {
+        // Onko toimitusehdon takana määritelty rahdinmaksaja? Tämä yliajaa toimitustavan takana olevan.
+        $toimehto_tresult = t_avainsana("TOIMEHTO", "", " and trim(concat_ws(' ', selite, selitetark)) = trim('$laskurow[toimitusehto]') ");
+
+        if (mysql_num_rows($toimehto_tresult) > 0) {
+          $toimehto_row = mysql_fetch_assoc($toimehto_tresult);
+
+          if ($toimehto_row["selitetark_3"] == "LAHETTAJAN_SOPIMUS") {
+            $meapu2row["merahti"] = "K";
+          }
+          elseif ($toimehto_row["selitetark_3"] == "VASTAANOTTAJAN_SOPIMUS") {
+            $meapu2row["merahti"] = "";
+          }
+        }
+      }
 
       if ($meapu2row["merahti"] != $laskurow["kohdistettu"]) {
         if ($kukarow["extranet"] == "") {

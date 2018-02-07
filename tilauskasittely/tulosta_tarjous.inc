@@ -756,6 +756,10 @@ if (!function_exists('rivi_tarjous')) {
     //K‰‰nnet‰‰n nimitys
     $row['nimitys'] = t_tuotteen_avainsanat($row, 'nimitys', $kieli);
 
+    //Purkka, jolla lis‰t‰‰n ranskalainen viiva jokaisen kommenttirivin alkuun koska bugi jos rivi alkaa numeroilla
+    $row["kommentti"] = "- ".preg_replace( "/\r\n/", "\n- ", $row["kommentti"]);
+    $row["kommentti"] = preg_replace( "/- \r|- \n/", "\r\n", $row["kommentti"]);
+    $row["kommentti"] = preg_replace( "/\n- -/", "\n-", $row["kommentti"]);    
     // Trimmataan
     $row["kommentti"] = trim($row["kommentti"]);
 

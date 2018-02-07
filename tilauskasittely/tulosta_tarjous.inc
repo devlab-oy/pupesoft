@@ -756,10 +756,6 @@ if (!function_exists('rivi_tarjous')) {
     //Käännetään nimitys
     $row['nimitys'] = t_tuotteen_avainsanat($row, 'nimitys', $kieli);
 
-    //Purkka, jolla lisätään ranskalainen viiva jokaisen kommenttirivin alkuun koska bugi jos rivi alkaa numeroilla
-    $row["kommentti"] = "- ".preg_replace( "/\r\n/", "\n- ", $row["kommentti"]);
-    $row["kommentti"] = preg_replace( "/- \r|- \n/", "\r\n", $row["kommentti"]);
-    $row["kommentti"] = preg_replace( "/\n- -/", "\n-", $row["kommentti"]);    
     // Trimmataan
     $row["kommentti"] = trim($row["kommentti"]);
 
@@ -1064,7 +1060,12 @@ if (!function_exists('tarjous_rivi_hinta_ale')) {
 
     if (trim($row["perhe_kommentti"]) != '' and $yhtiorow['tarjoustyyppi'] != 5) {
       $pohja = $pdf_tarjous->draw_paragraph($kala+$norm["height"], 45, 60, 480, $row["perhe_kommentti"],  $page_tarjous[$sivu], $norm);
-      $kala = $pohja - $rivinkorkeus;
+      if (is_numeric($pohja)) {
+        $kala = $pohja - $rivinkorkeus;
+      } 
+      else {
+        $kala = 0;
+      }
     }
 
     if (trim($verolliset_verottomat_hinnat) == 'verolliset') {
@@ -1184,12 +1185,22 @@ if (!function_exists('tarjous_rivi_hinta_ale')) {
 
       if ($row["kommentti"] != '') {
         $pohja = $pdf_tarjous->draw_paragraph($kala+$norm["height"]+2, 80, 60, 575, $row["kommentti"], $page_tarjous[$sivu], $norm);
-        $kala = $pohja - $rivinkorkeus;
+        if (is_numeric($pohja)) {
+          $kala = $pohja - $rivinkorkeus;
+        } 
+        else {
+          $kala = 0;
+        }
       }
 
       if (trim($row["perhe_kommentti"]) != '') {
         $pohja = $pdf_tarjous->draw_paragraph($kala+$norm["height"], 80, 60, 575, $row["perhe_kommentti"],  $page_tarjous[$sivu], $norm);
-        $kala = $pohja - $rivinkorkeus - 10;
+        if (is_numeric($pohja)) {
+          $kala = $pohja - $rivinkorkeus -10;
+        } 
+        else {
+          $kala = 0;
+        }      
       }
     }
     else {
@@ -1199,7 +1210,12 @@ if (!function_exists('tarjous_rivi_hinta_ale')) {
 
     if ($row["kommentti"] != '' and $yhtiorow['tarjoustyyppi'] != 5) {
       $pohja = $pdf_tarjous->draw_paragraph($kala+$norm["height"]+2, 45, 60, 480, $row["kommentti"], $page_tarjous[$sivu], $norm);
-      $kala = $pohja - $rivinkorkeus;
+      if (is_numeric($pohja)) {
+        $kala = $pohja - $rivinkorkeus;
+      } 
+      else {
+        $kala = 0;
+      }    
     }
 
     $kala = $kala - 5;
@@ -1223,7 +1239,12 @@ if (!function_exists('tarjous_rivi_custom')) {
 
     if (trim($row["perhe_kommentti"]) != '' and $yhtiorow["tarjoustyyppi"] != 1) {
       $pohja = $pdf_tarjous->draw_paragraph($kala+$norm["height"], 150, 60, 480, $row["perhe_kommentti"],  $page_tarjous[$sivu], $norm);
-      $kala = $pohja - $rivinkorkeus;
+      if (is_numeric($pohja)) {
+        $kala = $pohja - $rivinkorkeus;
+      } 
+      else {
+        $kala = 0;
+      }    
     }
 
     if ($naytetaanko_tuoteno == '') {
@@ -1336,7 +1357,12 @@ if (!function_exists('tarjous_rivi_custom')) {
 
     if (trim($row["perhe_kommentti"]) != '' and $yhtiorow["tarjoustyyppi"] == 1) {
       $pohja = $pdf_tarjous->draw_paragraph($kala+$norm["height"], 150, 60, 480, $row["perhe_kommentti"],  $page_tarjous[$sivu], $norm);
-      $kala = $pohja - $rivinkorkeus;
+      if (is_numeric($pohja)) {
+        $kala = $pohja - $rivinkorkeus;
+      } 
+      else {
+        $kala = 0;
+      }    
     }
 
     $kala = $kala - 5;

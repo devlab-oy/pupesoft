@@ -244,8 +244,8 @@ if (!function_exists('logmaster_outbounddelivery')) {
               asiakas.asiakasnro,
               tuote.eankoodi,
               tuote.ei_saldoa,
-              laskun_lisatiedot.noutopisteen_tunnus,
-              tuote.tullinimike1
+              tuote.tullinimike1,
+              laskun_lisatiedot.noutopisteen_tunnus
               FROM lasku
               LEFT JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus)
               JOIN tilausrivi ON (
@@ -399,13 +399,13 @@ if (!function_exists('logmaster_outbounddelivery')) {
       $line->addChild('TransId',           xml_cleanstring($looprow['tilausrivin_tunnus'], 20));
 
       if ($uj_nimi == "Velox") {
-        $line->addChild('ItemNumber',        xml_cleanstring($looprow[$logmaster_itemnumberfield], 42));
+        $line->addChild('ItemNumber',        xml_cleanstring($looprow[$logmaster_itemnumberfield], 32));
         $line->addChild('CustItemNumber',    0);
-        $line->addChild('ItemName',          0);
+        $line->addChild('ItemName',          xml_cleanstring($looprow['nimitys'], 100));
         $line->addChild('ItemText',          0);
         $line->addChild('BatchId',           0);
         $line->addChild('CustItemName',      0);
-        $line->addChild('Type',              1);
+        $line->addChild('Type',              $looprow['tyyppi']);
         $line->addChild('BBDate',            0);
         $line->addChild('OrderedQuantity',   $looprow['kpl']);
         $line->addChild('DeliveredQuantity', $looprow['kpl']);

@@ -8,6 +8,9 @@ if ($_POST["kaunisnimi"] != '') {
   $_POST["kaunisnimi"] = str_replace("/", "", $_POST["kaunisnimi"]);
 }
 
+// DataTables päälle
+$pupe_DataTables = "kekkonen";
+
 require 'inc/parametrit.inc';
 
 if (isset($tee) and $tee == "lataa_tiedosto") {
@@ -75,7 +78,7 @@ echo "<td class='back'>";
 $res2 = t_avainsana("OSASTO");
 
 if (mysql_num_rows($res2) > 11) {
-  echo "<div style='height:320px;overflow:auto;'>";
+  echo "<div style='height:440px;overflow:auto;'>";
 }
 
 //############## TUOTEOSASTO
@@ -123,7 +126,7 @@ echo "<td valign='top' class='back'>";
 $res2 = t_avainsana("TRY");
 
 if (mysql_num_rows($res2) > 11) {
-  echo "<div style='height:320px;overflow:auto;'>";
+  echo "<div style='height:440px;overflow:auto;'>";
 }
 
 //############## TUOTERYHMÄ
@@ -171,7 +174,7 @@ $query = "  SELECT distinct tuotemerkki FROM tuote use index (yhtio_tuotemerkki)
 $res2  = pupe_query($query);
 
 if (mysql_num_rows($res2) > 11) {
-  echo "<div style='height:320px;overflow:auto;'>";
+  echo "<div style='height:440px;overflow:auto;'>";
 }
 
 //############## TUOTEMERKKI
@@ -797,15 +800,47 @@ if ($tee == 'LISTAA') {
       $onsubmit = '';
     }
 
+    echo t('Löytyi yhteensä'), " {$tuotekuvia_count} ", t('riviä') ."<br>";
+
+    // lasketaan datatablesille sarakkeet
+    $_sarakkeet = 11;
+    $_status_sarake = "";
+    $_status_search = "";
+    $_korkeus_sarake = "";
+    $_korkeus_search = "";
+    $_leveys_sarake = "";
+    $_leveys_search = "";
+    $_ruksaa_sarake = "";
+    $_ruksaa_search = "";
+
+    // muutama sarake mahdollisesti lisää
+    if (count($mul_sta) > 0 or $status != '') {
+      $_status_sarake = "<th>". t('Status'). "</th>";
+      $_status_search = "<td><input type='text' class='search_field' name='search_".t('Status')."'></td>";
+      $_sarakkeet++;
+    }
+    if (count($mul_siz) > 0) {
+      if (in_array('korkeus', $mul_siz)) {
+        $_korkeus_sarake = "<th>". t('Korkeus'). "</th>";
+        $_korkeus_search = "<td><input type='text' class='search_field' name='search_".t('Korkeus')."'></td>";
+        $_sarakkeet++;
+      }
+      if (in_array('leveys', $mul_siz)) {
+        $_leveys_sarake = "<th>". t('Leveys'). "</th>";
+        $_leveys_search = "<td><input type='text' class='search_field' name='search_".t('Leveys')."'></td>";
+        $_sarakkeet++;
+      }
+    }
+    if ($mul_exl != 'tallennetaan') {
+      $_ruksaa_sarake = "<th>". t('Ruksaa'). "<br />".t('kaikki')." <input type='checkbox' name='mul_del' onclick='toggleAll(this);'></th>";
+      $_ruksaa_search = "<td></td>";
+      $_sarakkeet++;
+    }
+
+    pupe_DataTables(array(array($pupe_DataTables, $_sarakkeet, $_sarakkeet, true, false)));
+
     echo "<form method='post' action='yllapito_tuotekuvat.php' {$onsubmit}>";
-    echo "<table>";
-
-    echo "<tr>";
-    echo "<td valign='top' align='left' colspan='10' class='back'>";
-    echo t('Löytyi yhteensä'), " {$tuotekuvia_count} ", t('riviä');
-    echo "</td>";
-    echo "</tr>";
-
+    echo "<table class='display dataTable' id='$pupe_DataTables'><thead>";
     echo "<tr>";
     echo "<th>", t('Tunnus'), "</th>";
     echo "<th>", t('Tuoteno'), "</th>";
@@ -813,36 +848,37 @@ if ($tee == 'LISTAA') {
     echo "<th>", t('Osasto'), "</th>";
     echo "<th>", t('Tuoteryhma'), "</th>";
     echo "<th>", t('Tuotemerkki'), "</th>";
-    if (count($mul_sta) > 0 or $status != '') {
-      echo "<th>", t('Status'), "</th>";
-    }
+    echo $_status_sarake;
     echo "<th>", t('Tiedostonnimi'), "</th>";
-    if (count($mul_siz) > 0) {
-      if (in_array('korkeus', $mul_siz)) {
-        echo "<th>", t('Korkeus'), "</th>";
-      }
-      if (in_array('leveys', $mul_siz)) {
-        echo "<th>", t('Leveys'), "</th>";
-      }
-    }
+    echo $_korkeus_sarake;
+    echo $_leveys_sarake;
     echo "<th>", t('Käyttötarkoitus'), "</th>";
     echo "<th>", t('Muutospäivä'), "</th>";
     echo "<th>", t('Selite'), "</th>";
-    if ($mul_exl != 'tallennetaan') {
-      echo "<th>", t('Ruksaa'), "<br />".t('kaikki')." <input type='checkbox' name='mul_del' onclick='toggleAll(this);'></th>";
-    }
+    echo $_ruksaa_sarake;
+    echo "<th></th>";
     echo "</tr>";
 
-    if ($limit != '') {
-      if ($limit > $tuotekuvia_count) {
-        $i = ($tuotekuvia_count / 50);
-        $limit = $limit - ($i * 50);
-        mysql_data_seek($result, $limit);
-      }
-      else {
-        mysql_data_seek($result, $limit);
-      }
-    }
+    echo "<tr>";
+    echo "<td><input type='text' class='search_field' name='search_".t('Tunnus')."'></td>";
+    echo "<td><input type='text' class='search_field' name='search_".t('Tuoteno')."'></td>";
+    echo "<td><input type='text' class='search_field' name='search_".t('Nimitys')."'></td>";
+    echo "<td><input type='text' class='search_field' name='search_".t('Osasto')."'></td>";
+    echo "<td><input type='text' class='search_field' name='search_".t('Tuoteryhma')."'></td>";
+    echo "<td><input type='text' class='search_field' name='search_".t('Tuotemerkki')."'></td>";
+    echo $_status_search;
+    echo "<td><input type='text' class='search_field' name='search_".t('Tiedostonnimi')."'></td>";
+    echo $_korkeus_search;
+    echo $_leveys_search;
+    echo "<td><input type='text' class='search_field' name='search_".t('Käyttötarkoitus')."'></td>";
+    echo "<td><input type='text' class='search_field' name='search_".t('Muutospäivä')."'></td>";
+    echo "<td><input type='text' class='search_field' name='search_".t('Selite')."'></td>";
+    echo $_ruksaa_search;
+    echo "<td></td>";
+    echo "</tr>";
+
+    echo "</thead>";
+    echo "<tbody>";
 
     // Exceliä käytetään sisäänlue datassa joten on laitettava sarakkeet sen mukaisesti (kaikkea ei siis saada laittaa mukaan vaikka mieli tekisi)
     if (isset($workbook) and $mul_exl == 'tallennetaan') {
@@ -882,9 +918,6 @@ if ($tee == 'LISTAA') {
           echo "<td valign='top'>", $row['nimitys'], "</td>";
         }
         else {
-          echo "<div id='div_", $row['tunnus'], "_", $row['kayttotarkoitus'], "' class='popup' style='width: ", $row['leveys'], "px; height: ", $row['korkeus'], "px;'>";
-          echo "<img src='view.php?id=", $row['id'], "' height='", $row['korkeus'], "' width='", $row['leveys'], "'>";
-          echo "</div>";
           echo "<td valign='top' class='tooltip' id='", $row['tunnus'], "_", $row['kayttotarkoitus'], "'>", $row['nimitys'], "</td>";
         }
       }
@@ -945,12 +978,8 @@ if ($tee == 'LISTAA') {
       echo "</tr>";
 
       $laskuri++;
-
-      if ($laskuri == 50 and $mul_siv == '' and $mul_exl == '') {
-        break;
-      }
     }
-
+    echo "</tbody></table>";
     $colspan = '9';
 
     if (count($mul_siz) > 0 and in_array('korkeus', $mul_siz)) {
@@ -963,7 +992,8 @@ if ($tee == 'LISTAA') {
       $colspan++;
     }
 
-    echo "<tr>";
+
+    echo "<table><tr>";
     echo "<td valign='top' align='left' colspan='", $colspan, "' class='back'>";
     echo t('Löytyi yhteensä'), " {$tuotekuvia_count} ", t('riviä');
     echo "</td>";
@@ -991,102 +1021,6 @@ if ($tee == 'LISTAA') {
       echo "</td>";
     }
     echo "</tr>";
-
-    if ($mul_siv == '' and $mul_exl == '') {
-      if ($sel_osasto != '') {
-        $osasto = $sel_osasto;
-        $osasto = str_replace('(\'', '', $osasto);
-        $osasto = str_replace('\')', '', $osasto);
-        $osasto = str_replace('\',\'', ',', $osasto);
-      }
-
-      if ($sel_tuoteryhma != '') {
-        $try = $sel_tuoteryhma;
-        $try = str_replace('(\'', '', $try);
-        $try = str_replace('\')', '', $try);
-        $try = str_replace('\',\'', ',', $try);
-      }
-
-      if ($sel_tuotemerkki != '') {
-        $tmr = $sel_tuotemerkki;
-        $tmr = str_replace('(\'', '', $tmr);
-        $tmr = str_replace('\')', '', $tmr);
-        $tmr = str_replace('\',\'', ',', $tmr);
-      }
-
-      if ($sel_kayttotarkoitus != '') {
-        $kayt = $sel_kayttotarkoitus;
-        $kayt = str_replace('(\'', '', $kayt);
-        $kayt = str_replace('\')', '', $kayt);
-        $kayt = str_replace('\',\'', ',', $kayt);
-      }
-
-      if ($sel_selite != '') {
-        $sel = $sel_selite;
-        $sel = str_replace('(\'', '', $sel);
-        $sel = str_replace('\')', '', $sel);
-        $sel = str_replace('\',\'', ',', $sel);
-      }
-
-      if ($sel_status != '') {
-        $status = $sel_status;
-        $status = str_replace('(\'', '', $status);
-        $status = str_replace('\')', '', $status);
-        $status = str_replace('\',\'', ',', $status);
-      }
-
-      mysql_data_seek($result, 0);
-      $i = ceil((float) ($tuotekuvia_count / 50));
-      $limit = 0;
-      echo "<tr>";
-      echo "<td valign='top' align='center' colspan='10' class='back'>";
-
-      $limitx = (($sivu - 1) * 50) - 50;
-      if ($limitx >= 0) {
-        $alkuun = "<a href='$PHP_SELF?tee=LISTAA&sivu=1&limit=0&tuoteno=".urlencode($tuoteno)."&liitetiedosto=".urlencode($liitetiedosto)."&osasto=$osasto&try=$try&tmr=$tmr&kayt=$kayt&sel=$sel&nayta_tk=$nayta_tk&nayta_hr=$nayta_hr&nayta_th=$nayta_th&korkeus=$korkeus&leveys=$leveys&status=$status'>";
-        echo $alkuun, "&lt;&lt; ", t('Ensimmäinen'), "</a>&nbsp;&nbsp;";
-
-        $y = $sivu - 1;
-        $edellinen = "<a href='$PHP_SELF?tee=LISTAA&sivu=".(int)$y."&limit=$limitx&tuoteno=".urlencode($tuoteno)."&liitetiedosto=".urlencode($liitetiedosto)."&osasto=$osasto&try=$try&tmr=$tmr&kayt=$kayt&sel=$sel&nayta_tk=$nayta_tk&nayta_hr=$nayta_hr&nayta_th=$nayta_th&korkeus=$korkeus&leveys=$leveys&status=$status'>";
-        echo $edellinen, "&lt;&lt; ", t('Edellinen'), "</a>&nbsp;&nbsp;";
-      }
-
-      for ($y = 1; $y <= $i; $y++) {
-        if ($sivu != '' and $sivu == (int)$y) {
-          echo "<font style='font-weight: bold;'>", $y, "</font>";
-          $edellinen = "ok";
-          $seuraava = "ok";
-        }
-        elseif ($sivu == '' and (int)$y == '1') {
-          echo "<font style='font-weight: bold;'>", $y, "</font>";
-          $edellinen = "<a href='$PHP_SELF?tee=LISTAA&sivu=".(int)$y."&limit=$limit&tuoteno=".urlencode($tuoteno)."&liitetiedosto=".urlencode($liitetiedosto)."&osasto=$osasto&try=$try&tmr=$tmr&kayt=$kayt&sel=$sel&nayta_tk=$nayta_tk&nayta_hr=$nayta_hr&nayta_th=$nayta_th&korkeus=$korkeus&leveys=$leveys&status=$status'>";
-          $seuraava = "ok";
-        }
-        else {
-          if ($seuraava == "ok") {
-            $seuraava = "<a href='$PHP_SELF?tee=LISTAA&sivu=".(int)$y."&limit=$limit&tuoteno=".urlencode($tuoteno)."&liitetiedosto=".urlencode($liitetiedosto)."&osasto=$osasto&try=$try&tmr=$tmr&kayt=$kayt&sel=$sel&nayta_tk=$nayta_tk&nayta_hr=$nayta_hr&nayta_th=$nayta_th&korkeus=$korkeus&leveys=$leveys&status=$status'>";
-          }
-
-          echo "<a href='$PHP_SELF?tee=LISTAA&sivu=".(int)$y."&limit=$limit&tuoteno=".urlencode($tuoteno)."&liitetiedosto=".urlencode($liitetiedosto)."&osasto=$osasto&try=$try&tmr=$tmr&kayt=$kayt&sel=$sel&nayta_tk=$nayta_tk&nayta_hr=$nayta_hr&nayta_th=$nayta_th&korkeus=$korkeus&leveys=$leveys&status=$status'>$y</a>";
-        }
-        $limit += 50;
-        if (($y % '40') == 0) {
-          echo "<br />";
-        }
-        else {
-          echo "&nbsp;&nbsp;";
-        }
-      }
-      if ($seuraava != 'ok' and $seuraava != '') {
-        echo $seuraava, " ", t('Seuraava'), " &gt;&gt;</a>&nbsp;&nbsp;";
-
-        $limit -= 50;
-        $loppuun = "<a href='$PHP_SELF?tee=LISTAA&sivu=".(int)$i."&limit=$limit&tuoteno=".urlencode($tuoteno)."&liitetiedosto=".urlencode($liitetiedosto)."&osasto=$osasto&try=$try&tmr=$tmr&kayt=$kayt&sel=$sel&nayta_tk=$nayta_tk&nayta_hr=$nayta_hr&nayta_th=$nayta_th&korkeus=$korkeus&leveys=$leveys&status=$status'>";
-        echo $loppuun, " ", t('Viimeinen'), " &gt;&gt;</a>";
-      }
-      echo "</td>";
-      echo "</tr>";
-    }
 
     echo "</table>";
     echo "</form>";

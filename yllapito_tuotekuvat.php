@@ -816,23 +816,23 @@ if ($tee == 'LISTAA') {
     // muutama sarake mahdollisesti lisää
     if (count($mul_sta) > 0 or $status != '') {
       $_status_sarake = "<th>". t('Status'). "</th>";
-      $_status_search = "<td><input type='text' class='search_field' name='search_".t('Status')."'></td>";
+      $_status_search = "<td><input type='text' class='search_field' name='search_status'></td>";
       $_sarakkeet++;
     }
     if (count($mul_siz) > 0) {
       if (in_array('korkeus', $mul_siz)) {
         $_korkeus_sarake = "<th>". t('Korkeus'). "</th>";
-        $_korkeus_search = "<td><input type='text' class='search_field' name='search_".t('Korkeus')."'></td>";
+        $_korkeus_search = "<td><input type='text' class='search_field' name='search_korkeus'></td>";
         $_sarakkeet++;
       }
       if (in_array('leveys', $mul_siz)) {
         $_leveys_sarake = "<th>". t('Leveys'). "</th>";
-        $_leveys_search = "<td><input type='text' class='search_field' name='search_".t('Leveys')."'></td>";
+        $_leveys_search = "<td><input type='text' class='search_field' name='search_leveys'></td>";
         $_sarakkeet++;
       }
     }
     if ($mul_exl != 'tallennetaan') {
-      $_ruksaa_sarake = "<th>". t('Ruksaa'). "<br />".t('kaikki')." <input type='checkbox' name='mul_del' onclick='toggleAll(this);'></th>";
+      $_ruksaa_sarake = "<th>". t('Ruksaa'). "</th>";
       $_ruksaa_search = "<td></td>";
       $_sarakkeet++;
     }
@@ -840,6 +840,7 @@ if ($tee == 'LISTAA') {
     pupe_DataTables(array(array($pupe_DataTables, $_sarakkeet, $_sarakkeet, true, false)));
 
     echo "<form method='post' action='yllapito_tuotekuvat.php' {$onsubmit}>";
+    echo "<br>".t("Valitse kaikki listatut liitteet").": <input type='checkbox' name='mul_del' onclick='toggleAll(this);'><br>";
     echo "<table class='display dataTable' id='$pupe_DataTables'><thead>";
     echo "<tr>";
     echo "<th>", t('Tunnus'), "</th>";
@@ -860,19 +861,19 @@ if ($tee == 'LISTAA') {
     echo "</tr>";
 
     echo "<tr>";
-    echo "<td><input type='text' class='search_field' name='search_".t('Tunnus')."'></td>";
-    echo "<td><input type='text' class='search_field' name='search_".t('Tuoteno')."'></td>";
-    echo "<td><input type='text' class='search_field' name='search_".t('Nimitys')."'></td>";
-    echo "<td><input type='text' class='search_field' name='search_".t('Osasto')."'></td>";
-    echo "<td><input type='text' class='search_field' name='search_".t('Tuoteryhma')."'></td>";
-    echo "<td><input type='text' class='search_field' name='search_".t('Tuotemerkki')."'></td>";
+    echo "<td><input type='text' class='search_field' name='search_tunnus'></td>";
+    echo "<td><input type='text' class='search_field' name='search_tuoteno'></td>";
+    echo "<td><input type='text' class='search_field' name='search_nimitys'></td>";
+    echo "<td><input type='text' class='search_field' name='search_osasto'></td>";
+    echo "<td><input type='text' class='search_field' name='search_tuoteryhma'></td>";
+    echo "<td><input type='text' class='search_field' name='search_tuotemerkki'></td>";
     echo $_status_search;
-    echo "<td><input type='text' class='search_field' name='search_".t('Tiedostonnimi')."'></td>";
+    echo "<td><input type='text' class='search_field' name='search_tiedostonimi'></td>";
     echo $_korkeus_search;
     echo $_leveys_search;
-    echo "<td><input type='text' class='search_field' name='search_".t('Käyttötarkoitus')."'></td>";
-    echo "<td><input type='text' class='search_field' name='search_".t('Muutospäivä')."'></td>";
-    echo "<td><input type='text' class='search_field' name='search_".t('Selite')."'></td>";
+    echo "<td><input type='text' class='search_field' name='search_kayttotarkoitus'></td>";
+    echo "<td><input type='text' class='search_field' name='search_muutospaiva'></td>";
+    echo "<td><input type='text' class='search_field' name='search_selite'></td>";
     echo $_ruksaa_search;
     echo "<td></td>";
     echo "</tr>";

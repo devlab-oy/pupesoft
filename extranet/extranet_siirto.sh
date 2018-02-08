@@ -53,7 +53,8 @@ pics
 validation
 viivakoodi
 DataTables
-css"
+css
+pupe_xslx_template"
 
 # Kopioidaan näiden hakemistojen sisältö extranet roottiin
 CONTENT="extranet/*"

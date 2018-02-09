@@ -960,6 +960,7 @@ if ($upd == 1) {
                     postino           = '$otsikrow[postino]',
                     postitp           = '$otsikrow[postitp]',
                     maa               = '$otsikrow[maa]',
+                    toim_maa          = '$otsikrow[verovelvollinen]',
                     tila              = '$laskuorow[tila]',
                     ultilno           = '$otsikrow[ultilno]',
                     pankki_haltija    = '$otsikrow[pankki_haltija]',
@@ -2311,6 +2312,7 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
       'hyvaksynnanmuutos',
       'suoraveloitus',
       'sisviesti1',
+      'verovelvollinen',
     );
 
     foreach ($paivitettavat_kentat as $kentta) {

@@ -206,7 +206,16 @@ while (false !== ($file = readdir($handle))) {
       }
       else {
         // Jos ei oo etuk‰teen maksettu, niin tehd‰‰b ker‰yspoikkeama
-        $varattuupdate = ", tilausrivi.varattu = '{$keratty}' ";
+        $a = (int) ($tilausrivi_row['tilkpl'] * 10000);
+        $b = (int) ($keratty * 10000);
+
+        if ($a != $b) {
+          $kerayspoikkeama[$tilausrivi_row['tuoteno']]['tilauksella'] = round($tilausrivi_row['tilkpl']);
+          $kerayspoikkeama[$tilausrivi_row['tuoteno']]['keratty'] = $keratty;
+        }
+        else {
+          $varattuupdate = ", tilausrivi.varattu = '{$keratty}' ";
+        }
       }
 
       if ($laskurow["tila"] == "V" or $laskurow["tila"] == "S" or $laskurow["tila"] == "G") {

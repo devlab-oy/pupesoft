@@ -15,7 +15,7 @@ if (empty($ulkoinen_jarjestelma)) {
   echo "<td>";
   echo "<select name='ulkoinen_jarjestelma'>";
   echo "<option value='P'>PostNord</option>";
-  echo "<option value='L'>Helsingin Hyllyvarasto</option>";
+  echo "<option value='L'>Velox</option>";
   echo "</select>";
   echo "</td>";
   echo "<td>";
@@ -64,10 +64,10 @@ if (mysql_num_rows($res) > 0) {
   }
   else {
     if ($ulkoinen_jarjestelma == 'L') {
-      $uj_nimi = "LogMaster";
+      $uj_nimi = "Velox";
     }
     else {
-      $uj_nimi = "Posten";
+      $uj_nimi = "PostNord";
     }
 
     $xml = simplexml_load_string("<?xml version='1.0' encoding='UTF-8'?><Message></Message>");
@@ -139,7 +139,7 @@ if (mysql_num_rows($res) > 0) {
       $line->addChild('WholesalePackageSize',  '');
       $line->addChild('EANCode',               xml_cleanstring($row['eankoodi'], 20));
       $line->addChild('EANCode2',              '');
-      $line->addChild('CustomsTariffNum',      '');
+      $line->addChild('CustomsTariffNum',      xml_cleanstring($row['tullinimike1'], 14));
       $line->addChild('AlarmLimit',            '');
       $line->addChild('QualPeriod1',           '');
       $line->addChild('QualPeriod2',           '');

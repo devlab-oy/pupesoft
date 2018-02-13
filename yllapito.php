@@ -960,6 +960,7 @@ if ($upd == 1) {
                     postino           = '$otsikrow[postino]',
                     postitp           = '$otsikrow[postitp]',
                     maa               = '$otsikrow[maa]',
+                    toim_maa          = '$otsikrow[verovelvollinen]',
                     tila              = '$laskuorow[tila]',
                     ultilno           = '$otsikrow[ultilno]',
                     pankki_haltija    = '$otsikrow[pankki_haltija]',
@@ -2311,6 +2312,7 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
       'hyvaksynnanmuutos',
       'suoraveloitus',
       'sisviesti1',
+      'verovelvollinen',
     );
 
     foreach ($paivitettavat_kentat as $kentta) {
@@ -2450,6 +2452,9 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
     if (($toikrow = tarkista_oikeus("yllapito.php", "toimitustavan_lahdot%", "", "OK", $toimi_array)) !== FALSE) {
       echo "<iframe id='toimitustavan_lahdot_iframe' name='toimitustavan_lahdot_iframe' src='yllapito.php?toim=$toikrow[alanimi]&from=yllapito&haku[1]=@$tunnus&ohje=off&lukitse_avaimeen=$tunnus' style='width: 600px; border: 0px; display: block;' frameborder='0'></iFrame>";
     }
+    if (($toikrow = tarkista_oikeus("yllapito.php", "toimitustavan_avainsanat%", "", "OK", $toimi_array)) !== FALSE) {
+      echo "<iframe id='toimitustavan_avainsanat_iframe' name='toimitustavan_avainsanat_iframe' src='yllapito.php?toim=$toikrow[alanimi]&from=yllapito&haku[1]=@$tunnus&ohje=off&lukitse_avaimeen=$tunnus' style='width: 600px; border: 0px; display: block;' frameborder='0'></iFrame>";
+    }
   }
 
   if ($trow["tunnus"] > 0 and $errori == '' and $from != "yllapito" and ($toim == 'lasku' or $toim == 'asiakas' or $toim == "sarjanumeron_lisatiedot" or $toim == "tuote" or $toim == "avainsana" or $toim == "toimi")) {
@@ -2551,6 +2556,7 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
     $toim == "rahtisopimukset" or
     $toim == "etaisyydet" or
     $toim == "tuotteen_avainsanat" or
+    $toim == "toimitustavan_avainsanat" or
     $toim == "toimittajaalennus" or
     $toim == "vaihtoehtoiset_verkkolaskutunnukset" or
     $toim == "toimittajahinta" or

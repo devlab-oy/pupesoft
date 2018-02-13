@@ -217,6 +217,10 @@ if ($tee == "NAYTA") {
     $file = "";
     $lask = 1;
     $ytunnus = tulosta_ytunnus($yhtiorow['ytunnus']);
+    
+    // Aikaleima pakollinen 13.6.2017 alkaen
+    $date = new DateTime('now');
+    $aikaleima = date_format($date, 'dmYHis');
 
     foreach ($vspserie as $htunnus => $matkustaja) {
 
@@ -241,6 +245,7 @@ if ($tee == "NAYTA") {
       $file .= "156:{$matkustaja['kilsat_raha']}\n";
       $file .= "157:0,00\n";
       $file .= "014:0838105-5_PS\n";
+      $file .= "198:{$aikaleima}\n";
       $file .= "999:$lask\n";
 
       $lask++;
@@ -248,6 +253,10 @@ if ($tee == "NAYTA") {
 
     $filenimi = "VSPSERIE-$kukarow[yhtio]-".date("dmy-His").".txt";
     file_put_contents("/tmp/".$filenimi, $file);
+    
+    if (PUPE_UNICODE) {
+         exec("recode -f UTF8..ISO-8859-15 '/tmp/{$filenimi}'");
+    }
 
     echo "<br><form method='post' class='multisubmit'>
           <input type='hidden' name='tee' value='lataa_tiedosto'>

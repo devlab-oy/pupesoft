@@ -20,7 +20,7 @@ if (mysql_field_name($result, $i) == "liitostunnus") {
 }
 
 if (mysql_field_name($result, $i) == "laji") {
-  $vresult = t_avainsana("DPAVAINSANA_LAJI");
+  $vresult = t_avainsana("DPAVAINSANALAJI");
 
   $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 300)." onchange='submit();'>";
   $ulos .= "<option value=''>".t("Oletus")."</option>";

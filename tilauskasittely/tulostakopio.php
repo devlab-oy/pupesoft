@@ -202,6 +202,12 @@ if ($toim == "REKLAMAATIO") {
 if ($toim == "TAKUU") {
   $fuse = t("Takuu");
 }
+if ($toim == "LAVATARRA") {
+  $fuse = t("Lavatarra");
+}
+if ($toim == "LAVAKERAYSTARRA") {
+  $fuse = t("Lavakeraystarra");
+}
 
 if (isset($muutparametrit) and $muutparametrit != '') {
   $muut = explode('/', $muutparametrit);
@@ -256,6 +262,7 @@ if ($kukarow["extranet"] != "") {
 
       $asiakasid   = $asiakasrow["tunnus"];
       $ytunnus  = $asiakasrow["ytunnus"];
+      $kieli = $asiakasrow["kieli"] != '' ? $asiakasrow["kieli"] : $kieli;
     }
     else {
       exit;
@@ -745,7 +752,7 @@ if ($tee == "ETSILASKU") {
     }
     else {
       //myyntitilaus. Tulostetaan lähete.
-      $where1 .= " lasku.tila in ('L','N','V') ";
+      $where1 .= " lasku.tila in ('L','N','V') and lasku.alatila not in ('F','FF') ";
     }
 
     if (strlen($ytunnus) > 0 and substr($ytunnus, 0, 1) == '£') {
@@ -912,6 +919,28 @@ if ($tee == "ETSILASKU") {
     $use = " use index (yhtio_tila_luontiaika) ";
   }
 
+  if ($toim == "LAVAKERAYSTARRA" or $toim == "LAVATARRA") {
+    //myyntitilaus. Tulostetaan lavatarra-kopio.
+
+    if ($toim == "LAVAKERAYSTARRA") {
+      $where1 .= " lasku.tila = 'L' and lasku.alatila in ('A','B','C','D','E') ";
+    }
+    else {
+      $where1 .= " lasku.tila = 'L' and lasku.alatila in ('B','C','D','E') ";
+    }
+
+    if ($asiakasid > 0) {
+      $where2 .= " and lasku.liitostunnus  = '$asiakasid' ";
+    }
+
+    $where3 .= " and lasku.luontiaika >='$vva-$kka-$ppa 00:00:00'
+                 and lasku.luontiaika <='$vvl-$kkl-$ppl 23:59:59'";
+
+    $joinlisa = " JOIN asiakas on (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus and asiakas.kerayserat='H') ";
+
+    if (!isset($jarj)) $jarj = " lasku.tunnus ";
+    $use = " use index (yhtio_tila_luontiaika) ";
+  }
 
   if (strlen($laskunro) <> 0 and strpos($laskunro, ",") !== FALSE) {
     $where2 .= " and lasku.laskunro IN ('".str_replace(",", "','", $laskunro)."') ";
@@ -1333,6 +1362,9 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
   elseif ($toim == "KERAYSLISTA") {
     $tulostimet[0] = 'Keräyslista';
   }
+  elseif ($toim == "LAVAKERAYSTARRA" or $toim == "LAVATARRA") {
+    $tulostimet[0] = 'Lavatarra';
+  }
   elseif ($toim == "OSOITELAPPU") {
     $tulostimet[0] = 'Osoitelappu';
   }
@@ -1432,12 +1464,11 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
 
   while ($laskurow = mysql_fetch_assoc($rrrresult)) {
 
-    if (empty($kieli)) {
-      //  Haetaan asiakkaan kieli niin hekin ymmärtävät..
-      $query = "SELECT kieli from asiakas WHERE yhtio = '$kukarow[yhtio]' and tunnus='$laskurow[liitostunnus]'";
-      $kielires = pupe_query($query);
-      $kielirow = mysql_fetch_assoc($kielires);
-
+    //  Haetaan asiakkaan kieli niin hekin ymmärtävät..
+    $query = "SELECT kieli from asiakas WHERE yhtio = '$kukarow[yhtio]' and tunnus='$laskurow[liitostunnus]'";
+    $kielires = pupe_query($query);
+    $kielirow = mysql_fetch_assoc($kielires);
+    if ($kielirow['kieli'] != '') {
       $kieli = $kielirow['kieli'];
     }
 
@@ -2284,6 +2315,9 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
       elseif ($excel_tarjous != '') {
         $kerayslistatyyppi = "EXCEL3";
       }
+      elseif ($asrow['kerayserat'] == 'H') {
+        $kerayslistatyyppi = "LAVAKERAYS";
+      }
 
       // keräyslistalle ei oletuksena tulosteta saldottomia tuotteita
       if ($yhtiorow["kerataanko_saldottomat"] == '') {
@@ -2318,6 +2352,14 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
 
       $ale_query_select_lisa = generoi_alekentta_select('erikseen', 'M');
       $ale_query_select_lisa_y = generoi_alekentta_select('yhteen', 'M');
+
+      // Asiakaaalla lavakerays
+      if ($asrow['kerayserat'] == 'H') {
+        require "inc/lavakeraysparametrit.inc";
+
+        $select_lisa .= $lavakeraysparam;
+        $pjat_sortlisa = "tilausrivin_lisatiedot.alunperin_puute,lavasort,";
+      }
 
       // keräyslistan rivit
       if (isset($kerayseran_tilaukset) and trim($kerayseran_tilaukset) != '' and ($yhtiorow['kerayserat'] == 'K' or $yhtiorow['kerayserat'] == 'P' or ($yhtiorow['kerayserat'] == 'A' and $asrow['kerayserat'] == 'A'))) {
@@ -2405,7 +2447,7 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
         'iso_boldi'         => $iso_boldi,
         'kala'              => 0,
         'kieli'             => $kieli,
-        'komento'      => '',
+        'komento'           => '',
         'laskurow'          => $laskurow,
         'norm'              => $norm,
         'page'              => NULL,
@@ -2417,17 +2459,17 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
         'pieni_boldi'       => $pieni_boldi,
         'rectparam'         => $rectparam,
         'rivinkorkeus'      => $rivinkorkeus,
-        'rivinumerot'      => $rivinumerot,
+        'rivinumerot'       => $rivinumerot,
         'row'               => NULL,
         'sivu'              => 1,
         'tee'               => $tee,
-        'thispage'      => NULL,
+        'thispage'          => NULL,
         'tilausnumeroita'   => $tilausnumeroita,
         'toim'              => $toim,
         'tots'              => 0,
-        'tyyppi'        => $tyyppi,
+        'tyyppi'            => $tyyppi,
         'kerayseran_numero' => $kerayseran_numero,
-        'kerayslistatyyppi'  => $kerayslistatyyppi);
+        'kerayslistatyyppi' => $kerayslistatyyppi,);
 
       // Aloitellaan keräyslistan teko
       $params_kerayslista = alku_kerayslista($params_kerayslista);
@@ -2460,6 +2502,133 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
       //tulostetaan sivu
       print_pdf_kerayslista($params_kerayslista);
 
+      $tee = '';
+    }
+
+    if ($toim == "LAVAKERAYSTARRA" or $toim == "LAVATARRA") {
+
+      require "inc/lavakeraysparametrit.inc";
+
+      if ($toim == "LAVAKERAYSTARRA") {
+        require_once "inc/tulosta_lavakeraystarrat_tec.inc";
+      }
+      else {
+        require_once "lavatarra_pdf.inc";
+      }
+
+      $otunnus = $laskurow["tunnus"];
+      $tilausnumeroita = $otunnus;
+
+      if ($laskurow['kerayslista'] > 0) {
+        //haetaan kaikki tälle klöntille kuuluvat otsikot
+        $query = "SELECT GROUP_CONCAT(DISTINCT tunnus ORDER BY tunnus SEPARATOR ',') tunnukset
+                  FROM lasku
+                  WHERE yhtio     = '{$kukarow['yhtio']}'
+                  AND tila        = '{$laskurow['tila']}'
+                  AND kerayslista = '{$laskurow['kerayslista']}'
+                  HAVING tunnukset IS NOT NULL";
+        $toimresult = pupe_query($query);
+
+        //jos rivejä löytyy niin tiedetään, että tämä on keräysklöntti
+        if (mysql_num_rows($toimresult) > 0) {
+          $toimrow = mysql_fetch_assoc($toimresult);
+          $tilausnumeroita = $toimrow["tunnukset"];
+        }
+      }
+
+      $lisa1 = "";
+      $select_lisa = $lavakeraysparam;
+      $pjat_sortlisa = "tilausrivin_lisatiedot.alunperin_puute,lavasort,";
+      $where_lisa = "";
+
+      // keräyslistalle ei oletuksena tulosteta saldottomia tuotteita
+      if ($yhtiorow["kerataanko_saldottomat"] == '') {
+        $lisa1 = " and tuote.ei_saldoa = '' ";
+      }
+
+      $sorttauskentta = generoi_sorttauskentta($yhtiorow["kerayslistan_jarjestys"]);
+      $order_sorttaus = $yhtiorow["kerayslistan_jarjestys_suunta"];
+
+      if ($yhtiorow["kerayslistan_palvelutjatuottet"] == "E") $pjat_sortlisa = "tuotetyyppi,";
+
+      // Summataan rivit yhteen (HUOM: unohdetaan kaikki perheet!)
+      if ($yhtiorow["kerayslistan_jarjestys"] == "S") {
+        $select_lisa = "sum(tilausrivi.kpl) kpl, sum(tilausrivi.tilkpl) tilkpl, sum(tilausrivi.varattu) varattu, sum(tilausrivi.jt) jt, '' perheid, '' perheid2, ";
+        $where_lisa = "GROUP BY tilausrivi.tuoteno, tilausrivi.hyllyalue, tilausrivi.hyllyvali, tilausrivi.hyllyalue, tilausrivi.hyllynro";
+      }
+
+      // rivit
+      $query = "SELECT tilausrivi.*,
+                $select_lisa
+                $sorttauskentta,
+                if (tuote.tuotetyyppi='K','2 Työt','1 Muut') tuotetyyppi,
+                tuote.myynti_era
+                FROM tilausrivi
+                LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
+                JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
+                WHERE tilausrivi.otunnus  in ($tilausnumeroita)
+                and tilausrivi.yhtio      = '$kukarow[yhtio]'
+                and tilausrivi.tyyppi    != 'D'
+                and tilausrivi.var       != 'O'
+                $lisa1
+                $where_lisa
+                ORDER BY $pjat_sortlisa sorttauskentta $order_sorttaus, tilausrivi.tunnus";
+      $riresult = pupe_query($query);
+
+      $lavanumero = 1;
+      $lava_referenssiluku = 0;
+      $lavat = array();
+      $rivinumerot = array();
+      $kal = 1;
+
+      while ($row = mysql_fetch_assoc($riresult)) {
+        if (empty($lavat[$lavanumero][$row['otunnus']])) {
+          $lavat[$lavanumero][$row['otunnus']] = 0;
+        }
+
+        if ($lava_referenssiluku >= lavakerayskapasiteetti) {
+          $lavanumero++;
+          $lava_referenssiluku=0;
+        }
+
+        $lavat[$lavanumero][$row['otunnus']] += round(($row['varattu']+$row['kpl'])/$row['myynti_era'], 2);
+        $lava_referenssiluku += ($row['tilkpl'] * $row['lavakoko']);
+
+        $rivinumerot[$row["tunnus"]] = $kal;
+        $kal++;
+      }
+
+      if ($toim == "LAVAKERAYSTARRA") {
+        // Lavakeraystarrat
+        tulosta_lavakeraystarrat_tec($riresult, $rivinumerot, $komento["Lavatarra"]);
+      }
+      else {
+        $params_lavatarra = array(
+          'norm'              => $norm,
+          'pieni'             => $pieni,
+          'pieni_boldi'       => $pieni_boldi,
+          'boldi'             => $boldi,
+          'iso'               => $iso,
+          'iso_boldi'         => $iso_boldi,
+          'rectparam'         => $rectparam,
+          'komento'           => $komento["Lavatarra"],
+          'toimitustapa'      => $laskurow['toimitustapa'],
+          'pdf'               => NULL,
+          'lavanumero'        => 0,
+          'tilaukset'         => NULL,
+          'tee'               => $tee,
+          'thispage'          => NULL,);
+
+
+        foreach ($lavat as $lava => $tilaukset) {
+          ksort($tilaukset);
+          $params_lavatarra['lavanumero'] = $lava;
+          $params_lavatarra['tilaukset'] = $tilaukset;
+          $params_lavatarra = sivu_lavatarra($params_lavatarra);
+        }
+
+        print_pdf_lavatarra($params_lavatarra);
+      }
       $tee = '';
     }
 

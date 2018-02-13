@@ -223,8 +223,8 @@ else {
       echo "<br><br><font class='message'>".t("Asiakashinnastoa luodaan...")."</font><br>";
       flush();
 
-      if (@require_once "inc/ProgressBar.class.php");
-      elseif (@require_once "ProgressBar.class.php");
+      if (@include_once "inc/ProgressBar.class.php");
+      elseif (@include_once "ProgressBar.class.php");
 
       $bar = new ProgressBar();
       $elements = mysql_num_rows($rresult); // total number of elements to process
@@ -520,6 +520,18 @@ else {
           }
           $asiakashinta_veroton    = $asiakashinta;
           $asiakashinta_verollinen = round(($asiakashinta*(1+$lis_alv/100)), 2);
+        }
+
+        // Katsotaan, mistä löytyy enari
+        if ($rrow["eankoodi"] == '') {
+          $query = "SELECT *
+                    FROM tuotteen_toimittajat
+                    WHERE yhtio = '$kukarow[yhtio]'
+                    AND tuoteno = '$rrow[tuoteno]'
+                    ORDER BY if (jarjestys = 0, 9999, jarjestys) limit 1";
+          $tuotetoim_res = pupe_query($query);
+          $tuotetoimrow = mysql_fetch_assoc($tuotetoim_res);
+          $rrow["eankoodi"] = $tuotetoimrow["viivakoodi"];
         }
 
         if (isset($worksheet)) {

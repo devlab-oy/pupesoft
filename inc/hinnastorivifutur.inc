@@ -28,6 +28,18 @@ function hinnastorivi($tuote, $laskurow) {
     return;
   }
 
+  // Katsotaan, mistä löytyy enari
+  if ($tuote["eankoodi"] == '') {
+    $query = "SELECT *
+              FROM tuotteen_toimittajat
+              WHERE yhtio = '$kukarow[yhtio]'
+              AND tuoteno = '$tuote[tuoteno]'
+              ORDER BY if (jarjestys = 0, 9999, jarjestys) limit 1";
+    $tuotetoim_res = pupe_query($query);
+    $tuotetoimrow = mysql_fetch_assoc($tuotetoim_res);
+    $tuote["eankoodi"] = $tuotetoimrow["viivakoodi"];
+  }
+
   // muutetaan yksiköt ISO-standardin mukaisiksi
   $yksikko="";
   if ($tuote['yksikko']=='KPL' or $tuote['yksikko']=='PCE')
@@ -65,6 +77,7 @@ function hinnastorivi($tuote, $laskurow) {
   $out  .= sprintf("%-19.19s", "");                     // määrän minimi
   $out  .= sprintf("%-19.19s", "");                     // määrän maksimi
   $out  .= sprintf("%-11.11s", "");                     // alennushinta
+  $out  .= sprintf("%-35.35s", $tuote['muuta']);        // tuotteen "muuta"
   $out .= "\n";
 
   return $out;

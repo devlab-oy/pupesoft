@@ -140,7 +140,31 @@ if ((int) $chk_row["ok"] == (int) $chk_row["kaikki"] and (int) $chk_row["ok"] !=
     pupe_query($query);
   }
 
-  if ($yhtiorow['saldotarkistus_tulostusjonossa'] != '') {
+  if ($laskurow['liitostunnus'] != 999999999) {
+    //haetaan asiakkaan tiedot
+    $query = "SELECT luokka,
+              puhelin,
+              if (asiakasnro!='', asiakasnro, ytunnus) asiakasnro,
+              asiakasnro as asiakasnro_aito,
+              kerayserat,
+              kieli
+              FROM asiakas
+              WHERE tunnus='$laskurow[liitostunnus]' and yhtio='$kukarow[yhtio]'";
+    $riresult = pupe_query($query);
+    $asrow = mysql_fetch_assoc($riresult);
+  }
+  else {
+    $asrow = array(
+      'luokka' => '',
+      'puhelin' => '',
+      'asiakasnro' => '',
+      'asiakasnro_aito' => '',
+      'kerayserat' => '',
+      'kieli' => '',
+    );
+  }
+
+  if ($yhtiorow['saldotarkistus_tulostusjonossa'] != '' and $asrow['kerayserat'] != 'H') {
 
     if ($yhtiorow['saldotarkistus_tulostusjonossa'] == 'P') {
       $var_wherelisa = "AND var = 'P'";
@@ -208,30 +232,6 @@ if ((int) $chk_row["ok"] == (int) $chk_row["kaikki"] and (int) $chk_row["ok"] !=
   //keräyslistan tulostusta varten
   require_once "tulosta_lahete_kerayslista.inc";
 
-  if ($laskurow['liitostunnus'] != 999999999) {
-    //haetaan asiakkaan tiedot
-    $query = "SELECT luokka,
-              puhelin,
-              if (asiakasnro!='', asiakasnro, ytunnus) asiakasnro,
-              asiakasnro as asiakasnro_aito,
-              kerayserat,
-              kieli
-              FROM asiakas
-              WHERE tunnus='$laskurow[liitostunnus]' and yhtio='$kukarow[yhtio]'";
-    $riresult = pupe_query($query);
-    $asrow = mysql_fetch_assoc($riresult);
-  }
-  else {
-    $asrow = array(
-      'luokka' => '',
-      'puhelin' => '',
-      'asiakasnro' => '',
-      'asiakasnro_aito' => '',
-      'kerayserat' => '',
-      'kieli' => '',
-    );
-  }
-
   if ($yhtiorow['kerayserat'] == 'P' or ($yhtiorow['kerayserat'] == 'A' and $asrow['kerayserat'] == 'A')) {
     $kerayseran_numero = tee_keraysera_painon_perusteella($laskurow, $tilausnumeroita);
   }
@@ -254,6 +254,9 @@ if ((int) $chk_row["ok"] == (int) $chk_row["kaikki"] and (int) $chk_row["ok"] !=
   }
   elseif ($varastorow["ulkoinen_jarjestelma"] == "C") {
     $kerayslistatyyppi = "EXCEL1";
+  }
+  elseif ($asrow['kerayserat'] == 'H') {
+    $kerayslistatyyppi = "LAVAKERAYS";
   }
 
   // keräyslistalle ei oletuksena tulosteta saldottomia tuotteita
@@ -306,6 +309,15 @@ if ((int) $chk_row["ok"] == (int) $chk_row["kaikki"] and (int) $chk_row["ok"] !=
     }
   }
 
+  // Asiakaaalla lavakerays
+  if ($asrow['kerayserat'] == 'H') {
+    require "inc/lavakeraysparametrit.inc";
+    require "inc/tulosta_lavakeraystarrat_tec.inc";
+
+    $select_lisa .= $lavakeraysparam;
+    $pjat_sortlisa = "tilausrivin_lisatiedot.alunperin_puute,lavasort,";
+  }
+
   // keräyslistan rivit
   if (($yhtiorow['kerayserat'] == 'K' and isset($keraysvyohyke) and trim($keraysvyohyke) != '') or ($yhtiorow['kerayserat'] == 'P' or ($yhtiorow['kerayserat'] == 'A' and $asrow['kerayserat'] == 'A'))) {
 
@@ -342,6 +354,7 @@ if ((int) $chk_row["ok"] == (int) $chk_row["kaikki"] and (int) $chk_row["ok"] !=
               tuote.sarjanumeroseuranta,
               tuote.eankoodi
               FROM tilausrivi
+              LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
               JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
               JOIN lasku ON ( lasku.yhtio = tilausrivi.yhtio AND lasku.tunnus = tilausrivi.otunnus )
               WHERE tilausrivi.otunnus  in ($tilausnumeroita)
@@ -412,13 +425,14 @@ if ((int) $chk_row["ok"] == (int) $chk_row["kaikki"] and (int) $chk_row["ok"] !=
   }
 
   // Yhdistettäessä tilauksia samalle keräyslistalle haetaan kaikkien tilausten kommentit yms. tiedot mukaan
-  $query = "SELECT GROUP_CONCAT(if(tilausyhteyshenkilo != '', tilausyhteyshenkilo, NULL) SEPARATOR ', ') tilaajat,
-            GROUP_CONCAT(if(asiakkaan_tilausnumero != '', asiakkaan_tilausnumero, NULL) SEPARATOR ', ') asiakkaan_tilausnumerot,
-            GROUP_CONCAT(if(kohde != '', kohde, NULL) SEPARATOR ', ') kohteet,
-            GROUP_CONCAT(if(viesti != '', viesti, NULL) SEPARATOR ', ') tilausviitteet,
-            GROUP_CONCAT(if(ohjausmerkki != '', ohjausmerkki, NULL) SEPARATOR ', ') ohjausmerkit,
-            GROUP_CONCAT(if(comments != '', comments, NULL) SEPARATOR ', ') kommentti1,
-            GROUP_CONCAT(if(sisviesti2 != '', sisviesti2, NULL) SEPARATOR ', ') kommentti2
+  $query = "SELECT
+            GROUP_CONCAT(DISTINCT if(tilausyhteyshenkilo != '', tilausyhteyshenkilo, NULL) SEPARATOR ', ') tilaajat,
+            GROUP_CONCAT(DISTINCT if(asiakkaan_tilausnumero != '', asiakkaan_tilausnumero, NULL) SEPARATOR ', ') asiakkaan_tilausnumerot,
+            GROUP_CONCAT(DISTINCT if(kohde != '', kohde, NULL) SEPARATOR ', ') kohteet,
+            GROUP_CONCAT(DISTINCT if(viesti != '', viesti, NULL) SEPARATOR ', ') tilausviitteet,
+            GROUP_CONCAT(DISTINCT if(ohjausmerkki != '', ohjausmerkki, NULL) SEPARATOR ', ') ohjausmerkit,
+            GROUP_CONCAT(DISTINCT if(comments != '', comments, NULL) SEPARATOR ', ') kommentti1,
+            GROUP_CONCAT(DISTINCT if(sisviesti2 != '', sisviesti2, NULL) SEPARATOR ', ') kommentti2
             FROM lasku
             WHERE tunnus IN ({$tilausnumeroita})
             AND yhtio    = '{$kukarow['yhtio']}'";
@@ -485,6 +499,7 @@ if ((int) $chk_row["ok"] == (int) $chk_row["kaikki"] and (int) $chk_row["ok"] !=
 
     while ($row = mysql_fetch_assoc($riresult)) {
       $params_kerayslista["row"] = $row;
+
       $params_kerayslista = rivi_kerayslista($params_kerayslista);
     }
 
@@ -508,6 +523,19 @@ if ((int) $chk_row["ok"] == (int) $chk_row["kaikki"] and (int) $chk_row["ok"] !=
         $valittu_tulostin,
         "0"
       );
+    }
+  }
+
+  if (!empty($valittu_lavakeraystarra_tulostin)) {
+    $query  = "SELECT *
+               FROM kirjoittimet
+               WHERE yhtio = '$kukarow[yhtio]'
+               AND tunnus = '$valittu_lavakeraystarra_tulostin'";
+    $kirres = pupe_query($query);
+    $kirrow = mysql_fetch_assoc($kirres);
+
+    if (!empty($kirrow['komento'])) {
+      tulosta_lavakeraystarrat_tec($riresult, $rivinumerot, $kirrow['komento']);
     }
   }
 

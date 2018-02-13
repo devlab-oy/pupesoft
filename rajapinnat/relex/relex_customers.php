@@ -34,6 +34,7 @@ $weekly_ajo = FALSE;
 $ajotext = "";
 $ftppath = "/data/input";
 $extra_asiakastiedot = false;
+$crm_asiakastiedot = false;
 
 if (isset($argv[2]) and $argv[2] != '') {
 
@@ -61,6 +62,10 @@ if (isset($argv[4]) and trim($argv[4]) == 'extra') {
   $extra_asiakastiedot = true;
 }
 
+if (isset($argv[4]) and trim($argv[4]) == 'crm') {
+  $crm_asiakastiedot = true;
+}
+
 // Yhtiö
 $yhtio = mysql_real_escape_string($argv[1]);
 
@@ -77,6 +82,9 @@ if (!$fp = fopen($filepath, 'w+')) {
 // Otsikkotieto
 if ($extra_asiakastiedot) {
   $header = "code;name;customer_group;custnro;sellerid\n";
+}
+if ($crm_asiakastiedot) {
+  $header = "y-tunnus;nimi;katuosoite;postinumero;postitoimipaikka;maa;sähköpostiosoite;puhelin;asiakasnumero;asiakasryhmä ja ryhmän selitys;maksuehto;toimitusehto;myyjän nimi tai myyjän numero;toimitusosoitteen postitoimipaikka\n";
 }
 else {
   $header = "code;name;customer_group\n";
@@ -100,6 +108,9 @@ elseif ($paiva_ajo) {
 $asiakastiedot_lisa = "";
 if ($extra_asiakastiedot) {
   $asiakastiedot_lisa = ", asiakas.asiakasnro, asiakas.myyjanro";
+}
+if ($crm_asiakastiedot) {
+  $asiakastiedot_lisa = ", asiakas.ytunnus, asiakas.osoite, asiakas.postino, asiakas.postitp, asiakas.maa, asiakas.email, asiakas.puhelin, asiakas.asiakasnro, asiakas.ryhma, asiakas.maksuehto, asiakas.toimitusehto, asiakas.myyjanro, asiakas.toim_postitp";
 }
 
 // Haetaan asiakkaat
@@ -128,13 +139,33 @@ echo date("d.m.Y @ G:i:s") . ": Relex asiakasrivejä {$rows} kappaletta.\n";
 $k_rivi = 0;
 
 while ($row = mysql_fetch_assoc($res)) {
-  $rivi  = "{$row['maa']}-{$row['tunnus']};";
-  $rivi .= pupesoft_csvstring($row['nimi']).";";
-  $rivi .= pupesoft_csvstring($row['ryhma']);
+
+  if (!$crm_asiakastiedot) {
+    $rivi  = "{$row['maa']}-{$row['tunnus']};";
+    $rivi .= pupesoft_csvstring($row['nimi']).";";
+    $rivi .= pupesoft_csvstring($row['ryhma']);
+  }
 
   if ($extra_asiakastiedot) {
     $rivi .= ";".pupesoft_csvstring($row['asiakasnro']);
     $rivi .= ";".pupesoft_csvstring($row['myyjanro']);
+  }
+
+  if ($crm_asiakastiedot) {
+    $rivi .= pupesoft_csvstring($row['ytunnus']);
+    $rivi .= ";".pupesoft_csvstring($row['nimi']);
+    $rivi .= ";".pupesoft_csvstring($row['osoite']);
+    $rivi .= ";".pupesoft_csvstring($row['postino']);
+    $rivi .= ";".pupesoft_csvstring($row['postitp']);
+    $rivi .= ";".pupesoft_csvstring($row['maa']);
+    $rivi .= ";".pupesoft_csvstring($row['email']);
+    $rivi .= ";".pupesoft_csvstring($row['puhelin']);
+    $rivi .= ";".pupesoft_csvstring($row['asiakasnro']);
+    $rivi .= ";".pupesoft_csvstring($row['ryhma']);
+    $rivi .= ";".pupesoft_csvstring($row['maksuehto']);
+    $rivi .= ";".pupesoft_csvstring($row['toimitusehto']);
+    $rivi .= ";".pupesoft_csvstring($row['myyjanro']);
+    $rivi .= ";".pupesoft_csvstring($row['toim_postitp']);
   }
 
   $rivi .= "\n";

@@ -736,7 +736,6 @@ if ($tee == 'tulosta') {
         $rakir_row["toim_osoite"]  = $toitarow["toim_osoite"];
         $rakir_row["toim_postino"]  = $toitarow["toim_postino"];
         $rakir_row["toim_postitp"]  = $toitarow["toim_postitp"];
-
       }
 
       $res = $rakir_row["tunnukset_res"];
@@ -1097,41 +1096,13 @@ if ($tee == 'tulosta') {
       }
 
       $_desadv = (strpos($rakir_row['toimitusvahvistus'], 'desadv') !== false);
+      $_ra_kopio_check = (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") !== false);
+      $_ra_kopio_desadv = ($_ra_kopio_check and isset($tulosta_desadv) and $tulosta_desadv == 'JOO');
+      $_ra_kopio = (!$_ra_kopio_check or $_ra_kopio_desadv);
 
-      if ($rakir_row['toimitusvahvistus'] != '' and (!$_onko_unifaun or $_onko_unifaun_xp or $_desadv)) {
-
-        if ($rakir_row["toimitusvahvistus"] == "toimitusvahvistus_desadv_una.inc") {
-          $desadv_version = "una";
-          $rakir_row["toimitusvahvistus"] = "toimitusvahvistus_desadv.inc";
-        }
-        elseif ($rakir_row["toimitusvahvistus"] == "toimitusvahvistus_desadv_fi0089.inc") {
-          $desadv_version = "fi0089";
-          $rakir_row["toimitusvahvistus"] = "toimitusvahvistus_desadv.inc";
-        }
-        else {
-          $desadv_version = "";
-        }
-
-        if (file_exists("tilauskasittely/$rakir_row[toimitusvahvistus]")) {
-
-          if ($rakir_row["toimitusvahvistus"] == "editilaus_out_futur.inc") {
-
-            // jos $laskurow on jo populoitu, otetaan se talteen ja palautetaan t‰m‰n j‰lkeen
-            $tmp_laskurow = $laskurow;
-
-            $query = "SELECT * FROM lasku WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$rivi['otunnus']}'";
-            $laskurow_edi_res = pupe_query($query);
-            $laskurow = mysql_fetch_assoc($laskurow_edi_res);
-
-            $myynti_vai_osto = 'M';
-          }
-
-          require "tilauskasittely/$rakir_row[toimitusvahvistus]";
-
-          if ($rakir_row["toimitusvahvistus"] == "editilaus_out_futur.inc") {
-            $laskurow = $tmp_laskurow;
-          }
-        }
+      // L‰hetet‰‰n toimitusvahvistus
+      if ($rakir_row['toimitusvahvistus'] != '' and (!$_onko_unifaun or $_onko_unifaun_xp or $_desadv) and $_ra_kopio) {
+        pupesoft_toimitusvahvistus($otunnukset, $tunnukset, $rahtikirjanro);
       }
 
       // jos ei JV merkataan rahtikirjat tulostetuksi otsikollekkin E-tyyppiset Unifaunit merkataan toimitetuiksi close_with_printer-haarassa..

@@ -82,7 +82,10 @@ class PrestaManufacturers extends PrestaClient {
   }
 
   private function fetch_id_by_name($name) {
-    foreach ($this->fetch_all() as $record) {
+    $display = array('id', 'name');
+    $filters = array("name" => $name);
+
+    foreach ($this->all($display, $filters) as $record) {
       if ($record['name'] == $name) {
         return $record['id'];
       }

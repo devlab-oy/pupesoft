@@ -238,9 +238,13 @@ if (!function_exists('logmaster_outbounddelivery')) {
               lasku.varasto AS otsikon_varasto,
               tilausrivi.kpl + tilausrivi.varattu AS kpl,
               tilausrivi.tunnus AS tilausrivin_tunnus,
+              tilausrivi.keratty,
               lasku.toimaika AS lasku_toimaika,
               asiakas.email,
+              asiakas.asiakasnro,
               tuote.eankoodi,
+              tuote.ei_saldoa,
+              tuote.tullinimike1,
               laskun_lisatiedot.noutopisteen_tunnus
               FROM lasku
               LEFT JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus)
@@ -253,8 +257,7 @@ if (!function_exists('logmaster_outbounddelivery')) {
               )
               JOIN tuote ON (
                 tuote.yhtio         = tilausrivi.yhtio AND
-                tuote.tuoteno       = tilausrivi.tuoteno AND
-                tuote.ei_saldoa     = ''
+                tuote.tuoteno       = tilausrivi.tuoteno
               )
               LEFT JOIN laskun_lisatiedot ON (
                 laskun_lisatiedot.yhtio         = lasku.yhtio AND
@@ -276,7 +279,7 @@ if (!function_exists('logmaster_outbounddelivery')) {
 
     switch ($varastorow['ulkoinen_jarjestelma']) {
     case 'L':
-      $uj_nimi = "Helsingin Hyllyvarasto";
+      $uj_nimi = "Velox";
       break;
     case 'P':
       $uj_nimi = "PostNord";
@@ -349,6 +352,12 @@ if (!function_exists('logmaster_outbounddelivery')) {
     $orderedby->addChild('CustCountry',  xml_cleanstring($looprow['maa'], 10));
     $orderedby->addChild('Email',        xml_cleanstring($looprow['email']));
 
+    if ($uj_nimi == "Velox") {
+      $orderedby->addChild('Custnr',        xml_cleanstring($looprow['asiakasnro']));
+      $orderedby->addChild('PaymentTerm',   xml_cleanstring($looprow['maksuehto']));
+      $orderedby->addChild('Seller',        xml_cleanstring($looprow['myyja']));
+    }
+
     $receiver = $custpickinglist->addChild('Receiver');
     $receiver->addChild('RecCustAccount',  0);
     $receiver->addChild('RecCustName',     xml_cleanstring($rec_cust_name, 50));
@@ -383,24 +392,48 @@ if (!function_exists('logmaster_outbounddelivery')) {
       // Laitetaan kappalemäärät kuntoon
       $looprow['kpl'] = $looprow['var'] == 'J' ? 0 : $looprow['kpl'];
 
+      if ($uj_nimi == 'PostNord' and $looprow['ei_saldoa'] == 'o') continue;
+
       $line = $lines->addChild('Line');
       $line->addAttribute('No', $_line_i);
       $line->addChild('TransId',           xml_cleanstring($looprow['tilausrivin_tunnus'], 20));
-      $line->addChild('ItemNumber',        xml_cleanstring($looprow[$logmaster_itemnumberfield], 22));
-      $line->addChild('CustItemNumber',    0);
-      $line->addChild('ItemName',          0);
-      $line->addChild('ItemText',          0);
-      $line->addChild('BatchId',           0);
-      $line->addChild('CustItemName',      0);
-      $line->addChild('Type',              1);
-      $line->addChild('BBDate',            0);
-      $line->addChild('OrderedQuantity',   $looprow['kpl']);
-      $line->addChild('DeliveredQuantity', $looprow['kpl']);
-      $line->addChild('Unit',              0);
-      $line->addChild('Price',             0);
-      $line->addChild('DiscountPercent',   0);
-      $line->addChild('CurrencyCode',      0);
-      $line->addChild('TaxCode',           0);
+
+      if ($uj_nimi == "Velox") {
+        $line->addChild('ItemNumber',        xml_cleanstring($looprow[$logmaster_itemnumberfield], 32));
+        $line->addChild('CustItemNumber',    0);
+        $line->addChild('ItemName',          xml_cleanstring($looprow['nimitys'], 100));
+        $line->addChild('ItemText',          0);
+        $line->addChild('BatchId',           0);
+        $line->addChild('CustItemName',      0);
+        $line->addChild('Type',              $looprow['tyyppi']);
+        $line->addChild('BBDate',            0);
+        $line->addChild('OrderedQuantity',   $looprow['kpl']);
+        $line->addChild('DeliveredQuantity', $looprow['kpl']);
+        $line->addChild('Unit',              xml_cleanstring($looprow['yksikko']));
+        $line->addChild('Price',             $looprow['hinta']);
+        $line->addChild('DiscountPercent',   $looprow['ale1']);
+        $line->addChild('CurrencyCode',      $looprow['valkoodi']);
+        $line->addChild('TaxCode',           $looprow['alv']);
+        $line->addChild('Stockable',         $looprow['keratty']);
+      }
+      else {
+        $line->addChild('ItemNumber',        xml_cleanstring($looprow[$logmaster_itemnumberfield], 22));
+        $line->addChild('CustItemNumber',    0);
+        $line->addChild('ItemName',          0);
+        $line->addChild('ItemText',          0);
+        $line->addChild('BatchId',           0);
+        $line->addChild('CustItemName',      0);
+        $line->addChild('Type',              1);
+        $line->addChild('BBDate',            0);
+        $line->addChild('OrderedQuantity',   $looprow['kpl']);
+        $line->addChild('DeliveredQuantity', $looprow['kpl']);
+        $line->addChild('Unit',              0);
+        $line->addChild('Price',             0);
+        $line->addChild('DiscountPercent',   0);
+        $line->addChild('CurrencyCode',      0);
+        $line->addChild('TaxCode',           0);
+      }
+
       $line->addChild('LineInfo',          xml_cleanstring($looprow['kommentti'], 92));
 
       $_line_i++;

@@ -244,8 +244,8 @@ if (mysql_field_name($result, $i) == "ulkoinen_jarjestelma") {
   $ulos .= "<option value='U'{$sel['U']}>".t("Unikko")."</option>";
   $ulos .= "<option value='G'{$sel['G']}>".t("Geodis Wilson")."</option>";
   $ulos .= "<option value='C'{$sel['C']}>".t("Kiinalainen tehdas")."</option>";
-  $ulos .= "<option value='P'{$sel['P']}>".t("Posten Logistik")."</option>";
-  $ulos .= "<option value='L'{$sel['L']}>".t("Helsingin Hyllyvarasto")."</option>";
+  $ulos .= "<option value='P'{$sel['P']}>".t("PostNord")."</option>";
+  $ulos .= "<option value='L'{$sel['L']}>".t("Velox")."</option>";
   $ulos .= "<option value='D'{$sel['D']}>".t("Devoca TalknPick")."</option>";
   $ulos .= "</select>";
   $ulos .= "</td>";

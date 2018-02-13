@@ -16,7 +16,7 @@ if ($tee == 'TUOTE' and $kukarow['extranet'] != "") {
 
   // haetaan avoimen tilauksen otsikko
   if ($kukarow["kesken"] != 0) {
-    $query    = "SELECT * from lasku where yhtio='$kukarow[yhtio]' and tunnus='$kukarow[kesken]'";
+    $query = "SELECT * from lasku where yhtio='$kukarow[yhtio]' and tunnus='$kukarow[kesken]'";
     $laskures = pupe_query($query);
   }
   else {
@@ -27,7 +27,7 @@ if ($tee == 'TUOTE' and $kukarow['extranet'] != "") {
     $kaytiin_otsikolla = "NOJOO!";
 
     // haetaan avoimen tilauksen otsikko
-    $query    = "SELECT * from lasku where yhtio='$kukarow[yhtio]' and tunnus='$kukarow[kesken]'";
+    $query = "SELECT * from lasku where yhtio='$kukarow[yhtio]' and tunnus='$kukarow[kesken]'";
     $laskures = pupe_query($query);
   }
 
@@ -41,7 +41,7 @@ if ($tee == 'TUOTE' and $kukarow['extranet'] != "") {
   $kpl = 1;
 
   // haetaan tuotteen tiedot
-  $query    = "SELECT * from tuote where yhtio='$kukarow[yhtio]' and tuoteno='$tuoteno'";
+  $query = "SELECT * from tuote where yhtio='$kukarow[yhtio]' and tuoteno='$tuoteno'";
   $tuoteres = pupe_query($query);
 
   if (mysql_num_rows($tuoteres) == 0) {
@@ -51,22 +51,22 @@ if ($tee == 'TUOTE' and $kukarow['extranet'] != "") {
     // tuote löytyi ok, lisätään rivi
     $trow = mysql_fetch_array($tuoteres);
 
-    $ytunnus         = $laskurow["ytunnus"];
-    $kpl             = (float) $kpl;
-    $kpl_echo      = (float) $kpl;
-    $tuoteno         = $trow["tuoteno"];
-    $toimaika        = $laskurow["toimaika"];
-    $kerayspvm       = $laskurow["kerayspvm"];
-    $hinta          = "";
-    $netto          = "";
-    $alv         = "";
-    $var       = "";
-    $varasto        = $laskurow["varasto"];
-    $rivitunnus     = "";
-    $korvaavakielto   = "";
-    $jtkielto      = $laskurow['jtkielto'];
+    $ytunnus = $laskurow["ytunnus"];
+    $kpl = (float) $kpl;
+    $kpl_echo = (float) $kpl;
+    $tuoteno = $trow["tuoteno"];
+    $toimaika = $laskurow["toimaika"];
+    $kerayspvm = $laskurow["kerayspvm"];
+    $hinta = "";
+    $netto = "";
+    $alv = "";
+    $var = "";
+    $varasto = $laskurow["varasto"];
+    $rivitunnus = "";
+    $korvaavakielto = "";
+    $jtkielto = $laskurow['jtkielto'];
     $varataan_saldoa = "";
-    $paikka  = "";
+    $paikka = "";
 
     for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
       ${'ale'.$alepostfix} = "";
@@ -87,22 +87,22 @@ if ($tee == 'TUOTE' and $kukarow['extranet'] != "") {
 
   echo "<br>";
 
-  $trow       = "";
-  $ytunnus         = "";
-  $kpl             = "";
-  $tuoteno         = "";
-  $toimaika        = "";
-  $kerayspvm       = "";
-  $hinta          = "";
-  $netto          = "";
-  $alv         = "";
-  $var       = "";
-  $varasto        = "";
-  $rivitunnus     = "";
-  $korvaavakielto   = "";
+  $trow = "";
+  $ytunnus = "";
+  $kpl = "";
+  $tuoteno = "";
+  $toimaika = "";
+  $kerayspvm = "";
+  $hinta = "";
+  $netto = "";
+  $alv = "";
+  $var = "";
+  $varasto = "";
+  $rivitunnus = "";
+  $korvaavakielto = "";
   $varataan_saldoa = "";
-  $paikka       = "";
-  $tee        = "";
+  $paikka = "";
+  $tee = "";
 
   for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
     ${'ale'.$alepostfix} = "";
@@ -115,22 +115,22 @@ if ($tee == '') {
     $query = "SELECT ytunnus, tunnus
               FROM asiakas
               WHERE yhtio = '$kukarow[yhtio]'
-              and tunnus  = '$kukarow[oletus_asiakas]'
+              and tunnus = '$kukarow[oletus_asiakas]'
               LIMIT 1";
     $result = pupe_query($query);
 
     if (mysql_num_rows($result) == 1) {
       $sytunnusrow = mysql_fetch_assoc($result);
 
-      $sytunnus       = $sytunnusrow['ytunnus'];
-      $sliitostunnus   = $sytunnusrow['liitostunnus'];
-      $eiliittymaa    = "ON";
+      $sytunnus = $sytunnusrow['ytunnus'];
+      $sliitostunnus = $sytunnusrow['liitostunnus'];
+      $eiliittymaa = "ON";
       $luottorajavirhe = "";
-      $jvvirhe      = "";
-      $ylivito      = 0;
-      $trattavirhe    = "";
-      $laji        = "MA";
-      $grouppaus       = "";
+      $jvvirhe = "";
+      $ylivito = 0;
+      $trattavirhe = "";
+      $laji = "MA";
+      $grouppaus = "";
 
       require "saatanat.php";
     }
@@ -188,26 +188,66 @@ if ($tee == '') {
   $query = "SELECT *, kalenteri.tunnus tun, kalenteri.kuka toimittaja
             from kalenteri
             left join kuka on kuka.yhtio=kalenteri.yhtio and kuka.kuka=kalenteri.kuka
-            where tyyppi='extranet_uutinen' $lisa and $ehto
+            where tyyppi='extranet_uutinen'
+            $lisa
+            and $ehto
             and tapa != 'automanual_uutinen'
             order by kokopaiva desc, pvmalku desc, kalenteri.tunnus desc
             $limit";
 
   $result = pupe_query($query);
 
-  if (mysql_num_rows($result)>0) {
+  if (mysql_num_rows($result)) {
 
     ///* uutiset *///
     echo "<td class='back' valign='top' width='100%'>";
 
     while ($uutinen = mysql_fetch_array($result)) {
 
+      $segtunnarit = array();
+      $naytetaan = TRUE;
+
+      // Näytetäänkö uutinen
+      $preq = "SELECT segmenttitunnus
+               FROM uutinen_asiakassegmentti
+               WHERE yhtio = '$kukarow[yhtio]'
+               AND uutistunnus = '$uutinen[tun]'";
+      $preres = pupe_query($preq);
+
+      while ($prerow = mysql_fetch_array($preres)) {
+        $segtunnarit[$prerow["segmenttitunnus"]] = TRUE;
+      }
+
+      if (!empty($segtunnarit)) {
+        $naytetaan = FALSE;
+
+        $preq = "SELECT parent.tunnus
+                  FROM puun_alkio
+                  JOIN dynaaminen_puu AS node ON (puun_alkio.yhtio = node.yhtio and puun_alkio.laji = node.laji and puun_alkio.puun_tunnus = node.tunnus)
+                  JOIN dynaaminen_puu AS parent ON (parent.yhtio = node.yhtio AND parent.laji = node.laji AND parent.lft <= node.lft AND parent.rgt >= node.lft AND parent.lft > 0)
+                  WHERE puun_alkio.yhtio = '{$kukarow['yhtio']}'
+                  AND puun_alkio.laji    = 'ASIAKAS'
+                  AND puun_alkio.liitos  = '{$kukarow['oletus_asiakas']}'";
+        $preres = pupe_query($preq);
+
+        while ($puun_tunnukset = mysql_fetch_assoc($preres)) {
+          if (!empty($segtunnarit[$puun_tunnukset["tunnus"]])) {
+            $naytetaan = TRUE;
+            break;
+          }
+        }
+      }
+
+      if (!$naytetaan) {
+        continue;
+      }
+
       /*
       toimittaja = kuka
-      paivays    = pvmalku
-      otsikko    = kentta01
-      uutinen    = kentta02
-      kuvaurl    = kentta03
+      paivays = pvmalku
+      otsikko = kentta01
+      uutinen = kentta02
+      kuvaurl = kentta03
       */
 
       $kuva = "";
@@ -261,7 +301,7 @@ if ($tee == '') {
           $search[] = "/$m[0]/";
 
           if (mysql_num_rows($tres) <> 1) {
-            $replace[]  = "";
+            $replace[] = "";
           }
           else {
             $trow = mysql_fetch_array($tres);
@@ -270,10 +310,10 @@ if ($tee == '') {
             $asiakastempres = pupe_query($query);
             $asiakastemprow = mysql_fetch_array($asiakastempres);
 
-            $temp_laskurowwi['liitostunnus']  = $asiakastemprow['tunnus'];
-            $temp_laskurowwi['ytunnus']      = $asiakastemprow['ytunnus'];
-            $temp_laskurowwi['valkoodi']    = $asiakastemprow['valkoodi'];
-            $temp_laskurowwi['maa']        = $asiakastemprow['maa'];
+            $temp_laskurowwi['liitostunnus'] = $asiakastemprow['tunnus'];
+            $temp_laskurowwi['ytunnus'] = $asiakastemprow['ytunnus'];
+            $temp_laskurowwi['valkoodi'] = $asiakastemprow['valkoodi'];
+            $temp_laskurowwi['maa'] = $asiakastemprow['maa'];
             $temp_laskurowwi['yhtio_toimipaikka'] = $asiakastemprow['toimipaikka'];
 
             list($hinta, $netto, $ale_kaikki, $alehinta_alv, $alehinta_val) = alehinta($temp_laskurowwi, $trow, 1, '', '', '');
@@ -282,11 +322,11 @@ if ($tee == '') {
               // katotaan onko tuotteelle maakohtaisia valuuttahintoja
               $query = "SELECT *
                         from hinnasto
-                        where yhtio  = '$kukarow[yhtio]'
-                        and tuoteno  = '$trow[tuoteno]'
+                        where yhtio = '$kukarow[yhtio]'
+                        and tuoteno = '$trow[tuoteno]'
                         and valkoodi = '$temp_laskurowwi[valkoodi]'
-                        and maa      = '$temp_laskurowwi[maa]'
-                        and laji     = ''
+                        and maa = '$temp_laskurowwi[maa]'
+                        and laji = ''
                         and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
                         ORDER BY ifnull(to_days(current_date)-to_days(alkupvm),9999999999999)
                         LIMIT 1";
@@ -299,10 +339,10 @@ if ($tee == '') {
                 // katotaan onko tuotteelle valuuttahintoja
                 $query = "SELECT *
                           from hinnasto
-                          where yhtio  = '$kukarow[yhtio]'
-                          and tuoteno  = '$trow[tuoteno]'
+                          where yhtio = '$kukarow[yhtio]'
+                          and tuoteno = '$trow[tuoteno]'
                           and valkoodi = '$temp_laskurowwi[valkoodi]'
-                          and laji     = ''
+                          and laji = ''
                           and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
                           ORDER BY ifnull(to_days(current_date)-to_days(alkupvm),9999999999999)
                           LIMIT 1";
@@ -329,7 +369,7 @@ if ($tee == '') {
               $ashinta = "";
             }
 
-            $replace[]  = "<a href = '$PHP_SELF?tee=TUOTE&toim=$toim&tuoteno=".urlencode($m[1])."'>$trow[tuoteno]</a> $trow[nimitys] $ashinta (".t("ovh").". ".hintapyoristys($hintarow["hinta"])." $hintarow[valkoodi])";
+            $replace[] = "<a href = '$PHP_SELF?tee=TUOTE&toim=$toim&tuoteno=".urlencode($m[1])."'>$trow[tuoteno]</a> $trow[nimitys] $ashinta (".t("ovh").". ".hintapyoristys($hintarow["hinta"])." $hintarow[valkoodi])";
           }
         }
 

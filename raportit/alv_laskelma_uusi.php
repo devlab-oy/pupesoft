@@ -23,6 +23,8 @@ if (strpos($_SERVER['SCRIPT_NAME'], "viranomaisilmoitukset.php") === FALSE) {
 318 "Vero rakentamispalveluiden ostoista"
 319 "Rakentamispalvelun myynti"
 320 "Rakentamispalvelun ostot"
+304 "Vero tavaroiden maahantuonnista EU:n ulkop."
+310 "Tavaroiden maahantuonnit EU:n ulkop."
 */
 
 // suomen oletus ALV muuttui 1.7.2010
@@ -225,6 +227,11 @@ if (isset($tee) and $tee == 'VSRALVKK_UUSI_erittele') {
     // Tavaraostot muista EU-maista
     $taso = 'fi305';
   }
+  elseif ($ryhma == 'fi304') {
+    // Tavaroiden maahantuonnit EU:n ulkop.
+    $taso = 'fi310';
+    $_309lisa    = " or alv_taso like '%fi310%' ";
+  }
   elseif ($ryhma == 'fi318') {
     // Rakannuspalveluiden ostot
     $taso = 'fi320';
@@ -243,6 +250,7 @@ if (isset($tee) and $tee == 'VSRALVKK_UUSI_erittele') {
   }
 
   $query = "SELECT ifnull(group_concat(if(alv_taso like '%fi300%', concat(\"'\",tilino,\"'\"), NULL)), '') tilit300,
+            ifnull(group_concat(if(alv_taso like '%fi310%' and alv_taso not like '%fi300%', concat(\"'\",tilino,\"'\"), NULL)), '') tilit310,
             ifnull(group_concat(if(alv_taso not like '%fi300%', concat(\"'\",tilino,\"'\"), NULL)), '') tilitMUU
             FROM tili
             WHERE yhtio = '$kukarow[yhtio]'
@@ -283,7 +291,7 @@ if (isset($tee) and $tee == 'VSRALVKK_UUSI_erittele') {
               tili.nimi,
               group_concat(lasku.tunnus) ltunnus,
               sum(round(tiliointi.summa * (1 + tiliointi.vero / 100), 2)) $kerroin bruttosumma,
-              sum(round(tiliointi.summa * if (('$ryhma' = 'fi305' or '$ryhma' = 'fi306' or '$ryhma' = 'fi318'), ($oletus_verokanta / 100), tiliointi.vero / 100), 2)) $kerroin verot,
+              sum(round(tiliointi.summa * if(('$ryhma' = 'fi305' or '$ryhma' = 'fi306' or '$ryhma' = 'fi318'), ($oletus_verokanta / 100), if('$ryhma' = 'fi304', (substring(tili.alv_taso,7) / 100), (tiliointi.vero / 100))), 2)) $kerroin verot,
               sum(round(tiliointi.summa / if(lasku.vienti_kurssi = 0, 1, lasku.vienti_kurssi) * (1 + vero / 100), 2)) $kerroin bruttosumma_valuutassa,
               sum(round(tiliointi.summa / if(lasku.vienti_kurssi = 0, 1, lasku.vienti_kurssi) * vero / 100, 2)) $kerroin verot_valuutassa,
               count(*) kpl
@@ -489,6 +497,39 @@ if (isset($tee) and $tee == 'VSRALVKK_UUSI_erittele') {
       $query = "SELECT group_concat(concat(\"'\",tilino,\"'\")) tilit
                 FROM tili
                 WHERE yhtio  = '$kukarow[yhtio]'
+                and alv_taso like ('fi310%')";
+      $tilires = pupe_query($query);
+      $tilirow = mysql_fetch_assoc($tilires);
+
+      $vero = 0.0;
+
+      if ($tilirow['tilit'] != '') {
+        $query = "SELECT sum(round(tiliointi.summa * substring(tili.alv_taso,7) / 100, 2)) veronmaara
+                  FROM tiliointi
+                  join tili on tili.yhtio = tiliointi.yhtio and tili.tilino = tiliointi.tilino
+                  WHERE tiliointi.yhtio  = '$kukarow[yhtio]'
+                  AND tiliointi.korjattu = ''
+                  AND tiliointi.tilino   in ($tilirow[tilit])
+                  AND tiliointi.tapvm    >= '$alkupvm'
+                  AND tiliointi.tapvm    <= '$loppupvm'";
+        $verores = pupe_query($query);
+
+        while ($verorow = mysql_fetch_assoc($verores)) {
+          $vero += $verorow['veronmaara'];
+        }
+
+        echo "<tr><td colspan='5' align='right' class='spec'>".t("Vero tavaroiden maahantuonnista EU:n ulkop.").":</td>
+            <td class='spec'></td>
+            <td align = 'right' class='spec'>".sprintf('%.2f', $vero)."</td>
+            <td colspan='2' class='spec'></td>
+            <td class='spec'></td></tr>";
+
+        $verotot+=$vero;
+      }
+
+      $query = "SELECT group_concat(concat(\"'\",tilino,\"'\")) tilit
+                FROM tili
+                WHERE yhtio  = '$kukarow[yhtio]'
                 and alv_taso in ('fi320')";
       $tilires = pupe_query($query);
       $tilirow = mysql_fetch_assoc($tilires);
@@ -546,7 +587,7 @@ if (isset($tee) and $tee == 'VSRALVKK_UUSI_erittele') {
                 sum(round(rivihinta / if(lasku.vienti_kurssi = 0, 1, lasku.vienti_kurssi) * (1 + tilausrivi.alv / 100), 2)) bruttosumma_valuutassa,
                 sum(round(rivihinta / if(lasku.vienti_kurssi = 0, 1, lasku.vienti_kurssi) * tilausrivi.alv / 100, 2)) verot_valuutassa
                 FROM lasku USE INDEX (yhtio_tila_tapvm)
-                JOIN tilausrivi USE INDEX (uusiotunnus_index) ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.uusiotunnus = lasku.tunnus)
+                JOIN tilausrivi USE INDEX (uusiotunnus_index) ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.uusiotunnus = lasku.tunnus and tilausrivi.tyyppi = 'L')
                 JOIN tuote USE INDEX (tuoteno_index) ON (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno and tuote.tuoteno != '$yhtiorow[ennakkomaksu_tuotenumero]' $tuotetyyppilisa)
                 WHERE lasku.yhtio          = '$kukarow[yhtio]'
                 and lasku.tila             = 'U'
@@ -735,6 +776,10 @@ function laskeveroja($taso, $tulos) {
       $vainveroton = " and tiliointi.vero = 0 ";
     }
 
+    if ($taso == 'fi304' or $taso == 'fi310') {
+      $alvlisa = "JOIN tili ON tili.yhtio = tiliointi.yhtio and tili.tilino = tiliointi.tilino";
+    }
+
     if ($taso == 'fi312') {
       $tuotetyyppilisa = " AND tuote.tuotetyyppi = 'K' ";
       $taso        = 'fi311';
@@ -759,13 +804,18 @@ function laskeveroja($taso, $tulos) {
       $taso        = 'fi306';
       $cleantaso      = 'fi314';
     }
+    elseif ($taso == 'fi304') {
+      $taso        = 'fi310';
+      $cleantaso      = 'fi304';
+    }
     elseif ($taso == 'fi318') {
       $taso        = 'fi320';
       $cleantaso      = 'fi318';
     }
 
     $query = "SELECT ifnull(group_concat(if(alv_taso like '%fi300%', concat(\"'\",tilino,\"'\"), NULL)), '') tilit300,
-              ifnull(group_concat(if(alv_taso not like '%fi300%', concat(\"'\",tilino,\"'\"), NULL)), '') tilitMUU
+              ifnull(group_concat(if(alv_taso like '%fi310%', concat(\"'\",tilino,\"'\"), NULL)), '') tilit310,
+              ifnull(group_concat(if(alv_taso not like '%fi300%' and alv_taso not like '%fi310%', concat(\"'\",tilino,\"'\"), NULL)), '') tilitMUU
               FROM tili
               WHERE yhtio = '$kukarow[yhtio]'
               and (alv_taso like '%$taso%' $_309lisa)";
@@ -774,18 +824,31 @@ function laskeveroja($taso, $tulos) {
 
     $vero = 0.0;
 
-    if ($tilirow['tilit300'] != '' or $tilirow['tilitMUU'] != '') {
+    if ($tilirow['tilit300'] != '' or $tilirow['tilitMUU'] != '' or $tilirow['tilit310'] != '') {
 
 
       $tilinolisa = "";
       if ($tilirow["tilit300"] != "") $tilinolisa .= "(tiliointi.tilino in ($tilirow[tilit300]) $vainveroton)";
       if ($tilirow["tilit300"] != "" and $tilirow["tilitMUU"] != "") $tilinolisa .= " or ";
       if ($tilirow["tilitMUU"] != "") $tilinolisa .= " tiliointi.tilino in ($tilirow[tilitMUU])";
+      if ($tilirow["tilit310"] != "") $tilinolisa .= " tiliointi.tilino in ($tilirow[tilit310])";
 
-      if ($tuotetyyppilisa != '') {
+      if ($tilirow['tilit310'] != '') {
+        $query = "SELECT tili.alv_taso, sum(round(tiliointi.summa * substring(tili.alv_taso,7) / 100, 2)) veronmaara,
+                  sum(tiliointi.summa) summa,
+                   count(*) kpl
+                  FROM tiliointi
+                  $alvlisa
+                  WHERE tiliointi.yhtio  = '$kukarow[yhtio]'
+                  AND tiliointi.korjattu = ''
+                  AND ($tilinolisa)
+                  AND tiliointi.tapvm    >= '$startmonth'
+                  AND tiliointi.tapvm    <= '$endmonth'";
+      }
+      elseif ($tuotetyyppilisa != '') {
         $query = "SELECT lasku.tunnus, lasku.arvo laskuarvo, round(sum(tilausrivi.rivihinta),2) summa
                   FROM lasku USE INDEX (yhtio_tila_tapvm)
-                  JOIN tilausrivi USE INDEX (uusiotunnus_index) ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.uusiotunnus = lasku.tunnus)
+                  JOIN tilausrivi USE INDEX (uusiotunnus_index) ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.uusiotunnus = lasku.tunnus and tilausrivi.tyyppi = 'L')
                   JOIN tuote USE INDEX (tuoteno_index) ON (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno and tuote.tuoteno != '$yhtiorow[ennakkomaksu_tuotenumero]' $tuotetyyppilisa)
                   WHERE lasku.yhtio       = '$kukarow[yhtio]'
                   and lasku.tila          = 'U'
@@ -936,14 +999,17 @@ function alvlaskelma($kk, $vv) {
     // 306 "Vero palveluostoista muista EU maista"
     $fi306 = laskeveroja('fi306', $oletus_verokanta);
 
+    // 304 "Vero tavaraoiden maahnatuonnista EU:n ulkopuolelta"
+    $fi304 = laskeveroja('fi304', $oletus_verokanta);
+
     // 318 "Vero rakentamispalveluiden ostoista"
     $fi318 = laskeveroja('fi318', $oletus_verokanta);
 
     // 307 sääntö fi307
-    $fi307 = laskeveroja('fi307', 'veronmaara') + $fi305 + $fi306 + $fi318;
+    $fi307 = laskeveroja('fi307', 'veronmaara') + $fi305 + $fi306 + $fi304 + $fi318;
 
     // 308 laskennallinen
-    $fi308 = $fi301 + $fi302 + $fi303 + $fi305 + $fi306 + $fi318 - $fi307;
+    $fi308 = $fi301 + $fi302 + $fi303 + $fi305 + $fi306 + $fi304 + $fi318 - $fi307;
 
     // 309 sääntö fi309
     $fi309 = laskeveroja('fi309', 'summa') * -1;
@@ -960,6 +1026,8 @@ function alvlaskelma($kk, $vv) {
     // 314 sääntö fi314
     $fi314 = laskeveroja('fi314', 'summa');
 
+    // 310 "Tavaroiden maahantuonnit EU:n ulkop."
+    $fi310 = laskeveroja('fi310', 'summa');
 
     // 319 "Rakentamispalvelun myynnit"
     $fi319 = laskeveroja('fi319', 'summa') * -1;
@@ -1003,6 +1071,7 @@ function alvlaskelma($kk, $vv) {
     echo "<tr><th colspan='2'></th></tr>";
     echo "<tr class='aktiivi'><td><a href = '?tee=VSRALVKK_UUSI_erittele&ryhma=fi305&vv=$vv&kk=$kk&etsivirheita=$etsivirheita'>305</a> ", t("Vero tavaraostoista muista EU-maista"), "</td><td align='right'>".sprintf('%.2f', $fi305)."</td></tr>";
     echo "<tr class='aktiivi'><td><a href = '?tee=VSRALVKK_UUSI_erittele&ryhma=fi306&vv=$vv&kk=$kk&etsivirheita=$etsivirheita'>306</a> ", t("Vero palveluostoista muista EU-maista"), "</td><td align='right'>".sprintf('%.2f', $fi306)."</td></tr>";
+    echo "<tr class='aktiivi'><td><a href = '?tee=VSRALVKK_UUSI_erittele&ryhma=fi304&vv=$vv&kk=$kk&etsivirheita=$etsivirheita'>304</a> ", t("Vero tavaroiden maahantuonnista EU:n ulkop."), "</td><td align='right'>".sprintf('%.2f', $fi304)."</td></tr>";
     echo "<tr class='aktiivi'><td><a href = '?tee=VSRALVKK_UUSI_erittele&ryhma=fi318&vv=$vv&kk=$kk&etsivirheita=$etsivirheita'>318</a> ", t("Vero rakentamispalveluiden ostoista"), "</td><td align='right'>".sprintf('%.2f', $fi318)."</td></tr>";
 
     echo "<tr><th colspan='2'></th></tr>";
@@ -1022,6 +1091,7 @@ function alvlaskelma($kk, $vv) {
     echo "<tr class='aktiivi'><td><a href = '?tee=VSRALVKK_UUSI_erittele&ryhma=fi313&vv=$vv&kk=$kk&etsivirheita=$etsivirheita'>313</a> ", t("Tavaraostot muista EU-maista"), "</td><td align='right'>".sprintf('%.2f', $fi313)."</td></tr>";
     echo "<tr class='aktiivi'><td><a href = '?tee=VSRALVKK_UUSI_erittele&ryhma=fi314&vv=$vv&kk=$kk&etsivirheita=$etsivirheita'>314</a> ", t("Palveluostot muista EU-maista"), "</td><td align='right'>".sprintf('%.2f', $fi314)."</td></tr>";
 
+    echo "<tr class='aktiivi'><td><a href = '?tee=VSRALVKK_UUSI_erittele&ryhma=fi310&vv=$vv&kk=$kk&etsivirheita=$etsivirheita'>310</a> ", t("Tavaroiden maahantuonnit EU:n ulkop."), "</td><td align='right'>".sprintf('%.2f', $fi310)."</td></tr>";
     echo "<tr><th colspan='2'></th></tr>";
     echo "<tr class='aktiivi'><td><a href = '?tee=VSRALVKK_UUSI_erittele&ryhma=fi319&vv=$vv&kk=$kk&etsivirheita=$etsivirheita'>319</a> ", t("Rakentamispalvelun myynti"), "</td><td align='right'>".sprintf('%.2f', $fi319)."</td></tr>";
     echo "<tr class='aktiivi'><td><a href = '?tee=VSRALVKK_UUSI_erittele&ryhma=fi320&vv=$vv&kk=$kk&etsivirheita=$etsivirheita'>320</a> ", t("Rakentamispalvelun ostot"), "</td><td align='right'>".sprintf('%.2f', $fi320)."</td></tr>";
@@ -1110,12 +1180,14 @@ function alvlaskelma($kk, $vv) {
       $file .= "301:".round($fi301*100, 0)."\n";
       $file .= "302:".round($fi302*100, 0)."\n";
       $file .= "303:".round($fi303*100, 0)."\n";
+      $file .= "304:".round($fi304*100, 0)."\n";
       $file .= "305:".round($fi305*100, 0)."\n";
       $file .= "306:".round($fi306*100, 0)."\n";
       $file .= "318:".round($fi318*100, 0)."\n";
       $file .= "307:".round($fi307*100, 0)."\n";
       $file .= "308:".round($fi308*100, 0)."\n";
       $file .= "309:".round($fi309*100, 0)."\n";
+      $file .= "310:".round($fi310*100, 0)."\n";
       $file .= "311:".round($fi311*100, 0)."\n";
       $file .= "312:".round($fi312*100, 0)."\n";
       $file .= "313:".round($fi313*100, 0)."\n";

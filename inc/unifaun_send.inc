@@ -1034,7 +1034,7 @@ class Unifaun {
       $uni_add_val->addAttribute('n', "reference");
     }
 
-    if ($this->toitarow['virallinen_selite'] == "P19" and $this->postirow["toim_puh"] != "") {
+    if (($this->toitarow['virallinen_selite'] == "P19" or $this->toitarow['virallinen_selite'] == "P19FI") and $this->postirow["toim_puh"] != "") {
       $uni_addon = $uni_service->addChild('addon'); // Corresponds to add-on service. See SUP-112-Services-en.xls for valid add-on services.
       $uni_addon->addAttribute('adnid', "NOTSMS");
       $uni_add_val = $uni_addon->addChild('val', utf8_encode($this->postirow["toim_puh"])); // Defines value for misctype.
@@ -1055,7 +1055,7 @@ class Unifaun {
         $uni_add_val->addAttribute('n', "text4");
       }
     }
-    elseif ($this->toitarow['virallinen_selite'] == "P19") {
+    elseif ($this->toitarow['virallinen_selite'] == "P19" or $this->toitarow['virallinen_selite'] == "P19FI") {
       $uni_addon = $uni_service->addChild('addon'); // Corresponds to add-on service. See SUP-112-Services-en.xls for valid add-on services.
       $uni_addon->addAttribute('adnid', "NOTLTR");
     }
@@ -1116,6 +1116,43 @@ class Unifaun {
     //  $uni_add_val = $uni_addon->addChild('val', ""); # Min. temperature allowed. Used by DBSchenker ColdSped.
     //  $uni_add_val->addAttribute('n', "tempmin");
 
+    // Katsotaan onko sähköinen ennakkoilmoitus käytössä
+    $query = "SELECT *
+              FROM toimitustavan_avainsanat
+              WHERE yhtio = '{$this->kukarow['yhtio']}'
+              AND liitostunnus   = '{$this->toitarow['tunnus']}'
+              AND laji = 'unifaun_lisapalvelu'
+              AND selite = 'enot'
+              AND selitetark = 'k'";
+    $toimitustavan_avainsanat_res = pupe_query($query);
+
+    if (mysql_num_rows($toimitustavan_avainsanat_res) == 1) {
+
+      $uni_ufonline = $uni_shipment->addChild('ufonline');
+      $uni_option = $uni_ufonline->addChild('option');
+      $uni_option->addAttribute('optid', utf8_encode('ENOT'));
+
+      $uni_opt_val = $uni_option->addChild('val', utf8_encode($this->yhtiorow["postittaja_email"]));
+      $uni_opt_val->addAttribute('n', "from");
+
+      $uni_opt_val = $uni_option->addChild('val', utf8_encode($this->asiakasrow["email"]));
+      $uni_opt_val->addAttribute('n', "to");
+
+      $uni_opt_val = $uni_option->addChild('val', "");
+      $uni_opt_val->addAttribute('n', "cc");
+
+      $uni_opt_val = $uni_option->addChild('val', "");
+      $uni_opt_val->addAttribute('n', "bcc");
+
+      /*
+      $uni_opt_val = $uni_option->addChild('val', "messagea tähän");
+      $uni_opt_val->addAttribute('n', "message");
+
+      $uni_opt_val = $uni_option->addChild('val', "template name");
+      $uni_opt_val->addAttribute('n', "mailtemplate");
+      */
+    }
+
     $this->xml = $xml;
   }
 
@@ -1143,7 +1180,7 @@ class Unifaun {
     $uni_par_val = $uni_parcel->addChild('val', utf8_encode($pakkauskoodi)); // Package code. See SUP-112-Services-en.xls for valid package codes.
     $uni_par_val->addAttribute('n', "packagecode");
 
-    $pakkaustiedot['paino'] = $pakkaustiedot['paino'] < 1 ? 1 : $pakkaustiedot['paino'];
+    $pakkaustiedot['paino'] = $pakkaustiedot['paino'] < 0.1 ? 0.1 : $pakkaustiedot['paino'];
 
     $uni_par_val = $uni_parcel->addChild('val', utf8_encode($pakkaustiedot['paino'])); // Weight
     $uni_par_val->addAttribute('n', "weight");

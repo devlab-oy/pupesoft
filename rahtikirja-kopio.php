@@ -355,6 +355,10 @@ if ($tee == 'valitse' and $real_submit != '') {
 
     echo "</select><br><br>";
 
+    echo "<table><th>",t("Tulosta toimitussanomat rahtikirjakopioista"),"</th>";
+    echo "<th><input type='checkbox' name='tulosta_desadv' value='JOO' ></th></table>";
+    echo "<br>";
+
     echo "<br><input type='submit' value='".t("Tulosta valitut")."'>";
     echo "</form>";
   }

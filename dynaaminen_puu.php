@@ -17,7 +17,12 @@ if (tarkista_oikeus('yllapito.php', 'puun_alkio', 1)) {
   $saamuokataliitoksia = true;
 }
 
-if (!isset($mista)) $mista = $laji;
+if (!isset($mista) and !empty($laji)) {
+  $mista = $laji;
+}
+elseif (!isset($mista)) {
+  $mista = "";
+}
 
 if (isset($_REQUEST["ajax"]) and $_REQUEST["ajax"] == "OK") {
 
@@ -80,12 +85,43 @@ if (isset($_REQUEST["ajax"]) and $_REQUEST["ajax"] == "OK") {
 
     exit;
   }
+  elseif ($tee == 'hae_liite_lista') {
+    $query = "SELECT *
+              FROM liitetiedostot
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND liitos = 'dynaaminen_puu'
+              AND liitostunnus = '$nodeid'";
+    $dpliitteet_res = pupe_query($query);
+
+    while ($dp_row = mysql_fetch_assoc($dpliitteet_res)) {
+      if ($saamuokata) {
+        echo "<a class='remove_attachment' id='{$dp_row['tunnus']}'><img src='{$palvelin2}pics/lullacons/stop.png' alt='", t('Poista'), "'/></a>&nbsp;&nbsp;";
+        echo "<a style='float: right;' class='edit_attachment' id='{$dp_row['tunnus']}'><img src='{$palvelin2}pics/lullacons/document-properties.png' alt='", t('Muokkaa'), "'/></a>";
+        echo "<input type='hidden' class='edit_attachment_st' id='{$dp_row['tunnus']}_st' value='{$dp_row['selite']}' />";
+        echo "<input type='hidden' class='edit_attachment_kt' id='{$dp_row['tunnus']}_kt' value='{$dp_row['kayttotarkoitus']}' />";
+      }
+      $lkt = t_avainsana("LITETY", '', "and selite = '{$dp_row['kayttotarkoitus']}'", '', '', "selitetark");
+      echo "<span style='font-weight: bold;'>{$dp_row['selite']} / $lkt: ".js_openUrlNewWindow("{$palvelin2}view.php?id={$dp_row['tunnus']}", t('Näytä liite'), NULL, 800, 600)."</span>";
+      echo "<br />";
+    }
+
+    exit;
+  }
   elseif ($tee == 'poista_avainsana' and !empty($avainsanan_tunnus)) {
     $avainsanan_tunnus = (int) $avainsanan_tunnus;
 
     $query = "DELETE FROM dynaaminen_puu_avainsanat
               WHERE yhtio = '{$kukarow['yhtio']}'
               AND tunnus  = '{$avainsanan_tunnus}'";
+    $delres = pupe_query($query);
+    exit;
+  }
+  elseif ($tee == 'poista_liite' and !empty($liitteen_tunnus)) {
+    $liitteen_tunnus = (int) $liitteen_tunnus;
+
+    $query = "DELETE FROM liitetiedostot
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND tunnus  = '{$liitteen_tunnus}'";
     $delres = pupe_query($query);
     exit;
   }
@@ -135,7 +171,6 @@ if (isset($_REQUEST["ajax"]) and $_REQUEST["ajax"] == "OK") {
         }
         elseif ($tee == 'lisaa' and isset($uusi_nimi) and trim($uusi_nimi) != "") {
           // lisataan lapsitaso
-
           $uusi_koodi = $uusi_koodi == '' ? '0' : $uusi_koodi;
 
           $uusirivi = LisaaLapsi($toim, $noderow['lft'], $noderow['syvyys'], $uusi_koodi, $uusi_nimi, $uusi_nimi_en);
@@ -185,6 +220,21 @@ if (isset($_REQUEST["ajax"]) and $_REQUEST["ajax"] == "OK") {
             }
           }
 
+          exit;
+        }
+        elseif ($tee == 'lisaa_liite' and !empty($liite_selite) and !empty($toim) and empty($liitteen_tunnus)) {
+          tallenna_liite("liite_data", "dynaaminen_puu", $nodeid, $liite_selite, $liite_kayttotarkoitus);
+          exit;
+        }
+        elseif ($tee == 'lisaa_liite' and !empty($liite_selite) and !empty($toim) and !empty($liitteen_tunnus)) {
+          $query = "UPDATE liitetiedostot SET
+                    selite           = '{$liite_selite}',
+                    kayttotarkoitus  = '{$liite_kayttotarkoitus}'
+                    WHERE yhtio      = '{$kukarow['yhtio']}'
+                    AND liitos       = 'dynaaminen_puu'
+                    AND liitostunnus = '$nodeid'
+                    AND tunnus       = '{$liitteen_tunnus}'";
+          pupe_query($query);
           exit;
         }
         elseif ($tee == 'poista') {
@@ -263,9 +313,11 @@ if (isset($_REQUEST["ajax"]) and $_REQUEST["ajax"] == "OK") {
     $own_items = $row['lkm'];
 
     // lapsitasojen tuotteet
-    $qu = "SELECT count(*) lkm
+    $qu = "SELECT
+           count(distinct puu.tunnus) plkm,
+           count(alkio.tunnus) lkm
            FROM dynaaminen_puu puu
-           JOIN puun_alkio alkio ON (puu.yhtio = alkio.yhtio AND puu.laji=alkio.laji AND puu.tunnus = alkio.puun_tunnus)
+           LEFT JOIN puun_alkio alkio ON (puu.yhtio = alkio.yhtio AND puu.laji=alkio.laji AND puu.tunnus = alkio.puun_tunnus)
            WHERE puu.yhtio = '{$yhtiorow['yhtio']}'
            AND puu.laji    = '{$toim}'
            AND puu.lft     > {$noderow['lft']}
@@ -273,22 +325,28 @@ if (isset($_REQUEST["ajax"]) and $_REQUEST["ajax"] == "OK") {
     $re = pupe_query($qu);
     $row = mysql_fetch_assoc($re);
 
+    $child_nodes = $row['plkm'];
     $child_items = $row['lkm'];
 
     echo "<p>";
-    if ($own_items > 0) {
-      echo "<font class='message'>".t("Liitoksia").":</font> <a href='yllapito.php?toim=puun_alkio&laji={$toim}&haku[5]={$nodeid}'>".$own_items."</a><br />";
-    }
+
+    if ($child_nodes > 0) echo "<font class='message'>".t("Lapsitasoja").":</font>".$child_nodes."<br />";
+    if ($own_items > 0) echo "<font class='message'>".t("Liitoksia").":</font> <a href='yllapito.php?toim=puun_alkio&laji={$toim}&haku[5]={$nodeid}' target='_blank'>".$own_items."</a><br />";
     if ($child_items > 0) echo "<font class='message'>".t("Liitoksia lapsitasoilla").":</font>".$child_items;
+
     echo "</p>";
 
     echo "<hr /><div id='editbuttons'>";
     if ($saamuokata) {
       echo "  <a href='#' id='showeditbox' id='muokkaa'><img src='{$palvelin2}pics/lullacons/document-properties.png' alt='", t('Muokkaa lapsikategoriaa'), "'/> ".t('Muokkaa tason tietoja')."</a><br /><br />
           <a href='#' class='editbtn' id='ylos'><img src='{$palvelin2}pics/lullacons/arrow-single-up-green.png' alt='", t('Siirrä ylöspäin'), "'/> ".t('Siirrä tasoa ylöspäin')."</a><br />
-          <a href='#' class='editbtn' id='alas'><img src='{$palvelin2}pics/lullacons/arrow-single-down-green.png' alt='", t('Siirrä alaspäin'), "'/> ".t('Siirrä tasoa alaspäin')."</a><br /><br />
-          <a href='#' id='showmovebox'> <img src='{$palvelin2}pics/lullacons/arrow-single-right-green.png' alt='", t('Siirrä alatasoksi'), "'/> ".t('Siirrä oksa alatasoksi')."</a><br /><br />
-          <a href='#' id='showaddbox'><img src='{$palvelin2}pics/lullacons/add.png' alt='", t('Lisää'), "'/>".t('Lisää uusi lapsitaso')."</a><br /><br />";
+          <a href='#' class='editbtn' id='alas'><img src='{$palvelin2}pics/lullacons/arrow-single-down-green.png' alt='", t('Siirrä alaspäin'), "'/> ".t('Siirrä tasoa alaspäin')."</a><br /><br />";
+
+      if ($child_nodes == 0) {
+        echo "<a href='#' id='showmovebox'> <img src='{$palvelin2}pics/lullacons/arrow-single-right-green.png' alt='", t('Siirrä alatasoksi'), "'/> ".t('Siirrä oksa alatasoksi')."</a><br /><br />";
+      }
+
+      echo "<a href='#' id='showaddbox'><img src='{$palvelin2}pics/lullacons/add.png' alt='", t('Lisää'), "'/>".t('Lisää uusi lapsitaso')."</a><br /><br />";
 
       // poistonappi aktiivinen vain jos ei ole liitoksia
       if ($own_items > 0 or $child_items > 0) {
@@ -406,6 +464,11 @@ if (isset($_REQUEST["ajax"]) and $_REQUEST["ajax"] == "OK") {
       var nodebox_keywords    = jQuery("#nodebox_keywords");
       var nodebox_keywords_title  = jQuery("#nodebox_keywords_title");
       var addboxbutton_keywords  = jQuery("#showaddbox_keywords");
+
+      var nodebox_attachments    = jQuery("#nodebox_attachments");
+      var nodebox_attachments_title  = jQuery("#nodebox_attachments_title");
+      var addboxbutton_attachments  = jQuery("#showaddbox_attachments");
+
       var keywords_category     = jQuery("#keywords_category");
       var keywords_value       = jQuery("#keywords_value");
       var keywords_language    = jQuery("#keywords_language");
@@ -428,6 +491,16 @@ if (isset($_REQUEST["ajax"]) and $_REQUEST["ajax"] == "OK") {
         jQuery('#keywords_value').hide();
         jQuery('#keywords_language').hide();
         nodebox_keywords.show();
+        return false;
+      });
+
+      addboxbutton_attachments.click(function() {
+        nodebox_attachments_title.html("Lisää liitetiedosto");
+        addboxbutton_attachments.hide();
+        addboxbutton_attachments.after(nodebox_attachments);
+        jQuery('#attachments_value').hide();
+        jQuery('#attachments_language').hide();
+        nodebox_attachments.show();
         return false;
       });
 
@@ -476,10 +549,10 @@ if (isset($_REQUEST["ajax"]) and $_REQUEST["ajax"] == "OK") {
 
       jQuery("#keywordsform").live('submit', function() {
         params["laji"]       = jQuery("#keywords_category option:selected").html();
-        params["avainsana"]   = jQuery("#keywords_value").val();
-        params["kieli"]       = jQuery("#keywords_language").val();
-        params["tee"]      = 'lisaa_avainsana';
-        params["toim"]      = jQuery("#toim").val();
+        params["avainsana"]  = jQuery("#keywords_value").val();
+        params["kieli"]      = jQuery("#keywords_language").val();
+        params["tee"]        = 'lisaa_avainsana';
+        params["toim"]       = jQuery("#toim").val();
 
         if (jQuery("#keywords_category option:selected").val() == "" || params['avainsana'] == "") {
           jQuery("#nodebox_keywords_err").show();
@@ -527,6 +600,55 @@ if (isset($_REQUEST["ajax"]) and $_REQUEST["ajax"] == "OK") {
         editNode(params);
         return false;
       });
+
+      jQuery("#attachmentsform").live('submit', function() {
+        params["tee"]  = 'lisaa_liite';
+        params["toim"] = jQuery("#toim").val();
+
+        editNode_attachments(params);
+
+        return false;
+      });
+
+      jQuery(".remove_attachment").live('click', function(e) {
+        e.preventDefault();
+
+        if (confirm("<?php echo t("Poista liite"); ?>")) {
+          params["tee"] = 'poista_liite';
+          params["toim"] = jQuery("#toim").val();
+          params['liitteen_tunnus'] = $(this).attr('id');
+
+          editNode_attachments(params);
+        }
+
+        return false;
+      });
+
+      jQuery(".edit_attachment").live('click', function(e) {
+        e.preventDefault();
+
+        var nodebox_attachments = jQuery("#nodebox_attachments");
+
+        jQuery("#nodebox_attachments_title").html("Muokkaa liitettä");
+        jQuery("#showaddbox_attachments").hide();
+        jQuery("#showaddbox_attachments").after(nodebox_attachments);
+        nodebox_attachments.show();
+
+        params["tee"] = 'muokkaa_liite';
+        params["toim"] = jQuery("#toim").val();
+        params["liitteen_tunnus"] = $(this).attr('id');
+
+        editNode_attachments(params);
+      });
+
+      jQuery("#moveform").submit(function() {
+        params["kohdetaso"]  = jQuery("#kohdetaso").val();
+        params["tee"]    = "siirrataso";
+
+        editNode(params);
+        return false;
+      });
+
       <?php
     }
 ?>
@@ -608,6 +730,102 @@ if (isset($_REQUEST["ajax"]) and $_REQUEST["ajax"] == "OK") {
         <input type='hidden' id='tee' value='' />
         <input type='hidden' id='toim' value='{$toim}' />
         <p style='display: none; color: red' id='nodebox_keywords_err'>".t("Laji ja avainsana ei saa olla tyhjiä").".</p>
+        <input type='submit' id='editsubmitbtn' value='".t("Tallenna")."' />
+      </fieldset>
+      </form>
+    </div>";
+
+    echo "</div>";
+
+
+    // noden liitelaatikko
+    echo "<br /><hr /><br />";
+    echo "<div id='infobox_attachments' class='spec' style='padding: 20px; border: 1px solid black;'>";
+    echo "<h2 style='font-size: 20px'>", t("Liitteet"), "</h2><hr />";
+
+    echo "<div id='infobox_attachments_list' style='line-height: 16px;'>";
+
+    $query = "SELECT *
+              FROM liitetiedostot
+              WHERE yhtio      = '{$kukarow['yhtio']}'
+              AND liitos       = 'dynaaminen_puu'
+              AND liitostunnus = '{$nodeid}'";
+    $dpliitteet_res = pupe_query($query);
+
+    if (mysql_num_rows($dpliitteet_res) > 0) {
+
+      while ($dp_row = mysql_fetch_assoc($dpliitteet_res)) {
+        if ($saamuokata) {
+          echo "<a class='remove_attachment' id='{$dp_row['tunnus']}'><img src='{$palvelin2}pics/lullacons/stop.png' alt='", t('Poista'), "'/></a>&nbsp;&nbsp;";
+          echo "<a style='float: right;' class='edit_attachment' id='{$dp_row['tunnus']}'><img src='{$palvelin2}pics/lullacons/document-properties.png' alt='", t('Muokkaa'), "'/></a>";
+          echo "<input type='hidden' class='edit_attachment_st' id='{$dp_row['tunnus']}_st' value='{$dp_row['selite']}' />";
+          echo "<input type='hidden' class='edit_attachment_kt' id='{$dp_row['tunnus']}_kt' value='{$dp_row['kayttotarkoitus']}' />";
+        }
+
+        $lkt = t_avainsana("LITETY", '', "and selite = '{$dp_row['kayttotarkoitus']}'", '', '', "selitetark");
+        echo "<span style='font-weight: bold;'>{$dp_row['selite']} / $lkt: ".js_openUrlNewWindow("{$palvelin2}view.php?id={$dp_row['tunnus']}", t('Näytä liite'), NULL, 800, 600)."</span>";
+
+        echo "<br />";
+      }
+    }
+
+    echo "</div>";
+
+    echo "<br />";
+    echo "<div id='editbuttons_attachments'>";
+
+    if ($saamuokata) {
+      echo "<a href='#' id='showaddbox_attachments'><img src='{$palvelin2}pics/lullacons/add.png' alt='", t('Lisää'), "'/>", t('Lisää uusi liite'), "</a><br /><br />";
+    }
+
+    echo "</div>";
+
+    echo "<div id='nodebox_attachments' style='display: none'>
+      <form id='attachmentsform'>
+      <fieldset>
+        <legend style='font-weight: bold' id='nodebox_attachments_title'></legend>
+        <ul style='list-style:none; padding: 5px'>";
+
+    echo "<li style='padding: 3px' id='attachments_value_box'>";
+    echo "<label style='display: inline-block; width: 50px;'>".t("Selite")."</label>";
+    echo "<input type='text' name='liite_selite' id='liite_selite' />";
+
+    echo "</li><li>";
+    echo "<label style='display: inline-block; width: 100px;'>".t("Käyttötarkoitus")."</label>";
+
+    $kires = t_avainsana("LITETY");
+
+    echo "<select name='liite_kayttotarkoitus' id='liite_kayttotarkoitus'>";
+
+    while ($kirow = mysql_fetch_array($kires)) {
+      if ($kirow["selite"] == $trow[$i]) {
+        $select = 'SELECTED';
+        $natsasko = TRUE;
+      }
+      else $select = '';
+
+      if ($kirow["selitetark_2"] == "PAKOLLINEN") {
+        $paklisa = "*";
+      }
+      else {
+        $paklisa = "";
+      }
+
+      echo "<option value='$kirow[selite]' $select>$paklisa $kirow[selitetark]</option>";
+    }
+
+    echo "<option value='MU'>".t("Yleinen")."</option>";
+    echo "</select>";
+
+    echo "</li><li>";
+    echo "<label style='display: inline-block; width: 100px;'>".t("Data")."</label>";
+    echo "<input type = 'file' name = 'liite_data' id = 'liite_data'>";
+    echo "</li>";
+
+    echo "</ul>
+        <input type='hidden' id='tee' value='' />
+        <input type='hidden' id='toim' value='{$toim}' />
+        <p style='display: none; color: red' id='nodebox_attachments_err'>".t("Laji ja avainsana ei saa olla tyhjiä").".</p>
         <input type='submit' id='editsubmitbtn' value='".t("Tallenna")."' />
       </fieldset>
       </form>
@@ -911,6 +1129,93 @@ else {
 
     return false;
   }
+
+ function editNode_attachments(params) {
+   var editbox = jQuery("#editbuttons_attachments");
+
+   if (params.tee != 'lisaa_liite' && params.tee != 'poista_liite' && params.tee != 'muokkaa_liite') {
+     jQuery(editbox).hide().after(loadimg);
+   }
+
+   if (params.tee == 'lisaa_liite') {
+     var myForm = document.getElementById('attachmentsform');
+     formData = new FormData(myForm);
+     formData.append('tee', params.tee);
+     formData.append('toim', params.toim);
+     formData.append('nodeid', params.nodeid);
+
+     if (params.liitteen_tunnus > 0) {
+      formData.append('liitteen_tunnus', params.liitteen_tunnus);
+     }
+   }
+   else {
+    formData = new FormData();
+    formData.append('tee', params.tee);
+    formData.append('toim', params.toim);
+    formData.append('nodeid', params.nodeid);
+    formData.append('liitteen_tunnus', params.liitteen_tunnus);
+   }
+
+   jQuery.ajax({
+     type: "POST",
+     data: formData,
+     async: false,
+     cache: false,
+     contentType: false,
+     processData: false,
+     success: function(retval) {
+       if (params.tee == 'muokkaa_liite') {
+        jQuery("#liite_selite").val(jQuery('#'+params["liitteen_tunnus"]+'_st').val());
+
+        var litety_chk = jQuery('#'+params["liitteen_tunnus"]+'_kt').val();
+
+        jQuery('#liite_kayttotarkoitus > option').each(function() {
+          $(this).prop('selected', ($(this).val() == litety_chk));
+        });
+
+        jQuery('#liite_data').hide();
+
+        return false;
+       }
+       else if (params.tee == 'lisaa_liite') {
+         params.liitteen_tunnus = null;
+
+         var nodebox_attachments  = jQuery("#nodebox_attachments");
+         jQuery(nodebox_attachments).hide();
+
+         jQuery(editbox).show();
+
+         var showaddbox_attachments = jQuery('#showaddbox_attachments');
+         jQuery(showaddbox_attachments).show();
+
+         params.tee = 'hae_liite_lista';
+       }
+       else if (params.tee == 'poista_liite') {
+         params.tee = 'hae_liite_lista';
+       }
+       else {
+         jQuery("#infobox_attachments").html(retval);
+         return false;
+       }
+     }
+   });
+
+   if (params.tee == 'hae_liite_lista') {
+     jQuery.ajax({
+       data: params,
+       async: false,
+       success: function(retval) {
+         jQuery('#infobox_attachments_list').html(retval);
+         jQuery('#liite_selite').val('');
+         jQuery('#liite_kayttotarkoitus').val('');
+         jQuery('#liite_data').val('');
+         jQuery('#nodebox_keywords_err').hide();
+       }
+     });
+   }
+
+   return false;
+ }
 
   <?php
   // tarvittavat javascriptit kun muokataan liitoksia

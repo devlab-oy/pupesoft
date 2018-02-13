@@ -553,6 +553,23 @@ if ($fieldname == "ostolaskujen_oletusvaluutta") {
   $jatko = 0;
 }
 
+if ($fieldname == "ostolaskujen_oletusiban") {
+
+  $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+  $apu = (int) $trow[$i];
+  $sel = array("0" => "", "1" => "", "2" => "");
+  $sel[$apu] = "selected";
+
+  $ulos .= "<option value = '0' $sel[0]>".t("Verkkolaskujen vastaanotossa k‰ytet‰‰n toimittajan pankkitili‰ (iban + bic)");
+  $ulos .= "<option value = '1' $sel[1]>".t("Verkkolaskujen vastaanotossa k‰ytet‰‰n ensisijaisesti verkkolaskuaineiston pankkitili‰ (iban + bic)");
+  $ulos .= "<option value = '2' $sel[2]>".t("Verkkolaskujen vastaanotossa k‰ytet‰‰n ensisijaisesti verkkolaskuaineiston pankkitili‰ (iban + bic) ja se p‰ivitet‰‰n toimittajalle");
+
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
 if ($fieldname == "ostolaskujen_kurssipaiva") {
 
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
@@ -1517,6 +1534,7 @@ if ($fieldname == "kerayspoikkeama_kasittely") {
   $ulos .= "<option value='o' $sel[o]>".t("Ker‰‰j‰ p‰‰tt‰‰ ker‰yspoikkeaman k‰sittelyst‰")."</option>";
   $ulos .= "<option value='P' $sel[P]>".t("Ker‰‰j‰ p‰‰tt‰‰ ker‰yspoikkeaman k‰sittelyst‰ ja voi vaihtaa ker‰yspaikkaa")."</option>";
   $ulos .= "<option value='J' $sel[J]>".t("Ker‰‰j‰ p‰‰tt‰‰ ker‰yspoikkeaman k‰sittelyst‰ (Oletuksena JT)")."</option>";
+  $ulos .= "<option value='U' $sel[U]>".t("Ker‰‰j‰ p‰‰tt‰‰ ker‰yspoikkeaman k‰sittelyst‰ (Oletuksena puute)")."</option>";
   $ulos .= "</select></td>";
 
   $jatko = 0;
@@ -4614,6 +4632,19 @@ if ($fieldname == 'myyntihinta_paivitys_saapuminen') {
 
   $ulos .= "<option value = ''>".t("Myyntihintaa ei voi p‰ivitt‰‰ saapumisella")."</option>";
   $ulos .= "<option value = 'K' {$sel}>".t("Myyntihinnan voi p‰ivitt‰‰ saapumisella")."</option>";
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
+if ($fieldname == 'myyntihinnan_muutoksien_logitus') {
+
+  $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+  $sel = $trow[$i] == 'x' ? 'selected' : '';
+
+  $ulos .= "<option value = ''>".t("Myyntihinnan muutoksia ei logiteta")."</option>";
+  $ulos .= "<option value = 'x' {$sel}>".t("Myyntihinnan muutokset logitetaan omaan tietokantatauluun")."</option>";
   $ulos .= "</select></td>";
 
   $jatko = 0;

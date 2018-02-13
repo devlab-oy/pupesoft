@@ -273,7 +273,7 @@ if (!function_exists("ennakkolaskuta")) {
                 tilausrivi.tuoteno,
                 tilausrivi.nimitys,
                 tilausrivi.kommentti,
-                tilausrivi.varattu,
+                tilausrivi.varattu + tilausrivi.jt varattu,
                 tilausrivi.tilkpl,
                 {$alet}
                 if (tilausrivi.jaksotettu=lasku.jaksotettu, tilausrivi.hinta / if ('{$yhtiorow['alv_kasittely']}' = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1), 0) summa,
@@ -623,7 +623,7 @@ if (strpos($_SERVER['SCRIPT_NAME'], "maksusopimus_laskutukseen.php") !== FALSE) 
         $tarkres = pupe_query($query);
         $tarkrow = mysql_fetch_assoc($tarkres);
 
-        if (mysql_num_rows($tarkres) == 0 or $tarkrow["tilaok"] <> $tarkrow["toimituksia"] 
+        if (mysql_num_rows($tarkres) == 0 or $tarkrow["tilaok"] <> $tarkrow["toimituksia"]
           or ($tarkrow["toimittamatta"] > 0 and $row["nouto"] == '') or $tarkrow["keraamatta"] > 0) {
           echo "<td class='back'>";
           echo "<font class='error'>".t("Ei valmis loppulaskutettavaksi, koska tilausta ei ole vielä toimitettu").".</font>";

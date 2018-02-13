@@ -100,6 +100,14 @@ if (!function_exists("varastopaikattarkista")) {
       if (in_array($t[$i], array('L','P')) and !LOGMASTER_RAJAPINTA) {
         $virhe[$i] .= t("Valittuun ulkoiseen järjestelmään vaaditut FTP-tiedot puuttuvat")."!";
       }
+
+      if ($t[$i] == "D" and !TALKNPICK_RAJAPINTA) {
+        $virhe[$i] .= t("TalknPick-rajapinnan tiedot puuttuvat")."!";
+      }
+
+      if ($t[$i] == "D" and $yhtiorow["ulkoinen_jarjestelma"] != "K") {
+        $virhe[$i] .= t("TalknPick-rajapinta toimii vain keräyksessä. Päivitä yhtiön parametri: ulkoinen_jarjestelma")."!";
+      }
     }
   }
 }

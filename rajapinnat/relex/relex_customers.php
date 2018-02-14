@@ -152,7 +152,7 @@ while ($row = mysql_fetch_assoc($res)) {
   }
 
   if ($crm_asiakastiedot) {
-    $rivi .= pupesoft_csvstring($row['ytunnus']);
+    $rivi  = pupesoft_csvstring($row['ytunnus']);
     $rivi .= ";".pupesoft_csvstring($row['nimi']);
     $rivi .= ";".pupesoft_csvstring($row['osoite']);
     $rivi .= ";".pupesoft_csvstring($row['postino']);

@@ -139,8 +139,24 @@ while ($row = mysql_fetch_assoc($res)) {
   $excelsarake++;
   $worksheet->writeString($excelrivi, $excelsarake, $row["varastonnimi"]);
   $excelsarake++;
-  $row["tapahtumaselite"] = str_replace("<br>", " ", $row["tapahtumaselite"]);
-  $worksheet->writeString($excelrivi, $excelsarake, $row["tapahtumaselite"]);
+
+  // siivotaan rivinvaihdot pois
+  //$row["tapahtumaselite"] = str_replace("<br>", " ", $row["tapahtumaselite"]);
+
+  // siivotaan selitteestä kaikki hintoihin liittyvä veke,
+  // yhtiön kielellä ja käyttäjän kielellä
+  $_jl_text = t("Jälkilaskennan ostohinta");
+  $_ot_text = t("Ostohinta");
+  $_jl_text2 = t("Jälkilaskennan ostohinta", $yhtiorow['kieli']);
+  $_ot_text2 = t("Ostohinta", $yhtiorow['kieli']);
+
+  $selite = preg_replace("/({$_jl_text}: [0-9\.]*|, {$_ot_text}:[0-9\. ]*)/", "", $row["tapahtumaselite"]);
+  $selite = preg_replace("/({$_jl_text2}: [0-9\.]*|, {$_ot_text2}:[0-9\. ]*)/", "", $selite);
+  $selite = preg_replace("/(\([0-9\.\-\> ]*\)|\[[0-9\.\-]*\])/", "", $selite);
+  $selite = preg_replace("/(,<br>|<br><br>)/", "", $selite);
+  $selite = trim($selite);
+
+  $worksheet->writeString($excelrivi, $excelsarake, $selite);
   $excelsarake++;
   $excelrivi++;
 }

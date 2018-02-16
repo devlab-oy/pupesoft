@@ -183,7 +183,12 @@ if (($paiva_ajo or $weekly_ajo) and !empty($relex_ftphost)) {
   $ftpuser = $relex_ftpuser;
   $ftppass = $relex_ftppass;
   $ftpfile = $filepath;
-  require "inc/ftp-send.inc";
+  if (!empty($relex_ftptype)) {
+    require "inc/sftp-send.inc";
+  }
+  else {
+    require "inc/ftp-send.inc";
+  }
 }
 
 echo date("d.m.Y @ G:i:s") . ": Relex asiakkaat valmis.\n\n";

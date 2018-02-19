@@ -230,10 +230,11 @@ if (isset($tee) and $tee == "lataa_tiedosto") {
   exit;
 }
 else {
-  //Nollataan muuttujat
-  $tulostettavat       = array();
-  $tulostettavat_email = array();
-  $tulos_ulos          = "";
+  // Nollataan muuttujat
+  $tulostettavat        = array();
+  $tulostettavat_email  = array();
+  $tulostettavat_ulkvar = array();
+  $tulos_ulos           = "";
 
   $verkkolaskuputkeen_pupevoice = array();
   $verkkolaskuputkeen_finvoice  = array();
@@ -2805,6 +2806,11 @@ else {
               $tulostettavat_email[] = $lasrow["tunnus"];
             }
 
+            // halutaan l‰hett‰‰ lasku ulkoiseen varastoon
+            if ($lasrow["verkkotunnus"] == "VELOX") {
+              $tulostettavat_ulkvar[] = $lasrow["tunnus"];
+            }
+
             // Halutaan tulostaa itse
             $tulostettavat[] = $lasrow["tunnus"];
             $lask++;
@@ -2882,7 +2888,7 @@ else {
         $tulos_ulos .= t("Luotiin")." $lask ".t("laskua").".<br>\n";
       }
 
-      //jos verkkotunnus lˆytyy niin
+      // jos verkkotunnus lˆytyy niin
       if ($yhtiorow['verkkotunnus_lah'] != '' and file_exists(realpath($nimixml))) {
 
         if ($silent == "") {
@@ -3347,6 +3353,20 @@ else {
 
             unset($Xpdf);
           }
+        }
+      }
+
+      // l‰hetet‰‰n sa‰hkˆpostilaskut
+      if (count($tulostettavat_ulkvar) > 0) {
+        require_once "tilauskasittely/tulosta_lasku.inc";
+        require_once "rajapinnat/logmaster/logmaster-functions.php";
+
+        if ($silent == "" or $silent == "VIENTI") $tulos_ulos .= "<br>\n".t("Siirret‰‰n laskuja ulkoiseen varastoon").":<br>\n";
+
+        foreach ($tulostettavat_ulkvar as $lasku) {
+          $lasku_ulkvar_file = tulosta_lasku($lasku, $kieli, "VERKKOLASKU_APIX", "", "", "", "");
+
+          $palautus = logmaster_send_file($filename);
         }
       }
     }

@@ -277,7 +277,6 @@ while (false !== ($file = readdir($handle))) {
         else {
           $tilalisa = "tila = 'G', alatila = 'D'";
         }
-
       }
       elseif ($laskurow["tila"] == "V") {
         $tilalisa = "tila = 'V', alatila = 'C'";
@@ -296,6 +295,21 @@ while (false !== ($file = readdir($handle))) {
       $upd_res = pupe_query($query);
 
       paivita_rahtikirjat_tulostetuksi_ja_toimitetuksi(array('otunnukset' => $laskurow['tunnus'], 'kilotyht' => $tuotteiden_paino));
+
+      if ($laskurow['alatila'] != 'X' and ($laskurow['vienti'] == 'E' or $laskurow['vienti'] == 'K')) {
+        viennin_lisatiedot($laskurow['tunnus']);
+
+        // Luodaan lasku
+        if ($laskurow['verkkotunnus'] == "VELOX") {
+          // Laskutetaan tilaus
+          $laskutettavat    = $laskurow['tunnus'];
+          $tee              = "TARKISTA";
+          $laskutakaikki    = "KYLLA";
+          $silent           = "KYLLA";
+
+          require "tilauskasittely/verkkolasku.php";
+        }
+      }
 
       pupesoft_log('logmaster_outbound_delivery_confirmation', "Keräyskuittaus tilauksesta {$otunnus} päivitettiin toimitetuksi");
     }

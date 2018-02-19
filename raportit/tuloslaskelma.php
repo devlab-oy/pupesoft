@@ -1441,8 +1441,15 @@ else {
                       and tyyppi           = '$kirjain'";
             $summares = pupe_query($query);
 
-            // Budjettia ei summata
-            if ($summarow = mysql_fetch_assoc($summares) and substr($kaudet[$i], 0, 4) != "budj") {
+            // Budjettia ei summata välttämättä
+            if ($vertailubu2 == "") {
+              $bu_check = (substr($kaudet[$i], 0, 4) != "budj");
+            }
+            else {
+              $bu_check = true;
+            }
+
+            if ($summarow = mysql_fetch_assoc($summares) and $bu_check) {
               foreach (explode(",", $summarow["summattava_taso"]) as $staso) {
                 $summa[$kaudet[$i]][$key][(string) $sarake] = $summa[$kaudet[$i]][$key][(string) $sarake] + $summa[$kaudet[$i]][$staso][(string) $sarake];
               }

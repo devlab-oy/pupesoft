@@ -350,10 +350,13 @@ else {
       <option $sel[0] value='0'>0 ".t("desimaalia")."</option>
       </select></td></tr>";
 
-  $vchek = $bchek = $ychek = $vpvmchek = "";
+  $vchek = $bchek = $b2chek = $ychek = $vpvmchek = "";
   if ($vertailued != "")  $vchek = "CHECKED";
   if ($vertailubu != "")  $bchek = "CHECKED";
-  if ($vertailubu2 != "") $b2chek = "CHECKED";
+  if ($vertailubu2 != "") {
+    $bchek = "";
+    $b2chek = "CHECKED";
+  }
   if ($vertailupvm != "") $vpvmchek = "CHECKED";
   if ($ei_yhteensa != "") $ychek = "CHECKED";
 
@@ -533,10 +536,6 @@ else {
   echo "<br><input type = 'submit' value = '".t("Näytä")."'></form><br><br>";
 
   if ($tltee == "aja") {
-
-    if ($vertailubu2 != "") {
-      $vertailubu = "X";
-    }
 
     // Desimaalit
     $muoto = "%.". (int) $desi . "f";
@@ -761,7 +760,7 @@ else {
   }
 
   // Budjettitauluun sopiva rajaus
-  if (isset($lisa) and $lisa != "" and $vertailubu != "") {
+  if (isset($lisa) and $lisa != "" and ($vertailubu != "" or $vertailubu2 != "")) {
     // Rajataan budjettia
     $bulisa = str_replace("tiliointi.", "budjetti.", $lisa);
   }
@@ -804,7 +803,11 @@ else {
       $paakirjalink = FALSE;
     }
 
-    $lopelinkki = "&lopetus=$PHP_SELF////tltee=$tltee//toim=$toim//tyyppi=$tyyppi//plvv=$plvv//plvk=$plvk//plvp=$plvp//alvv=$alvv//alvk=$alvk//alvp=$alvp//tkausi=$tkausi//rtaso=$rtaso//tarkkuus=$tarkkuus//desi=$desi//kaikkikaudet=$kaikkikaudet//ei_yhteensa=$ei_yhteensa//vertailued=$vertailued//vertailupvm=$vertailupvm//vertailubu=$vertailubu".str_replace("&", "//", $ulisa);
+    $lopelinkki = "&lopetus=$PHP_SELF////tltee=$tltee//toim=$toim//tyyppi=$tyyppi//plvv=$plvv//plvk=$plvk//plvp=$plvp//alvv=$alvv//alvk=$alvk//alvp=$alvp//tkausi=$tkausi//rtaso=$rtaso//tarkkuus=$tarkkuus//desi=$desi//kaikkikaudet=$kaikkikaudet//ei_yhteensa=$ei_yhteensa//vertailued=$vertailued//vertailupvm=$vertailupvm//vertailubu=$vertailubu//vertailubu2=$vertailubu2".str_replace("&", "//", $ulisa);
+
+    if ($vertailubu2 != "") {
+      $vertailubu = "X";
+    }
 
     $startmonth  = date("Ymd",   mktime(0, 0, 0, $plvk, 1, $plvv));
     $endmonth   = date("Ymd",   mktime(0, 0, 0, $alvk, 1, $alvv));

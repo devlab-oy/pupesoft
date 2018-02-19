@@ -692,7 +692,7 @@ if ($tee == 'LISTAA') {
     $sel_tuotemerkki = "('".str_replace(',', '\',\'', implode(",", $mul_tmr))."')";
     $lisa .= " and tuote.tuotemerkki in $sel_tuotemerkki ";
   }
-// SELECT distinct selite, selitetark FROM tuotteen_avainsanat WHERE yhtio='$kukarow[yhtio]' and laji = 'KEMOM' ORDER BY selitetark
+
   if ($kem != '') {
     $avainsana_lisa = " JOIN tuotteen_avainsanat ON (tuotteen_avainsanat.yhtio = tuote.yhtio and tuotteen_avainsanat.laji = 'KEMOM' and tuotteen_avainsanat.tuoteno = tuote.tuoteno and tuotteen_avainsanat.kieli = '{$kukarow['kieli']}' and tuotteen_avainsanat.selite in ('".str_replace(',', '\',\'', $kem)."')) ";
     $avainsana_selectlisa = ", tuotteen_avainsanat.selite AS kem_selite";
@@ -707,13 +707,20 @@ if ($tee == 'LISTAA') {
     $avainsana_selectlisa = ", tuotteen_avainsanat.selite AS kem_selite";
   }
 
-  if ($liitetiedosto != '' and $lisa != '') {
+  if ($liitetiedosto != '' and ($lisa != '' or ($kem != '' or count($mul_kem) > 0))) {
     $liitetiedosto = mysql_real_escape_string(trim($liitetiedosto));
     $lisa .= " and liitetiedostot.filename like '%{$liitetiedosto}%' ";
   }
   elseif ($liitetiedosto != '') {
     echo "<font class='error'>";
-    echo t("Liitetiedostohaku yksin‰‰n on liian hidas. Lis‰‰ rajauksia joko osastoon, try tai / ja tuotemerkkiin.");
+
+    if ($_kem) {
+      echo t("Liitetiedostohaku yksin‰‰n on liian hidas. Lis‰‰ rajauksia joko osastoon, try, tuotemerkkiin  tai / ja kemialliseen ominaisuuteen.");
+    }
+    else {
+      echo t("Liitetiedostohaku yksin‰‰n on liian hidas. Lis‰‰ rajauksia joko osastoon, try tai / ja tuotemerkkiin.");
+    }
+
     echo "</font>";
     die;
   }

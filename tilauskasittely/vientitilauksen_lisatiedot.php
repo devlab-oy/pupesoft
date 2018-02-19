@@ -51,7 +51,7 @@ if ($tapa == "tuonti" and $tee != "") {
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) == 0) {
-    echo $toim == "TYOMAARAYS" ? t("Työmääräysä ei löydy") : t("Laskua ei löydy");
+    echo $toim == "TYOMAARAYS" ? t("Työmääräystä ei löydy") : t("Laskua ei löydy");
     exit;
   }
   else {
@@ -364,7 +364,8 @@ elseif ($tee != "") {
                 vahennettava_era               = '$vahennettava_era',
                 comments                       = '$lomake_lisatiedot',
                 ultilno                        = '$ultilno'
-                WHERE tunnus                   = '$otun' and yhtio = '$kukarow[yhtio]'";
+                WHERE tunnus = '$otun'
+                and yhtio    = '$kukarow[yhtio]'";
       $result = pupe_query($query);
 
       //päivitetään alatila vain jos tilaus ei vielä ole laskutettu
@@ -388,7 +389,9 @@ elseif ($tee != "") {
       $result = pupe_query($query);
     }
 
-    $tee = '';
+    if (empty($from_viennin_lisatiedot_funktio)) {
+      $tee = '';
+    }
 
     if ($lopetus != "") {
       lopetus($lopetus, 'meta');

@@ -212,6 +212,57 @@ echo "</tr>";
 echo "</table>";
 echo "</td>";
 
+//############## Kemiallinen ominaisuus tuotteen avainsana
+$query = "  SELECT distinct selite, selitetark FROM tuotteen_avainsanat WHERE yhtio='$kukarow[yhtio]' and laji = 'KEMOM' and kieli = '{$kukarow['kieli']}' ORDER BY selitetark";
+$res2  = pupe_query($query);
+
+if (mysql_num_rows($res2) > 0) {
+  echo "<td>";
+  echo "<table>";
+  echo "<tr>";
+  echo "<td valign='top' class='back'>";
+
+  if (mysql_num_rows($res2) > 11) {
+    echo "<div style='height:440px;overflow:auto;'>";
+  }
+
+  //############## Kemiallinen ominaisuus tuotteen avainsana
+  echo "<table>";
+  echo "<tr>";
+  echo "<th colspan='2'>", t("Kemiallinen ominaisuus"), ":</th>";
+  echo "</tr>";
+  echo "<tr>";
+  echo "<td><input type='checkbox' name='mul_kem' onclick='toggleAll(this);'></td><td nowrap>", t("Ruksaa kaikki"), "</td>";
+  echo "</tr>";
+
+  if (isset($kem) and $kem != '') {
+    $mul_kem = explode(",", $kem);
+  }
+
+  while ($rivi = mysql_fetch_array($res2)) {
+    $mul_check = '';
+    if (count($mul_kem) > 0) {
+      if (in_array($rivi['selite'], $mul_kem)) {
+        $mul_check = 'CHECKED';
+      }
+    }
+
+    echo "<tr><td><input type='checkbox' name='mul_kem[]' value='{$rivi['selite']}' {$mul_check}></td><td>{$rivi['selite']}</td></tr>";
+  }
+
+  echo "</table>";
+
+  if (mysql_num_rows($res2) > 11) {
+    echo "</div>";
+  }
+
+  echo "</td>";
+  echo "</tr>";
+  echo "</table>";
+  echo "</td>";
+}
+
+## haku
 echo "<td>";
 echo "<table>";
 echo "<tr>";
@@ -636,6 +687,16 @@ if ($tee == 'LISTAA') {
     $sel_tuotemerkki = "('".str_replace(',', '\',\'', implode(",", $mul_tmr))."')";
     $lisa .= " and tuote.tuotemerkki in $sel_tuotemerkki ";
   }
+// SELECT distinct selite, selitetark FROM tuotteen_avainsanat WHERE yhtio='$kukarow[yhtio]' and laji = 'KEMOM' ORDER BY selitetark
+  if ($kem != '') {
+    $avainsana_lisa = " JOIN tuotteen_avainsanat ON (tuotteen_avainsanat.yhtio = tuote.yhtio and tuotteen_avainsanat.tuoteno = tuote.tuoteno and tuotteen_avainsanat.kieli = '{$kukarow['kieli']}' and tuotteen_avainsanat.selite in ('".str_replace(',', '\',\'', $kem)."')) ";
+    $avainsana_selectlisa = ", tuotteen_avainsanat.selite AS kem_selite";
+  }
+  elseif (count($mul_kem) > 0) {
+    $sel_kem = "('".str_replace(',', '\',\'', implode(",", $mul_kem))."')";
+    $avainsana_lisa = " JOIN tuotteen_avainsanat ON (tuotteen_avainsanat.yhtio = tuote.yhtio and tuotteen_avainsanat.tuoteno = tuote.tuoteno and tuotteen_avainsanat.kieli = '{$kukarow['kieli']}' and tuotteen_avainsanat.selite in $sel_kem) ";
+    $avainsana_selectlisa = ", tuotteen_avainsanat.selite AS kem_selite";
+  }
 
   if ($liitetiedosto != '' and $lisa != '') {
     $liitetiedosto = mysql_real_escape_string(trim($liitetiedosto));
@@ -751,11 +812,13 @@ if ($tee == 'LISTAA') {
              liitetiedostot.selite,
              liitetiedostot.liitos,
              if(liitetiedostot.muutospvm = '0000-00-00 00:00:00', liitetiedostot.luontiaika, liitetiedostot.muutospvm) muutospvm
+             {$avainsana_selectlisa}
              FROM tuote
              INNER JOIN liitetiedostot ON (liitetiedostot.yhtio = tuote.yhtio
               AND liitetiedostot.liitos        = 'tuote'
               AND liitetiedostot.liitostunnus  = tuote.tunnus
               AND liitetiedostot.filename     != '')
+             {$avainsana_lisa}
              WHERE tuote.yhtio                 = '{$kukarow["yhtio"]}'
              $lisa
              ORDER BY $orderlisa";
@@ -819,6 +882,11 @@ if ($tee == 'LISTAA') {
       $_status_search = "<td><input type='text' class='search_field' name='search_status'></td>";
       $_sarakkeet++;
     }
+    if (count($mul_kem) > 0 or $kem != '') {
+      $_kem_sarake = "<th>". t('Kemiallinen ominaisuus'). "</th>";
+      $_kem_search = "<td><input type='text' class='search_field' name='search_kem'></td>";
+      $_sarakkeet++;
+    }
     if (count($mul_siz) > 0) {
       if (in_array('korkeus', $mul_siz)) {
         $_korkeus_sarake = "<th>". t('Korkeus'). "</th>";
@@ -854,6 +922,7 @@ if ($tee == 'LISTAA') {
     echo $_korkeus_sarake;
     echo $_leveys_sarake;
     echo "<th>", t('Käyttötarkoitus'), "</th>";
+    echo $_kem_sarake;
     echo "<th>", t('Muutospäivä'), "</th>";
     echo "<th>", t('Selite'), "</th>";
     echo $_ruksaa_sarake;
@@ -872,6 +941,7 @@ if ($tee == 'LISTAA') {
     echo $_korkeus_search;
     echo $_leveys_search;
     echo "<td><input type='text' class='search_field' name='search_kayttotarkoitus'></td>";
+    echo $_kem_search;
     echo "<td><input type='text' class='search_field' name='search_muutospaiva'></td>";
     echo "<td><input type='text' class='search_field' name='search_selite'></td>";
     echo $_ruksaa_search;
@@ -952,6 +1022,9 @@ if ($tee == 'LISTAA') {
       }
 
       echo "<td valign='top' align='right'>", $row['kayttotarkoitus'], "</td>";
+      if (count($mul_kem) > 0 or $kem != '') {
+        echo "<td valign='top'>", $row['kem_selite'], "</td>";
+      }
       echo "<td valign='top' align='right'>", $row['muutospvm'], "</td>";
       echo "<td valign='top'>", $row['selite'], "</td>";
 
@@ -969,6 +1042,10 @@ if ($tee == 'LISTAA') {
       if (isset($workbook) and $mul_exl == 'tallennetaan') {
         $worksheet->writeString($excelrivi, $excelsarake, $row['kayttotarkoitus'],     $format_bold);
         $excelsarake++;
+        if (count($mul_kem) > 0 or $kem != '') {
+          $worksheet->writeString($excelrivi, $excelsarake, $row['kem_selite'],     $format_bold);
+          $excelsarake++;
+        }
         $worksheet->writeString($excelrivi, $excelsarake, date("Y-m-d", $row['muutospvm']),     $format_bold);
         $excelsarake++;
         $worksheet->writeString($excelrivi, $excelsarake, $row['selite'],     $format_bold);

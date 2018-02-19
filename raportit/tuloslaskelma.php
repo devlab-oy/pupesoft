@@ -828,6 +828,7 @@ else {
 
     $alkuquery1 = "";
     $alkuquery2 = "";
+    $alkuquery3 = "";
 
     for ($i = $startmonth;  $i <= $endmonth;) {
 
@@ -881,6 +882,7 @@ else {
       if ($vertailubu != "") {
         $alkuquery1 .= " ,(SELECT sum(budjetti.summa) FROM budjetti USE INDEX (yhtio_taso_kausi) WHERE budjetti.yhtio = tili.yhtio and budjetti.tyyppi = '$kirjain' and BINARY budjetti.taso = BINARY tili.$tilikarttataso and budjetti.kausi = '$bukausi' $bulisa) 'budj $headny'\n";
         $alkuquery2 .= " ,(SELECT sum(budjetti.summa) FROM budjetti USE INDEX (yhtio_taso_kausi) WHERE budjetti.yhtio = tili.yhtio and budjetti.tyyppi = '$kirjain' and BINARY budjetti.taso = BINARY tili.taso and budjetti.kausi = '$bukausi' $bulisa) 'budj $headny'\n";
+        $alkuquery3 .= " ,(SELECT sum(budjetti.summa) FROM budjetti USE INDEX (yhtio_taso_kausi) WHERE budjetti.yhtio = tili.yhtio and budjetti.tyyppi = '$kirjain' and BINARY budjetti.tili = BINARY tili.tili and BINARY tili.tili != 0 and budjetti.kausi = '$bukausi' $bulisa) 'budj-tili $headny'\n";
         $kaudet[] = "budj $headny";
       }
 
@@ -911,6 +913,7 @@ else {
       if ($vertailubu != "") {
         $alkuquery1 .= " ,(SELECT sum(budjetti.summa) FROM budjetti USE INDEX (yhtio_taso_kausi) WHERE budjetti.yhtio = tili.yhtio and budjetti.tyyppi = '$kirjain' and BINARY budjetti.taso = BINARY tili.$tilikarttataso and budjetti.kausi >= '$budjettalk' and budjetti.kausi <= '$budjettlop' $bulisa) 'budj $vka - $vkl' \n";
         $alkuquery2 .= " ,(SELECT sum(budjetti.summa) FROM budjetti USE INDEX (yhtio_taso_kausi) WHERE budjetti.yhtio = tili.yhtio and budjetti.tyyppi = '$kirjain' and BINARY budjetti.taso = BINARY tili.taso and budjetti.kausi >= '$budjettalk' and budjetti.kausi <= '$budjettlop' $bulisa) 'budj $vka - $vkl' \n";
+        $alkuquery3 .= " ,(SELECT sum(budjetti.summa) FROM budjetti USE INDEX (yhtio_taso_kausi) WHERE budjetti.yhtio = tili.yhtio and budjetti.tyyppi = '$kirjain' and BINARY budjetti.tili = BINARY tili.tili and BINARY tili.tili != 0 and budjetti.kausi >= '$budjettalk' and budjetti.kausi <= '$budjettlop' $bulisa) 'budj-tili $vka - $vkl' \n";
         $kaudet[] = "budj ".$vka." - ".$vkl;
       }
     }
@@ -1023,21 +1026,28 @@ else {
     }
 
     // Haetaan kaikki budjetit
-    $query = "SELECT budjetti.taso, budjetti.yhtio groupsarake, $alkuquery2
+    $query = "SELECT budjetti.taso, budjetti.tili, budjetti.yhtio groupsarake, $alkuquery2
+              $alkuquery3
               FROM budjetti
               JOIN budjetti tili ON (tili.yhtio = budjetti.yhtio and tili.tunnus = budjetti.tunnus)
               LEFT JOIN tiliointi USE INDEX (PRIMARY) ON (tiliointi.tunnus = 0)
               WHERE budjetti.yhtio = '$kukarow[yhtio]'
               AND budjetti.tyyppi  = '$kirjain'
               $bulisa
-              GROUP BY budjetti.taso, groupsarake
-              ORDER BY budjetti.taso, groupsarake";
+              GROUP BY budjetti.taso, budjetti.tili, groupsarake
+              ORDER BY budjetti.taso, budjetti.tili, groupsarake";
     $tilires = pupe_query($query);
 
     $budjetit = array();
+    $budjetit_tili = array();
 
     while ($tilirow = mysql_fetch_assoc($tilires)) {
-      $budjetit[(string) $tilirow["taso"]][(string) $tilirow["groupsarake"]] = $tilirow;
+      if (empty($tilirow['tili'])) {
+        $budjetit[(string) $tilirow["taso"]][(string) $tilirow["groupsarake"]] = $tilirow;
+      }
+      else {
+        $budjetit_tili[(string) $tilirow["tili"]][(string) $tilirow["groupsarake"]] = $tilirow;
+      }
     }
 
     // Haetaan kaikki tasot ja rakennetaan tuloslaskelma-array
@@ -1102,12 +1112,18 @@ else {
             $tilirow_summat = array("$firstgroup" => 0);
           }
 
+          if (isset($budjetit_tili[(string) $tilirow["tilino"]])) {
+            $tilirow_summat = array_replace_recursive($budjetit_tili[(string) $tilirow["tilino"]], $tilirow_summat);
+          }
+
           foreach ($tilirow_summat as $sarake => $tilirow_sum) {
             // summataan kausien saldot
             foreach ($kaudet as $kausi) {
               if (substr($kausi, 0, 4) == "budj") {
                 $i = $tasoluku - 1;
 
+                $_kausi_budjetti_tili = str_replace("budj", "budj-tili", $kausi);
+                $tilisumma[$taso[$i]][$summakey][$kausi][(string) $sarake] = $tilirow_sum[$_kausi_budjetti_tili];
                 $summa[$kausi][$taso[$i]][(string) $sarake] = $tilirow_sum[$kausi];
               }
               else {

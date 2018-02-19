@@ -216,7 +216,11 @@ echo "</td>";
 $query = "  SELECT distinct selite, selitetark FROM tuotteen_avainsanat WHERE yhtio='$kukarow[yhtio]' and laji = 'KEMOM' and kieli = '{$kukarow['kieli']}' ORDER BY selitetark";
 $res2  = pupe_query($query);
 
+// näytetäänkö tuloksissa kemiallinen ominaisuus vaikkei olisi mitään valittunakaan
+$_kem = false;
+
 if (mysql_num_rows($res2) > 0) {
+  $_kem = true;
   echo "<td>";
   echo "<table>";
   echo "<tr>";
@@ -659,6 +663,8 @@ if ($tee == 'LISTAA') {
   $sel_tuotemerkki = "";
   $sel_kayttotarkoitus = "";
   $sel_selite = "";
+  $avainsana_lisa = "";
+  $avainsana_selectlisa = "";
 
   $lisa  = "";
   $orderlisa = "";
@@ -688,12 +694,16 @@ if ($tee == 'LISTAA') {
   }
 // SELECT distinct selite, selitetark FROM tuotteen_avainsanat WHERE yhtio='$kukarow[yhtio]' and laji = 'KEMOM' ORDER BY selitetark
   if ($kem != '') {
-    $avainsana_lisa = " JOIN tuotteen_avainsanat ON (tuotteen_avainsanat.yhtio = tuote.yhtio and tuotteen_avainsanat.tuoteno = tuote.tuoteno and tuotteen_avainsanat.kieli = '{$kukarow['kieli']}' and tuotteen_avainsanat.selite in ('".str_replace(',', '\',\'', $kem)."')) ";
+    $avainsana_lisa = " JOIN tuotteen_avainsanat ON (tuotteen_avainsanat.yhtio = tuote.yhtio and tuotteen_avainsanat.laji = 'KEMOM' and tuotteen_avainsanat.tuoteno = tuote.tuoteno and tuotteen_avainsanat.kieli = '{$kukarow['kieli']}' and tuotteen_avainsanat.selite in ('".str_replace(',', '\',\'', $kem)."')) ";
     $avainsana_selectlisa = ", tuotteen_avainsanat.selite AS kem_selite";
   }
   elseif (count($mul_kem) > 0) {
     $sel_kem = "('".str_replace(',', '\',\'', implode(",", $mul_kem))."')";
-    $avainsana_lisa = " JOIN tuotteen_avainsanat ON (tuotteen_avainsanat.yhtio = tuote.yhtio and tuotteen_avainsanat.tuoteno = tuote.tuoteno and tuotteen_avainsanat.kieli = '{$kukarow['kieli']}' and tuotteen_avainsanat.selite in $sel_kem) ";
+    $avainsana_lisa = " JOIN tuotteen_avainsanat ON (tuotteen_avainsanat.yhtio = tuote.yhtio and tuotteen_avainsanat.laji = 'KEMOM' and tuotteen_avainsanat.tuoteno = tuote.tuoteno and tuotteen_avainsanat.kieli = '{$kukarow['kieli']}' and tuotteen_avainsanat.selite in $sel_kem) ";
+    $avainsana_selectlisa = ", tuotteen_avainsanat.selite AS kem_selite";
+  }
+  elseif ($_kem) {
+    $avainsana_lisa = "LEFT JOIN tuotteen_avainsanat ON (tuotteen_avainsanat.yhtio = tuote.yhtio and tuotteen_avainsanat.laji = 'KEMOM' and tuotteen_avainsanat.tuoteno = tuote.tuoteno and tuotteen_avainsanat.kieli = '{$kukarow['kieli']}')";
     $avainsana_selectlisa = ", tuotteen_avainsanat.selite AS kem_selite";
   }
 
@@ -872,7 +882,7 @@ if ($tee == 'LISTAA') {
       $_status_search = "<td><input type='text' class='search_field' name='search_status'></td>";
       $_sarakkeet++;
     }
-    if (count($mul_kem) > 0 or $kem != '') {
+    if ($_kem) {
       $_kem_sarake = "<th>". t('Kemiallinen ominaisuus'). "</th>";
       $_kem_search = "<td><input type='text' class='search_field' name='search_kem'></td>";
       $_sarakkeet++;
@@ -947,15 +957,19 @@ if ($tee == 'LISTAA') {
 
       $worksheet->writeString($excelrivi, $excelsarake, t("Tuoteno"),       $format_bold);
       $excelsarake++;
-      $worksheet->writeString($excelrivi, $excelsarake, t("Liitos"),         $format_bold);
+      $worksheet->writeString($excelrivi, $excelsarake, t("Liitos"),        $format_bold);
       $excelsarake++;
-      $worksheet->writeString($excelrivi, $excelsarake, t("Filename"),       $format_bold);
+      $worksheet->writeString($excelrivi, $excelsarake, t("Filename"),      $format_bold);
       $excelsarake++;
-      $worksheet->writeString($excelrivi, $excelsarake, t("Kayttotarkoitus"),     $format_bold);
+      $worksheet->writeString($excelrivi, $excelsarake, t("Kayttotarkoitus"),$format_bold);
       $excelsarake++;
-      $worksheet->writeString($excelrivi, $excelsarake, t("Muutospäivä"),     $format_bold);
+      if ($_kem) {
+        $worksheet->writeString($excelrivi, $excelsarake, t("Kemiallinen ominaisuus"), $format_bold);
+        $excelsarake++;
+      }
+      $worksheet->writeString($excelrivi, $excelsarake, t("Muutospäivä"),   $format_bold);
       $excelsarake++;
-      $worksheet->writeString($excelrivi, $excelsarake, t("Selite"),     $format_bold);
+      $worksheet->writeString($excelrivi, $excelsarake, t("Selite"),        $format_bold);
       $excelsarake++;
       $excelrivi++;
       $excelsarake = 0;
@@ -969,7 +983,7 @@ if ($tee == 'LISTAA') {
       echo "<td valign='top'>", $row['tuoteno'], "</td>";
 
       if (isset($workbook) and $mul_exl == 'tallennetaan') {
-        $worksheet->writeString($excelrivi, $excelsarake, $row['tuoteno'],     $format_bold);
+        $worksheet->writeString($excelrivi, $excelsarake, $row['tuoteno'],  $format_bold);
         $excelsarake++;
       }
 
@@ -1012,7 +1026,7 @@ if ($tee == 'LISTAA') {
       }
 
       echo "<td valign='top' align='right'>", $row['kayttotarkoitus'], "</td>";
-      if (count($mul_kem) > 0 or $kem != '') {
+      if ($_kem) {
         echo "<td valign='top'>", $row['kem_selite'], "</td>";
       }
       echo "<td valign='top' align='right'>", $row['muutospvm'], "</td>";
@@ -1032,7 +1046,7 @@ if ($tee == 'LISTAA') {
       if (isset($workbook) and $mul_exl == 'tallennetaan') {
         $worksheet->writeString($excelrivi, $excelsarake, $row['kayttotarkoitus'],     $format_bold);
         $excelsarake++;
-        if (count($mul_kem) > 0 or $kem != '') {
+        if ($_kem) {
           $worksheet->writeString($excelrivi, $excelsarake, $row['kem_selite'],     $format_bold);
           $excelsarake++;
         }

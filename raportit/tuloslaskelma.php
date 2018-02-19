@@ -1137,7 +1137,7 @@ else {
 
               $_kausi = str_replace("budj", "budj-tili", $kausi);
 
-              if ($vertailubu2 == "") {
+              if ($vertailubu2 == "" and substr($kausi, 0, 4) == "budj") {
                 $i = $tasoluku - 1;
                 $summa[$kausi][$taso[$i]][(string) $sarake] = $tilirow_sum[$kausi];
               }

@@ -226,7 +226,6 @@ if (mysql_num_rows($res2) > 0) {
     echo "<div style='height:440px;overflow:auto;'>";
   }
 
-  //############## Kemiallinen ominaisuus tuotteen avainsana
   echo "<table>";
   echo "<tr>";
   echo "<th colspan='2'>", t("Kemiallinen ominaisuus"), ":</th>";
@@ -780,15 +779,6 @@ if ($tee == 'LISTAA') {
   if ($tuoteno != '') {
     $tuoteno = mysql_real_escape_string(trim($tuoteno));
     $lisa .= " and tuote.tuoteno like '$tuoteno%' ";
-  }
-
-  if ($liitetiedosto != '' and $lisa != '') {
-    $liitetiedosto = mysql_real_escape_string(trim($liitetiedosto));
-    $lisa .= " and liitetiedostot.filename like '%{$liitetiedosto}%' ";
-  }
-  elseif ($liitetiedosto != '') {
-    echo "<br>Ei kyl ny jätkä onnistu, kokeileppas uusiks<br>";
-    die;
   }
 
   $orderlisa = "tuote.osasto, tuote.try, tuote.tuoteno";

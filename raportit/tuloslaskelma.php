@@ -25,6 +25,7 @@ if (!isset($rtaso))          $rtaso = "TILI";
 if (!isset($kaikkikaudet))   $kaikkikaudet = "";
 if (!isset($vertailued))     $vertailued = "";
 if (!isset($vertailubu))     $vertailubu = "";
+if (!isset($vertailubu2))    $vertailubu2 = "";
 if (!isset($ei_yhteensa))    $ei_yhteensa = "";
 if (!isset($konsernirajaus)) $konsernirajaus = "";
 if (!isset($sarakebox))      $sarakebox = "";
@@ -352,6 +353,7 @@ else {
   $vchek = $bchek = $ychek = $vpvmchek = "";
   if ($vertailued != "")  $vchek = "CHECKED";
   if ($vertailubu != "")  $bchek = "CHECKED";
+  if ($vertailubu2 != "") $b2chek = "CHECKED";
   if ($vertailupvm != "") $vpvmchek = "CHECKED";
   if ($ei_yhteensa != "") $ychek = "CHECKED";
 
@@ -373,6 +375,7 @@ else {
   echo "<td>";
   echo "&nbsp;<input type='checkbox' name='vertailued' $vchek> ".t("Edellinen vastaava");
   echo "<br>&nbsp;<input type='checkbox' name='vertailubu' $bchek> ".t("Budjetti");
+  echo "<br>&nbsp;<input type='checkbox' name='vertailubu2' $b2chek> ".t("Budjetti tileittäin, summataan tileiltä tasoille");
   echo "<br>&nbsp;<input type='checkbox' name='vertailupvm' $vpvmchek> ".t("Vertailu vapaavalintaisen kauden kanssa");
   echo "</td></tr>";
 
@@ -530,6 +533,11 @@ else {
   echo "<br><input type = 'submit' value = '".t("Näytä")."'></form><br><br>";
 
   if ($tltee == "aja") {
+
+    if ($vertailubu2 != "") {
+      $vertailubu = "X";
+    }
+
     // Desimaalit
     $muoto = "%.". (int) $desi . "f";
 
@@ -881,7 +889,9 @@ else {
       // budjettivertailu
       if ($vertailubu != "") {
         $alkuquery1 .= " ,(SELECT sum(budjetti.summa) FROM budjetti USE INDEX (yhtio_taso_kausi) WHERE budjetti.yhtio = tili.yhtio and budjetti.tyyppi = '$kirjain' and BINARY budjetti.taso = BINARY tili.$tilikarttataso and budjetti.kausi = '$bukausi' $bulisa) 'budj $headny'\n";
-        $alkuquery2 .= " ,(SELECT sum(budjetti.summa) FROM budjetti USE INDEX (yhtio_taso_kausi) WHERE budjetti.yhtio = tili.yhtio and budjetti.tyyppi = '$kirjain' and BINARY budjetti.taso = BINARY tili.taso and budjetti.kausi = '$bukausi' $bulisa) 'budj $headny'\n";
+        if ($vertailubu2 == "") {
+          $alkuquery2 .= " ,(SELECT sum(budjetti.summa) FROM budjetti USE INDEX (yhtio_taso_kausi) WHERE budjetti.yhtio = tili.yhtio and budjetti.tyyppi = '$kirjain' and BINARY budjetti.taso = BINARY tili.taso and budjetti.kausi = '$bukausi' $bulisa) 'budj $headny'\n";
+        }
         $alkuquery3 .= " ,(SELECT sum(budjetti.summa) FROM budjetti USE INDEX (yhtio_taso_kausi) WHERE budjetti.yhtio = tili.yhtio and budjetti.tyyppi = '$kirjain' and BINARY budjetti.tili = BINARY tili.tili and BINARY tili.tili != 0 and budjetti.kausi = '$bukausi' $bulisa) 'budj-tili $headny'\n";
         $kaudet[] = "budj $headny";
       }
@@ -912,7 +922,9 @@ else {
       // budjettivertailu
       if ($vertailubu != "") {
         $alkuquery1 .= " ,(SELECT sum(budjetti.summa) FROM budjetti USE INDEX (yhtio_taso_kausi) WHERE budjetti.yhtio = tili.yhtio and budjetti.tyyppi = '$kirjain' and BINARY budjetti.taso = BINARY tili.$tilikarttataso and budjetti.kausi >= '$budjettalk' and budjetti.kausi <= '$budjettlop' $bulisa) 'budj $vka - $vkl' \n";
-        $alkuquery2 .= " ,(SELECT sum(budjetti.summa) FROM budjetti USE INDEX (yhtio_taso_kausi) WHERE budjetti.yhtio = tili.yhtio and budjetti.tyyppi = '$kirjain' and BINARY budjetti.taso = BINARY tili.taso and budjetti.kausi >= '$budjettalk' and budjetti.kausi <= '$budjettlop' $bulisa) 'budj $vka - $vkl' \n";
+        if ($vertailubu2 == "") {
+          $alkuquery2 .= " ,(SELECT sum(budjetti.summa) FROM budjetti USE INDEX (yhtio_taso_kausi) WHERE budjetti.yhtio = tili.yhtio and budjetti.tyyppi = '$kirjain' and BINARY budjetti.taso = BINARY tili.taso and budjetti.kausi >= '$budjettalk' and budjetti.kausi <= '$budjettlop' $bulisa) 'budj $vka - $vkl' \n";
+        }
         $alkuquery3 .= " ,(SELECT sum(budjetti.summa) FROM budjetti USE INDEX (yhtio_taso_kausi) WHERE budjetti.yhtio = tili.yhtio and budjetti.tyyppi = '$kirjain' and BINARY budjetti.tili = BINARY tili.tili and BINARY tili.tili != 0 and budjetti.kausi >= '$budjettalk' and budjetti.kausi <= '$budjettlop' $bulisa) 'budj-tili $vka - $vkl' \n";
         $kaudet[] = "budj ".$vka." - ".$vkl;
       }
@@ -1119,37 +1131,37 @@ else {
           foreach ($tilirow_summat as $sarake => $tilirow_sum) {
             // summataan kausien saldot
             foreach ($kaudet as $kausi) {
-              if (substr($kausi, 0, 4) == "budj") {
-                $i = $tasoluku - 1;
 
-                $_kausi_budjetti_tili = str_replace("budj", "budj-tili", $kausi);
-                $tilisumma[$taso[$i]][$summakey][$kausi][(string) $sarake] = $tilirow_sum[$_kausi_budjetti_tili];
+              $_kausi = str_replace("budj", "budj-tili", $kausi);
+
+              if ($vertailubu2 == "") {
+                $i = $tasoluku - 1;
                 $summa[$kausi][$taso[$i]][(string) $sarake] = $tilirow_sum[$kausi];
               }
               else {
                 // Summataan kaikkia pienempiä summaustasoja
                 for ($i = $tasoluku - 1; $i >= 0; $i--) {
                   // Summat per kausi/taso
-                  if (isset($summa[$kausi][$taso[$i]][(string) $sarake])) $summa[$kausi][$taso[$i]][(string) $sarake] += $tilirow_sum[$kausi];
-                  else $summa[$kausi][$taso[$i]][(string) $sarake] = $tilirow_sum[$kausi];
+                  if (isset($summa[$kausi][$taso[$i]][(string) $sarake])) $summa[$kausi][$taso[$i]][(string) $sarake] += $tilirow_sum[$_kausi];
+                  else $summa[$kausi][$taso[$i]][(string) $sarake] = $tilirow_sum[$_kausi];
 
                   //Onko tämä yhtiön tulostili? Jos on niin summataan tulos mukaan
                   if (isset($tulokset[$sarake][$kausi]) and ($tilirow["tunnus"] == $yhtiorow["tilikauden_tulos"])) {
-                    $summa[$kausi][$taso[$i]][(string) $sarake] += $tulokset[$sarake][$kausi];
+                    $summa[$kausi][$taso[$i]][(string) $sarake] += $tulokset[$sarake][$_kausi];
                   }
                 }
+              }
 
-                // Summat per taso/tili/kausi
-                $i = $tasoluku - 1;
-                $summakey = $tilirow["tilino"]."###".$tilirow["nimi"];
+              // Summat per taso/tili/kausi
+              $i = $tasoluku - 1;
+              $summakey = $tilirow["tilino"]."###".$tilirow["nimi"];
 
-                if (isset($tilisumma[$taso[$i]][$summakey][$kausi][(string) $sarake])) $tilisumma[$taso[$i]][$summakey][$kausi][(string) $sarake] += $tilirow_sum[$kausi];
-                else $tilisumma[$taso[$i]][$summakey][$kausi][(string) $sarake] = $tilirow_sum[$kausi];
+              if (isset($tilisumma[$taso[$i]][$summakey][$kausi][(string) $sarake])) $tilisumma[$taso[$i]][$summakey][$kausi][(string) $sarake] += $tilirow_sum[$_kausi];
+              else $tilisumma[$taso[$i]][$summakey][$kausi][(string) $sarake] = $tilirow_sum[$_kausi];
 
-                // Onko tämä yhtiön tulostili? Jos on niin summataan tulos mukaan
-                if (isset($tulokset[$sarake][$kausi]) and ($tilirow["tunnus"] == $yhtiorow["tilikauden_tulos"])) {
-                  $tilisumma[$taso[$i]][$summakey][$kausi][(string) $sarake] += $tulokset[$sarake][$kausi];
-                }
+              // Onko tämä yhtiön tulostili? Jos on niin summataan tulos mukaan
+              if (isset($tulokset[$sarake][$kausi]) and ($tilirow["tunnus"] == $yhtiorow["tilikauden_tulos"])) {
+                $tilisumma[$taso[$i]][$summakey][$kausi][(string) $sarake] += $tulokset[$sarake][$_kausi];
               }
             }
           }

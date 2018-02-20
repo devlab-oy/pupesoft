@@ -218,6 +218,7 @@ echo "<option value = 'VS' {$sel["VS"]}>",  t("Valuuttasummalla"), "</option>";
 echo "<option value = 'N'  {$sel["N"]}>",   t("Nimell‰"), "</option>";
 echo "<option value = 'V'  {$sel["V"]}>",   t("Viitteell‰"), "</option>";
 echo "<option value = 'L'  {$sel["L"]}>",   t("Laskunnumerolla"), "</option>";
+echo "<option value = 'K'  {$sel["K"]}>",   t("Kohteella"), "</option>";
 echo "<option value = 'A'  {$sel["A"]}>",   t("Asiakasnumerolla"), "</option>";
 echo "<option value = 'AT'  {$sel["AT"]}>", t("Asiakkaan tilausnumerolla"), "</option>";
 echo "<option value = 'LN' {$sel["LN"]}>",  t("Laatijan/myyj‰n nimell‰"), "</option>";
@@ -383,6 +384,12 @@ if ($tee == 'L') {
   $jarj = "nimi, summa";
 }
 
+// K = kohteella
+if ($tee == 'K') {
+  $ehto = "tila = 'U' and kohde = '{$summa1}'";
+  $jarj = "nimi, summa";
+}
+
 // M = er‰p‰iv‰m‰‰r‰ll‰
 if ($tee == 'M') {
   $ehto = "tila = 'U' and lasku.erpcm = '$pvm'";
@@ -464,7 +471,7 @@ if (!empty($tee)) {
 
     while ($trow = mysql_fetch_assoc($result)) {
       echo "<tr class='aktiivi'>";
-      
+
       if ($kukarow['taso'] < 2) {
         echo "<td valign='top'>".pupe_DataTablesEchoSort($trow['tapvm']).tv1dateconv($trow["tapvm"])."</td>";
       }

@@ -8,11 +8,26 @@ if ($_POST["kaunisnimi"] != '') {
   $_POST["kaunisnimi"] = str_replace("/", "", $_POST["kaunisnimi"]);
 }
 
+// DataTables päälle
+$pupe_DataTables = "kekkonen";
+
 require 'inc/parametrit.inc';
 
 if (isset($tee) and $tee == "lataa_tiedosto") {
   readfile("/tmp/".$tmpfilenimi);
   exit;
+}
+
+// Liitetiedostot popup
+if (isset($liite_popup_toiminto) and $liite_popup_toiminto == "AK") {
+  liite_popup("AK", $tuotetunnus, $width, $height, $litety_id);
+}
+else {
+  liite_popup("JS");
+}
+
+if (function_exists("js_popup")) {
+  echo js_popup();
 }
 
 echo " <SCRIPT TYPE=\"text/javascript\" LANGUAGE=\"JavaScript\">
@@ -63,7 +78,7 @@ echo "<td class='back'>";
 $res2 = t_avainsana("OSASTO");
 
 if (mysql_num_rows($res2) > 11) {
-  echo "<div style='height:320px;overflow:auto;'>";
+  echo "<div style='height:440px;overflow:auto;'>";
 }
 
 //############## TUOTEOSASTO
@@ -111,7 +126,7 @@ echo "<td valign='top' class='back'>";
 $res2 = t_avainsana("TRY");
 
 if (mysql_num_rows($res2) > 11) {
-  echo "<div style='height:320px;overflow:auto;'>";
+  echo "<div style='height:440px;overflow:auto;'>";
 }
 
 //############## TUOTERYHMÄ
@@ -159,7 +174,7 @@ $query = "  SELECT distinct tuotemerkki FROM tuote use index (yhtio_tuotemerkki)
 $res2  = pupe_query($query);
 
 if (mysql_num_rows($res2) > 11) {
-  echo "<div style='height:320px;overflow:auto;'>";
+  echo "<div style='height:440px;overflow:auto;'>";
 }
 
 //############## TUOTEMERKKI
@@ -197,6 +212,60 @@ echo "</tr>";
 echo "</table>";
 echo "</td>";
 
+//############## Kemiallinen ominaisuus tuotteen avainsana
+$query = "  SELECT distinct selite, selitetark FROM tuotteen_avainsanat WHERE yhtio='$kukarow[yhtio]' and laji = 'KEMOM' and kieli = '{$kukarow['kieli']}' ORDER BY selitetark";
+$res2  = pupe_query($query);
+
+// näytetäänkö tuloksissa kemiallinen ominaisuus vaikkei olisi mitään valittunakaan
+$_kem = false;
+
+if (mysql_num_rows($res2) > 0) {
+  $_kem = true;
+  echo "<td>";
+  echo "<table>";
+  echo "<tr>";
+  echo "<td valign='top' class='back'>";
+
+  if (mysql_num_rows($res2) > 11) {
+    echo "<div style='height:440px;overflow:auto;'>";
+  }
+
+  echo "<table>";
+  echo "<tr>";
+  echo "<th colspan='2'>", t("Kemiallinen ominaisuus"), ":</th>";
+  echo "</tr>";
+  echo "<tr>";
+  echo "<td><input type='checkbox' name='mul_kem' onclick='toggleAll(this);'></td><td nowrap>", t("Ruksaa kaikki"), "</td>";
+  echo "</tr>";
+
+  if (isset($kem) and $kem != '') {
+    $mul_kem = explode(",", $kem);
+  }
+
+  while ($rivi = mysql_fetch_array($res2)) {
+    $mul_check = '';
+    if (count($mul_kem) > 0) {
+      if (in_array($rivi['selite'], $mul_kem)) {
+        $mul_check = 'CHECKED';
+      }
+    }
+
+    echo "<tr><td><input type='checkbox' name='mul_kem[]' value='{$rivi['selite']}' {$mul_check}></td><td>{$rivi['selite']}</td></tr>";
+  }
+
+  echo "</table>";
+
+  if (mysql_num_rows($res2) > 11) {
+    echo "</div>";
+  }
+
+  echo "</td>";
+  echo "</tr>";
+  echo "</table>";
+  echo "</td>";
+}
+
+## haku
 echo "<td>";
 echo "<table>";
 echo "<tr>";
@@ -211,11 +280,16 @@ echo "<tr>";
 echo "<td><input type='text' name='tuoteno' size='15' value='{$tuoteno}'></td>";
 echo "</tr>";
 echo "</table>";
-echo "</td>";
-echo "</tr>";
 
+################ Haku liitetiedoston nimellä
+echo "<table width='100%'>";
 echo "<tr>";
-echo "<td valign='top' class='back'>";
+echo "<th colspan='3'>", t("Liitetiedostohaku"), ":</th>";
+echo "</tr>";
+echo "<tr>";
+echo "<td><input type='text' name='liitetiedosto' size='15' value='{$liitetiedosto}'></td>";
+echo "</tr>";
+echo "</table>";
 
 //############## KÄYTTÖTARKOITUS (onko thumbnail vai tuotekuva)
 echo "<table width='100%'>";
@@ -230,41 +304,18 @@ if (isset($kayt) and $kayt != '') {
   $mul_kay = explode(",", $kayt);
 }
 
-$mul_check = '';
-if (count($mul_kay) > 0) {
-  if (in_array('th', $mul_kay)) {
-    $mul_check = 'CHECKED';
+$res = t_avainsana("LITETY");
+
+while ($rows = mysql_fetch_assoc($res)) {
+
+  $mul_check = '';
+  if (count($mul_kay) > 0) {
+    if (in_array($rows['selite'], $mul_kay)) {
+      $mul_check = 'CHECKED';
+    }
   }
+  echo "<tr><td><input type='checkbox' name='mul_kay[]' value='{$rows['selite']}' {$mul_check}></td><td nowrap>{$rows['selitetark']}</td></tr>";
 }
-
-echo "<tr><td><input type='checkbox' name='mul_kay[]' value='th' {$mul_check}></td><td nowrap>", t("Thumbnail"), "</td></tr>";
-
-$mul_check = '';
-if (count($mul_kay) > 0) {
-  if (in_array('tk', $mul_kay)) {
-    $mul_check = 'CHECKED';
-  }
-}
-
-echo "<tr><td><input type='checkbox' name='mul_kay[]' value='tk' {$mul_check}></td><td nowrap>", t("Tuotekuva"), "</td></tr>";
-
-$mul_check = '';
-if (count($mul_kay) > 0) {
-  if (in_array('hr', $mul_kay)) {
-    $mul_check = 'CHECKED';
-  }
-}
-
-echo "<tr><td><input type='checkbox' name='mul_kay[]' value='hr' {$mul_check}></td><td nowrap>", t("Painokuva"), "</td></tr>";
-
-$mul_check = '';
-if (count($mul_kay) > 0) {
-  if (in_array('mu', $mul_kay)) {
-    $mul_check = 'CHECKED';
-  }
-}
-
-echo "<tr><td><input type='checkbox' name='mul_kay[]' value='mu' {$mul_check}></td><td nowrap>", t("Muu"), "</td></tr>";
 
 echo "</table>";
 
@@ -577,10 +628,9 @@ if ($tee == '' and count($mul_del) > 0) {
   echo t('Poistettiin kuvat tuotteista: '), "<br />";
 
   foreach ($mul_del as $key => $val) {
-    list($tunnus, $ltunnus, $ltiedtunnus, $kayttotarkoitus, $filetype) = explode('_', $val);
+    list($tunnus, $ltiedtunnus, $kayttotarkoitus, $filetype) = explode('_', $val);
 
     $tunnus = mysql_real_escape_string($tunnus);
-    $ltunnus = mysql_real_escape_string($ltunnus);
     $ltiedtunnus = mysql_real_escape_string($ltiedtunnus);
     $kayttotarkoitus = mysql_real_escape_string($kayttotarkoitus);
     $filetype = mysql_real_escape_string($filetype);
@@ -591,7 +641,7 @@ if ($tee == '' and count($mul_del) > 0) {
               FROM liitetiedostot
               WHERE yhtio          = '$kukarow[yhtio]'
               AND tunnus           = '$ltiedtunnus'
-              AND liitostunnus     = '$ltunnus'
+              AND liitostunnus     = '$tunnus'
               AND kayttotarkoitus  = '$kayttotarkoitus'
               AND liitos           = 'tuote'
               AND filename        != ''
@@ -613,6 +663,8 @@ if ($tee == 'LISTAA') {
   $sel_tuotemerkki = "";
   $sel_kayttotarkoitus = "";
   $sel_selite = "";
+  $avainsana_lisa = "";
+  $avainsana_selectlisa = "";
 
   $lisa  = "";
   $orderlisa = "";
@@ -639,6 +691,38 @@ if ($tee == 'LISTAA') {
   elseif (count($mul_tmr) > 0) {
     $sel_tuotemerkki = "('".str_replace(',', '\',\'', implode(",", $mul_tmr))."')";
     $lisa .= " and tuote.tuotemerkki in $sel_tuotemerkki ";
+  }
+
+  if ($kem != '') {
+    $avainsana_lisa = " JOIN tuotteen_avainsanat ON (tuotteen_avainsanat.yhtio = tuote.yhtio and tuotteen_avainsanat.laji = 'KEMOM' and tuotteen_avainsanat.tuoteno = tuote.tuoteno and tuotteen_avainsanat.kieli = '{$kukarow['kieli']}' and tuotteen_avainsanat.selite in ('".str_replace(',', '\',\'', $kem)."')) ";
+    $avainsana_selectlisa = ", tuotteen_avainsanat.selite AS kem_selite";
+  }
+  elseif (count($mul_kem) > 0) {
+    $sel_kem = "('".str_replace(',', '\',\'', implode(",", $mul_kem))."')";
+    $avainsana_lisa = " JOIN tuotteen_avainsanat ON (tuotteen_avainsanat.yhtio = tuote.yhtio and tuotteen_avainsanat.laji = 'KEMOM' and tuotteen_avainsanat.tuoteno = tuote.tuoteno and tuotteen_avainsanat.kieli = '{$kukarow['kieli']}' and tuotteen_avainsanat.selite in $sel_kem) ";
+    $avainsana_selectlisa = ", tuotteen_avainsanat.selite AS kem_selite";
+  }
+  elseif ($_kem) {
+    $avainsana_lisa = "LEFT JOIN tuotteen_avainsanat ON (tuotteen_avainsanat.yhtio = tuote.yhtio and tuotteen_avainsanat.laji = 'KEMOM' and tuotteen_avainsanat.tuoteno = tuote.tuoteno and tuotteen_avainsanat.kieli = '{$kukarow['kieli']}')";
+    $avainsana_selectlisa = ", tuotteen_avainsanat.selite AS kem_selite";
+  }
+
+  if ($liitetiedosto != '' and ($lisa != '' or ($kem != '' or count($mul_kem) > 0))) {
+    $liitetiedosto = mysql_real_escape_string(trim($liitetiedosto));
+    $lisa .= " and liitetiedostot.filename like '%{$liitetiedosto}%' ";
+  }
+  elseif ($liitetiedosto != '') {
+    echo "<font class='error'>";
+
+    if ($_kem) {
+      echo t("Liitetiedostohaku yksinään on liian hidas. Lisää rajauksia joko osastoon, try, tuotemerkkiin  tai / ja kemialliseen ominaisuuteen.");
+    }
+    else {
+      echo t("Liitetiedostohaku yksinään on liian hidas. Lisää rajauksia joko osastoon, try tai / ja tuotemerkkiin.");
+    }
+
+    echo "</font>";
+    die;
   }
 
   if ($kayt != '') {
@@ -726,7 +810,6 @@ if ($tee == 'LISTAA') {
              tuote.tunnus,
              tuote.status,
              liitetiedostot.tunnus ltiedtunnus,
-             liitetiedostot.liitostunnus ltunnus,
              liitetiedostot.filename,
              liitetiedostot.filetype,
              liitetiedostot.kayttotarkoitus,
@@ -734,12 +817,15 @@ if ($tee == 'LISTAA') {
              liitetiedostot.image_height korkeus,
              liitetiedostot.image_width leveys,
              liitetiedostot.selite,
-             liitetiedostot.liitos
+             liitetiedostot.liitos,
+             if(liitetiedostot.muutospvm = '0000-00-00 00:00:00', liitetiedostot.luontiaika, liitetiedostot.muutospvm) muutospvm
+             {$avainsana_selectlisa}
              FROM tuote
              INNER JOIN liitetiedostot ON (liitetiedostot.yhtio = tuote.yhtio
               AND liitetiedostot.liitos        = 'tuote'
               AND liitetiedostot.liitostunnus  = tuote.tunnus
               AND liitetiedostot.filename     != '')
+             {$avainsana_lisa}
              WHERE tuote.yhtio                 = '{$kukarow["yhtio"]}'
              $lisa
              ORDER BY $orderlisa";
@@ -784,15 +870,53 @@ if ($tee == 'LISTAA') {
       $onsubmit = '';
     }
 
+    echo t('Löytyi yhteensä'), " {$tuotekuvia_count} ", t('riviä') ."<br>";
+
+    // lasketaan datatablesille sarakkeet
+    $_sarakkeet = 11;
+    $_status_sarake = "";
+    $_status_search = "";
+    $_korkeus_sarake = "";
+    $_korkeus_search = "";
+    $_leveys_sarake = "";
+    $_leveys_search = "";
+    $_ruksaa_sarake = "";
+    $_ruksaa_search = "";
+
+    // muutama sarake mahdollisesti lisää
+    if (count($mul_sta) > 0 or $status != '') {
+      $_status_sarake = "<th>". t('Status'). "</th>";
+      $_status_search = "<td><input type='text' class='search_field' name='search_status'></td>";
+      $_sarakkeet++;
+    }
+    if ($_kem) {
+      $_kem_sarake = "<th>". t('Kemiallinen ominaisuus'). "</th>";
+      $_kem_search = "<td><input type='text' class='search_field' name='search_kem'></td>";
+      $_sarakkeet++;
+    }
+    if (count($mul_siz) > 0) {
+      if (in_array('korkeus', $mul_siz)) {
+        $_korkeus_sarake = "<th>". t('Korkeus'). "</th>";
+        $_korkeus_search = "<td><input type='text' class='search_field' name='search_korkeus'></td>";
+        $_sarakkeet++;
+      }
+      if (in_array('leveys', $mul_siz)) {
+        $_leveys_sarake = "<th>". t('Leveys'). "</th>";
+        $_leveys_search = "<td><input type='text' class='search_field' name='search_leveys'></td>";
+        $_sarakkeet++;
+      }
+    }
+    if ($mul_exl != 'tallennetaan') {
+      $_ruksaa_sarake = "<th>". t('Ruksaa'). "</th>";
+      $_ruksaa_search = "<td></td>";
+      $_sarakkeet++;
+    }
+
+    pupe_DataTables(array(array($pupe_DataTables, $_sarakkeet, $_sarakkeet, true, false)));
+
     echo "<form method='post' action='yllapito_tuotekuvat.php' {$onsubmit}>";
-    echo "<table>";
-
-    echo "<tr>";
-    echo "<td valign='top' align='left' colspan='10' class='back'>";
-    echo t('Löytyi yhteensä'), " {$tuotekuvia_count} ", t('riviä');
-    echo "</td>";
-    echo "</tr>";
-
+    echo "<br>".t("Valitse kaikki listatut liitteet").": <input type='checkbox' name='mul_del' onclick='toggleAll(this);'><br>";
+    echo "<table class='display dataTable' id='$pupe_DataTables'><thead>";
     echo "<tr>";
     echo "<th>", t('Tunnus'), "</th>";
     echo "<th>", t('Tuoteno'), "</th>";
@@ -800,36 +924,39 @@ if ($tee == 'LISTAA') {
     echo "<th>", t('Osasto'), "</th>";
     echo "<th>", t('Tuoteryhma'), "</th>";
     echo "<th>", t('Tuotemerkki'), "</th>";
-    if (count($mul_sta) > 0 or $status != '') {
-      echo "<th>", t('Status'), "</th>";
-    }
-    echo "<th>", t('Liitostunnus'), "</th>";
+    echo $_status_sarake;
     echo "<th>", t('Tiedostonnimi'), "</th>";
-    if (count($mul_siz) > 0) {
-      if (in_array('korkeus', $mul_siz)) {
-        echo "<th>", t('Korkeus'), "</th>";
-      }
-      if (in_array('leveys', $mul_siz)) {
-        echo "<th>", t('Leveys'), "</th>";
-      }
-    }
+    echo $_korkeus_sarake;
+    echo $_leveys_sarake;
     echo "<th>", t('Käyttötarkoitus'), "</th>";
+    echo $_kem_sarake;
+    echo "<th>", t('Muutospäivä'), "</th>";
     echo "<th>", t('Selite'), "</th>";
-    if ($mul_exl != 'tallennetaan') {
-      echo "<th>", t('Ruksaa'), "<br />".t('kaikki')." <input type='checkbox' name='mul_del' onclick='toggleAll(this);'></th>";
-    }
+    echo $_ruksaa_sarake;
+    echo "<th></th>";
     echo "</tr>";
 
-    if ($limit != '') {
-      if ($limit > $tuotekuvia_count) {
-        $i = ($tuotekuvia_count / 50);
-        $limit = $limit - ($i * 50);
-        mysql_data_seek($result, $limit);
-      }
-      else {
-        mysql_data_seek($result, $limit);
-      }
-    }
+    echo "<tr>";
+    echo "<td><input type='text' class='search_field' name='search_tunnus'></td>";
+    echo "<td><input type='text' class='search_field' name='search_tuoteno'></td>";
+    echo "<td><input type='text' class='search_field' name='search_nimitys'></td>";
+    echo "<td><input type='text' class='search_field' name='search_osasto'></td>";
+    echo "<td><input type='text' class='search_field' name='search_tuoteryhma'></td>";
+    echo "<td><input type='text' class='search_field' name='search_tuotemerkki'></td>";
+    echo $_status_search;
+    echo "<td><input type='text' class='search_field' name='search_tiedostonimi'></td>";
+    echo $_korkeus_search;
+    echo $_leveys_search;
+    echo "<td><input type='text' class='search_field' name='search_kayttotarkoitus'></td>";
+    echo $_kem_search;
+    echo "<td><input type='text' class='search_field' name='search_muutospaiva'></td>";
+    echo "<td><input type='text' class='search_field' name='search_selite'></td>";
+    echo $_ruksaa_search;
+    echo "<td></td>";
+    echo "</tr>";
+
+    echo "</thead>";
+    echo "<tbody>";
 
     // Exceliä käytetään sisäänlue datassa joten on laitettava sarakkeet sen mukaisesti (kaikkea ei siis saada laittaa mukaan vaikka mieli tekisi)
     if (isset($workbook) and $mul_exl == 'tallennetaan') {
@@ -837,27 +964,33 @@ if ($tee == 'LISTAA') {
 
       $worksheet->writeString($excelrivi, $excelsarake, t("Tuoteno"),       $format_bold);
       $excelsarake++;
-      $worksheet->writeString($excelrivi, $excelsarake, t("Liitostunnus"),     $format_bold);
+      $worksheet->writeString($excelrivi, $excelsarake, t("Liitos"),        $format_bold);
       $excelsarake++;
-      $worksheet->writeString($excelrivi, $excelsarake, t("Liitos"),         $format_bold);
+      $worksheet->writeString($excelrivi, $excelsarake, t("Filename"),      $format_bold);
       $excelsarake++;
-      $worksheet->writeString($excelrivi, $excelsarake, t("Filename"),       $format_bold);
+      $worksheet->writeString($excelrivi, $excelsarake, t("Kayttotarkoitus"),$format_bold);
       $excelsarake++;
-      $worksheet->writeString($excelrivi, $excelsarake, t("Kayttotarkoitus"),     $format_bold);
+      if ($_kem) {
+        $worksheet->writeString($excelrivi, $excelsarake, t("Kemiallinen ominaisuus"), $format_bold);
+        $excelsarake++;
+      }
+      $worksheet->writeString($excelrivi, $excelsarake, t("Muutospäivä"),   $format_bold);
       $excelsarake++;
-      $worksheet->writeString($excelrivi, $excelsarake, t("Selite"),     $format_bold);
+      $worksheet->writeString($excelrivi, $excelsarake, t("Selite"),        $format_bold);
       $excelsarake++;
       $excelrivi++;
       $excelsarake = 0;
     }
     while ($row = mysql_fetch_array($result)) {
 
+      $row['muutospvm'] = substr($row['muutospvm'], 0, 10);
+
       echo "<tr class='aktiivi'>";
       echo "<td valign='top'>", $row['tunnus'], "</td>";
       echo "<td valign='top'>", $row['tuoteno'], "</td>";
 
       if (isset($workbook) and $mul_exl == 'tallennetaan') {
-        $worksheet->writeString($excelrivi, $excelsarake, $row['tuoteno'],     $format_bold);
+        $worksheet->writeString($excelrivi, $excelsarake, $row['tuoteno'],  $format_bold);
         $excelsarake++;
       }
 
@@ -867,9 +1000,6 @@ if ($tee == 'LISTAA') {
           echo "<td valign='top'>", $row['nimitys'], "</td>";
         }
         else {
-          echo "<div id='div_", $row['tunnus'], "_", $row['kayttotarkoitus'], "' class='popup' style='width: ", $row['leveys'], "px; height: ", $row['korkeus'], "px;'>";
-          echo "<img src='view.php?id=", $row['id'], "' height='", $row['korkeus'], "' width='", $row['leveys'], "'>";
-          echo "</div>";
           echo "<td valign='top' class='tooltip' id='", $row['tunnus'], "_", $row['kayttotarkoitus'], "'>", $row['nimitys'], "</td>";
         }
       }
@@ -883,12 +1013,9 @@ if ($tee == 'LISTAA') {
       if (count($mul_sta) > 0 or $status != '') {
         echo "<td valign='top'>", $row['status'], "</td>";
       }
-      echo "<td valign='top'>", $row['ltunnus'], "</td>";
       echo "<td valign='top'>", $row['filename'], "</td>";
 
       if (isset($workbook) and $mul_exl == 'tallennetaan') {
-        $worksheet->writeString($excelrivi, $excelsarake, $row['ltunnus'],     $format_bold);
-        $excelsarake++;
         $worksheet->writeString($excelrivi, $excelsarake, $row['liitos'],     $format_bold);
         $excelsarake++;
         $worksheet->writeString($excelrivi, $excelsarake, $row['filename'],     $format_bold);
@@ -906,14 +1033,31 @@ if ($tee == 'LISTAA') {
       }
 
       echo "<td valign='top' align='right'>", $row['kayttotarkoitus'], "</td>";
+      if ($_kem) {
+        echo "<td valign='top'>", $row['kem_selite'], "</td>";
+      }
+      echo "<td valign='top' align='right'>", $row['muutospvm'], "</td>";
       echo "<td valign='top'>", $row['selite'], "</td>";
 
       if ($mul_exl != 'tallennetaan') {
-        echo "<td valign='top'><input type='checkbox' name='mul_del[]' value='", $row['tunnus'], "_", $row['ltunnus'], "_", $row['ltiedtunnus'], "_", $row['kayttotarkoitus'], "_", $row['filetype'], "'></td>";
+        echo "<td valign='top'><input type='checkbox' name='mul_del[]' value='", $row['tunnus'], "_", $row['ltiedtunnus'], "_", $row['kayttotarkoitus'], "_", $row['filetype'], "'></td>";
+      }
+
+      // Onko liitetiedostoja
+      $liitteet = liite_popup("TN", $row["tunnus"], "", "", $row['id']);
+
+      if ($liitteet != "") {
+        echo "<td valign='top'>", $liitteet, "</td>";
       }
 
       if (isset($workbook) and $mul_exl == 'tallennetaan') {
         $worksheet->writeString($excelrivi, $excelsarake, $row['kayttotarkoitus'],     $format_bold);
+        $excelsarake++;
+        if ($_kem) {
+          $worksheet->writeString($excelrivi, $excelsarake, $row['kem_selite'],     $format_bold);
+          $excelsarake++;
+        }
+        $worksheet->writeString($excelrivi, $excelsarake, date("Y-m-d", $row['muutospvm']),     $format_bold);
         $excelsarake++;
         $worksheet->writeString($excelrivi, $excelsarake, $row['selite'],     $format_bold);
         $excelsarake = 0;
@@ -923,12 +1067,8 @@ if ($tee == 'LISTAA') {
       echo "</tr>";
 
       $laskuri++;
-
-      if ($laskuri == 50 and $mul_siv == '' and $mul_exl == '') {
-        break;
-      }
     }
-
+    echo "</tbody></table>";
     $colspan = '9';
 
     if (count($mul_siz) > 0 and in_array('korkeus', $mul_siz)) {
@@ -941,7 +1081,8 @@ if ($tee == 'LISTAA') {
       $colspan++;
     }
 
-    echo "<tr>";
+
+    echo "<table><tr>";
     echo "<td valign='top' align='left' colspan='", $colspan, "' class='back'>";
     echo t('Löytyi yhteensä'), " {$tuotekuvia_count} ", t('riviä');
     echo "</td>";
@@ -969,102 +1110,6 @@ if ($tee == 'LISTAA') {
       echo "</td>";
     }
     echo "</tr>";
-
-    if ($mul_siv == '' and $mul_exl == '') {
-      if ($sel_osasto != '') {
-        $osasto = $sel_osasto;
-        $osasto = str_replace('(\'', '', $osasto);
-        $osasto = str_replace('\')', '', $osasto);
-        $osasto = str_replace('\',\'', ',', $osasto);
-      }
-
-      if ($sel_tuoteryhma != '') {
-        $try = $sel_tuoteryhma;
-        $try = str_replace('(\'', '', $try);
-        $try = str_replace('\')', '', $try);
-        $try = str_replace('\',\'', ',', $try);
-      }
-
-      if ($sel_tuotemerkki != '') {
-        $tmr = $sel_tuotemerkki;
-        $tmr = str_replace('(\'', '', $tmr);
-        $tmr = str_replace('\')', '', $tmr);
-        $tmr = str_replace('\',\'', ',', $tmr);
-      }
-
-      if ($sel_kayttotarkoitus != '') {
-        $kayt = $sel_kayttotarkoitus;
-        $kayt = str_replace('(\'', '', $kayt);
-        $kayt = str_replace('\')', '', $kayt);
-        $kayt = str_replace('\',\'', ',', $kayt);
-      }
-
-      if ($sel_selite != '') {
-        $sel = $sel_selite;
-        $sel = str_replace('(\'', '', $sel);
-        $sel = str_replace('\')', '', $sel);
-        $sel = str_replace('\',\'', ',', $sel);
-      }
-
-      if ($sel_status != '') {
-        $status = $sel_status;
-        $status = str_replace('(\'', '', $status);
-        $status = str_replace('\')', '', $status);
-        $status = str_replace('\',\'', ',', $status);
-      }
-
-      mysql_data_seek($result, 0);
-      $i = ceil((float) ($tuotekuvia_count / 50));
-      $limit = 0;
-      echo "<tr>";
-      echo "<td valign='top' align='center' colspan='10' class='back'>";
-
-      $limitx = (($sivu - 1) * 50) - 50;
-      if ($limitx >= 0) {
-        $alkuun = "<a href='$PHP_SELF?tee=LISTAA&sivu=1&limit=0&tuoteno=".urlencode($tuoteno)."&osasto=$osasto&try=$try&tmr=$tmr&kayt=$kayt&sel=$sel&nayta_tk=$nayta_tk&nayta_hr=$nayta_hr&nayta_th=$nayta_th&korkeus=$korkeus&leveys=$leveys&status=$status'>";
-        echo $alkuun, "&lt;&lt; ", t('Ensimmäinen'), "</a>&nbsp;&nbsp;";
-
-        $y = $sivu - 1;
-        $edellinen = "<a href='$PHP_SELF?tee=LISTAA&sivu=".(int)$y."&limit=$limitx&tuoteno=".urlencode($tuoteno)."&osasto=$osasto&try=$try&tmr=$tmr&kayt=$kayt&sel=$sel&nayta_tk=$nayta_tk&nayta_hr=$nayta_hr&nayta_th=$nayta_th&korkeus=$korkeus&leveys=$leveys&status=$status'>";
-        echo $edellinen, "&lt;&lt; ", t('Edellinen'), "</a>&nbsp;&nbsp;";
-      }
-
-      for ($y = 1; $y <= $i; $y++) {
-        if ($sivu != '' and $sivu == (int)$y) {
-          echo "<font style='font-weight: bold;'>", $y, "</font>";
-          $edellinen = "ok";
-          $seuraava = "ok";
-        }
-        elseif ($sivu == '' and (int)$y == '1') {
-          echo "<font style='font-weight: bold;'>", $y, "</font>";
-          $edellinen = "<a href='$PHP_SELF?tee=LISTAA&sivu=".(int)$y."&limit=$limit&tuoteno=".urlencode($tuoteno)."&osasto=$osasto&try=$try&tmr=$tmr&kayt=$kayt&sel=$sel&nayta_tk=$nayta_tk&nayta_hr=$nayta_hr&nayta_th=$nayta_th&korkeus=$korkeus&leveys=$leveys&status=$status'>";
-          $seuraava = "ok";
-        }
-        else {
-          if ($seuraava == "ok") {
-            $seuraava = "<a href='$PHP_SELF?tee=LISTAA&sivu=".(int)$y."&limit=$limit&tuoteno=".urlencode($tuoteno)."&osasto=$osasto&try=$try&tmr=$tmr&kayt=$kayt&sel=$sel&nayta_tk=$nayta_tk&nayta_hr=$nayta_hr&nayta_th=$nayta_th&korkeus=$korkeus&leveys=$leveys&status=$status'>";
-          }
-
-          echo "<a href='$PHP_SELF?tee=LISTAA&sivu=".(int)$y."&limit=$limit&tuoteno=".urlencode($tuoteno)."&osasto=$osasto&try=$try&tmr=$tmr&kayt=$kayt&sel=$sel&nayta_tk=$nayta_tk&nayta_hr=$nayta_hr&nayta_th=$nayta_th&korkeus=$korkeus&leveys=$leveys&status=$status'>$y</a>";
-        }
-        $limit += 50;
-        if (($y % '40') == 0) {
-          echo "<br />";
-        }
-        else {
-          echo "&nbsp;&nbsp;";
-        }
-      }
-      if ($seuraava != 'ok' and $seuraava != '') {
-        echo $seuraava, " ", t('Seuraava'), " &gt;&gt;</a>&nbsp;&nbsp;";
-
-        $limit -= 50;
-        $loppuun = "<a href='$PHP_SELF?tee=LISTAA&sivu=".(int)$i."&limit=$limit&tuoteno=".urlencode($tuoteno)."&osasto=$osasto&try=$try&tmr=$tmr&kayt=$kayt&sel=$sel&nayta_tk=$nayta_tk&nayta_hr=$nayta_hr&nayta_th=$nayta_th&korkeus=$korkeus&leveys=$leveys&status=$status'>";
-        echo $loppuun, " ", t('Viimeinen'), " &gt;&gt;</a>";
-      }
-      echo "</td>";
-      echo "</tr>";
-    }
 
     echo "</table>";
     echo "</form>";

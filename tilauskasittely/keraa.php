@@ -3614,7 +3614,7 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
           $lava_referenssiluku += ($row["tilkpl"] * $row['lavakoko']);
         }
 
-        if ($row['ei_saldoa'] != '') {
+        if ($row['ei_saldoa'] != '' and $yhtiorow['kerays_riveittain'] != 'K') {
           echo "<tr class='aktiivi'>";
 
           if (!empty($rivinumerot)) {

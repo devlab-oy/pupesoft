@@ -1400,14 +1400,26 @@ if ($tee == "JATKA") {
               $jt_saldopvm = $jtrow['ttoimaika'];
             }
 
-            foreach ($varastosta as $vara) {
-              list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($jtrow["tuoteno"], $jtspec, $vara, "", "", "", "", "", $asiakasmaa, $jt_saldopvm);
+            if ($yhtiorow['jt_toimitus_varastorajaus'] == "K") {
+              list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($jtrow["tuoteno"], $jtspec, $jtrow["varasto"], "", "", "", "", "", $asiakasmaa, $jt_saldopvm);
 
               if ($saldolaskenta == "hyllysaldo") {
                 $kokonaismyytavissa += $hyllyssa;
               }
               else {
                 $kokonaismyytavissa += $myytavissa;
+              }
+            }
+            else {
+              foreach ($varastosta as $vara) {
+                list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($jtrow["tuoteno"], $jtspec, $vara, "", "", "", "", "", $asiakasmaa, $jt_saldopvm);
+
+                if ($saldolaskenta == "hyllysaldo") {
+                  $kokonaismyytavissa += $hyllyssa;
+                }
+                else {
+                  $kokonaismyytavissa += $myytavissa;
+                }
               }
             }
 
@@ -1964,7 +1976,12 @@ if ($tee == "JATKA") {
                   $tunnusarray     = explode(',', $tunnukset);
 
                   // Toimitetaan jtrivit
-                  tee_jt_tilaus($tunnukset, $tunnusarray, $kpl, $loput, $suoratoimitus_paikat, $tilaus_on_jo, $varastosta, $jt_huomioi_pvm, $mista_tullaan);
+                  if ($yhtiorow['jt_toimitus_varastorajaus'] == "K") {
+                    tee_jt_tilaus($tunnukset, $tunnusarray, $kpl, $loput, $suoratoimitus_paikat, $tilaus_on_jo, $jtrow["varasto"], $jt_huomioi_pvm, $mista_tullaan);
+                  }
+                  else {
+                    tee_jt_tilaus($tunnukset, $tunnusarray, $kpl, $loput, $suoratoimitus_paikat, $tilaus_on_jo, $varastosta, $jt_huomioi_pvm, $mista_tullaan);
+                  }
 
                   $jt_rivilaskuri++;
                 }
@@ -2062,7 +2079,12 @@ if ($tee == "JATKA") {
                   $tunnusarray     = explode(',', $tunnukset);
 
                   // Toimitetaan jtrivit
-                  tee_jt_tilaus($tunnukset, $tunnusarray, $kpl, $loput, $suoratoimitus_paikat, $tilaus_on_jo, $varastosta, $jt_huomioi_pvm, $mista_tullaan);
+                  if ($yhtiorow['jt_toimitus_varastorajaus'] == "K") {
+                    tee_jt_tilaus($tunnukset, $tunnusarray, $kpl, $loput, $suoratoimitus_paikat, $tilaus_on_jo, $jtrow["varasto"], $jt_huomioi_pvm, $mista_tullaan);
+                  }
+                  else {
+                    tee_jt_tilaus($tunnukset, $tunnusarray, $kpl, $loput, $suoratoimitus_paikat, $tilaus_on_jo, $varastosta, $jt_huomioi_pvm, $mista_tullaan);
+                  }
 
                   $jt_rivilaskuri++;
                 }

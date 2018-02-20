@@ -297,15 +297,25 @@ while (false !== ($file = readdir($handle))) {
       paivita_rahtikirjat_tulostetuksi_ja_toimitetuksi(array('otunnukset' => $laskurow['tunnus'], 'kilotyht' => $tuotteiden_paino));
 
       if ($laskurow['alatila'] != 'X' and ($laskurow['vienti'] == 'E' or $laskurow['vienti'] == 'K')) {
-        viennin_lisatiedot($laskurow['tunnus']);
+        $uusialatila = viennin_lisatiedot($laskurow['tunnus']);
 
         // Luodaan lasku
-        if ($laskurow['verkkotunnus'] == "VELOX") {
+        if ($laskurow['verkkotunnus'] == "VELOX" and $uusialatila == 'E') {
+
+          // p‰ivitet‰‰n laskun otsikko laskutusjonoon
+          $query = "UPDATE lasku
+                    set alatila = 'D'
+                    WHERE yhtio = '{$kukarow['yhtio']}'
+                    AND tunnus  = '{$laskurow['tunnus']}'";
+          $result = pupe_query($query);
+
           // Laskutetaan tilaus
           $laskutettavat    = $laskurow['tunnus'];
           $tee              = "TARKISTA";
           $laskutakaikki    = "KYLLA";
           $silent           = "KYLLA";
+          $force_web        = True;
+          $pupe_root_polku  = dirname(dirname(dirname(__FILE__)));
 
           require "tilauskasittely/verkkolasku.php";
         }

@@ -2808,7 +2808,7 @@ else {
 
             // halutaan l‰hett‰‰ lasku ulkoiseen varastoon
             if ($lasrow["verkkotunnus"] == "VELOX") {
-              $tulostettavat_ulkvar[] = $lasrow["tunnus"];
+              $tulostettavat_ulkvar[] = $lasrow["laskunro"];
             }
 
             // Halutaan tulostaa itse
@@ -3364,9 +3364,12 @@ else {
         if ($silent == "" or $silent == "VIENTI") $tulos_ulos .= "<br>\n".t("Siirret‰‰n laskuja ulkoiseen varastoon").":<br>\n";
 
         foreach ($tulostettavat_ulkvar as $lasku) {
-          $lasku_ulkvar_file = tulosta_lasku($lasku, $kieli, "VERKKOLASKU_APIX", "", "", "", "");
+          $lasku_ulkvar_file = tulosta_lasku("LASKU:".$lasku, $kieli, "VERKKOLASKU_APIX", "", "", "", "");
+          // nimet‰‰n lasku n‰tisti
+          $nattinimi = "/tmp/Invoice_{$kukarow['yhtio']}_{$lasku}.pdf";
+          rename($lasku_ulkvar_file, $nattinimi);
 
-          $palautus = logmaster_send_file($filename);
+          $palautus = logmaster_send_file($nattinimi);
         }
       }
     }

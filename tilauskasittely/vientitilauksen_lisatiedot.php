@@ -1,19 +1,21 @@
 <?php
 
-require '../inc/cookie_functions.inc';
+if (strpos($_SERVER['SCRIPT_NAME'], "vientitilauksen_lisatiedot.php") !== FALSE) {
 
-handle_cookie("toimittamattomat", "find_submit");
+  require '../inc/cookie_functions.inc';
+  handle_cookie("toimittamattomat", "find_submit");
 
-require '../inc/parametrit.inc';
+  require '../inc/parametrit.inc';
 
-if (isset($livesearch_tee) and $livesearch_tee == "TULLINIMIKEHAKU") {
-  livesearch_tullinimikehaku();
-  exit;
+  if (isset($livesearch_tee) and $livesearch_tee == "TULLINIMIKEHAKU") {
+    livesearch_tullinimikehaku();
+    exit;
+  }
+
+  enable_ajax();
+
+  echo "<font class='head'>".t("Lisätietojen syöttö")."</font><hr>";
 }
-
-enable_ajax();
-
-echo "<font class='head'>".t("Lisätietojen syöttö")."</font><hr>";
 
 if (isset($bruttopaino)) $bruttopaino = str_replace(",", ".", $bruttopaino);
 if (isset($lisattava_era)) $lisattava_era = str_replace(",", ".", $lisattava_era);
@@ -1095,4 +1097,6 @@ elseif ($tee == '') {
   echo "</table><br>";
 }
 
-require "inc/footer.inc";
+if (strpos($_SERVER['SCRIPT_NAME'], "vientitilauksen_lisatiedot.php") !== FALSE) {
+  require "inc/footer.inc";
+}

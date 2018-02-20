@@ -17,7 +17,15 @@ else {
   $order->appendChild($order_type);
 
   $shipping = $xml->createElement('shipping');
-  $shipping->nodeValue = 610;
+
+  $shipping_street = $xml->createElement('street');
+  $shipping_street->nodeValue = 5555;
+  $shipping->appendChild($shipping_street);
+
+  $shipping_name = $xml->createElement('nimi');
+  $shipping_name->nodeValue = 123;
+  $shipping->appendChild($shipping_name);
+
   $order->appendChild($shipping);
 
   $sales_order = $xml->createElement('ID');

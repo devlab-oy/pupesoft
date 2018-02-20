@@ -336,10 +336,10 @@ if ($tunnus != "" and $tee == "valitse") {
         if (($tila_row["tila"] == "L" or $tila_row["tila"] == "V") and in_array($tila_row["alatila"], array('A', 'B', 'C', 'D'))) {
           echo "<option value = '2'>", t("Tilaus tulostusjonossa"), "</option>";
         }
-        if (in_array($tila_row["alatila"], array('B', 'C', 'D'))) {
+        if (in_array($tila_row["alatila"], array('B', 'C', 'D', 'E'))) {
           echo "<option value = '3'>", t("Keräyslista tulostettu"), "</option>";
         }
-        if (in_array($tila_row["alatila"], array('B', 'D'))) {
+        if (in_array($tila_row["alatila"], array('B', 'D', 'E'))) {
           echo "<option value = '4'>", t("Tilaus kerätty"), "</option>";
         }
         if (in_array($tila_row["alatila"], array('D'))) {

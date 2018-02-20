@@ -34673,6 +34673,17 @@ if (!function_exists("viennin_lisatiedot")) {
 
     # P‰ivitet‰‰n viennin lis‰tiedot
     require "tilauskasittely/vientitilauksen_lisatiedot.php";
+
+    $query = "SELECT alatila
+              FROM lasku
+              WHERE tunnus = $otunnus
+              and tila = 'L'
+              AND vienti  in ('K','E')
+              and yhtio = '$kukarow[yhtio]'";
+    $result = pupe_query($query);
+    $alatila = mysql_fetch_assoc($result);
+
+    return $alatila['alatila'];
   }
 }
 

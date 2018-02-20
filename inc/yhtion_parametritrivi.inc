@@ -553,6 +553,23 @@ if ($fieldname == "ostolaskujen_oletusvaluutta") {
   $jatko = 0;
 }
 
+if ($fieldname == "ostolaskujen_oletusiban") {
+
+  $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+  $apu = (int) $trow[$i];
+  $sel = array("0" => "", "1" => "", "2" => "");
+  $sel[$apu] = "selected";
+
+  $ulos .= "<option value = '0' $sel[0]>".t("Verkkolaskujen vastaanotossa k‰ytet‰‰n toimittajan pankkitili‰ (iban + bic)");
+  $ulos .= "<option value = '1' $sel[1]>".t("Verkkolaskujen vastaanotossa k‰ytet‰‰n ensisijaisesti verkkolaskuaineiston pankkitili‰ (iban + bic)");
+  $ulos .= "<option value = '2' $sel[2]>".t("Verkkolaskujen vastaanotossa k‰ytet‰‰n ensisijaisesti verkkolaskuaineiston pankkitili‰ (iban + bic) ja se p‰ivitet‰‰n toimittajalle");
+
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
 if ($fieldname == "ostolaskujen_kurssipaiva") {
 
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";

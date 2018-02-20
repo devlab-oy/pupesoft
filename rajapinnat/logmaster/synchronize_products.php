@@ -15,7 +15,7 @@ if (empty($ulkoinen_jarjestelma)) {
   echo "<td>";
   echo "<select name='ulkoinen_jarjestelma'>";
   echo "<option value='P'>PostNord</option>";
-  echo "<option value='L'>Helsingin Hyllyvarasto</option>";
+  echo "<option value='L'>Velox</option>";
   echo "</select>";
   echo "</td>";
   echo "<td>";
@@ -64,7 +64,7 @@ if (mysql_num_rows($res) > 0) {
   }
   else {
     if ($ulkoinen_jarjestelma == 'L') {
-      $uj_nimi = "LogMaster";
+      $uj_nimi = "Velox";
     }
     else {
       $uj_nimi = "PostNord";

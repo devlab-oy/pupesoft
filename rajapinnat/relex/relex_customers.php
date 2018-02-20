@@ -84,7 +84,7 @@ if ($extra_asiakastiedot) {
   $header = "code;name;customer_group;custnro;sellerid\n";
 }
 if ($crm_asiakastiedot) {
-  $header = "y-tunnus;nimi;katuosoite;postinumero;postitoimipaikka;maa;sähköpostiosoite;puhelin;asiakasnumero;asiakasryhmä ja ryhmän selitys;maksuehto;toimitusehto;myyjän nimi tai myyjän numero;toimitusosoittee postitoimipaikka\n";
+  $header = "y-tunnus;nimi;katuosoite;postinumero;postitoimipaikka;maa;sähköpostiosoite;puhelin;asiakasnumero;asiakasryhmä ja ryhmän selitys;maksuehto;toimitusehto;myyjän nimi tai myyjän numero;toimitusosoitteen postitoimipaikka\n";
 }
 else {
   $header = "code;name;customer_group\n";
@@ -152,7 +152,7 @@ while ($row = mysql_fetch_assoc($res)) {
   }
 
   if ($crm_asiakastiedot) {
-    $rivi .= pupesoft_csvstring($row['ytunnus']);
+    $rivi  = pupesoft_csvstring($row['ytunnus']);
     $rivi .= ";".pupesoft_csvstring($row['nimi']);
     $rivi .= ";".pupesoft_csvstring($row['osoite']);
     $rivi .= ";".pupesoft_csvstring($row['postino']);
@@ -183,7 +183,12 @@ if (($paiva_ajo or $weekly_ajo) and !empty($relex_ftphost)) {
   $ftpuser = $relex_ftpuser;
   $ftppass = $relex_ftppass;
   $ftpfile = $filepath;
-  require "inc/ftp-send.inc";
+  if (!empty($relex_ftptype)) {
+    require "inc/sftp-send.inc";
+  }
+  else {
+    require "inc/ftp-send.inc";
+  }
 }
 
 echo date("d.m.Y @ G:i:s") . ": Relex asiakkaat valmis.\n\n";

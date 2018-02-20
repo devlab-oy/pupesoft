@@ -18,6 +18,8 @@ $laskuttajan_nimi    = utf8_decode(array_shift($xml->xpath('Group2/NAD[@e3035="I
 $laskuttajan_vat    = array_shift($xml->xpath('Group2/Group3/RFF[@eC506.1153="VA"]/@eC506.1154'));
 $laskuttajan_valkoodi   = "";
 $laskun_pankkiviite    = array_shift($xml->xpath('Group1/RFF[@eC506.1153="PQ"]/@eC506.1154'));
+$laskun_iban = "";
+$laskun_bic = "";
 $laskun_asiakastunnus  = array_shift($xml->xpath('Group2[NAD/@e3035="IV"]/Group3/RFF/@eC506.1154'));
 $laskun_summa_eur    = (float) array_shift($xml->xpath('Group48/MOA[@eC516.5025="9" and @eC516.6345="EUR"]/@eC516.5004'));
 $laskun_tilausviite   = "";

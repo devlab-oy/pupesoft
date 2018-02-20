@@ -446,104 +446,60 @@ if ($oper == t("Vaihda listan kaikkien asiakkaiden tila")) {
 }
 
 if ($tee == 'laheta' or $tee == 'lahetalista') {
+  include 'inc/pupeExcel.inc';
+
+  $worksheet   = new pupeExcel();
+  $excelrivi   = 0;
+  $excelsarake = 0;
+
+  $format_bold = array("bold" => TRUE);
 
   if ($tee == "lahetalista") {
-    if (@include 'Spreadsheet/Excel/Writer.php') {
-      //keksitään failille joku varmasti uniikki nimi:
-      list($usec, $sec) = explode(' ', microtime());
-      mt_srand((float) $sec + ((float) $usec * 100000));
-      $excelnimi = md5(uniqid(mt_rand(), true)).".xls";
-
-      $workbook = new Spreadsheet_Excel_Writer('/tmp/'.$excelnimi);
-      $workbook->setVersion(8);
-      $worksheet =& $workbook->addWorksheet('Sheet 1');
-
-      $format_bold =& $workbook->addFormat();
-      $format_bold->setBold();
-
-      $excelrivi = 0;
-
-      if (isset($workbook)) {
-        $excelsarake = 0;
-
-        for ($i=1; $i<mysql_num_fields($result)-1; $i++) {
-          if (isset($workbook)) {
-            $worksheet->write($excelrivi, $excelsarake, t(mysql_field_name($result, $i)) , $format_bold);
-            $excelsarake++;
-          }
-        }
-
-        $excelsarake = 0;
-        $excelrivi++;
-      }
+    for ($i=1; $i<mysql_num_fields($result)-1; $i++) {
+      $worksheet->write($excelrivi, $excelsarake, t(mysql_field_name($result, $i)) , $format_bold);
+      $excelsarake++;
     }
+
+    $excelsarake = 0;
+    $excelrivi++;
   }
   else {
-    if (@include 'Spreadsheet/Excel/Writer.php') {
-      //keksitään failille joku varmasti uniikki nimi:
-      list($usec, $sec) = explode(' ', microtime());
-      mt_srand((float) $sec + ((float) $usec * 100000));
-      $excelnimi = md5(uniqid(mt_rand(), true)).".xls";
-
-      $workbook = new Spreadsheet_Excel_Writer('/tmp/'.$excelnimi);
-      $workbook->setVersion(8);
-      $worksheet =& $workbook->addWorksheet('Sheet 1');
-
-      $format_bold =& $workbook->addFormat();
-      $format_bold->setBold();
-
-      $excelrivi = 0;
-
-      if (isset($workbook)) {
-        $excelsarake = 0;
-
-        for ($i=1; $i<mysql_num_fields($result); $i++) {
-          //$liite .= $trow[$i]."\t";
-          if (isset($workbook)) {
-            $worksheet->write($excelrivi, $excelsarake, t(mysql_field_name($result, $i)) , $format_bold);
-            $excelsarake++;
-          }
-        }
-
-        $worksheet->write($excelrivi, $excelsarake, t("pvm") , $format_bold);
-        $excelsarake++;
-        $worksheet->write($excelrivi, $excelsarake, t("kampanjat") , $format_bold);
-        $excelsarake++;
-        $worksheet->write($excelrivi, $excelsarake, t("pvm käyty") , $format_bold);
-        $excelsarake++;
-        $worksheet->write($excelrivi, $excelsarake, t("km") , $format_bold);
-        $excelsarake++;
-        $worksheet->write($excelrivi, $excelsarake, t("lähtö") , $format_bold);
-        $excelsarake++;
-        $worksheet->write($excelrivi, $excelsarake, t("paluu") , $format_bold);
-        $excelsarake++;
-        $worksheet->write($excelrivi, $excelsarake, t("pvraha") , $format_bold);
-        $excelsarake++;
-        $worksheet->write($excelrivi, $excelsarake, t("kommentti") , $format_bold);
-
-        $excelsarake = 0;
-        $excelrivi++;
-      }
+    for ($i=1; $i<mysql_num_fields($result); $i++) {
+      //$liite .= $trow[$i]."\t";
+      $worksheet->write($excelrivi, $excelsarake, t(mysql_field_name($result, $i)) , $format_bold);
+      $excelsarake++;
     }
+
+    $worksheet->write($excelrivi, $excelsarake, t("pvm"), $format_bold);
+    $excelsarake++;
+    $worksheet->write($excelrivi, $excelsarake, t("kampanjat") , $format_bold);
+    $excelsarake++;
+    $worksheet->write($excelrivi, $excelsarake, t("pvm käyty") , $format_bold);
+    $excelsarake++;
+    $worksheet->write($excelrivi, $excelsarake, t("km") , $format_bold);
+    $excelsarake++;
+    $worksheet->write($excelrivi, $excelsarake, t("lähtö") , $format_bold);
+    $excelsarake++;
+    $worksheet->write($excelrivi, $excelsarake, t("paluu") , $format_bold);
+    $excelsarake++;
+    $worksheet->write($excelrivi, $excelsarake, t("pvraha") , $format_bold);
+    $excelsarake++;
+    $worksheet->write($excelrivi, $excelsarake, t("kommentti") , $format_bold);
+
+    $excelsarake = 0;
+    $excelrivi++;
   }
 
   while ($trow = mysql_fetch_array($result)) {
     $excelsarake = 0;
     for ($i = 1; $i < mysql_num_fields($result)-1; $i++) {
-      if (isset($workbook)) {
-        $worksheet->writeString($excelrivi, $excelsarake, $trow[$i], $format_bold);
-        $excelsarake++;
-      }
+      $worksheet->writeString($excelrivi, $excelsarake, $trow[$i], $format_bold);
+      $excelsarake++;
     }
     $excelrivi++;
   }
 
-  if (isset($workbook)) {
-    // We need to explicitly close the workbook
-    $workbook->close();
-  }
-
-  $liite = "/tmp/".$excelnimi;
+  $liite = $worksheet->close();
 
   $bound = uniqid(time()."_") ;
 
@@ -557,8 +513,9 @@ if ($tee == 'laheta' or $tee == 'lahetalista') {
   $content .= "Content-Transfer-Encoding: base64\n" ;
   $content .= "Content-Disposition: inline; filename=\"".basename($tiednimi)."\"\n\n";
 
-  $handle  = fopen($liite, "r");
-  $sisalto = fread($handle, filesize($liite));
+  $handle  = fopen('/tmp/'.$liite, "r");
+
+  $sisalto = fread($handle, filesize('/tmp/'.$liite));
   fclose($handle);
 
   $content .= chunk_split(base64_encode($sisalto));

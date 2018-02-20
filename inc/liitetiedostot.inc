@@ -55,7 +55,7 @@ if ($lukitse_laji == "lasku" and $lukitse_avaimeen > 0) {
     }
   }
   //  Nämä ovat varmaankin sitten itse tilauksia?
-  elseif (in_array($lasrow['tila'], array("L", "N", "R", "E", "T", "U", "0", "A", "O", "V"))) {
+  elseif (in_array($lasrow['tila'], array("L", "N", "R", "E", "T", "U", "0", "A", "O", "V", "C"))) {
     $uusilukko = "";
   }
 

@@ -32,7 +32,7 @@ if (strpos($file, "maventa") !== false) {
 }
 
 // parseroidaan xml
-$yhtio = xml_string($xml->BuyerOrganisationUnitNumber);
+$yhtio = xml_string($xml->InvoiceRecipientOrganisationUnitNumber);
 $verkkotunnus_vas = xml_string($xml->BuyerPartyDetails->BuyerOrganisationTaxCode);
 $verkkotunnus_vas_inv = xml_string($xml->InvoiceRecipientPartyDetails->InvoiceRecipientOrganisationTaxCode);
 $laskun_tyyppi = xml_string($xml->InvoiceDetails->InvoiceTypeCode);
@@ -49,6 +49,16 @@ $laskuttajan_vat = xml_string($xml->SellerPartyDetails->SellerOrganisationTaxCod
 $laskuttajan_identifier = xml_string($xml->SellerPartyDetails->SellerPartyIdentifier);
 $laskuttajan_valkoodi = xml_string($xml->EpiDetails->EpiPaymentInstructionDetails->EpiInstructedAmount->attributes()->AmountCurrencyIdentifier);
 $laskun_pankkiviite = xml_string($xml->EpiDetails->EpiPaymentInstructionDetails->EpiRemittanceInfoIdentifier);
+$laskun_iban = "";
+$laskun_bic = "";
+
+if (xml_string($xml->EpiDetails->EpiPartyDetails->EpiBeneficiaryPartyDetails->EpiAccountID->attributes()->IdentificationSchemeName) == "IBAN") {
+  $laskun_iban = xml_string($xml->EpiDetails->EpiPartyDetails->EpiBeneficiaryPartyDetails->EpiAccountID);
+}
+if (xml_string($xml->EpiDetails->EpiPartyDetails->EpiBfiPartyDetails->EpiBfiIdentifier->attributes()->IdentificationSchemeName) == "BIC") {
+  $laskun_bic = xml_string($xml->EpiDetails->EpiPartyDetails->EpiBfiPartyDetails->EpiBfiIdentifier);
+}
+
 $laskun_asiakastunnus = xml_string($xml->BuyerPartyDetails->BuyerPartyIdentifier);
 $laskun_summa_eur = xml_float($xml->EpiDetails->EpiPaymentInstructionDetails->EpiInstructedAmount);
 $laskun_tilausviite = xml_string($xml->InvoiceDetails->AgreementIdentifier);
@@ -87,9 +97,12 @@ if (strpos($file, "maventa") !== false and $laskuttajan_identifier != "") {
 }
 
 if ($yhtio == "") {
-  $yhtio = xml_string($xml->BuyerPartyDetails->BuyerPartyIdentifier);
+  $yhtio = xml_string($xml->BuyerOrganisationUnitNumber);
 }
 
+if ($yhtio == "") {
+  $yhtio = xml_string($xml->BuyerPartyDetails->BuyerPartyIdentifier);
+}
 if ($yhtio == "") {
   $yhtio = xml_string($xml->BuyerPartyDetails->BuyerOrganisationTaxCode);
 }

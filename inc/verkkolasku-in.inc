@@ -43,44 +43,50 @@ if (!function_exists("verkkolasku_in")) {
 
     // Nämä muuttujat kuuluisi olla setattuna:
     /*
-    echo "\n\nLASKUNTIEDOT:\n";
-    echo "01: ".$yhtio."\n";
-    echo "02: ".$verkkotunnus_vas."\n";
-    echo "03: ".$laskun_tyyppi."\n";
-    echo "04: ".$laskun_numero."\n";
-    echo "05: ".$laskun_ebid."\n";
-    echo "06: ".$laskun_tapvm."\n";
-    echo "07: ".$laskun_lapvm."\n";
-    echo "08: ".$laskun_erapaiva."\n";
-    echo "09: ".$laskun_kapvm."\n";
-    echo "10: ".$laskun_kasumma."\n";
-    echo "11: ".$laskuttajan_ovt."\n";
-    echo "12: ".$laskuttajan_nimi."\n";
-    echo "13: ".$laskuttajan_vat."\n";
-    echo "14: ".$laskun_pankkiviite."\n";
-    echo "15: ".$laskun_asiakastunnus."\n";
-    echo "16: ".$laskun_summa_eur."\n";
-    echo "17: ".$laskun_tilausviite."\n";
-    echo "18: ".$kauttalaskutus."\n";
-    echo "19: ".$laskun_asiakkaan_tilausnumero."\n";
-    echo "20: ".$toim_asiakkaantiedot["toim_ovttunnus"]."\n";
-    echo "21: ".$toim_asiakkaantiedot["ytunnus"]."\n";
-    echo "22: ".$toim_asiakkaantiedot["nimi"]."\n";
-    echo "23: ".$toim_asiakkaantiedot["osoite"]."\n";
-    echo "24: ".$toim_asiakkaantiedot["postino"]."\n";
-    echo "25: ".$toim_asiakkaantiedot["postitp"]."\n";
-    echo "26: ".$ostaja_asiakkaantiedot["toim_ovttunnus"]."\n";
-    echo "27: ".$ostaja_asiakkaantiedot["ytunnus"]."\n";
-    echo "28: ".$ostaja_asiakkaantiedot["nimi"]."\n";
-    echo "29: ".$ostaja_asiakkaantiedot["osoite"]."\n";
-    echo "30: ".$ostaja_asiakkaantiedot["postino"]."\n";
-    echo "31: ".$ostaja_asiakkaantiedot["postitp"]."\n";
-    echo "32: ".$laskuttajan_toimittajanumero."\n";
-    echo "33: ".$laskuttajan_valkoodi."\n";
-    echo "34: ".$laskun_toimitunnus."\n";
+    // kauniimpi linebreak
+    if ($cli) $_lb = "\n";
+    else $_lb = "<br>";
 
-    Nämä muuttujat ovat valinnaisia:
-
+    echo "{$_lb}{$_lb}LASKUNTIEDOT:{$_lb}";
+    echo "01: ".$yhtio."{$_lb}";
+    echo "02: ".$verkkotunnus_vas."{$_lb}";
+    echo "03: ".$laskun_tyyppi."{$_lb}";
+    echo "04: ".$laskun_numero."{$_lb}";
+    echo "05: ".$laskun_ebid."{$_lb}";
+    echo "06: ".$laskun_tapvm."{$_lb}";
+    echo "07: ".$laskun_lapvm."{$_lb}";
+    echo "08: ".$laskun_erapaiva."{$_lb}";
+    echo "09: ".$laskun_kapvm."{$_lb}";
+    echo "10: ".$laskun_kasumma."{$_lb}";
+    echo "11: ".$laskuttajan_ovt."{$_lb}";
+    echo "12: ".$laskuttajan_nimi."{$_lb}";
+    echo "13: ".$laskuttajan_vat."{$_lb}";
+    echo "14: ".$laskun_pankkiviite."{$_lb}";
+    echo "14.2: ".$laskun_iban."{$_lb}";
+    echo "14.4: ".$laskun_bic."{$_lb}";
+    echo "15: ".$laskun_asiakastunnus."{$_lb}";
+    echo "16: ".$laskun_summa_eur."{$_lb}";
+    echo "17: ".$laskun_tilausviite."{$_lb}";
+    echo "18: ".$kauttalaskutus."{$_lb}";
+    echo "19: ".$laskun_asiakkaan_tilausnumero."{$_lb}";
+    echo "20: ".$toim_asiakkaantiedot["toim_ovttunnus"]."{$_lb}";
+    echo "21: ".$toim_asiakkaantiedot["ytunnus"]."{$_lb}";
+    echo "22: ".$toim_asiakkaantiedot["nimi"]."{$_lb}";
+    echo "23: ".$toim_asiakkaantiedot["osoite"]."{$_lb}";
+    echo "24: ".$toim_asiakkaantiedot["postino"]."{$_lb}";
+    echo "25: ".$toim_asiakkaantiedot["postitp"]."{$_lb}";
+    echo "26: ".$ostaja_asiakkaantiedot["toim_ovttunnus"]."{$_lb}";
+    echo "27: ".$ostaja_asiakkaantiedot["ytunnus"]."{$_lb}";
+    echo "28: ".$ostaja_asiakkaantiedot["nimi"]."{$_lb}";
+    echo "29: ".$ostaja_asiakkaantiedot["osoite"]."{$_lb}";
+    echo "30: ".$ostaja_asiakkaantiedot["postino"]."{$_lb}";
+    echo "31: ".$ostaja_asiakkaantiedot["postitp"]."{$_lb}";
+    echo "32: ".$laskuttajan_toimittajanumero."{$_lb}";
+    echo "33: ".$laskuttajan_valkoodi."{$_lb}";
+    echo "34: ".$laskun_toimitunnus."{$_lb}";
+    */
+    //Nämä muuttujat ovat valinnaisia:
+    /*
     RIVINTIEDOT:
     $rtuoteno[]["ale"]
     $rtuoteno[]["alv"]
@@ -569,6 +575,27 @@ if (!function_exists("verkkolasku_in")) {
       }
       else {
         $valkoodi = 'EUR';
+      }
+
+      // tsekataan halutaanko laskun iban/bic käyttöön
+      if (in_array($yhtiorow['ostolaskujen_oletusiban'], array('1','2'))) {
+
+        $laskun_iban  = str_replace(" ", "", $laskun_iban);
+        $laskun_bic  = str_replace(" ", "", $laskun_bic);
+
+        if (!empty($laskun_iban) and !empty($laskun_bic)) {
+          $trow['ultilno'] = $laskun_iban;
+          $trow['swift'] = $laskun_bic;
+
+          // halutaanko päivittää nämä myös toimittajan taakse
+          if ($yhtiorow['ostolaskujen_oletusiban'] == '2') {
+            $query = "  UPDATE toimi SET
+                        ultilno = '{$trow['ultilno']}',
+                        swift = '{$trow['swift']}'
+                        WHERE tunnus = {$trow['tunnus']}";
+            $result = pupe_query($query);
+          }
+        }
       }
 
       // Hylätään viite jos se on nollaa

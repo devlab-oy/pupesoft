@@ -235,7 +235,20 @@ if ($toim == 'LAVAKERAYS' and $tee == 'KERAA_KAIKKI_LAVAKERAYS' and $lavakerays_
 
     $tilausnumeroita = implode(",", $tilausnumeroita);
 
-    // Tulostetaan keräsylistat
+    // Jos tilauksella on vain puuttetia, niin se mitätöidään tilaus-valmis.inc:ssä
+    // tilaus on poistettava tilausnumeroita-listasta jos näin on käynyt
+    $query = " SELECT group_concat(tunnus) tilausnumeroita
+               from lasku
+               where tunnus in ($tilausnumeroita)
+               and yhtio = '$kukarow[yhtio]'
+               and tila = 'N'
+               and alatila = 'A'";
+    $result = pupe_query($query);
+    $tilrow = mysql_fetch_assoc($result);
+
+    $tilausnumeroita = $tilrow['tilausnumeroita'];
+
+    // Tulostetaan keräyslistat
     // Haetaan ekan kerättävän tilauksen tiedot
     $query = " SELECT *
                from lasku

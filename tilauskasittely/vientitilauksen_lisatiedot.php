@@ -1,19 +1,21 @@
 <?php
 
-require '../inc/cookie_functions.inc';
+if (strpos($_SERVER['SCRIPT_NAME'], "vientitilauksen_lisatiedot.php") !== FALSE) {
 
-handle_cookie("toimittamattomat", "find_submit");
+  require '../inc/cookie_functions.inc';
+  handle_cookie("toimittamattomat", "find_submit");
 
-require '../inc/parametrit.inc';
+  require '../inc/parametrit.inc';
 
-if (isset($livesearch_tee) and $livesearch_tee == "TULLINIMIKEHAKU") {
-  livesearch_tullinimikehaku();
-  exit;
+  if (isset($livesearch_tee) and $livesearch_tee == "TULLINIMIKEHAKU") {
+    livesearch_tullinimikehaku();
+    exit;
+  }
+
+  enable_ajax();
+
+  echo "<font class='head'>".t("Lisätietojen syöttö")."</font><hr>";
 }
-
-enable_ajax();
-
-echo "<font class='head'>".t("Lisätietojen syöttö")."</font><hr>";
 
 if (isset($bruttopaino)) $bruttopaino = str_replace(",", ".", $bruttopaino);
 if (isset($lisattava_era)) $lisattava_era = str_replace(",", ".", $lisattava_era);
@@ -51,7 +53,7 @@ if ($tapa == "tuonti" and $tee != "") {
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) == 0) {
-    echo $toim == "TYOMAARAYS" ? t("Työmääräysä ei löydy") : t("Laskua ei löydy");
+    echo $toim == "TYOMAARAYS" ? t("Työmääräystä ei löydy") : t("Laskua ei löydy");
     exit;
   }
   else {
@@ -364,7 +366,8 @@ elseif ($tee != "") {
                 vahennettava_era               = '$vahennettava_era',
                 comments                       = '$lomake_lisatiedot',
                 ultilno                        = '$ultilno'
-                WHERE tunnus                   = '$otun' and yhtio = '$kukarow[yhtio]'";
+                WHERE tunnus = '$otun'
+                and yhtio    = '$kukarow[yhtio]'";
       $result = pupe_query($query);
 
       //päivitetään alatila vain jos tilaus ei vielä ole laskutettu
@@ -388,7 +391,9 @@ elseif ($tee != "") {
       $result = pupe_query($query);
     }
 
-    $tee = '';
+    if (empty($from_viennin_lisatiedot_funktio)) {
+      $tee = '';
+    }
 
     if ($lopetus != "") {
       lopetus($lopetus, 'meta');
@@ -1092,4 +1097,6 @@ elseif ($tee == '') {
   echo "</table><br>";
 }
 
-require "inc/footer.inc";
+if (strpos($_SERVER['SCRIPT_NAME'], "vientitilauksen_lisatiedot.php") !== FALSE) {
+  require "inc/footer.inc";
+}

@@ -314,6 +314,7 @@ while (false !== ($file = readdir($handle))) {
           $tee              = "TARKISTA";
           $laskutakaikki    = "KYLLA";
           $silent           = "KYLLA";
+          $velox_laskutus   = "KYLLA";
           $force_web        = True;
           $pupe_root_polku  = dirname(dirname(dirname(__FILE__)));
 

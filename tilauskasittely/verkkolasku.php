@@ -251,6 +251,9 @@ else {
   if (!isset($kieli)) {
     $kieli = "";
   }
+  if (!isset($velox_laskutus)) {
+    $velox_laskutus = "";
+  }
 
   if ($silent == "") {
     $tulos_ulos .= "<font class='head'>".t("Laskutusajo")."</font><hr>\n";
@@ -2807,7 +2810,7 @@ else {
             }
 
             // halutaan l‰hett‰‰ lasku ulkoiseen varastoon
-            if ($lasrow["verkkotunnus"] == "VELOX") {
+            if ($lasrow["verkkotunnus"] == "VELOX" and $velox_laskutus == "KYLLA") {
               $tulostettavat_ulkvar[] = $lasrow["laskunro"];
             }
 

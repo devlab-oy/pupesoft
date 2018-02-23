@@ -88,6 +88,7 @@ if ($tee == 'etsi' and !empty($hakusubmit)) {
   if ($hakuteksti != '') {
     $hakuehdot .= " AND ( lasku.nimi LIKE '%".$hakuteksti."%' ";
     $hakuehdot .= " OR lasku.tunnus LIKE '%".$hakuteksti."%' ";
+    $hakuehdot .= " OR lasku.sisviesti2 LIKE '%".$hakuteksti."%' ";
     $hakuehdot .= " OR asiakas.asiakasnro LIKE '%".$hakuteksti."%' ";
 
     foreach ($tyom_kentat_array as $selite => $selitetark) {

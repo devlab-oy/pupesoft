@@ -61,7 +61,7 @@ else {
   foreach ($ostotilaus['tilausrivit'] as $tilausrivi) {
     $article = $xml->createElement('article');
 
-    //  Tarkastetaan olisiko toimittajalla yksikkö!
+    //  Tarkastetaan olisiko toimittajalla tuotenumero!
     $query = "SELECT toim_tuoteno
               FROM tuotteen_toimittajat
               WHERE yhtio      = '{$kukarow['yhtio']}'
@@ -102,6 +102,10 @@ else {
   $ftppass = $toimirow['edi_salasana'];
   $ftppath = $toimirow['edi_polku'];
   $ftpfile = $xml_editilaus;
+
+  // Portti
+  if (isset($toimirow['edi_portti'])) $ftpport = $toimirow['edi_portti'];
+
   require "inc/sftp-send.inc";
 
   if ($palautus == 0) {

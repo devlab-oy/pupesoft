@@ -7,7 +7,7 @@ if (empty($ostotilaus['tilausrivit'])) {
   echo "<font class='error'>".t("Lähetettäviä tilausrivejä ei löydy")."</font><br/>";
 }
 else {
-  $xml_editilaus = $pupe_root_polku."/dataout/xml-order-BuyerCustomerParty.xml";
+  $xml_editilaus = $pupe_root_polku."/dataout/xml-order-$laskurow[tunnus].xml";
 
   $xml = new DOMDocument();
   $order = $xml->createElement('Order');
@@ -94,14 +94,28 @@ else {
 
   $xml->save($xml_editilaus);
 
-  echo "<table>";
-  echo "<tr><th>".t("Tallenna ostotilaus").":</th>";
-  echo "<form method='post' action='{$palvelin2}tilauskasittely/tilaus_osto.php'>";
-  echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
-  echo "<input type='hidden' name='kaunisnimi' value='".t('Osto')."_{$laskurow["tunnus"]}.xml'>";
-  echo "<input type='hidden' name='filenimi' value='$xml_editilaus'>";
-  echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
-  echo "</table><br>";
+  // tarvitaan  $ftphost $ftpuser $ftppass $ftppath $ftpfile
+  // palautetaan $palautus ja $syy
+
+  $ftphost = $toimirow['edi_palvelin'];
+  $ftpuser = $toimirow['edi_kayttaja'];
+  $ftppass = $toimirow['edi_salasana'];
+  $ftppath = $toimirow['edi_polku'];
+  $ftpfile = $xml_editilaus;
+  require "inc/sftp-send.inc";
+
+  if ($palautus == 0) {
+    echo "<font class='message'>".t("Tilaus lähetettiin onnistuneesti")."!</font><br>";
+
+    $sqlquery = "UPDATE lasku
+                 SET kirjoitin = 'edi'
+                 WHERE yhtio = '$kukarow[yhtio]'
+                 AND tunnus  = '$laskurow[tunnus]'";
+    $result = pupe_query($sqlquery);
+  }
+  else {
+    echo "<font class='error'>".t("Tilauksen lähetys epäonnistui")."!</font><br>";
+  }
 }
 
 // Nollataan tarkoituksella lopetusmuuttuja

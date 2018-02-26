@@ -13,22 +13,18 @@ else {
   $order = $xml->createElement('Order');
 
   $order_type = $xml->createElement('orderType');
-  $order_type->nodeValue = "Ostotilaus";
+  $order_type->nodeValue = "Purchase order";
   $order->appendChild($order_type);
 
-  $shipping = $xml->createElement('shipping');
+  $PartyName = $xml->createElement('PartyName');
+  $PartyName->nodeValue = $yhtiorow["nimi"];
+  $order->appendChild($PartyName);
 
-  $shipping_street = $xml->createElement('street');
-  $shipping_street->nodeValue = 5555;
-  $shipping->appendChild($shipping_street);
+  $PartyIdentification = $xml->createElement('PartyIdentification');
+  $PartyIdentification->nodeValue = $yhtiorow["ovttunnus"];
+  $order->appendChild($PartyIdentification);
 
-  $shipping_name = $xml->createElement('nimi');
-  $shipping_name->nodeValue = 123;
-  $shipping->appendChild($shipping_name);
-
-  $order->appendChild($shipping);
-
-  $sales_order = $xml->createElement('ID');
+  $sales_order = $xml->createElement('OrderID');
   $sales_order->nodeValue = $ostotilaus['tunnus'];
   $order->appendChild($sales_order);
 
@@ -36,31 +32,52 @@ else {
   $IssueDate->nodeValue = $ostotilaus['toimaika'];
   $order->appendChild($IssueDate);
 
-  $PartyIdentification = $xml->createElement('PartyIdentification');
-  $PartyIdentification->nodeValue = $yhtiorow["ovttunnus"];
-  $order->appendChild($PartyIdentification);
+  $sales_order = $xml->createElement('PartyIdentificationID');
+  $sales_order->nodeValue = $yhtiorow['ovttunnus'];
+  $order->appendChild($sales_order);
 
-  $PartyName = $xml->createElement('PartyName');
-  $PartyName->nodeValue = $yhtiorow["nimi"];
-  $order->appendChild($PartyName);
+  $delivery = $xml->createElement('Delivery');
 
-  $Delivery = $xml->createElement('Delivery');
-  $Delivery2 = $xml->createElement('Delivery_2');
+  $delivery_name = $xml->createElement('Name');
+  $delivery_name->nodeValue = ($ostotilaus['toim_nimi']);
+  $delivery->appendChild($delivery_name);
 
-  $Delivery->nodeValue = $yhtiorow["nimi"];
-  $order->appendChild($Delivery);
+  $delivery_street = $xml->createElement('Street');
+  $delivery_street->nodeValue = ($ostotilaus['toim_osoite']);
+  $delivery->appendChild($delivery_street);
 
-  $address_for_shipment = $xml->createElement('addressForShipment');
-  $address_for_shipment->nodeValue = "802005050 100002184";
-  $order->appendChild($address_for_shipment);
+  $delivery_zip = $xml->createElement('Zip');
+  $delivery_zip->nodeValue = ($ostotilaus['toim_postino']);
+  $delivery->appendChild($delivery_zip);
+
+  $delivery_city = $xml->createElement('City');
+  $delivery_city->nodeValue = ($ostotilaus['toim_postitp']);
+  $delivery->appendChild($delivery_city);
+
+  $order->appendChild($delivery);
 
   $positions = $xml->createElement('Positions');
 
   foreach ($ostotilaus['tilausrivit'] as $tilausrivi) {
     $article = $xml->createElement('article');
 
+    //  Tarkastetaan olisiko toimittajalla yksikkö!
+    $query = "SELECT toim_tuoteno
+              FROM tuotteen_toimittajat
+              WHERE yhtio      = '{$kukarow['yhtio']}'
+              AND tuoteno      = '{$tilausrivi['tuoteno']}'
+              AND liitostunnus = '{$ostotilaus['liitostunnus']}'";
+    $rarres = pupe_query($query);
+    $rarrow   = mysql_fetch_assoc($rarres);
+
     $articleno = $xml->createElement('articleNo');
-    $articleno->nodeValue = $tilausrivi['tuoteno'];
+
+    if (!empty($rarrow['toim_tuoteno'])) {
+      $articleno->nodeValue = $rarrow['toim_tuoteno'];
+    }
+    else {
+      $articleno->nodeValue = $tilausrivi['tuoteno'];
+    }
 
     $article_quantity = $xml->createElement('articleQuantity');
     $article_quantity->nodeValue = $tilausrivi['tilkpl'];

@@ -323,7 +323,7 @@ if (!function_exists("toimitarkista")) {
     if ($fieldname == "edi_polku") {
       $tmp_edi_polku = trim($t[$i]);
 
-      if ($tmp_edi_kuvaus == 'editilaus_out_wabco.inc' or $tmp_edi_kuvaus == 'editilaus_out_excel.inc' or $tmp_edi_kuvaus == 'editilaus_out_xml.inc' or $tmp_edi_kuvaus == 'sendorder_out_futur') {
+      if ($tmp_edi_kuvaus == 'editilaus_out_wabco.inc' or $tmp_edi_kuvaus == 'editilaus_out_excel.inc' or $tmp_edi_kuvaus == 'editilaus_out_xml.inc' or $tmp_edi_kuvaus == 'editilaus_out_xml_stap.inc' or $tmp_edi_kuvaus == 'sendorder_out_futur') {
         // Näissä tyypeissä ei tartte olle mitään kenttiä syötetty
       }
       elseif ($tmp_edi_kuvaus != "" and $tmp_edi_palvelin == "localhost" and ($tmp_edi_polku == "" or !is_writable($tmp_edi_polku))) {

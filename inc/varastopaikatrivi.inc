@@ -251,6 +251,20 @@ if (mysql_field_name($result, $i) == "ulkoinen_jarjestelma") {
   $jatko = 0;
 }
 
+if (mysql_field_name($result, $i) == "epakurantointi") {
+  $ulos = "<td>";
+
+  $sel = array();
+  $sel[$trow[$i]] = " selected";
+
+  $ulos .= "<select name='{$nimi}'>";
+  $ulos .= "<option value=''>".t("Huomioidaan epäkunranttiajossa")."</option>";
+  $ulos .= "<option value='E'{$sel['E']}>".t("Ei huomioida epäkuranttiajossa")."</option>";
+  $ulos .= "</select>";
+  $ulos .= "</td>";
+  $jatko = 0;
+}
+
 if (mysql_field_name($result, $i) == "projekti" or mysql_field_name($result, $i) == "kohde" or mysql_field_name($result, $i) == "kustp") {
 
   if (mysql_field_name($result, $i) == "projekti") $kptyyppi = "P";

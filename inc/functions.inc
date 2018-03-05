@@ -34857,6 +34857,7 @@ if (!function_exists("tilauksen_seurantalinkit")) {
       $unifaun    = (stripos($rahtikirja, "unifaun") !== false and !empty($unifaun_url_key));
       $ups        = (stripos($rahtikirjanro, 'ups') !== false);
       $kaukokiito = (strtoupper($virallinen_selite) == "KKSTD");
+      $matkahuolto  = (stripos($virallinen_selite, "MH") !== false);
 
       // dpd unifaunin kautta
       if ($dpd and $unifaun) {
@@ -34945,6 +34946,20 @@ if (!function_exists("tilauksen_seurantalinkit")) {
           $seurantakoodit[] = array(
             "id" => $nro,
             "link" => "http://kaukoputki.kaukokiito.fi/kaukokiito/ordermonitor?findOrders=&searchId={$nro}"
+          );
+        }
+      }
+      elseif ($matkahuolto) {
+        $_i = 0;
+        foreach (explode("\n", $row['rahtikirjanro']) as $nro) {
+
+          $_i++;
+          // skipataan ensimmäinen (Pupen generoima numero)
+          if ($_i == 1) continue;
+
+          $seurantakoodit[] = array(
+            "id" => $nro,
+            "link" => "http://mhhkiweb1.matkahuolto.fi/scripts/loginetyleinen.wsc/002tapahtuma_new?spacketnum={$nro}"
           );
         }
       }

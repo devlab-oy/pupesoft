@@ -576,12 +576,16 @@ if ($tee == 'I') {
     }
   }
 
+  if ($kassaale != 0) {
+    $kassaale = str_replace(",", ".", trim($kassaale));
+  }
   if ($kapro != 0) {
     if ($kassaale > 0) {
       $errormsg .= "<font class='error'>".t("Kaksi kassa-alesummaa")."</font><br>";
       $tee = 'E';
     }
     else {
+      $kapro = str_replace(",", ".", trim($kapro));
       $kassaale = $summa * $kapro / 100;
       $kapro = 0;
     }

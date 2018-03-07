@@ -250,10 +250,12 @@ if ($tee == "paalle" or $tee == "25paalle" or $tee == "puolipaalle" or $tee == "
               AND lasku.tunnus     = tilausrivi.uusiotunnus
               AND lasku.tila       = 'K'
               AND lasku.alatila    not in ('X', 'I'))
+            JOIN varastopaikat ON (varastopaikat.yhtio = lasku.yhtio and varastopaikat.tunnus = lasku.varasto)
             WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
-            and tuoteno            = '$tuoterow[tuoteno]'
-            and varattu            = 0
-            and tyyppi             = 'O'";
+            and tilausrivi.tuoteno            = '$tuoterow[tuoteno]'
+            and tilausrivi.varattu            = 0
+            and tilausrivi.tyyppi             = 'O'
+            and varastopaikat.epakurantointi = ''";
   $tilre = pupe_query($query);
 
   if (mysql_num_rows($tilre) != 0 and $tee != "pois" and $tee != "peru") {

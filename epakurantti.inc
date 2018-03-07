@@ -247,14 +247,14 @@ if ($tee == "paalle" or $tee == "25paalle" or $tee == "puolipaalle" or $tee == "
   $query = "SELECT laskunro
             FROM tilausrivi use index (yhtio_tyyppi_tuoteno_varattu)
             JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio
-            JOIN varastopaikat ON (varastopaikat.yhtio = lasku.yhtio and varastopaikat.tunnus = lasku.varasto)
               AND lasku.tunnus     = tilausrivi.uusiotunnus
               AND lasku.tila       = 'K'
               AND lasku.alatila    not in ('X', 'I'))
+            JOIN varastopaikat ON (varastopaikat.yhtio = lasku.yhtio and varastopaikat.tunnus = lasku.varasto)
             WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
-            and tuoteno            = '$tuoterow[tuoteno]'
-            and varattu            = 0
-            and tyyppi             = 'O'
+            and tilausrivi.tuoteno            = '$tuoterow[tuoteno]'
+            and tilausrivi.varattu            = 0
+            and tilausrivi.tyyppi             = 'O'
             and varastopaikat.epakurantointi = ''";
   $tilre = pupe_query($query);
 

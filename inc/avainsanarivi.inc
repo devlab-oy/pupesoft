@@ -307,7 +307,7 @@ if (mysql_field_name($result, $i) == "laji") {
   if ($lukitse_laji== "" or $lukitse_laji == "OSTOTIL_TILTYYP") $ulos .= "<option value='OSTOTIL_TILTYYP' {$avain_sel['OSTOTIL_TILTYYP']}>".t("Ostotilauksen tilaustyyppi")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "TARJOUS_VAKIOTE") $ulos .= "<option value='TARJOUS_VAKIOTE' {$avain_sel['TARJOUS_VAKIOTE']}>".t("Tarjouksen vakioteksti")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "TARJOUS_EHDOT") $ulos .= "<option value='TARJOUS_EHDOT' {$avain_sel['TARJOUS_EHDOT']}>".t("Pelkistetyn tarjouksen kauppaehdot")."</option>";
-  if ($lukitse_laji== "" or $lukitse_laji == "TARJOUS_KAUPEHD") $ulos .= "<option value='TARJOUS_KAUPEHD' {$avain_sel['TARJOUS_KAUPEHD']}>".t("Pelkistetyn tarjouksen lopun kauppaehdot (kohdat (3 ja 4)")."</option>";
+  if ($lukitse_laji== "" or $lukitse_laji == "TARJOUS_KAUPEHD") $ulos .= "<option value='TARJOUS_KAUPEHD' {$avain_sel['TARJOUS_KAUPEHD']}>".t("Pelkistetyn tarjouksen lopun kauppaehdot (kohdat 3 ja 4)")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "KATEISOTTO") $ulos .= "<option value='KATEISOTTO' {$avain_sel['KATEISOTTO']}>".t("Käteisoton luonne")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "KOHDE_TYYPPI") $ulos .= "<option value='KOHDE_TYYPPI' {$avain_sel['KOHDE_TYYPPI']}>".t("Kohteen tyyppi")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "MYYNNISTA_OSTO") $ulos .= "<option value='MYYNNISTA_OSTO' {$avain_sel['MYYNNISTA_OSTO']}>".t("Ostotilauksen käsittely myyntitilauksella")."</option>";

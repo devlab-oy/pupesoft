@@ -34171,7 +34171,7 @@ if (!function_exists('tuoteperheiden_hintojen_paivitys')) {
       );
       $kertoimet = tuoteperheen_lapsien_kertoimet($_params);
       $laskettu_hinta = 0;
-
+ 
       $hinnoittelu_isatuotteella = (in_array($kertoimet[0]['hintatyyppi'], array('I', 'L')));
 
       // Jos meillä ei ole isätuotteeseen perustuva hinnoitelu, ei tarvitse tehdä mitään,
@@ -34219,14 +34219,21 @@ if (!function_exists('tuoteperheiden_hintojen_paivitys')) {
 
       // jos on pyöristyseroa
       if ($pyoristysero != 0) {
-        $vikalapsi = array_pop($perhe);
+          $nquery = "SELECT tunnus
+                    FROM tilausrivi
+                    WHERE yhtio = '{$kukarow['yhtio']}'
+                    AND otunnus  = {$row['otunnus']}
+                    AND perheid = '{$row['perheid']}'
+                    AND hinta > 0 LIMIT 1";
+          $nresult = pupe_query($nquery);
+          $nrow = mysql_fetch_assoc($nresult);
 
         // Lisätään pyöristys tämän perheen vikalle lapselle
         $query = "UPDATE tilausrivi SET
                   hinta       = round(hinta - ({$pyoristysero} / tilkpl), {$yhtiorow['hintapyoristys']})
                   WHERE yhtio = '{$kukarow['yhtio']}'
                   AND perheid = '{$row['perheid']}'
-                  AND tunnus  = $vikalapsi";
+                  AND tunnus  = {$nrow['tunnus']}";
         pupe_query($query);
       }
     }

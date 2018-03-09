@@ -16,13 +16,13 @@ else {
   $order_type->nodeValue = "Purchase order";
   $order->appendChild($order_type);
 
-  $PartyName = $xml->createElement('PartyName');
-  $PartyName->nodeValue = $yhtiorow["nimi"];
-  $order->appendChild($PartyName);
+  $BuyerPartyName = $xml->createElement('BuyerPartyName');
+  $BuyerPartyName->nodeValue = $yhtiorow["nimi"];
+  $order->appendChild($BuyerPartyName);
 
-  $PartyIdentification = $xml->createElement('PartyIdentification');
-  $PartyIdentification->nodeValue = $yhtiorow["ovttunnus"];
-  $order->appendChild($PartyIdentification);
+  $BuyerPartyIdentification = $xml->createElement('BuyerPartyIdentification');
+  $BuyerPartyIdentification->nodeValue = $yhtiorow["ovttunnus"];
+  $order->appendChild($BuyerPartyIdentification);
 
   $sales_order = $xml->createElement('OrderID');
   $sales_order->nodeValue = $ostotilaus['tunnus'];
@@ -32,9 +32,13 @@ else {
   $IssueDate->nodeValue = $ostotilaus['toimaika'];
   $order->appendChild($IssueDate);
 
-  $sales_order = $xml->createElement('PartyIdentificationID');
-  $sales_order->nodeValue = $yhtiorow['ovttunnus'];
-  $order->appendChild($sales_order);
+  $SellerSupplierPartyName = $xml->createElement('SellerSupplierPartyName');
+  $SellerSupplierPartyName->nodeValue = $toimirow["nimi"];
+  $order->appendChild($SellerSupplierPartyName);
+
+  $SellerSupplierPartyIdentification = $xml->createElement('SellerSupplierPartyIdentification');
+  $SellerSupplierPartyIdentification->nodeValue = $toimirow["ovttunnus"];
+  $order->appendChild($SellerSupplierPartyIdentification);
 
   $delivery = $xml->createElement('Delivery');
 

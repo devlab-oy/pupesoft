@@ -584,7 +584,7 @@ if ($ytunnus != '' or $tuoteno != '' or (int) $asiakasid > 0 or (int) $toimittaj
 
     $csp2 = 3;
 
-    $loopattava_maara = $toim == 'OSTO' ? 1 : $yhtiorow['myynnin_alekentat'];
+    $loopattava_maara = $toim == 'OSTO' ? 2 : $yhtiorow['myynnin_alekentat'];
 
     for ($alepostfix = 1; $alepostfix <= $loopattava_maara; $alepostfix++) {
       if ($alepostfix > 1) {

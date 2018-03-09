@@ -110,7 +110,7 @@ else {
   // Portti
   if (isset($toimirow['edi_portti'])) $ftpport = $toimirow['edi_portti'];
 
-  require "inc/ftp-send.inc";
+  require "inc/sftp-send.inc";
 
   if ($palautus == 0) {
     echo "<font class='message'>".t("Tilaus lähetettiin onnistuneesti")."!</font><br>";

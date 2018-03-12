@@ -390,6 +390,7 @@ if (isset($tee) and $tee == 'TOIMITA_ENNAKKO' and in_array($yhtiorow["ennakkotil
 }
 
 if (!isset($asiakastiedot)) $asiakastiedot = '';
+if (!isset($viitetiedot)) $viitetiedot = '';
 if (!isset($limit)) $limit = '';
 if (!isset($etsi)) $etsi = '';
 if (!isset($pv_rajaus)) $pv_rajaus = $yhtiorow['muokkaatilaus_pv_rajaus'];
@@ -830,7 +831,7 @@ if (strpos($_SERVER['SCRIPT_NAME'], "muokkaatilaus.php") !== FALSE) {
         echo "<form method='post' action='tilauskasittely/tilaus_myynti.php'>";
       }
 
-      $lopetus = "{$palvelin2}muokkaatilaus.php////toim={$toim}//asiakastiedot={$asiakastiedot}//limit={$limit}//etsi={$etsi}";
+      $lopetus = "{$palvelin2}muokkaatilaus.php////toim={$toim}//asiakastiedot={$asiakastiedot}//viitetiedot={$viitetiedot}//limit={$limit}//etsi={$etsi}";
 
       if (isset($toimipaikka)) {
         $lopetus .= "//toimipaikka=$toimipaikka";
@@ -877,6 +878,7 @@ if (strpos($_SERVER['SCRIPT_NAME'], "muokkaatilaus.php") !== FALSE) {
   echo "<form method='post' name='hakuformi'>";
   echo "<input type='hidden' name='toim' value='$toim'>";
   echo "<input type='hidden' name='asiakastiedot' value='$asiakastiedot'>";
+  echo "<input type='hidden' name='viitetiedot' value='$viitetiedot'>";
   echo "<input type='hidden' name='limit' value='$limit'>";
   echo "<font class='head'>".t("Etsi")." $otsikko<hr></font>";
 
@@ -1222,6 +1224,10 @@ if (empty($naytetaanko_saldot)) {
   $naytetaanko_saldot = isset($_COOKIE["naytetaanko_saldot"]) ? $_COOKIE["naytetaanko_saldot"] : "";
 }
 
+if (empty($viitetiedot)) {
+  $viitetiedot= isset($_COOKIE["viitetiedot"]) ? $_COOKIE["viitetiedot"] : "";
+}
+
 echo "  <script language=javascript>
     function lahetys_verify(pitaako_varmistaa) {
       msg = pitaako_varmistaa;
@@ -1253,6 +1259,14 @@ if ($toim != "LAVAKERAYS") {
   }
   elseif (!empty($yhtiorow["saldo_kasittely"]) and $toim == '') {
     echo " <a href='muokkaatilaus.php?toim={$toim}&limit={$limit}&etsi={$etsi}&naytetaanko_saldot=kylla&toimipaikka={$toimipaikka}'>" .t("Näytä saldot keräyspäivänä") . "</a>";
+  }
+
+  // Näytetään viite ja asiakkaan tilausnumero
+  if ($toim == '' and $viitetiedot == 'kylla') {
+    echo " <a href='muokkaatilaus.php?toim={$toim}&viitetiedot=ei&limit={$limit}&etsi={$etsi}&toimipaikka={$toimipaikka}'>" .t("Piilota viite ja asiakkaan tilausnumero") . "</a>";
+  }
+  else {
+    echo " <a href='muokkaatilaus.php?toim={$toim}&viitetiedot=kylla&limit={$limit}&etsi={$etsi}&toimipaikka={$toimipaikka}'>" . t("Näytä myös viite ja asiakkaan tilausnumero") . "</a>";
   }
 
   echo "<br><br>";
@@ -1379,7 +1393,7 @@ elseif ($toim == 'SUPER' or $toim == 'SUPERTEHDASPALAUTUKSET' or $toim == "SUPER
     $_ei_tyomaarays_tyomaarayksia_arraylisa = "AND laskun_lisatiedot.luontitapa != 'tyomaarays'";
   }
 
-  $query = "  SELECT DISTINCT lasku.tunnus tilaus, $asiakasstring asiakas, lasku.luontiaika, if(kuka1.kuka is null, lasku.laatija, if (kuka1.kuka!=kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi)) laatija, lasku.viesti tilausviite, ";
+  $query = "  SELECT DISTINCT lasku.tunnus tilaus, $asiakasstring asiakas, lasku.luontiaika, if(kuka1.kuka is null, lasku.laatija, if (kuka1.kuka!=kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi)) laatija, lasku.viesti tilausviite, lasku.asiakkaan_tilausnumero astilno, lasku.viesti viite,";
 
   if ($kukarow['hinnat'] == 0) {
     $query .= " round(sum(tilausrivi.hinta
@@ -2357,7 +2371,7 @@ elseif ($toim == 'ODOTTAA_SUORITUSTA') {
 }
 else {
   $query = "SELECT DISTINCT lasku.tunnus tilaus, $asiakasstring asiakas, lasku.luontiaika,
-            if(kuka1.kuka is null, lasku.laatija, if (kuka1.kuka!=kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi)) laatija,
+            if(kuka1.kuka is null, lasku.laatija, if (kuka1.kuka!=kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi)) laatija, lasku.asiakkaan_tilausnumero astilno, lasku.viesti viite,
             $seuranta $kohde  $toimaikalisa lasku.alatila, lasku.tila, lasku.tunnus, kuka1.extranet extra, lasku.mapvm, lasku.tilaustyyppi, lasku.label, lasku.kerayspvm, lasku.varasto
             FROM lasku use index (tila_index)
             LEFT JOIN kuka as kuka1 ON (kuka1.yhtio = lasku.yhtio and kuka1.kuka = lasku.laatija)
@@ -2478,6 +2492,11 @@ if (mysql_num_rows($result) != 0) {
   // syötettynä keräyspäivänä.
   if (!empty($yhtiorow["saldo_kasittely"]) and $toim == '' and $naytetaanko_saldot == 'kylla') {
     echo "<th>".t("Riittääkö saldot keräyspäivänä")."?</th>";
+  }
+
+  if ($toim == '' and $viitetiedot == 'kylla') {
+    echo "<th>".t("Viite")."</th>";
+    echo "<th>".t("Asiakkaan tilausnumero")."</th>";
   }
 
   echo "<th class='back'></th></tr>";
@@ -3200,7 +3219,7 @@ if (mysql_num_rows($result) != 0) {
 
       echo "<td class='back' nowrap>";
 
-      $lopetus = "{$palvelin2}muokkaatilaus.php////toim={$toim}//asiakastiedot={$asiakastiedot}//limit={$limit}//etsi={$etsi}";
+      $lopetus = "{$palvelin2}muokkaatilaus.php////toim={$toim}//asiakastiedot={$asiakastiedot}//viitetiedot={$viitetiedot}//limit={$limit}//etsi={$etsi}";
 
       if (isset($toimipaikka)) {
         $lopetus .= "//toimipaikka=$toimipaikka";

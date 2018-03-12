@@ -1261,12 +1261,18 @@ if ($toim != "LAVAKERAYS") {
     echo " <a href='muokkaatilaus.php?toim={$toim}&limit={$limit}&etsi={$etsi}&naytetaanko_saldot=kylla&toimipaikka={$toimipaikka}'>" .t("Näytä saldot keräyspäivänä") . "</a>";
   }
 
-  // Näytetään viite ja asiakkaan tilausnumero
-  if ($toim == '' and $viitetiedot == 'kylla') {
-    echo " <a href='muokkaatilaus.php?toim={$toim}&viitetiedot=ei&limit={$limit}&etsi={$etsi}&toimipaikka={$toimipaikka}'>" .t("Piilota viite ja asiakkaan tilausnumero") . "</a>";
+  // Näytetään viite ja asiakkaan tilausnumero "avoimet tilaukset" ja "muokkaa" näkymässä
+  if ($toim == "") {
+    $_tilviite_text = "tilausviite ja";
   }
   else {
-    echo " <a href='muokkaatilaus.php?toim={$toim}&viitetiedot=kylla&limit={$limit}&etsi={$etsi}&toimipaikka={$toimipaikka}'>" . t("Näytä myös viite ja asiakkaan tilausnumero") . "</a>";
+    $_tilviite_text = "";
+  }
+  if (in_array($toim, array("", "SUPER")) and $viitetiedot == 'kylla') {
+    echo " <br><a href='muokkaatilaus.php?toim={$toim}&viitetiedot=ei&limit={$limit}&etsi={$etsi}&toimipaikka={$toimipaikka}'>" .t("Piilota $_tilviite_text asiakkaan tilausnumero") . "</a>";
+  }
+  elseif (in_array($toim, array("", "SUPER"))) {
+    echo " <br><a href='muokkaatilaus.php?toim={$toim}&viitetiedot=kylla&limit={$limit}&etsi={$etsi}&toimipaikka={$toimipaikka}'>" . t("Näytä myös $_tilviite_text asiakkaan tilausnumero") . "</a>";
   }
 
   echo "<br><br>";
@@ -1393,7 +1399,20 @@ elseif ($toim == 'SUPER' or $toim == 'SUPERTEHDASPALAUTUKSET' or $toim == "SUPER
     $_ei_tyomaarays_tyomaarayksia_arraylisa = "AND laskun_lisatiedot.luontitapa != 'tyomaarays'";
   }
 
-  $query = "  SELECT DISTINCT lasku.tunnus tilaus, $asiakasstring asiakas, lasku.luontiaika, if(kuka1.kuka is null, lasku.laatija, if (kuka1.kuka!=kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi)) laatija, lasku.viesti tilausviite, lasku.asiakkaan_tilausnumero astilno, lasku.viesti viite,";
+  $_querylisa = "";
+  if ($toim == 'SUPER' and $viitetiedot == 'kylla') {
+    $_querylisa = " lasku.asiakkaan_tilausnumero astilno,";
+  }
+
+  $query = "  SELECT DISTINCT lasku.tunnus tilaus,
+              $asiakasstring asiakas,
+              lasku.luontiaika,
+              if(kuka1.kuka is null,
+                lasku.laatija,
+                if (kuka1.kuka!=kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi)
+              ) laatija,
+              $_querylisa
+              lasku.viesti tilausviite,";
 
   if ($kukarow['hinnat'] == 0) {
     $query .= " round(sum(tilausrivi.hinta
@@ -2370,8 +2389,14 @@ elseif ($toim == 'ODOTTAA_SUORITUSTA') {
   $miinus = 8;
 }
 else {
+
+  $_querylisa = "";
+  if ($viitetiedot == 'kylla') {
+    $_querylisa = " lasku.asiakkaan_tilausnumero astilno, lasku.viesti tilausviite,";
+  }
+
   $query = "SELECT DISTINCT lasku.tunnus tilaus, $asiakasstring asiakas, lasku.luontiaika,
-            if(kuka1.kuka is null, lasku.laatija, if (kuka1.kuka!=kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi)) laatija, lasku.asiakkaan_tilausnumero astilno, lasku.viesti viite,
+            if(kuka1.kuka is null, lasku.laatija, if (kuka1.kuka!=kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi)) laatija, $_querylisa
             $seuranta $kohde  $toimaikalisa lasku.alatila, lasku.tila, lasku.tunnus, kuka1.extranet extra, lasku.mapvm, lasku.tilaustyyppi, lasku.label, lasku.kerayspvm, lasku.varasto
             FROM lasku use index (tila_index)
             LEFT JOIN kuka as kuka1 ON (kuka1.yhtio = lasku.yhtio and kuka1.kuka = lasku.laatija)
@@ -2492,11 +2517,6 @@ if (mysql_num_rows($result) != 0) {
   // syötettynä keräyspäivänä.
   if (!empty($yhtiorow["saldo_kasittely"]) and $toim == '' and $naytetaanko_saldot == 'kylla') {
     echo "<th>".t("Riittääkö saldot keräyspäivänä")."?</th>";
-  }
-
-  if ($toim == '' and $viitetiedot == 'kylla') {
-    echo "<th>".t("Viite")."</th>";
-    echo "<th>".t("Asiakkaan tilausnumero")."</th>";
   }
 
   echo "<th class='back'></th></tr>";

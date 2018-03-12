@@ -31296,6 +31296,7 @@ if (!function_exists("tallenna_tiliote_viite")) {
     $virhe = 0;
     $td_perheid = 0;
     $insert_count = 0;
+    $xxtyyppi = '';
     $serc = array("{", "|", "}", "[", "\\", "]", "'");
     $repl = array("ä", "ö", "å", "Ä", "Ö" , "Å", " ");
 
@@ -31357,6 +31358,23 @@ if (!function_exists("tallenna_tiliote_viite")) {
             if (mysql_num_rows($f_result) == 1) {
               $f_row = mysql_fetch_assoc($f_result);
               $tilino = $f_row['tilino'];
+            }
+          }
+          else {
+            // Kokeillaan onko kyse PPG:n factoring-aineistosta
+            $xxtyyppi = 'P';
+            $uusitilino = substr($tietue, 16, 6);
+            $query = "SELECT tilino
+                      FROM yriti
+                      WHERE tilino = '$uusitilino'
+                      AND kaytossa = ''
+                      LIMIT 1;";
+            $fp_result = pupe_query($query);
+
+            // jos tämä epäonnistuu, virheilmoitus tulee alempana kun tilinumeroa ei löydy
+            if (mysql_num_rows($fp_result) == 1) {
+              $fp_row = mysql_fetch_assoc($fp_result);
+              $tilino = $fp_row['tilino'];
             }
           }
         }
@@ -31699,6 +31717,7 @@ if (!function_exists("tallenna_tiliote_viite")) {
       }
 
       if ($xtyyppi > 0 and $xtyyppi <= 3) {
+        $xxtyyppi = ($xxtyyppi != '') ? $xxtyyppi : $xtyyppi;
         // Kirjoitetaan tiedosto kantaan
         $query = "INSERT into tiliotedata set
                   yhtio    = '$yritirow[yhtio]',
@@ -31706,7 +31725,7 @@ if (!function_exists("tallenna_tiliote_viite")) {
                   tilino   = '$tilino',
                   alku     = '$alkupvm',
                   loppu    = '$loppupvm',
-                  tyyppi   = '$xtyyppi',
+                  tyyppi   = '$xxtyyppi',
                   tieto    = '$tietue'";
         $tiliotedataresult = pupe_query($query);
         $tiliote_id = mysql_insert_id($GLOBALS["masterlink"]);
@@ -31773,6 +31792,7 @@ if (!function_exists("kasittele_tiliote_viite")) {
     $tee_viitemaksu_kohdistus = false;
     $vastavienti = 0;
     $vastavienti_valuutassa = 0;
+    $tilino = '';
 
     $tilioteselailu_oikrow = tarkista_oikeus("tilioteselailu.php", "%", "", "OK");
 
@@ -31819,7 +31839,8 @@ if (!function_exists("kasittele_tiliote_viite")) {
         $tee_selvittely = true;
         require "inc/LMP.inc";
       }
-      if ($tiliotedatarow['tyyppi'] == 3) {
+      if ($tiliotedatarow['tyyppi'] == 3 or $tiliotedatarow['tyyppi'] == 'P') {
+        if ($tiliotedatarow['tyyppi'] == 'P') $tilino = $tiliotedatarow['tilino'];
         $tee_viitemaksu_kohdistus = true;
         require "inc/viitemaksut.inc";
       }

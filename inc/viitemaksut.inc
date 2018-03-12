@@ -9,6 +9,7 @@
 // 3 -> viitesiirto
 // 5 -> suoraveloitus
 // 9 -> summatietue
+// P -> PPG-factoringrivi 
 // S -> factoringrivi, alatyyppi positiossa 88 (numerointi alkaa yhdestä)
 
 $type = substr($tietue, 0, 1);
@@ -32,6 +33,10 @@ elseif ($type == '3' or ($type == 'S' and
 
   if ($type == 'S') {
     $account = $tiliotedatarow['tilino'];
+  }
+  // PPG factoring-viiteaineisto
+  elseif ($tilino != '') {
+    $account = $tilino;
   }
   else {
     $account = substr($tietue, 1, 14);

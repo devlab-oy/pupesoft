@@ -293,7 +293,7 @@ if ($tee == 'S') {
       if ($tiliotedatarow['tyyppi'] == 2) {
         require "inc/LMP.inc";
       }
-      if ($tiliotedatarow['tyyppi'] == 3) {
+      if ($tiliotedatarow['tyyppi'] == 3 or $tiliotedatarow['tyyppi'] == 'P') {
         require "inc/naytaviitteet.inc";
       }
 

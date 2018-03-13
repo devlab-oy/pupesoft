@@ -31296,7 +31296,6 @@ if (!function_exists("tallenna_tiliote_viite")) {
     $virhe = 0;
     $td_perheid = 0;
     $insert_count = 0;
-    $xxtyyppi = '';
     $serc = array("{", "|", "}", "[", "\\", "]", "'");
     $repl = array("ä", "ö", "å", "Ä", "Ö" , "Å", " ");
 
@@ -31362,7 +31361,6 @@ if (!function_exists("tallenna_tiliote_viite")) {
           }
           else {
             // Kokeillaan onko kyse PPG:n factoring-aineistosta
-            $xxtyyppi = 'P';
             $uusitilino = substr($tietue, 16, 6);
             $query = "SELECT tilino
                       FROM yriti
@@ -31717,15 +31715,17 @@ if (!function_exists("tallenna_tiliote_viite")) {
       }
 
       if ($xtyyppi > 0 and $xtyyppi <= 3) {
-        $xxtyyppi = ($xxtyyppi != '') ? $xxtyyppi : $xtyyppi;
         // Kirjoitetaan tiedosto kantaan
+        if (substr($tietue, 0, 1) == 3 and $tilino != substr($tietue, 2, 14)) {
+          $tietue = substr($tietue, 0, 1).str_pad($tilino, 14, ' ').substr($tietue, 15);
+        }
         $query = "INSERT into tiliotedata set
                   yhtio    = '$yritirow[yhtio]',
                   aineisto = '$aineistorow[aineisto]',
                   tilino   = '$tilino',
                   alku     = '$alkupvm',
                   loppu    = '$loppupvm',
-                  tyyppi   = '$xxtyyppi',
+                  tyyppi   = '$xtyyppi',
                   tieto    = '$tietue'";
         $tiliotedataresult = pupe_query($query);
         $tiliote_id = mysql_insert_id($GLOBALS["masterlink"]);
@@ -31792,7 +31792,6 @@ if (!function_exists("kasittele_tiliote_viite")) {
     $tee_viitemaksu_kohdistus = false;
     $vastavienti = 0;
     $vastavienti_valuutassa = 0;
-    $tilino = '';
 
     $tilioteselailu_oikrow = tarkista_oikeus("tilioteselailu.php", "%", "", "OK");
 
@@ -31839,8 +31838,7 @@ if (!function_exists("kasittele_tiliote_viite")) {
         $tee_selvittely = true;
         require "inc/LMP.inc";
       }
-      if ($tiliotedatarow['tyyppi'] == 3 or $tiliotedatarow['tyyppi'] == 'P') {
-        if ($tiliotedatarow['tyyppi'] == 'P') $tilino = $tiliotedatarow['tilino'];
+      if ($tiliotedatarow['tyyppi'] == 3) {
         $tee_viitemaksu_kohdistus = true;
         require "inc/viitemaksut.inc";
       }

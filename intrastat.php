@@ -59,7 +59,7 @@ if ($tee == "tulosta") {
     include 'inc/pupeExcel.inc';
 
     $worksheet    = new pupeExcel();
-    $format_bold = array("bold" => TRUE);
+    $format_bold  = array("bold" => TRUE);
     $excelrivi    = 0;
   }
 
@@ -475,7 +475,6 @@ if ($tee == "tulosta") {
       }
       $excelrivi++;
     }
-
   }
   else {
     // tehd‰‰n kaunista ruutukamaa
@@ -557,7 +556,43 @@ if ($tee == "tulosta") {
   $ots .= sprintf('%-3.3s',     $yhtiorow["valkoodi"]);                                          //valuutta
   $ots .= "\r\n";
 
+  // Tehd‰‰n CSV
+  $csvrivit = "\"Tiedonantaja\";";
+  $csvrivit .= "\"Jakso\";";
+  $csvrivit .= "\"Suunta\";";
+  $csvrivit .= "\"Asiamies\";";
+  $csvrivit .= "\"CN8\";";
+  $csvrivit .= "\"Kauppa\";";
+  $csvrivit .= "\"J‰senmaa\";";
+  $csvrivit .= "\"Alkuper‰maa\";";
+  $csvrivit .= "\"Kuljetusmuoto\";";
+  $csvrivit .= "\"Nettopaino\";";
+  $csvrivit .= "\"Lis‰yksikˆt\";";
+  $csvrivit .= "\"Laskutusarvo euroissa\";";
+  $csvrivit .= "\"Tilastoarvo euroissa\";";
+  $csvrivit .= "\"Viite\"\n";
+
+  $csvotsikkotiedot = FALSE;
+
   while ($row = mysql_fetch_array($result)) {
+    if (!$csvotsikkotiedot) {
+      $csvrivit .= "\"FI{$ytunnus}{$ylisatunnus}\";";
+      $csvrivit .= "\"{$vuosi}{$kuuka}\";";
+
+      // tuonti vai vienti
+      if ($tapa == "tuonti") {
+        $csvrivit .= "\"1\";";
+      }
+      elseif ($tapa == "vienti") {
+        $csvrivit .= "\"2\";";
+      }
+
+      $csvrivit .= "\"\";";
+      $csvotsikkotiedot = TRUE;
+    }
+    else {
+      $csvrivit .= ";;;;";
+    }
 
     list($row["tuoteno"], $row["nimitys"]) = explode("!°!", $row["tuoteno_nimitys"]);
 
@@ -640,12 +675,43 @@ if ($tee == "tulosta") {
     }
 
     if ($tapa == "yhdistetty" and $outputti == 'tilasto') {
-      $nim .= sprintf('%010d',     $row["rivihinta_laskutusarvo"]);                                          //nimikkeen laskutusarvo
+      $nim .= sprintf('%010d',     $row["rivihinta_laskutusarvo"]);                  //nimikkeen laskutusarvo
     }
     else {
-      $nim .= sprintf('%010d',     $row["rivihinta"]);                                          //nimikkeen laskutusarvo
+      $nim .= sprintf('%010d',     $row["rivihinta"]);                               //nimikkeen laskutusarvo
     }
     $nim .= "\r\n";
+
+    $csvrivit .= "\"{$row["tullinimike1"]}\";";
+    $csvrivit .= "\"{$row["kauppatapahtuman_luonne"]}\";";
+
+    if ($tapa == "tuonti") {
+      $csvrivit .= "\"{$row["maalahetys"]}\";";
+    }
+    else {
+      $csvrivit .= "\"{$row["maamaara"]}\";";
+    }
+
+    $csvrivit .= "\"{$row["alkuperamaa"]}\";";
+    $csvrivit .= "\"{$row["kuljetusmuoto"]}\";";
+    $csvrivit .= "{$row["paino"]};";
+
+    if ($row["su"] != '') {
+      $csvrivit .= "{$row["kpl"]};";
+    }
+    else {
+      $csvrivit .= ";";
+    }
+
+    if ($tapa == "yhdistetty" and $outputti == 'tilasto') {
+      $csvrivit .= "{$row["rivihinta_laskutusarvo"]};";
+    }
+    else {
+      $csvrivit .= "{$row["rivihinta"]};";
+    }
+
+    $csvrivit .= ";";
+    $csvrivit .= "\"\"\n";
 
     if ($outputti == "tilasto") {
       // tehd‰‰n tilastoarvolistausta
@@ -1043,12 +1109,28 @@ if ($tee == "tulosta") {
     echo "$ulos";
   }
 
+  if ($virhe == 0) {
+    // Tallennetaan rivit tiedostoon
+    $filepath = "Intrastat_{$yhtio}_".date("Y-m-d").".csv";
+    file_put_contents("/tmp/".$filepath, $csvrivit);
+
+    echo "<form method='post' class='multisubmit'>";
+    echo "<br><table>";
+    echo "<tr><th>".t("Tallenna tullille ladattava CSV-tiedosto").":</th>";
+    echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
+    echo "<input type='hidden' name='kaunisnimi' value='Intrastat_{$yhtio}_".date("Y-m-d").".csv'>";
+    echo "<input type='hidden' name='tmpfilenimi' value='{$filepath}'>";
+    echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr>";
+    echo "</table>";
+    echo "</form>";
+  }
+
   if (isset($worksheet) and $virhe == 0) {
     // We need to explicitly close the worksheet
     $excelnimi = $worksheet->close();
 
     echo "<br><table>";
-    echo "<tr><th>".t("Tallenna tulos").":</th>";
+    echo "<tr><th>".t("Tallenna Excel").":</th>";
     echo "<form method='post' class='multisubmit'>";
     echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
     echo "<input type='hidden' name='kaunisnimi' value='Intrastat.xlsx'>";

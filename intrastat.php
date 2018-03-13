@@ -572,28 +572,20 @@ if ($tee == "tulosta") {
   $csvrivit .= "\"Tilastoarvo euroissa\";";
   $csvrivit .= "\"Viite\"\n";
 
-  $csvotsikkotiedot = FALSE;
+  $csvrivit .= "\"FI{$ytunnus}{$ylisatunnus}\";";
+  $csvrivit .= "\"{$vuosi}{$kuuka}\";";
+
+  // tuonti vai vienti
+  if ($tapa == "tuonti") {
+    $csvrivit .= "\"1\";";
+  }
+  elseif ($tapa == "vienti") {
+    $csvrivit .= "\"2\";";
+  }
+
+  $csvrivit .= "\"\"\n";
 
   while ($row = mysql_fetch_array($result)) {
-    if (!$csvotsikkotiedot) {
-      $csvrivit .= "\"FI{$ytunnus}{$ylisatunnus}\";";
-      $csvrivit .= "\"{$vuosi}{$kuuka}\";";
-
-      // tuonti vai vienti
-      if ($tapa == "tuonti") {
-        $csvrivit .= "\"1\";";
-      }
-      elseif ($tapa == "vienti") {
-        $csvrivit .= "\"2\";";
-      }
-
-      $csvrivit .= "\"\";";
-      $csvotsikkotiedot = TRUE;
-    }
-    else {
-      $csvrivit .= ";;;;";
-    }
-
     list($row["tuoteno"], $row["nimitys"]) = explode("!¡!", $row["tuoteno_nimitys"]);
 
     if ($row["paino"] < 1) $row["paino"] = 1;
@@ -682,17 +674,19 @@ if ($tee == "tulosta") {
     }
     $nim .= "\r\n";
 
+    $csvrivit .= "\"\";\"\";\"\";\"\";";
     $csvrivit .= "\"{$row["tullinimike1"]}\";";
     $csvrivit .= "\"{$row["kauppatapahtuman_luonne"]}\";";
 
     if ($tapa == "tuonti") {
       $csvrivit .= "\"{$row["maalahetys"]}\";";
+      $csvrivit .= "\"{$row["alkuperamaa"]}\";";
     }
     else {
       $csvrivit .= "\"{$row["maamaara"]}\";";
+      $csvrivit .= "\"\";";
     }
 
-    $csvrivit .= "\"{$row["alkuperamaa"]}\";";
     $csvrivit .= "\"{$row["kuljetusmuoto"]}\";";
     $csvrivit .= "{$row["paino"]};";
 

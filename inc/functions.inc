@@ -330,7 +330,7 @@ if (!function_exists("pupe_error")) {
 
       $puperror = htmlentities($puperror, ENT_IGNORE);
     }
-
+    echo nl2br($puperror);
     if ($_display == '1' or $_pupedebug !== false) {
       echo nl2br($puperror);
     }
@@ -34171,7 +34171,7 @@ if (!function_exists('tuoteperheiden_hintojen_paivitys')) {
       );
       $kertoimet = tuoteperheen_lapsien_kertoimet($_params);
       $laskettu_hinta = 0;
- 
+
       $hinnoittelu_isatuotteella = (in_array($kertoimet[0]['hintatyyppi'], array('I', 'L')));
 
       // Jos meill‰ ei ole is‰tuotteeseen perustuva hinnoitelu, ei tarvitse tehd‰ mit‰‰n,

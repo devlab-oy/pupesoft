@@ -31296,6 +31296,7 @@ if (!function_exists("tallenna_tiliote_viite")) {
     $virhe = 0;
     $td_perheid = 0;
     $insert_count = 0;
+    $onko_ppg = FALSE;
     $serc = array("{", "|", "}", "[", "\\", "]", "'");
     $repl = array("ä", "ö", "å", "Ä", "Ö" , "Å", " ");
 
@@ -31357,6 +31358,23 @@ if (!function_exists("tallenna_tiliote_viite")) {
             if (mysql_num_rows($f_result) == 1) {
               $f_row = mysql_fetch_assoc($f_result);
               $tilino = $f_row['tilino'];
+            }
+          }
+          else {
+            // Kokeillaan onko kyse PPG:n factoring-aineistosta
+            $uusitilino = substr($tietue, 16, 6);
+            $query = "SELECT tilino
+                      FROM yriti
+                      WHERE tilino = '$uusitilino'
+                      AND kaytossa = ''
+                      LIMIT 1;";
+            $fp_result = pupe_query($query);
+
+            // jos tämä epäonnistuu, virheilmoitus tulee alempana kun tilinumeroa ei löydy
+            if (mysql_num_rows($fp_result) == 1) {
+              $fp_row = mysql_fetch_assoc($fp_result);
+              $tilino = $fp_row['tilino'];
+              $onko_ppg = TRUE;
             }
           }
         }
@@ -31700,6 +31718,9 @@ if (!function_exists("tallenna_tiliote_viite")) {
 
       if ($xtyyppi > 0 and $xtyyppi <= 3) {
         // Kirjoitetaan tiedosto kantaan
+        if (substr($tietue, 0, 1) == 3 and $tilino != substr($tietue, 2, 14) and $onko_ppg) {
+          $tietue = substr($tietue, 0, 1).str_pad($tilino, 14, ' ').substr($tietue, 15);
+        }
         $query = "INSERT into tiliotedata set
                   yhtio    = '$yritirow[yhtio]',
                   aineisto = '$aineistorow[aineisto]',

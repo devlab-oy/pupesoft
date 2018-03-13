@@ -129,27 +129,27 @@ if (isset($aja_raportti) and !empty($vva) and !empty($kka) and !empty($ppa) and 
   echo "</td></tr>";
 
   echo "<tr><td class='ptop back'>";
-  piirra_taulukko(hae_data('tuotteet', $limitit, $rajaukset, $asumvalinta), hae_data('tuotteet', $limitit, $rajaukset, $asumvalinta, "ED"));
+  piirra_taulukko(hae_data('tuotteet', $limitit, $rajaukset, $asumvalinta));
   echo "</td>";
 
   echo "<td class='ptop back'>";
-  piirra_taulukko(hae_data('asiakkaat', $limitit, $rajaukset, $asumvalinta), hae_data('tuotteet', $limitit, $rajaukset, $asumvalinta, "ED"));
+  piirra_taulukko(hae_data('asiakkaat', $limitit, $rajaukset, $asumvalinta));
   echo "</td>";
 
   echo "<tr><td class='ptop back'>";
-  piirra_taulukko(hae_data('asiakasmyyjat', $limitit, $rajaukset, $asumvalinta), hae_data('tuotteet', $limitit, $rajaukset, $asumvalinta, "ED"));
+  piirra_taulukko(hae_data('asiakasmyyjat', $limitit, $rajaukset, $asumvalinta));
   echo "</td>";
 
   echo "<td class='ptop back'>";
-  piirra_taulukko(hae_data('asiakasryhmat', $limitit, $rajaukset, $asumvalinta), hae_data('tuotteet', $limitit, $rajaukset, $asumvalinta, "ED"));
+  piirra_taulukko(hae_data('asiakasryhmat', $limitit, $rajaukset, $asumvalinta));
   echo "</td>";
 
   echo "<tr><td class='ptop back'>";
-  piirra_taulukko(hae_data('asiakasosastot', $limitit, $rajaukset, $asumvalinta), hae_data('tuotteet', $limitit, $rajaukset, $asumvalinta, "ED"));
+  piirra_taulukko(hae_data('asiakasosastot', $limitit, $rajaukset, $asumvalinta));
   echo "</td>";
 
   echo "<td class='ptop back'>";
-  piirra_taulukko(hae_data('tuotemerkit', $limitit, $rajaukset, $asumvalinta), hae_data('tuotteet', $limitit, $rajaukset, $asumvalinta, "ED"));
+  piirra_taulukko(hae_data('tuotemerkit', $limitit, $rajaukset, $asumvalinta));
   echo "</td></tr></table>";
 }
 
@@ -195,36 +195,26 @@ function hae_rajauksen_paivamaarat($pvmvalinta) {
   return $paivamaarat;
 }
 
-function piirra_taulukko($data, $eddata = array()) {
+function piirra_taulukko($data) {
   global $yhtiorow;
 
   $jarjestys = 1;
-  $indeksi = "";
-  $yhteensa = "";
-
-  if (!empty($eddata)) {
-    $indeksi = "<th>".t('Indeksi')."</th>";
-    $yhteensa = "<td class='tumma' align='right'>".hintapyoristys($data['yhteensa'] / $eddata['yhteensa'], $yhtiorow['hintapyoristys'])."</td>";
-  }
 
   echo "<table style='width: 100%;'>";
-  echo "<tr><th>#</th><th>".t($data['otsikko'])."</th><th>".t('Laskutus')."</th>{$indeksi}</tr>";
+  echo "<tr><th>#</th><th>".t($data['otsikko'])."</th><th>".t('Laskutus')."</th><th>".t('Indeksi')."</th></tr>";
 
   foreach ($data['rivit'] as $row) {
     echo "<tr>";
     echo "<td>{$jarjestys}</td>";
     echo "<td>{$row['nimi']}</td>";
     echo "<td align='right'>".hintapyoristys($row['myyntinyt'], $yhtiorow['hintapyoristys'])."</td>";
-
-    if (!empty($eddata)) {
-      echo "<td align='right'>".hintapyoristys($row['myyntinyt'] / $eddata['rivit'][$jarjestys-1]['myyntinyt'], $yhtiorow['hintapyoristys'])."</td>";
-    }
-
+    echo "<td align='right'>".hintapyoristys($row['myyntinyt'] / $row['edmyyntinyt'], $yhtiorow['hintapyoristys'])."</td>";
     echo "</tr>";
 
     $jarjestys++;
   }
 
+  $yhteensa = "<td class='tumma' align='right'>".hintapyoristys($data['yhteensa'] / $data['edyhteensa'], $yhtiorow['hintapyoristys'])."</td>";
   echo "<tr><td class='tumma' colspan='2'>".t('Yhteensä')."</td><td class='tumma' align='right'>".hintapyoristys($data['yhteensa'], $yhtiorow['hintapyoristys'])."</td>{$yhteensa}</tr>";
   echo "</table>";
 }
@@ -234,17 +224,8 @@ function palautaYhteinenOsa($array, $occurance = 3) {
   return implode(" ",array_keys(array_filter(array_count_values($array),function($var)use($occurance) {return $var > $occurance ;})));
 }
 
-function hae_data($tyyppi, $limitit, $rajaukset, $asumvalinta, $edkausi = "") {
+function hae_data($tyyppi, $limitit, $rajaukset, $asumvalinta) {
   global $kukarow, $yhtiorow, $alkupvm, $loppupvm, $edalkupvm, $edloppupvm;
-
-  if ($edkausi == "ED") {
-    $_alkupvm = $edalkupvm;
-    $_loppupvm = $edloppupvm;
-  }
-  else {
-    $_alkupvm = $alkupvm;
-    $_loppupvm = $loppupvm;
-  }
 
   $tuoterajaus = '';
   $ryhmarajaus = '';
@@ -333,8 +314,8 @@ function hae_data($tyyppi, $limitit, $rajaukset, $asumvalinta, $edkausi = "") {
     $kukaleftjoin = "";
     $ryhmaleftjoin = "LEFT JOIN avainsana AS ryhma ON
                         (ryhma.yhtio = lasku.yhtio
-                        AND ryhma.laji        = 'ASIAKASRYHMA'
-                        AND ryhma.selite      = asiakas.ryhma)";
+                        AND ryhma.laji = 'ASIAKASRYHMA'
+                        AND ryhma.selite = asiakas.ryhma)";
     $osastoleftjoin = "";
     $tuotemerkkileftjoin = "";
     break;
@@ -380,8 +361,10 @@ function hae_data($tyyppi, $limitit, $rajaukset, $asumvalinta, $edkausi = "") {
   }
 
   $query = "SELECT {$nimikentta} nimi,
-            sum(if(tilausrivi.laskutettuaika >= '{$_alkupvm}' and tilausrivi.laskutettuaika <= '{$_loppupvm}', tilausrivi.rivihinta, 0)) myyntinyt,
-            sum(if(tilausrivi.laskutettuaika >= '{$_alkupvm}' and tilausrivi.laskutettuaika <= '{$_loppupvm}', tilausrivi.kpl, 0)) myykplnyt
+            sum(if(tilausrivi.laskutettuaika >= '{$alkupvm}' and tilausrivi.laskutettuaika <= '{$loppupvm}', tilausrivi.rivihinta, 0)) myyntinyt,
+            sum(if(tilausrivi.laskutettuaika >= '{$alkupvm}' and tilausrivi.laskutettuaika <= '{$loppupvm}', tilausrivi.kpl, 0)) myykplnyt,
+            sum(if(tilausrivi.laskutettuaika >= '{$edalkupvm}' and tilausrivi.laskutettuaika <= '{$edloppupvm}', tilausrivi.rivihinta, 0)) edmyyntinyt,
+            sum(if(tilausrivi.laskutettuaika >= '{$edalkupvm}' and tilausrivi.laskutettuaika <= '{$edloppupvm}', tilausrivi.kpl, 0)) edmyykplnyt
             FROM lasku use index (yhtio_tila_tapvm)
             JOIN yhtio ON (yhtio.yhtio = lasku.yhtio)
             JOIN tilausrivi use index (uusiotunnus_index) ON (tilausrivi.yhtio = lasku.yhtio
@@ -405,13 +388,14 @@ function hae_data($tyyppi, $limitit, $rajaukset, $asumvalinta, $edkausi = "") {
             WHERE lasku.yhtio              = '{$kukarow['yhtio']}'
             AND lasku.tila                 = 'U'
             AND lasku.alatila              = 'X'
-            AND lasku.tapvm                >= '{$_alkupvm}'
-            AND lasku.tapvm                <= '{$_loppupvm}'
+            AND lasku.tapvm                >= '{$edalkupvm}'
+            AND lasku.tapvm                <= '{$loppupvm}'
             GROUP BY {$grouppauskentta}
             ORDER BY myyntinyt DESC
             {$limitti}";
   $result = pupe_query($query);
   $summayhteensa = 0;
+  $edsummayhteensa = 0;
 
   // Haetaan rivit
   while ($row = mysql_fetch_assoc($result)) {
@@ -429,9 +413,11 @@ function hae_data($tyyppi, $limitit, $rajaukset, $asumvalinta, $edkausi = "") {
 
     $haettu_data['rivit'][] = $row;
     $summayhteensa += $row['myyntinyt'];
+    $edsummayhteensa += $row['edmyyntinyt'];
   }
 
   $haettu_data['yhteensa'] = $summayhteensa;
+  $haettu_data['edyhteensa'] = $edsummayhteensa;
 
   return $haettu_data;
 }

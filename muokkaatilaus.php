@@ -2892,6 +2892,9 @@ if (mysql_num_rows($result) != 0) {
 
           echo "<td class='$class' valign='top' NOWRAP>".$row[$fieldname]." <div style='float: right;'><img src='pics/lullacons/$img' class='info' $linkkilisa onclick=\"window.open('{$palvelin2}crm/asiakasmemo.php?tee=NAYTA&liitostunnus=$row[liitostunnus]&tunnusnippu=$row[tunnusnippu]&from=muokkaatilaus.php');\"> $nums</div></td>";
         }
+        elseif ($fieldname == 'astilno') {
+          echo "<td class='$class' align='left' valign='top'>".$row[$fieldname]."</td>";
+        }
         elseif (is_numeric($row[$fieldname])) {
           echo "<td class='$class' align='right' valign='top'>".$row[$fieldname]."</td>";
         }

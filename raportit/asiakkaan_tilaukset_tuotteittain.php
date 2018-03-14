@@ -245,6 +245,8 @@ if ($ytunnus != '' or $tuoteno != '' or (int) $asiakasid > 0 or (int) $toimittaj
     $query = "SELECT distinct
               tilausrivi.tunnus,
               tilausrivi.otunnus tilaus,
+              lasku.viesti viite,
+              lasku.asiakkaan_tilausnumero astilno,
               lasku.laskunro,
               $asiakaslisa
               tilausrivi.tuoteno,
@@ -573,16 +575,16 @@ if ($ytunnus != '' or $tuoteno != '' or (int) $asiakasid > 0 or (int) $toimittaj
     }
     else {
       if ($asiakaslisa != "") {
-        $csp = 6;
+        $csp = 8;
       }
       else {
-        $csp = 3;
+        $csp = 5;
       }
     }
 
-    $csp2 = 2;
+    $csp2 = 3;
 
-    $loopattava_maara = $toim == 'OSTO' ? 1 : $yhtiorow['myynnin_alekentat'];
+    $loopattava_maara = $toim == 'OSTO' ? 2 : $yhtiorow['myynnin_alekentat'];
 
     for ($alepostfix = 1; $alepostfix <= $loopattava_maara; $alepostfix++) {
       if ($alepostfix > 1) {

@@ -163,8 +163,14 @@ if (!function_exists("tulosta_lavakeraystarrat_tec")) {
 
     $tarrat .= chr(12);
 
-    $tarrat = escapeshellarg($tarrat);
-    $line = exec(" echo \"$tarrat\" | $komento");
+    // Kirjoitetaan temppifileen
+    $filenimi = "/tmp/lavatarrat_".md5(uniqid(mt_rand(), true)).".txt";
+
+    file_put_contents($filenimi, $tarrat);
+
+    $line = exec("$komento $filenimi");
+    system("rm -f $filenimi");
+
     echo t("Lavakeräystarrat tulostuu")."...<br>";
     #echo "<pre>$tarrat</pre><br><br>";
   }

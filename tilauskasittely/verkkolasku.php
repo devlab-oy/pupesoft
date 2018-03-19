@@ -3372,7 +3372,7 @@ else {
           $nattinimi = "/tmp/Invoice_{$kukarow['yhtio']}_{$lasku}.pdf";
           rename($lasku_ulkvar_file, $nattinimi);
 
-          $palautus = logmaster_send_file($nattinimi);
+          $palautus = logmaster_send_file($nattinimi, TRUE);
         }
       }
     }

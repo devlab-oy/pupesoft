@@ -67,7 +67,7 @@ if (!function_exists('logmaster_send_file')) {
 
     $ftpfile = realpath($filename);
 
-    require "inc/sftp-send.inc";
+    require "inc/ftp-send.inc";
 
     return $palautus;
   }

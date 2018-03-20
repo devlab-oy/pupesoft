@@ -5221,21 +5221,9 @@ if ($tee == '') {
     }
 
     //Lis‰t‰‰n tuote tiettyyn tuoteperheeseen/reseptiin
-    if ($tila == "LISAARESEPTIIN" and $teeperhe == "OK") {
+    if (($tila == "LISAARESEPTIIN" or $tila == "LISAAKERTARESEPTIIN") and $teeperhe == "OK") {
       $query = "UPDATE tilausrivi
-                SET perheid2 = '$isatunnus'
-                WHERE yhtio = '$kukarow[yhtio]'
-                and tunnus  = '$isatunnus'";
-      $presult = pupe_query($query);
-      $perheid2 = $isatunnus;
-    }
-
-    //Lis‰t‰‰n tuote tiettyyn tuoteperheeseen/reseptiin
-    if ($tila == "LISAAKERTARESEPTIIN" and $teeperhe == "OK") {
-
-      $query = "UPDATE tilausrivi
-                SET
-                perheid     = '$isatunnus'
+                SET perheid = '$isatunnus'
                 WHERE yhtio = '$kukarow[yhtio]'
                 and tunnus  = '$isatunnus'";
       $presult = pupe_query($query);
@@ -5244,17 +5232,6 @@ if ($tee == '') {
 
     //Lis‰t‰‰n tuote tiettyyn tuoteperheeseen/reseptiin
     if ($tila == "LISAAISAKERTARESEPTIIN") {
-      if ($teeperhe == "OK") {
-
-        $query = "UPDATE tilausrivi
-                  SET
-                  perheid     = '$isatunnus'
-                  WHERE yhtio = '$kukarow[yhtio]'
-                  and tunnus  = '$isatunnus'";
-        $presult = pupe_query($query);
-        $perheid = $isatunnus;
-      }
-
       // useamman valmisteen reseptit...
       $perheid2 = -100;
     }

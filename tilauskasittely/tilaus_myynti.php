@@ -7224,6 +7224,8 @@ if ($tee == '') {
         }
       }
 
+      $rivikappaleetyht = 0;
+
       foreach ($rows as $row) {
         if ($toim == "VALMISTAVARASTOON" and $yhtiorow["kehahinta_valmistuksella"] == "K"
           and $row["tyyppi"] != "V" and isset($tuotteenpainotettukehayht["keha"])) {
@@ -7314,6 +7316,7 @@ if ($tee == '') {
           $kplmaara *
           generoi_alekentta_php($row, 'M', 'kerto', 'ei_erikoisale');
 
+        $rivikappaleetyht += $kplmaara;
         $kotisumma  = $row["kotihinta"] * ($row["varattu"] + $row["jt"]) * generoi_alekentta_php($row, 'M', 'kerto', 'ei_erikoisale');
 
         // T‰n rivin alviton rivihinta
@@ -9447,7 +9450,7 @@ if ($tee == '') {
 
         if ($toim != 'SIIRTOLISTA') {
 
-          if ($kukarow['extranet'] == '' and in_array($toim, array('RIVISYOTTO', 'PIKATILAUS', 'TARJOUS')) and in_array($yhtiorow['tilaukselle_mittatiedot'], array('M', 'A'))) {
+          if ($kukarow['extranet'] == '' and in_array($toim, array('RIVISYOTTO', 'PIKATILAUS', 'TARJOUS')) and in_array($yhtiorow['tilaukselle_mittatiedot'], array('M', 'A', 'K'))) {
 
             if ($yhtiorow['tilaukselle_mittatiedot'] == 'A') {
               echo "<tr>$jarjlisa
@@ -9456,20 +9459,28 @@ if ($tee == '') {
                   <td class='spec' colspan='3' align='center'>{$asiakasrow['osasto']}</td>";
             }
 
-            echo "<tr>$jarjlisa
-                <td class='back' colspan='".($sarakkeet_alku-5)."'>&nbsp;</td>
-                <th colspan='5' align='right'>".t("Tilauksen kokonaispaino").":</th>
-                <td class='spec' align='right'>".sprintf("%.2f", $tilauksen_tuotemassa)."</td>";
-            echo "<td></td>";
-            echo "<td class='spec'>KG</td>";
-            echo "</tr>";
-            echo "<tr>$jarjlisa
-                <td class='back' colspan='".($sarakkeet_alku-5)."'>&nbsp;</td>
-                <th colspan='5' align='right'>".t("Tilauksen kokonaistilavuus").":</th>
-                <td class='spec' align='right'>".sprintf("%.2f", $tilauksen_tuotetilavuus)."</td>";
-            echo "<td></td>";
-            echo "<td class='spec'>M3</td>";
-            echo "</tr>";
+            if ($yhtiorow['tilaukselle_mittatiedot'] == 'K') {
+              echo "<tr>$jarjlisa
+                  <td class='back' colspan='".($sarakkeet_alku-5)."'>&nbsp;</td>
+                  <th colspan='5' align='right'>".t("Kappalem‰‰r‰t").":</th>
+                  <td class='spec' colspan='3' align='center'>{$rivikappaleetyht}</td>";
+            }
+            else {
+              echo "<tr>$jarjlisa
+                  <td class='back' colspan='".($sarakkeet_alku-5)."'>&nbsp;</td>
+                  <th colspan='5' align='right'>".t("Tilauksen kokonaispaino").":</th>
+                  <td class='spec' align='right'>".sprintf("%.2f", $tilauksen_tuotemassa)."</td>";
+              echo "<td></td>";
+              echo "<td class='spec'>KG</td>";
+              echo "</tr>";
+              echo "<tr>$jarjlisa
+                  <td class='back' colspan='".($sarakkeet_alku-5)."'>&nbsp;</td>
+                  <th colspan='5' align='right'>".t("Tilauksen kokonaistilavuus").":</th>
+                  <td class='spec' align='right'>".sprintf("%.2f", $tilauksen_tuotetilavuus)."</td>";
+              echo "<td></td>";
+              echo "<td class='spec'>M3</td>";
+              echo "</tr>";
+            }
           }
 
           if ($kukarow["extranet"] == "" and $arvo_ulkomaa != 0) {

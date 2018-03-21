@@ -112,13 +112,16 @@ if ($php_cli or (isset($ajo_tee) and ($ajo_tee == "NAYTA" or $ajo_tee == "NAYTAP
              tuote.luontiaika,
              tuote.vihapvm,
              tuote.sarjanumeroseuranta,
-             sum(tuotepaikat.saldo) saldo
+             sum(tuotepaikat.saldo) saldo,
+             varastopaikat.epakurantointi
              FROM tuote
              JOIN tuotepaikat ON (tuotepaikat.yhtio = tuote.yhtio AND tuotepaikat.tuoteno = tuote.tuoteno)
+             JOIN varastopaikat ON (varastopaikat.yhtio = tuote.yhtio AND varastopaikat.tunnus = tuotepaikat.varasto)
              WHERE tuote.yhtio             = '$kukarow[yhtio]'
              AND tuote.ei_saldoa           = ''
              AND tuote.epakurantti100pvm   = '0000-00-00'
              AND tuote.sarjanumeroseuranta NOT IN ('S','G')
+             AND varastopaikat.epakurantointi = ''
              GROUP BY 1,2,3,4,5,6,7,8,9,10
              HAVING saldo > 0
              ORDER BY tuoteno";
@@ -197,14 +200,16 @@ if ($php_cli or (isset($ajo_tee) and ($ajo_tee == "NAYTA" or $ajo_tee == "NAYTAP
 
       // Haetaan tuotteen viimeisin tulo
       // Eliminoidaan konversioiden alkusaldot ja kehahin muutokset selitteellä (epakurantti.inc ~664)
-      $query  = "SELECT laadittu
+      $query  = "SELECT tapahtuma.laadittu
                  FROM tapahtuma
-                 WHERE yhtio = '$kukarow[yhtio]'
-                 AND laji    in ('tulo', 'valmistus')
-                 AND tuoteno = '$epakurantti_row[tuoteno]'
-                 AND selite  not like '%alkusaldo%'
-                 AND selite  not like 'Keskihankintahinnan muutos:%'
-                 AND selite  not like '{$_vaihda_kehahin_selite}:%'
+                 JOIN varastopaikat ON (varastopaikat.yhtio = tapahtuma.yhtio AND varastopaikat.tunnus = tapahtuma.varasto)
+                 WHERE tapahtuma.yhtio = '$kukarow[yhtio]'
+                 AND tapahtuma.laji    in ('tulo', 'valmistus')
+                 AND tapahtuma.tuoteno = '$epakurantti_row[tuoteno]'
+                 AND tapahtuma.selite  not like '%alkusaldo%'
+                 AND tapahtuma.selite  not like 'Keskihankintahinnan muutos:%'
+                 AND tapahtuma.selite  not like '{$_vaihda_kehahin_selite}:%'
+                 AND varastopaikat.epakurantointi = ''
                  ORDER BY laadittu DESC
                  LIMIT 1";
       $tapres = pupe_query($query);
@@ -233,13 +238,15 @@ if ($php_cli or (isset($ajo_tee) and ($ajo_tee == "NAYTA" or $ajo_tee == "NAYTAP
 
       // Haetaan tuotteen viimeisin laskutus (ei huomioida hyvityksiä)
       // Ei myöskään huomioida fuusioissa muodostuneita tapahtumia (rivitunnus 0 tai -1)
-      $query  = "SELECT laadittu
+      $query  = "SELECT tapahtuma.laadittu
                  FROM tapahtuma
-                 WHERE yhtio    = '$kukarow[yhtio]'
-                 AND laji       in ('laskutus', 'kulutus')
-                 AND tuoteno    = '$epakurantti_row[tuoteno]'
-                 AND kpl        < 0
-                 AND rivitunnus not in (0, -1)
+                 JOIN varastopaikat ON (varastopaikat.yhtio = tapahtuma.yhtio AND varastopaikat.tunnus = tapahtuma.varasto)
+                 WHERE tapahtuma.yhtio    = '$kukarow[yhtio]'
+                 AND tapahtuma.laji       in ('laskutus', 'kulutus')
+                 AND tapahtuma.tuoteno    = '$epakurantti_row[tuoteno]'
+                 AND tapahtuma.kpl        < 0
+                 AND tapahtuma.rivitunnus not in (0, -1)
+                 AND varastopaikat.epakurantointi = ''
                  ORDER BY laadittu DESC
                  LIMIT 1;";
       $tapres = pupe_query($query);

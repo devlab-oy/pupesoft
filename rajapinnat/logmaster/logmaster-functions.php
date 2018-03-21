@@ -51,7 +51,7 @@ if (!function_exists('logmaster_send_email')) {
 }
 
 if (!function_exists('logmaster_send_file')) {
-  function logmaster_send_file($filename, $sftp = FALSE) {
+  function logmaster_send_file($filename, $binary = FALSE) {
     global $kukarow, $yhtiorow, $logmaster;
 
     // L‰hetet‰‰n aina UTF-8 muodossa
@@ -65,14 +65,11 @@ if (!function_exists('logmaster_send_file')) {
     $ftppass = $logmaster['pass'];
     $ftppath = $logmaster['path'];
 
+    $ftpbinary = $binary;
+
     $ftpfile = realpath($filename);
 
-    if ($sftp) {
-      require "inc/sftp-send.inc";
-    }
-    else {
-      require "inc/ftp-send.inc";
-    }
+    require "inc/ftp-send.inc";
 
     return $palautus;
   }

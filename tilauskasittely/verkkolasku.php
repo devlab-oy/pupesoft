@@ -3373,6 +3373,13 @@ else {
           rename($lasku_ulkvar_file, $nattinimi);
 
           $palautus = logmaster_send_file($nattinimi, TRUE);
+
+          if ($palautus == "") {
+            pupesoft_log('logmaster_outbound_delivery', "Siirretiin lasku {$nattinimi} onnistuneesti.");
+          }
+          else {
+            pupesoft_log('logmaster_outbound_delivery', "Laskun {$nattinimi} siirto epäonnistui.");
+          }
         }
       }
     }

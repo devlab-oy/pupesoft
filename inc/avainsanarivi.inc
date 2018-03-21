@@ -336,6 +336,7 @@ if (mysql_field_name($result, $i) == "laji") {
   if ($lukitse_laji== "" or $lukitse_laji == "KUITIN_VAKTEXT") $ulos .= "<option value='KUITIN_VAKTEXT' {$avain_sel['KUITIN_VAKTEXT']}>".t("Kuitin vakioteksti")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "STCK_LST_FLTR") $ulos .= "<option value='STCK_LST_FLTR' {$avain_sel['STCK_LST_FLTR']}>".t("Varastosaldoraportin rajaus")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "PIIRI_ALENNUS") $ulos .= "<option value='PIIRI_ALENNUS' {$avain_sel['PIIRI_ALENNUS']}>".t("Piiriin sidottu hinnoittelu")."</option>";
+  if ($lukitse_laji== "" or $lukitse_laji == "MESSENGER_RYHMA") $ulos .= "<option value='MESSENGER_RYHMA' {$avain_sel['MESSENGER_RYHMA']}>".t("Messenger k‰ytt‰j‰ryhm‰")."</option>";
   if ($lukitse_laji== "") $ulos .= "</optgroup>";
 
   if ($lukitse_laji== "") $ulos .= "<optgroup label='".t("Verkkokaupan avainsanat")."'>";
@@ -1630,6 +1631,31 @@ if ($avain_sel['PS_ALA_TRY'] == "SELECTED" and $_selitetark_2) {
   $ulos  = "<th>" . t("Nimitys") . "</th>
             <td><input type='text' size='35' value='{$trow[$i]}' name='{$nimi}'></td>";
   $jatko = 0;
+}
+
+if ($avain_sel['MESSENGER_RYHMA'] == 'SELECTED') {
+
+  if ($_selitetark) {
+    $ulos = "<td><select name = '$nimi'>";
+    $ulos .= "<option value=''>".t('Valitse k‰ytt‰j‰ ryhm‰‰n')."</option>";
+    $query = "SELECT *
+              FROM kuka
+              WHERE yhtio    = '{$kukarow['yhtio']}'
+              AND aktiivinen = 1
+              AND extranet   = ''
+              ORDER BY nimi";
+    $kayttajaresult = pupe_query($query);
+
+    while ($kaytrow = mysql_fetch_assoc($kayttajaresult)) {
+      $sel = '';
+      if ($trow[$i] == $kaytrow['kuka']) {
+        $sel = 'selected';
+      }
+      $ulos .= "<option value='{$kaytrow['kuka']}' $sel>{$kaytrow['nimi']} ({$kaytrow['kuka']})</option>";
+    }
+    $ulos .= "</select></td>";
+    $jatko = 0;
+  }
 }
 
 // Unifaun l‰hett‰j‰n viite

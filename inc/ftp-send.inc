@@ -39,6 +39,7 @@ $palautus_pyynto = isset($palautus_pyynto) ? trim($palautus_pyynto) : "";
 $filenimi        = basename($ftpfile);
 $ftptmpr         = isset($ftptmpr) ? $ftptmpr : true;
 $ftputf8         = isset($ftputf8) ? $ftputf8 : false;
+$ftpbinary       = isset($ftpbinary) ? $ftpbinary : false;
 
 // Lähetetään oletuksena ISO-8859-15 merkistömuodossa
 if (PUPE_UNICODE and $ftputf8 === false) {
@@ -117,14 +118,20 @@ else {
       $ftpfile_tmp = $filenimi;
     }
 
+    $ftpmode = FTP_ASCII;
+
+    if ($ftpbinary) {
+      $ftpmode = FTP_BINARY;
+    }
+
     // Kokeillaan passiivista siirtoa
     ftp_pasv($conn_id, TRUE);
-    $upload = @ftp_put($conn_id, $ftppath.$ftpfile_tmp, realpath($ftpfile), FTP_ASCII);
+    $upload = @ftp_put($conn_id, $ftppath.$ftpfile_tmp, realpath($ftpfile), $ftpmode);
 
     // Kokeillaan aktiivista siirtoa jos passiivi feilaa
     if ($upload === FALSE) {
       ftp_pasv($conn_id, FALSE);
-      $upload = ftp_put($conn_id, $ftppath.$ftpfile_tmp, realpath($ftpfile), FTP_ASCII);
+      $upload = ftp_put($conn_id, $ftppath.$ftpfile_tmp, realpath($ftpfile), $ftpmode);
     }
 
     if ($ftptmpr) {

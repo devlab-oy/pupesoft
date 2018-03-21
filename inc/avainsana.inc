@@ -52,3 +52,6 @@ $mysqlaliasarray['ASIAKASHINNASTO']['selite']         = "Käytetäänkö myyntihinna
 
 $mysqlaliasarray['TOIMTAPAVKN']['selite']           = "Toimitustavan nimi Pupesoftissa";
 $mysqlaliasarray['TOIMTAPAVKN']['selitetark']       = "Toimitustavan nimi verkkokaupassa";
+
+$mysqlaliasarray['MESSENGER_RYHMA']['selite']       = "Ryhmän nimi";
+$mysqlaliasarray['MESSENGER_RYHMA']['selitetark']   = "Käyttäjät";

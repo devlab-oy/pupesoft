@@ -87,6 +87,14 @@ elseif ($palautus != "" and isset($ftpfail) and $ftpfail != "") {
   rename($ftpfile, $ftpfail."/".$filenimi);
 }
 
+// logia talteen
+if ($palautus == "") {
+  pupesoft_log('sftp_send', "Tiedoston '{$ftpfile}' l‰hetys palvelimelle '{$ftphost}' onnistui");
+}
+else {
+  pupesoft_log('sftp_send', "Tiedoston '{$ftpfile}' l‰hetys palvelimelle '{$ftphost}' ep‰onnistui: {$palautus}");
+}
+
 // jos siirto ep‰onnistuu ja faildirri ei oo setattu nin l‰hetet‰‰n maili
 // jos faildirri ON setattu niin ei ekoteta eik‰ meilata mitt‰‰n
 if ($palautus != "" and (!isset($ftpfail) or $ftpfail == "")) {

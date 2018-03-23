@@ -31,4 +31,6 @@ else {
     asiakaskommentti.kommentti";
 }
 
+$hakukentat = 'tunnus, ytunnus, tuoteno, kommentti';
+  
 $jarjestys = 'ytunnus, tuoteno';

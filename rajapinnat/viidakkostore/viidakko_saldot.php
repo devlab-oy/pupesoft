@@ -26,7 +26,7 @@ class ViidakkoStoreSaldot {
       $url = $this->apiurl."/api/v1/stock/".$product_row["tuoteno"];
 
       $data_json = json_encode(array("enabled" => true,
-                                     "quantity" => $product_row['saldo']));
+                                     "stock" => $product_row['stock']));
 
       $ch = curl_init($url);
       curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PATCH');

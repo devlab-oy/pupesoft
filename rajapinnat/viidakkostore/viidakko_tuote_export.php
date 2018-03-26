@@ -99,11 +99,23 @@ if (!isset($viidakko_debug)) {
 
 viidakko_echo("Aloitetaan ViidakkoStore-päivitys.");
 
+if (viidakko_ajetaanko_sykronointi('tuotteet', $synkronoi)) {
+  $tyyppi = "viidakko_tuotteet";
+  $kaikki_tuotteet = viidakko_hae_tuotteet();
+
+  viidakko_echo("Siirretään tuotteet.");
+  $viidakko_products = new ViidakkoStoreTuotteet($viidakko_url, $viidakko_username, $viidakko_api_key, $tyyppi);
+
+  $viidakko_products->set_all_products($kaikki_tuotteet);
+  $viidakko_products->check_products();
+}
+
 if (viidakko_ajetaanko_sykronointi('saldot', $synkronoi)) {
-  $kaikki_tuotteet = viidakko_hae_paivitettavat_saldot();
+  $tyyppi = "viidakko_saldot";
+  $kaikki_tuotteet = viidakko_hae_tuotteet($tyyppi);
 
   viidakko_echo("Siirretään saldot.");
-  $viidakko_stocks = new ViidakkoStoreSaldot($viidakko_url, $viidakko_username, $viidakko_api_key, 'viidakko_saldot');
+  $viidakko_stocks = new ViidakkoStoreSaldot($viidakko_url, $viidakko_username, $viidakko_api_key, $tyyppi);
 
   $viidakko_stocks->set_all_products($kaikki_tuotteet);
   $viidakko_stocks->update_stock();

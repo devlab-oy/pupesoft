@@ -1,6 +1,6 @@
 <?php
 
-function viidakko_hae_paivitettavat_saldot() {
+function viidakko_hae_tuotteet($tyyppi = "viidakko_tuotteet") {
   global $kukarow, $yhtiorow, $viidakko_varastot, $ajetaanko_kaikki;
 
   viidakko_echo("Haetaan kaikki tuotteet ja varastosaldot.");
@@ -17,20 +17,26 @@ function viidakko_hae_paivitettavat_saldot() {
   $row = mysql_fetch_assoc($result);
   $aloitusaika = $row['aika'];
 
-  // Haetaan aika jolloin tämä skripti on viimeksi ajettu
-  $datetime_checkpoint = cron_aikaleima("MYCF_SALDO_CRON");
+  if ($tyyppi == "viidakko_saldot") {
+    $datetime_checkpoint = cron_aikaleima("VIID_SALDO_CRON");
+  }
+  else {
+    $datetime_checkpoint = cron_aikaleima("VIID_TUOTE_CRON");
+  }
 
-  pupesoft_log("viidakko_saldot", "Aloitetaan saldopäivitys {$aloitusaika}");
+  pupesoft_log($tyyppi, "Aloitetaan tuotehaku {$aloitusaika}");
 
   if ($datetime_checkpoint != "" and $ajetaanko_kaikki == "NO") {
-    pupesoft_log("viidakko_saldot", "Haetaan {$datetime_checkpoint} jälkeen muuttuneet");
+    pupesoft_log($tyyppi, "Haetaan {$datetime_checkpoint} jälkeen muuttuneet");
 
     $muutoslisa1 = "AND tapahtuma.laadittu  >= '{$datetime_checkpoint}'";
     $muutoslisa2 = "AND tilausrivi.laadittu >= '{$datetime_checkpoint}'";
     $muutoslisa3 = "AND tuote.muutospvm     >= '{$datetime_checkpoint}'";
 
-    // Haetaan saldot tuotteille, joille on tehty tunnin sisällä tilausrivi tai tapahtuma
-    $query =  "(SELECT tuote.tuoteno, tuote.ei_saldoa, tuote.status
+    // Haetaan tuotteet, joille on tehty tunnin sisällä tilausrivi tai tapahtuma
+    $query =  "(SELECT
+                tuote.tuoteno,
+                tuote.eankoodi
                 FROM tapahtuma
                 JOIN tuote ON (tuote.yhtio = tapahtuma.yhtio
                   AND tuote.tuoteno = tapahtuma.tuoteno
@@ -40,7 +46,9 @@ function viidakko_hae_paivitettavat_saldot() {
 
                 UNION
 
-                (SELECT tuote.tuoteno, tuote.ei_saldoa, tuote.status
+                (SELECT
+                tuote.tuoteno,
+                tuote.eankoodi
                 FROM tilausrivi
                 JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio
                   AND tuote.tuoteno = tilausrivi.tuoteno
@@ -50,7 +58,9 @@ function viidakko_hae_paivitettavat_saldot() {
 
                 UNION
 
-                (SELECT tuote.tuoteno, tuote.ei_saldoa, tuote.status
+                (SELECT
+                tuote.tuoteno,
+                tuote.eankoodi
                 FROM tuote
                 WHERE tuote.yhtio = '{$kukarow["yhtio"]}'
                 {$tuoterajaus}
@@ -59,7 +69,9 @@ function viidakko_hae_paivitettavat_saldot() {
                 ORDER BY 1";
   }
   else {
-    $query = "SELECT tuote.tuoteno, tuote.ei_saldoa, tuote.status
+    $query = "SELECT
+              tuote.tuoteno,
+              tuote.eankoodi
               FROM tuote
               WHERE tuote.yhtio = '{$kukarow['yhtio']}'
               {$tuoterajaus}";
@@ -67,23 +79,103 @@ function viidakko_hae_paivitettavat_saldot() {
 
   $res = pupe_query($query);
 
+  if ($tyyppi == "viidakko_saldot") {
+    cron_aikaleima("VIID_SALDO_CRON", $aloitusaika);
+  }
+  else {
+    cron_aikaleima("VIID_TUOTE_CRON", $aloitusaika);
+  }
+
   $tuotteet = array();
 
   while ($row = mysql_fetch_array($res)) {
     $tuoteno = $row['tuoteno'];
 
-    // normituote
-    list(, , $myytavissa) = saldo_myytavissa($tuoteno, '', $viidakko_varastot);
+    if ($tyyppi == "viidakko_saldot") {
+      // normituote
+      list(, , $myytavissa) = saldo_myytavissa($tuoteno, '', $viidakko_varastot);
 
-    // lisätään saldon päivittämiseen tarvittavat tiedot
-    $tuotteet[] = array(
-      "saldo"   => $myytavissa,
-      "status"  => $row['status'],
-      "tuoteno" => $tuoteno,
-    );
+      $tuotteet[] = array(
+        "product_code"            => $tuoteno,
+        "stock"                   => $myytavissa,
+      );
+    }
+    else {
+      $myytavissa = 0;
+
+      //  haetaan loput tuotetiedot
+      $query = "  SELECT *
+                  FROM tuote
+                  WHERE yhtio = '{$kukarow['yhtio']}'
+                  {$tuoterajaus}";
+      $res2 = pupe_query($query);
+      $product_row = mysql_fetch_array($res2);
+
+      //  haetaan kielikäännökset avainsanoista
+      $query = "  SELECT *
+                  FROM tuotteen_avainsanat
+                  WHERE yhtio = '{$kukarow['yhtio']}'
+                  AND tuoteno = '$tuoteno'
+                  AND laji in ('kuvaus', 'nimitys')";
+      $avainsana_res = pupe_query($query);
+      $nimitys_en = $kuvaus_en = "";
+
+      while ($avainsana_row = mysql_fetch_array($avainsana_res)) {
+        if ($avainsana_row['laji'] == 'nimitys') {
+          $nimitys_en = $avainsana_row['selite'];
+        }
+        elseif ($avainsana_row['laji'] == 'kuvaus') {
+          $kuvaus_en = $avainsana_row['selite'];
+        }
+      }
+
+      $tuotteet[] = array(
+        "product_code"            => $tuoteno,
+        "category"                => "", #todo
+        "ean_code"                => $row['eankoodi'],
+        "names"                       => array(
+          "fi"                        => "$row['nimitys']",
+          "en"                        => $nimitys_en),
+        "base_price"              => $product_row['myyntihinta'],
+        "supplier_code"           => "", #todo
+        "descriptions"                => array(
+          "fi"                        => $product_row['kuvaus'],
+          "en"                        => $kuvaus_en),
+        "image"                   => $row,
+        "teaser_image"            => $row,
+        "inventory_price"         => $product_row['kehahin'],
+        "msrp"                    => "", #todo
+        "vat_percent"             => $row['alv'],
+        "use_default_vat_percent" => $row,
+        "availability_begins_at"  => $row,
+        "availability_ends_at"    => $row,
+      );
+    }
+
+/* jeesiä varten
+$data_json = json_encode(array( "product_code"                => "{$product_row["tuoteno"]}",
+                                "ean_code"                    => "{$product_row["tuoteno"]}",
+                                "category"                    => "{$product_row["tuoteno"]}",
+                                "names"                       => array(
+                                  "fi"                        => "",
+                                  "en"                        => "",),
+                                "base_price"                  => "{$product_row["tuoteno"]}",
+                                "stock"                       => "", #??????
+                                "supplier_code"               => "",
+                                "descriptions"                => array(
+                                  "fi"                        => "",
+                                  "en"                        => "",),
+                                "image"                       => "{$product_row["tuoteno"]}",
+                                "teaser_image"                => "{$product_row["tuoteno"]}",
+                                "inventory_price"             => "{$product_row["tuoteno"]}",
+                                "msrp"                        => "{$product_row["tuoteno"]}",
+                                "vat_percent"                 => "{$product_row["tuoteno"]}",
+                                "use_default_vat_percent"     => "{$product_row["alv"]}",
+                                "availability_begins_at"      => "",
+                                "availability_ends_at"        => "",
+                              ));
+*/
   }
-
-  cron_aikaleima("MYCF_SALDO_CRON", $aloitusaika);
 
   return $tuotteet;
 }
@@ -92,7 +184,8 @@ function viidakko_tuoterajaus() {
   $tuoterajaus = " AND tuote.tuoteno != ''
                    AND tuote.ei_saldoa = ''
                    AND tuote.tuotetyyppi NOT in ('A','B')
-                   AND tuote.status != 'P' ";
+                   AND tuote.status != 'P'
+                   AND hinnastoon in ('','W') ";
 
   return $tuoterajaus;
 }

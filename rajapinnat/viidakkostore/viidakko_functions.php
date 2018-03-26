@@ -1,7 +1,7 @@
 <?php
 
 function viidakko_hae_tuotteet($tyyppi = "viidakko_tuotteet") {
-  global $kukarow, $yhtiorow, $viidakko_varastot, $ajetaanko_kaikki;
+  global $kukarow, $yhtiorow, $viidakko_varastot, $ajetaanko_kaikki, $viidakko_kuvaurl;
 
   viidakko_echo("Haetaan kaikki tuotteet ja varastosaldot.");
 
@@ -16,6 +16,15 @@ function viidakko_hae_tuotteet($tyyppi = "viidakko_tuotteet") {
   $result = pupe_query($query);
   $row = mysql_fetch_assoc($result);
   $aloitusaika = $row['aika'];
+
+  if (isset($viidakko_kuvaurl) and $viidakko_kuvaurl != '') {
+    if (substr($viidakko_kuvaurl, -1) == '/') {
+      $viidakko_kuvaurl = substr($viidakko_kuvaurl, 0, -1);
+    }
+  }
+  else {
+    $viidakko_kuvaurl = '';
+  }
 
   if ($tyyppi == "viidakko_saldot") {
     $datetime_checkpoint = cron_aikaleima("VIID_SALDO_CRON");
@@ -35,6 +44,7 @@ function viidakko_hae_tuotteet($tyyppi = "viidakko_tuotteet") {
 
     // Haetaan tuotteet, joille on tehty tunnin sisällä tilausrivi tai tapahtuma
     $query =  "(SELECT
+                tuote.tunnus,
                 tuote.tuoteno,
                 tuote.eankoodi
                 FROM tapahtuma
@@ -47,6 +57,7 @@ function viidakko_hae_tuotteet($tyyppi = "viidakko_tuotteet") {
                 UNION
 
                 (SELECT
+                tuote.tunnus,
                 tuote.tuoteno,
                 tuote.eankoodi
                 FROM tilausrivi
@@ -59,6 +70,7 @@ function viidakko_hae_tuotteet($tyyppi = "viidakko_tuotteet") {
                 UNION
 
                 (SELECT
+                tuote.tunnus,
                 tuote.tuoteno,
                 tuote.eankoodi
                 FROM tuote
@@ -70,6 +82,7 @@ function viidakko_hae_tuotteet($tyyppi = "viidakko_tuotteet") {
   }
   else {
     $query = "SELECT
+              tuote.tunnus,
               tuote.tuoteno,
               tuote.eankoodi
               FROM tuote
@@ -129,6 +142,43 @@ function viidakko_hae_tuotteet($tyyppi = "viidakko_tuotteet") {
         }
       }
 
+      $liite_tk_url = "";
+      $liite_th_url = "";
+
+      //kuvalinkit tarvittaessa
+      if ($viidakko_kuvaurl != '') {
+
+        // normaalikuva
+        $query = "SELECT liitetiedostot.*
+                  FROM liitetiedostot
+                  WHERE liitetiedostot.yhtio = '{$kukarow['yhtio']}'
+                  AND liitetiedostot.liitos  = 'tuote'
+                  AND liitetiedostot.liitostunnus = '{$row['tunnus']}'
+                  AND liitetiedostot.kayttotarkoitus = 'TK'
+                  ORDER BY if(liitetiedostot.jarjestys = 0, 9999, liitetiedostot.jarjestys) jarjestys
+                  LIMIT 1";
+        $result = pupe_query($query);
+        if (mysql_num_rows($result) == 1) {
+          $liite_row = mysql_fetch_array($result);
+          $liite_tk_url = "{$viidakko_kuvaurl}/view.php?id={$liite_row['tunnus']}";
+        }
+
+        // thumbnail
+        $query = "SELECT liitetiedostot.*
+                  FROM liitetiedostot
+                  WHERE liitetiedostot.yhtio = '{$kukarow['yhtio']}'
+                  AND liitetiedostot.liitos  = 'tuote'
+                  AND liitetiedostot.liitostunnus = '{$row['tunnus']}'
+                  AND liitetiedostot.kayttotarkoitus = 'TH'
+                  ORDER BY if(liitetiedostot.jarjestys = 0, 9999, liitetiedostot.jarjestys) jarjestys
+                  LIMIT 1";
+        $result = pupe_query($query);
+        if (mysql_num_rows($result) == 1) {
+          $liite_row = mysql_fetch_array($result);
+          $liite_th_url = "{$viidakko_kuvaurl}/view.php?id={$liite_row['tunnus']}";
+        }
+      }
+
       $tuotteet[] = array(
         "product_code"            => $tuoteno,
         "category"                => "", #todo
@@ -141,40 +191,16 @@ function viidakko_hae_tuotteet($tyyppi = "viidakko_tuotteet") {
         "descriptions"                => array(
           "fi"                        => $product_row['kuvaus'],
           "en"                        => $kuvaus_en),
-        "image"                   => $row,
-        "teaser_image"            => $row,
+        "image"                   => $liite_tk_url,
+        "teaser_image"            => $liite_th_url,
         "inventory_price"         => $product_row['kehahin'],
-        "msrp"                    => "", #todo
+        #"msrp"                    => "",
         "vat_percent"             => $row['alv'],
-        "use_default_vat_percent" => $row,
-        "availability_begins_at"  => $row,
-        "availability_ends_at"    => $row,
+        #"use_default_vat_percent" => "",
+        #"availability_begins_at"  => "",
+        #"availability_ends_at"    => "",
       );
     }
-
-/* jeesiä varten
-$data_json = json_encode(array( "product_code"                => "{$product_row["tuoteno"]}",
-                                "ean_code"                    => "{$product_row["tuoteno"]}",
-                                "category"                    => "{$product_row["tuoteno"]}",
-                                "names"                       => array(
-                                  "fi"                        => "",
-                                  "en"                        => "",),
-                                "base_price"                  => "{$product_row["tuoteno"]}",
-                                "stock"                       => "", #??????
-                                "supplier_code"               => "",
-                                "descriptions"                => array(
-                                  "fi"                        => "",
-                                  "en"                        => "",),
-                                "image"                       => "{$product_row["tuoteno"]}",
-                                "teaser_image"                => "{$product_row["tuoteno"]}",
-                                "inventory_price"             => "{$product_row["tuoteno"]}",
-                                "msrp"                        => "{$product_row["tuoteno"]}",
-                                "vat_percent"                 => "{$product_row["tuoteno"]}",
-                                "use_default_vat_percent"     => "{$product_row["alv"]}",
-                                "availability_begins_at"      => "",
-                                "availability_ends_at"        => "",
-                              ));
-*/
   }
 
   return $tuotteet;

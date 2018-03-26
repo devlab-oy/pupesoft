@@ -15,17 +15,35 @@ while ($row = mysql_fetch_array($result)) {
 }
 $konsyhtiot = " in (".substr($konsyhtiot, 0, -1).") ";
 
+$vastaanottajat = array();
+
 if (isset($messenger) and $message != "") {
-  $query = "INSERT INTO messenger
-            SET yhtio='$kukarow[yhtio]', kuka='$kukarow[kuka]', vastaanottaja='$vastaanottaja', viesti='$message', status='$status', luontiaika=now()";
-  $messenger_result = pupe_query($query);
+
+  // jos kyseessä ryhmä
+  if (substr($vastaanottaja, 0, 5) == '!###!') {
+    $vastaanottajat_res = t_avainsana("MESSENGER_RYHMA", "", "and selite = '".substr($vastaanottaja, 5)."'");
+    while ($vastaanottaja_row = mysql_fetch_assoc($vastaanottajat_res)) {
+      $vastaanottajat[] = array('vastaanottaja' => $vastaanottaja_row['selitetark'],
+                                'ryhma' => substr($vastaanottaja, 5),);
+    }
+  }
+  else {
+    $vastaanottajat[] = array('vastaanottaja' => $vastaanottaja,
+                              'ryhma' => '',);
+  }
+
+  foreach ($vastaanottajat as $vastaanottaja) {
+    $query = "INSERT INTO messenger
+              SET yhtio='$kukarow[yhtio]', kuka='$kukarow[kuka]', vastaanottaja='{$vastaanottaja['vastaanottaja']}', ryhma='{$vastaanottaja['ryhma']}', viesti='$message', status='$status', luontiaika=now()";
+    $messenger_result = pupe_query($query);
+  }
 }
 
 if (!isset($kpl)) {
   $kpl = 20;
 }
 
-$query = "SELECT DISTINCT messenger.vastaanottaja viimeisin
+$query = "SELECT DISTINCT if(messenger.ryhma != '', messenger.ryhma, messenger.vastaanottaja) viimeisin
           FROM kuka
           LEFT JOIN messenger ON (messenger.yhtio=kuka.yhtio AND messenger.kuka=kuka.kuka)
           WHERE kuka.extranet  = ''
@@ -40,6 +58,26 @@ echo "<input type='hidden' name='messenger' value='X'>";
 echo "<input type='hidden' name='status' value='X'>";
 echo "<tr><th>".t("Lähetä viesti")." --> ".t("Vastaanottaja").": <select name='vastaanottaja'>";
 
+// haetaan messenger ryhmät
+$query = "SELECT DISTINCT selite
+          FROM avainsana
+          WHERE yhtio = '{$yhtiorow['yhtio']}'
+          AND laji = 'MESSENGER_RYHMA'
+          ORDER BY selite";
+$ryhmaresult = pupe_query($query);
+
+if (mysql_num_rows($ryhmaresult) > 0) {
+  echo "<optgroup label='".t("Messenger ryhmät")."'>";
+  while ($ryhmarow = mysql_fetch_assoc($ryhmaresult)) {
+    if ($viimeisin_row["viimeisin"] == $ryhmarow["kuka"]) {
+      echo "<option value='!###!{$ryhmarow['selite']}' selected>{$ryhmarow['selite']}</option>";
+    }
+    else {
+      echo "<option value='!###!{$ryhmarow['selite']}'>{$ryhmarow['selite']}</option>";
+    }
+  }
+}
+
 $query = "SELECT DISTINCT kuka.nimi, kuka.kuka
           FROM kuka
           WHERE kuka.yhtio $konsyhtiot
@@ -48,6 +86,7 @@ $query = "SELECT DISTINCT kuka.nimi, kuka.kuka
           AND kuka.nimi       != ''
           ORDER BY kuka.nimi, kuka.kuka";
 $result = pupe_query($query);
+echo "<optgroup label='".t("Messenger käyttäjät")."'>";
 
 while ($userrow = mysql_fetch_array($result)) {
   if ($viimeisin_row["viimeisin"] == $userrow["kuka"]) {
@@ -57,6 +96,7 @@ while ($userrow = mysql_fetch_array($result)) {
     echo "<option value='{$userrow['kuka']}'>{$userrow['nimi']}</option>";
   }
 }
+
 echo "</select></th></tr>";
 echo "<tr><td><textarea rows='20' cols='80' name='message'>";
 echo "</textarea></td></tr>";

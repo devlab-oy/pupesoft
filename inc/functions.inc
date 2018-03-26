@@ -12530,13 +12530,13 @@ if (!function_exists("hae_yhtion_parametrit")) {
 }
 
 if (!function_exists("liite_popup")) {
-  function liite_popup($toiminto, $tuotetunnus = 0, $width=0, $height=0) {
+  function liite_popup($toiminto, $tuotetunnus = 0, $width=0, $height=0, $litety_id = FALSE) {
     global $kukarow, $yhtiorow, $PHP_SELF, $palvelin2, $pupe_root_polku, $toim;
 
     if ($toiminto == "JS") {
       echo "<SCRIPT type='text/javascript'>
           <!--
-            function liite_popup_js(tuotetunnus, maxwidth, totalheight) {
+            function liite_popup_js(tuotetunnus, maxwidth, totalheight, litety_id) {
               var myWidth = 0, myHeight = 0;
 
               if (typeof(window.innerWidth ) == 'number') {
@@ -12554,10 +12554,10 @@ if (!function_exists("liite_popup")) {
               }
 
               if (maxwidth == '0' && totalheight == '0') {
-                window.open('$PHP_SELF?ohje=off&toim=$toim&liite_popup_toiminto=AK&tuotetunnus='+tuotetunnus, '_blank' ,'toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,left=25,top=25, width='+myWidth+', height='+myHeight);
+                window.open('$PHP_SELF?ohje=off&toim=$toim&liite_popup_toiminto=AK&litety_id='+litety_id+'&tuotetunnus='+tuotetunnus, '_blank' ,'toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,left=25,top=25, width='+myWidth+', height='+myHeight);
               }
               else {
-                window.open('$PHP_SELF?ohje=off&toim=$toim&liite_popup_toiminto=AK&tuotetunnus='+tuotetunnus+'&width='+maxwidth, '_blank' ,'toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,left=25,top=25, width='+maxwidth+', height='+totalheight);
+                window.open('$PHP_SELF?ohje=off&toim=$toim&liite_popup_toiminto=AK&litety_id='+litety_id+'&tuotetunnus='+tuotetunnus+'&width='+maxwidth, '_blank' ,'toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,left=25,top=25, width='+maxwidth+', height='+totalheight);
               }
             }
           //-->
@@ -12567,6 +12567,13 @@ if (!function_exists("liite_popup")) {
 
       if ($width > 0) {
         $maxi = " width='".($width-30)."' ";
+      }
+
+      if ($litety_id) {
+        $_lisa = " AND liitetiedostot.tunnus = $litety_id";
+      }
+      else {
+        $_lisa = " AND kayttotarkoitus != 'TH'";
       }
 
       $query = "SELECT
@@ -12585,7 +12592,7 @@ if (!function_exists("liite_popup")) {
                 WHERE yhtio          = '$kukarow[yhtio]'
                 AND liitos           = 'tuote'
                 AND liitostunnus     = '$tuotetunnus'
-                AND kayttotarkoitus != 'TH'
+                $_lisa
                 ORDER BY sorttaus, jarjestys, filename";
       $kuvares = pupe_query($query);
 
@@ -12595,7 +12602,7 @@ if (!function_exists("liite_popup")) {
         echo "<tr><th style='text-align: center;'>$kuvarow[selite]</th></tr>";
         echo "<tr><td align='center'>";
 
-        if ($kuvarow["kayttotarkoitus"] == "TK" and in_array($kuvarow["filetype"], array("image/jpeg", "image/jpg", "image/gif", "image/png", "image/bmp"))) {
+        if (in_array($kuvarow["kayttotarkoitus"], array("TK", "TH")) and in_array($kuvarow["filetype"], array("image/jpeg", "image/jpg", "image/gif", "image/png", "image/bmp"))) {
 
           echo "<img $maxi src='".$palvelin2."view.php?id=$kuvarow[tunnus]'>";
 
@@ -12637,6 +12644,13 @@ if (!function_exists("liite_popup")) {
       unset($pdf_exist);
       unset($filetype);
 
+      if ($litety_id) {
+        $_lisa = " AND liitetiedostot.tunnus = $litety_id";
+      }
+      else {
+        $_lisa = " AND kayttotarkoitus != 'TH'";
+      }
+
       $filetype_query = "SELECT
                          yhtio,
                          selite,
@@ -12653,7 +12667,7 @@ if (!function_exists("liite_popup")) {
                          WHERE yhtio          = '$kukarow[yhtio]'
                          and liitos           = 'tuote'
                          and liitostunnus     = '$tuotetunnus'
-                         AND kayttotarkoitus != 'TH'
+                         $_lisa
                          ORDER BY sorttaus, jarjestys, filename";
       $filetype_result = pupe_query($filetype_query);
 
@@ -12696,7 +12710,8 @@ if (!function_exists("liite_popup")) {
         else {
           $liitteet .= t("Kuva");
         }
-        $liitteet .= "' onClick=\"javascript:liite_popup_js($tuotetunnus, $maxwidth, $totalheight)\">";
+
+        $liitteet .= "' onClick=\"javascript:liite_popup_js($tuotetunnus, $maxwidth, $totalheight, $litety_id)\">";
 
         return $liitteet;
       }
@@ -12706,6 +12721,13 @@ if (!function_exists("liite_popup")) {
       unset($images_exist);
       unset($pdf_exist);
       unset($filetype);
+
+      if ($litety_id) {
+        $_lisa = " AND liitetiedostot.tunnus = $litety_id";
+      }
+      else {
+        $_lisa = " AND kayttotarkoitus != 'TH'";
+      }
 
       $filetype_query = "SELECT
                          yhtio,
@@ -31274,6 +31296,7 @@ if (!function_exists("tallenna_tiliote_viite")) {
     $virhe = 0;
     $td_perheid = 0;
     $insert_count = 0;
+    $onko_ppg = FALSE;
     $serc = array("{", "|", "}", "[", "\\", "]", "'");
     $repl = array("ä", "ö", "å", "Ä", "Ö" , "Å", " ");
 
@@ -31335,6 +31358,23 @@ if (!function_exists("tallenna_tiliote_viite")) {
             if (mysql_num_rows($f_result) == 1) {
               $f_row = mysql_fetch_assoc($f_result);
               $tilino = $f_row['tilino'];
+            }
+          }
+          else {
+            // Kokeillaan onko kyse PPG:n factoring-aineistosta
+            $uusitilino = substr($tietue, 16, 6);
+            $query = "SELECT tilino
+                      FROM yriti
+                      WHERE tilino = '$uusitilino'
+                      AND kaytossa = ''
+                      LIMIT 1;";
+            $fp_result = pupe_query($query);
+
+            // jos tämä epäonnistuu, virheilmoitus tulee alempana kun tilinumeroa ei löydy
+            if (mysql_num_rows($fp_result) == 1) {
+              $fp_row = mysql_fetch_assoc($fp_result);
+              $tilino = $fp_row['tilino'];
+              $onko_ppg = TRUE;
             }
           }
         }
@@ -31678,6 +31718,9 @@ if (!function_exists("tallenna_tiliote_viite")) {
 
       if ($xtyyppi > 0 and $xtyyppi <= 3) {
         // Kirjoitetaan tiedosto kantaan
+        if (substr($tietue, 0, 1) == 3 and $tilino != substr($tietue, 2, 14) and $onko_ppg) {
+          $tietue = substr($tietue, 0, 1).str_pad($tilino, 14, ' ').substr($tietue, 15);
+        }
         $query = "INSERT into tiliotedata set
                   yhtio    = '$yritirow[yhtio]',
                   aineisto = '$aineistorow[aineisto]',
@@ -34149,7 +34192,7 @@ if (!function_exists('tuoteperheiden_hintojen_paivitys')) {
       );
       $kertoimet = tuoteperheen_lapsien_kertoimet($_params);
       $laskettu_hinta = 0;
-
+ 
       $hinnoittelu_isatuotteella = (in_array($kertoimet[0]['hintatyyppi'], array('I', 'L')));
 
       // Jos meillä ei ole isätuotteeseen perustuva hinnoitelu, ei tarvitse tehdä mitään,
@@ -34197,14 +34240,21 @@ if (!function_exists('tuoteperheiden_hintojen_paivitys')) {
 
       // jos on pyöristyseroa
       if ($pyoristysero != 0) {
-        $vikalapsi = array_pop($perhe);
+          $nquery = "SELECT tunnus
+                    FROM tilausrivi
+                    WHERE yhtio = '{$kukarow['yhtio']}'
+                    AND otunnus  = {$row['otunnus']}
+                    AND perheid = '{$row['perheid']}'
+                    AND hinta > 0 LIMIT 1";
+          $nresult = pupe_query($nquery);
+          $nrow = mysql_fetch_assoc($nresult);
 
         // Lisätään pyöristys tämän perheen vikalle lapselle
         $query = "UPDATE tilausrivi SET
                   hinta       = round(hinta - ({$pyoristysero} / tilkpl), {$yhtiorow['hintapyoristys']})
                   WHERE yhtio = '{$kukarow['yhtio']}'
                   AND perheid = '{$row['perheid']}'
-                  AND tunnus  = $vikalapsi";
+                  AND tunnus  = {$nrow['tunnus']}";
         pupe_query($query);
       }
     }
@@ -34584,6 +34634,109 @@ if (!function_exists("laskun_hyvaksyjia")) {
   }
 }
 
+if (!function_exists("viennin_lisatiedot")) {
+  function viennin_lisatiedot($otunnus) {
+    global $kukarow, $yhtiorow;
+
+    $from_viennin_lisatiedot_funktio = True;
+    $tee = 'L';
+
+    $query = "SELECT *
+              FROM lasku
+              WHERE tunnus = $otunnus
+              and tila = 'L'
+              AND vienti  in ('K','E')
+              and yhtio = '$kukarow[yhtio]'";
+    $result = pupe_query($query);
+    $laskurow = mysql_fetch_assoc($result);
+
+    if (empty($laskurow)) {
+      return;
+    }
+
+    $query = "SELECT sum(kollit) kollit, sum(kilot) kilot
+              FROM rahtikirjat
+              WHERE otsikkonro = $otunnus
+              and yhtio = '$kukarow[yhtio]'";
+    $result = pupe_query($query);
+    $rahtirow = mysql_fetch_assoc($result);
+
+    if ($laskurow["bruttopaino"] == 0) $laskurow["bruttopaino"] = $rahtirow["kilot"];
+
+    $query = "SELECT *
+              from asiakas
+              WHERE yhtio = '$kukarow[yhtio]'
+              and tunnus = '$laskurow[liitostunnus]'";
+    $result = pupe_query($query);
+    $asiakasrow = mysql_fetch_assoc($result);
+
+    // otetaan defaultit asiakkaalta jos laskulla ei ole mitään
+    if ($laskurow["poistumistoimipaikka_koodi"]       == "") $laskurow["poistumistoimipaikka_koodi"]       = $asiakasrow["poistumistoimipaikka_koodi"];
+    if ($laskurow["kuljetusmuoto"]                    ==  0) $laskurow["kuljetusmuoto"]                    = $asiakasrow["kuljetusmuoto"];
+    if ($laskurow["kauppatapahtuman_luonne"]          ==  0) $laskurow["kauppatapahtuman_luonne"]          = $asiakasrow["kauppatapahtuman_luonne"];
+    if ($laskurow["aktiivinen_kuljetus_kansallisuus"] == "") $laskurow["aktiivinen_kuljetus_kansallisuus"] = $asiakasrow["aktiivinen_kuljetus_kansallisuus"];
+    if ($laskurow["aktiivinen_kuljetus"]              == "") $laskurow["aktiivinen_kuljetus"]              = $asiakasrow["aktiivinen_kuljetus"];
+    if ($laskurow["kontti"]                           ==  0) $laskurow["kontti"]                           = $asiakasrow["kontti"];
+    if ($laskurow["sisamaan_kuljetusmuoto"]           ==  0) $laskurow["sisamaan_kuljetusmuoto"]           = $asiakasrow["sisamaan_kuljetusmuoto"];
+    if ($laskurow["sisamaan_kuljetus_kansallisuus"]   == "") $laskurow["sisamaan_kuljetus_kansallisuus"]   = $asiakasrow["sisamaan_kuljetus_kansallisuus"];
+    if ($laskurow["sisamaan_kuljetus"]                == "") $laskurow["sisamaan_kuljetus"]                = $asiakasrow["sisamaan_kuljetus"];
+    if ($laskurow["maa_maara"]                        == "") $laskurow["maa_maara"]                        = $asiakasrow["maa_maara"];
+
+    $maa_maara = $laskurow["maa_maara"];
+
+    if ($laskurow["vienti"] == "K") {
+      $sisamaan_kuljetus = $laskurow["sisamaan_kuljetus"];
+      $sisamaan_kuljetus_kansallisuus = $laskurow["sisamaan_kuljetus_kansallisuus"];
+      $sisamaan_kuljetusmuoto = $laskurow["sisamaan_kuljetusmuoto"];
+      $kontti = $laskurow["kontti"];
+      $aktiivinen_kuljetus = $laskurow["aktiivinen_kuljetus"];
+      $aktiivinen_kuljetus_kansallisuus = $laskurow["aktiivinen_kuljetus_kansallisuus"];
+    }
+
+    $kauppatapahtuman_luonne = $laskurow["kauppatapahtuman_luonne"];
+    $kuljetusmuoto = $laskurow["kuljetusmuoto"];
+
+    if ($laskurow["vienti"] == "K") {
+      $vresult = t_avainsana("TULLI");
+
+      while ($vrow = mysql_fetch_assoc($vresult)) {
+        if ($laskurow["poistumistoimipaikka_koodi"] == $vrow["selite"]) {
+          $poistumistoimipaikka = "$vrow[selitetark]##$vrow[selite]";
+        }
+      }
+
+      if ($laskurow["lisattava_era"] == 0) {
+        $laskurow["lisattava_era"] = $yhtiorow["tulli_lisattava_era"];
+      }
+      if ($laskurow["vahennettava_era"] == 0) {
+        $laskurow["vahennettava_era"] = $yhtiorow["tulli_vahennettava_era"];
+      }
+
+      $vahennettava_era = $laskurow["vahennettava_era"];
+      $lisattava_era = $laskurow["lisattava_era"];
+    }
+
+    $bruttopaino = $laskurow["bruttopaino"];
+    $lomake_lisatiedot = $laskurow["comments"];
+    $aiotut_rajatoimipaikat = $laskurow["aiotut_rajatoimipaikat"];
+    $maaratoimipaikka = $laskurow["maaratoimipaikka"];
+
+    # Päivitetään viennin lisätiedot
+    require "tilauskasittely/vientitilauksen_lisatiedot.php";
+
+    $query = "SELECT alatila
+              FROM lasku
+              WHERE tunnus = $otunnus
+              and tila = 'L'
+              AND vienti  in ('K','E')
+              and yhtio = '$kukarow[yhtio]'";
+    $result = pupe_query($query);
+    $alatila = mysql_fetch_assoc($result);
+
+    return $alatila['alatila'];
+  }
+}
+
 if (!function_exists('kpl_ruudulle')) {
   function kpl_ruudulle($row, $laskurow, $asiakasrow) {
     global $kukarow, $yhtiorow;
@@ -34732,6 +34885,7 @@ if (!function_exists("tilauksen_seurantalinkit")) {
       $unifaun    = (stripos($rahtikirja, "unifaun") !== false and !empty($unifaun_url_key));
       $ups        = (stripos($rahtikirjanro, 'ups') !== false);
       $kaukokiito = (strtoupper($virallinen_selite) == "KKSTD");
+      $matkahuolto  = (stripos($virallinen_selite, "MH") !== false);
 
       // dpd unifaunin kautta
       if ($dpd and $unifaun) {
@@ -34820,6 +34974,20 @@ if (!function_exists("tilauksen_seurantalinkit")) {
           $seurantakoodit[] = array(
             "id" => $nro,
             "link" => "http://kaukoputki.kaukokiito.fi/kaukokiito/ordermonitor?findOrders=&searchId={$nro}"
+          );
+        }
+      }
+      elseif ($matkahuolto) {
+        $_i = 0;
+        foreach (explode("\n", $row['rahtikirjanro']) as $nro) {
+
+          $_i++;
+          // skipataan ensimmäinen (Pupen generoima numero)
+          if ($_i == 1) continue;
+
+          $seurantakoodit[] = array(
+            "id" => $nro,
+            "link" => "http://mhhkiweb1.matkahuolto.fi/scripts/loginetyleinen.wsc/002tapahtuma_new?spacketnum={$nro}"
           );
         }
       }

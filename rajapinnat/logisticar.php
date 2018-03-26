@@ -263,7 +263,10 @@ function asiakas($limit = '') {
             asiakas.tunnus    asiakastunnus,
             concat_ws(' ', asiakas.nimi, asiakas.nimitark)  asiakkaannimi,
             asiakas.ryhma    asiakasryhma,
-            kuka.kuka       myyjatunnus
+            kuka.kuka       myyjatunnus,
+            asiakas.postino  postinumero,
+            asiakas.toim_postitp toimituspostitp,
+            asiakas.toim_maa toimitusmaa
             FROM asiakas
             LEFT JOIN kuka ON kuka.myyja=asiakas.myyjanro and kuka.yhtio=asiakas.yhtio and kuka.myyja > 0
             where asiakas.yhtio='$yhtio'
@@ -284,7 +287,10 @@ function asiakas($limit = '') {
     'asiakastunnus'  => null,
     'asiakkaannimi'  => null,
     'asiakasryhma'   => null,
-    'myyjatunnus'    => null
+    'myyjatunnus'    => null,
+    'postinumero'    => null,
+    'toimituspostitp' => null,
+    'toimitusmaa'    => null
   );
 
   create_headers($fp, array_keys($headers));

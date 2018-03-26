@@ -125,11 +125,15 @@ if ($_onko_param and $_onko_myynti and $kukarow['extranet'] == '') {
   }
 }
 
-if (isset($alkupera_trow) and $yhtiorow["korvaavat_hyvaksynta"] != "" and strtoupper($alkupera_trow["tuoteno"]) != strtoupper($row["tuoteno"]) and !in_array($row["var2"], array("OK", "PK")) and $korvattiin_korvaavalla == "HIIOHEI!") {
+if (isset($alkupera_trow) and $yhtiorow["korvaavat_hyvaksynta"] != "" and strtoupper($alkupera_trow["tuoteno"]) != strtoupper($row["tuoteno"])
+  and strtoupper($row["tuoteno"]) == strtoupper($krow2["tuoteno"]) 
+  and (!isset($from_mikrotilaus) or (isset($from_mikrotilaus) and !$from_mikrotilaus))
+  and !in_array($row["var2"], array("OK", "PK")) and $korvattiin_korvaavalla == "HIIOHEI!") {
   $varaosavirhe .= t("HUOM: tämä on korvaava tuote, haluatko hyväksyä?")."<br>";
   $riviok++;
   $tilausok++;
   $saako_hyvaksya++;
+  $korvattiin_korvaavalla = "";
 }
 
 $logmaster_errors = logmaster_verify_row($row['tunnus'], $toim);
@@ -148,7 +152,6 @@ if ($kukarow['extranet'] != '' and $trow['sarjanumeroseuranta'] != '' and $row['
   $tilausok++;
 }
 
-$korvattiin_korvaavalla = "";
 $pikaperustus_naytetaan = 0;
 
 if (mysql_num_rows($tres) == 0) {

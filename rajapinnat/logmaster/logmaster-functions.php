@@ -51,7 +51,7 @@ if (!function_exists('logmaster_send_email')) {
 }
 
 if (!function_exists('logmaster_send_file')) {
-  function logmaster_send_file($filename) {
+  function logmaster_send_file($filename, $binary = FALSE) {
     global $kukarow, $yhtiorow, $logmaster;
 
     // Lähetetään aina UTF-8 muodossa
@@ -64,6 +64,8 @@ if (!function_exists('logmaster_send_file')) {
     $ftpuser = $logmaster['user'];
     $ftppass = $logmaster['pass'];
     $ftppath = $logmaster['path'];
+
+    $ftpbinary = $binary;
 
     $ftpfile = realpath($filename);
 
@@ -244,8 +246,8 @@ if (!function_exists('logmaster_outbounddelivery')) {
               asiakas.asiakasnro,
               tuote.eankoodi,
               tuote.ei_saldoa,
-              laskun_lisatiedot.noutopisteen_tunnus,
-              tuote.tullinimike1
+              tuote.tullinimike1,
+              laskun_lisatiedot.noutopisteen_tunnus
               FROM lasku
               LEFT JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus)
               JOIN tilausrivi ON (
@@ -397,18 +399,18 @@ if (!function_exists('logmaster_outbounddelivery')) {
       $line = $lines->addChild('Line');
       $line->addAttribute('No', $_line_i);
       $line->addChild('TransId',           xml_cleanstring($looprow['tilausrivin_tunnus'], 20));
-      $line->addChild('ItemNumber',        xml_cleanstring($looprow[$logmaster_itemnumberfield], 22));
-      $line->addChild('CustItemNumber',    0);
-      $line->addChild('ItemName',          0);
-      $line->addChild('ItemText',          0);
-      $line->addChild('BatchId',           0);
-      $line->addChild('CustItemName',      0);
-      $line->addChild('Type',              1);
-      $line->addChild('BBDate',            0);
-      $line->addChild('OrderedQuantity',   $looprow['kpl']);
-      $line->addChild('DeliveredQuantity', $looprow['kpl']);
 
       if ($uj_nimi == "Velox") {
+        $line->addChild('ItemNumber',        xml_cleanstring($looprow[$logmaster_itemnumberfield], 32));
+        $line->addChild('CustItemNumber',    0);
+        $line->addChild('ItemName',          xml_cleanstring($looprow['nimitys'], 100));
+        $line->addChild('ItemText',          0);
+        $line->addChild('BatchId',           0);
+        $line->addChild('CustItemName',      0);
+        $line->addChild('Type',              $looprow['tyyppi']);
+        $line->addChild('BBDate',            0);
+        $line->addChild('OrderedQuantity',   $looprow['kpl']);
+        $line->addChild('DeliveredQuantity', $looprow['kpl']);
         $line->addChild('Unit',              xml_cleanstring($looprow['yksikko']));
         $line->addChild('Price',             $looprow['hinta']);
         $line->addChild('DiscountPercent',   $looprow['ale1']);
@@ -417,6 +419,16 @@ if (!function_exists('logmaster_outbounddelivery')) {
         $line->addChild('Stockable',         $looprow['keratty']);
       }
       else {
+        $line->addChild('ItemNumber',        xml_cleanstring($looprow[$logmaster_itemnumberfield], 22));
+        $line->addChild('CustItemNumber',    0);
+        $line->addChild('ItemName',          0);
+        $line->addChild('ItemText',          0);
+        $line->addChild('BatchId',           0);
+        $line->addChild('CustItemName',      0);
+        $line->addChild('Type',              1);
+        $line->addChild('BBDate',            0);
+        $line->addChild('OrderedQuantity',   $looprow['kpl']);
+        $line->addChild('DeliveredQuantity', $looprow['kpl']);
         $line->addChild('Unit',              0);
         $line->addChild('Price',             0);
         $line->addChild('DiscountPercent',   0);

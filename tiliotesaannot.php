@@ -53,7 +53,7 @@ if ($tee == 'U') {
 
     $nimitieto = strtoupper($nimitieto);
 
-    if (($nimitieto=="LUOTTOKUNTA-KREDITLAGET") or ($nimitieto=="LUOTTOKUNTA") or ($nimitieto=="LUOTTOKUNTA/VISA") or ($nimitieto=="LUOTTOKUNTA OY") or ($nimitieto=="NETS OY")) {
+    if (($nimitieto=="LUOTTOKUNTA-KREDITLAGET") or ($nimitieto=="LUOTTOKUNTA") or ($nimitieto=="LUOTTOKUNTA/VISA") or ($nimitieto=="LUOTTOKUNTA OY") or ($nimitieto=="NETS OY") or ($nimitieto=="NETS DENMARK A/S FILIAL I FINLAND")) {
       $query = "SELECT tilino
                 FROM tili
                 WHERE tilino = '$tilino2' and yhtio = '$kukarow[yhtio]'";
@@ -83,7 +83,7 @@ if ($tee == 'U') {
     }
     else {
       if ($tilino2 != 0) {
-        $virhe.= t("Vain maksajalle LUOTTOKUNTA-KREDITLAGET tai LUOTTOKUNTA tai LUOTTOKUNTA/VISA tai NETS OY voi antaa palkkiotilin")."<br>";
+        $virhe.= t("Vain maksajalle LUOTTOKUNTA-KREDITLAGET tai LUOTTOKUNTA tai LUOTTOKUNTA/VISA tai NETS OY tai NETS DENMARK A/S FILIAL I FINLAND voi antaa palkkiotilin")."<br>";
         $ok = 1;
         $tee = '';
       }

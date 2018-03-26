@@ -580,7 +580,7 @@ if (mysql_field_name($result, $i) == "edi_kuvaus") {
 
   $path_parts = pathinfo($trow[$i]);
 
-  $sel = array($path_parts['filename'] => 'selected') + array('editilaus_out_teccom.inc' => '', 'editilaus_out_wabco.inc' => '', 'editilaus_out_excel.inc' => '', 'editilaus_out_elma.inc' => '', 'editilaus_out_xml.inc' => '', 'editilaus_out_futur.inc' => '');
+  $sel = array($path_parts['filename'] => 'selected') + array('editilaus_out_teccom.inc' => '', 'editilaus_out_wabco.inc' => '', 'editilaus_out_excel.inc' => '', 'editilaus_out_elma.inc' => '', 'editilaus_out_xml.inc' => '',  'editilaus_out_xml_stap.inc' => '','editilaus_out_futur.inc' => '');
 
   $ulos  = "<td><select name='{$nimi}'>";
   $ulos .= "<option value=''>".t("Ei käytössä")."</option>";
@@ -589,6 +589,7 @@ if (mysql_field_name($result, $i) == "edi_kuvaus") {
   $ulos .= "<option value='editilaus_out_excel.inc' {$sel['editilaus_out_excel']}>".t("Excel-ostotilaus")."</option>";
   $ulos .= "<option value='editilaus_out_elma.inc' {$sel['editilaus_out_elma']}>".t("Elma-editilaus")."</option>";
   $ulos .= "<option value='editilaus_out_xml.inc' {$sel['editilaus_out_xml']}>".t("Xml-ostotilaus")."</option>";
+  $ulos .= "<option value='editilaus_out_xml_stap.inc' {$sel['editilaus_out_xml_stap']}>".t("Xml-ostotilaus Staples")."</option>";
   $ulos .= "<option value='editilaus_out_futur.inc' {$sel['editilaus_out_futur']}>".t("Futur-ostotilaus")."</option>";
 
   if (@file_exists("inc/sahkoinen_tilausliitanta.inc")) {

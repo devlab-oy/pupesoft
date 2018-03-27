@@ -1493,6 +1493,9 @@ if (($toim == 'lisaa' or $toim == 'lisaa_siirto') and $id == 0 and (string) $id 
     $grouplisa = ", lasku.vanhatunnus, lasku.varasto, lasku.pakkaamo ";
     $selecttoimitustapaehto = " toimitustapa.tunnus kimppakyyti, ";
   }
+  elseif ($kukarow['yhtio'] == 'mast') {
+    $selecttoimitustapaehto = " if (toimitustapa.tulostustapa='K', toimitustapa.tunnus, if (lasku.kerayslista > 0, lasku.kerayslista, lasku.tunnus)) kimppakyyti, ";
+  }
   else {
     $selecttoimitustapaehto = " if (toimitustapa.tulostustapa='K', toimitustapa.tunnus, lasku.tunnus) kimppakyyti, ";
   }

@@ -929,6 +929,8 @@ if ($tee == "ETSILASKU") {
       $where1 .= " lasku.tila = 'L' and lasku.alatila in ('B','C','D','E') ";
     }
 
+    $where1 .= " and (lasku.kerayslista = lasku.tunnus or lasku.kerayslista = 0) ";
+
     if ($asiakasid > 0) {
       $where2 .= " and lasku.liitostunnus  = '$asiakasid' ";
     }
@@ -936,7 +938,7 @@ if ($tee == "ETSILASKU") {
     $where3 .= " and lasku.luontiaika >='$vva-$kka-$ppa 00:00:00'
                  and lasku.luontiaika <='$vvl-$kkl-$ppl 23:59:59'";
 
-    $joinlisa = " JOIN asiakas on (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus and asiakas.kerayserat='H') ";
+    $joinlisa = " JOIN asiakas on (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus and asiakas.kerayserat = 'H') ";
 
     if (!isset($jarj)) $jarj = " lasku.tunnus ";
     $use = " use index (yhtio_tila_luontiaika) ";
@@ -1041,6 +1043,7 @@ if ($tee == "ETSILASKU") {
             if (kuka.nimi !='' and kuka.nimi is not null, kuka.nimi, lasku.laatija) laatija,
             lasku.summa,
             lasku.toimaika Toimitusaika,
+            lasku.toimitustapa,
             lasku.tila,
             lasku.alatila,
             lasku.yhtio,
@@ -1130,6 +1133,11 @@ if ($tee == "ETSILASKU") {
     echo "<a href='{$hreffi}&jarj=lasku.laskunro'>", t("Laskunro"), "</a></th>";
 
     echo "<th valign='top'><a href='{$hreffi}&jarj=lasku.ytunnus'>", t("Ytunnus"), "</a><br><a href='{$hreffi}&jarj=lasku.nimi'>", t("Nimi"), "</a></th>";
+
+    if ($toim == "LAVAKERAYSTARRA" or $toim == "LAVATARRA") {
+      echo "<th valign='top'><a href='{$hreffi}&jarj=toimitustapa'>", t("Toimitustapa"), "</a></th>";
+    }
+
     echo "<th valign='top'><a href='{$hreffi}&jarj=pvm'>", t("Pvm"), "</a><br><a href='{$hreffi}&jarj=lasku.toimaika'>", t("Toimaika"), "</a></th>";
     echo "<th valign='top'><a href='{$hreffi}&jarj=lasku.laatija'>", t("Laatija"), "</a></th>";
 
@@ -1181,6 +1189,11 @@ if ($tee == "ETSILASKU") {
       }
       echo "</$ero>";
       echo "<$ero valign='top'>", tarkistahetu($row['ytunnus']), "<br>$row[nimi]<br>$row[nimitark]</$ero>";
+
+      if ($toim == "LAVAKERAYSTARRA" or $toim == "LAVATARRA") {
+        echo "<$ero valign='top'>$row[toimitustapa]</$ero>";
+      }
+
       echo "<$ero valign='top'>".tv1dateconv($row["pvm"])."<br>".tv1dateconv($row["toimaika"])."</$ero>";
       echo "<$ero valign='top'>$row[laatija]</$ero>";
 
@@ -2562,7 +2575,8 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
                 $select_lisa
                 $sorttauskentta,
                 if (tuote.tuotetyyppi='K','2 Työt','1 Muut') tuotetyyppi,
-                tuote.myynti_era
+                tuote.myynti_era,
+                tuote.mallitarkenne
                 FROM tilausrivi
                 LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
                 JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
@@ -2589,6 +2603,11 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
         if ($lava_referenssiluku >= lavakerayskapasiteetti) {
           $lavanumero++;
           $lava_referenssiluku=0;
+        }
+
+        // myynti_era = 1 / mallitarkenne = 400 poikkeus
+        if ((int) $row['myynti_era'] == 1 and (int) $row['mallitarkenne'] == 400) {
+          $row['myynti_era'] = 6;
         }
 
         $lavat[$lavanumero][$row['otunnus']] += round(($row['varattu']+$row['kpl'])/$row['myynti_era'], 2);

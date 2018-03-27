@@ -56,6 +56,9 @@ if (!function_exists('sivu_lavatarra')) {
         continue;
       }
 
+      // Pyöristetään ylös lähimpään kokonaislukuun
+      $myyntierat = ceil($myyntierat);
+
       $query = "SELECT asiakkaan_tilausnumero
                 FROM lasku
                 WHERE yhtio = '{$kukarow['yhtio']}'

@@ -122,8 +122,10 @@ if (!function_exists("tulosta_lavakeraystarrat_tec")) {
 {XR;0000,0000,0900,0500,A|}
 {PC000;0020,0050,10,10,H,00,B|}
 {RC000;10622900 {$lasrow['yhtio_nimi']}|}
-{PC001;0020,0290,30,30,K,00,B|}
+{PC001;0020,0200,30,30,K,00,B|}
 {RC001;LAVA: $ed_lavanumero|}
+{PC002;0020,330,15,15,J,00,B|}
+{RC002;{$ed_toimtapa}|}
 *** TULOSTUS  ***
 {XS;I,0001,0002C3200|}
 {XJ;VAIHDA LAVA|}
@@ -142,6 +144,7 @@ if (!function_exists("tulosta_lavakeraystarrat_tec")) {
       }
 
       $ed_lavanumero = $tilrow['lavanumero'];
+      $ed_toimtapa = $lasrow['toimitustapa'];
     }
 
     // Ekan lavan tiedot
@@ -150,8 +153,10 @@ if (!function_exists("tulosta_lavakeraystarrat_tec")) {
 {XR;0000,0000,0900,0500,A|}
 {PC000;0020,0050,10,10,H,00,B|}
 {RC000;10622900 {$lasrow['yhtio_nimi']}|}
-{PC001;0020,0290,30,30,K,00,B|}
+{PC001;0020,0200,30,30,K,00,B|}
 {RC001;LAVA: $ed_lavanumero|}
+{PC002;0020,330,15,15,J,00,B|}
+{RC002;{$ed_toimtapa}|}
 *** TULOSTUS  ***
 {XS;I,0001,0002C3200|}
 ";

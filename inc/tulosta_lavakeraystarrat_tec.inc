@@ -119,7 +119,8 @@ if (!function_exists("tulosta_lavakeraystarrat_tec")) {
       if (!empty($ed_lavanumero) and $tilrow['lavanumero'] != $ed_lavanumero) {
         $tarrat .= "
 *** TARRA ALKAA ***
-{XR;0000,0000,0900,0500,A|}
+{C|}
+{XR;0000,0000,0900,0450,A|}
 {PC000;0020,0050,10,10,H,00,B|}
 {RC000;10622900 {$lasrow['yhtio_nimi']}|}
 {PC001;0020,0200,30,30,K,00,B|}
@@ -150,7 +151,8 @@ if (!function_exists("tulosta_lavakeraystarrat_tec")) {
     // Ekan lavan tiedot
     $tarrat .= "
 *** TARRA ALKAA ***
-{XR;0000,0000,0900,0500,A|}
+{C|}
+{XR;0000,0000,0900,0450,A|}
 {PC000;0020,0050,10,10,H,00,B|}
 {RC000;10622900 {$lasrow['yhtio_nimi']}|}
 {PC001;0020,0200,30,30,K,00,B|}

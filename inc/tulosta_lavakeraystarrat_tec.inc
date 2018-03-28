@@ -124,7 +124,7 @@ if (!function_exists("tulosta_lavakeraystarrat_tec")) {
 {RC000;10622900 {$lasrow['yhtio_nimi']}|}
 {PC001;0020,0200,30,30,K,00,B|}
 {RC001;LAVA: $ed_lavanumero|}
-{PC002;0020,330,15,15,J,00,B|}
+{PC002;0020,0330,15,15,J,00,B|}
 {RC002;{$ed_toimtapa}|}
 *** TULOSTUS  ***
 {XS;I,0001,0002C3200|}
@@ -155,7 +155,7 @@ if (!function_exists("tulosta_lavakeraystarrat_tec")) {
 {RC000;10622900 {$lasrow['yhtio_nimi']}|}
 {PC001;0020,0200,30,30,K,00,B|}
 {RC001;LAVA: $ed_lavanumero|}
-{PC002;0020,330,15,15,J,00,B|}
+{PC002;0020,0330,15,15,J,00,B|}
 {RC002;{$ed_toimtapa}|}
 *** TULOSTUS  ***
 {XS;I,0001,0002C3200|}

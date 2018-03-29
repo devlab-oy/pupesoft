@@ -278,16 +278,16 @@ if ($tee == 'GO') {
     elseif ($toiminto == 'paino' and $paino_kuvat != "1") {
       continue;
     }
-    // jos ei olla ruksattu painokuvia niin ohitetaan ne
+    // jos ei olla ruksattu muita niin ohitetaan ne
     elseif ($toiminto == 'muut' and $muut_kuvat != "1") {
       continue;
     }
-    // jos ei olla ruksattu painokuvia niin ohitetaan ne
+    // jos ei olla ruksattu tuoteinfoja niin ohitetaan ne
     elseif ($toiminto == 'tuoteinfo' and $tuoteinfo_kuvat != "1") {
       continue;
     }
-    // jos ei olla ruksattu painokuvia niin ohitetaan ne
-    elseif ($toiminto == 'ktt' and $ktt_kuvat != "1") {
+    // jos ei olla ruksattu ktt niin ohitetaan ne
+    elseif ($toiminto == 'kayttoturvatiedote' and $ktt_kuvat != "1") {
       continue;
     }
     // ohitetaan aina käsiteltävät kuvat, koska ne on hoidettu jo ylhäällä
@@ -296,7 +296,7 @@ if ($tee == 'GO') {
     }
 
     // tuntematon toiminto
-    if (!in_array($toiminto, array('thumb', 'normaali', 'paino', 'kasittele', 'muut', 'tuoteinfo', 'ktt'))) {
+    if (!in_array($toiminto, array('thumb', 'normaali', 'paino', 'kasittele', 'muut', 'tuoteinfo', 'kayttoturvatiedote'))) {
       echo "<font class='error'>";
       echo t("Tuntematon toiminto %s %s!", "", $toiminto, $thumb_kuvat);
       echo "</font><br>";
@@ -421,11 +421,14 @@ if ($tee == 'GO') {
         }
       }
 
-      $query = "SELECT tuoteno, tunnus
-                FROM tuote
-                WHERE yhtio = '{$kukarow['yhtio']}'
-                AND tuoteno LIKE '{$kuvanalku}%'";
-      $apuresult = pupe_query($query);
+      // haetaan tuoteno vain jos ei ole tiedostosta kääntöä
+      if (count($filearray) == 0) {
+        $query = "SELECT tuoteno, tunnus
+                  FROM tuote
+                  WHERE yhtio = '{$kukarow['yhtio']}'
+                  AND tuoteno LIKE '{$kuvanalku}%'";
+        $apuresult = pupe_query($query);
+      }
     }
 
     if (file_exists($file)) {
@@ -533,7 +536,7 @@ if ($tee == 'GO') {
           }
 
           if (trim($kayttotarkoitus_custom) != '') {
-            $kayttotarkoitus = $kayttotarkoitus_custom;
+            $kayttotarkoitus = strtoupper($kayttotarkoitus_custom);
           }
 
           // poistetaan vanhat kuvat ja ...
@@ -608,6 +611,12 @@ if ($tee == 'DUMPPAA') {
     }
     elseif ($row["kayttotarkoitus"] == "MU") {
       $toiminto = "muut";
+    }
+    elseif ($row["kayttotarkoitus"] == "KT") {
+      $toiminto = "kayttoturvatiedote";
+    }
+    elseif ($row["kayttotarkoitus"] == "IN") {
+      $toiminto = "tuoteinfo";
     }
     else {
       echo "<font class='message'>";
@@ -753,7 +762,7 @@ if ($lukutuoteinfo > 0) {
   echo "</tr>";
 }
 
-if ($lukuktt) {
+if ($lukuktt > 0) {
   echo "<tr>";
   echo "<td>".t("Käyttöturvatiedote")."</td>";
   echo "<td>{$lukuktt} ".t("kpl")."</td>";

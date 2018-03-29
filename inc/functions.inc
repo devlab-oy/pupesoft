@@ -330,7 +330,7 @@ if (!function_exists("pupe_error")) {
 
       $puperror = htmlentities($puperror, ENT_IGNORE);
     }
-    echo nl2br($puperror);
+
     if ($_display == '1' or $_pupedebug !== false) {
       echo nl2br($puperror);
     }

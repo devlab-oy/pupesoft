@@ -143,7 +143,9 @@ if (!is_writable($dirri)) {
 
 if ($tee == 'GO') {
 
-  if ($kasittele_kuvat != "1" and $thumb_kuvat != "1" and $normaali_kuvat != "1" and $paino_kuvat != "1" and $muut_kuvat != "1") {
+  $_kasittelyyn = ($kasittele_kuvat + $thumb_kuvat + $normaali_kuvat + $paino_kuvat + $muut_kuvat + $tuoteinfo_kuvat + $ktt_kuvat > 0);
+
+  if (!$_kasittelyyn) {
     echo "<font class='message'>".t("Et valinnut mitään käsiteltävää!")."</font>";
     exit;
   }
@@ -239,12 +241,14 @@ if ($tee == 'GO') {
       $filerivit = pupeFileReader($kasiteltava_tiedoto_path, $ext);
 
       foreach ($filerivit as $rivi) {
-        list($filetuoteno, $filename) = explode(";", $rivi[0]);
+        list($filetuoteno, $filename, $_kayttotarkoitus) = explode(";", $rivi[0]);
 
-        $filetuoteno = pupesoft_cleanstring($filetuoteno);
-        $filename    = pupesoft_cleanstring($filename);
+        $filetuoteno      = pupesoft_cleanstring($filetuoteno);
+        $filename         = pupesoft_cleanstring($filename);
+        $_kayttotarkoitus  = pupesoft_cleanstring($_kayttotarkoitus);
 
-        $filearray[$filename][] = $filetuoteno;
+        $filearray[$filename]['filetuoteno'][] = $filetuoteno;
+        $filearray[$filename]['kayttotarkoitus'] = $_kayttotarkoitus;
       }
     }
   }
@@ -274,8 +278,16 @@ if ($tee == 'GO') {
     elseif ($toiminto == 'paino' and $paino_kuvat != "1") {
       continue;
     }
-    // jos ei olla ruksattu painokuvia niin ohitetaan ne
+    // jos ei olla ruksattu muita niin ohitetaan ne
     elseif ($toiminto == 'muut' and $muut_kuvat != "1") {
+      continue;
+    }
+    // jos ei olla ruksattu tuoteinfoja niin ohitetaan ne
+    elseif ($toiminto == 'tuoteinfo' and $tuoteinfo_kuvat != "1") {
+      continue;
+    }
+    // jos ei olla ruksattu ktt niin ohitetaan ne
+    elseif ($toiminto == 'kayttoturvatiedote' and $ktt_kuvat != "1") {
       continue;
     }
     // ohitetaan aina käsiteltävät kuvat, koska ne on hoidettu jo ylhäällä
@@ -284,7 +296,7 @@ if ($tee == 'GO') {
     }
 
     // tuntematon toiminto
-    if (!in_array($toiminto, array('thumb', 'normaali', 'paino', 'kasittele', 'muut'))) {
+    if (!in_array($toiminto, array('thumb', 'normaali', 'paino', 'kasittele', 'muut', 'tuoteinfo', 'kayttoturvatiedote'))) {
       echo "<font class='error'>";
       echo t("Tuntematon toiminto %s %s!", "", $toiminto, $thumb_kuvat);
       echo "</font><br>";
@@ -409,11 +421,14 @@ if ($tee == 'GO') {
         }
       }
 
-      $query = "SELECT tuoteno, tunnus
-                FROM tuote
-                WHERE yhtio = '{$kukarow['yhtio']}'
-                AND tuoteno LIKE '{$kuvanalku}%'";
-      $apuresult = pupe_query($query);
+      // haetaan tuoteno vain jos ei ole tiedostosta kääntöä
+      if (count($filearray) == 0) {
+        $query = "SELECT tuoteno, tunnus
+                  FROM tuote
+                  WHERE yhtio = '{$kukarow['yhtio']}'
+                  AND tuoteno LIKE '{$kuvanalku}%'";
+        $apuresult = pupe_query($query);
+      }
     }
 
     if (file_exists($file)) {
@@ -468,10 +483,11 @@ if ($tee == 'GO') {
 
         $tuotenolisa = "AND tuoteno = '{$tuoteno}'";
 
-        # Tiedostossa voi olla tuotenumeron kääntö
+        # Tiedostossa voi olla tuotenumeron kääntö / lisätietoja
         if (count($filearray) > 0) {
           if (isset($filearray[$kuva])) {
-            $tuotenolisa = "AND tuoteno IN ('".implode("','", $filearray[$kuva])."')";
+            $tuotenolisa = "AND tuoteno IN ('".implode("','", $filearray[$kuva]['filetuoteno'])."')";
+            $kayttotarkoitus_custom = !empty($filearray[$kuva]['kayttotarkoitus']) ? $filearray[$kuva]['kayttotarkoitus'] : $kayttotarkoitus_custom;
           }
           else {
             echo " &raquo; ";
@@ -520,7 +536,7 @@ if ($tee == 'GO') {
           }
 
           if (trim($kayttotarkoitus_custom) != '') {
-            $kayttotarkoitus = $kayttotarkoitus_custom;
+            $kayttotarkoitus = strtoupper($kayttotarkoitus_custom);
           }
 
           // poistetaan vanhat kuvat ja ...
@@ -596,6 +612,12 @@ if ($tee == 'DUMPPAA') {
     elseif ($row["kayttotarkoitus"] == "MU") {
       $toiminto = "muut";
     }
+    elseif ($row["kayttotarkoitus"] == "KT") {
+      $toiminto = "kayttoturvatiedote";
+    }
+    elseif ($row["kayttotarkoitus"] == "IN") {
+      $toiminto = "tuoteinfo";
+    }
     else {
       echo "<font class='message'>";
       echo t("Tuntematon käyttötarkoitus %s!", "", $row['kayttotarkoitus']);
@@ -670,6 +692,8 @@ $lukunormit   = 0;
 $lukutconvertit = 0;
 $lukupainot   = 0;
 $lukumuut     = 0;
+$lukutuoteinfo = 0;
+$lukuktt = 0;
 
 foreach ($files as $file) {
 
@@ -687,6 +711,12 @@ foreach ($files as $file) {
   }
   if ($toiminto == 'muut' and $kuva != '') {
     $lukumuut++;
+  }
+  if ($toiminto == 'tuoteinfo' and $kuva != '') {
+    $lukutuoteinfo++;
+  }
+  if ($toiminto == 'kayttoturvatiedote' and $kuva != '') {
+    $lukuktt++;
   }
   if ($toiminto == 'kasittele' and $kuva != '') {
     $lukutconvertit++;
@@ -724,6 +754,22 @@ echo "<td>{$lukumuut} ".t("kpl")."</td>";
 echo "<td><input type='checkbox' name='muut_kuvat' value='1'></td>";
 echo "</tr>";
 
+if ($lukutuoteinfo > 0) {
+  echo "<tr>";
+  echo "<td>".t("Tuoteinfo")."</td>";
+  echo "<td>{$lukutuoteinfo} ".t("kpl")."</td>";
+  echo "<td><input type='checkbox' name='tuoteinfo_kuvat' value='1'></td>";
+  echo "</tr>";
+}
+
+if ($lukuktt > 0) {
+  echo "<tr>";
+  echo "<td>".t("Käyttöturvatiedote")."</td>";
+  echo "<td>{$lukuktt} ".t("kpl")."</td>";
+  echo "<td><input type='checkbox' name='ktt_kuvat' value='1'></td>";
+  echo "</tr>";
+}
+
 echo "<tr>";
 echo "<td>".t("Käsittele")."</td>";
 echo "<td>{$lukutconvertit} ".t("kpl")."</td>";
@@ -731,7 +777,7 @@ echo "<td><input type='checkbox' name='kasittele_kuvat' value='1'></td>";
 echo "</tr>";
 
 echo "<tr>";
-echo "<th>".t("Kohdista tuotekuvat tiedostosta (tuoteno;tiedostonimi)").":</th>";
+echo "<th>".t("Kohdista tuotekuvat tiedostosta <br>(tuoteno;tiedostonimi;käyttötarkoitus)").":</th>";
 echo "<td colspan='2'><input name='userfile' type='file'></td>";
 echo "</tr>";
 
@@ -741,7 +787,7 @@ echo "<br>";
 echo "<input type='submit' value='".t("Tuo")."'>";
 echo "</form>";
 
-if ($lukuthumbit + $lukunormit + $lukupainot + $lukumuut + $lukutconvertit == 0) {
+if ($lukuthumbit + $lukunormit + $lukupainot + $lukumuut + $lukutconvertit + $lukutuoteinfo + $lukuktt == 0) {
 
   echo "<br><br>";
   echo "<font class='head'>".t("Kuvien uloskirjoitus")."</font><hr>";

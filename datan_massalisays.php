@@ -374,6 +374,7 @@ if ($tee == 'GO') {
 
     $apuselite = "";
     $mikakieli = "fi";
+    $kayttotarkoitus_custom = '';
 
     // wildcard
     if (strpos($kuva, "%") !== FALSE) {
@@ -400,6 +401,8 @@ if ($tee == 'GO') {
           $apuselite = t("Käyttöturvatiedote");
           $mikakieli = "fi";
         }
+
+        $kayttotarkoitus_custom = "KT";
       }
       elseif (strpos($kuva, "%tko") !== FALSE) {
         $mistakieli = strpos($kuva, "%tko" ) + 4;
@@ -419,6 +422,8 @@ if ($tee == 'GO') {
           $apuselite = t("Info");
           $mikakieli = "fi";
         }
+
+        $kayttotarkoitus_custom = "IN";
       }
 
       // haetaan tuoteno vain jos ei ole tiedostosta kääntöä
@@ -471,13 +476,11 @@ if ($tee == 'GO') {
         continue;
       }
 
-      $kayttotarkoitus_custom = '';
-
       if (!isset($apuresult)) {
         $mihin   = strpos($kuva, ".$ext");
         $tuoteno = substr($kuva, 0, "$mihin");
 
-        if (strpos($tuoteno, "=") !== false) {
+        if (strpos($tuoteno, "=") !== false and empty($kayttotarkoitus_custom)) {
           list($tuoteno, $kayttotarkoitus_custom) = explode("=", $tuoteno);
         }
 

@@ -534,6 +534,14 @@ if ($tee == 'GO') {
             $kayttotarkoitus = 'HR';
             $kuvaselite = "Tuotekuva painokuva";
           }
+          elseif ($toiminto == 'kayttoturvatiedote' and $apuselite == "") {
+            $kayttotarkoitus = 'KT';
+            $kuvaselite = "Käyttöturvatiedote";
+          }
+          elseif ($toiminto == 'tuoteinfo' and $apuselite == "") {
+            $kayttotarkoitus = 'IN';
+            $kuvaselite = "Info";
+          }
           elseif ($apuselite != "") {
             $kuvaselite = $apuselite;
           }

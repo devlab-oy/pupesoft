@@ -140,8 +140,7 @@ if ($kollityht > 0) {
     }
     else {
       if (strtolower($toitarow['lajittelupiste']) == 'sameday') {
-        //$parcelOrder["lahetystapa"] = "NP,SD"; Toistaiseksi tuo SD pois DPD:n pyynnöstä "sameday" tapauksessa.
-        $parcelOrder["lahetystapa"] = "NP";
+        $parcelOrder["lahetystapa"] = "NP,SD";
       }
       elseif (strtolower($toitarow['lajittelupiste']) == 'regular' and $as_avainsana_row['avainsana'] != '') {
         $parcelOrder["lahetystapa"] = "NP,{$as_avainsana_row['avainsana']}";

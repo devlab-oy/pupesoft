@@ -5460,8 +5460,8 @@ if ($tee == '') {
         //Tuote löytyi
         $trow = mysql_fetch_assoc($result);
 
-        //extranettajille ei myydä tuotteita joilla ei ole myyntihintaa
-        if ($kukarow["extranet"] != '' and $trow["myyntihinta"] == 0 and $trow['ei_saldoa'] == '') {
+        //extranettajille ei myydä tuotteita joilla ei ole myyntihintaa ellei tuote ole private label
+        if ($kukarow["extranet"] != '' and ($trow["myyntihinta"] == 0 and $trow["hinnastoon"] !='V') and $trow['ei_saldoa'] == '') {
           $varaosavirhe = t("VIRHE: Tuotenumeroa ei löydy järjestelmästä!")."<br>";
           $trow    = "";
           $tuoteno = "";

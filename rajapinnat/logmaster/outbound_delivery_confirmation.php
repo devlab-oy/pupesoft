@@ -244,6 +244,10 @@ while (false !== ($file = readdir($handle))) {
           $kerattyupdate = "tilausrivi.kerattyaika = '0000-00-00 00:00:00', tilausrivi.keratty = ''";
           $toimitettu_lisa = "";
           $varattuupdate = ", tilausrivi.var = '{$_var}'";
+
+          $kerayspoikkeama[$tilausrivi_row['tuoteno']]['tilauksella'] = round($tilausrivi_row['varattu']);
+          $kerayspoikkeama[$tilausrivi_row['tuoteno']]['keratty'] = $keratty;
+          $kerayspoikkeama[$tilausrivi_row['tuoteno']]['status'] = $_var;
         }
         elseif ($a != $b) {
 
@@ -264,11 +268,11 @@ while (false !== ($file = readdir($handle))) {
           // kopioidaan tilausrivi poikkeavalle määrälle ja jätetään se jt/puute
           $poikkeuskentat = array("tilausrivi.varattu"=> $_varaus, "tilausrivi.jt"=> $_poikkeama, "tilausrivi.var" => $_var);
           kopioi_tilausrivi($tilausrivin_tunnus, $poikkeuskentat);
-        }
 
-        $kerayspoikkeama[$tilausrivi_row['tuoteno']]['tilauksella'] = round($tilausrivi_row['varattu']);
-        $kerayspoikkeama[$tilausrivi_row['tuoteno']]['keratty'] = $keratty;
-        $kerayspoikkeama[$tilausrivi_row['tuoteno']]['status'] = $_var;
+          $kerayspoikkeama[$tilausrivi_row['tuoteno']]['tilauksella'] = round($tilausrivi_row['varattu']);
+          $kerayspoikkeama[$tilausrivi_row['tuoteno']]['keratty'] = $keratty;
+          $kerayspoikkeama[$tilausrivi_row['tuoteno']]['status'] = $_var;
+        }
       }
 
       $query = "UPDATE tilausrivi

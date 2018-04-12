@@ -197,7 +197,7 @@ while (false !== ($file = readdir($handle))) {
       $tilausrivi_row = mysql_fetch_assoc($tilausrivi_res);
 
       $varattuupdate = "";
-      $kerattyupdate = ", tilausrivi.kerattyaika = '{$toimaika}', tilausrivi.keratty = '{$kukarow['kuka']}'";
+      $kerattyupdate = "tilausrivi.kerattyaika = '{$toimaika}', tilausrivi.keratty = '{$kukarow['kuka']}'";
 
       // Verkkokaupassa etukäteen maksettu tuote!
       if ($laskurow["mapvm"] != '' and $laskurow["mapvm"] != '0000-00-00') {
@@ -214,7 +214,7 @@ while (false !== ($file = readdir($handle))) {
       }
       else {
         // Jos ei oo etukäteen maksettu, niin tehdään keräyspoikkeama
-        $varattuupdate = ", tilausrivi.varattu = '{$keratty}' ";
+        $varattuupdate = ", tilausrivi.varattu = '{$keratty}'";
         $keratty_yhteensa += $keratty;
         $_etukateen_maksettu = false;
       }
@@ -241,9 +241,9 @@ while (false !== ($file = readdir($handle))) {
           // ei kosketa mihinkään muuhun kuin var kenttään
           pupesoft_log('logmaster_outbound_delivery_confirmation', "Keräyskuittaus {$otunnus} rivi {$tilausrivin_tunnus} ({$item_number}) jäi kokonaan keräämättä!");
 
-          $kerattyupdate = "";
-          $varattuupdate = ", tilausrivi.var = '{$_var}' ";
+          $kerattyupdate = "tilausrivi.kerattyaika = '0000-00-00 00:00:00', tilausrivi.keratty = ''";
           $toimitettu_lisa = "";
+          $varattuupdate = ", tilausrivi.var = '{$_var}'";
         }
         elseif ($a != $b) {
 

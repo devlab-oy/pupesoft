@@ -227,7 +227,6 @@ while (false !== ($file = readdir($handle))) {
       // vain jos normaali myyntitilaus kyseess‰
       if (in_array($yhtiorow['Kerayspoikkeama_kasittely'], array('J','U') and !$_etukateen_maksettu and $laskurow['tila'] == 'L') {
 
-        // tsekataan onko poikkeamaa
         $a = (int) ($tilausrivi_row['varattu'] * 10000);
         $b = (int) ($keratty * 10000);
 
@@ -235,7 +234,7 @@ while (false !== ($file = readdir($handle))) {
         $_var = $yhtiorow['Kerayspoikkeama_kasittely'] == 'J' ? "J" : "P";
 
         // tsekataan tarviiko rivi‰ splittaa, eli j‰ikˆ kokonaan ker‰‰m‰tt‰
-        if ($a - $b == 0) {
+        if (empty($keratty)) {
 
           // jos j‰i niin muutetaan rivin update sen mukaan eik‰ erikseen splitata
           // ei kosketa mihink‰‰n muuhun kuin var kentt‰‰n

@@ -2210,6 +2210,7 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
           $yhtiorow["dynaaminen_kassamyynti"] != "") and
         $kateinen != '' and
         $kukarow['extranet'] == '' and
+        $laskurow['tilaustyyppi'] != 'W' and
         $kateisohitus == "" and
         (($yhtiorow["maksupaate_kassamyynti"] == "" and
             $kukarow["maksupaate_kassamyynti"] == "") or

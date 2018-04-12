@@ -197,6 +197,7 @@ while (false !== ($file = readdir($handle))) {
       $tilausrivi_row = mysql_fetch_assoc($tilausrivi_res);
 
       $varattuupdate = "";
+      $kerattyupdate = ", tilausrivi.kerattyaika = '{$toimaika}', tilausrivi.keratty = '{$kukarow['kuka']}'";
 
       // Verkkokaupassa etuk‰teen maksettu tuote!
       if ($laskurow["mapvm"] != '' and $laskurow["mapvm"] != '0000-00-00') {
@@ -240,6 +241,7 @@ while (false !== ($file = readdir($handle))) {
           // ei kosketa mihink‰‰n muuhun kuin var kentt‰‰n
           pupesoft_log('logmaster_outbound_delivery_confirmation', "Ker‰yskuittaus {$otunnus} rivi {$tilausrivin_tunnus} ({$item_number}) j‰i kokonaan ker‰‰m‰tt‰!");
 
+          $kerattyupdate = "";
           $varattuupdate = ", tilausrivi.var = '{$_var}' ";
           $toimitettu_lisa = "";
         }
@@ -271,8 +273,8 @@ while (false !== ($file = readdir($handle))) {
 
       $query = "UPDATE tilausrivi
                 JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio {$tuotelisa} AND tuote.tuoteno = tilausrivi.tuoteno)
-                SET tilausrivi.keratty = '{$kukarow['kuka']}',
-                tilausrivi.kerattyaika = '{$toimaika}'
+                SET
+                {$kerattyupdate}
                 {$toimitettu_lisa}
                 {$varattuupdate}
                 WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'

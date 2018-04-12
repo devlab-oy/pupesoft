@@ -260,6 +260,7 @@ while (false !== ($file = readdir($handle))) {
           // varaako jt:t saldoa?
           if ($yhtiorow['kerayspoikkeama_kasittely'] == 'J' and $yhtiorow['varaako_jt_saldoa'] == 'K') {
             $_varaus = $_poikkeama;
+            $_poikkeama = 0;
           }
           elseif ($yhtiorow['kerayspoikkeama_kasittely'] == 'U') {
             $_poikkeama = 0;

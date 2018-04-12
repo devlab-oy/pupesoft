@@ -225,7 +225,7 @@ while (false !== ($file = readdir($handle))) {
 
       // Jos poikkeava m‰‰r‰ ker‰tty, j‰tet‰‰n mahdollisesti var p/j rivej‰
       // vain jos normaali myyntitilaus kyseess‰
-      if (in_array($yhtiorow['Kerayspoikkeama_kasittely'], array('J','U') and !$_etukateen_maksettu and $laskurow['tila'] == 'L')) {
+      if (in_array($yhtiorow['kerayspoikkeama_kasittely'], array('J','U')) and !$_etukateen_maksettu and $laskurow['tila'] == 'L') {
 
         $a = (int) ($tilausrivi_row['varattu'] * 10000);
         $b = (int) ($keratty * 10000);

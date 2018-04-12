@@ -441,13 +441,14 @@ while (false !== ($file = readdir($handle))) {
 
       if (isset($_arr['status'])) {
         $_status = $_arr['status'] == "J" ? t("Jälkitoimitukseen") : t("Puuteriviksi");
-        $_status = $_status . " " . $_arr['tilauksella'] - $_arr['keratty'];
+        $_erotus = $_arr['tilauksella'] - $_arr['keratty'];
+        $_status = "{$_status} {$_erotus}";
       }
       else {
         $_status = "";
       }
 
-      $email_array[] = "{$tuoteno} {$_arr['keratty']} {$_arr['tilauksella']} {$_status}";
+      $email_array[] = "{$tuoteno} {$_arr['keratty']} {$_arr['tilauksella']} ".$_status;
     }
 
     pupesoft_log('logmaster_outbound_delivery_confirmation', "Keräyspoikkeamia tilauksessa {$otunnus}");

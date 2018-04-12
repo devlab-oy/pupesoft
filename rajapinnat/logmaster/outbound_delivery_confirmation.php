@@ -165,6 +165,9 @@ while (false !== ($file = readdir($handle))) {
     $paivitettiin_tilausrivi_onnistuneesti = false;
     $keratty_yhteensa = 0;
 
+    // tsekataan mahollinen var arvo
+    $_var = $yhtiorow['kerayspoikkeama_kasittely'] == 'J' ? "J" : "P";
+
     foreach ($tilausrivit as $tilausrivin_tunnus => $data) {
 
       $item_number = $data['item_number'];
@@ -230,9 +233,6 @@ while (false !== ($file = readdir($handle))) {
         $a = (int) ($tilausrivi_row['varattu'] * 10000);
         $b = (int) ($keratty * 10000);
 
-        // tsekataan mahollinen var arvo
-        $_var = $yhtiorow['Kerayspoikkeama_kasittely'] == 'J' ? "J" : "P";
-
         // tsekataan tarviiko riviä splittaa, eli jäikö kokonaan keräämättä
         if (empty($keratty)) {
 
@@ -252,10 +252,10 @@ while (false !== ($file = readdir($handle))) {
           $_poikkeama = $tilausrivi_row['varattu'] - $keratty;
 
           // varaako jt:t saldoa?
-          if ($yhtiorow['Kerayspoikkeama_kasittely'] == 'J' and $yhtiorow['varaako_jt_saldoa'] == 'K') {
+          if ($yhtiorow['kerayspoikkeama_kasittely'] == 'J' and $yhtiorow['varaako_jt_saldoa'] == 'K') {
             $_varaus = $_poikkeama;
           }
-          elseif ($yhtiorow['Kerayspoikkeama_kasittely'] == 'U') {
+          elseif ($yhtiorow['kerayspoikkeama_kasittely'] == 'U') {
             $_poikkeama = 0;
           }
 
@@ -263,6 +263,10 @@ while (false !== ($file = readdir($handle))) {
           $poikkeuskentat = array("tilausrivi.varattu"=> $_varaus, "tilausrivi.jt"=> $_poikkeama, "tilausrivi.var" => $_var);
           kopioi_tilausrivi($tilausrivin_tunnus, $poikkeuskentat);
         }
+
+        $kerayspoikkeama[$tilausrivi_row['tuoteno']]['tilauksella'] = round($tilausrivi_row['varattu']);
+        $kerayspoikkeama[$tilausrivi_row['tuoteno']]['keratty'] = $keratty;
+        $kerayspoikkeama[$tilausrivi_row['tuoteno']]['status'] = $_var;
       }
 
       $query = "UPDATE tilausrivi
@@ -431,10 +435,19 @@ while (false !== ($file = readdir($handle))) {
   if (count($kerayspoikkeama) != 0 and !empty($error_email)) {
 
     $email_array[] = t("Tilauksen %d keräyksessä on havaittu poikkeamia", "", $otunnus).":";
-    $email_array[] = t("Tuoteno")." ".t("Kerätty")." ".t("Tilauksella");
+    $email_array[] = t("Tuoteno")." ".t("Kerätty")." ".t("Tilauksella")." ".t("Status");
 
     foreach ($kerayspoikkeama as $tuoteno => $_arr) {
-      $email_array[] = "{$tuoteno} {$_arr['keratty']} {$_arr['tilauksella']}";
+
+      if (isset($_arr['status'])) {
+        $_status = $_arr['status'] == "J" ? t("Jälkitoimitukseen") : t("Puuteriviksi");
+        $_status = $_status . " " . $_arr['tilauksella'] - $_arr['keratty'];
+      }
+      else {
+        $_status = "";
+      }
+
+      $email_array[] = "{$tuoteno} {$_arr['keratty']} {$_arr['tilauksella']} {$_status}";
     }
 
     pupesoft_log('logmaster_outbound_delivery_confirmation', "Keräyspoikkeamia tilauksessa {$otunnus}");

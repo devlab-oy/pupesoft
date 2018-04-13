@@ -602,7 +602,7 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
                         FROM varastopaikat
                         WHERE yhtio = '{$kukarow['yhtio']}'
                         AND tunnus = '{$laskurow['varasto']}'
-                        AND ulkoinen_jarjestelma IN ('L','P')";
+                        AND ulkoinen_jarjestelma IN ('P')";
             $v_result = pupe_query($v_query);
 
             if (mysql_num_rows($v_result) == 1) {

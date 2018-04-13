@@ -1626,7 +1626,7 @@ if ($tee == "VALMIS"
     $kassamyyja_kesken   = "";
     $kateisohitus    = "X";
   }
-  elseif (!isset($kassamyyja_kesken) and !isset($seka)) {
+  elseif (!isset($kassamyyja_kesken) and !isset($seka) and $laskurow['tilaustyyppi'] != 'W') {
 
     $query_maksuehto = "SELECT *
                         FROM maksuehto

@@ -264,9 +264,10 @@ function asiakas($limit = '') {
             concat_ws(' ', asiakas.nimi, asiakas.nimitark)  asiakkaannimi,
             asiakas.ryhma    asiakasryhma,
             kuka.kuka       myyjatunnus,
-            asiakas.postino  postinumero,
-            asiakas.toim_postitp toimituspostitp,
-            asiakas.toim_maa toimitusmaa
+            if(asiakas.toim_postino !='', asiakas.toim_postino, asiakas.postino) postinumero,
+            if(asiakas.toim_postitp !='', asiakas.toim_postitp, asiakas.postitp) toimituspostitp,
+            if(asiakas.toim_maa !='', asiakas.toim_maa, asiakas.maa) toimitusmaa,
+            if(asiakas.toim_nimitark !='', asiakas.toim_nimitark, asiakas.nimitark) nimitarkenne
             FROM asiakas
             LEFT JOIN kuka ON kuka.myyja=asiakas.myyjanro and kuka.yhtio=asiakas.yhtio and kuka.myyja > 0
             where asiakas.yhtio='$yhtio'

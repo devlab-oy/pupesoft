@@ -143,8 +143,8 @@ if (!function_exists("tulosta_lavakeraystarrat_tec")) {
 *** TARRA ALKAA ***
 {C|}
 {XR;0000,0000,0900,0450,A|}
-{PC003;0300,0190,10,10,I,00,B|}
-{RC003;ASIAKAS VAIHTUU|}
+{PC000;0300,0190,10,10,I,00,B|}
+{RC000;ASIAKAS VAIHTUU|}
 *** TULOSTUS  ***
 {XS;I,0001,0002C3200|}";
       }

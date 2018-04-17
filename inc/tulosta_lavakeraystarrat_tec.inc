@@ -117,9 +117,8 @@ if (!function_exists("tulosta_lavakeraystarrat_tec")) {
 {XS;I,0001,0002C3200|}
 ";
 
-      // jos mallitarkenne 400 ja myyntierä 1
-      //jos asiakas vaihtuu
-
+      // jos mallitarkenne 400 ja myyntierä 1 ja jos asiakas vaihtuu,
+      // niin tulostetaan tyhjä tarra
       $_mt400_me1 = ($tuorow['mallitarkenne'] == '400' and $tuorow['myynti_era'] == '1');
 
       if ($_mt400_me1 and !empty($ed_asiakas) and $lasrow['liitostunnus'] != $ed_asiakas) {

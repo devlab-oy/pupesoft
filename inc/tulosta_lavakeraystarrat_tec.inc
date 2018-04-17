@@ -13,6 +13,7 @@ if (!function_exists("tulosta_lavakeraystarrat_tec")) {
     $tuotteet = array();
     $lava_referenssiluku = 0;
     $lavanumero = 1;
+    $ed_asiakas = "";
 
     while ($tilrow = mysql_fetch_assoc($riresult)) {
 
@@ -116,6 +117,17 @@ if (!function_exists("tulosta_lavakeraystarrat_tec")) {
 {XS;I,0001,0002C3200|}
 ";
 
+      // jos mallitarkenne 400 ja myyntierä 1
+      //jos asiakas vaihtuu
+
+      $_mt400_me1 = ($tuorow['mallitarkenne'] == '400' and $tuorow['myynti_era'] == '1');
+
+      if ($_mt400_me1 and !empty($ed_asiakas) and $lasrow['liitostunnus'] != $ed_asiakas) {
+        $tarra = "
+*** TULOSTUS  ***
+{XS;I,0001,0002C3200|}";
+      }
+
       if (!empty($ed_lavanumero) and $tilrow['lavanumero'] != $ed_lavanumero) {
         $tarrat .= "
 *** TARRA ALKAA ***
@@ -146,6 +158,7 @@ if (!function_exists("tulosta_lavakeraystarrat_tec")) {
 
       $ed_lavanumero = $tilrow['lavanumero'];
       $ed_toimtapa = $lasrow['toimitustapa'];
+      $ed_asiakas = $lasrow['liitostunnus'];
     }
 
     // Ekan lavan tiedot

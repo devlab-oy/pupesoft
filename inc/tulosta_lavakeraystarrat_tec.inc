@@ -123,6 +123,9 @@ if (!function_exists("tulosta_lavakeraystarrat_tec")) {
 
       if ($_mt400_me1 and !empty($ed_asiakas) and $lasrow['liitostunnus'] != $ed_asiakas) {
         $tarra .= "
+*** TARRA ALKAA ***
+{C|}
+{XR;0000,0000,0900,0450,A|}
 *** TULOSTUS  ***
 {XS;I,0001,0002C3200|}";
       }

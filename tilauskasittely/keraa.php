@@ -2478,8 +2478,7 @@ if ($tee == 'P') {
                     $sorttauskentta,
                     if (tuote.tuotetyyppi='K','2 Työt','1 Muut') tuotetyyppi,
                     tuote.myynti_era,
-                    tuote.mallitarkenne,
-                    lasku.liitostunnus asiakasliitostunnus
+                    tuote.mallitarkenne
                     FROM tilausrivi
                     JOIN lasku ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus
                     LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus

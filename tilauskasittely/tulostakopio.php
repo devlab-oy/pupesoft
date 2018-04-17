@@ -2578,6 +2578,7 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
                 tuote.myynti_era,
                 tuote.mallitarkenne
                 FROM tilausrivi
+                JOIN lasku ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus
                 LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
                 JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
                 WHERE tilausrivi.otunnus  in ($tilausnumeroita)

@@ -117,19 +117,6 @@ if (!function_exists("tulosta_lavakeraystarrat_tec")) {
 {XS;I,0001,0002C3200|}
 ";
 
-      // jos mallitarkenne 400 ja myyntierä 1 ja jos asiakas vaihtuu,
-      // niin tulostetaan tyhjä tarra
-      $_mt400_me1 = ($tuorow['mallitarkenne'] == '400' and $tuorow['myynti_era'] == '1');
-
-      if ($_mt400_me1 and !empty($ed_asiakas) and $lasrow['liitostunnus'] != $ed_asiakas) {
-        $tarra .= "
-*** TARRA ALKAA ***
-{C|}
-{XR;0000,0000,0900,0450,A|}
-*** TULOSTUS  ***
-{XS;I,0001,0002C3200|}";
-      }
-
       if (!empty($ed_lavanumero) and $tilrow['lavanumero'] != $ed_lavanumero) {
         $tarrat .= "
 *** TARRA ALKAA ***
@@ -156,6 +143,19 @@ if (!function_exists("tulosta_lavakeraystarrat_tec")) {
 
       for ($i=1; $i<=$tulkpl; $i++) {
         $tarrat .= $tarra;
+      }
+
+      // jos mallitarkenne 400 ja myyntierä 1 ja jos asiakas vaihtuu,
+      // niin tulostetaan tyhjä tarra
+      $_mt400_me1 = ($tuorow['mallitarkenne'] == '400' and $tuorow['myynti_era'] == '1');
+
+      if ($_mt400_me1 and !empty($ed_asiakas) and $lasrow['liitostunnus'] != $ed_asiakas) {
+        $tarrat .= "
+*** TARRA ALKAA ***
+{C|}
+{XR;0000,0000,0900,0450,A|}
+*** TULOSTUS  ***
+{XS;I,0001,0002C3200|}";
       }
 
       $ed_lavanumero = $tilrow['lavanumero'];

@@ -30,6 +30,8 @@ if ($tee == "VAHV_TA_AJAX") {
             and tunnus      = '{$rivitunnus}'";
   pupe_query($query);
 
+  joku_funktio($rivitunnus,$paiv_toimaika,TRUE);
+
   echo json_encode('ok');
   exit;
 }
@@ -43,6 +45,8 @@ if ($tee == "PAIVITA_TA_AJAX") {
             and uusiotunnus = 0
             and tunnus      = '{$rivitunnus}'";
   pupe_query($query);
+
+  joku_funktio($rivitunnus,$paiv_toimaika);
 
   echo json_encode('ok');
   exit;
@@ -1554,12 +1558,14 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
             var submitid    = $(this).attr(\"id\");
             var osat        = submitid.split(\"_\");
             var rivitunnus  = osat[1];
+            var paiv_toimaika = osat[2];
 
             $.post('{$_SERVER['SCRIPT_NAME']}',
               {
                 tee: 'VAHV_TA_AJAX',
                 async: false,
                 rivitunnus: rivitunnus,
+                paiv_toimaika: paiv_toimaika,
                 no_head: 'yes',
                 ohje: 'off'
               },
@@ -2051,7 +2057,7 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
             echo "</span>";
 
             if ($prow['jaksotettu'] == 0) {
-              echo " <a href='#' class='vahvistarivintoimaika' id ='vta_$prow[tunnus]'>*".t("Vahvista toimitusaika")."*</a>";
+              echo " <a href='#' class='vahvistarivintoimaika' id ='vta_$prow[tunnus]_$prow[toimaika]'>*".t("Vahvista toimitusaika")."*</a>";
             }
           }
 

@@ -7790,6 +7790,23 @@ if (!function_exists("paivita_toimitukset")) {
   }
 }
 
+if (!function_exists("joku_funktio")) {
+  function joku_funktio($rivitunnus, $paiv_toimiaika, $vahvistus = false) {
+    global $yhtiorow, $kukarow;
+
+    $query = "INSERT INTO ostorivien_vahvistus SET
+              yhtio                = '$kukarow[yhtio]',
+              tilausrivin_tunnus   = '$rivitunnus',
+              vahvistettuaika      = '$paiv_toimiaika',
+              laatija              = '$kukarow[kuka]',
+              luontiaika           = now()";
+    pupe_query($query);
+
+
+
+
+  }
+}
 if (!function_exists("tulosta_ytunnus")) {
   function tulosta_ytunnus($ytunnus, $maa = "", $vienti = "", $hetu_tarkenne = false) {
     global $yhtiorow, $kukarow;

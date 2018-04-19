@@ -7790,14 +7790,18 @@ if (!function_exists("paivita_toimitukset")) {
   }
 }
 
-if (!function_exists("joku_funktio")) {
-  function joku_funktio($rivitunnus, $paiv_toimiaika, $vahvistus = false) {
+if (!function_exists("tallenna_ostotilaus_vahvistus")) {
+  function tallenna_ostotilaus_vahvistus($rivitunnus, $paiv_toimiaika, $vahvistus = false) {
     global $yhtiorow, $kukarow;
 
+    if ($vahvistus) {
+      $vahvistettu = ',vahvistettu = 1';
+    }
     $query = "INSERT INTO ostorivien_vahvistus SET
               yhtio                = '$kukarow[yhtio]',
               tilausrivin_tunnus   = '$rivitunnus',
               vahvistettuaika      = '$paiv_toimiaika',
+              $vahvistettu
               laatija              = '$kukarow[kuka]',
               luontiaika           = now()";
     pupe_query($query);

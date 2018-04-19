@@ -30,7 +30,7 @@ if ($tee == "VAHV_TA_AJAX") {
             and tunnus      = '{$rivitunnus}'";
   pupe_query($query);
 
-  joku_funktio($rivitunnus,$paiv_toimaika,TRUE);
+  tallenna_ostotilaus_vahvistus($rivitunnus,$paiv_toimaika,TRUE);
 
   echo json_encode('ok');
   exit;
@@ -45,8 +45,6 @@ if ($tee == "PAIVITA_TA_AJAX") {
             and uusiotunnus = 0
             and tunnus      = '{$rivitunnus}'";
   pupe_query($query);
-
-  joku_funktio($rivitunnus,$paiv_toimaika);
 
   echo json_encode('ok');
   exit;

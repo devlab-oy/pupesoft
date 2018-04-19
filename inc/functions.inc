@@ -7795,8 +7795,9 @@ if (!function_exists("tallenna_ostotilaus_vahvistus")) {
     global $yhtiorow, $kukarow;
 
     if ($vahvistus) {
-      $vahvistettu = ',vahvistettu = 1';
+      $vahvistettu = 'vahvistettu = 1,';
     }
+
     $query = "INSERT INTO ostorivien_vahvistus SET
               yhtio                = '$kukarow[yhtio]',
               tilausrivin_tunnus   = '$rivitunnus',

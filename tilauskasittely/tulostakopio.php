@@ -2571,6 +2571,18 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
         $where_lisa = "GROUP BY tilausrivi.tuoteno, tilausrivi.hyllyalue, tilausrivi.hyllyvali, tilausrivi.hyllyalue, tilausrivi.hyllynro";
       }
 
+      // ignoorataan rivien haussa pakkauksien kulutuotteet
+      $query = "SELECT group_concat(pakkausveloitus_tuotenumero) pakkausveloitus_tuotenumero
+                FROM pakkaus
+                WHERE  yhtio      = '$kukarow[yhtio]'
+                AND trim(pakkausveloitus_tuotenumero) != ''";
+      $pakvel_result = pupe_query($query);
+      $pakvel_row = mysql_fetch_assoc($pakvel_result);
+
+      if (!empty($pakvel_row['pakkausveloitus_tuotenumero'])) {
+        $lisa1 .= " and tuote.tuoteno not in ('".str_replace(",", "','", $pakvel_row['pakkausveloitus_tuotenumero'])."')";
+      }
+
       // rivit
       $query = "SELECT tilausrivi.*,
                 $select_lisa

@@ -2580,7 +2580,7 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
       $pakvel_row = mysql_fetch_assoc($pakvel_result);
 
       if (!empty($pakvel_row['pakkausveloitus_tuotenumero'])) {
-        $lisa1 .= " and tuote.tuoteno not in ('".str_replace(",", "','", $pakvel_row['pakkausveloitus_tuotenumero'])."')";
+        $lisa1 .= " and tilausrivi.tuoteno not in ('".str_replace(",", "','", $pakvel_row['pakkausveloitus_tuotenumero'])."')";
       }
 
       // rivit

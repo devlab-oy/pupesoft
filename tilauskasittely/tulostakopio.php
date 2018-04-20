@@ -2574,7 +2574,7 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
       // ignoorataan rivien haussa pakkauksien kulutuotteet
       $query = "SELECT group_concat(pakkausveloitus_tuotenumero) pakkausveloitus_tuotenumero
                 FROM pakkaus
-                WHERE  yhtio      = '$kukarow[yhtio]'
+                WHERE yhtio = '$kukarow[yhtio]'
                 AND trim(pakkausveloitus_tuotenumero) != ''";
       $pakvel_result = pupe_query($query);
       $pakvel_row = mysql_fetch_assoc($pakvel_result);

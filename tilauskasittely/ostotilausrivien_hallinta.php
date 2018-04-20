@@ -189,6 +189,8 @@ if ($ytunnus != '') {
         foreach ($vahvistetturivi as $tunnus => $vahvistettu) {
           $query = "UPDATE tilausrivi SET  jaksotettu = '{$vahvistettu}' where yhtio = '{$kukarow['yhtio']}' and tunnus = '{$tunnus}' and tyyppi = 'O'";
           $result = pupe_query($query);
+
+          tallenna_ostotilaus_vahvistus($tunnus,$vahvistetturivi_toimaika[$tunnus],TRUE);
         }
       }
 
@@ -481,12 +483,14 @@ if (isset($laskurow)) {
       }
       elseif (mysql_field_name($presult, $i) == 'toimaika') {
         echo "<td align='right'><input type='text' name='toimaikarivi[{$prow['tunnus']}]' value='{$prow[$i]}' size='10'></td>";
+        $_toimaika = $prow[$i];
       }
       elseif (mysql_field_name($presult, $i) == 'vahvistettu') {
         $chekkis = "";
         if ($prow['vahvistettu'] == 1) {
           $chekkis = 'CHECKED';
         }
+        echo "<input type='hidden' name='vahvistetturivi_toimaika[{$prow['tunnus']}]' value='$_toimaika'>";
         echo "<td><input type='checkbox' name='vahvistetturivi[{$prow['tunnus']}]' value='1' {$chekkis}></td>";
       }
       else {

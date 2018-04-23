@@ -904,7 +904,7 @@ $laskun_numero = $osrow["laskunro"]; // älä mene muuttaamaan tai poistamaan tätä
 
 $lajilisa = strtolower(substr($osrow['ebid'], 0, 3));
 
-if ($osrow["ebid"] != "TECCOM-INVOICE" and $osrow['ebid'] != "MAVENTAXML" and $trow['asn_sanomat'] != 'F') {
+if ($osrow['ebid'] == "FINVOICEXML" and $trow['asn_sanomat'] == 'F') {
   $query  = "LOCK TABLE lasku WRITE, sanakirja WRITE, tiliointi READ";
   $result = pupe_query($query);
 
@@ -982,7 +982,8 @@ $virheet   = 0;
 for ($i = 0; $i < count($rtuoteno); $i++) {
 
   // tehdään tää vaan jos meillä on rivinumero
-  if ((!isset($rtuoteno[$i]["kauttalaskutus"]) or $rtuoteno[$i]["kauttalaskutus"] != "KAUTTALASKUTUS") and (int) $rtuoteno[$i]["tilaajanrivinro"] != 0 and $osrow['ebid'] != "TECCOM-INVOICE" and $osrow['ebid'] != "MAVENTAXML" and $trow['asn_sanomat'] != 'F') {
+  if ((!isset($rtuoteno[$i]["kauttalaskutus"]) or $rtuoteno[$i]["kauttalaskutus"] != "KAUTTALASKUTUS") and (int) $rtuoteno[$i]["tilaajanrivinro"] != 0 and 
+  ($osrow['ebid'] == "FINVOICEXML" and $trow['asn_sanomat'] == 'F')) {
 
     $toim_tuoteno   = $rtuoteno[$i]["tuoteno"];
     $kpl      = (float) $rtuoteno[$i]["kpl"];
@@ -1681,8 +1682,8 @@ for ($i = 0; $i < count($rtuoteno); $i++) {
   }
 }
 
-// Jos kyseessä on TecCom ostolasku tai Maventa-lasku
-if ($osrow["ebid"] == "TECCOM-INVOICE" or ($osrow['ebid'] == 'MAVENTAXML' and $trow['asn_sanomat'] == 'M') or ($osrow['ebid'] == 'FINVOICEXML' and $trow['asn_sanomat'] == 'F')) {
+// Jos kyseessä on TecCom ostolasku tai Maventa-lasku tai Finvoice-lasku
+if (($osrow["ebid"] == "TECCOM-INVOICE"  and $trow['asn_sanomat'] == 'K') or ($osrow['ebid'] == 'MAVENTAXML' and $trow['asn_sanomat'] == 'M') or ($osrow['ebid'] == 'FINVOICEXML' and $trow['asn_sanomat'] == 'F')) {
 
   $loop_array = array();
 

@@ -509,6 +509,12 @@ if ($lopetus == "") {
     <td class='back'><br></td>
     </tr>
     <tr><th valign='top'>", t("Tuotelista"), "<br>(", t("Rajaa näillä tuotteilla"), ")</th><td colspan='3'><textarea name='tuotteet_lista' rows='5' cols='35'>{$tuotteet_lista}</textarea></td></tr>
+
+    <tr><th valign='top'>", t("Tuotelista 2"),
+    "<br>(", t("Kaikkia annettuja tuotteita tulee löytyä"), ")</th><td colspan='3'><textarea name='tuotteet_lista2' rows='5' cols='35'>{$tuotteet_lista2}</textarea></td>
+
+    <td class='back'>", t("(Ei toimi jos listaat tuloksen tuotteittain)"), "</td>
+    </tr>
     <tr>
     <td class='back'><br></td>
     </tr>
@@ -1726,8 +1732,10 @@ if ((isset($aja_raportti) or isset($valitse_asiakas)) and count($_REQUEST) > 0) 
     }
 
     if (isset($tuotteet_lista) and $tuotteet_lista != '') {
+
       $tuotteet = explode("\n", $tuotteet_lista);
       $tuoterajaus = "";
+
       foreach ($tuotteet as $tuote) {
         if (trim($tuote) != '') {
           $tuoterajaus .= "'".trim($tuote)."',";
@@ -1736,6 +1744,33 @@ if ((isset($aja_raportti) or isset($valitse_asiakas)) and count($_REQUEST) > 0) 
 
       if ($tuoterajaus != "") {
         $lisa .= "and tuote.tuoteno in (".substr($tuoterajaus, 0, -1).") ";
+      }
+    }
+
+    if (isset($tuotteet_lista2) and $tuotteet_lista2 != '') {
+
+      // ei voida groupata tuotteittain tässä keississä
+      if ($tuotegroups > 0) {
+        echo "<font class='error'>".t("VIRHE: Tulosta ei voi groupata tuotteilla kun käytetään tuotelista 2 rajausta")."!</font><br>";
+        #$tee = '';
+      }
+
+      $tuotteet = explode("\n", $tuotteet_lista2);
+      $tuotelista2_having = "";
+      $tuotelista2_rajaus = "";
+      $_i = 1;
+
+      foreach ($tuotteet as $tuote) {
+        if (trim($tuote) != '') {
+          $tuote = trim($tuote);
+          $tuotelista2_select .= ", sum(if(tilausrivi.tuoteno = '{$tuote}',1,0)) check_{$_i}";
+          $tuotelista2_having .= "check_{$_i} > 0 and ";
+          $_i++;
+        }
+      }
+
+      if (!empty($tuotelista2_having)) {
+        $tuotelista2_having = " HAVING ".substr($tuotelista2_having, 0, -5);
       }
     }
 
@@ -2485,6 +2520,7 @@ if ((isset($aja_raportti) or isset($valitse_asiakas)) and count($_REQUEST) > 0) 
       }
 
       $query .= $tilauslisa3;
+      $query .= $tuotelista2_select;
       $query .= "\nFROM lasku use index (yhtio_tila_tapvm)
             JOIN yhtio ON (yhtio.yhtio = lasku.yhtio)
             JOIN tilausrivi use index ({$index}) ON (tilausrivi.yhtio=lasku.yhtio and tilausrivi.{$ouusio}=lasku.tunnus and tilausrivi.tyyppi={$tyyppi})
@@ -2610,6 +2646,7 @@ if ((isset($aja_raportti) or isset($valitse_asiakas)) and count($_REQUEST) > 0) 
       $query .= "  {$myse_asiakasrajaus}
             {$lisa}
             GROUP BY {$group}
+            {$tuotelista2_having}
             ORDER BY {$order}";
 
       // ja sitten ajetaan itte query

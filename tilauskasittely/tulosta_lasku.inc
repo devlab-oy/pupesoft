@@ -951,6 +951,7 @@ if (!function_exists('rivi_lasku')) {
                 WHERE yhtio = '{$kukarow['yhtio']}'
                 AND tuoteno = '{$row['tuoteno']}'
                 AND ytunnus = '{$laskurow['ytunnus']}'
+                AND tyyppi  = ''
                 ORDER BY tunnus";
       $asiakaskommentti_res = pupe_query($query);
 

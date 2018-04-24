@@ -770,7 +770,8 @@ if (!function_exists('rivi_tarjous')) {
                      from asiakaskommentti
                      where yhtio = '{$kukarow['yhtio']}'
                      and tuoteno = '{$row['tuoteno']}'
-                     and ytunnus = '{$laskurow['ytunnus']}'";
+                     and ytunnus = '{$laskurow['ytunnus']}'
+                     and tyyppi  = ''";
       $askomresul = pupe_query($askomquery);
 
       if (mysql_num_rows($askomresul) > 0) {

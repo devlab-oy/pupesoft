@@ -1378,7 +1378,8 @@ if (!function_exists('rivi_lahete')) {
                      from asiakaskommentti
                      where yhtio = '$kukarow[yhtio]'
                      and tuoteno = '$row[tuoteno]'
-                     and ytunnus = '$laskurow[ytunnus]'";
+                     and ytunnus = '$laskurow[ytunnus]'
+                     and tyyppi  = ''";
       $askomresul = pupe_query($askomquery);
 
       if (mysql_num_rows($askomresul) > 0) {
@@ -3360,7 +3361,8 @@ if (!function_exists('rivi_asiakviivakoodi_lahete')) {
                  from asiakaskommentti
                  where yhtio = '$kukarow[yhtio]'
                  and ytunnus = '$laskurow[ytunnus]'
-                 and tuoteno = '$row[tuoteno]'";
+                 and tuoteno = '$row[tuoteno]'
+                 and tyyppi  = ''";
     $eanres = pupe_query($eanquery);
     $komrow = mysql_fetch_assoc($eanres);
 

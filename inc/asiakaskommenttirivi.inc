@@ -13,7 +13,7 @@ if (mysql_field_name($result, $i) == "ytunnus" and $lukitse_avaimeen != "") {
   $tyyppi = 4;
   $jatko = 0;
 }
-if ($fieldname == "tyyppi") {
+if (mysql_field_name($result, $i) == "tyyppi") {
 
   $sela = $selb = '';
   if ($trow[$i]=='S') $selb='SELECTED';

@@ -77,6 +77,7 @@ if (!function_exists("laheta_excel_koontilahete")) {
                 ON asiakaskommentti.yhtio = tilausrivi.yhtio
                 AND asiakaskommentti.ytunnus = lasku.ytunnus
                 AND asiakaskommentti.tuoteno = tilausrivi.tuoteno
+                AND asiakaskommentti.tyyppi = ''
               LEFT JOIN tuotteen_avainsanat AS avainsana_nimitys
                 ON avainsana_nimitys.yhtio = tuote.yhtio
                 AND avainsana_nimitys.kieli = asiakas.kieli

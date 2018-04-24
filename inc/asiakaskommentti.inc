@@ -17,7 +17,8 @@ $kentat = "asiakaskommentti.tunnus,
   FROM tuote
   WHERE tuote.tuoteno = asiakaskommentti.tuoteno
   AND tuote.yhtio = asiakaskommentti.yhtio)) Tuote,
-  asiakaskommentti.kommentti";
+  asiakaskommentti.kommentti,
+  if (asiakaskommentti.tyyppi = 'S', 'Sisäinen', '') Tyyppi";
 }
 else {
   // HUOM HUOM: ethän muuta näitä ilman, että korjaat myös yllapito.php:ssä iframen lukitse_avaimeen muuttujat
@@ -28,7 +29,8 @@ else {
     FROM tuote
     WHERE tuote.tuoteno = asiakaskommentti.tuoteno
     AND tuote.yhtio = asiakaskommentti.yhtio)) Tuote, 
-    asiakaskommentti.kommentti";
+    asiakaskommentti.kommentti,
+    if (asiakaskommentti.tyyppi = 'S', 'Sisäinen', '') Tyyppi";
 }
 
 $hakukentat = 'tunnus, ytunnus, tuoteno, kommentti';

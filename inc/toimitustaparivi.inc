@@ -133,20 +133,15 @@ if (mysql_field_name($result, $i) == "virallinen_selite") {
   $ulos .= "<optgroup label='Unifaun / DANX'>";
   $ulos .= "<option value='DANXSTD' {$sel["DANXSTD"]}>DANX</option>";
   $ulos .= "</optgroup>";
-
-  $ulos .= "<optgroup label='Unifaun / DB SCHENKER kotimaankuljetukset'>";
-  $ulos .= "<option value='KLGRP' {$sel["KLGRP"]}>DB SCHENKER kotimaankuljetukset</option>";
-  $ulos .= "</optgroup>";
-
+  
   $ulos .= "<optgroup label='Unifaun / DB SCHENKER Parcel - kotimaan pakettikuljetukset'>";
   $ulos .= "<option value='SBTLFIEXP' {$sel["SBTLFIEXP"]}>DB SCHENKERparcel (Suomi)</option>";
   $ulos .= "</optgroup>";
 
-  $ulos .= "<optgroup label='Unifaun / DB SCHENKER Vientikuljetukset'>";
-  $ulos .= "<option value='SBTLFISY' {$sel["SBTLFISY"]}>DB SCHENKER Vientikuljetukset</option>";
-  $ulos .= "</optgroup>";
-
   $ulos .= "<optgroup label='Unifaun / DB Schenker'>";
+  $ulos .= "<option value='KLGRP' {$sel["SBTLFIRREX"]}>DB SCHENKER Noutopistepaketti</option>";
+  $ulos .= "<option value='KLGRP' {$sel["KLGRP"]}>DB SCHENKER kotimaankuljetukset</option>";
+  $ulos .= "<option value='SBTLFISY' {$sel["SBTLFISY"]}>DB SCHENKER Vientikuljetukset</option>";
   $ulos .= "<option value='BBU' {$sel["BBU"]}>DB SCHENKERbudget</option>";
   $ulos .= "<option value='BCSI' {$sel["BCSI"]}>DB SCHENKERcoldsped - Europa</option>";
   $ulos .= "<option value='BCS' {$sel["BCS"]}>DB SCHENKERcoldsped - Sverige</option>";

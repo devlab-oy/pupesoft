@@ -2647,6 +2647,7 @@ else {
                           WHERE yhtio = '{$kukarow['yhtio']}'
                           AND tuoteno = '{$tilrow['tuoteno']}'
                           AND ytunnus = '{$lasrow['ytunnus']}'
+                          AND tyyppi  = ''
                           ORDER BY tunnus";
                 $asiakaskommentti_res = pupe_query($query);
 

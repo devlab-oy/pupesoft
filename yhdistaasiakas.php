@@ -537,6 +537,7 @@ function yhdista_asiakkaita($jataminut, $yhdista) {
                          kommentti  = '$ahrow[kommentti]',
                          tuoteno    = '$ahrow[tuoteno]',
                          ytunnus    = '$jrow[ytunnus]',
+                         tyyppi     = '$ahrow[tyyppi]',
                          laatija    = '$kukarow[kuka]',
                          luontiaika = now()";
             $ahinsertresult = pupe_query($ahinsert);

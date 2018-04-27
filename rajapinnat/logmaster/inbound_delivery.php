@@ -107,7 +107,7 @@ $toimires = pupe_query($query);
 $toimirow = mysql_fetch_assoc($toimires);
 
 // haetaan tilausrivit
-$query = "SELECT *
+$query = "SELECT tilausrivi.*, varastopaikat.*
           FROM tilausrivi
           JOIN varastopaikat ON (
             varastopaikat.yhtio   = tilausrivi.yhtio AND
@@ -121,8 +121,24 @@ $query = "SELECT *
           AND varattu     > 0
           AND uusiotunnus = '{$saapumisnro}'";
 $rivit_res = pupe_query($query);
+$varasto_check = array();
 
-$uj_nimi = "Velox";
+while ($rivit_row = mysql_fetch_array($rivit_res)) {
+  $varasto_check[$rivit_row['ulkoinen_jarjestelma']]++;
+}
+
+mysql_data_seek($rivit_res, 0);
+
+if ($varasto_check['L'] > 0 and $varasto_check['P'] == 0) {
+  $uj_nimi = "Velox";
+}
+elseif ($varasto_check['L'] == 0 and $varasto_check['P'] > 0) {
+  $uj_nimi = "Postnord";
+}
+else {
+  pupesoft_log('logmaster_inbound_delivery', "Saapuminen {$row['laskunro']} sis‰lt‰‰ useamman ulkoisen varaston tuotteita. Ei saa sis‰lt‰‰ kuin yht‰.");
+  exit("Saapuminen {$row['laskunro']} sis‰lt‰‰ useamman ulkoisen varaston tuotteita. Ei saa sis‰lt‰‰ kuin yht‰.");
+}
 
 # Rakennetaan XML
 $xml = simplexml_load_string("<?xml version='1.0' encoding='UTF-8'?><Message></Message>");

@@ -79,7 +79,7 @@ if ($datetime_checkpoint != "" and $ajetaanko_kaikki == "NO") {
                 AND tuote.status      != 'P'
                 AND tuote.tuotetyyppi  NOT in ('A','B')
                 AND tuote.tuoteno     != ''
-                AND tuote.nakyvyys    != '')
+                AND (tuote.nakyvyys != '' or tuote.hinnastoon = 'W'))
               WHERE tapahtuma.yhtio    = '{$kukarow["yhtio"]}'
               $muutoslisa1)
 
@@ -92,7 +92,7 @@ if ($datetime_checkpoint != "" and $ajetaanko_kaikki == "NO") {
                 AND tuote.status      != 'P'
                 AND tuote.tuotetyyppi  NOT in ('A','B')
                 AND tuote.tuoteno     != ''
-                AND tuote.nakyvyys    != '')
+                AND (tuote.nakyvyys != '' or tuote.hinnastoon = 'W'))
               WHERE tilausrivi.yhtio   = '{$kukarow["yhtio"]}'
               $muutoslisa2)
 
@@ -104,7 +104,7 @@ if ($datetime_checkpoint != "" and $ajetaanko_kaikki == "NO") {
               AND tuote.status        != 'P'
               AND tuote.tuotetyyppi    NOT in ('A','B')
               AND tuote.tuoteno       != ''
-              AND tuote.nakyvyys      != ''
+              AND (tuote.nakyvyys != '' or tuote.hinnastoon = 'W')
               $muutoslisa3)
 
               ORDER BY 1";
@@ -116,7 +116,7 @@ else {
              AND tuote.status      != 'P'
              AND tuote.tuotetyyppi  NOT in ('A','B')
              AND tuote.tuoteno     != ''
-             AND tuote.hinnastoon  != ''";
+             AND (tuote.nakyvyys != '' or tuote.hinnastoon = 'W')";
 }
 
 $result = pupe_query($query);

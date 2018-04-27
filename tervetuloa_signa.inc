@@ -133,6 +133,8 @@ function echo_myyntiseuranta_table() {
 function hae_tulos_ja_liikevaihto($aikajana) {
   global $kukarow;
 
+  $today = date('Y-m-d');
+  
   $query = "SELECT
             IFNULL(round(Sum(if (tili.sisainen_taso != '3A', summa, 0)) * -1, 2), 0) AS tulos,
             IFNULL(round(Sum(if (tili.sisainen_taso LIKE '31%', summa, 0)) * -1, 2), 0) AS liikevaihto
@@ -143,7 +145,7 @@ function hae_tulos_ja_liikevaihto($aikajana) {
             WHERE tiliointi.yhtio    = '{$kukarow['yhtio']}'
             AND tiliointi.korjattu   = ''
             AND tiliointi.tapvm      >= '{$aikajana['start_date']}'
-            AND tiliointi.tapvm      <= '{$aikajana['end_date']}'";
+            AND tiliointi.tapvm      <= '{$today}'";
   $result = pupe_query($query);
 
   return mysql_fetch_assoc($result);

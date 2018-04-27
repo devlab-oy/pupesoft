@@ -98,6 +98,21 @@ $query = "SELECT otunnus, min(toimaika) toimaika, count(*) maara
 $tilasnumero_res = pupe_query($query);
 $tilasnumero_row = mysql_fetch_assoc($tilasnumero_res);
 
+$varastorow = hae_varasto($row['varasto']);
+
+switch ($varastorow['ulkoinen_jarjestelma']) {
+case 'L':
+  $uj_nimi = "Velox";
+  break;
+case 'P':
+  $uj_nimi = "PostNord";
+  break;
+default:
+  pupesoft_log('logmaster_inbound_delivery', "Tilauksen {$otunnus} varaston ulkoinen järjestelmä oli virheellinen.");
+
+  return false;
+}
+
 // haetaan toimittajan tiedot
 $query = "SELECT *
           FROM toimi
@@ -131,6 +146,9 @@ $body->addChild('OrderCode',        $ordercode);
 $body->addChild('OrderType',        'PO');
 $body->addChild('ReceiptsListDate', tv1dateconv($row['luontiaika']));
 $body->addChild('DeliveryDate',     tv1dateconv($tilasnumero_row['toimaika']));
+if ($uj_nimi == "Velox") {
+  $body->addChild('Comments',        xml_cleanstring($row['comments']));
+}
 $body->addChild('Warehouse',        '');
 
 $vendor = $body->addChild('Vendor');

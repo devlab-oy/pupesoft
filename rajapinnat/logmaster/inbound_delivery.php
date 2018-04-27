@@ -98,21 +98,6 @@ $query = "SELECT otunnus, min(toimaika) toimaika, count(*) maara
 $tilasnumero_res = pupe_query($query);
 $tilasnumero_row = mysql_fetch_assoc($tilasnumero_res);
 
-$varastorow = hae_varasto($row['varasto']);
-
-switch ($varastorow['ulkoinen_jarjestelma']) {
-case 'L':
-  $uj_nimi = "Velox";
-  break;
-case 'P':
-  $uj_nimi = "PostNord";
-  break;
-default:
-  pupesoft_log('logmaster_inbound_delivery', "Tilauksen {$otunnus} varaston ulkoinen järjestelmä oli virheellinen.");
-
-  return false;
-}
-
 // haetaan toimittajan tiedot
 $query = "SELECT *
           FROM toimi
@@ -124,12 +109,20 @@ $toimirow = mysql_fetch_assoc($toimires);
 // haetaan tilausrivit
 $query = "SELECT *
           FROM tilausrivi
-          WHERE yhtio     = '{$kukarow['yhtio']}'
-          AND tyyppi      = 'O'
+          JOIN varastopaikat ON (
+            varastopaikat.yhtio   = tilausrivi.yhtio AND
+            varastopaikat.tunnus  = tilausrivi.varasto AND
+            varastopaikat.tyyppi != 'P' AND
+            varastopaikat.ulkoinen_jarjestelma IN ('L','P')
+          )
+          WHERE tilausrivi.yhtio     = '{$kukarow['yhtio']}'
+          AND tilausrivi.tyyppi      = 'O'
           AND kpl         = 0
           AND varattu     > 0
           AND uusiotunnus = '{$saapumisnro}'";
 $rivit_res = pupe_query($query);
+
+$uj_nimi = "Velox";
 
 # Rakennetaan XML
 $xml = simplexml_load_string("<?xml version='1.0' encoding='UTF-8'?><Message></Message>");

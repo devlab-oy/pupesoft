@@ -958,6 +958,22 @@ if ($tee == 'NAYTATILAUS' or !empty($komento["Purkulista"]) or !empty($komento["
         $row['kommentti'] .= "\n".t("Jälkitoimituksessa")." {$jt_check_row['kpl']} ".t_avainsana("Y", "", "and avainsana.selite='{$row["yksikko"]}'", "", "", "selite");
       }
 
+      // katsotaan onko tuotetta ennakkotilauksilla
+      $query = "SELECT sum(varattu) kpl
+                FROM tilausrivi USE INDEX (yhtio_tyyppi_tuoteno_laskutettuaika)
+                WHERE yhtio        = '{$kukarow['yhtio']}'
+                AND tyyppi         = 'E'
+                AND tuoteno        = '{$row['tuoteno']}'
+                AND laskutettuaika = '0000-00-00'
+                AND var            = ''
+                $laskurow_query_lisa";
+      $en_check_res = pupe_query($query);
+      $en_check_row = mysql_fetch_assoc($en_check_res);
+
+      if ($en_check_row['kpl'] > 0) {
+        $row['kommentti'] .= "\n".t("Ennakkotilauksilla")." {$en_check_row['kpl']} ".t_avainsana("Y", "", "and avainsana.selite='{$row["yksikko"]}'", "", "", "selite");
+      }
+
       // Trimmataan uudestaan
       $row["kommentti"] = trim($row["kommentti"]);
 

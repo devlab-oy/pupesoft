@@ -93,6 +93,8 @@ if ($rows > 0) {
   $excelsarake++;
   $worksheet->writeString($excelrivi, $excelsarake, t("Myyntihinta"));
   $excelsarake++;
+  $worksheet->writeString($excelrivi, $excelsarake, t("Myymälähinta"));
+  $excelsarake++;
   $worksheet->writeString($excelrivi, $excelsarake, t("Tuotemerkki"));
   $excelsarake++;
   $worksheet->writeString($excelrivi, $excelsarake, t("Laatija"));
@@ -109,6 +111,8 @@ while ($row = mysql_fetch_assoc($res)) {
   $worksheet->writeString($excelrivi, $excelsarake, $row["nimitys"]);
   $excelsarake++;
   $worksheet->writeString($excelrivi, $excelsarake, $row["myyntihinta"]);
+  $excelsarake++;
+  $worksheet->writeString($excelrivi, $excelsarake, $row["myymalahinta"]);
   $excelsarake++;
   $worksheet->writeString($excelrivi, $excelsarake, $row["tuotemerkki"]);
   $excelsarake++;

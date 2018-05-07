@@ -512,6 +512,11 @@ if ((int) $chk_row["ok"] == (int) $chk_row["kaikki"] and (int) $chk_row["ok"] !=
 
     $valittu_tulostin = !isset($valittu_tulostin) ? '' : $valittu_tulostin;
 
+    if ($toim == "LAVAKERAYS") {
+      // HB-kerayslista tulostin
+      setcookie("hb_kerayslista_tulostin", $valittu_tulostin, time()+60*60*24*90, "/");
+    }
+
     if ($valittu_tulostin == "-88") {
       $komento = "-88";
     }
@@ -533,6 +538,9 @@ if ((int) $chk_row["ok"] == (int) $chk_row["kaikki"] and (int) $chk_row["ok"] !=
                AND tunnus = '$valittu_lavakeraystarra_tulostin'";
     $kirres = pupe_query($query);
     $kirrow = mysql_fetch_assoc($kirres);
+
+    // HB-keraystarra tulostin
+    setcookie("hb_keraystarra_tulostin", $kirrow['tunnus'], time()+60*60*24*90, "/");
 
     if (!empty($kirrow['komento'])) {
       tulosta_lavakeraystarrat_tec($riresult, $rivinumerot, $kirrow['komento']);

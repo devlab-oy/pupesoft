@@ -3361,15 +3361,26 @@ if (mysql_num_rows($result) != 0) {
 
       echo "<table>";
       echo "<tr>";
-      echo "<th>".t("Keräsylistan tulostin")."</th>";
+      echo "<th>".t("Keräyslistan tulostin")."</th>";
       echo "<td><select name='valittu_tulostin'>";
       echo "<option value=''>".t("Valitse tulostin")."</option>";
+
+      if (empty($hb_kerayslista_tulostin)) {
+        $hb_kerayslista_tulostin = isset($_COOKIE["hb_kerayslista_tulostin"]) ? $_COOKIE["hb_kerayslista_tulostin"] : "";
+      }
+
+      if (empty($hb_keraystarra_tulostin)) {
+        $hb_keraystarra_tulostin = isset($_COOKIE["hb_keraystarra_tulostin"]) ? $_COOKIE["hb_keraystarra_tulostin"] : "";
+      }
 
       while ($kirrow = mysql_fetch_array($kirre)) {
         $sel = '';
 
-        //tässä vaiheessa käyttäjän oletustulostin ylikirjaa optimaalisen varastotulostimen
-        if (($kirrow['tunnus'] == $kirjoitin and ($kukarow['kirjoitin'] == 0 or $lasku_yhtio_originaali != $kukarow["yhtio"])) or ($kirrow['tunnus'] == $kukarow['kirjoitin'])) {
+        if ($hb_kerayslista_tulostin == $kirrow['tunnus']) {
+          $sel = "SELECTED";
+        }
+        elseif (($kirrow['tunnus'] == $kirjoitin and ($kukarow['kirjoitin'] == 0 or $lasku_yhtio_originaali != $kukarow["yhtio"])) or ($kirrow['tunnus'] == $kukarow['kirjoitin'])) {
+          //tässä vaiheessa käyttäjän oletustulostin ylikirjaa optimaalisen varastotulostimen
           $sel = "SELECTED";
         }
 
@@ -3388,8 +3399,11 @@ if (mysql_num_rows($result) != 0) {
       while ($kirrow = mysql_fetch_array($kirre)) {
         $sel = '';
 
-        //tässä vaiheessa käyttäjän oletustulostin ylikirjaa optimaalisen varastotulostimen
-        if (($kirrow['tunnus'] == $kirjoitin and ($kukarow['kirjoitin'] == 0 or $lasku_yhtio_originaali != $kukarow["yhtio"])) or ($kirrow['tunnus'] == $kukarow['kirjoitin'])) {
+        if ($hb_keraystarra_tulostin == $kirrow['tunnus']) {
+          $sel = "SELECTED";
+        }
+        elseif (($kirrow['tunnus'] == $kirjoitin and ($kukarow['kirjoitin'] == 0 or $lasku_yhtio_originaali != $kukarow["yhtio"])) or ($kirrow['tunnus'] == $kukarow['kirjoitin'])) {
+          //tässä vaiheessa käyttäjän oletustulostin ylikirjaa optimaalisen varastotulostimen
           $sel = "SELECTED";
         }
 

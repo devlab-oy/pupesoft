@@ -358,6 +358,13 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
               WHERE tilausrivin_lisatiedot. yhtio = '{$kukarow['yhtio']}'";
     pupe_query($query);
 
+    if(!empty($vahvista_kaikki_rivit)) {
+
+      foreach ($vahvista_kaikki_rivit as $_tunnus => $_toimaika) {
+        tallenna_ostotilaus_vahvistus($_tunnus,$_toimaika,TRUE);
+      }
+    }
+
     $tee = "Y";
   }
 
@@ -1657,12 +1664,17 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
 
       mysql_data_seek($presult, 0);
 
+      $_vahvista_kaikki_rivit = array();
+
       while ($prow = mysql_fetch_assoc($presult)) {
+
         $divnolla++;
         $erikoisale_summa += (($prow['rivihinta'] * ($laskurow['erikoisale'] / 100)) * -1);
         $yhteensa += $prow["rivihinta"];
         $paino_yhteensa += ($prow["tilattu"]*$prow["tuotemassa"]);
         $tilavuus_yhteensa += ($prow["tilattu"]*$prow["tuotetilavuus"]);
+
+        $_vahvista_kaikki_rivit[$prow['tunnus']] = $prow['toimaika'];
 
         $class = "class='ptop'";
 
@@ -2255,6 +2267,7 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
             <input type='hidden' name='toim_nimitykset'    value = '$toim_nimitykset'>
             <input type='hidden' name='toim_tuoteno'     value = '$toim_tuoteno'>
             <input type='hidden' name='naytetaankolukitut' value = '$naytetaankolukitut'>
+            <input type='hidden' name='vahvista_kaikki_rivit' value = '$_vahvista_kaikki_rivit'>
             <input type='hidden' name='tee'          value = 'vahvista'>
             <input type='submit' value='".t("Vahvista toimitus")."'>
             </form>

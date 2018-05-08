@@ -823,7 +823,7 @@ if ($tee == 'NAYTA' or $eiliittymaa == 'ON') {
     $row = mysql_fetch_assoc($result);
 
     if (isset($row["liitostunnus"]) and $row["liitostunnus"] != 0) {
-      list($luottoraja, $kaatotilisumma, $avoimettilaukset) = luottotilanne($row["liitostunnus"], $saatavat_yhtio);
+      list($luottoraja, $kaatotilisumma, $avoimettilaukset) = luottotilanne($row["liitostunnus"]);
 
       $luottotilanne_nyt = round($luottoraja+$kaatotilisumma-$avoimettilaukset, 2);
 

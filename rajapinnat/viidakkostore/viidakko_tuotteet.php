@@ -2,13 +2,13 @@
 
 class ViidakkoStoreTuotteet {
   private $apiurl = "";
-  private $userpwd = "";
+  private $token = "";
   private $pupesoft_all_products = array();
   protected $logger = null;
 
-  public function __construct($url, $username, $api_key, $log_file) {
+  public function __construct($url, $token, $log_file) {
     $this->apiurl = $url;
-    $this->userpwd = "{$username}:{$api_key}";
+    $this->token = $token;
 
     $this->logger = new Logger($log_file);
   }
@@ -17,17 +17,15 @@ class ViidakkoStoreTuotteet {
     $this->logger->log('---------Tarkistetaan onko tuote jo kaupassa---------');
 
     $pupesoft_products = $this->pupesoft_all_products;
+    $total = count($pupesoft_products);
 
     foreach ($pupesoft_products as $product) {
 
       $url = $this->apiurl."/products/".$product["product_code"];
 
       $ch = curl_init($url);
-      curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PATCH');
-      curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
-      curl_setopt($ch, CURLOPT_USERPWD, $this->userpwd);
-      curl_setopt($ch, CURLOPT_HTTPHEADER, array('Accept: application/json'));
-      curl_setopt($ch, CURLOPT_HEADER, TRUE);
+      curl_setopt($ch, CURLOPT_HTTPHEADER, array('Accept: application/json', 'X-Auth-Token: '.$this->token));
+      curl_setopt($ch, CURLOPT_HEADER, FALSE);
       curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 
       $response = curl_exec($ch);
@@ -38,11 +36,11 @@ class ViidakkoStoreTuotteet {
 
       if ($response_array->code == "200") {
         $this->logger->log("[{$current}/{$total}] tuote {$product["product_code"]} löytyy kaupasta");
-        update_product($product);
+        $this->update_product($product);
       }
       else {
-        $this->logger->log("[{$current}/{$total}] tuote {$product["product_code"]} ei löydy kaupasta");
-        insert_product($product);
+        $this->logger->log("[{$current}/{$total}] tuote {$product["product_code"]} ei löydy kaupasta | response_code: $response_array->code");
+        $this->insert_product($product);
       }
     }
   }
@@ -52,10 +50,7 @@ class ViidakkoStoreTuotteet {
     $data_json = json_encode($product);
 
     $ch = curl_init($url);
-    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PATCH');
-    curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
-    curl_setopt($ch, CURLOPT_USERPWD, $this->userpwd);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, array('Accept: application/json'));
+    curl_setopt($ch, CURLOPT_HTTPHEADER, array('Accept: application/json', 'X-Auth-Token: '.$this->token));
     curl_setopt($ch, CURLOPT_HEADER, TRUE);
     curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "PUT");
     curl_setopt($ch, CURLOPT_POSTFIELDS, $data_json);
@@ -73,11 +68,9 @@ class ViidakkoStoreTuotteet {
     $data_json = json_encode($product);
 
     $ch = curl_init($url);
-    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PATCH');
-    curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
-    curl_setopt($ch, CURLOPT_USERPWD, $this->userpwd);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, array('Accept: application/json'));
+    curl_setopt($ch, CURLOPT_HTTPHEADER, array('Accept: application/json', 'Content-Type: application/json', 'X-Auth-Token: '.$this->token));
     curl_setopt($ch, CURLOPT_HEADER, TRUE);
+    curl_setopt($ch, CURLOPT_POST, TRUE);
     curl_setopt($ch, CURLOPT_POSTFIELDS, $data_json);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 

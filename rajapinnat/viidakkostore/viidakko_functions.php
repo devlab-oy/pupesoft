@@ -104,10 +104,10 @@ function viidakko_hae_tuotteet($tyyppi = "viidakko_tuotteet") {
   while ($row = mysql_fetch_array($res)) {
     $tuoteno = $row['tuoteno'];
 
+    list(, , $myytavissa) = saldo_myytavissa($tuoteno, '', $viidakko_varastot);
+
     if ($tyyppi == "viidakko_saldot") {
       // normituote
-      list(, , $myytavissa) = saldo_myytavissa($tuoteno, '', $viidakko_varastot);
-
       $tuotteet[] = array(
         "product_code"            => $tuoteno,
         "stock"                   => $myytavissa,
@@ -155,7 +155,7 @@ function viidakko_hae_tuotteet($tyyppi = "viidakko_tuotteet") {
                   AND liitetiedostot.liitos  = 'tuote'
                   AND liitetiedostot.liitostunnus = '{$row['tunnus']}'
                   AND liitetiedostot.kayttotarkoitus = 'TK'
-                  ORDER BY if(liitetiedostot.jarjestys = 0, 9999, liitetiedostot.jarjestys) jarjestys
+                  ORDER BY if(liitetiedostot.jarjestys = 0, 9999, liitetiedostot.jarjestys)
                   LIMIT 1";
         $result = pupe_query($query);
         if (mysql_num_rows($result) == 1) {
@@ -164,13 +164,13 @@ function viidakko_hae_tuotteet($tyyppi = "viidakko_tuotteet") {
         }
 
         // thumbnail
-        $query = "SELECT liitetiedostot.*
+        $query = "SELECT liitetiedostot.tunnus
                   FROM liitetiedostot
                   WHERE liitetiedostot.yhtio = '{$kukarow['yhtio']}'
                   AND liitetiedostot.liitos  = 'tuote'
                   AND liitetiedostot.liitostunnus = '{$row['tunnus']}'
                   AND liitetiedostot.kayttotarkoitus = 'TH'
-                  ORDER BY if(liitetiedostot.jarjestys = 0, 9999, liitetiedostot.jarjestys) jarjestys
+                  ORDER BY if(liitetiedostot.jarjestys = 0, 9999, liitetiedostot.jarjestys)
                   LIMIT 1";
         $result = pupe_query($query);
         if (mysql_num_rows($result) == 1) {
@@ -181,21 +181,50 @@ function viidakko_hae_tuotteet($tyyppi = "viidakko_tuotteet") {
 
       $tuotteet[] = array(
         "product_code"            => $tuoteno,
-        "category"                => "", #todo
+        "category"                => "1", #todo
         "ean_code"                => $row['eankoodi'],
+        "stock"                   => $myytavissa,
+        "ean_code"                => $product_row['eankoodi'],
         "names"                       => array(
-          "fi"                        => "$row['nimitys']",
-          "en"                        => $nimitys_en),
+          array(
+            "language" => "FI",
+            "name" => $row['nimitys']
+          ),
+          array(
+            "language" => "EN",
+            "name" => $nimitys_en
+          ),
+        ),
         "base_price"              => $product_row['myyntihinta'],
+        "hidden"                  => false,
+        "" => "",
+        "" => "",
+        "" => "",
         "supplier_code"           => "", #todo
-        "descriptions"                => array(
-          "fi"                        => $product_row['kuvaus'],
-          "en"                        => $kuvaus_en),
-        "image"                   => $liite_tk_url,
+        "descriptions"                       => array(
+          array(
+            "language" => "FI",
+            "description" => $product_row['kuvaus']
+          ),
+          array(
+            "language" => "EN",
+            "description" => $kuvaus_en
+          ),
+        ),
+        "images"                       => array(
+          array(
+            "language" => "FI",
+            "image" => $liite_tk_url
+          ),
+          array(
+            "language" => "EN",
+            "image" => $liite_tk_url
+          ),
+        ),
         "teaser_image"            => $liite_th_url,
         "inventory_price"         => $product_row['kehahin'],
         #"msrp"                    => "",
-        "vat_percent"             => $row['alv'],
+        "vat_percent"             => $product_row['alv'],
         #"use_default_vat_percent" => "",
         #"availability_begins_at"  => "",
         #"availability_ends_at"    => "",
@@ -211,7 +240,7 @@ function viidakko_tuoterajaus() {
                    AND tuote.ei_saldoa = ''
                    AND tuote.tuotetyyppi NOT in ('A','B')
                    AND tuote.status != 'P'
-                   AND hinnastoon in ('','W') ";
+                   AND tuote.hinnastoon in ('W')";
 
   return $tuoterajaus;
 }

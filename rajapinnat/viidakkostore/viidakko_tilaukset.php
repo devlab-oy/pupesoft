@@ -4,7 +4,7 @@ require_once "rajapinnat/edi.php";
 
 class ViidakkoStoreTilaukset {
   private $apiurl = "";
-  private $whkey = "";
+  private $userpwd = "";
 
   // Minne hakemistoon EDI-tilaus tallennetaan
   private $edi_polku = '/tmp';
@@ -32,9 +32,9 @@ class ViidakkoStoreTilaukset {
 
   protected $logger = null;
 
-  public function __construct($url, $viidakko_webhooks_key, $log_file) {
+  public function __construct($url, $username, $api_key, $log_file) {
     $this->apiurl = $url;
-    $this->whkey = $viidakko_webhooks_key;
+    $this->userpwd = "{$username}:{$api_key}";
 
     $this->logger = new Logger($log_file);
   }
@@ -79,7 +79,7 @@ class ViidakkoStoreTilaukset {
     $this->logger->log('---------Aloitetaan tilausten haku---------');
 
     // Haetaan aika jolloin tämä skripti on viimeksi ajettu
-    $datetime_checkpoint = cron_aikaleima("MYCF_ORDR_CRON");
+    $datetime_checkpoint = cron_aikaleima("VIID_ORDR_CRON");
 
     if (empty($datetime_checkpoint)) {
       $datetime_checkpoint = 1;
@@ -97,175 +97,182 @@ class ViidakkoStoreTilaukset {
       'erikoiskasittely'   => $this->viidakko_erikoiskasittely,
     );
 
-    $url = "{$this->apiurl}/webhooks/changes?ts={$datetime_checkpoint}&key={$this->whkey}";
+    $url = $this->apiurl."/orders?status=".$viidakko_tilausstatus;
 
-    // Webhooks-call
     $ch = curl_init($url);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, array('Accept: application/xml'));
+    curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
+    curl_setopt($ch, CURLOPT_USERPWD, $this->userpwd);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, array('Accept: application/json'));
+    curl_setopt($ch, CURLOPT_HEADER, TRUE);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
     $response = curl_exec($ch);
     curl_close($ch);
 
-    $xml = simplexml_load_string($response);
-
-    if ($xml === FALSE) {
-      echo "Response is not valid XML!\n";
-    }
+    $response_array = json_decode($response);
 
     $tilaus = array();
 
-    foreach ($xml->Order as $order) {
+    if ($response_array->code == "200") {
+      $this->logger->log("Tilausten haku onnistui");
 
-      // Ostajan tiedot
-      $tilaus['billing_address']['city'] = $order->CustomerInformation->City;
-      $tilaus['billing_address']['company'] = "";
-      $tilaus['billing_address']['fax'] = "";
-      $tilaus['billing_address']['firstname'] = $order->CustomerInformation->FirstName;
-      $tilaus['billing_address']['lastname'] = $order->CustomerInformation->LastName;
-      $tilaus['billing_address']['postcode'] = $order->CustomerInformation->ZipCode;
-      $tilaus['billing_address']['street'] = $order->CustomerInformation->StreetAddress;
-      $tilaus['billing_address']['telephone'] = $order->CustomerInformation->Phone;
+      foreach ($response_array->items as $order) {
 
-      // Toimitusosoitteen tiedot
-      $tilaus['shipping_address']['city'] = $order->ShippingAddress->City;
-      $tilaus['shipping_address']['company'] = "";
-      $tilaus['shipping_address']['country_id'] = strtoupper($order->ShippingAddress->Country);
-      $tilaus['shipping_address']['firstname'] = $order->ShippingAddress->FirstName;
-      $tilaus['shipping_address']['lastname'] = $order->ShippingAddress->LastName;
-      $tilaus['shipping_address']['postcode'] = $order->ShippingAddress->ZipCode;
-      $tilaus['shipping_address']['street'] = $order->ShippingAddress->StreetAddress;
-      $tilaus['shipping_address']['telephone'] = $order->ShippingAddress->Phone;
+        // Ostajan tiedot
+        $tilaus['billing_address']['city'] = $order->payer->city;
+        $tilaus['billing_address']['company'] = $order->payer->company;
+        $tilaus['billing_address']['firstname'] = $order->payer->name;
+        $tilaus['billing_address']['lastname'] = "";
+        $tilaus['billing_address']['street'] = $order->payer->street;
+        $tilaus['billing_address']['postcode'] = $order->payer->postal_code;
+        $tilaus['billing_address']['city'] = $order->payer->city;
+        $tilaus['billing_address']['telephone'] = $order->payer->phone_number;
+        $tilaus['billing_address']['fax'] = "";
 
-      // Sähköposti
-      if (!empty($order->ShippingAddress->Email)) {
-        $tilaus['customer_email'] = $order->ShippingAddress->Email;
-      }
-      else {
-        $tilaus['customer_email'] = $order->CustomerInformation->Email;
-      }
+        // Toimitusosoitteen tiedot
+        $tilaus['shipping_address']['city'] = $order->recipient->city;
+        $tilaus['shipping_address']['company'] = $order->recipient->company;
+        $tilaus['shipping_address']['country_id'] = strtoupper($order->recipient->country_code);
+        $tilaus['shipping_address']['firstname'] = $order->recipient->name;
+        $tilaus['shipping_address']['lastname'] = "";
+        $tilaus['shipping_address']['postcode'] = $order->recipient->postal_code;
+        $tilaus['shipping_address']['street'] = $order->recipient->street;
+        $tilaus['shipping_address']['telephone'] = $order->recipient->phone_number;
 
-      // Tilausnumero
-      $tilaus['order_number'] = $order->OrderNumber;
-      $tilaus['increment_id'] = $order->OrderNumber;
-
-      // Verkkokaupan nimi
-      $tilaus['store_name'] = "ViidakkoStore";
-
-      // Maksettu
-      $tilaus['status'] = "processing";
-
-      // Ei käytössä
-      $tilaus['reference_number'] = "";
-      $tilaus['target'] = "";
-      $tilaus['webtex_giftcard'] = "";
-
-      // Asiakasnumero
-      $tilaus['customer_id'] = "";
-
-      // Asiakkaan viesti meille
-      $tilaus['customer_note'] = trim((string) $order->Comments[0]);
-
-      // Yhteensäsumma, summataan riveiltä
-      $tilaus['grand_total'] = 0;
-
-      // Veron määrä, summataan riveiltä
-      $tilaus['tax_amount'] = 0;
-
-      // Valuutta
-      $tilaus['order_currency_code'] = "EUR";
-
-      // Tuotteet
-      $tilaus['items'] = array();
-
-      foreach ($order->Products->Product as $product) {
-
-        // Maksutavan hinta
-        if (!empty($product->ProductID->attributes()->PaymentID)) {
-          $tilaus['payment']['method'] = "";
-          continue;
+        // Sähköposti
+        if (!empty($order->recipient->email)) {
+          $tilaus['customer_email'] = $order->recipient->email;
+        }
+        else {
+          $tilaus['customer_email'] = $order->payer->email;
         }
 
+        // Tilausnumero
+        $tilaus['order_number'] = $order->id;
+        $tilaus['increment_id'] = $order->number;
+
+        // Verkkokaupan nimi
+        $tilaus['store_name'] = "ViidakkoStore";
+
+        // Maksettu
+        $tilaus['status'] = "processing";
+
+        // Ei käytössä
+        $tilaus['reference_number'] = "";
+        $tilaus['target'] = "";
+        $tilaus['webtex_giftcard'] = "";
+
+        // Asiakasnumero
+        $tilaus['customer_id'] = $order->company;
+
+        // Asiakkaan viesti meille
+        $tilaus['customer_note'] = trim((string) $order->notes);
+
+        // Yhteensäsumma, summataan riveiltä
+        $tilaus['grand_total'] = 0;
+
+        // Veron määrä, summataan riveiltä
+        $tilaus['tax_amount'] = 0;
+
+        // Valuutta
+        $tilaus['order_currency_code'] = "EUR";
+
         // Rahtimaksu
-        if (!empty($product->ProductID->attributes()->ShippingID)) {
+        if (!empty($order->delivery->cost)) {
           // Rahtikulu, veroton
-          $tilaus['shipping_amount'] = (float) $product->Total - (float) $product->TotalTax;
+          $tilaus['shipping_amount'] = (float) $order->delivery->cost;
 
           // Toimitustavan nimi
-          $tilaus['shipping_description'] = $product->ProductName;
-          $tilaus['shipping_description_line'] = $product->ProductName;
+          $tilaus['shipping_description'] = $order->delivery->names->fi;
+          $tilaus['shipping_description_line'] = $order->delivery->names->fi;
 
           // Noutopisteen tiedot: Tallennetaan toimitusosoitteen perään [# ]-tägeihin
-          $pickupcode = trim($order->ShippingMethod->attributes()->PickUpPointCode);
+          $pickupcode = "";
 
           if (!empty($pickupcode)) {
             $tilaus['shipping_address']['street'] .= " [#".$pickupcode."]";
           }
 
-          // Veron määrä
-          $tilaus['shipping_tax_amount'] = $product->TotalTax;
+          // Veron määrä (ei toistaiseksi)
+          $tilaus['shipping_tax_amount'] = 0;
           continue;
         }
 
-        $item = array();
+        // Tuotteet
+        $tilaus['items'] = array();
 
-        // Tämä on alennustuote
-        if (!empty($product->ProductID->attributes()->CouponCode) and !empty($GLOBALS["yhtiorow"]["alennus_tuotenumero"])) {
-          // Tuoteno
-          $item['sku'] = $GLOBALS["yhtiorow"]["alennus_tuotenumero"];
+        foreach ($order->rows as $product) {
 
-          // Nimitys
-          $item['name'] = "Alennuskoodi: ".$product->ProductName;
+          // Maksutavan hinta
+          if (!empty($product->ProductID->attributes()->PaymentID)) {
+            $tilaus['payment']['method'] = "";
+            continue;
+          }
 
-          // Hinta ja määräkerroin
-          $kerroin = -1;
+          $item = array();
+
+          // Tämä on alennustuote
+          if (!empty($product->ProductID->attributes()->CouponCode) and !empty($GLOBALS["yhtiorow"]["alennus_tuotenumero"])) {
+            // Tuoteno
+            $item['sku'] = $GLOBALS["yhtiorow"]["alennus_tuotenumero"];
+
+            // Nimitys
+            $item['name'] = "Alennuskoodi: ".$product->ProductName;
+
+            // Hinta ja määräkerroin
+            $kerroin = -1;
+          }
+          else {
+            // Tuoteno
+            $item['sku'] = $product->Code;
+
+            // Nimitys
+            $item['name'] = $product->ProductName;
+
+            // Hinta ja määräkerroin
+            $kerroin = 1;
+          }
+
+          // Määrä
+          $item['qty_ordered'] = $product->Quantity * $kerroin;
+
+          $item['base_discount_amount'] = 0;
+          $item['discount_percent'] = 0;
+
+          // Verollinen yksikköhinta
+          $item['original_price'] = $product->UnitPrice * $kerroin;
+
+          // Veroton yksikköhinta
+          $item['price'] = ((float) $product->UnitPrice - (float) $product->UnitTax) * $kerroin;
+
+          // Verokanta
+          $item['tax_percent'] = $product->UnitPrice->attributes()->vat;
+
+          // Yheensäsumma
+          $tilaus['grand_total'] += (float) $product->Total * $kerroin;
+          $tilaus['tax_amount'] += (float) $product->TotalTax * $kerroin;
+
+          // Ei käytössä
+          $item['parent_item_id'] = "";
+          $item['product_id'] = "";
+          $item['product_type'] = "";
+
+          // Lisätään tuotelistaan
+          $tilaus['items'][] = $item;
         }
-        else {
-          // Tuoteno
-          $item['sku'] = $product->Code;
 
-          // Nimitys
-          $item['name'] = $product->ProductName;
+        $filename = Edi::create($tilaus, $options);
 
-          // Hinta ja määräkerroin
-          $kerroin = 1;
-        }
+        // Tallennetaan tämän tilauksen aikaleima
+        $tilausaika = $order->OrderedAt->attributes()->timestamp;
 
-        // Määrä
-        $item['qty_ordered'] = $product->Quantity * $kerroin;
+        cron_aikaleima("VIID_ORDR_CRON", $tilausaika);
 
-        $item['base_discount_amount'] = 0;
-        $item['discount_percent'] = 0;
-
-        // Verollinen yksikköhinta
-        $item['original_price'] = $product->UnitPrice * $kerroin;
-
-        // Veroton yksikköhinta
-        $item['price'] = ((float) $product->UnitPrice - (float) $product->UnitTax) * $kerroin;
-
-        // Verokanta
-        $item['tax_percent'] = $product->UnitPrice->attributes()->vat;
-
-        // Yheensäsumma
-        $tilaus['grand_total'] += (float) $product->Total * $kerroin;
-        $tilaus['tax_amount'] += (float) $product->TotalTax * $kerroin;
-
-        // Ei käytössä
-        $item['parent_item_id'] = "";
-        $item['product_id'] = "";
-        $item['product_type'] = "";
-
-        // Lisätään tuotelistaan
-        $tilaus['items'][] = $item;
+        $this->logger->log("Tallennettiin tilaus '{$filename}'");
       }
-
-      $filename = Edi::create($tilaus, $options);
-
-      // Tallennetaan tämän tilauksen aikaleima
-      $tilausaika = $order->OrderedAt->attributes()->timestamp;
-
-      cron_aikaleima("MYCF_ORDR_CRON", $tilausaika);
-
-      $this->logger->log("Tallennettiin tilaus '{$filename}'");
+    }
+    else {
+      $this->logger->log("Tilausten haku epäonnistui");
     }
 
     $this->logger->log('---------Tilausten haku valmis---------');

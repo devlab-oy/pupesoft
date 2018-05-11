@@ -20,6 +20,7 @@ require_once 'rajapinnat/logger.php';
 
 require "rajapinnat/viidakkostore/viidakko_functions.php";
 require "rajapinnat/viidakkostore/viidakko_saldot.php";
+require "rajapinnat/viidakkostore/viidakko_tuotteet.php";
 require "rajapinnat/viidakkostore/viidakko_tilaukset.php";
 
 if (empty($argv[1])) {
@@ -59,13 +60,9 @@ if (!isset($viidakko_url)) {
   // viidakkokaupan url
   die('ViidakkoStore url puuttuu');
 }
-if (!isset($viidakko_api_key)) {
+if (!isset($viidakko_token)) {
   // viidakkon API salasana
-  die('ViidakkoStore api key puuttuu');
-}
-if (!isset($viidakko_username)) {
-  // viidakkon API salasana
-  die('ViidakkoStore käyttäjätunnus puuttuu');
+  die('ViidakkoStore token puuttuu');
 }
 
 if (!isset($viidakko_edi_folderpath)) {
@@ -92,6 +89,14 @@ if (!isset($viidakko_asiakasnro)) {
   die('ViidakkoStore asiakasnumero puuttuu');
 }
 
+if (!isset($viidakko_tilausstatus)) {
+  die('ViidakkoStore tilaus status puuttuu');
+}
+
+if (!isset($viidakko_kuvaurl)) {
+  $viidakko_kuvaurl = "";
+}
+
 if (!isset($viidakko_debug)) {
   // debug mode echottaa ruudulle ajon statusta
   $viidakko_debug = false;
@@ -104,7 +109,7 @@ if (viidakko_ajetaanko_sykronointi('tuotteet', $synkronoi)) {
   $kaikki_tuotteet = viidakko_hae_tuotteet();
 
   viidakko_echo("Siirretään tuotteet.");
-  $viidakko_products = new ViidakkoStoreTuotteet($viidakko_url, $viidakko_username, $viidakko_api_key, $tyyppi);
+  $viidakko_products = new ViidakkoStoreTuotteet($viidakko_url, $viidakko_token, $tyyppi);
 
   $viidakko_products->set_all_products($kaikki_tuotteet);
   $viidakko_products->check_products();
@@ -123,7 +128,7 @@ if (viidakko_ajetaanko_sykronointi('saldot', $synkronoi)) {
 
 if (viidakko_ajetaanko_sykronointi('tilaukset', $synkronoi)) {
   viidakko_echo("Haetaan tilaukset.");
-  $viidakko_orders = new ViidakkoStoreTilaukset($viidakko_url, $viidakko_webhooks_key, 'viidakko_tilaukset');
+  $viidakko_orders = new ViidakkoStoreTilaukset($viidakko_url, $viidakko_username, $viidakko_api_key, 'viidakko_tilaukset');
 
   $viidakko_orders->set_edi_polku($viidakko_edi_folderpath);
   $viidakko_orders->set_ovt_tunnus($viidakko_ovttunnus);

@@ -107,7 +107,7 @@ $toimires = pupe_query($query);
 $toimirow = mysql_fetch_assoc($toimires);
 
 // haetaan tilausrivit
-$query = "SELECT tilausrivi.*, varastopaikat.*
+$query = "SELECT varastopaikat.*, tilausrivi.*
           FROM tilausrivi
           JOIN varastopaikat ON (
             varastopaikat.yhtio   = tilausrivi.yhtio AND

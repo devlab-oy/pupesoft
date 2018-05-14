@@ -215,6 +215,7 @@ $editilaus_toimitustapa       = "";
 $editilaus_tyyppi             = "L"; // tilausrivi tyyppi
 $editilaus_valuuttakoodi      = "";
 $editilaus_ytunnus            = "";
+$editilaus_toimipaikka.       = "";
 $ei_esteta_laskutusta         = true;
 $id                           = "";
 $ketjutus                     = "";
@@ -258,6 +259,7 @@ $verkkokauppavarasto_li       = "";
 $verokanta                    = "";
 $veromaara                    = "";
 $viite                        = "";
+$laskuviite                   = "";
 $yhteyshenkilon_puhelin       = "";
 
 // nollataan kaikki rivin muuttujat (n‰m‰ samat pit‰‰ tehd‰ tuote insertin j‰lkeen)
@@ -1195,6 +1197,18 @@ while ($tietue = fgets($fd)) {
         $edi_ulos .= t("J‰lkivaatimus-toimitustapaa ei lˆytynyt")."!\n";
       }
     }
+
+    if ($edi_tyyppi == "magento" and substr($tieto, 0, 10) == 'maksuehto#') {
+      // verkkokaupasta asetetaan tietty maksuehto
+      $kukarow["kassamyyja"] = "";
+      $editilaus_kassalipas  = "";
+      $editilaus_maksuehto = "";
+
+      if (is_numeric(substr($tieto, 11))) {
+        $editilaus_maksuehto = substr($tieto, 11);
+      }
+    }
+
     break;
 
   case 'OSTOTIL.OT_SUMMA' :
@@ -1209,6 +1223,20 @@ while ($tietue = fgets($fd)) {
     // halutaan futur ja magento-aineistoista t‰m‰ tieto sisviesti2-kentt‰‰n
     $orig_tieto = pupesoft_cleanstring($orig_tieto, array(";"));
     $lopviesti = trim($orig_tieto);
+    break;
+
+  case 'OSTOTIL.OT_LASKUVIITE':
+    // verkkokaupan tilaukselle halutaan laskutuksessa tietty viite
+    if ($edi_tyyppi == "magento") {
+      $laskuviite = $tieto;
+    }
+    break;
+
+  case 'OSTOTIL.OT_YRITYS_TOIMIPAIKKA':
+    // verkkokaupan tilaukselle halutaan tietty toimipaikka
+    if ($edi_tyyppi == "magento") {
+      $editilaus_toimipaikka = $tieto;
+    }
     break;
 
   case 'OSTOTIL.OT_VEROMAARA':
@@ -1715,6 +1743,11 @@ while ($tietue = fgets($fd)) {
         $valkurssi = 1;
       }
 
+      // pakotetaan tilaukset tarvittaessa haluttuun toimipaikkaan
+      if ($edi_tyyppi == 'magento' and $editilaus_toimipaikka) {
+        $kukarow['toimipaikka'] = $editilaus_toimipaikka;
+      }
+
       // Lis‰t‰‰n otsikko
       $query = "INSERT into lasku SET
                 aktiivinen_kuljetus     = '$suunnistus',
@@ -1794,6 +1827,7 @@ while ($tietue = fgets($fd)) {
                 vienti                  = '$til_vienti',
                 vienti_kurssi           = '{$valkurssi}',
                 viesti                  = '$viite',
+                viite                   = '{$laskuviite}',
                 viikorkopros            = '$yhtiorow[viivastyskorko]',
                 yhtio                   = '$kukarow[yhtio]',
                 yhtio_kotipaikka        = '$yhtiorow[kotipaikka]',
@@ -2745,6 +2779,7 @@ while ($tietue = fgets($fd)) {
     $editilaus_tyyppi             = "L"; // tilausrivi tyyppi
     $editilaus_valuuttakoodi      = "";
     $editilaus_ytunnus            = "";
+    $editilaus_toimipaikka.       = "";
     $ei_esteta_laskutusta         = true;
     $id                           = "";
     $ketjutus                     = "";
@@ -2787,6 +2822,7 @@ while ($tietue = fgets($fd)) {
     $verokanta                    = "";
     $veromaara                    = "";
     $viite                        = "";
+    $laskuviite                   = "";
     $yhteyshenkilon_puhelin       = "";
     break;
   }

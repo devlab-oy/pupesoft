@@ -215,7 +215,7 @@ $editilaus_toimitustapa       = "";
 $editilaus_tyyppi             = "L"; // tilausrivi tyyppi
 $editilaus_valuuttakoodi      = "";
 $editilaus_ytunnus            = "";
-$editilaus_toimipaikka.       = "";
+$editilaus_toimipaikka        = "";
 $ei_esteta_laskutusta         = true;
 $id                           = "";
 $ketjutus                     = "";
@@ -1195,17 +1195,6 @@ while ($tietue = fgets($fd)) {
       else {
         $editilaus_toimitustapa = "";
         $edi_ulos .= t("Jälkivaatimus-toimitustapaa ei löytynyt")."!\n";
-      }
-    }
-
-    if ($edi_tyyppi == "magento" and substr($tieto, 0, 10) == 'maksuehto#') {
-      // verkkokaupasta asetetaan tietty maksuehto
-      $kukarow["kassamyyja"] = "";
-      $editilaus_kassalipas  = "";
-      $editilaus_maksuehto = "";
-
-      if (is_numeric(substr($tieto, 11))) {
-        $editilaus_maksuehto = substr($tieto, 11);
       }
     }
 
@@ -2779,7 +2768,7 @@ while ($tietue = fgets($fd)) {
     $editilaus_tyyppi             = "L"; // tilausrivi tyyppi
     $editilaus_valuuttakoodi      = "";
     $editilaus_ytunnus            = "";
-    $editilaus_toimipaikka.       = "";
+    $editilaus_toimipaikka        = "";
     $ei_esteta_laskutusta         = true;
     $id                           = "";
     $ketjutus                     = "";

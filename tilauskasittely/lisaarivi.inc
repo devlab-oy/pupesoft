@@ -1901,6 +1901,8 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
                   $lis_hinta = $lis_hinta_chk;
                   $lis_netto = $lis_netto_chk;
                   $lis_ale_kaikki = $lis_ale_kaikki_chk;
+                  $alehinta_alv = $alehinta_alv_chk;
+                  $alehinta_val = $alehinta_val_chk;
                 }
               }
 
@@ -2914,6 +2916,8 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
           $lis_hinta = $lis_hinta_chk;
           $lis_netto = $lis_netto_chk;
           $lis_ale_kaikki = $lis_ale_kaikki_chk;
+          $alehinta_alv = $alehinta_alv_chk;
+          $alehinta_val = $alehinta_val_chk;
         }
       }
 

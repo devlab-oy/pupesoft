@@ -38,7 +38,7 @@ if ($tee == "") {
 
     echo "<thead>";
     echo "<tr>";
-    echo "<th valign='top'>".t("Tilausnro")."</td>";
+    echo "<th valign='top'>".t("Keräyslista")."</td>";
     echo "<th valign='top'>".t("Asiakas")."</td>";
     echo "<th valign='top'>".t("Pvm")."</td>";
     echo "<th valign='top'>".t("Toimitustapa")."</td>";

@@ -28,6 +28,11 @@ if ($toim == 'hyvaksynta') {
   $pupe_DataTables = array("hyvaksynta");
 }
 
+if ($toim == 'dokumenttien_hyvaksynta') {
+  // DataTables p‰‰lle
+  $pupe_DataTables = array("dokumenttien_hyvaksynta");
+}
+
 if ($toim == 'toimittajahaku' or $toim == 'laskuhaku' or $toim == 'myyrespaakirja') {
   // DataTables p‰‰lle
   $pupe_DataTables = $toim;

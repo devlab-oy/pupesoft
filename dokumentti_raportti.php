@@ -43,9 +43,20 @@ if ($tee == "raportoi") {
     $tilalisa = "AND hyvaksyttavat_dokumentit.tila='D'";
   }
 
-  $query = "SELECT hyvaksyttavat_dokumentit.*, kuka.nimi laatija
+  $query = "SELECT hyvaksyttavat_dokumentit.*,
+            kuka.nimi laatija,
+            kuka1.nimi hyvaksyja1,
+            kuka2.nimi hyvaksyja2,
+            kuka3.nimi hyvaksyja3,
+            kuka4.nimi hyvaksyja4,
+            kuka5.nimi hyvaksyja5
             FROM hyvaksyttavat_dokumentit
-            LEFT JOIN kuka ON kuka.yhtio = hyvaksyttavat_dokumentit.yhtio and kuka.kuka = hyvaksyttavat_dokumentit.hyvaksyja_nyt
+            LEFT JOIN kuka as kuka ON kuka.yhtio = hyvaksyttavat_dokumentit.yhtio and kuka.kuka = hyvaksyttavat_dokumentit.laatija
+            LEFT JOIN kuka as kuka1 ON kuka1.yhtio = hyvaksyttavat_dokumentit.yhtio and kuka1.kuka = hyvaksyttavat_dokumentit.hyvak1
+            LEFT JOIN kuka as kuka2 ON kuka2.yhtio = hyvaksyttavat_dokumentit.yhtio and kuka2.kuka = hyvaksyttavat_dokumentit.hyvak2
+            LEFT JOIN kuka as kuka3 ON kuka3.yhtio = hyvaksyttavat_dokumentit.yhtio and kuka3.kuka = hyvaksyttavat_dokumentit.hyvak3
+            LEFT JOIN kuka as kuka4 ON kuka4.yhtio = hyvaksyttavat_dokumentit.yhtio and kuka4.kuka = hyvaksyttavat_dokumentit.hyvak4
+            LEFT JOIN kuka as kuka5 ON kuka5.yhtio = hyvaksyttavat_dokumentit.yhtio and kuka5.kuka = hyvaksyttavat_dokumentit.hyvak5
             WHERE hyvaksyttavat_dokumentit.yhtio = '$kukarow[yhtio]'
             {$tilalisa}
             ORDER BY hyvaksyttavat_dokumentit.tunnus";
@@ -60,6 +71,7 @@ if ($tee == "raportoi") {
   echo "<th>".t("Kuvaus")."</th>";
   echo "<th>".t("Kommentit")."</th>";
   echo "<th>".t("Laatija")."</th>";
+  echo "<th>".t("Hyväksyjät")."</th>";
   echo "<th>".t("Tiedosto")."</th>";
   echo "<th>".t("Tila")."</th>";
   echo "</tr>";
@@ -68,6 +80,7 @@ if ($tee == "raportoi") {
   echo "<td><input type='text' class='search_field' name='search_kuvaus'></td>";
   echo "<td><input type='text' class='search_field' name='search_kommentit'></td>";
   echo "<td><input type='text' class='search_field' name='search_laatija'></td>";
+  echo "<td><input type='text' class='search_field' name='search_hyvak'></td>";
   echo "<td><input type='text' class='search_field' name='search_tiedosto'></td>";
   echo "<td><input type='text' class='search_field' name='search_tila'></td>";
   echo "</tr>";
@@ -82,6 +95,28 @@ if ($tee == "raportoi") {
     echo "<td>$trow[kuvaus]</td>";
     echo "<td>$trow[kommentit]</td>";
     echo "<td>$trow[laatija]</td>";
+
+
+    echo "<td>";
+
+    if ($trow[h1time] != '0000-00-00 00:00:00') {
+      echo "$trow[hyvaksyja1] @ $trow[h1time]<br>";
+    }
+    if ($trow[h2time] != '0000-00-00 00:00:00') {
+      echo "$trow[hyvaksyja2] @ $trow[h2time]<br>";
+    }
+    if ($trow[h3time] != '0000-00-00 00:00:00') {
+      echo "$trow[hyvaksyja3] @ $trow[h3time]<br>";
+    }
+    if ($trow[h4time] != '0000-00-00 00:00:00') {
+      echo "$trow[hyvaksyja4] @ $trow[h4time]<br>";
+    }
+    if ($trow[h5time] != '0000-00-00 00:00:00') {
+      echo "$trow[hyvaksyja5] @ $trow[h5time]";
+    }
+
+    echo "</td>";
+
 
     $query = "SELECT tunnus, filename, selite
               from liitetiedostot

@@ -27,7 +27,8 @@ if ($tee == "") {
             and lasku.tila = 'L'
             and lasku.luontiaika >='$vva-$kka-$ppa 00:00:00'
             and lasku.luontiaika <='$vvl-$kkl-$ppl 23:59:59'
-            and lasku.tunnus = lasku.kerayslista";
+            and lasku.tunnus = lasku.kerayslista
+            ORDER BY tunnus DESC";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) > 0) {
@@ -50,8 +51,6 @@ if ($tee == "") {
 
     echo "<tbody>";
 
-    $oikmuutosite = tarkista_oikeus("muutosite.php");
-
     while ($row = mysql_fetch_assoc($result)) {
 
       $query = "SELECT count(*) tilauksia
@@ -64,12 +63,12 @@ if ($tee == "") {
 
       echo "<tr>";
 
-      echo "<td valign='top'>$row[tunnus]</td>";
-      echo "<td valign='top'>$row[nimi]</td>";
-      echo "<td valign='top'>$row[luontiaika]</td>";
-      echo "<td valign='top'>$row[toimitustapa]</td>";
-      echo "<td valign='top'>$row[lahetepvm]</td>";
-      echo "<td valign='top'>$tilrow[tilauksia]</td>";
+      echo "<td class='ptop'>$row[tunnus]</td>";
+      echo "<td class='ptop'>$row[toim_nimi] $row[toim_nimitark]</td>";
+      echo "<td class='ptop text-right'>",pupe_DataTablesEchoSort($row["luontiaika"]),tv1dateconv($row["luontiaika"], "PITKA"),"</td>";
+      echo "<td class='ptop'>$row[toimitustapa]</td>";
+      echo "<td class='ptop text-right'>",pupe_DataTablesEchoSort($row["lahetepvm"]),tv1dateconv($row["lahetepvm"], "PITKA"),"</td>";
+      echo "<td class='ptop text-right'>$tilrow[tilauksia]</td>";
 
       echo "<td class='back'>
             <form method='post' autocomplete='off'>

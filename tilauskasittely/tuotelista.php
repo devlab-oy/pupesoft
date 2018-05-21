@@ -1,7 +1,6 @@
 <?php
 
-///* Tämä skripti käyttää slave-tietokantapalvelinta *///
-$useslave = 1;
+$pupe_DataTables = 'tuotelista';
 
 if (@include "../inc/parametrit.inc");
 elseif (@include "parametrit.inc");
@@ -177,15 +176,24 @@ if (mysql_num_rows($result) > 0) {
   echo "&raquo;  ".count($rows)." ", t($muoto)."<br/><br/>";
 
   if (count($rows) > 0) {
-    echo "<table>";
+
+    $cols = 3;
+
+    if ($kukarow['hinnat'] >= 0) {
+      $cols++;
+    }
+
+    if ($oikeurow["paivitys"] == 1 and $kukarow["kuka"] != "") {
+      $cols++;
+    }
+
+    pupe_DataTables(array(array($pupe_DataTables, $cols, $cols)));
+
+    echo "<table class='display dataTable' id='$pupe_DataTables'>";
+    echo "<thead>";
     echo "<tr>";
-
-    echo "<td class='back'>&nbsp;</td>";
-    echo "<th>&nbsp;</th>";
-
-    echo "<th>".t("Tuoteno")."</a>";
-    echo "</th>";
-
+    echo "<th>".t("Kuva")."</th>";
+    echo "<th>".t("Tuoteno")."</a></th>";
     echo "<th>".t("Nimitys")."</th>";
 
     if ($kukarow['hinnat'] >= 0) {
@@ -197,6 +205,7 @@ if (mysql_num_rows($result) > 0) {
     }
 
     echo "</tr>";
+    echo "</thead>";
   }
 
   $yht_i     = 0;
@@ -214,6 +223,8 @@ if (mysql_num_rows($result) > 0) {
     }
   }
 
+  echo "<tbody>";
+
   foreach ($rows as $row_key => &$row) {
 
     if ($kukarow['extranet'] != '') {
@@ -226,10 +237,8 @@ if (mysql_num_rows($result) > 0) {
     $rivin_yksikko = t_avainsana("Y", "", " and avainsana.selite='$row[yksikko]'", "", "", "selite");
 
     echo "<tr class='aktiivi'>";
-    echo "<td class='back'></td>";
 
     $vari = "";
-
 
     if (strtoupper($row["status"]) == "P") {
       $vari = "tumma";
@@ -363,6 +372,7 @@ if (mysql_num_rows($result) > 0) {
     echo "</tr>";
   }
 
+  echo "</tbody>";
   echo "</table>";
   echo "</form>";
 

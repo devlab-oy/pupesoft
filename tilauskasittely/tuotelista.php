@@ -7,8 +7,9 @@ if (@include "../inc/parametrit.inc");
 elseif (@include "parametrit.inc");
 else exit;
 
-enable_ajax();
+$kukarow['extranet'] = 'o';
 
+enable_ajax();
 
 // Liitetiedostot popup
 if (isset($liite_popup_toiminto) and $liite_popup_toiminto == "AK") {
@@ -22,37 +23,15 @@ if (function_exists("js_popup")) {
   echo js_popup(-100);
 }
 
-if ($kukarow['extranet'] == '') {
-  echo "  <script type='text/javascript'>
-
-        $(function() {
-
-          $('.tuote_submit').on('click', function(e) {
-            if ($('#lisaaformi')) {
-              e.preventDefault();
-              var id = $(this).attr('id'),
-                form_action = $('#lisaaformi').attr('action'),
-                anchor = '#' + $('#anchor_'+id).attr('name');
-
-              $('#lisaaformi').attr('action', '$PHP_SELF' + form_action + anchor);
-              $('#lisaaformi').submit();
-            }
-          });
-
-        });
-
-      </script>";
-}
-
 // Jos tullaan sivuvalikosta extranetiss‰ tyhj‰t‰‰n kesken ettei lis‰t‰ tuotteita v‰‰r‰lle tilaukselle
 if ($kukarow['extranet'] != '') {
   $kukarow['kesken'] = '';
 }
 
-$query    = "SELECT *
-             from lasku
-             where tunnus = '$kukarow[kesken]'
-             and yhtio    = '$kukarow[yhtio]'";
+$query = "SELECT *
+          FROM lasku
+          WHERE tunnus = '$kukarow[kesken]'
+          AND yhtio    = '$kukarow[yhtio]'";
 $result   = pupe_query($query);
 $laskurow = mysql_fetch_assoc($result);
 
@@ -213,7 +192,7 @@ if (mysql_num_rows($result) > 0) {
       echo "<th>".t("Hinta")."</th>";
     }
 
-    if ($oikeurow["paivitys"] == 1 and ($kukarow["kuka"] != "" or is_numeric($ostoskori))) {
+    if ($oikeurow["paivitys"] == 1 and $kukarow["kuka"] != "") {
       echo "<th>&nbsp;</th>";
     }
 
@@ -432,9 +411,9 @@ function hae_oletusasiakas($laskurow) {
 }
 
 function piirra_ostoskoriin_lisays($row) {
-  global $oikeurow, $kukarow, $ostoskori, $vari, $yht_i, $hae_ja_selaa_row, $_etukateen_maksettu;
+  global $oikeurow, $kukarow, $vari, $yht_i, $hae_ja_selaa_row, $_etukateen_maksettu;
 
-  if (empty($_etukateen_maksettu) and $oikeurow["paivitys"] == 1 and ($kukarow["kuka"] != "" or is_numeric($ostoskori))) {
+  if (empty($_etukateen_maksettu) and $oikeurow["paivitys"] == 1) {
     if (($row["tuoteperhe"] == "" or $row["tuoteperhe"] == $row["tuoteno"] or $row["tyyppi"] == "V") and $row["osaluettelo"] == "") {
       echo "<td align='right' class='$vari' style='vertical-align: top;' nowrap>";
       echo "<input type='hidden' name='tiltuoteno[$yht_i]' value = '$row[tuoteno]'>";
@@ -456,14 +435,13 @@ function piirra_ostoskoriin_lisays($row) {
  * Piirt‰‰ formin aloitustagin ja hidden inputit
  */
 function piirra_formin_aloitus() {
-  global $kukarow, $ostoskori, $variaatio;
+  global $kukarow, $variaatio;
 
   $variaatio_query_param = isset($variaatio) ? "&variaatio={$variaatio}" : "";
 
   echo "<form action='?submit_button=1' name='lisaa' method='post' autocomplete='off' id='lisaaformi'>";
   echo "<input type='hidden' name='tee' value = 'TI'>";
   echo "<input type='hidden' name='tilausnumero' value='$kukarow[kesken]'>";
-  echo "<input type='hidden' name='ostoskori' value='$ostoskori'>";
 }
 
 
@@ -471,17 +449,11 @@ function piirra_formin_aloitus() {
  * Tarkistetaan tilausrivin tiedot ja echotetaan ruudulle lis‰tyt tuotteet
  */
 function tarkista_tilausrivi() {
-  global $tee, $ostoskori, $tilkpl, $kukarow, $yhtiorow, $toim, $tiltuoteno,
-  $tilsarjatunnus, $myyntierahuom, $lisatty_tun, $hae_ja_selaa_row;
+  global $tee, $tilkpl, $kukarow, $yhtiorow, $toim, $tiltuoteno, $myyntierahuom, $lisatty_tun, $hae_ja_selaa_row;
 
   pupemaster_start();
 
-  if (($tee == 'TI' or is_numeric($ostoskori)) and isset($tilkpl)) {
-
-    if (is_numeric($ostoskori)) {
-      $kori = check_ostoskori($ostoskori, $kukarow["oletus_asiakas"]);
-      $kukarow["kesken"] = $kori["tunnus"];
-    }
+  if ($tee == 'TI' and isset($tilkpl)) {
 
     // haetaan avoimen tilauksen otsikko
     if ($kukarow["kesken"] != 0) {
@@ -515,12 +487,7 @@ function tarkista_tilausrivi() {
       $laskurow = mysql_fetch_assoc($laskures);
     }
 
-    if (is_numeric($ostoskori)) {
-      echo "<font class='message'>" . t("Lis‰t‰‰n tuotteita ostoskoriin") . " $ostoskori.</font><br>";
-    }
-    else {
-      echo "<font class='message'>" . t("Lis‰t‰‰n tuotteita tilaukselle") . " $kukarow[kesken].</font><br>";
-    }
+    echo "<font class='message'>" . t("Lis‰t‰‰n tuotteita tilaukselle") . " $kukarow[kesken].</font><br>";
 
     // K‰yd‰‰n l‰pi formin kaikki rivit
     foreach ($tilkpl as $yht_i => $kpl) {
@@ -571,15 +538,10 @@ function tarkista_tilausrivi() {
           $korvaavakielto = "";
           $jtkielto = $laskurow['jtkielto'];
           $varataan_saldoa = "";
-          $myy_sarjatunnus = $tilsarjatunnus[$yht_i];
           $paikka = "";
 
           // jos meill‰ on ostoskori muuttujassa numero, niin halutaan lis‰t‰ tuotteita siihen ostoskoriin
-          if (is_numeric($ostoskori)) {
-            lisaa_ostoskoriin($ostoskori, $laskurow["liitostunnus"], $tuoteno, $kpl);
-            $kukarow["kesken"] = "";
-          }
-          elseif (file_exists("../tilauskasittely/lisaarivi.inc")) {
+          if (file_exists("../tilauskasittely/lisaarivi.inc")) {
             require "../tilauskasittely/lisaarivi.inc";
           }
           else {
@@ -613,13 +575,6 @@ function tarkista_tilausrivi() {
 
             echo "<font class='error'>" . $mimyhuom . "</font><br>";
           }
-
-          //Hanskataan sarjanumerollisten tuotteiden lis‰varusteet
-          if ($tilsarjatunnus[$yht_i] > 0 and $lisatty_tun > 0) {
-            require "sarjanumeron_lisavarlisays.inc";
-
-            lisavarlisays($tilsarjatunnus[$yht_i], $lisatty_tun);
-          }
         } // tuote ok else
       } // end kpl > 0
     } // end foreach
@@ -640,7 +595,6 @@ function tarkista_tilausrivi() {
     $rivitunnus = "";
     $korvaavakielto = "";
     $varataan_saldoa = "";
-    $myy_sarjatunnus = "";
     $paikka = "";
     $tee = "";
 

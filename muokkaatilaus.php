@@ -2079,6 +2079,8 @@ elseif ($toim == "LAVAKERAYS") {
              FROM lasku use index (tila_index)
              JOIN asiakas ON (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus)
              LEFT JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi != 'D')
+             LEFT JOIN kuka as kuka1 ON (kuka1.yhtio = lasku.yhtio and kuka1.kuka = lasku.laatija)
+             LEFT JOIN kuka as kuka2 ON (kuka2.yhtio = lasku.yhtio and kuka2.tunnus = lasku.myyja)
              WHERE lasku.yhtio = '$kukarow[yhtio]'
              and lasku.tila = 'N'
              and lasku.alatila = 'FF'

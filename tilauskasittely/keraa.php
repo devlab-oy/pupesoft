@@ -538,7 +538,6 @@ if ($tee == 'P') {
                       WHERE yhtio = '$kukarow[yhtio]'
                       and tunnus  = '$toimrow[tunnus]'";
             $lisa_res = pupe_query($query);
-          pupesoft_log('pupesoft-loki', '541_update:');
           }
         }
 
@@ -1233,7 +1232,6 @@ if ($tee == 'P') {
                          perheid2        = '$tilrivirow[perheid2]',
                          nimitys         = '$tilrivirow[nimitys]',
                          jaksotettu      = '$tilrivirow[jaksotettu]'";
-pupesoft_log('pupesoft-loki', "1203-insert: Tuoteno: '$tilrivirow[tuoteno]' tilkpl: '$rtilkpl' Varattu: '$rvarattu'");
               $riviresult = pupe_query($querys);
               $lisatty_tun = mysql_insert_id($GLOBALS["masterlink"]);
 
@@ -1305,7 +1303,6 @@ pupesoft_log('pupesoft-loki', "1203-insert: Tuoteno: '$tilrivirow[tuoteno]' tilk
                              SET varattu = '$tilrivimaara'
                              WHERE tunnus = '$tilrivirow2[tunnus]'
                              AND yhtio    = '$kukarow[yhtio]'";
-pupesoft_log('pupesoft-loki', "1307_update: Tunnus:: '$tilrivirow2[tunnus]' Varattu: '$tilrivimaara'");
                   $result1 = pupe_query($query1);
                 }
               }
@@ -1380,7 +1377,7 @@ pupesoft_log('pupesoft-loki', "1307_update: Tunnus:: '$tilrivirow2[tunnus]' Vara
                 }
               }
             }
-pupesoft_log('pupesoft-loki', "1471_update: $kerattylisa $kerivi[$i] $tilrivirow[tilkp] $tilrivirow[varattu] $tilrivirow[kpl] ");
+
             $query_ins = "UPDATE kerayserat SET
                           pakkausnro     = '{$pakkauskirjain}',
                           sscc           = '{$pakkaukset[$monesko]['sscc']}',
@@ -1441,7 +1438,6 @@ pupesoft_log('pupesoft-loki', "1471_update: $kerattylisa $kerivi[$i] $tilrivirow
 
           //p‰ivitet‰‰n alkuper‰inen rivi
           $query .= " WHERE tunnus='$apui' and yhtio='$kukarow[yhtio]'";
-          pupesoft_log('pupesoft-loki', "1432_update: $id $apui");
           $result = pupe_query($query);
 
           // jos ker‰yser‰t on k‰ytˆss‰, p‰ivitet‰‰n ker‰tyt kappalem‰‰r‰t ker‰yser‰‰n
@@ -1491,7 +1487,6 @@ pupesoft_log('pupesoft-loki', "1471_update: $kerattylisa $kerivi[$i] $tilrivirow
                                 SET varattu = round({$maara[$apui]} * ({$lapset_chk_row["varattu"]}/{$tilrivirow["varattu"]}), 2)
                                 WHERE yhtio = '{$kukarow['yhtio']}'
                                 AND tunnus  = '{$lapset_chk_row['tunnus']}'";
-pupesoft_log('pupesoft-loki', "1480_update: Tunnus: $lapset_chk_row[tunnus] Varattu: $maara[$apui] * $lapset_chk_row[varattu] / $tilrivirow[varattu]");
                   $keraysera_update_res = pupe_query($query_upd);
                 }
               }

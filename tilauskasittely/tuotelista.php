@@ -6,8 +6,6 @@ if (@include "../inc/parametrit.inc");
 elseif (@include "parametrit.inc");
 else exit;
 
-$kukarow['extranet'] = 'o';
-
 enable_ajax();
 
 // Liitetiedostot popup
@@ -23,7 +21,7 @@ if (function_exists("js_popup")) {
 }
 
 // Jos tullaan sivuvalikosta extranetiss‰ tyhj‰t‰‰n kesken ettei lis‰t‰ tuotteita v‰‰r‰lle tilaukselle
-if ($kukarow['extranet'] != '') {
+if ($kukarow['extranet'] != '' and isset($indexvas) and $indexvas == 1) {
   $kukarow['kesken'] = '';
 }
 
@@ -71,11 +69,6 @@ if (isset($vierow) and $vierow["maa"] != "") {
     "or tuote.vienti like '%+%') and tuote.vienti not like '%+$vierow[maa]%' ";
 }
 
-if ($kukarow["extranet"] != "") {
-  $extra_poislisa = " and tuote.hinnastoon != 'E' ";
-  $avainlisa      = " and avainsana.jarjestys < 10000 ";
-}
-
 $poislisa = " and (tuote.status not in ('P','X')
               or (SELECT sum(saldo)
               FROM tuotepaikat
@@ -84,6 +77,11 @@ $poislisa = " and (tuote.status not in ('P','X')
               AND tuotepaikat.saldo > 0) > 0) ";
 
 list($oleasrow, $valuurow) = hae_oletusasiakas($laskurow);
+
+if (empty($oleasrow['tunnus'])) {
+  echo t("VIRHE: K‰ytt‰j‰tiedoissasi on virhe, oleutsasiakas puuttuu! Ota yhteys j‰rjestelm‰n yll‰pit‰j‰‰n.")."<br><br>";
+  exit;
+}
 
 if ($kukarow["kuka"] != "" and $laskurow["tila"] != "") {
 
@@ -94,10 +92,10 @@ if ($kukarow["kuka"] != "" and $laskurow["tila"] != "") {
     $tilauskasittely = "tilauskasittely/";
   }
 
-  echo "  <form method='post' action='".$palvelin2.$tilauskasittely."tilaus_myynti.php'>
-      <input type='hidden' name='tilausnumero' value='$kukarow[kesken]'>
-      <input type='submit' value='".t("Takaisin tilaukselle")."'>
-      </form><br><br>";
+  echo "<form method='post' action='".$palvelin2.$tilauskasittely."tilaus_myynti.php'>
+        <input type='hidden' name='tilausnumero' value='$kukarow[kesken]'>
+        <input type='submit' value='".t("Takaisin tilaukselle")."'>
+        </form><br><br>";
 }
 
 if (!isset($tee)) {
@@ -114,9 +112,12 @@ $query = "SELECT tuote.*,
           ifnull((SELECT isatuoteno FROM tuoteperhe use index (yhtio_tyyppi_isatuoteno) where tuoteperhe.yhtio=tuote.yhtio and tuoteperhe.tyyppi = 'P' and tuoteperhe.isatuoteno=tuote.tuoteno LIMIT 1), '') tuoteperhe,
           ifnull((SELECT isatuoteno FROM tuoteperhe use index (yhtio_tyyppi_isatuoteno) where tuoteperhe.yhtio=tuote.yhtio and tuoteperhe.tyyppi = 'V' and tuoteperhe.isatuoteno=tuote.tuoteno LIMIT 1), '') osaluettelo
           FROM tuote
-          JOIN asiakashinta on (tuote.yhtio=asiakashinta.yhtio and tuote.tuoteno=asiakashinta.tuoteno and asiakashinta.asiakas={$kukarow['oletus_asiakas']})
+          JOIN asiakashinta on (tuote.yhtio=asiakashinta.yhtio and tuote.tuoteno=asiakashinta.tuoteno and asiakashinta.asiakas={$oleasrow['tunnus']})
           WHERE tuote.yhtio = '$kukarow[yhtio]'
           and tuote.tuotetyyppi NOT IN ('A','B')
+          and tuote.hinnastoon != 'E'
+          {$kieltolisa}
+          {$poislisa}
           ORDER BY tuote.tuoteno";
 $result = pupe_query($query);
 
@@ -459,7 +460,7 @@ function piirra_formin_aloitus() {
  * Tarkistetaan tilausrivin tiedot ja echotetaan ruudulle lis‰tyt tuotteet
  */
 function tarkista_tilausrivi() {
-  global $tee, $tilkpl, $kukarow, $yhtiorow, $toim, $tiltuoteno, $myyntierahuom, $lisatty_tun, $hae_ja_selaa_row;
+  global $tee, $tilkpl, $kukarow, $yhtiorow, $tiltuoteno, $myyntierahuom, $lisatty_tun, $hae_ja_selaa_row;
 
   pupemaster_start();
 
@@ -504,11 +505,7 @@ function tarkista_tilausrivi() {
 
       $kpl = str_replace(',', '.', $kpl);
 
-      if ((float) $kpl > 0 or ($kukarow["extranet"] == "" and (float) $kpl < 0) or ($yhtiorow['reklamaation_kasittely'] == 'U' and $toim == 'EXTRANET_REKLAMAATIO' and (float) $kpl != 0)) {
-
-        if ($yhtiorow['reklamaation_kasittely'] == 'U' and $toim == 'EXTRANET_REKLAMAATIO') {
-          $kpl = abs($kpl) * -1;
-        }
+      if ((float) $kpl > 0 or ($kukarow["extranet"] == "" and (float) $kpl < 0)) {
 
         // haetaan tuotteen tiedot
         $query = "SELECT * from tuote where yhtio='$kukarow[yhtio]' and tuoteno='$tiltuoteno[$yht_i]'";
@@ -525,7 +522,6 @@ function tarkista_tilausrivi() {
           $kpl = (float) $kpl;
           $kpl_echo = (float) $kpl;
           $tuoteno = $trow["tuoteno"];
-          $yllapita_toim_stash = $toim;
 
           $toimaika = $laskurow["toimaika"];
           $kerayspvm = $laskurow["kerayspvm"];
@@ -558,7 +554,6 @@ function tarkista_tilausrivi() {
             require "lisaarivi.inc";
           }
 
-          $toim = $yllapita_toim_stash;
           echo "<font class='message'>" . t("Lis‰ttiin") . " $kpl_echo " . t_avainsana("Y", "", " and avainsana.selite='$trow[yksikko]'", "", "", "selite") . " " . t("tuotetta") . " $tiltuoteno[$yht_i].</font><br>";
 
           if (isset($myyntierahuom) and count($myyntierahuom) > 0) {

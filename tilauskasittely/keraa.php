@@ -538,6 +538,7 @@ if ($tee == 'P') {
                       WHERE yhtio = '$kukarow[yhtio]'
                       and tunnus  = '$toimrow[tunnus]'";
             $lisa_res = pupe_query($query);
+          pupesoft_log('pupesoft-loki', '541_update:');
           }
         }
 
@@ -1232,6 +1233,7 @@ if ($tee == 'P') {
                          perheid2        = '$tilrivirow[perheid2]',
                          nimitys         = '$tilrivirow[nimitys]',
                          jaksotettu      = '$tilrivirow[jaksotettu]'";
+pupesoft_log('pupesoft-loki', "1203-insert: Tuoteno: '$tilrivirow[tuoteno]' tilkpl: '$rtilkpl' Varattu: '$rvarattu'");
               $riviresult = pupe_query($querys);
               $lisatty_tun = mysql_insert_id($GLOBALS["masterlink"]);
 
@@ -1303,6 +1305,7 @@ if ($tee == 'P') {
                              SET varattu = '$tilrivimaara'
                              WHERE tunnus = '$tilrivirow2[tunnus]'
                              AND yhtio    = '$kukarow[yhtio]'";
+pupesoft_log('pupesoft-loki', "1307_update: Tunnus:: '$tilrivirow2[tunnus]' Varattu: '$tilrivimaara'");
                   $result1 = pupe_query($query1);
                 }
               }
@@ -1320,7 +1323,19 @@ if ($tee == 'P') {
 
           if ($keraysvirhe == 0 and ($yhtiorow['kerayserat'] == 'P' or ($yhtiorow['kerayserat'] == 'A' and $otsikkorivi['kerayserat'] == 'A'))) {
 
-            $kerattylisa = (trim($maara[$apui]) == '' or $maara[$apui] < 0) ? ", kpl_keratty = kpl" : ", kpl_keratty = '{$maara[$apui]}'";
+            // Tarkistetaan, ettei ole keräyslistan korjaus ja manuaalisesti syötetty kerättymäärä päivittynyt jo keräyserat-tauluun
+            $kerattylisa = '';
+            if (trim($maara[$apui]) == '' or $maara[$apui] < 0) {
+              if ($tilrivirow['tilkpl'] != $tilrivirow['varattu'] and $tilrivirow['var'] == '') {
+                $kerattylisa = ", kpl_keratty = '{$tilrivirow[varattu]}'";
+              }
+              else {
+                $kerattylisa = ", kpl_keratty = kpl";
+              }
+            }  
+            else {
+              $kerattylisa = ", kpl_keratty = '{$maara[$apui]}'";
+            }
 
             $pakkauskirjain = (int) abs(ord($keraysera_pakkaus[$kerivi[$i]]) - 64);
             $monesko = -1;
@@ -1365,7 +1380,7 @@ if ($tee == 'P') {
                 }
               }
             }
-
+pupesoft_log('pupesoft-loki', "1471_update: $kerattylisa $kerivi[$i] $tilrivirow[tilkp] $tilrivirow[varattu] $tilrivirow[kpl] ");
             $query_ins = "UPDATE kerayserat SET
                           pakkausnro     = '{$pakkauskirjain}',
                           sscc           = '{$pakkaukset[$monesko]['sscc']}',
@@ -1426,6 +1441,7 @@ if ($tee == 'P') {
 
           //päivitetään alkuperäinen rivi
           $query .= " WHERE tunnus='$apui' and yhtio='$kukarow[yhtio]'";
+          pupesoft_log('pupesoft-loki', "1432_update: $id $apui");
           $result = pupe_query($query);
 
           // jos keräyserät on käytössä, päivitetään kerätyt kappalemäärät keräyserään
@@ -1475,6 +1491,7 @@ if ($tee == 'P') {
                                 SET varattu = round({$maara[$apui]} * ({$lapset_chk_row["varattu"]}/{$tilrivirow["varattu"]}), 2)
                                 WHERE yhtio = '{$kukarow['yhtio']}'
                                 AND tunnus  = '{$lapset_chk_row['tunnus']}'";
+pupesoft_log('pupesoft-loki', "1480_update: Tunnus: $lapset_chk_row[tunnus] Varattu: $maara[$apui] * $lapset_chk_row[varattu] / $tilrivirow[varattu]");
                   $keraysera_update_res = pupe_query($query_upd);
                 }
               }

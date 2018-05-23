@@ -683,6 +683,21 @@ while ($tietue = fgets($fd)) {
           $editilaus_maksuehto   = $editilaus_maksuehto_row['tunnus'];
         }
       }
+      if ($editilaus_maksuehto != "" and $editilaus_kassalipas != "") {
+        $query = "SELECT *
+                  FROM maksuehto
+                  WHERE yhtio = '{$kukarow['yhtio']}'
+                  AND teksti  = '{$tieto}'
+                  AND kateinen = 'o'
+                  AND kaytossa != 'E'
+                  LIMIT 1";
+        $result = pupe_query($query);
+
+        if (mysql_num_rows($result) == 1) {
+          $editilaus_maksuehto_row = mysql_fetch_assoc($result);
+          $editilaus_maksuehto   = $editilaus_maksuehto_row['tunnus'];
+        }
+      }
 
       $editilaus_maksuteksti .= $tieto;
     }

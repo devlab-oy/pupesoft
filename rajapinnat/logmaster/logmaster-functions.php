@@ -243,6 +243,7 @@ if (!function_exists('logmaster_outbounddelivery')) {
               tilausrivi.keratty,
               lasku.toimaika AS lasku_toimaika,
               asiakas.email,
+              lasku.toim_email,
               asiakas.asiakasnro,
               tuote.eankoodi,
               tuote.ei_saldoa,
@@ -352,7 +353,12 @@ if (!function_exists('logmaster_outbounddelivery')) {
     $orderedby->addChild('CustPostCode', xml_cleanstring($looprow['postino'], 10));
     $orderedby->addChild('CustCity',     xml_cleanstring($looprow['postitp'], 30));
     $orderedby->addChild('CustCountry',  xml_cleanstring($looprow['maa'], 10));
-    $orderedby->addChild('Email',        xml_cleanstring($looprow['email']));
+    if ($looprow['toim_email'] == '') {
+      $orderedby->addChild('Email',        xml_cleanstring($looprow['email']));
+    }
+      else {
+      $orderedby->addChild('Email',        xml_cleanstring($looprow['toim_email']));
+    }
 
     if ($uj_nimi == "Velox") {
       $orderedby->addChild('Custnr',        xml_cleanstring($looprow['asiakasnro']));

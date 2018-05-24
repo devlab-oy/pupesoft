@@ -2064,7 +2064,7 @@ elseif ($toim == "EXTRANET") {
 }
 elseif ($toim == "LAVAKERAYS") {
 
-  $query = "SELECT DISTINCT lasku.tunnus tilaus, asiakkaan_tilausnumero as 'astilno', $asiakasstring asiakas, asiakas.asiakasnro, lasku.luontiaika, count(tilausrivi.tunnus) riveja, ";
+  $query = "SELECT DISTINCT lasku.toim_maa maa, lasku.tunnus tilaus, asiakkaan_tilausnumero as 'astilno', $asiakasstring asiakas, asiakas.asiakasnro, lasku.luontiaika, count(tilausrivi.tunnus) riveja, ";
 
   if ($kukarow['hinnat'] == 0) {
     $query .= " round(sum(tilausrivi.hinta

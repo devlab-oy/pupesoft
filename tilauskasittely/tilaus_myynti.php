@@ -2299,6 +2299,18 @@ if ($kukarow["extranet"] == "" and ((($toim == "TYOMAARAYS" or $toim == "TYOMAAR
   require "tyomaarays/tyomaarays.inc";
 }
 
+if ($kukarow["extranet"] == "" and $laskurow['alatila'] == "FF" and $tee == "FFJONOON") {
+  echo "<br>";
+  echo t("Tilaus palautettu lavakeräysjonoon!");
+  echo "<br><br>";
+
+  $tee = '';
+  $tilausnumero = '';
+  $laskurow = '';
+  $kukarow['kesken'] = '';
+  $tila = '';
+}
+
 if ($kukarow["extranet"] == "" and $toim == "REKLAMAATIO" and $tee == "LEPAA" and
   ($yhtiorow['reklamaation_kasittely'] == 'U' or
     ($yhtiorow['reklamaation_kasittely'] == 'X' and $laskurow['tilaustyyppi'] != 'U'))) {
@@ -10364,6 +10376,22 @@ if ($tee == '') {
                 </form>
               </td>";
       }
+    }
+
+    if ($kukarow["extranet"] == "" and $muokkauslukko == "" and $laskurow['alatila'] == "FF") {
+      echo "  <td class='back ptop'>
+          <form name='tlepaamaan' method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php'>
+          <input type='hidden' name='toim' value='$toim'>
+          <input type='hidden' name='lopetus' value='$lopetus'>
+          <input type='hidden' name='ruutulimit' value = '$ruutulimit'>
+          <input type='hidden' name='projektilla' value='$projektilla'>
+          <input type='hidden' name='tee' value='FFJONOON'>
+          <input type='hidden' name='tilausnumero' value='$tilausnumero'>
+          <input type='hidden' name='mista' value = '$mista'>
+          <input type='hidden' name='orig_tila' value='$orig_tila'>
+          <input type='hidden' name='orig_alatila' value='$orig_alatila'>
+          <input type='submit' value='* ".t("Tilaus lavakeräysjonoon")." *'>
+          </form></td>";
     }
 
     if ($kukarow["extranet"] == "" and $muokkauslukko == "" and $toim == "REKLAMAATIO") {

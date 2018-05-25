@@ -2309,6 +2309,10 @@ if ($kukarow["extranet"] == "" and $laskurow['alatila'] == "FF" and $tee == "FFJ
   $laskurow = '';
   $kukarow['kesken'] = '';
   $tila = '';
+
+  if ($lopetus != '') {
+    lopetus($lopetus, "META");
+  }
 }
 
 if ($kukarow["extranet"] == "" and $toim == "REKLAMAATIO" and $tee == "LEPAA" and

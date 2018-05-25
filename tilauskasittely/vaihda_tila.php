@@ -338,17 +338,6 @@ if ($tunnus != "" and $tee == "valitse") {
 
         if ($tila_row["alatila"] != "") {
           echo "<option value = '1'>", t("Tilaus kesken"), "</option>";
-
-          $asq = "SELECT kerayserat
-                  FROM asiakas
-                  WHERE yhtio = '{$kukarow['yhtio']}'
-                  AND tunnus = '{$tila_row['liitostunnus']}'";
-          $asr = pupe_query($asq);
-          $asiakas_row = mysql_fetch_assoc($asr);
-
-          if ($asiakas_row['kerayserat'] == "H" and $tila_row["alatila"] != 'FF') {
-            echo "<option value = 'LJ'>", t("Lavakeräysjonoon"), "</option>";
-          }
         }
 
         $asq = "SELECT kerayserat

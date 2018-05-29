@@ -96,7 +96,7 @@ if ($tee == 'hae_ostotilaukset') {
     }
     if (in_array($kenelle, array("toimittaja"))) {
       $ostotilaukset_toimittajittain = kasittele_ostotilaukset($ostotilaukset, 'toimittaja');
-      $email_bodys = generoi_email_body($ostotilaukset_toimittajittain, $ostotilaukset['kieli'], $toimittajan_tuotetiedot);
+      $email_bodys = generoi_email_body($ostotilaukset_toimittajittain, $kieli, $toimittajan_tuotetiedot);
       laheta_sahkopostit($email_bodys, $kieli, true);
     }
   }

@@ -199,8 +199,7 @@ if (count($tuotetiedot) > 0) {
       $rtuoteno[$i]["ale"] = xml_float($tuotetieto->RowDiscountPercent);
       $rtuoteno[$i]["hinta"] = round(xml_float($tuotetieto->UnitPriceAmount), 2);
 
-      // rivikommentti (kommentti putsataan ja decoodataan kokonaisuudessaan myöhemmin)
-      $xrinfo = $tuotetieto->RowFreeText;
+      $xrinfo = xml_string($tuotetieto->RowFreeText);
 
       if (is_array($xrinfo)) {
         foreach ($xrinfo as $xln) {

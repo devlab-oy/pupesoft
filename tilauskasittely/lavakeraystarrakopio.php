@@ -45,6 +45,7 @@ if ($tee == "") {
     echo "<th valign='top'>".t("Toimitustapa")."</td>";
     echo "<th valign='top'>".t("Tulostettu")."</td>";
     echo "<th valign='top'>".t("Tilauksia")."</td>";
+    echo "<th valign='top'>".t("Rivit")."</td>";
     echo "<th style='display:none;'></th>";
     echo "</tr>";
     echo "</thead>";
@@ -61,6 +62,14 @@ if ($tee == "") {
       $tilres = pupe_query($query);
       $tilrow = mysql_fetch_assoc($tilres);
 
+      $query = "SELECT count(*) riveja
+                FROM tilausrivi
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                and tyyppi = 'L'
+                and otunnus = '{$row['tunnus']}'";
+      $tilrivires = pupe_query($query);
+      $tilrivirow = mysql_fetch_assoc($tilrivires);
+
       echo "<tr>";
 
       echo "<td class='ptop'>$row[tunnus]</td>";
@@ -69,6 +78,7 @@ if ($tee == "") {
       echo "<td class='ptop'>$row[toimitustapa]</td>";
       echo "<td class='ptop text-right'>",pupe_DataTablesEchoSort($row["lahetepvm"]),tv1dateconv($row["lahetepvm"], "PITKA"),"</td>";
       echo "<td class='ptop text-right'>$tilrow[tilauksia]</td>";
+      echo "<td class='ptop text-right'>$tilrivirow[riveja]</td>";
 
       echo "<td class='back'>
             <form method='post' autocomplete='off'>
@@ -244,8 +254,22 @@ if ($tee == "TULOSTA" and $kerayslista > 0) {
       $kal++;
     }
 
-    // Lavakeraystarrat
-    tulosta_lavakeraystarrat_tec($riresult, $rivinumerot, $komento["Lavatarra"], "KOPIOTULOSTUS");
+    if (!empty($valittu_tulostin)) {
+      $query  = "SELECT *
+                 FROM kirjoittimet
+                 WHERE yhtio = '$kukarow[yhtio]'
+                 AND tunnus = '$valittu_tulostin'";
+      $kirres = pupe_query($query);
+      $kirrow = mysql_fetch_assoc($kirres);
+
+      // HB-keraystarra tulostin
+      //setcookie("hb_keraystarra_tulostin", $kirrow['tunnus'], time()+60*60*24*90, "/");
+
+      if (!empty($kirrow['komento'])) {
+        // Lavakeraystarrat
+        tulosta_lavakeraystarrat_tec($riresult, $rivinumerot, $kirrow["komento"], "KOPIOTULOSTUS");
+      }
+    }
   }
 }
 

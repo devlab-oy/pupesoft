@@ -130,7 +130,15 @@ if ($tee == "TULOSTA" and $kerayslista > 0) {
     echo "<td><select name='valittu_tulostin'>";
     echo "<option value=''>".t("Valitse tulostin")."</option>";
 
+    if (empty($hb_keraystarra_tulostin)) {
+      $hb_keraystarra_tulostin = isset($_COOKIE["hb_keraystarra_tulostin"]) ? $_COOKIE["hb_keraystarra_tulostin"] : "";
+    }
+
     while ($kirrow = mysql_fetch_array($kirre)) {
+      $sel = "";
+      if ($hb_keraystarra_tulostin == $kirrow['tunnus']) {
+        $sel = "SELECTED";
+      }
       echo "<option value='$kirrow[tunnus]' $sel>$kirrow[kirjoitin]</option>";
     }
 
@@ -263,7 +271,7 @@ if ($tee == "TULOSTA" and $kerayslista > 0) {
       $kirrow = mysql_fetch_assoc($kirres);
 
       // HB-keraystarra tulostin
-      //setcookie("hb_keraystarra_tulostin", $kirrow['tunnus'], time()+60*60*24*90, "/");
+      setcookie("hb_keraystarra_tulostin", $kirrow['tunnus'], time()+60*60*24*90, "/");
 
       if (!empty($kirrow['komento'])) {
         // Lavakeraystarrat

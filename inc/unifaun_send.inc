@@ -699,6 +699,33 @@ class Unifaun {
     //$uni_par_val = $uni_receiver_partner->addChild('val', "");   # Agent's identity, mandatory value for DBSchenker PrivPak. Normally set by application.
     //$uni_par_val->addAttribute('n', "agentno");
 
+    // Käytetään vastaanottajan rahtisopimusta: toimitusosoite on eri kuin rahtisopåimuksen omistaja ->
+    // kerrotaan Unifaunille myös rahtisopimuksen omistajajn tiedot  
+    if ($this->rakir_row["toim_nimi"] != $this->rakir_row["nimi"] and $this->toitarow["virallinen_selite"] == "POF1") {
+      $uni_party = $xml->addChild('party');  // Any contents. Mandatory.
+
+      $uni_party->addAttribute('ptyid', '3');
+      $shipment_to = '3';
+
+      $_nimi = htmlspecialchars($this->rakir_row["nimi"]);
+      $_nimitark = htmlspecialchars($this->rakir_row["nimitark"]);
+
+      $uni_prt_val = $uni_party->addChild('val', utf8_encode(trim($_nimi.' '.$_nimitark))); // Party's name
+      $uni_prt_val->addAttribute('n', "name");
+      
+      $uni_prt_val = $uni_party->addChild('val', utf8_encode($this->rakir_row["osoite"])); // Party's name
+      $uni_prt_val->addAttribute('n', "address1");
+      
+      $uni_prt_val = $uni_party->addChild('val', utf8_encode($this->rakir_row["postino"])); // Party's name
+      $uni_prt_val->addAttribute('n', "zipcode");
+      
+      $uni_prt_val = $uni_party->addChild('val', utf8_encode($this->rakir_row["postitp"])); // Party's name
+      $uni_prt_val->addAttribute('n', "city");
+      
+      $uni_prt_val = $uni_party->addChild('val', utf8_encode($this->rakir_row["maa"])); // Party's name
+      $uni_prt_val->addAttribute('n', "country");
+
+    }
     // Lähetyksen tiedot
     $uni_shipment = $xml->addChild('shipment');  // Unique order number. Any contents. Mandatory. Order number is searchable in the system but not printed on shipping documents.
     $uni_shipment->addAttribute('orderno', utf8_encode($this->postirow["shipment_unique_id"]));
@@ -718,7 +745,13 @@ class Unifaun {
     $uni_shi_val = $uni_shipment->addChild('val', $this->pikahakuarvo()); // Defines the sender. Refers to the sndid value for sender.
     $uni_shi_val->addAttribute('n', "from");
 
-    $uni_shi_val = $uni_shipment->addChild('val', utf8_encode($this->asiakasrow["tunnus"])); // Defines the receiver. Refers to rcvid value for receiver.
+    if ($this->rakir_row["toim_nimi"] != $this->rakir_row["nimi"] and $this->toitarow['virallinen_selite'] == 'POF1') {
+      $to_tunnus = $shipment_to;
+    }
+    else {
+      $to_tunnus = $this->asiakasrow["tunnus"];
+    }
+    $uni_shi_val = $uni_shipment->addChild('val', utf8_encode($to_tunnus)); // Defines the receiver. Refers to rcvid value for receiver.
     $uni_shi_val->addAttribute('n', "to");
 
     if ($this->toitarow['virallinen_selite'] == 'PO2711') {

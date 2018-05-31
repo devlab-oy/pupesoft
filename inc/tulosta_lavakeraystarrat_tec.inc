@@ -220,7 +220,6 @@ if (!function_exists("tulosta_lavakeraystarrat_tec")) {
 {PC000;0300,0190,10,10,I,00,B|}
 *** TULOSTUS  ***
 {XS;I,0001,0002C3200|}
-{XJ;|}
 ";
     }
 

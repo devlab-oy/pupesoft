@@ -103,7 +103,7 @@ if (!function_exists("tulosta_lavakeraystarrat_tec")) {
 {RC001;$pvm|}
 {PC002;0020,0190,30,30,K,00,B|}
 {RC002;{$asrow['toim_nimitark']}|}
-{PC003;0300,0190,10,10,I,00,B|}
+{PC003;0300,0190,08,08,I,00,B|}
 {RC003;{$asrow['toim_nimi']}|}
 {PC004;0890,0080,08,08,H,00,B,P3|}
 {RC004;{$lasrow['toimitustapa']}|}

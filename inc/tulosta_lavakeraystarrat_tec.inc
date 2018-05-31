@@ -202,6 +202,26 @@ if (!function_exists("tulosta_lavakeraystarrat_tec")) {
 *** TULOSTUS  ***
 {XS;I,0001,0002C3200|}
 ";
+
+      // tulostetaan muutama tyhj‰ ennen kuin
+      // pyydet‰‰n vaihtamaan lavaa
+      $tarrat .= "
+*** TARRA ALKAA ***
+{C|}
+{XR;0000,0000,0900,0450,A|}
+{PC000;0300,0190,10,10,I,00,B|}
+*** TULOSTUS  ***
+{XS;I,0001,0002C3200|}";
+
+      $tarrat .= "
+*** TARRA ALKAA ***
+{C|}
+{XR;0000,0000,0900,0450,A|}
+{PC000;0300,0190,10,10,I,00,B|}
+*** TULOSTUS  ***
+{XS;I,0001,0002C3200|}
+{XJ;|}
+";
     }
 
     //konvertoidaan ‰‰kkˆset printterin ymm‰rt‰m‰‰n muotoon

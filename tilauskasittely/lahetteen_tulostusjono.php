@@ -1140,6 +1140,7 @@ if ($tee2 == '') {
     $tulostakaikki_tun = array();
     $edennakko = "";
     $riveja_yht = 0;
+    $paino_yht = 0;
 
     while ($tilrow = mysql_fetch_array($tilre)) {
       if ($logistiikka_yhtio != '') {
@@ -1440,6 +1441,7 @@ if ($tee2 == '') {
       }
 
       $riveja_yht += $tilrow["riveja"];
+      $paino_yht += $tilrow["tilauksen_paino"];
     }
 
     $spanni = $logistiikka_yhtio != '' ? 7 : 6;
@@ -1449,6 +1451,7 @@ if ($tee2 == '') {
 
     echo t("Rivejä yhteensä")."</th>";
     echo "<th>".$riveja_yht."</th>";
+    echo "<th style='text-align:right'>".$paino_yht."</th>";
 
     if ($show_ohjelma_moduli) {
       $spanni = 5;

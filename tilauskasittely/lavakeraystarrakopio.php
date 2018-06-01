@@ -54,7 +54,7 @@ if ($tee == "") {
 
     while ($row = mysql_fetch_assoc($result)) {
 
-      $query = "SELECT count(*) tilauksia
+      $query = "SELECT group_concat(tunnus) tunnukset, count(*) tilauksia
                 FROM lasku
                 WHERE yhtio = '{$kukarow['yhtio']}'
                 and tila = 'L'
@@ -66,7 +66,7 @@ if ($tee == "") {
                 FROM tilausrivi
                 WHERE yhtio = '{$kukarow['yhtio']}'
                 and tyyppi = 'L'
-                and otunnus = '{$row['tunnus']}'";
+                and otunnus in ({$tilrow['tunnukset']})";
       $tilrivires = pupe_query($query);
       $tilrivirow = mysql_fetch_assoc($tilrivires);
 

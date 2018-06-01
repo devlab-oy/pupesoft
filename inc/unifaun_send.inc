@@ -705,7 +705,7 @@ class Unifaun {
       $uni_party = $xml->addChild('party');  // Any contents. Mandatory.
 
       $uni_party->addAttribute('ptyid', '3');
-      $shipment_to = '3';
+      $shipment_payer = '3';
 
       $_nimi = htmlspecialchars(utf8_encode($this->rakir_row["nimi"]), ENT_SUBSTITUTE);
       $_nimitark = htmlspecialchars(utf8_encode($this->rakir_row["nimitark"]), ENT_SUBSTITUTE);
@@ -745,14 +745,13 @@ class Unifaun {
     $uni_shi_val = $uni_shipment->addChild('val', $this->pikahakuarvo()); // Defines the sender. Refers to the sndid value for sender.
     $uni_shi_val->addAttribute('n', "from");
 
-    if ($this->rakir_row["toim_nimi"] != $this->rakir_row["nimi"] and $this->toitarow['virallinen_selite'] == 'POF1') {
-      $to_tunnus = $shipment_to;
-    }
-    else {
-      $to_tunnus = $this->asiakasrow["tunnus"];
-    }
-    $uni_shi_val = $uni_shipment->addChild('val', utf8_encode($to_tunnus)); // Defines the receiver. Refers to rcvid value for receiver.
+    $uni_shi_val = $uni_shipment->addChild('val', utf8_encode($this->asiakasrow["tunnus"])); // Defines the receiver. Refers to rcvid value for receiver.
     $uni_shi_val->addAttribute('n', "to");
+    
+    if ($this->rakir_row["toim_nimi"] != $this->rakir_row["nimi"] and $this->toitarow['virallinen_selite'] == 'POF1') {
+      $uni_shi_val = $uni_shipment->addChild('val', utf8_encode($shipment_payer)); // Defines the receiver. Refers to rcvid value for receiver.
+      $uni_shi_val->addAttribute('n', "payerfreight");
+    }
 
     if ($this->toitarow['virallinen_selite'] == 'PO2711') {
 

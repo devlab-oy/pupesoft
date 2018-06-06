@@ -245,19 +245,16 @@ if (!empty($etsinappi)) {
     $query .= " ORDER BY 1 ";
   }
   else {
+    $onkomyohassa_sql = "if(left(tilausrivi.toimitettuaika, 10) > 0, left(tilausrivi.toimitettuaika, 10), CURDATE()) ";
+
     if ($raptaso == "yritys") {
       $query = "SELECT
                 count(distinct lasku.tunnus) tilauksia,
                 count(tilausrivi.tunnus) riveja,
-                count(distinct if(left(tilausrivi.toimitettuaika, 10) > lasku.toimaika, lasku.tunnus, null)) myohassa_tilauksia,
-                sum(if(left(tilausrivi.toimitettuaika, 10) > lasku.toimaika, 1, 0)) myohassa_riveja,
-                from_unixtime(
-                  avg(
-                    unix_timestamp(tilausrivi.toimitettuaika)
-                  ), '%Y-%m-%d'
-                ) toimitettu,
+                count(distinct if($onkomyohassa_sql > lasku.toimaika, lasku.tunnus, null)) myohassa_tilauksia,
+                sum(if($onkomyohassa_sql > lasku.toimaika, 1, 0)) myohassa_riveja,
                 round(avg(
-                  if(left(tilausrivi.toimitettuaika, 10) > lasku.toimaika, DATEDIFF(tilausrivi.toimitettuaika, tilausrivi.toimaika), null)
+                  if($onkomyohassa_sql > lasku.toimaika, DATEDIFF($onkomyohassa_sql, tilausrivi.toimaika), null)
                 ), 1) myohassa_pva
                 ";
     }
@@ -267,15 +264,10 @@ if (!empty($etsinappi)) {
                 max(lasku.nimi) nimi,
                 count(distinct lasku.tunnus) tilauksia,
                 count(tilausrivi.tunnus) riveja,
-                count(distinct if(left(tilausrivi.toimitettuaika, 10) > lasku.toimaika, lasku.tunnus, null)) myohassa_tilauksia,
-                sum(if(left(tilausrivi.toimitettuaika, 10) > lasku.toimaika, 1, 0)) myohassa_riveja,
-                from_unixtime(
-                  avg(
-                    unix_timestamp(tilausrivi.toimitettuaika)
-                  ), '%Y-%m-%d'
-                ) toimitettu,
+                count(distinct if($onkomyohassa_sql > lasku.toimaika, lasku.tunnus, null)) myohassa_tilauksia,
+                sum(if($onkomyohassa_sql > lasku.toimaika, 1, 0)) myohassa_riveja,
                 round(avg(
-                  if(left(tilausrivi.toimitettuaika, 10) > lasku.toimaika, DATEDIFF(tilausrivi.toimitettuaika, tilausrivi.toimaika), null)
+                  if($onkomyohassa_sql > lasku.toimaika, DATEDIFF($onkomyohassa_sql, tilausrivi.toimaika), null)
                 ), 1) myohassa_pva
                 ";
     }
@@ -285,14 +277,14 @@ if (!empty($etsinappi)) {
                 lasku.tunnus tilaus,
                 lasku.toimaika,
                 count(tilausrivi.tunnus) riveja,
-                sum(if(left(tilausrivi.toimitettuaika, 10) > lasku.toimaika, 1, 0)) myohassa_riveja,
+                sum(if($onkomyohassa_sql > lasku.toimaika, 1, 0)) myohassa_riveja,
                 from_unixtime(
                   avg(
                     unix_timestamp(tilausrivi.toimitettuaika)
                   ), '%Y-%m-%d'
                 ) toimitettu,
                 round(avg(
-                  DATEDIFF(tilausrivi.toimitettuaika, tilausrivi.toimaika)
+                  DATEDIFF($onkomyohassa_sql, tilausrivi.toimaika)
                 ), 1) myohassa_pva
                 ";
     }

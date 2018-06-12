@@ -1086,7 +1086,10 @@ if (strpos($_SERVER['SCRIPT_NAME'], "muokkaatilaus.php") !== FALSE) {
     $myyntitili_haku = " or tilausrivi.tuoteno like '%{$etsi}%' ";
   }
 
-  if (!empty($etsi) and is_string($etsi)) {
+  if (!empty($etsi) and is_string($etsi) and $toim == "LAVAKERAYS") {
+    $haku = " and (lasku.nimi like '%{$etsi}%' or lasku.nimitark like '%{$etsi}%' or lasku.viesti like '%{$etsi}%' or lasku.toim_nimi like '%{$etsi}%' or lasku.toim_nimitark like '%{$etsi}%') ";
+  }
+  else if (!empty($etsi) and is_string($etsi)) {
     $haku = " and (lasku.nimi like '%{$etsi}%' or lasku.nimitark like '%{$etsi}%' or lasku.viesti like '%{$etsi}%' or lasku.toim_nimi like '%{$etsi}%' or lasku.toim_nimitark like '%{$etsi}%' or lasku.laatija like '%{$etsi}%' or kuka1.nimi like '%{$etsi}%' or kuka2.nimi like '%{$etsi}%' {$myyntitili_haku}) ";
   }
 
@@ -2436,7 +2439,7 @@ else {
 
   $miinus = 9;
 }
-
+query_dump($query);
 $result = pupe_query($query);
 
 if (mysql_num_rows($result) != 0) {

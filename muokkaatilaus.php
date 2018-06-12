@@ -2439,7 +2439,7 @@ else {
 
   $miinus = 9;
 }
-query_dump($query);
+
 $result = pupe_query($query);
 
 if (mysql_num_rows($result) != 0) {

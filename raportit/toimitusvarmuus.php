@@ -292,12 +292,12 @@ if (!empty($etsinappi)) {
     if ($toim == 'AVOIMET') {
       $tilalisa = "or (lasku.tila='V' and tilaustyyppi = 'V')";
     }
-                
-    $query .= " JOIN lasku ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus 
+
+    $query .= " JOIN lasku ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus
                     and (lasku.tila = 'L' $tilalisa))
-                JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio and tilausrivi.tuoteno = tuote.tuoteno 
+                JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio and tilausrivi.tuoteno = tuote.tuoteno
                   and tuote.ei_saldoa = '')
-                WHERE tilausrivi.yhtio = '$kukarow[yhtio]'                
+                WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
                 and tilausrivi.var not in ('P','J','O','S')";
 
     if ($toim == 'AVOIMET') {
@@ -328,7 +328,7 @@ if (!empty($etsinappi)) {
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) > 0) {
-    echo "$query<br>";
+    echo "<br>";
 
     include 'inc/pupeExcel.inc';
 
@@ -558,7 +558,7 @@ if (!empty($etsinappi)) {
 
           if (($toim == "MYYNTI" or $toim == 'AVOIMET') and $row['alatila'] != 'X') {
             $lop .= "//asiakasid=$asiakasid";
-            
+
             if ($row['tila'] == 'V') {
               $toimi = "VALMISTAASIAKKAALLE";
             }

@@ -107,6 +107,9 @@ class MagentoClient {
   // Poistetaanko tuotteita oletuksena
   private $_magento_poista_tuotteita = false;
 
+  // Estetäänkö asiakkaiden muokkaus
+  private $_magento_asiakaspaivitysesto = "YES";
+
   // Käsitelläänkö tuotekuvia magentossa
   private $magento_lisaa_tuotekuvat = true;
 
@@ -1384,6 +1387,10 @@ class MagentoClient {
     $this->_sisaanluvun_esto = $sisaanluvun_esto;
   }
 
+  public function setAsiakasPaivitysEsto($value) {
+    $this->_magento_asiakaspaivitysesto = $magento_asiakaspaivitysesto;
+  }
+
   public function setUniversalTuoteryhma($universal_tuoteryhma) {
     $this->_universal_tuoteryhma = $universal_tuoteryhma;
   }
@@ -1412,10 +1419,6 @@ class MagentoClient {
 
   public function setRemoveProducts($value) {
     $this->_magento_poista_tuotteita = $value;
-  }
-
-  public function setAsiakasPaivitysEsto($value) {
-    $this->_magento_asiakaspaivitysesto = $value;
   }
 
   public function set_magento_lisaa_tuotekuvat($value) {

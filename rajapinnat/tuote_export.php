@@ -288,8 +288,8 @@ if (empty($verkkokauppa_asiakasnro)) {
 }
 
 // Estetäänkö asiakkaiden päivitys
-if (empty($magento_asikaspaivitysesto)) {
-  $magento_asikaspaivitysesto = 'YES';
+if (empty($magento_asiakaspaivitysesto)) {
+  $magento_asiakaspaivitysesto = 'NO';
 }
 
 // Vaihtoehtoinen varastosaldo Magenton tuotekenttään
@@ -455,7 +455,7 @@ if (in_array('asiakkaat', $magento_ajolista)) {
 
   tuote_export_echo("Päivitetään asiakkaat");
   $magento_client->lisaa_asiakkaat($dnsasiakas);
-  $magento_client->setAsiakasPaivitysEsto($magento_asikaspaivitysesto);
+  $magento_client->setAsiakasPaivitysEsto($magento_asiakaspaivitysesto);
 }
 
 if (in_array('lajitelmatuotteet', $magento_ajolista)) {

@@ -108,7 +108,7 @@ class MagentoClient {
   private $_magento_poista_tuotteita = false;
 
   // Estetäänkö asiakkaiden muokkaus
-  private $_magento_asiakaspaivitysesto = "YES";
+  private $_magento_asiakaspaivitysesto = "";
 
   // Käsitelläänkö tuotekuvia magentossa
   private $magento_lisaa_tuotekuvat = true;
@@ -1223,12 +1223,12 @@ class MagentoClient {
           $this->debug('magento_asiakkaat', $asiakas_data);
         }
       }
-      // Asiakas on jo olemassa, päivitetään
+      // Asiakas on jo olemassa, päivitetään(kö)
 
-      if ($this->_magento_asiakaspaivitysesto == "YES") {
+      elseif ($this->_magento_asiakaspaivitysesto == "YES") {
         $this->log('magento_asiakkaat', "Asiakaspäivitys on estetty");
         // Skipataan tämä asiakas
-        continue 2;
+        continue;
       }
       else {
         try {
@@ -1388,7 +1388,7 @@ class MagentoClient {
   }
 
   public function setAsiakasPaivitysEsto($value) {
-    $this->_magento_asiakaspaivitysesto = $magento_asiakaspaivitysesto;
+    $this->_magento_asiakaspaivitysesto = $value;
   }
 
   public function setUniversalTuoteryhma($universal_tuoteryhma) {

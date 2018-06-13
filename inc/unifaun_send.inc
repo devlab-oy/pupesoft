@@ -700,8 +700,8 @@ class Unifaun {
     //$uni_par_val->addAttribute('n', "agentno");
 
     // Käytetään vastaanottajan rahtisopimusta: toimitusosoite on eri kuin rahtisopåimuksen omistaja ->
-    // kerrotaan Unifaunille myös rahtisopimuksen omistajajn tiedot  
-    if ($this->rakir_row["toim_nimi"] != $this->rakir_row["nimi"] and $this->toitarow["virallinen_selite"] == "POF1") {
+    // kerrotaan Unifaunille myös rahtisopimuksen omistajajn tiedot
+    if ($this->rakir_row['merahti'] == "" and $this->rakir_row["toim_nimi"] != $this->rakir_row["nimi"] and $this->toitarow["virallinen_selite"] == "POF1") { //keijo
       $uni_party = $xml->addChild('party');  // Any contents. Mandatory.
 
       $uni_party->addAttribute('ptyid', '3');
@@ -712,16 +712,16 @@ class Unifaun {
 
       $uni_prt_val = $uni_party->addChild('val', trim($_nimi.' '.$_nimitark)); // Party's name
       $uni_prt_val->addAttribute('n', "name");
-      
+
       $uni_prt_val = $uni_party->addChild('val', utf8_encode($this->rakir_row["osoite"])); // Party's name
       $uni_prt_val->addAttribute('n', "address1");
-      
+
       $uni_prt_val = $uni_party->addChild('val', utf8_encode($this->rakir_row["postino"])); // Party's name
       $uni_prt_val->addAttribute('n', "zipcode");
-      
+
       $uni_prt_val = $uni_party->addChild('val', utf8_encode($this->rakir_row["postitp"])); // Party's name
       $uni_prt_val->addAttribute('n', "city");
-      
+
       $uni_prt_val = $uni_party->addChild('val', utf8_encode($this->rakir_row["maa"])); // Party's name
       $uni_prt_val->addAttribute('n', "country");
 
@@ -747,7 +747,7 @@ class Unifaun {
 
     $uni_shi_val = $uni_shipment->addChild('val', utf8_encode($this->asiakasrow["tunnus"])); // Defines the receiver. Refers to rcvid value for receiver.
     $uni_shi_val->addAttribute('n', "to");
-    
+
     if ($this->rakir_row["toim_nimi"] != $this->rakir_row["nimi"] and $this->toitarow['virallinen_selite'] == 'POF1') {
       $uni_shi_val = $uni_shipment->addChild('val', utf8_encode($shipment_payer)); // Defines the receiver. Refers to rcvid value for receiver.
       $uni_shi_val->addAttribute('n', "payerfreight");

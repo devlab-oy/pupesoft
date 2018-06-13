@@ -1221,6 +1221,12 @@ class MagentoClient {
         }
       }
       // Asiakas on jo olemassa, päivitetään
+
+      if ($this->_magento_asiakaspaivitysesto == "YES") {
+        $this->log('magento_asiakkaat', "Asiakaspäivitys on estetty");
+        // Skipataan tämä asiakas
+        continue 2;
+      }
       else {
         try {
           $poista_asiakas_defaultit = $this->_magento_poista_asiakasdefaultit;
@@ -1408,6 +1414,10 @@ class MagentoClient {
     $this->_magento_poista_tuotteita = $value;
   }
 
+  public function setAsiakasPaivitysEsto($value) {
+    $this->_magento_asiakaspaivitysesto = $value;
+  }
+
   public function set_magento_lisaa_tuotekuvat($value) {
     $this->magento_lisaa_tuotekuvat = $value;
   }
@@ -1574,7 +1584,7 @@ class MagentoClient {
       }
       $onnistuiko_lisays = true;
     }
-    
+
     if ($onnistuiko_lisays === false) {
       $current = $offset;
       for ($i = $offset; $i <= $total; $i++) {
@@ -1586,7 +1596,7 @@ class MagentoClient {
             'price_per_customer.setPriceForCustomersPerProduct',
             array($magento_tuotenumero, array($hintadata))
           );
-      
+
           $this->log('magento_tuotteet', "({$current}/{$i}/{$total}): Tuotteen {$magento_tuotenumero} asiakaskohtaiset ({$hintadata['customerEmail']}) hinnat lisätty");
           $this->debug('magento_tuotteet', $hintadata);
         }

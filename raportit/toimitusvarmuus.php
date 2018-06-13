@@ -270,6 +270,7 @@ if (!empty($etsinappi)) {
     else {
       $query = "SELECT
                 lasku.nimi,
+                lasku.tila,
                 lasku.alatila,
                 lasku.tunnus tilaus,
                 lasku.toimaika,
@@ -286,19 +287,29 @@ if (!empty($etsinappi)) {
                 ";
     }
 
-    $query .= " FROM tilausrivi
-                JOIN lasku ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and lasku.tila = 'L')
-                JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio and tilausrivi.tuoteno = tuote.tuoteno and tuote.ei_saldoa = '')
-                WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
-                and tilausrivi.tyyppi = 'L'
+    $query .= " FROM tilausrivi";
+
+    if ($toim == 'AVOIMET') {
+      $tilalisa = "or (lasku.tila='V' and tilaustyyppi = 'V')";
+    }
+                
+    $query .= " JOIN lasku ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus 
+                    and (lasku.tila = 'L' $tilalisa))
+                JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio and tilausrivi.tuoteno = tuote.tuoteno 
+                  and tuote.ei_saldoa = '')
+                WHERE tilausrivi.yhtio = '$kukarow[yhtio]'                
                 and tilausrivi.var not in ('P','J','O','S')";
 
     if ($toim == 'AVOIMET') {
-      $query .= " and tilausrivi.toimitettuaika = '0000-00-00 00:00:00'
-                  and tilausrivi.laskutettuaika = '0000-00-00'";
+      $query .= " and tilausrivi.tyyppi in ('L','M','W')
+                  and (tilausrivi.varattu + tilausrivi.jt) != 0
+                  and tilausrivi.toimitettuaika = '0000-00-00 00:00:00'
+                  and tilausrivi.laskutettuaika = '0000-00-00'
+                  and tilausrivi.toimaika < CURDATE()";
     }
     else {
-      $query .= " and tilausrivi.toimitettuaika >='$vva-$kka-$ppa 00:00:00'
+      $query .= " and tilausrivi.tyyppi = 'L'
+                  and tilausrivi.toimitettuaika >='$vva-$kka-$ppa 00:00:00'
                   and tilausrivi.toimitettuaika <='$vvl-$kkl-$ppl 23:59:59'";
     }
 
@@ -317,7 +328,7 @@ if (!empty($etsinappi)) {
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) > 0) {
-    echo "<br>";
+    echo "$query<br>";
 
     include 'inc/pupeExcel.inc';
 
@@ -546,11 +557,22 @@ if (!empty($etsinappi)) {
           $lop = "&lopetus=$PHP_SELF////toim=$toim//raptaso=tilaus//ppa=$ppa//kka=$kka//vva=$vva//ppl=$ppl//kkl=$kkl//vvl=$vvl//etsinappi=yes";
 
           if (($toim == "MYYNTI" or $toim == 'AVOIMET') and $row['alatila'] != 'X') {
-            echo "<a href='{$palvelin2}tilauskasittely/tilaus_myynti.php?toim=RIVISYOTTO&tilausnumero=$row[tilaus]$lop'><img src='{$palvelin2}pics/lullacons/doc-option-edit.png'></a>";
+            $lop .= "//asiakasid=$asiakasid";
+            
+            if ($row['tila'] == 'V') {
+              $toimi = "VALMISTAASIAKKAALLE";
+            }
+            else {
+              $toimi = "RIVISYOTTO";
+            }
+
+            echo "<a href='{$palvelin2}tilauskasittely/tilaus_myynti.php?toim={$toimi}&tilausnumero=$row[tilaus]$lop'><img src='{$palvelin2}pics/lullacons/doc-option-edit.png'></a>";
           }
 
           if ($toim == "OSTO") {
-            echo "<a href='{$palvelin2}tilauskasittely/ostotilausrivien_hallinta.php?ytunnus={$row['ytunnus']}&otunnus={$row['tilaus']}&toimittajaid={$row['liitostunnus']}$lop'><img src='{$palvelin2}pics/lullacons/doc-option-edit.png'></a>";
+            $lop .= "//toimittajaid=$toimittajaid";
+
+            echo "<a href='{$palvelin2}tilauskasittely/ostotilausrivien_hallinta.php?nayta_rivit=ihankaikki&ytunnus={$row['ytunnus']}&otunnus={$row['tilaus']}&toimittajaid={$row['liitostunnus']}$lop'><img src='{$palvelin2}pics/lullacons/doc-option-edit.png'></a>";
           }
 
           echo "</td>";

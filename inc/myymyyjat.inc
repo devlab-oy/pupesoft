@@ -288,7 +288,7 @@ function piirra_myyjien_myynnit($lisa, $pvmalku, $pvmloppu, $toim, $kuluprosentt
         } 
         $yhteensa_avoimet += $avoimetsumma;
         $yhteensa_avoimet_kausi[$kausi] += $avoimetsumma;
-        echo "<br>{$avoimetsumma}";
+        echo "<br>&nbsp";
       }
  
       echo "</td>";

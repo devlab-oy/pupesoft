@@ -2039,6 +2039,28 @@ while ($tietue = fgets($fd)) {
       $result = pupe_query($query);
 
       if (mysql_num_rows($result) == 0) {
+        // Spessukase
+        if ($yhtiorow["yhtio"] == "mast" and $arow["kerayserat"] == 'H') {
+          $pos = strpos($tieto, "-EU");
+          if ($pos > 0) {
+            $tuotetieto = substring($tieto, 0, $pos - 1);
+            $query = "SELECT *
+                      FROM tuote
+                      WHERE tuote.yhtio = '{$kukarow["yhtio"]}'
+                      and tuote.tuoteno = '{$tuotetieto}'
+                      {$kieltolisa}";
+            $result = pupe_query($query);
+
+            if (mysql_num_rows($result) == 0) {
+              ///* Lisätään tilaukselle dummytuote ja kommentti *///
+              $edi_ulos .= t("Rivi")." $rivinumero ".t("Tuote")." '$tieto' ".t("ei löydy")."!\n";
+              $tuoteerrortxt .= " $tieto";
+              $tuoteerror = 1;
+            }
+          }
+        }
+      } 
+      if (mysql_num_rows($result) == 0) {     
         ///* Lisätään tilaukselle dummytuote ja kommentti *///
         $edi_ulos .= t("Rivi")." $rivinumero ".t("Tuote")." '$tieto' ".t("ei löydy")."!\n";
         $tuoteerrortxt .= " $tieto";
@@ -2109,6 +2131,42 @@ while ($tietue = fgets($fd)) {
       $result = pupe_query($query);
 
       if (mysql_num_rows($result) == 0) {
+        // Spessukase
+        if ($yhtiorow["yhtio"] == "mast" and $arow["kerayserat"] == 'H') {
+          $query2 = "SELECT *
+                    FROM tuote USE INDEX (yhtio_eankoodi_index)
+                    WHERE yhtio  = '$kukarow[yhtio]'
+                    and eankoodi = '$tieto'
+                    ORDER BY tunnus";
+          $result2 = pupe_query($query2);
+          
+          if (mysql_num_rows($result2) == 1) {
+            $t2row = mysql_fetch_assoc($result2);
+            $pos = strpos($t2row["tuoteno"], "-EU");
+
+            if ($pos > 0) {
+              $tuotetieto = substr($t2row["tuoteno"], 0, $pos);
+              
+              $query = "SELECT *
+                        FROM tuote
+                        WHERE tuote.yhtio = '{$kukarow["yhtio"]}'
+                        and tuote.tuoteno = '{$tuotetieto}'
+                        $kieltolisa
+                        ORDER BY tunnus";
+              $result = pupe_query($query);
+            
+              if (mysql_num_rows($result) == 0) {
+                ///* Lisätään tilaukselle dummytuote ja kommentti *///
+                $edi_ulos .= t("Rivi")." $rivinumero ".t("Tuote")." '$tuotetieto' ".t("ei löydy")."!\n";
+                $tuoteerrortxt .= " $tuotetieto";
+                $tuoteerror = 1;
+              }
+            }
+          }
+        }  
+      } 
+      if (mysql_num_rows($result) == 0) {     
+        
         ///* Lisätään tilaukselle dummytuote ja kommentti *///
         $edi_ulos .= t("Rivi")." $rivinumero EAN '$tieto' ".t("ei löydy")."!\n";
         $tuoteerrortxt .= " $tieto";

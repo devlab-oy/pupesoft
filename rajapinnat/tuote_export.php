@@ -454,8 +454,8 @@ if (in_array('asiakkaat', $magento_ajolista)) {
   $dnsasiakas = tuote_export_hae_asiakkaat($params);
 
   tuote_export_echo("Päivitetään asiakkaat");
-  $magento_client->lisaa_asiakkaat($dnsasiakas);
   $magento_client->setAsiakasPaivitysEsto($magento_asiakaspaivitysesto);
+  $magento_client->lisaa_asiakkaat($dnsasiakas);
 }
 
 if (in_array('lajitelmatuotteet', $magento_ajolista)) {

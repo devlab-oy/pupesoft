@@ -437,8 +437,12 @@ class Unifaun {
 
     // Lähettäjän rahtisopimustiedot
     $uni_sender_partner = $uni_sender->addChild('partner'); // Attribute parid corresponds to carrier's ID. See SUP-112-Services-en.xls.
-    $uni_sender_partner->addAttribute('parid', utf8_encode($this->toitarow['rahdinkuljettaja']));
-
+    if ($this->rakir_row['merahti'] == "" and $this->rakir_row["toim_nimi"] != $this->rakir_row["nimi"] and $this->toitarow["virallinen_selite"] == "POF1") {
+      $uni_sender_partner->addAttribute('parid', "ITELLALOG");
+    }
+    else  {
+      $uni_sender_partner->addAttribute('parid', utf8_encode($this->toitarow['rahdinkuljettaja']));
+    }
     $lahettajan_sopimusnro = $this->toitarow['sopimusnro'] != "" ? $this->toitarow['sopimusnro'] : "n/a";
 
     $uni_par_val = $uni_sender_partner->addChild('val', utf8_encode($lahettajan_sopimusnro));   // Customer number
@@ -704,8 +708,8 @@ class Unifaun {
     if ($this->rakir_row['merahti'] == "" and $this->rakir_row["toim_nimi"] != $this->rakir_row["nimi"] and $this->toitarow["virallinen_selite"] == "POF1") { //keijo
       $uni_party = $xml->addChild('party');  // Any contents. Mandatory.
 
-      $uni_party->addAttribute('ptyid', '3');
-      $shipment_payer = '3';
+      $uni_party->addAttribute('ptyid', utf8_encode($this->asiakasrow["tunnus"]));
+      $shipment_payer = utf8_encode($this->asiakasrow["tunnus"]);
 
       $_nimi = htmlspecialchars(utf8_encode($this->rakir_row["nimi"]), ENT_SUBSTITUTE);
       $_nimitark = htmlspecialchars(utf8_encode($this->rakir_row["nimitark"]), ENT_SUBSTITUTE);

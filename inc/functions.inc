@@ -14244,7 +14244,7 @@ if (!function_exists("TuotteenAlkiot")) {
 
     $mista = empty($mista) ? $laji : $mista;
 
-    $kieli = empty($kieli) ? $kieli : $yhtiorow['kieli'];
+    $kieli = !empty($kieli) ? $kieli : $yhtiorow['kieli'];
 
     $qu = "INSERT INTO puun_alkio
            SET yhtio  = '$kukarow[yhtio]',

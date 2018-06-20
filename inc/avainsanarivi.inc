@@ -333,6 +333,7 @@ if (mysql_field_name($result, $i) == "laji") {
   if ($lukitse_laji== "" or $lukitse_laji == "HUOLTOP_EMAIL") $ulos .= "<option value='HUOLTOP_EMAIL' {$avain_sel['HUOLTOP_EMAIL']}>".t("RMA portaalin huoltopyyntöemail")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "POSTEN_TKOODI")   $ulos .= "<option value='POSTEN_TKOODI' {$avain_sel['POSTEN_TKOODI']}>".t("Logmaster OutboundDelivery ja MaterialMaster sanomien kentät")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "UNIFAUN_REF") $ulos .= "<option value='UNIFAUN_REF' {$avain_sel['UNIFAUN_REF']}>".t("Unifaun lähettäjän viite")."</option>";
+  if ($lukitse_laji== "" or $lukitse_laji == "UNIFAUN_MESSAGE") $ulos .= "<option value='UNIFAUN_MESSAGE' {$avain_sel['UNIFAUN_MESSAGE']}>".t("Unifaun ENOT viesti")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "KUITIN_VAKTEXT") $ulos .= "<option value='KUITIN_VAKTEXT' {$avain_sel['KUITIN_VAKTEXT']}>".t("Kuitin vakioteksti")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "STCK_LST_FLTR") $ulos .= "<option value='STCK_LST_FLTR' {$avain_sel['STCK_LST_FLTR']}>".t("Varastosaldoraportin rajaus")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "PIIRI_ALENNUS") $ulos .= "<option value='PIIRI_ALENNUS' {$avain_sel['PIIRI_ALENNUS']}>".t("Piiriin sidottu hinnoittelu")."</option>";
@@ -1514,6 +1515,17 @@ if ($avain_sel["TIL-LITETY"] == "SELECTED" and $_selitetark_2) {
 }
 
 if ($avain_sel['KUITIN_VAKTEXT'] == "SELECTED") {
+  if ($_selite || $_jarjestys) {
+    $tyyppi = 0;
+  }
+  elseif ($_selitetark) {
+    $ulos = "<td><textarea name='{$nimi}' rows='10' cols='50'>{$trow[$i]}</textarea></td>";
+    $jatko = 0;
+  }
+}
+
+// Unifaun ennakkoilmoitus vakioteksti
+if ($avain_sel['UNIFAUN_MESSAGE'] == "SELECTED") {
   if ($_selite || $_jarjestys) {
     $tyyppi = 0;
   }

@@ -14240,9 +14240,11 @@ if (!function_exists("asiakashakuohje")) {
 // Funktio lis‰‰ tuotteenalkion dynaamiseen puuhun.
 if (!function_exists("TuotteenAlkiot")) {
   function TuotteenAlkiot($laji, $liitos, $puun_tunnus, $kieli, $mista = '') {
-    global $kukarow;
+    global $kukarow, $yhtiorow;
 
     $mista = empty($mista) ? $laji : $mista;
+
+    $kieli = empty($kieli) ? $kieli : $yhtiorow['kieli'];
 
     $qu = "INSERT INTO puun_alkio
            SET yhtio  = '$kukarow[yhtio]',

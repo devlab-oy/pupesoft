@@ -1162,7 +1162,7 @@ class Unifaun {
       if ($message_avainsanasta = t_avainsana("UNIFAUN_MESSAGE", '', '', '', '', "selitetark")) {
         $message = $message_avainsanasta;
 
-        $uni_opt_val = $uni_option->addChild('val', $message);
+        $uni_opt_val = $uni_option->addChild('val', utf8_encode($message));
         $uni_opt_val->addAttribute('n', "message");
       }
 

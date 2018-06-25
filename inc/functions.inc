@@ -12806,6 +12806,7 @@ if (!function_exists("liite_popup")) {
 
         $filetype_peukalo_query = "SELECT tunnus peukalokuva, image_width, image_height
                                    FROM liitetiedostot
+                                   USE INDEX (yhtio_liitos_liitostunnus)
                                    WHERE yhtio         = '$kukarow[yhtio]'
                                    AND liitos          = 'tuote'
                                    AND liitostunnus    = '$filetype_row[liitostunnus]'

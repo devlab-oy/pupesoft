@@ -799,7 +799,7 @@ function sepa_target_id_for_file_type($params) {
 
   // Jos filetypeä ei löydy listasta, ei voida hakea
   if ($target_id == "") {
-    echo "Pankki '{$pankkiyhteys['bank']}' ei tule tiedostotyyppiä '{$file_type}'";
+    echo "Pankki '{$pankkiyhteys['bank']}' ei tue tiedostotyyppiä '{$file_type}'<br><br>";
     return false;
   }
 

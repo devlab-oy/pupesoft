@@ -14,6 +14,13 @@ if (!isset($argv[1]) or $argv[1] == '') {
 
 $yhtio = $argv[1];
 
+if (isset($argv[2]) and $argv[2] != '') {
+  $customer_laajennus = true;
+}
+else {
+  $customer_laajennus = false;
+}
+
 ini_set("memory_limit", "1G");
 
 // otetaan includepath aina rootista
@@ -253,21 +260,43 @@ function nimike($limit = '') {
 }
 
 function asiakas($limit = '') {
-  global $path_asiakas, $yhtio, $logisticar;
+  global $path_asiakas, $yhtio, $logisticar, $customer_laajennus;
 
   $where_logisticar = $logisticar[$yhtio]["where"];
 
   echo "Asiakkaat...";
 
-  $query = "SELECT
-            asiakas.tunnus    asiakastunnus,
-            concat_ws(' ', asiakas.nimi, asiakas.nimitark)  asiakkaannimi,
-            asiakas.ryhma    asiakasryhma,
-            kuka.kuka       myyjatunnus
-            FROM asiakas
-            LEFT JOIN kuka ON kuka.myyja=asiakas.myyjanro and kuka.yhtio=asiakas.yhtio and kuka.myyja > 0
-            where asiakas.yhtio='$yhtio'
-            $limit";
+  if ($customer_laajennus){
+
+    $query = "SELECT
+              asiakas.tunnus    asiakastunnus,
+              concat_ws(' ', asiakas.nimi, asiakas.nimitark)  asiakkaannimi,
+              asiakas.ryhma    asiakasryhma,
+              kuka.kuka       myyjatunnus,
+              if(asiakas.toim_postino !='', asiakas.toim_postino, asiakas.postino) postinumero,
+              if(asiakas.toim_postitp !='', asiakas.toim_postitp, asiakas.postitp) toimituspostitp,
+              if(asiakas.toim_maa !='', asiakas.toim_maa, asiakas.maa) toimitusmaa,
+              if(asiakas.toim_nimitark !='', asiakas.toim_nimitark, asiakas.nimitark) nimitarkenne
+              FROM asiakas
+              LEFT JOIN kuka ON kuka.myyja=asiakas.myyjanro and kuka.yhtio=asiakas.yhtio and kuka.myyja > 0
+              where asiakas.yhtio='$yhtio'
+              $limit";
+
+  }
+  else {
+    $query = "SELECT
+              asiakas.tunnus    asiakastunnus,
+              concat_ws(' ', asiakas.nimi, asiakas.nimitark)  asiakkaannimi,
+              asiakas.ryhma    asiakasryhma,
+              kuka.kuka       myyjatunnus,
+              asiakas.postino  postinumero,
+              asiakas.toim_postitp toimituspostitp,
+              asiakas.toim_maa toimitusmaa
+              FROM asiakas
+              LEFT JOIN kuka ON kuka.myyja=asiakas.myyjanro and kuka.yhtio=asiakas.yhtio and kuka.myyja > 0
+              where asiakas.yhtio='$yhtio'
+              $limit";
+  }
   $rest = pupe_query($query);
 
   $rows = mysql_num_rows($rest);
@@ -280,12 +309,29 @@ function asiakas($limit = '') {
 
   $fp = fopen($path_asiakas, 'w+');
 
-  $headers = array(
-    'asiakastunnus'  => null,
-    'asiakkaannimi'  => null,
-    'asiakasryhma'   => null,
-    'myyjatunnus'    => null
-  );
+  if ($customer_laajennus) {
+    $headers = array(
+      'asiakastunnus'  => null,
+      'asiakkaannimi'  => null,
+      'asiakasryhma'   => null,
+      'myyjatunnus'    => null,
+      'postinumero'    => null,
+      'toimituspostitp' => null,
+      'toimitusmaa'    => null,
+      'nimitarkenne'   => null
+    );
+  }
+  else {
+    $headers = array(
+      'asiakastunnus'  => null,
+      'asiakkaannimi'  => null,
+      'asiakasryhma'   => null,
+      'myyjatunnus'    => null,
+      'postinumero'    => null,
+      'toimituspostitp' => null,
+      'toimitusmaa'    => null
+    );
+  }
 
   create_headers($fp, array_keys($headers));
 

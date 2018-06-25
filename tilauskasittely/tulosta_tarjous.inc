@@ -770,7 +770,8 @@ if (!function_exists('rivi_tarjous')) {
                      from asiakaskommentti
                      where yhtio = '{$kukarow['yhtio']}'
                      and tuoteno = '{$row['tuoteno']}'
-                     and ytunnus = '{$laskurow['ytunnus']}'";
+                     and ytunnus = '{$laskurow['ytunnus']}'
+                     and tyyppi  = ''";
       $askomresul = pupe_query($askomquery);
 
       if (mysql_num_rows($askomresul) > 0) {
@@ -1062,7 +1063,7 @@ if (!function_exists('tarjous_rivi_hinta_ale')) {
       $pohja = $pdf_tarjous->draw_paragraph($kala+$norm["height"], 45, 60, 480, $row["perhe_kommentti"],  $page_tarjous[$sivu], $norm);
       if (is_numeric($pohja)) {
         $kala = $pohja - $rivinkorkeus;
-      } 
+      }
       else {
         $kala = 0;
       }
@@ -1187,7 +1188,7 @@ if (!function_exists('tarjous_rivi_hinta_ale')) {
         $pohja = $pdf_tarjous->draw_paragraph($kala+$norm["height"]+2, 80, 60, 575, $row["kommentti"], $page_tarjous[$sivu], $norm);
         if (is_numeric($pohja)) {
           $kala = $pohja - $rivinkorkeus;
-        } 
+        }
         else {
           $kala = 0;
         }
@@ -1197,10 +1198,10 @@ if (!function_exists('tarjous_rivi_hinta_ale')) {
         $pohja = $pdf_tarjous->draw_paragraph($kala+$norm["height"], 80, 60, 575, $row["perhe_kommentti"],  $page_tarjous[$sivu], $norm);
         if (is_numeric($pohja)) {
           $kala = $pohja - $rivinkorkeus -10;
-        } 
+        }
         else {
           $kala = 0;
-        }      
+        }
       }
     }
     else {
@@ -1212,10 +1213,10 @@ if (!function_exists('tarjous_rivi_hinta_ale')) {
       $pohja = $pdf_tarjous->draw_paragraph($kala+$norm["height"]+2, 45, 60, 480, $row["kommentti"], $page_tarjous[$sivu], $norm);
       if (is_numeric($pohja)) {
         $kala = $pohja - $rivinkorkeus;
-      } 
+      }
       else {
         $kala = 0;
-      }    
+      }
     }
 
     $kala = $kala - 5;
@@ -1241,10 +1242,10 @@ if (!function_exists('tarjous_rivi_custom')) {
       $pohja = $pdf_tarjous->draw_paragraph($kala+$norm["height"], 150, 60, 480, $row["perhe_kommentti"],  $page_tarjous[$sivu], $norm);
       if (is_numeric($pohja)) {
         $kala = $pohja - $rivinkorkeus;
-      } 
+      }
       else {
         $kala = 0;
-      }    
+      }
     }
 
     if ($naytetaanko_tuoteno == '') {
@@ -1359,10 +1360,10 @@ if (!function_exists('tarjous_rivi_custom')) {
       $pohja = $pdf_tarjous->draw_paragraph($kala+$norm["height"], 150, 60, 480, $row["perhe_kommentti"],  $page_tarjous[$sivu], $norm);
       if (is_numeric($pohja)) {
         $kala = $pohja - $rivinkorkeus;
-      } 
+      }
       else {
         $kala = 0;
-      }    
+      }
     }
 
     $kala = $kala - 5;
@@ -1557,8 +1558,32 @@ if (!function_exists('loppu_tarjous')) {
           $pdf_tarjous->draw_text(200, $kala-51, t($laskurow['maksuehto'], $kieli)." ".t("tai erillisen maksupostiohjelman mukaan", $kieli), $page_tarjous[$sivu], $norm);
 
           $pdf_tarjous->draw_text(50, $kala-64, t("Myynti- ja toimitusehdot", $kieli), $page_tarjous[$sivu], $boldi);
-          $pdf_tarjous->draw_text(200, $kala-64, $yhtiorow['nimi'].t(":n yleiset kauppaehdot", $kieli)." 30.6.2014", $page_tarjous[$sivu], $norm);
-          $pdf_tarjous->draw_text(200, $kala-77, $yhtiorow['nimi'].':n '.t("tilaajavastuulain mukaiset asiakirjat löydät www.tilaajavastuulaki.fi", $kieli), $page_tarjous[$sivu], $norm);
+
+          $result = t_avainsana('TARJOUS_EHDOT', $kieli);
+          $vakioteksti_row = mysql_fetch_assoc($result);
+          $vakioteksti = $vakioteksti_row['selitetark'];
+
+          if (!empty($vakioteksti)) {
+            $_y = $kala - 64;
+
+            if (strlen($vakioteksti) > 100) {
+              $vakioteksti = wordwrap($vakioteksti, 100, "\n");
+              foreach (explode("\n", $vakioteksti) as $teksi) {
+                $pdf_tarjous->draw_text(200,  $_y, $teksi, $page_tarjous[$sivu], $norm);
+                $_y = $_y - 13;
+              }
+            }
+            else {
+              $pdf_tarjous->draw_text(200,  $_y, $vakioteksti, $page_tarjous[$sivu], $norm);
+              $_y = $_y - 13;
+            }
+
+            $kala = $_y + 90;
+          }
+          else {
+            $pdf_tarjous->draw_text(200, $kala-64, $yhtiorow['nimi'].t(":n yleiset kauppaehdot", $kieli)." 30.6.2014", $page_tarjous[$sivu], $norm);
+            $pdf_tarjous->draw_text(200, $kala-77, $yhtiorow['nimi'].':n '.t("tilaajavastuulain mukaiset asiakirjat löydät www.tilaajavastuulaki.fi", $kieli), $page_tarjous[$sivu], $norm);
+          }
 
           $pdf_tarjous->draw_text(50, $kala-90, t("Salassapito", $kieli), $page_tarjous[$sivu], $boldi);
           $pdf_tarjous->draw_text(200, $kala-90, t("Tämä asiakirja liitteineen on luottamuksellinen eikä sitä saa ilman ", $kieli).$yhtiorow['nimi'].':n ', $page_tarjous[$sivu], $norm);
@@ -1588,8 +1613,39 @@ if (!function_exists('loppu_tarjous')) {
           $pdf_tarjous->draw_text(50, $kala-130, t("Sopimusasiakirjojen etusijajärjestys on seuraava", $kieli).':', $page_tarjous[$sivu], $pieni);
           $pdf_tarjous->draw_text(50, $kala-140, '1. '.t("Tilausvahvistus", $kieli), $page_tarjous[$sivu], $pieni);
           $pdf_tarjous->draw_text(50, $kala-150, '2. '.t("Allekirjoitettu tarjous", $kieli), $page_tarjous[$sivu], $pieni);
-          $pdf_tarjous->draw_text(50, $kala-160, "3. $yhtiorow[nimi]".t(":n yleiset kauppaehdot", $kieli)." 30.6.2014", $page_tarjous[$sivu], $pieni);
-          $pdf_tarjous->draw_text(50, $kala-170, "4. ".t("Rakennustuotteiden yleisiä hankinta- ja toimitusehtoja (RYHT 2000) ja betonielementtien asennusehdot", $kieli).'.', $page_tarjous[$sivu], $pieni);
+
+          $result = t_avainsana('TARJOUS_KAUPEHD', $kieli);
+          $vakioteksti_row = mysql_fetch_assoc($result);
+          $vakioteksti = $vakioteksti_row['selitetark'];
+
+          if (!empty($vakioteksti)) {
+            $_y = $kala - 160;
+
+            if (strlen($vakioteksti) > 150) {
+              $vakioteksti = wordwrap($vakioteksti, 150, "\n");
+              foreach (explode("\n", $vakioteksti) as $teksi) {
+                $pdf_tarjous->draw_text(50,  $_y, $teksi, $page_tarjous[$sivu], $pieni);
+                $_y = $_y - 10;
+              }
+            }
+            else {
+              if (strpos($vakioteksti, "\n") !== false) {
+                foreach (explode("\n", $vakioteksti) as $teksi) {
+                  $pdf_tarjous->draw_text(50,  $_y, $teksi, $page_tarjous[$sivu], $pieni);
+                  $_y = $_y - 10;
+                }
+              }
+              else {
+                $pdf_tarjous->draw_text(50,  $_y, $vakioteksti, $page_tarjous[$sivu], $pieni);
+                $_y = $_y - 10;
+              }
+            }
+            $kala = $_y + 190;
+          }
+          else {
+            $pdf_tarjous->draw_text(50, $kala-160, "3. $yhtiorow[nimi]".t(":n yleiset kauppaehdot", $kieli)." 30.6.2014", $page_tarjous[$sivu], $pieni);
+            $pdf_tarjous->draw_text(50, $kala-170, "4. ".t("Rakennustuotteiden yleisiä hankinta- ja toimitusehtoja (RYHT 2000) ja betonielementtien asennusehdot", $kieli).'.', $page_tarjous[$sivu], $pieni);
+          }
 
           $pdf_tarjous->draw_text(50, $kala-190, t("Olen tutustunut", $kieli)." $yhtiorow[nimi]".t(":n yleisiin sopimusehtoihin ja hyväksyn ne sellaisenaan").'.', $page_tarjous[$sivu], $pieni);
 

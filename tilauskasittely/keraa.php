@@ -2477,8 +2477,10 @@ if ($tee == 'P') {
                     $select_lisa
                     $sorttauskentta,
                     if (tuote.tuotetyyppi='K','2 Työt','1 Muut') tuotetyyppi,
-                    tuote.myynti_era
+                    tuote.myynti_era,
+                    tuote.mallitarkenne
                     FROM tilausrivi
+                    JOIN lasku ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus
                     LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
                     JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
                     WHERE tilausrivi.otunnus  in ($tilausnumeroita_backup)
@@ -2504,6 +2506,11 @@ if ($tee == 'P') {
             if ($lava_referenssiluku >= lavakerayskapasiteetti) {
               $lavanumero++;
               $lava_referenssiluku=0;
+            }
+
+            // myynti_era = 1 / mallitarkenne = 400 poikkeus
+            if ((int) $row['myynti_era'] == 1 and (int) $row['mallitarkenne'] == 400) {
+              $row['myynti_era'] = 6;
             }
 
             $lavat[$lavanumero][$row['otunnus']] += round(($row['varattu']+$row['kpl'])/$row['myynti_era'], 2);
@@ -4112,6 +4119,12 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
         $oslappkpl   = $oslappkpl != 0 ? $oslappkpl : $yhtiorow["oletus_oslappkpl"];
         $lahetekpl   = $yhtiorow["oletus_lahetekpl"];
         $vakadrkpl  = $yhtiorow["oletus_lahetekpl"];
+      }
+
+      // Lavakeräyksessä ei tarvita normaalia lähetettä eikä osoitelappua
+      if ($otsik_row['kerayserat'] == "H") {
+        $oslappkpl   = 0;
+        $lahetekpl   = 0;
       }
 
       $spanni = 4;

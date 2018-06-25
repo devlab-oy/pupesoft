@@ -18,6 +18,7 @@ $select = "";
 if ($nayta_rivit == 'vahvistamattomat') {
   $select = "selected";
 }
+
 // N‰ytet‰‰n muuten vaan sopivia tilauksia
 echo "<form method = 'post'>";
 echo "<br><table>";
@@ -25,6 +26,11 @@ echo "<tr><th>", t("Valitse toimittaja"), ":</th><td style='text-align: top;'><i
 echo "<select name='nayta_rivit'>";
 echo "<option value=''>", t("Kaikki avoimet rivit"), "</option>";
 echo "<option value='vahvistamattomat' {$select}>", t("Vain vahvistamattomia rivej‰"), "</option> ";
+
+if ($nayta_rivit == 'ihankaikki') {
+  echo "<option value='ihankaikki' selected>", t("Kaikki rivit"), "</option> ";
+}
+
 echo "<input type='submit' class='hae_btn' value = '".t("Etsi")."'></td>";
 echo "</tr>";
 
@@ -70,7 +76,7 @@ if ($yhtiorow['toimipaikkakasittely'] == "L" and $toimipaikat_res = hae_yhtion_t
 echo "</table>";
 echo "</form><br>";
 
-if ($ytunnus == "" and isset($nayta_rivit) and $nayta_rivit != "") {
+if ($ytunnus == "" and isset($nayta_rivit) and $nayta_rivit == "vahvistamattomat") {
 
   $toimipaikkalisa = "";
 
@@ -151,6 +157,9 @@ if ($ytunnus != '') {
       if ($keikka > 0) {
         $mitkakaikkipvm = " and uusiotunnus = {$keikka} and tyyppi = 'O' and kpl = 0 ";
       }
+      elseif ($nayta_rivit == "ihankaikki") {
+        $mitkakaikkipvm = " and otunnus in ({$tilaus_otunnukset}) ";
+      }
       else {
         $mitkakaikkipvm = " and otunnus in ({$tilaus_otunnukset}) and uusiotunnus=0 ";
       }
@@ -189,6 +198,8 @@ if ($ytunnus != '') {
         foreach ($vahvistetturivi as $tunnus => $vahvistettu) {
           $query = "UPDATE tilausrivi SET  jaksotettu = '{$vahvistettu}' where yhtio = '{$kukarow['yhtio']}' and tunnus = '{$tunnus}' and tyyppi = 'O'";
           $result = pupe_query($query);
+
+          tallenna_ostotilaus_vahvistus($tunnus,$vahvistetturivi_toimaika[$tunnus],TRUE);
         }
       }
 
@@ -414,10 +425,14 @@ if (isset($laskurow)) {
               LEFT JOIN tuote ON tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno
               LEFT JOIN tuotteen_toimittajat ON tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.liitostunnus='{$toimittajaid}'
               WHERE otunnus in ({$tilaus_otunnukset})
-              and tilausrivi.yhtio='{$kukarow['yhtio']}'
-              and tilausrivi.uusiotunnus=0
-              and tilausrivi.tyyppi='O'
-              ORDER BY {$jarjestys}";
+              and tilausrivi.yhtio='{$kukarow['yhtio']}'";
+    
+    if ($nayta_rivit != "ihankaikki") {
+      $query .= " and tilausrivi.uusiotunnus=0 ";
+    }
+              
+    $query .= " and tilausrivi.tyyppi='O'
+                ORDER BY {$jarjestys}";
   }
   $presult = pupe_query($query);
 
@@ -481,12 +496,14 @@ if (isset($laskurow)) {
       }
       elseif (mysql_field_name($presult, $i) == 'toimaika') {
         echo "<td align='right'><input type='text' name='toimaikarivi[{$prow['tunnus']}]' value='{$prow[$i]}' size='10'></td>";
+        $_toimaika = $prow[$i];
       }
       elseif (mysql_field_name($presult, $i) == 'vahvistettu') {
         $chekkis = "";
         if ($prow['vahvistettu'] == 1) {
           $chekkis = 'CHECKED';
         }
+        echo "<input type='hidden' name='vahvistetturivi_toimaika[{$prow['tunnus']}]' value='$_toimaika'>";
         echo "<td><input type='checkbox' name='vahvistetturivi[{$prow['tunnus']}]' value='1' {$chekkis}></td>";
       }
       else {

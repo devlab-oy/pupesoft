@@ -29,6 +29,17 @@ if (php_sapi_name() == 'cli') {
     $toimittajan_tuotetiedot = trim($argv[4]);
   }
 
+  if (isset($argv[5])) {
+    if (!in_array(trim($argv[5]), array('ostaja', 'vastuuostaja', 'toimittaja', 'default'))) {
+      echo "\n5th parameter valid options: 'ostaja', 'vastuuostaja', 'toimittaja', 'default' (ostaja & vastuuostaja)\n\n";
+      die;
+    }
+    $kenelle = trim($argv[5]);
+  }
+  else {
+    $kenelle = "default";
+  }
+
   //yhtiötä tai sähköpostia ei ole annettu
   if (empty($yhtio) or empty($paivamaararaja)) {
     echo "\nUsage: php ".basename($argv[0])." yhtio 3\n\n";
@@ -64,6 +75,7 @@ else {
   $paivamaararaja          = 3;
   $kieli                   = "";
   $toimittajan_tuotetiedot = "";
+  $kenelle                 = "default";
   $php_cli                 = false;
 }
 
@@ -71,13 +83,22 @@ if ($tee == 'hae_ostotilaukset') {
   $ostotilaukset = hae_myohassa_olevat_ostotilaukset($paivamaararaja);
 
   if (!empty($ostotilaukset)) {
-    $ostotilaukset_ostajittain = kasittele_ostotilaukset($ostotilaukset, 'ostaja');
-    $email_bodys = generoi_email_body($ostotilaukset_ostajittain, $kieli, $toimittajan_tuotetiedot);
-    laheta_sahkopostit($email_bodys, $kieli);
 
-    $ostotilaukset_vastuuostajittain = kasittele_ostotilaukset($ostotilaukset, 'vastuuostaja');
-    $email_bodys = generoi_email_body($ostotilaukset_vastuuostajittain, $kieli, $toimittajan_tuotetiedot);
-    laheta_sahkopostit($email_bodys, $kieli);
+    if (in_array($kenelle, array("ostaja", "default"))) {
+      $ostotilaukset_ostajittain = kasittele_ostotilaukset($ostotilaukset, 'ostaja');
+      $email_bodys = generoi_email_body($ostotilaukset_ostajittain, $kieli, $toimittajan_tuotetiedot);
+      laheta_sahkopostit($email_bodys, $kieli);
+    }
+    if (in_array($kenelle, array("vastuuostaja", "default"))) {
+      $ostotilaukset_vastuuostajittain = kasittele_ostotilaukset($ostotilaukset, 'vastuuostaja');
+      $email_bodys = generoi_email_body($ostotilaukset_vastuuostajittain, $kieli, $toimittajan_tuotetiedot);
+      laheta_sahkopostit($email_bodys, $kieli);
+    }
+    if (in_array($kenelle, array("toimittaja"))) {
+      $ostotilaukset_toimittajittain = kasittele_ostotilaukset($ostotilaukset, 'toimittaja');
+      $email_bodys = generoi_email_body($ostotilaukset_toimittajittain, $kieli, $toimittajan_tuotetiedot);
+      laheta_sahkopostit($email_bodys, $kieli, true);
+    }
   }
 }
 
@@ -106,8 +127,11 @@ function hae_myohassa_olevat_ostotilaukset($paivamaararaja) {
             tilausrivi.jaksotettu as vahvistettu,
             lasku.laatija as ostaja,
             tuote.ostajanro as vastuuostaja,
+            lasku.tilausyhteyshenkilo as toimiyhteyshenkilo,
+            lasku.liitostunnus as toimitunnus,
             tuotteen_toimittajat.toim_tuoteno,
-            tuotteen_toimittajat.toim_nimitys
+            tuotteen_toimittajat.toim_nimitys,
+            toimi.kieli
             FROM lasku
             JOIN tilausrivi
             ON ( tilausrivi.yhtio = lasku.yhtio
@@ -122,6 +146,9 @@ function hae_myohassa_olevat_ostotilaukset($paivamaararaja) {
             ON ( tuotteen_toimittajat.yhtio = tilausrivi.yhtio
               AND tuotteen_toimittajat.tuoteno      = tilausrivi.tuoteno
               AND tuotteen_toimittajat.liitostunnus = lasku.liitostunnus)
+            JOIN toimi
+            ON (toimi.yhtio = lasku.yhtio
+              AND toimi.tunnus = lasku.liitostunnus)
             WHERE lasku.yhtio                       = '{$kukarow['yhtio']}'
             AND lasku.tila                          = 'O'
             AND lasku.alatila                       = 'A'
@@ -147,6 +174,7 @@ function hae_myohassa_olevat_ostotilaukset($paivamaararaja) {
 function kasittele_ostotilaukset($ostotilaukset, $ostaja_tyyppi) {
   $ostotilaukset_temp = array();
   $ostajanro_kuka = array();
+  $toimi_email = array();
 
   foreach ($ostotilaukset as $ostotilaus) {
 
@@ -157,8 +185,23 @@ function kasittele_ostotilaukset($ostotilaukset, $ostaja_tyyppi) {
 
       $kuka = $ostajanro_kuka[$ostotilaus['vastuuostaja']];
     }
-    else {
+    elseif ($ostaja_tyyppi == "ostaja") {
       $kuka = $ostotilaus['ostaja'];
+    }
+    elseif ($ostaja_tyyppi == "toimittaja") {
+
+      if (!empty($ostotilaus['toimiyhteyshenkilo']) and empty($toimi_email[$ostotilaus['toimiyhteyshenkilo']])) {
+        // haetaan yhteyshenkilön sähköposti
+        $toimi_email[$ostotilaus['toimiyhteyshenkilo']] = hae_email_toimiyhteyshenkilon_perusteella($ostotilaus['toimiyhteyshenkilo'], $ostotilaus['toimitunnus']);
+      }
+
+      if (!empty($ostotilaus['toimiyhteyshenkilo']) and !empty($toimi_email[$ostotilaus['toimiyhteyshenkilo']])) {
+        $kuka = $toimi_email[$ostotilaus['toimiyhteyshenkilo']];
+      }
+      else {
+        // hae toimittajan email
+        $kuka = hae_toimiemail_toimitunnuksen_perusteella($ostotilaus['toimitunnus']);
+      }
     }
 
     $ostotilaukset_temp[$kuka][$ostotilaus['lasku_tunnus']]['rivit'][] = $ostotilaus;
@@ -184,9 +227,9 @@ function generoi_email_body($ostotilaukset, $kieli, $toimittajan_tuotetiedot) {
     $email_bodys[$ostaja] = t("Seuraavat ostotilausrivit ovat myöhässä", $kieli).".\n\n";
     foreach ($ostajan_ostotilaukset as $ostotilaus_tunnus => $ostotilaus) {
       $email_bodys[$ostaja] .= "-----------------------\n";
-      $email_bodys[$ostaja] .= t("Ostotilaus", $kieli)." $ostotilaus_tunnus\n";
+      $email_bodys[$ostaja] .= t("Ostotilaus", $kieli).": $ostotilaus_tunnus\n";
       //toimittaja voidaan hakea rivin ekalta solulta koska se on ostotilauksen kaikille riveille aina sama
-      $email_bodys[$ostaja] .= t("Toimittaja", $kieli)." {$ostotilaus['rivit'][0]['toimittaja']}\n\n";
+      $email_bodys[$ostaja] .= t("Toimittaja", $kieli).": {$ostotilaus['rivit'][0]['toimittaja']}\n\n";
 
       if ($toimittajan_tuotetiedot != "") {
         $email_bodys[$ostaja] .= t("Tuoteno", $kieli).', ';
@@ -232,9 +275,17 @@ function generoi_email_body($ostotilaukset, $kieli, $toimittajan_tuotetiedot) {
  *
  * @param array   $email_bodys
  */
-function laheta_sahkopostit($email_bodys, $kieli) {
+function laheta_sahkopostit($email_bodys, $kieli, $toimittaja = false) {
+
   foreach ($email_bodys as $kuka => $email_body) {
-    $to = hae_sahkopostiosoite($kuka);
+
+    if ($toimittaja) {
+      $to = $kuka;
+    }
+    else {
+      $to = hae_sahkopostiosoite($kuka);
+    }
+
     $parametrit = array(
       "to"     => $to,
       "subject"   => t("Myöhässä olevat ostotilaukset", $kieli),
@@ -290,3 +341,39 @@ function hae_kuka_ostajanro_perusteella($ostajanro) {
 
   return $kuka['kuka'];
 }
+function hae_toimiemail_toimitunnuksen_perusteella($toimitunnus) {
+  global $kukarow, $yhtiorow;
+
+  $query = "SELECT email
+            FROM toimi
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND tunnus  = '{$toimitunnus}'";
+  $result = pupe_query($query);
+
+  $email = mysql_fetch_assoc($result);
+
+  if (empty($email['email'])) {
+    if (!empty($yhtiorow['ostotilaus_email'])) {
+      return $yhtiorow['ostotilaus_email'];
+    }
+    return $yhtiorow['alert_email'];
+  }
+
+  return $email['email'];
+}
+function hae_email_toimiyhteyshenkilon_perusteella($yhteyshenkilo, $toimitunnus) {
+  global $kukarow, $yhtiorow;
+
+  $query = "SELECT email
+            FROM yhteyshenkilo
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND tyyppi = 'T'
+            AND liitostunnus = '{$toimitunnus}'
+            AND nimi = '{$yhteyshenkilo}'";
+  $result = pupe_query($query);
+
+  $email = mysql_fetch_assoc($result);
+
+  return $email['email'];
+}
+

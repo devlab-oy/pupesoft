@@ -556,6 +556,7 @@ class Unifaun {
         'MH30',
         'MH10_SPTR',
         'MH30_SPTR',
+        'P83FI',
       );
 
       $allowed_opay = array(
@@ -918,6 +919,10 @@ class Unifaun {
       'MH20_SPTR',
       'MH3050_SPTR',
     );
+    // Postnord "Ennakkoilmoitus puhelimitse " lisäpalvelu
+    $_PO_DRVNOT = array(
+      'P83FI',
+    );
 
     if (in_array($this->toitarow['virallinen_selite'], $_DLV09)) {
       $uni_ser_val = $uni_service->addChild('addon');
@@ -937,6 +942,14 @@ class Unifaun {
     if (in_array($this->toitarow['virallinen_selite'], $_MA_SPTR)) {
       $uni_ser_val = $uni_service->addChild('addon');
       $uni_ser_val->addAttribute('adnid', "SPTR");
+    }
+
+    if (in_array($this->toitarow['virallinen_selite'], $_PO_DRVNOT) and $this->postirow["toim_puh"] != "") {
+      $uni_addon = $uni_service->addChild('addon');
+      $uni_addon->addAttribute('adnid', "DRVNOT");
+
+      $uni_add_val = $uni_addon->addChild('val', utf8_encode($this->postirow["toim_puh"]));
+      $uni_add_val->addAttribute('n', 'misc');
     }
 
     // Postin palvelukoodit, jotka tukevat lisäpalvelua FDNGPP: "LQ Prosessilupa"
@@ -1143,6 +1156,15 @@ class Unifaun {
 
       $uni_opt_val = $uni_option->addChild('val', "");
       $uni_opt_val->addAttribute('n', "bcc");
+
+      // Haetaan avainsanoista ennakkoilmoituksen vakioviesti
+
+      if ($message_avainsanasta = t_avainsana("UNIFAUN_MESSAGE", '', '', '', '', "selitetark")) {
+        $message = $message_avainsanasta;
+
+        $uni_opt_val = $uni_option->addChild('val', utf8_encode($message));
+        $uni_opt_val->addAttribute('n', "message");
+      }
 
       /*
       $uni_opt_val = $uni_option->addChild('val', "messagea tähän");

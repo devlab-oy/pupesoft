@@ -258,6 +258,14 @@ if (!function_exists("onkokaikkivalmistettu")) {
   }
 }
 
+if ($toim != "TUOTE" AND !empty($valmistuksen_lisatiedot_tilaus)) {
+  $query = "UPDATE lasku
+            SET valmistuksen_lisatiedot = '$valmistuksen_lisatiedot'
+            WHERE yhtio = '$kukarow[yhtio]'
+            and tunnus = '$valmistuksen_lisatiedot_tilaus'";
+  pupe_query($query);
+}
+
 if ($tee == "TEEVALMISTUS" and $era_new_paikka != "") {
   $paivitetty = 0;
 
@@ -983,7 +991,8 @@ if (!isset($from_kaikkikorj)) {
               GROUP_CONCAT(DISTINCT lasku.tunnus SEPARATOR ', ') 'Tilaus',
               GROUP_CONCAT(DISTINCT lasku.nimi SEPARATOR ', ') 'Asiakas/Nimi',
               GROUP_CONCAT(DISTINCT lasku.ytunnus SEPARATOR ', ') 'Ytunnus',
-              GROUP_CONCAT(DISTINCT lasku.tilaustyyppi SEPARATOR ', ') 'Tilaustyyppi'
+              GROUP_CONCAT(DISTINCT lasku.tilaustyyppi SEPARATOR ', ') 'Tilaustyyppi',
+              max(valmistuksen_lisatiedot) valmistuksen_lisatiedot
               FROM tilausrivi
               JOIN lasku ON (lasku.tunnus = tilausrivi.otunnus and lasku.yhtio = tilausrivi.yhtio)
               WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
@@ -999,8 +1008,6 @@ if (!isset($from_kaikkikorj)) {
   }
 
   if ($tee == "VALMISTA" and $valmistettavat != "") {
-
-
     //Päivitetään lasku niin, että se on tilassa korjataan
     if ($toim == "KORJAA") {
       $query = "UPDATE lasku
@@ -1550,13 +1557,25 @@ if (!isset($from_kaikkikorj)) {
 
       $forcenap = "<tr><td colspan='9' class='back'>".t("Väkisinvalmista vaikka raaka-aineiden saldo ei riitä").". <input type='checkbox' name='vakisinhyvaksy' value='OK'></td></tr>";
 
-      if (isset($kokovalmistus))                 $kokovalmistus_force = $forcenap;
+      if (isset($kokovalmistus)) $kokovalmistus_force = $forcenap;
       elseif (isset($osavalmistus) and (int) $kokopros > 0)  $osavalmistuspros_force = $forcenap;
-      elseif (isset($osavalmistus))                $osavalmistus_force = $forcenap;
-      elseif (isset($osatoimitus))              $osatoimitus_force = $forcenap;
+      elseif (isset($osavalmistus)) $osavalmistus_force = $forcenap;
+      elseif (isset($osatoimitus)) $osatoimitus_force = $forcenap;
     }
 
     if ($toim != 'KORJAA' and $toim != 'TUTKAA') {
+      if ($toim != 'TUOTE') {
+        echo "<tr>
+              <td colspan='2'>".t("Kommentit").":</td>
+              <td colspan='6'>
+                <input type='hidden' name='valmistuksen_lisatiedot_tilaus' id='hae_lisatiedot_tilaus' value='$row[Tilaus]'>
+                <textarea name='valmistuksen_lisatiedot' id='hae_lisatiedot' rows='5' cols='80'>{$row['valmistuksen_lisatiedot']}</textarea>
+              </td>
+              <td></td>
+              </tr>";
+      }
+
+      echo "<tr><td colspan='9' class='back'><br></td></tr>";
       echo "<tr><td colspan='8'>", t("Valmista syötetyt kappaleet"), ":</td><td><input type='submit' name='osavalmistus' id='osavalmistus' value='".t("Valmista")."'></td>$osavalmistus_force</tr>";
       echo "<tr><td colspan='4'>", t("Valmista prosentti koko tilauksesta"), ":</td><td colspan='4' align='right'><input type='text' name='kokopros' size='5'> % </td><td><input type='submit' name='osavalmistus' id='osavalmistus' value='".t("Valmista")."'></td>$osavalmistuspros_force</tr>";
       echo "<tr><td colspan='8'>", t("Siirrä valitut valmisteet uudelle tilaukselle"), ":</td><td><input type='submit' name='osatoimitus' id='osatoimitus' value='".t("Osatoimita")."'></td>$osatoimitus_force</tr>";
@@ -1570,12 +1589,22 @@ if (!isset($from_kaikkikorj)) {
     echo "</form>";
     echo "</table><br><br>";
 
-    echo "  <form method='post' autocomplete='off'>";
+
+    echo "  <SCRIPT LANGUAGE=JAVASCRIPT>
+      function lisatiedot(){
+        document.getElementById('haetut_lisatiedot_tilaus').value = document.getElementById('hae_lisatiedot_tilaus').value;
+        document.getElementById('haetut_lisatiedot').value = document.getElementById('hae_lisatiedot').value;
+      }
+    </SCRIPT>";
+
+    echo "<form method='post' autocomplete='off'>";
     echo "<input type='hidden' name='toim'  value='$toim'>";
 
     if ($toim != 'KORJAA') {
       echo "<input type='hidden' name='tee' value=''>";
-      echo "<input type='submit' name='' value='".t("Valmis")."'>";
+      echo "<input type='hidden' name='valmistuksen_lisatiedot_tilaus' id='haetut_lisatiedot_tilaus' value=''>";
+      echo "<input type='hidden' name='valmistuksen_lisatiedot' id='haetut_lisatiedot' value=''>";
+      echo "<input type='submit' name='' value='".t("Valmis")."' onclick='lisatiedot();'>";
     }
     else {
       echo "<input type='hidden' name='tee' value='alakorjaa'>";

@@ -119,7 +119,12 @@ if (mysql_num_rows($res) > 0) {
       $line = $items->addChild('Line');
       $line->addAttribute('No', $i);
       $line->addChild('Type',                  $type);
-      $line->addChild('ItemNumber',            xml_cleanstring($row[$logmaster_itemnumberfield], 20));
+      if ($uj_nimi == "Velox") {
+        $line->addChild('ItemNumber',          xml_cleanstring($row[$logmaster_itemnumberfield], 32));
+      }
+      else {
+        $line->addChild('ItemNumber',          xml_cleanstring($row[$logmaster_itemnumberfield], 20));
+      }
       $line->addChild('ItemName',              xml_cleanstring($row['nimitys'], 50));
       $line->addChild('ProdGroup1',            xml_cleanstring($row[$logmaster_prodgroup1field], 6));
       $line->addChild('ProdGroup2',            xml_cleanstring($row[$logmaster_prodgroup2field], 6));
@@ -140,6 +145,9 @@ if (mysql_num_rows($res) > 0) {
       $line->addChild('EANCode',               xml_cleanstring($row['eankoodi'], 20));
       $line->addChild('EANCode2',              '');
       $line->addChild('CustomsTariffNum',      xml_cleanstring($row['tullinimike1'], 14));
+      if ($uj_nimi == "Velox") {
+        $line->addChild('CustomsTariffTreat',  xml_cleanstring($row['tullikohtelu'], 4));
+      }
       $line->addChild('AlarmLimit',            '');
       $line->addChild('QualPeriod1',           '');
       $line->addChild('QualPeriod2',           '');

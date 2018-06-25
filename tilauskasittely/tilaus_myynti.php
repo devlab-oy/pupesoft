@@ -1626,7 +1626,7 @@ if ($tee == "VALMIS"
     $kassamyyja_kesken   = "";
     $kateisohitus    = "X";
   }
-  elseif (!isset($kassamyyja_kesken) and !isset($seka)) {
+  elseif (!isset($kassamyyja_kesken) and !isset($seka) and $laskurow['tilaustyyppi'] != 'W') {
 
     $query_maksuehto = "SELECT *
                         FROM maksuehto
@@ -2297,6 +2297,22 @@ if ($kukarow["extranet"] == "" and ((($toim == "TYOMAARAYS" or $toim == "TYOMAAR
       ($yhtiorow['reklamaation_kasittely'] == '' or
         ($yhtiorow['reklamaation_kasittely'] == 'X' and $laskurow['tilaustyyppi'] == 'U'))))) {
   require "tyomaarays/tyomaarays.inc";
+}
+
+if ($kukarow["extranet"] == "" and $laskurow['alatila'] == "FF" and $tee == "FFJONOON") {
+  echo "<br>";
+  echo t("Tilaus palautettu lavakeräysjonoon!");
+  echo "<br><br>";
+
+  $tee = '';
+  $tilausnumero = '';
+  $laskurow = '';
+  $kukarow['kesken'] = '';
+  $tila = '';
+
+  if ($lopetus != '') {
+    lopetus($lopetus, "META");
+  }
 }
 
 if ($kukarow["extranet"] == "" and $toim == "REKLAMAATIO" and $tee == "LEPAA" and
@@ -5221,21 +5237,9 @@ if ($tee == '') {
     }
 
     //Lisätään tuote tiettyyn tuoteperheeseen/reseptiin
-    if ($tila == "LISAARESEPTIIN" and $teeperhe == "OK") {
+    if (($tila == "LISAARESEPTIIN" or $tila == "LISAAKERTARESEPTIIN") and $teeperhe == "OK") {
       $query = "UPDATE tilausrivi
-                SET perheid2 = '$isatunnus'
-                WHERE yhtio = '$kukarow[yhtio]'
-                and tunnus  = '$isatunnus'";
-      $presult = pupe_query($query);
-      $perheid2 = $isatunnus;
-    }
-
-    //Lisätään tuote tiettyyn tuoteperheeseen/reseptiin
-    if ($tila == "LISAAKERTARESEPTIIN" and $teeperhe == "OK") {
-
-      $query = "UPDATE tilausrivi
-                SET
-                perheid     = '$isatunnus'
+                SET perheid = '$isatunnus'
                 WHERE yhtio = '$kukarow[yhtio]'
                 and tunnus  = '$isatunnus'";
       $presult = pupe_query($query);
@@ -5244,17 +5248,6 @@ if ($tee == '') {
 
     //Lisätään tuote tiettyyn tuoteperheeseen/reseptiin
     if ($tila == "LISAAISAKERTARESEPTIIN") {
-      if ($teeperhe == "OK") {
-
-        $query = "UPDATE tilausrivi
-                  SET
-                  perheid     = '$isatunnus'
-                  WHERE yhtio = '$kukarow[yhtio]'
-                  and tunnus  = '$isatunnus'";
-        $presult = pupe_query($query);
-        $perheid = $isatunnus;
-      }
-
       // useamman valmisteen reseptit...
       $perheid2 = -100;
     }
@@ -5483,8 +5476,8 @@ if ($tee == '') {
         //Tuote löytyi
         $trow = mysql_fetch_assoc($result);
 
-        //extranettajille ei myydä tuotteita joilla ei ole myyntihintaa
-        if ($kukarow["extranet"] != '' and $trow["myyntihinta"] == 0 and $trow['ei_saldoa'] == '') {
+        //extranettajille ei myydä tuotteita joilla ei ole myyntihintaa ellei tuote ole private label
+        if ($kukarow["extranet"] != '' and ($trow["myyntihinta"] == 0 and $trow["hinnastoon"] !='V') and $trow['ei_saldoa'] == '') {
           $varaosavirhe = t("VIRHE: Tuotenumeroa ei löydy järjestelmästä!")."<br>";
           $trow    = "";
           $tuoteno = "";
@@ -7247,6 +7240,8 @@ if ($tee == '') {
         }
       }
 
+      $rivikappaleetyht = 0;
+
       foreach ($rows as $row) {
         if ($toim == "VALMISTAVARASTOON" and $yhtiorow["kehahinta_valmistuksella"] == "K"
           and $row["tyyppi"] != "V" and isset($tuotteenpainotettukehayht["keha"])) {
@@ -7337,6 +7332,7 @@ if ($tee == '') {
           $kplmaara *
           generoi_alekentta_php($row, 'M', 'kerto', 'ei_erikoisale');
 
+        $rivikappaleetyht += $kplmaara;
         $kotisumma  = $row["kotihinta"] * ($row["varattu"] + $row["jt"]) * generoi_alekentta_php($row, 'M', 'kerto', 'ei_erikoisale');
 
         // Tän rivin alviton rivihinta
@@ -9470,7 +9466,7 @@ if ($tee == '') {
 
         if ($toim != 'SIIRTOLISTA') {
 
-          if ($kukarow['extranet'] == '' and in_array($toim, array('RIVISYOTTO', 'PIKATILAUS', 'TARJOUS')) and in_array($yhtiorow['tilaukselle_mittatiedot'], array('M', 'A'))) {
+          if ($kukarow['extranet'] == '' and in_array($toim, array('RIVISYOTTO', 'PIKATILAUS', 'TARJOUS')) and in_array($yhtiorow['tilaukselle_mittatiedot'], array('M', 'A', 'K'))) {
 
             if ($yhtiorow['tilaukselle_mittatiedot'] == 'A') {
               echo "<tr>$jarjlisa
@@ -9479,20 +9475,28 @@ if ($tee == '') {
                   <td class='spec' colspan='3' align='center'>{$asiakasrow['osasto']}</td>";
             }
 
-            echo "<tr>$jarjlisa
-                <td class='back' colspan='".($sarakkeet_alku-5)."'>&nbsp;</td>
-                <th colspan='5' align='right'>".t("Tilauksen kokonaispaino").":</th>
-                <td class='spec' align='right'>".sprintf("%.2f", $tilauksen_tuotemassa)."</td>";
-            echo "<td></td>";
-            echo "<td class='spec'>KG</td>";
-            echo "</tr>";
-            echo "<tr>$jarjlisa
-                <td class='back' colspan='".($sarakkeet_alku-5)."'>&nbsp;</td>
-                <th colspan='5' align='right'>".t("Tilauksen kokonaistilavuus").":</th>
-                <td class='spec' align='right'>".sprintf("%.2f", $tilauksen_tuotetilavuus)."</td>";
-            echo "<td></td>";
-            echo "<td class='spec'>M3</td>";
-            echo "</tr>";
+            if ($yhtiorow['tilaukselle_mittatiedot'] == 'K') {
+              echo "<tr>$jarjlisa
+                  <td class='back' colspan='".($sarakkeet_alku-5)."'>&nbsp;</td>
+                  <th colspan='5' align='right'>".t("Kappalemäärät").":</th>
+                  <td class='spec' colspan='3' align='center'>{$rivikappaleetyht}</td>";
+            }
+            else {
+              echo "<tr>$jarjlisa
+                  <td class='back' colspan='".($sarakkeet_alku-5)."'>&nbsp;</td>
+                  <th colspan='5' align='right'>".t("Tilauksen kokonaispaino").":</th>
+                  <td class='spec' align='right'>".sprintf("%.2f", $tilauksen_tuotemassa)."</td>";
+              echo "<td></td>";
+              echo "<td class='spec'>KG</td>";
+              echo "</tr>";
+              echo "<tr>$jarjlisa
+                  <td class='back' colspan='".($sarakkeet_alku-5)."'>&nbsp;</td>
+                  <th colspan='5' align='right'>".t("Tilauksen kokonaistilavuus").":</th>
+                  <td class='spec' align='right'>".sprintf("%.2f", $tilauksen_tuotetilavuus)."</td>";
+              echo "<td></td>";
+              echo "<td class='spec'>M3</td>";
+              echo "</tr>";
+            }
           }
 
           if ($kukarow["extranet"] == "" and $arvo_ulkomaa != 0) {
@@ -10376,6 +10380,22 @@ if ($tee == '') {
                 </form>
               </td>";
       }
+    }
+
+    if ($kukarow["extranet"] == "" and $muokkauslukko == "" and $laskurow['alatila'] == "FF") {
+      echo "  <td class='back ptop'>
+          <form name='tlepaamaan' method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php'>
+          <input type='hidden' name='toim' value='$toim'>
+          <input type='hidden' name='lopetus' value='$lopetus'>
+          <input type='hidden' name='ruutulimit' value = '$ruutulimit'>
+          <input type='hidden' name='projektilla' value='$projektilla'>
+          <input type='hidden' name='tee' value='FFJONOON'>
+          <input type='hidden' name='tilausnumero' value='$tilausnumero'>
+          <input type='hidden' name='mista' value = '$mista'>
+          <input type='hidden' name='orig_tila' value='$orig_tila'>
+          <input type='hidden' name='orig_alatila' value='$orig_alatila'>
+          <input type='submit' value='* ".t("Tilaus lavakeräysjonoon")." *'>
+          </form></td>";
     }
 
     if ($kukarow["extranet"] == "" and $muokkauslukko == "" and $toim == "REKLAMAATIO") {

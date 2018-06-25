@@ -163,6 +163,10 @@ while (false !== ($file = readdir($handle))) {
     pupesoft_log('logmaster_outbound_delivery_confirmation', "Sanomassa {$file} ".count($tilausrivit)." uniikkia tilausriviä.");
 
     $paivitettiin_tilausrivi_onnistuneesti = false;
+    $keratty_yhteensa = 0;
+
+    // tsekataan mahollinen var arvo
+    $_var = $yhtiorow['kerayspoikkeama_kasittely'] == 'J' ? "J" : "P";
 
     foreach ($tilausrivit as $tilausrivin_tunnus => $data) {
 
@@ -193,6 +197,7 @@ while (false !== ($file = readdir($handle))) {
       $tilausrivi_row = mysql_fetch_assoc($tilausrivi_res);
 
       $varattuupdate = "";
+      $kerattyupdate = "tilausrivi.kerattyaika = '{$toimaika}', tilausrivi.keratty = '{$kukarow['kuka']}'";
 
       // Verkkokaupassa etukäteen maksettu tuote!
       if ($laskurow["mapvm"] != '' and $laskurow["mapvm"] != '0000-00-00') {
@@ -203,10 +208,15 @@ while (false !== ($file = readdir($handle))) {
           $kerayspoikkeama[$tilausrivi_row['tuoteno']]['tilauksella'] = round($tilausrivi_row['tilkpl']);
           $kerayspoikkeama[$tilausrivi_row['tuoteno']]['keratty'] = $keratty;
         }
+
+        $keratty_yhteensa += $tilausrivi_row['tilkpl'];
+        $_etukateen_maksettu = true;
       }
       else {
-        // Jos ei oo etukäteen maksettu, niin tehdääb keräyspoikkeama
-        $varattuupdate = ", tilausrivi.varattu = '{$keratty}' ";
+        // Jos ei oo etukäteen maksettu, niin tehdään keräyspoikkeama
+        $varattuupdate = ", tilausrivi.varattu = '{$keratty}'";
+        $keratty_yhteensa += $keratty;
+        $_etukateen_maksettu = false;
       }
 
       if ($laskurow["tila"] == "V" or $laskurow["tila"] == "S" or $laskurow["tila"] == "G") {
@@ -217,10 +227,59 @@ while (false !== ($file = readdir($handle))) {
                               tilausrivi.toimitettuaika = '{$toimaika}'";
       }
 
+      // Jos poikkeava määrä kerätty, jätetään mahdollisesti var p/j rivejä
+      // vain jos normaali myyntitilaus kyseessä
+      if (in_array($yhtiorow['kerayspoikkeama_kasittely'], array('J','U')) and !$_etukateen_maksettu and $laskurow['tila'] == 'L') {
+
+        $a = (int) ($tilausrivi_row['varattu'] * 10000);
+        $b = (int) ($keratty * 10000);
+
+        // tsekataan tarviiko riviä splittaa, eli jäikö kokonaan keräämättä
+        if (empty($keratty)) {
+
+          // jos jäi niin muutetaan rivin update sen mukaan eikä erikseen splitata
+          // ei kosketa mihinkään muuhun kuin var kenttään
+          pupesoft_log('logmaster_outbound_delivery_confirmation', "Keräyskuittaus {$otunnus} rivi {$tilausrivin_tunnus} ({$item_number}) jäi kokonaan keräämättä!");
+
+          $kerattyupdate = "tilausrivi.kerattyaika = '0000-00-00 00:00:00', tilausrivi.keratty = ''";
+          $toimitettu_lisa = "";
+          $varattuupdate = ", tilausrivi.var = '{$_var}'";
+
+          $kerayspoikkeama[$tilausrivi_row['tuoteno']]['tilauksella'] = round($tilausrivi_row['varattu']);
+          $kerayspoikkeama[$tilausrivi_row['tuoteno']]['keratty'] = $keratty;
+          $kerayspoikkeama[$tilausrivi_row['tuoteno']]['status'] = $_var;
+        }
+        elseif ($a != $b) {
+
+          // jos vain osa jäi keräämättä niin tarvii splittaa
+          pupesoft_log('logmaster_outbound_delivery_confirmation', "Keräyskuittaus {$otunnus} rivi {$tilausrivin_tunnus} ({$item_number}) sisältää keräyspoikkeaman, splitataan erotus var {$_var}:ksi");
+
+          $_varaus = 0;
+          $_poikkeama = $tilausrivi_row['varattu'] - $keratty;
+
+          // varaako jt:t saldoa?
+          if ($yhtiorow['kerayspoikkeama_kasittely'] == 'J' and $yhtiorow['varaako_jt_saldoa'] == 'K') {
+            $_varaus = $_poikkeama;
+            $_poikkeama = 0;
+          }
+          elseif ($yhtiorow['kerayspoikkeama_kasittely'] == 'U') {
+            $_poikkeama = 0;
+          }
+
+          // kopioidaan tilausrivi poikkeavalle määrälle ja jätetään se jt/puute
+          $poikkeuskentat = array("tilausrivi.varattu"=> $_varaus, "tilausrivi.jt"=> $_poikkeama, "tilausrivi.var" => $_var);
+          kopioi_tilausrivi($tilausrivin_tunnus, $poikkeuskentat);
+
+          $kerayspoikkeama[$tilausrivi_row['tuoteno']]['tilauksella'] = round($tilausrivi_row['varattu']);
+          $kerayspoikkeama[$tilausrivi_row['tuoteno']]['keratty'] = $keratty;
+          $kerayspoikkeama[$tilausrivi_row['tuoteno']]['status'] = $_var;
+        }
+      }
+
       $query = "UPDATE tilausrivi
                 JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio {$tuotelisa} AND tuote.tuoteno = tilausrivi.tuoteno)
-                SET tilausrivi.keratty = '{$kukarow['kuka']}',
-                tilausrivi.kerattyaika = '{$toimaika}'
+                SET
+                {$kerattyupdate}
                 {$toimitettu_lisa}
                 {$varattuupdate}
                 WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
@@ -229,104 +288,148 @@ while (false !== ($file = readdir($handle))) {
 
       $paivitettiin_tilausrivi_onnistuneesti = true;
 
-      $query = "SELECT SUM(tuote.tuotemassa) paino
+      $query = "SELECT SUM(tilausrivi.varattu * tuote.tuotemassa) paino
                 FROM tilausrivi
                 JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
                 WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-                AND tilausrivi.tunnus  = '{$tilausrivin_tunnus}'";
+                AND tilausrivi.tunnus  = '{$tilausrivin_tunnus}'
+                AND tilausrivi.var not in ('J','P')";
       $painores = pupe_query($query);
       $painorow = mysql_fetch_assoc($painores);
 
       $tuotteiden_paino += $painorow['paino'];
     }
 
-    // Päivitetään saldottomat tuotteet myös toimitetuksi
-    $query = "UPDATE tilausrivi
-              JOIN tuote ON (
-                tuote.yhtio              = tilausrivi.yhtio AND
-                tuote.tuoteno            = tilausrivi.tuoteno AND
-                tuote.ei_saldoa         != ''
-              )
-              SET tilausrivi.keratty = '{$kukarow['kuka']}',
-              tilausrivi.kerattyaika     = '{$toimaika}',
-              tilausrivi.toimitettu      = '{$kukarow['kuka']}',
-              tilausrivi.toimitettuaika  = '{$toimaika}'
-              WHERE tilausrivi.yhtio     = '{$kukarow['yhtio']}'
-              AND tilausrivi.otunnus     = '{$otunnus}'";
-    pupe_query($query);
+    // tsekataan onko yhtään kerättyä riviä myyntitilauksella
+    if ($keratty_yhteensa == 0 and $laskurow['tila'] == 'L') {
 
-    $query  = "INSERT INTO rahtikirjat SET
-               toimitustapa   = '{$laskurow['toimitustapa']}',
-               kollit         = 1,
-               kilot          = {$tuotteiden_paino},
-               pakkaus        = '',
-               pakkauskuvaus  = '',
-               rahtikirjanro  = '',
-               otsikkonro     = '{$otunnus}',
-               tulostuspaikka = '{$laskurow['varasto']}',
-               yhtio          = '{$kukarow['yhtio']}',
-               viesti         = ''";
-    $result_rk = pupe_query($query);
-
-    if ($paivitettiin_tilausrivi_onnistuneesti) {
-
-      if ($laskurow["tila"] == "G") {
-        if ($laskurow["tilaustyyppi"] != 'M') {
-          $tilalisa = "tila = 'G', alatila = 'C'";
-        }
-        else {
-          $tilalisa = "tila = 'G', alatila = 'D'";
-        }
-
-      }
-      elseif ($laskurow["tila"] == "V") {
-        $tilalisa = "tila = 'V', alatila = 'C'";
-      }
-      elseif ($laskurow["tila"] == "S") {
-        $tilalisa = "tila = 'S', alatila = 'C'";
-      }
-      else {
-        $tilalisa = "tila = 'L', alatila = 'D'";
-      }
+      // päivitetään otsikkoa (kesken, odottamaan jt rivejä) molemmissa var keisseissä
+      // iltasiivo hoitaa var p keissit
+      pupesoft_log('logmaster_outbound_delivery_confirmation', "Keräyskuittaus {$otunnus} sisältää vain keräyspoikkeamia, laitetaan tilaus kesken odottamaan jälkitoimituksia");
 
       $query = "UPDATE lasku SET
-                {$tilalisa}
-                WHERE yhtio = '{$kukarow['yhtio']}'
-                AND tunnus  = '{$laskurow['tunnus']}'";
-      $upd_res = pupe_query($query);
-
-      paivita_rahtikirjat_tulostetuksi_ja_toimitetuksi(array('otunnukset' => $laskurow['tunnus'], 'kilotyht' => $tuotteiden_paino));
-
-      pupesoft_log('logmaster_outbound_delivery_confirmation', "Keräyskuittaus tilauksesta {$otunnus} päivitettiin toimitetuksi");
+                alatila     = 'T',
+                tila        = 'N'
+                WHERE yhtio = '$kukarow[yhtio]'
+                AND tunnus  = '$laskurow[tunnus]'";
+      pupe_query($query);
     }
+    else {
 
-    if (count($tilausrivit_error) > 0) {
-      pupesoft_log('logmaster_outbound_delivery_confirmation', "Sanomassa {$file} oli ".count($tilausrivit_error)." virheellistä tilausriviä.");
-    }
+      // Jatketaan normaalisti jos oli jotain kerättävää
+      // Päivitetään saldottomat tuotteet myös toimitetuksi
+      $query = "UPDATE tilausrivi
+                JOIN tuote ON (
+                  tuote.yhtio              = tilausrivi.yhtio AND
+                  tuote.tuoteno            = tilausrivi.tuoteno AND
+                  tuote.ei_saldoa         != ''
+                )
+                SET tilausrivi.keratty = '{$kukarow['kuka']}',
+                tilausrivi.kerattyaika     = '{$toimaika}',
+                tilausrivi.toimitettu      = '{$kukarow['kuka']}',
+                tilausrivi.toimitettuaika  = '{$toimaika}'
+                WHERE tilausrivi.yhtio     = '{$kukarow['yhtio']}'
+                AND tilausrivi.otunnus     = '{$otunnus}'";
+      pupe_query($query);
 
-    pupesoft_log('logmaster_outbound_delivery_confirmation', "Keräyskuittaus tilauksesta {$otunnus} vastaanotettu");
+      $query  = "INSERT INTO rahtikirjat SET
+                 toimitustapa   = '{$laskurow['toimitustapa']}',
+                 kollit         = 1,
+                 kilot          = {$tuotteiden_paino},
+                 pakkaus        = '',
+                 pakkauskuvaus  = '',
+                 rahtikirjanro  = '',
+                 otsikkonro     = '{$otunnus}',
+                 tulostuspaikka = '{$laskurow['varasto']}',
+                 yhtio          = '{$kukarow['yhtio']}',
+                 viesti         = ''";
+      $result_rk = pupe_query($query);
 
-    $avainsanaresult = t_avainsana("ULKJARJLAHETE");
-    $avainsanarow = mysql_fetch_assoc($avainsanaresult);
+      if ($paivitettiin_tilausrivi_onnistuneesti) {
 
-    if ($avainsanarow['selite'] != '') {
+        if ($laskurow["tila"] == "G") {
+          if ($laskurow["tilaustyyppi"] != 'M') {
+            $tilalisa = "tila = 'G', alatila = 'C'";
+          }
+          else {
+            $tilalisa = "tila = 'G', alatila = 'D'";
+          }
+        }
+        elseif ($laskurow["tila"] == "V") {
+          $tilalisa = "tila = 'V', alatila = 'C'";
+        }
+        elseif ($laskurow["tila"] == "S") {
+          $tilalisa = "tila = 'S', alatila = 'C'";
+        }
+        else {
+          $tilalisa = "tila = 'L', alatila = 'D'";
+        }
 
-      // Tulostetaan lähete
-      $params = array(
-        'extranet_tilausvahvistus' => "",
-        'kieli'                    => "",
-        'komento'                  => "asiakasemail{$avainsanarow['selite']}",
-        'lahetekpl'                => "",
-        'laskurow'                 => $laskurow,
-        'naytetaanko_rivihinta'    => "",
-        'sellahetetyyppi'          => "",
-        'tee'                      => "",
-        'toim'                     => "",
-      );
+        $query = "UPDATE lasku SET
+                  {$tilalisa}
+                  WHERE yhtio = '{$kukarow['yhtio']}'
+                  AND tunnus  = '{$laskurow['tunnus']}'";
+        $upd_res = pupe_query($query);
 
-      pupesoft_tulosta_lahete($params);
+        paivita_rahtikirjat_tulostetuksi_ja_toimitetuksi(array('otunnukset' => $laskurow['tunnus'], 'kilotyht' => $tuotteiden_paino));
 
-      pupesoft_log('logmaster_outbound_delivery_confirmation', "Lähetettiin lähete tilauksesta {$laskurow['tunnus']} osoitteeseen {$avainsanarow['selite']}");
+        if ($laskurow['alatila'] != 'X' and ($laskurow['vienti'] == 'E' or $laskurow['vienti'] == 'K')) {
+          $uusialatila = viennin_lisatiedot($laskurow['tunnus']);
+
+          // Luodaan lasku
+          if ($laskurow['verkkotunnus'] == "VELOX" and $uusialatila == 'E') {
+
+            // päivitetään laskun otsikko laskutusjonoon
+            $query = "UPDATE lasku
+                      set alatila = 'D'
+                      WHERE yhtio = '{$kukarow['yhtio']}'
+                      AND tunnus  = '{$laskurow['tunnus']}'";
+            $result = pupe_query($query);
+
+            // Laskutetaan tilaus
+            $laskutettavat    = $laskurow['tunnus'];
+            $tee              = "TARKISTA";
+            $laskutakaikki    = "KYLLA";
+            $silent           = "KYLLA";
+            $velox_laskutus   = "KYLLA";
+            $force_web        = True;
+            $pupe_root_polku  = dirname(dirname(dirname(__FILE__)));
+
+            require "tilauskasittely/verkkolasku.php";
+          }
+        }
+
+        pupesoft_log('logmaster_outbound_delivery_confirmation', "Keräyskuittaus tilauksesta {$otunnus} päivitettiin toimitetuksi");
+      }
+
+      if (count($tilausrivit_error) > 0) {
+        pupesoft_log('logmaster_outbound_delivery_confirmation', "Sanomassa {$file} oli ".count($tilausrivit_error)." virheellistä tilausriviä.");
+      }
+
+      pupesoft_log('logmaster_outbound_delivery_confirmation', "Keräyskuittaus tilauksesta {$otunnus} vastaanotettu");
+
+      $avainsanaresult = t_avainsana("ULKJARJLAHETE");
+      $avainsanarow = mysql_fetch_assoc($avainsanaresult);
+
+      if ($avainsanarow['selite'] != '') {
+
+        // Tulostetaan lähete
+        $params = array(
+          'extranet_tilausvahvistus' => "",
+          'kieli'                    => "",
+          'komento'                  => "asiakasemail{$avainsanarow['selite']}",
+          'lahetekpl'                => "",
+          'laskurow'                 => $laskurow,
+          'naytetaanko_rivihinta'    => "",
+          'sellahetetyyppi'          => "",
+          'tee'                      => "",
+          'toim'                     => "",
+        );
+
+        pupesoft_tulosta_lahete($params);
+
+        pupesoft_log('logmaster_outbound_delivery_confirmation', "Lähetettiin lähete tilauksesta {$laskurow['tunnus']} osoitteeseen {$avainsanarow['selite']}");
+      }
     }
   }
   else {
@@ -339,10 +442,20 @@ while (false !== ($file = readdir($handle))) {
   if (count($kerayspoikkeama) != 0 and !empty($error_email)) {
 
     $email_array[] = t("Tilauksen %d keräyksessä on havaittu poikkeamia", "", $otunnus).":";
-    $email_array[] = t("Tuoteno")." ".t("Kerätty")." ".t("Tilauksella");
+    $email_array[] = t("Tuoteno")." ".t("Kerätty")." ".t("Tilauksella")." ".t("Status");
 
     foreach ($kerayspoikkeama as $tuoteno => $_arr) {
-      $email_array[] = "{$tuoteno} {$_arr['keratty']} {$_arr['tilauksella']}";
+
+      if (isset($_arr['status'])) {
+        $_status = $_arr['status'] == "J" ? t("Jälkitoimitukseen") : t("Puuteriviksi");
+        $_erotus = $_arr['tilauksella'] - $_arr['keratty'];
+        $_status = "{$_status} {$_erotus}";
+      }
+      else {
+        $_status = "";
+      }
+
+      $email_array[] = "{$tuoteno} {$_arr['keratty']} {$_arr['tilauksella']} ".$_status;
     }
 
     pupesoft_log('logmaster_outbound_delivery_confirmation', "Keräyspoikkeamia tilauksessa {$otunnus}");

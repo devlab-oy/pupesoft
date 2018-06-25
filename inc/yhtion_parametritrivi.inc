@@ -894,10 +894,15 @@ if ($fieldname == "myynti_jt_huom") {
 
   $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
 
-  $sel = $trow[$i] == 'K' ? 'selected' : '';
+  $sel = array();
+  $apu = $trow[$i];
+  $sel[$apu] = "SELECTED";
+
+  //$sel = $trow[$i] == 'K' ? 'selected' : '';
 
   $ulos .= "<option value = ''>".t("Myyntitilauksella ei ilmoiteta k‰ytt‰j‰lle jos tuotetta on jo j‰lkitoimituksessa")."</option>";
-  $ulos .= "<option value = 'K' {$sel}>".t("Myyntitilauksella ilmoitetaan k‰ytt‰j‰lle jos tuotetta on jo j‰lkitoimituksessa")."</option>";
+  $ulos .= "<option value = 'K' $sel[K]>".t("Myyntitilauksella ilmoitetaan k‰ytt‰j‰lle jos tuotetta on jo j‰lkitoimituksessa")."</option>";
+  $ulos .= "<option value = 'T' $sel[T]>".t("Myyntitilauksella ilmoitetaan k‰ytt‰j‰lle jos tuotetta on tarjouksella")."</option>";
   $ulos .= "</select></td>";
 
   $jatko = 0;
@@ -4767,6 +4772,7 @@ if ($fieldname == 'tilaukselle_mittatiedot') {
   $ulos .= "<option value = ''>".t("Myyntitilauksella, ostotilauksella sek‰ tarjouksella ei n‰ytet‰ mittatietojen yhteenvetoa")."</option>";
   $ulos .= "<option value = 'M' {$sel['M']}>".t("Myyntitilauksella, ostotilauksella sek‰ tarjouksella n‰ytet‰‰n mittatietojen yhteenveto")."</option>";
   $ulos .= "<option value = 'A' {$sel['A']}>".t("Myyntitilauksella, ostotilauksella sek‰ tarjouksella n‰ytet‰‰n mittatietojen yhteenveto sek‰ asiakasosasto")."</option>";
+  $ulos .= "<option value = 'K' {$sel['K']}>".t("Myyntitilauksella, ostotilauksella sek‰ tarjouksella n‰ytet‰‰n kappalem‰‰rien yhteenveto")."</option>";
   $ulos .= "</select></td>";
 
   $jatko = 0;

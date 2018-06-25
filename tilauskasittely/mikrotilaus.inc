@@ -451,7 +451,7 @@ if ($tee == "file") {
                     unset($tuoteno_array, $kpl_array, $kommentti_array, $lapsenlap_array);
                   }
                   else {
-
+                    $from_mikrotilaus = TRUE;
                     if ($yhtiorow["reklamaation_hinnoittelu"] == "K" and ($toim == "REKLAMAATIO" or $toim == "EXTRANET_REKLAMAATIO") and $var != "H") {
 
                       $palautus = hae_hyvityshinta($laskurow["liitostunnus"], $tuoteno, $kpl);
@@ -875,7 +875,7 @@ if ($tee == "file") {
                   unset($tuoteno_array, $kpl_array, $kommentti_array, $lapsenlap_array);
                 }
                 else {
-
+                  $from_mikrotilaus = TRUE;
                   if ($yhtiorow["reklamaation_hinnoittelu"] == "K" and ($toim == "REKLAMAATIO" or $toim == "EXTRANET_REKLAMAATIO") and $var != "H") {
 
                     $palautus = hae_hyvityshinta($laskurow["liitostunnus"], $tuoteno, $kpl);
@@ -1063,3 +1063,4 @@ if ($tee == 'mikrotila') {
 
   echo "</form>";
 }
+$from_mikrotilaus = FALSE;

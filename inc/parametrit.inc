@@ -512,6 +512,14 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
       elseif ($naytetaanko_saldot == 'ei') {
         setcookie("naytetaanko_saldot", '', time()+60*60*24*90, "/");
       }
+
+      // N‰ytet‰‰n viite/asiakkaan tilausnumero lis‰tietoja
+      if ($viitetiedot == 'kylla') {
+        setcookie("viitetiedot", $viitetiedot, time()+60*60*24*90, "/");
+      }
+      elseif ($viitetiedot == 'ei') {
+        setcookie("viitetiedot", '', time()+60*60*24*90, "/");
+      }
     }
 
     if ($phpnimi == "asiakasmemo.php" or $phpnimi == "tilaus_myynti.php") {

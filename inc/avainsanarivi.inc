@@ -306,6 +306,8 @@ if (mysql_field_name($result, $i) == "laji") {
   if ($lukitse_laji== "" or $lukitse_laji == "LABEL") $ulos .= "<option value='LABEL' {$avain_sel['LABEL']}>".t("Myyntitilauksen luokitus")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "OSTOTIL_TILTYYP") $ulos .= "<option value='OSTOTIL_TILTYYP' {$avain_sel['OSTOTIL_TILTYYP']}>".t("Ostotilauksen tilaustyyppi")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "TARJOUS_VAKIOTE") $ulos .= "<option value='TARJOUS_VAKIOTE' {$avain_sel['TARJOUS_VAKIOTE']}>".t("Tarjouksen vakioteksti")."</option>";
+  if ($lukitse_laji== "" or $lukitse_laji == "TARJOUS_EHDOT") $ulos .= "<option value='TARJOUS_EHDOT' {$avain_sel['TARJOUS_EHDOT']}>".t("Pelkistetyn tarjouksen kauppaehdot")."</option>";
+  if ($lukitse_laji== "" or $lukitse_laji == "TARJOUS_KAUPEHD") $ulos .= "<option value='TARJOUS_KAUPEHD' {$avain_sel['TARJOUS_KAUPEHD']}>".t("Pelkistetyn tarjouksen lopun kauppaehdot (kohdat 3 ja 4)")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "KATEISOTTO") $ulos .= "<option value='KATEISOTTO' {$avain_sel['KATEISOTTO']}>".t("Käteisoton luonne")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "KOHDE_TYYPPI") $ulos .= "<option value='KOHDE_TYYPPI' {$avain_sel['KOHDE_TYYPPI']}>".t("Kohteen tyyppi")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "MYYNNISTA_OSTO") $ulos .= "<option value='MYYNNISTA_OSTO' {$avain_sel['MYYNNISTA_OSTO']}>".t("Ostotilauksen käsittely myyntitilauksella")."</option>";
@@ -331,9 +333,11 @@ if (mysql_field_name($result, $i) == "laji") {
   if ($lukitse_laji== "" or $lukitse_laji == "HUOLTOP_EMAIL") $ulos .= "<option value='HUOLTOP_EMAIL' {$avain_sel['HUOLTOP_EMAIL']}>".t("RMA portaalin huoltopyyntöemail")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "POSTEN_TKOODI")   $ulos .= "<option value='POSTEN_TKOODI' {$avain_sel['POSTEN_TKOODI']}>".t("Logmaster OutboundDelivery ja MaterialMaster sanomien kentät")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "UNIFAUN_REF") $ulos .= "<option value='UNIFAUN_REF' {$avain_sel['UNIFAUN_REF']}>".t("Unifaun lähettäjän viite")."</option>";
+  if ($lukitse_laji== "" or $lukitse_laji == "UNIFAUN_MESSAGE") $ulos .= "<option value='UNIFAUN_MESSAGE' {$avain_sel['UNIFAUN_MESSAGE']}>".t("Unifaun ENOT viesti")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "KUITIN_VAKTEXT") $ulos .= "<option value='KUITIN_VAKTEXT' {$avain_sel['KUITIN_VAKTEXT']}>".t("Kuitin vakioteksti")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "STCK_LST_FLTR") $ulos .= "<option value='STCK_LST_FLTR' {$avain_sel['STCK_LST_FLTR']}>".t("Varastosaldoraportin rajaus")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "PIIRI_ALENNUS") $ulos .= "<option value='PIIRI_ALENNUS' {$avain_sel['PIIRI_ALENNUS']}>".t("Piiriin sidottu hinnoittelu")."</option>";
+  if ($lukitse_laji== "" or $lukitse_laji == "MESSENGER_RYHMA") $ulos .= "<option value='MESSENGER_RYHMA' {$avain_sel['MESSENGER_RYHMA']}>".t("Messenger käyttäjäryhmä")."</option>";
   if ($lukitse_laji== "") $ulos .= "</optgroup>";
 
   if ($lukitse_laji== "") $ulos .= "<optgroup label='".t("Verkkokaupan avainsanat")."'>";
@@ -709,6 +713,12 @@ if (mysql_field_name($result, $i) == "kieli") {
 if ($avain_sel["TARJOUS_VAKIOTE"] == "SELECTED" and ($_selite or $_selitetark_2 or $_selitetark_3 or $_selitetark_4)) {
   $tyyppi = 0;
 }
+if ($avain_sel["TARJOUS_EHDOT"] == "SELECTED" and ($_selite or $_selitetark_2 or $_selitetark_3 or $_selitetark_4)) {
+  $tyyppi = 0;
+}
+if ($avain_sel["TARJOUS_KAUPEHD"] == "SELECTED" and ($_selite or $_selitetark_2 or $_selitetark_3 or $_selitetark_4)) {
+  $tyyppi = 0;
+}
 
 if ($avain_sel["KERAYSLISTA"] == "SELECTED" and $_selite) {
 
@@ -1032,6 +1042,8 @@ if (($avain_sel["KARHUVIESTI"] == "SELECTED"
     or $avain_sel["TV_LISATIETO"] == "SELECTED"
     or $avain_sel['KAANTALVVIESTI'] == "SELECTED"
     or $avain_sel['TARJOUS_VAKIOTE'] == "SELECTED"
+    or $avain_sel['TARJOUS_EHDOT'] == "SELECTED"
+    or $avain_sel['TARJOUS_KAUPEHD'] == "SELECTED"
     or $avain_sel["SALDOVAHVISTUS"] == "SELECTED"
     or $avain_sel["MYYNTITILASTO"] == "SELECTED")
   and $_selitetark) {
@@ -1512,6 +1524,17 @@ if ($avain_sel['KUITIN_VAKTEXT'] == "SELECTED") {
   }
 }
 
+// Unifaun ennakkoilmoitus vakioteksti
+if ($avain_sel['UNIFAUN_MESSAGE'] == "SELECTED") {
+  if ($_selite || $_jarjestys) {
+    $tyyppi = 0;
+  }
+  elseif ($_selitetark) {
+    $ulos = "<td><textarea name='{$nimi}' rows='10' cols='50'>{$trow[$i]}</textarea></td>";
+    $jatko = 0;
+  }
+}
+
 if ($avain_sel['STCK_LST_FLTR'] == "SELECTED") {
   if ($_selite) {
     $sel = array();
@@ -1620,6 +1643,31 @@ if ($avain_sel['PS_ALA_TRY'] == "SELECTED" and $_selitetark_2) {
   $ulos  = "<th>" . t("Nimitys") . "</th>
             <td><input type='text' size='35' value='{$trow[$i]}' name='{$nimi}'></td>";
   $jatko = 0;
+}
+
+if ($avain_sel['MESSENGER_RYHMA'] == 'SELECTED') {
+
+  if ($_selitetark) {
+    $ulos = "<td><select name = '$nimi'>";
+    $ulos .= "<option value=''>".t('Valitse käyttäjä ryhmään')."</option>";
+    $query = "SELECT *
+              FROM kuka
+              WHERE yhtio    = '{$kukarow['yhtio']}'
+              AND aktiivinen = 1
+              AND extranet   = ''
+              ORDER BY nimi";
+    $kayttajaresult = pupe_query($query);
+
+    while ($kaytrow = mysql_fetch_assoc($kayttajaresult)) {
+      $sel = '';
+      if ($trow[$i] == $kaytrow['kuka']) {
+        $sel = 'selected';
+      }
+      $ulos .= "<option value='{$kaytrow['kuka']}' $sel>{$kaytrow['nimi']} ({$kaytrow['kuka']})</option>";
+    }
+    $ulos .= "</select></td>";
+    $jatko = 0;
+  }
 }
 
 // Unifaun lähettäjän viite

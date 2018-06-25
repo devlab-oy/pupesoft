@@ -271,7 +271,14 @@ if (!function_exists('alku')) {
 
     if ($laskutyyppi != 8) {
       $pdf_lasku->draw_text(310, $otsik[$rivi_ind], t("Viitenumero", $kieli), $page_lasku[$sivu], $pieni);
-      $pdf_lasku->draw_text(310, $arvo[$rivi_ind], $laskurow["viite"], $page_lasku[$sivu], $boldi);
+
+      // Näytetään tilausnumero viitteenä kun kyseessä on ulkomaille lähetettävä proformalasku
+      if ($toim == 'PROFORMA' and strtoupper($laskurow["maa"] )!= strtoupper($yhtiorow["maa"]) and $laskurow["viite"] == "") {
+        $pdf_lasku->draw_text(310, $arvo[$rivi_ind], $laskurow["tunnus"], $page_lasku[$sivu], $boldi);
+      }
+      else {
+        $pdf_lasku->draw_text(310, $arvo[$rivi_ind], $laskurow["viite"], $page_lasku[$sivu], $boldi);
+      }
       $rivi_ind++;
     }
 
@@ -944,6 +951,7 @@ if (!function_exists('rivi_lasku')) {
                 WHERE yhtio = '{$kukarow['yhtio']}'
                 AND tuoteno = '{$row['tuoteno']}'
                 AND ytunnus = '{$laskurow['ytunnus']}'
+                AND tyyppi  = ''
                 ORDER BY tunnus";
       $asiakaskommentti_res = pupe_query($query);
 

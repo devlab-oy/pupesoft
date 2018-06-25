@@ -173,7 +173,8 @@ elseif (isset($lajit) and count($lajit) > 0) {
     $query = "SELECT *
               FROM asiakaskommentti
               WHERE yhtio = '{$kukarow['yhtio']}'
-              AND tuoteno = '{$tilausrivi['tuoteno']}'";
+              AND tuoteno = '{$tilausrivi['tuoteno']}'
+              AND tyyppi  = ''";
     $spessuressi = pupe_query($query);
     $spessurowi = mysql_fetch_assoc($spessuressi);
 

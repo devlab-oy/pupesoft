@@ -30,6 +30,8 @@ if ($tee == "VAHV_TA_AJAX") {
             and tunnus      = '{$rivitunnus}'";
   pupe_query($query);
 
+  tallenna_ostotilaus_vahvistus($rivitunnus,$paiv_toimaika,TRUE);
+
   echo json_encode('ok');
   exit;
 }
@@ -339,7 +341,17 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
     $result = pupe_query($query);
 
     if (mysql_affected_rows() > 0) {
+
       echo "<font class='message'>".t("Toimitus vahvistettu")."</font><br><br>";
+
+        if (!empty($vahvista_kaikki_rivit)) {
+          $vahvista_kaikki_rivit = explode(",", $vahvista_kaikki_rivit);
+
+          foreach ($vahvista_kaikki_rivit as $_tunnus_toimaika) {
+            list($_tunnus, $_toimaika) = explode("##!!##", $_tunnus_toimaika);
+            tallenna_ostotilaus_vahvistus($_tunnus,$_toimaika,TRUE);
+          }
+        }
     }
     else {
       echo "<font class='error'>".t("Toimituksella ei ollut vahvistettavia rivejä")."</font><br><br>";
@@ -602,7 +614,7 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
                         FROM varastopaikat
                         WHERE yhtio = '{$kukarow['yhtio']}'
                         AND tunnus = '{$laskurow['varasto']}'
-                        AND ulkoinen_jarjestelma IN ('L','P')";
+                        AND ulkoinen_jarjestelma IN ('P')";
             $v_result = pupe_query($v_query);
 
             if (mysql_num_rows($v_result) == 1) {
@@ -1554,12 +1566,14 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
             var submitid    = $(this).attr(\"id\");
             var osat        = submitid.split(\"_\");
             var rivitunnus  = osat[1];
+            var paiv_toimaika = osat[2];
 
             $.post('{$_SERVER['SCRIPT_NAME']}',
               {
                 tee: 'VAHV_TA_AJAX',
                 async: false,
                 rivitunnus: rivitunnus,
+                paiv_toimaika: paiv_toimaika,
                 no_head: 'yes',
                 ohje: 'off'
               },
@@ -1653,12 +1667,17 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
 
       mysql_data_seek($presult, 0);
 
+      $vahvista_kaikki_rivit = array();
+
       while ($prow = mysql_fetch_assoc($presult)) {
+
         $divnolla++;
         $erikoisale_summa += (($prow['rivihinta'] * ($laskurow['erikoisale'] / 100)) * -1);
         $yhteensa += $prow["rivihinta"];
         $paino_yhteensa += ($prow["tilattu"]*$prow["tuotemassa"]);
         $tilavuus_yhteensa += ($prow["tilattu"]*$prow["tuotetilavuus"]);
+
+        $vahvista_kaikki_rivit[] = $prow['tunnus'] . "##!!##" . $prow['toimaika'];
 
         $class = "class='ptop'";
 
@@ -2051,7 +2070,7 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
             echo "</span>";
 
             if ($prow['jaksotettu'] == 0) {
-              echo " <a href='#' class='vahvistarivintoimaika' id ='vta_$prow[tunnus]'>*".t("Vahvista toimitusaika")."*</a>";
+              echo " <a href='#' class='vahvistarivintoimaika' id ='vta_$prow[tunnus]_$prow[toimaika]'>*".t("Vahvista toimitusaika")."*</a>";
             }
           }
 
@@ -2251,6 +2270,7 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
             <input type='hidden' name='toim_nimitykset'    value = '$toim_nimitykset'>
             <input type='hidden' name='toim_tuoteno'     value = '$toim_tuoteno'>
             <input type='hidden' name='naytetaankolukitut' value = '$naytetaankolukitut'>
+            <input type='hidden' name='vahvista_kaikki_rivit' value = '".implode(',', $vahvista_kaikki_rivit)."'>
             <input type='hidden' name='tee'          value = 'vahvista'>
             <input type='submit' value='".t("Vahvista toimitus")."'>
             </form>

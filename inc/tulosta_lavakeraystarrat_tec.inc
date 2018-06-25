@@ -2,7 +2,7 @@
 
 
 if (!function_exists("tulosta_lavakeraystarrat_tec")) {
-  function tulosta_lavakeraystarrat_tec($riresult, $rivinumerot, $komento) {
+  function tulosta_lavakeraystarrat_tec($riresult, $rivinumerot, $komento, $from="") {
     global $kukarow;
 
     mysql_data_seek($riresult, 0);
@@ -13,6 +13,7 @@ if (!function_exists("tulosta_lavakeraystarrat_tec")) {
     $tuotteet = array();
     $lava_referenssiluku = 0;
     $lavanumero = 1;
+    $ed_asiakas = "";
 
     while ($tilrow = mysql_fetch_assoc($riresult)) {
 
@@ -42,6 +43,10 @@ if (!function_exists("tulosta_lavakeraystarrat_tec")) {
 ";
 
     foreach ($rivit as $tilrow) {
+
+      if ($from == "KOPIOTULOSTUS" and empty($rivinumerot[$tilrow['tunnus']])) {
+        continue;
+      }
 
       if (!isset($tilaukset[$tilrow['otunnus']])) {
         $query  = "SELECT *
@@ -98,7 +103,7 @@ if (!function_exists("tulosta_lavakeraystarrat_tec")) {
 {RC001;$pvm|}
 {PC002;0020,0190,30,30,K,00,B|}
 {RC002;{$asrow['toim_nimitark']}|}
-{PC003;0300,0190,10,10,I,00,B|}
+{PC003;0300,0190,08,08,I,00,B|}
 {RC003;{$asrow['toim_nimi']}|}
 {PC004;0890,0080,08,08,H,00,B,P3|}
 {RC004;{$lasrow['toimitustapa']}|}
@@ -116,18 +121,54 @@ if (!function_exists("tulosta_lavakeraystarrat_tec")) {
 {XS;I,0001,0002C3200|}
 ";
 
-      if (!empty($ed_lavanumero) and $tilrow['lavanumero'] != $ed_lavanumero) {
+      $_mt400_me1 = ($tuorow['mallitarkenne'] == '400' and $tuorow['myynti_era'] == '1');
+
+      if (!empty($ed_lavanumero) and $tilrow['lavanumero'] != $ed_lavanumero and $from == "") {
         $tarrat .= "
 *** TARRA ALKAA ***
-{XR;0000,0000,0900,0500,A|}
+{C|}
+{XR;0000,0000,0900,0450,A|}
 {PC000;0020,0050,10,10,H,00,B|}
 {RC000;10622900 {$lasrow['yhtio_nimi']}|}
-{PC001;0020,0290,30,30,K,00,B|}
+{PC001;0020,0200,30,30,K,00,B|}
 {RC001;LAVA: $ed_lavanumero|}
+{PC002;0020,0330,15,15,J,00,B|}
+{RC002;{$ed_toimtapa}|}
+*** TULOSTUS  ***
+{XS;I,0001,0002C3200|}";
+
+        // tulostetaan muutama tyhjä ennen kuin
+        // pyydetään vaihtamaan lavaa
+        $tarrat .= "
+*** TARRA ALKAA ***
+{C|}
+{XR;0000,0000,0900,0450,A|}
+{PC000;0300,0190,10,10,I,00,B|}
+*** TULOSTUS  ***
+{XS;I,0001,0002C3200|}";
+
+        $tarrat .= "
+*** TARRA ALKAA ***
+{C|}
+{XR;0000,0000,0900,0450,A|}
+{PC000;0300,0190,10,10,I,00,B|}
 *** TULOSTUS  ***
 {XS;I,0001,0002C3200|}
 {XJ;VAIHDA LAVA|}
 ";
+      }
+      elseif ($_mt400_me1 and !empty($ed_asiakas) and $lasrow['liitostunnus'] != $ed_asiakas and $from == "") {
+
+        // jos mallitarkenne 400 ja myyntierä 1 ja jos asiakas vaihtuu,
+        // niin tulostetaan tyhjä tarra
+        $tarrat .= "
+*** TARRA ALKAA ***
+{C|}
+{XR;0000,0000,0900,0450,A|}
+{PC000;0300,0190,10,10,I,00,B|}
+{RC000;ASIAKAS VAIHTUU|}
+*** TULOSTUS  ***
+{XS;I,0001,0002C3200|}";
       }
 
       $tulkpl = 1;
@@ -142,19 +183,45 @@ if (!function_exists("tulosta_lavakeraystarrat_tec")) {
       }
 
       $ed_lavanumero = $tilrow['lavanumero'];
+      $ed_toimtapa = $lasrow['toimitustapa'];
+      $ed_asiakas = $lasrow['liitostunnus'];
     }
 
     // Ekan lavan tiedot
-    $tarrat .= "
+    if ($from == "") {
+      $tarrat .= "
 *** TARRA ALKAA ***
-{XR;0000,0000,0900,0500,A|}
+{C|}
+{XR;0000,0000,0900,0450,A|}
 {PC000;0020,0050,10,10,H,00,B|}
 {RC000;10622900 {$lasrow['yhtio_nimi']}|}
-{PC001;0020,0290,30,30,K,00,B|}
+{PC001;0020,0200,30,30,K,00,B|}
 {RC001;LAVA: $ed_lavanumero|}
+{PC002;0020,0330,15,15,J,00,B|}
+{RC002;{$ed_toimtapa}|}
 *** TULOSTUS  ***
 {XS;I,0001,0002C3200|}
 ";
+
+      // tulostetaan muutama tyhjä ennen kuin
+      // pyydetään vaihtamaan lavaa
+      $tarrat .= "
+*** TARRA ALKAA ***
+{C|}
+{XR;0000,0000,0900,0450,A|}
+{PC000;0300,0190,10,10,I,00,B|}
+*** TULOSTUS  ***
+{XS;I,0001,0002C3200|}";
+
+      $tarrat .= "
+*** TARRA ALKAA ***
+{C|}
+{XR;0000,0000,0900,0450,A|}
+{PC000;0300,0190,10,10,I,00,B|}
+*** TULOSTUS  ***
+{XS;I,0001,0002C3200|}
+";
+    }
 
     //konvertoidaan ääkköset printterin ymmärtämään muotoon
     $from = array ('ä', 'å', 'ö', 'Ä', 'Å', 'Ö', '`');
@@ -163,8 +230,14 @@ if (!function_exists("tulosta_lavakeraystarrat_tec")) {
 
     $tarrat .= chr(12);
 
-    $tarrat = escapeshellarg($tarrat);
-    $line = exec(" echo \"$tarrat\" | $komento");
+    // Kirjoitetaan temppifileen
+    $filenimi = "/tmp/lavatarrat_".md5(uniqid(mt_rand(), true)).".txt";
+
+    file_put_contents($filenimi, $tarrat);
+
+    $line = exec("$komento $filenimi");
+    system("rm -f $filenimi");
+
     echo t("Lavakeräystarrat tulostuu")."...<br>";
     #echo "<pre>$tarrat</pre><br><br>";
   }

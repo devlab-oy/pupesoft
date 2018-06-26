@@ -147,6 +147,7 @@ if (mysql_num_rows($res) > 0) {
       $line->addChild('CustomsTariffNum',      xml_cleanstring($row['tullinimike1'], 14));
       if ($uj_nimi == "Velox") {
         $line->addChild('CustomsTariffTreat',  xml_cleanstring($row['tullikohtelu'], 4));
+        $line->addChild('Brand',               xml_cleanstring($row['tuotemerkki'], 30));
       }
       $line->addChild('AlarmLimit',            '');
       $line->addChild('QualPeriod1',           '');

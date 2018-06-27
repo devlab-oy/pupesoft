@@ -267,6 +267,7 @@ if (!$php_cli) {
   $sel3 = "";
   $sel4 = "";
   $sel5 = "";
+  $sel6 = "";
 
   if (isset($summaustaso) and $summaustaso == "S") {
     $sel1 = "SELECTED";
@@ -283,6 +284,9 @@ if (!$php_cli) {
   elseif (isset($summaustaso) and $summaustaso == "TME") {
     $sel5 = "SELECTED";
   }
+  elseif (isset($summaustaso) and $summaustaso == "VTR") {
+    $sel6 = "SELECTED";
+  }
 
   echo "<tr>";
   echo "<th>".t("Summaustaso").":</th>";
@@ -294,6 +298,7 @@ if (!$php_cli) {
       <option value='T'   $sel3>".t("Varastonarvo tuotteittain")."</option>
       <option value='TRY' $sel4>".t("Varastonarvo tuoteryhmittäin")."</option>
       <option value='TME' $sel5>".t("Varastonarvo tuotemerkeittäin")."</option>
+      <option value='VTR' $sel6>".t("Varastonarvo varastoittain/tuoteryhmittäin/tuotteittain")."</option>
       </select>";
 
   if ($yhtiorow['tuotteiden_jarjestys_raportoinnissa'] == 'V') {
@@ -428,6 +433,7 @@ if (!$php_cli) {
 if ($pp == "00" or $kk == "00" or $vv == "0000") $tee = $pp = $kk = $vv = "";
 
 $varastot2 = array();
+$varastot3 = array();
 
 if (isset($supertee) and $supertee == "RAPORTOI") {
 
@@ -455,7 +461,7 @@ if (isset($supertee) and $supertee == "RAPORTOI") {
   }
 
   //#################  Sorttausjärjestykset ##################
-  $order_lisa    = "";
+  $order_lisa     = "";
   $jarjestys_sel  = "";
   $jarjestys_join = "";
 
@@ -497,6 +503,9 @@ if (isset($supertee) and $supertee == "RAPORTOI") {
     else {
       $order_lisa = "varastonnimi, osasto, try, $order_extra";
     }
+  }
+  elseif ($summaustaso == "VTR") {
+    $order_lisa = "varastonnimi, osasto, try, $order_extra";
   }
   else {
     $order_lisa = "osasto, try, $order_extra";
@@ -685,7 +694,7 @@ if (isset($supertee) and $supertee == "RAPORTOI") {
     else echo t("Tuotteita/tuotepaikkoja"), ": $elements<br>";
   }
 
-  if ($summaustaso == 'TRY') {
+  if ($summaustaso == 'TRY' or $summaustaso == 'VTR') {
     $query  = "SELECT distinct selite, selitetark
                FROM avainsana
                WHERE yhtio = '$kukarow[yhtio]'
@@ -771,7 +780,7 @@ if (isset($supertee) and $supertee == "RAPORTOI") {
     if ($tallennusmuoto_check) {
       $worksheet->writeString($excelrivi, $excelsarake, t("Hyllyalue"),     $format_bold);
       $excelsarake++;
-      $worksheet->writeString($excelrivi, $excelsarake, t("Hyllynro"),     $format_bold);
+      $worksheet->writeString($excelrivi, $excelsarake, t("Hyllynro"),      $format_bold);
       $excelsarake++;
       $worksheet->writeString($excelrivi, $excelsarake, t("Hyllyvali"),     $format_bold);
       $excelsarake++;
@@ -797,9 +806,9 @@ if (isset($supertee) and $supertee == "RAPORTOI") {
   }
 
   if ($tallennusmuoto_check) {
-    $worksheet->writeString($excelrivi, $excelsarake, t("Osasto"),         $format_bold);
+    $worksheet->writeString($excelrivi, $excelsarake, t("Osasto"),        $format_bold);
     $excelsarake++;
-    $worksheet->writeString($excelrivi, $excelsarake, t("Tuoteryhmä"),       $format_bold);
+    $worksheet->writeString($excelrivi, $excelsarake, t("Tuoteryhmä"),    $format_bold);
     $excelsarake++;
     $worksheet->writeString($excelrivi, $excelsarake, t("Tuoteno"),       $format_bold);
     $excelsarake++;
@@ -1101,9 +1110,9 @@ if (isset($supertee) and $supertee == "RAPORTOI") {
       $summaus_lisa = "";
     }
 
-    $muutoskpl     = $kpl;
-    $muutoshinta   = $varaston_arvo;
-    $bmuutoshinta   = $bruttovaraston_arvo;
+    $muutoskpl    = $kpl;
+    $muutoshinta  = $varaston_arvo;
+    $bmuutoshinta = $bruttovaraston_arvo;
     $edlaadittu   = '';
 
     // tuotteen muutos varastossa annetun päivän jälkeen
@@ -1277,6 +1286,24 @@ if (isset($supertee) and $supertee == "RAPORTOI") {
     }
 
     if ($ok == TRUE) {
+
+      if ($summaustaso == 'VTR') {
+        $vartryosind = "{$row["varastonnimi"]}###".sprintf('%06d', $row["osasto"])." - {$osasto_array[$row["osasto"]]}###".sprintf('%06d', $row["try"])." - {$try_array[$row["try"]]}";
+
+        if ((!empty($edvartryosind) and $edvartryosind != $vartryosind) or (!empty($edvarasto) and $edvarasto != $row["varastonnimi"])) {
+          $worksheet->write($excelrivi, 0, t("Tuoteryhmä yhteensä"));
+          $worksheet->writeNumber($excelrivi, $vararvosarake, sprintf("%.06f", $varastot2[$edvartryosind]["netto"] ));
+          $worksheet->writeNumber($excelrivi, $bvararvosarake, sprintf("%.06f", $varastot2[$edvartryosind]["brutto"] ));
+          $excelrivi++;
+        }
+
+        if (!empty($edvarasto) and $edvarasto != $row["varastonnimi"]) {
+          $worksheet->write($excelrivi, 0, t("Varasto yhteensä"));
+          $worksheet->writeNumber($excelrivi, $vararvosarake, sprintf("%.06f", $varastot3[$edvarasto]["netto"] ));
+          $worksheet->writeNumber($excelrivi, $bvararvosarake, sprintf("%.06f", $varastot3[$edvarasto]["brutto"] ));
+          $excelrivi++;
+        }
+      }
 
       // summataan varastonarvoa
       $varvo   += $muutoshinta;
@@ -1542,6 +1569,11 @@ if (isset($supertee) and $supertee == "RAPORTOI") {
         }
 
         $worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.06f", $muutoshinta));
+
+        if (empty($vararvosarake)) {
+          $vararvosarake = $excelsarake;
+        }
+
         $excelsarake++;
       }
       else {
@@ -1566,6 +1598,11 @@ if (isset($supertee) and $supertee == "RAPORTOI") {
 
       if ($tallennusmuoto_check) {
         $worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.06f", $bmuutoshinta));
+
+        if (empty($bvararvosarake)) {
+          $bvararvosarake = $excelsarake;
+        }
+
         $excelsarake++;
       }
       else {
@@ -1762,7 +1799,7 @@ if (isset($supertee) and $supertee == "RAPORTOI") {
         }
       }
       elseif ($summaustaso == 'TRY') {
-        $tryosind = "$row[osasto] - ".$osasto_array[$row["osasto"]]."###$row[try] - ".$try_array[$row["try"]];
+        $tryosind = sprintf('%06d', $row["osasto"])." - {$osasto_array[$row["osasto"]]}###".sprintf('%06d', $row["try"])." - {$try_array[$row["try"]]}";
 
         if (!isset($varastot2[$tryosind])) {
           $varastot2[$tryosind]["netto"]  = $muutoshinta;
@@ -1771,6 +1808,25 @@ if (isset($supertee) and $supertee == "RAPORTOI") {
         else {
           $varastot2[$tryosind]["netto"]  += $muutoshinta;
           $varastot2[$tryosind]["brutto"] += $bmuutoshinta;
+        }
+      }
+      elseif ($summaustaso == 'VTR') {
+        if (!isset($varastot2[$vartryosind])) {
+          $varastot2[$vartryosind]["netto"]  = $muutoshinta;
+          $varastot2[$vartryosind]["brutto"] = $bmuutoshinta;
+        }
+        else {
+          $varastot2[$vartryosind]["netto"]  += $muutoshinta;
+          $varastot2[$vartryosind]["brutto"] += $bmuutoshinta;
+        }
+
+        if (!isset($varastot3[$row["varastonnimi"]])) {
+          $varastot3[$row["varastonnimi"]]["netto"]  = $muutoshinta;
+          $varastot3[$row["varastonnimi"]]["brutto"] = $bmuutoshinta;
+        }
+        else {
+          $varastot3[$row["varastonnimi"]]["netto"]  += $muutoshinta;
+          $varastot3[$row["varastonnimi"]]["brutto"] += $bmuutoshinta;
         }
       }
       else {
@@ -1783,8 +1839,30 @@ if (isset($supertee) and $supertee == "RAPORTOI") {
           $varastot2[$row["varastonnimi"]]["brutto"] += $bmuutoshinta;
         }
       }
+
+      if ($summaustaso == 'VTR') {
+        $edvarasto = $row["varastonnimi"];
+        $edvartryosind = $vartryosind;
+      }
     }
   } while ($do);
+
+  if ($summaustaso == 'VTR') {
+    $worksheet->write($excelrivi, 0, t("Tuoteryhmä yhteensä"));
+    $worksheet->writeNumber($excelrivi, $vararvosarake, sprintf("%.06f", $varastot2[$edvartryosind]["netto"]));
+    $worksheet->writeNumber($excelrivi, $bvararvosarake, sprintf("%.06f", $varastot2[$edvartryosind]["brutto"]));
+    $excelrivi++;
+
+    $worksheet->write($excelrivi, 0, t("Varasto yhteensä"));
+    $worksheet->writeNumber($excelrivi, $vararvosarake, sprintf("%.06f", $varastot3[$edvarasto]["netto"]));
+    $worksheet->writeNumber($excelrivi, $bvararvosarake, sprintf("%.06f", $varastot3[$edvarasto]["brutto"]));
+    $excelrivi++;
+
+    $worksheet->write($excelrivi, 0, t("Yhteensä"));
+    $worksheet->writeNumber($excelrivi, $vararvosarake, sprintf("%.06f", $varvo));
+    $worksheet->writeNumber($excelrivi, $bvararvosarake, sprintf("%.06f", $bvarvo));
+    $excelrivi++;
+  }
 
   if (!$php_cli) {
     echo "<br>";
@@ -1798,6 +1876,11 @@ if (isset($supertee) and $supertee == "RAPORTOI") {
       echo "<th>".t("Osasto")."</th>";
       echo "<th>".t("Ryhmä")."</th>";
     }
+    elseif ($summaustaso == 'VTR') {
+      echo "<th>".t("Varasto")."</th>";
+      echo "<th>".t("Osasto")."</th>";
+      echo "<th>".t("Ryhmä")."</th>";
+    }
     else {
       echo "<th>".t("Varasto")."</th>";
     }
@@ -1808,6 +1891,27 @@ if (isset($supertee) and $supertee == "RAPORTOI") {
     ksort($varastot2);
 
     foreach ($varastot2 as $varasto => $arvot) {
+      if ($summaustaso == 'VTR') {
+        list($vara, $osai, $tryi) = explode("###", $varasto);
+
+        if (!empty($edvara) and $edvara != $vara) {
+            echo "<tr>";
+            echo "<td>$edvara</td>";
+            echo "<td></td>";
+            echo "<td></td>";
+
+            foreach ($varastot3[$edvara] as $arvo) {
+              if ($arvo != '') {
+                echo "<td align='right'>".sprintf("%.2f", $arvo)."</td>";
+              }
+              else {
+                echo "<td>&nbsp;</td>";
+              }
+            }
+            echo "</tr>";
+        }
+      }
+
       echo "<tr>";
 
       if ($summaustaso == 'TME') {
@@ -1815,8 +1919,13 @@ if (isset($supertee) and $supertee == "RAPORTOI") {
       }
       elseif ($summaustaso == 'TRY') {
         list($osai, $tryi) = explode("###", $varasto);
-        echo "<td>$osai</td>";
-        echo "<td>$tryi</td>";
+        echo "<td>".preg_replace("/\b0{2,}/", "", $osai)."</td>";
+        echo "<td>".preg_replace("/\b0{2,}/", "", $tryi)."</td>";
+      }
+      elseif ($summaustaso == 'VTR') {
+        echo "<td>$vara</td>";
+        echo "<td>".preg_replace("/\b0{2,}/", "", $osai)."</td>";
+        echo "<td>".preg_replace("/\b0{2,}/", "", $tryi)."</td>";
       }
       elseif ($summaustaso == 'T') {
         echo "<td>".t("Varastot")."</td>";
@@ -1834,12 +1943,36 @@ if (isset($supertee) and $supertee == "RAPORTOI") {
         }
       }
       echo "</tr>";
+
+      if ($summaustaso == 'VTR') {
+        $edvara = $vara;
+      }
+    }
+
+    if ($summaustaso == 'VTR') {
+      echo "<tr>";
+      echo "<td>$edvara</td>";
+      echo "<td></td>";
+      echo "<td></td>";
+
+      foreach ($varastot3[$edvara] as $arvo) {
+        if ($arvo != '') {
+          echo "<td align='right'>".sprintf("%.2f", $arvo)."</td>";
+        }
+        else {
+          echo "<td>&nbsp;</td>";
+        }
+      }
+      echo "</tr>";
     }
 
     $cspan = 2;
 
     if ($summaustaso == 'TRY') {
       $cspan = 3;
+    }
+    elseif ($summaustaso == 'VTR') {
+      $cspan = 4;
     }
 
     echo "<tr><th>".t("Pvm")."</th><th colspan='$cspan'>".t("Yhteensä")."</th></tr>";

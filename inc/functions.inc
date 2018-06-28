@@ -31370,13 +31370,15 @@ if (!function_exists("tallenna_tiliote_viite")) {
           $onko_vipn = (substr($tilino, 0, 1) == 'S') ? 1 : 0;
           $tilino = substr($tilino, 1, 14);
           fseek($fd, $pointterin_paikka);
-
+          
+          $ppg_uusitilino = trim(substr($tietue, 16, 6));
+            
           if ($onko_vipn) {
             $query = "SELECT tilino
                       FROM yriti
                       WHERE bic      = 'DABAFIHH'
                       AND factoring != ''
-                      LIMIT 1;";
+                      LIMIT 1";
             $f_result = pupe_query($query);
 
             // jos tämä epäonnistuu, virheilmoitus tulee alempana kun tilinumeroa ei löydy
@@ -31385,14 +31387,13 @@ if (!function_exists("tallenna_tiliote_viite")) {
               $tilino = $f_row['tilino'];
             }
           }
-          else {
+          elseif (!empty($ppg_uusitilino)) {
             // Kokeillaan onko kyse PPG:n factoring-aineistosta
-            $uusitilino = substr($tietue, 16, 6);
             $query = "SELECT tilino
                       FROM yriti
-                      WHERE tilino = '$uusitilino'
+                      WHERE tilino = '$ppg_uusitilino'
                       AND kaytossa = ''
-                      LIMIT 1;";
+                      LIMIT 1";
             $fp_result = pupe_query($query);
 
             // jos tämä epäonnistuu, virheilmoitus tulee alempana kun tilinumeroa ei löydy

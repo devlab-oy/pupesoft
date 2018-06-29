@@ -55,3 +55,6 @@ $mysqlaliasarray['TOIMTAPAVKN']['selitetark']       = "Toimitustavan nimi verkko
 
 $mysqlaliasarray['MESSENGER_RYHMA']['selite']       = "Ryhmän nimi";
 $mysqlaliasarray['MESSENGER_RYHMA']['selitetark']   = "Käyttäjät";
+
+$mysqlaliasarray['VALM_FAKTA']['selitetark']        = "Fonttikoko";
+$mysqlaliasarray['VALM_FAKTA']['selitetark_2']      = "Rivikorkeus";

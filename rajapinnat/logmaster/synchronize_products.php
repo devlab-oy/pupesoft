@@ -33,13 +33,15 @@ $logmaster_itemnumberfield = logmaster_field('ItemNumber');
 $logmaster_prodgroup1field = logmaster_field('ProdGroup1');
 $logmaster_prodgroup2field = logmaster_field('ProdGroup2');
 
-$query = "SELECT tuote.*, ta.selite AS synkronointi, ta.tunnus AS ta_tunnus
+$query = "SELECT tuote.*, ta.selite AS synkronointi, ta.tunnus AS ta_tunnus, toim_tuoteno
           FROM tuote
           LEFT JOIN tuotteen_avainsanat AS ta ON (ta.yhtio = tuote.yhtio AND ta.tuoteno = tuote.tuoteno AND ta.laji = 'synkronointi')
+          LEFT JOIN tuotteen_toimittajat AS tt ON (tt.yhtio = tuote.yhtio AND tt.tuoteno = tuote.tuoteno)
           WHERE tuote.yhtio   = '{$kukarow['yhtio']}'
           AND tuote.ei_saldoa = ''
           AND tuote.tuotetyyppi NOT IN ('A', 'B')
           AND tuote.{$logmaster_itemnumberfield} != ''
+          GROUP BY tuoteno
           HAVING (ta.tunnus IS NOT NULL AND ta.selite = '') OR
                   # jos avainsanaa ei ole olemassa ja status P niin ei haluta näitä tuotteita jatkossakaan
                  (ta.tunnus IS NULL AND tuote.status != 'P')";
@@ -148,6 +150,7 @@ if (mysql_num_rows($res) > 0) {
       if ($uj_nimi == "Velox") {
         $line->addChild('CustomsTariffTreat',  xml_cleanstring($row['tullikohtelu'], 4));
         $line->addChild('Brand',               xml_cleanstring($row['tuotemerkki'], 30));
+        $line->addChild('ProviderNum',         xml_cleanstring($row['toim_tuoteno'], 30));
       }
       $line->addChild('AlarmLimit',            '');
       $line->addChild('QualPeriod1',           '');

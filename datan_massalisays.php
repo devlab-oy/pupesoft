@@ -788,7 +788,7 @@ echo "<td><input type='checkbox' name='kasittele_kuvat' value='1'></td>";
 echo "</tr>";
 
 echo "<tr>";
-echo "<th>".t("Kohdista tuotekuvat tiedostosta <br>(tuoteno;tiedostonimi;käyttötarkoitus)").":</th>";
+echo "<th>".t("Kohdista tuotekuvat tiedostosta <br>(tuoteno;tiedostonimi;käyttötarkoitus,csv-tiedosto)").":</th>";
 echo "<td colspan='2'><input name='userfile' type='file'></td>";
 echo "</tr>";
 

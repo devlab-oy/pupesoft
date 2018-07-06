@@ -3588,7 +3588,7 @@ if ($fieldname == "saldovirhe_esto_laskutus") {
   $ulos .= "<option value = ''>".t("Ei estet‰ laskutusta")."</option>";
   $ulos .= "<option value = 'H' $sel[H]>".t("Mik‰li laskutuksessa tuotteen varastosaldo v‰henee negatiiviseksi, hyl‰t‰‰n KAIKKI tilaukset, joilla on kyseist‰ tuotetta")."</option>";
   $ulos .= "<option value = 'K' $sel[K]>".t("Sallitaan tilauksien laskutus luontij‰rjestyksess‰, kunnes tuotteen varastosaldo loppuu")."</option>";
-  $ulos .= "<option value = 'V' $sel[K]>".t("Sallitaan tilauksien laskutus luontij‰rjestyksess‰, kunnes tuotteen varastosaldo loppuu valitusta varastosta")."</option>";
+  $ulos .= "<option value = 'V' $sel[V]>".t("Sallitaan tilauksien laskutus luontij‰rjestyksess‰, kunnes tuotteen varastosaldo loppuu valitusta varastosta")."</option>";
   $ulos .= "</select></td>";
 
   $jatko = 0;

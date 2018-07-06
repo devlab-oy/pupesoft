@@ -621,7 +621,7 @@ else {
       }
 
       // SALLITTAAN FIFO PERIAATTELLA SALDOJA
-      if (empty($editil_cli) and $yhtiorow['saldovirhe_esto_laskutus'] == 'K') {
+      if (empty($editil_cli) and ($yhtiorow['saldovirhe_esto_laskutus'] == 'K' or $yhtiorow['saldovirhe_esto_laskutus'] == 'V')) {
 
         // haetaan tilausriveiltä tuotenumero ja summataan varatut kappaleet
         $query = "SELECT tilausrivi.tuoteno, sum(tilausrivi.varattu) varattu
@@ -638,11 +638,21 @@ else {
 
           if (!isset($laskutus_esto_saldot[$tuoteno_varattu_chk_row['tuoteno']])) {
 
-            // haetaan saldo tuotepaikalta
-            $query = "SELECT sum(tuotepaikat.saldo) saldo
-                      FROM tuotepaikat
-                      WHERE tuotepaikat.yhtio = '$kukarow[yhtio]'
-                      AND tuotepaikat.tuoteno = '$tuoteno_varattu_chk_row[tuoteno]'";
+            if ($yhtiorow['saldovirhe_esto_laskutus'] == 'V') {
+              // haetaan saldo tuotepaikoilta vain laskulla olevasta varastosta
+              $query = "SELECT sum(tuotepaikat.saldo) saldo
+                        FROM tuotepaikat
+                        WHERE tuotepaikat.yhtio = '$kukarow[yhtio]'
+                        AND tuotepaikat.tuoteno = '$tuoteno_varattu_chk_row[tuoteno]'
+                        AND tuotepaikat.varasto = '$laskurow[varasto]'";
+            }
+            else {
+              // haetaan saldo tuotepaikoilta kaikista varastoista
+              $query = "SELECT sum(tuotepaikat.saldo) saldo
+                        FROM tuotepaikat
+                        WHERE tuotepaikat.yhtio = '$kukarow[yhtio]'
+                        AND tuotepaikat.tuoteno = '$tuoteno_varattu_chk_row[tuoteno]'";
+            }
             $saldo_chk_res = pupe_query($query);
             $saldo_chk_row = mysql_fetch_assoc($saldo_chk_res);
 

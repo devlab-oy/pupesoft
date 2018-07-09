@@ -1673,7 +1673,6 @@ if ((isset($aja_raportti) or isset($valitse_asiakas)) and count($_REQUEST) > 0) 
     if ($label != "") {
       // N‰ytet‰‰n laskulle tallennettu label
       $label_join = "LEFT JOIN avainsana AS AV ON (AV.yhtio = lasku.yhtio AND AV.tunnus = lasku.label)";
-      $group .= ",AV.selitetark";
       $select .= "AV.selitetark luokittelu, ";
 
       $gluku++;

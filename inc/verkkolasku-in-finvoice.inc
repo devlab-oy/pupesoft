@@ -157,7 +157,7 @@ $osto_rahti_alv = 0;
 $osto_rivi_kulu_alv = 0;
 $ei_oteta_kulua_pois = true;
 $rivien_summa_yhteensa = 0;
-$poistettava_merkit = array("'", '"');
+$poistettava_merkit = array("'", '"', "”");
 
 if (count($tuotetiedot) > 0) {
   foreach ($tuotetiedot as $tuotetieto) {

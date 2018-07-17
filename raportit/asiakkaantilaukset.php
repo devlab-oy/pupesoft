@@ -801,8 +801,11 @@ if ($ytunnus != '') {
           <input type='submit' value='".t("Näytä tilaus")."'>
           </form></td>";
 
-      $poista_tilaus_whiteliset = array("heidi", "tarja", "admin", "Rosa");
+      #$poista_tilaus_whiteliset = array("heidi", "tarja", "admin", "Rosa");
 
+      // Poista nappi vain Heidille, sovittu Tarjan kanssa puhelimessa 174.7.2018/SA
+      $poista_tilaus_whiteliset = array("heidi",  "admin");
+      
       if ($row["tila"] != "U" and in_array($kukarow['kuka'], $poista_tilaus_whiteliset)) {
         echo "<td class='back'>
                 <form>

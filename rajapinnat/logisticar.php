@@ -70,14 +70,14 @@ else {
 echo "Logisticar siirto: $yhtio\n";
 
 //testausta varten limit
-#$limit = "";
-$limit = "limit 300";
+$limit = "";
+//$limit = "limit 300";
 
 // Ajetaan kaikki operaatiot
-#nimike($limit);
-#asiakas($limit);
-#toimittaja($limit);
-#varasto($limit);
+nimike($limit);
+asiakas($limit);
+toimittaja($limit);
+varasto($limit);
 varastotapahtumat($limit);
 myynti($limit);
 
@@ -502,7 +502,7 @@ function varastotapahtumat($limit = '') {
   if (! $fp = fopen($path_tapahtumat, 'w+')) {
     die("Ei voitu avata filea $path_tapahtumat");
   }
-$where_logisticar["paiva_ajo"] = 'X';
+
   if ($where_logisticar["paiva_ajo"] != "") {
     $pvmlisa = " and date_format(tapahtuma.laadittu, '%Y-%m-%d') >= date_sub(now(), interval 30 day) ";
   }
@@ -527,8 +527,7 @@ $where_logisticar["paiva_ajo"] = 'X';
             kuka.kuka                   myyjatunnus,
             lasku.yhtio_toimipaikka     toimipaikka,
             varastopaikat.tunnus        varastotunnus,
-            tapahtuma.laji              tapahtumatyyppi,
-            lasku.liitostunnus
+            tapahtuma.laji              tapahtumatyyppi
             FROM tapahtuma
             LEFT JOIN tilausrivi USE INDEX (PRIMARY) ON (tilausrivi.yhtio = tapahtuma.yhtio and tilausrivi.tunnus = tapahtuma.rivitunnus)
             LEFT JOIN lasku USE INDEX (PRIMARY) ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus)
@@ -639,7 +638,7 @@ $where_logisticar["paiva_ajo"] = 'X';
     $asquery = "SELECT asiakas.myyjanro, kuka.kuka from asiakas
               LEFT JOIN kuka ON (kuka.yhtio = asiakas.yhtio and kuka.myyja = asiakas.myyjanro)
               WHERE asiakas.yhtio = '$yhtio'
-                and asiakas.tunnus = '{$trow[liitostunnus]}'";
+                and asiakas.tunnus = '{$trow[asiakastunnus]}'";
     $asres = pupe_query($asquery);
 
     $asrow = mysql_fetch_assoc($asres);
@@ -647,7 +646,6 @@ $where_logisticar["paiva_ajo"] = 'X';
     if ($asrow['myyjanro'] > 0) $trow['myyjatunnus'] = $asrow['kuka'];
     
     unset($trow['kate']);
-    unset($trow['liitostunnus']);
 
     // Siivotaan kentät:
     foreach ($trow as &$tk) {

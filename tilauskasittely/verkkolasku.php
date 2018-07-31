@@ -175,6 +175,13 @@ if ($php_cli) {
   $laskvv   = "";
   $eilinen  = "";
   $eiketjut = "";
+  $viennit  = "";
+
+  // Laskutetaanko myös vientitilauksia
+  if (!empty($argv[3]) and substr($argv[3], 0, 7) == "vienti_") {
+    $argv[3] = substr($argv[3], 7);
+    $viennit = "KYLLA";
+  }
 
   // jos komentorivin kolmas arg on "eilinen" niin edelliselle laskutus päivälle, ohitetaan laskutusviikonpäivät
   if ($argv[3] == "eilinen") {
@@ -498,6 +505,24 @@ else {
     elseif (php_sapi_name() == 'cli') {
       // Komentoriviltä ei ikinä laskuteta käteismyyntejä ($php_cli ei kelpaa, koska $editil_cli virittää sen myös)
       $lasklisa_eikateiset = " JOIN maksuehto ON (lasku.yhtio=maksuehto.yhtio and lasku.maksuehto=maksuehto.tunnus and maksuehto.kateinen='')";
+    }
+
+    // Päivitetään laskutettavat vientitilaukset toimitetuiksi
+    if (php_sapi_name() == 'cli' and $viennit == "KYLLA") {
+      $query = "UPDATE lasku
+                JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio and lasku.tunnus = tilausrivi.otunnus and tilausrivi.tyyppi='L')
+                JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno)
+                {$lasklisa_eikateiset}
+                SET lasku.alatila = 'D'
+                WHERE lasku.yhtio = '$kukarow[yhtio]'
+                and lasku.tila = 'L'
+                and lasku.chn != '999'
+                and (tilausrivi.keratty != '' or tuote.ei_saldoa!='')
+                and tilausrivi.varattu != 0
+                and lasku.alatila = 'E'
+                and lasku.vienti != ''
+                {$lasklisa}";
+      pupe_query($query);
     }
 
     $tulos_ulos_maksusoppari = "";

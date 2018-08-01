@@ -27,7 +27,7 @@ if (isset($_POST['piirtele_valikko'])) {
             FROM avainsana
             WHERE yhtio = '{$kukarow['yhtio']}'
             AND laji    in ('PARAMETRI', 'LISATIETO')
-            ORDER BY selite";
+            ORDER BY laji, selite";
   $result = pupe_query($query);
 
   echo "<form>";
@@ -61,7 +61,7 @@ if (isset($_POST['piirtele_valikko'])) {
       }
     }
 
-    echo "<td align='left' valign='top' nowrap><input type='checkbox' class='lajiboksit' name='lajit[]' value='{$row['laji']}_{$row['selite']}' $tsekk>{$row['selitetark']}</td>";
+    echo "<td align='left' valign='top' nowrap><input type='checkbox' class='lajiboksit' name='lajit[]' value='{$row['laji']}_{$row['selite']}' $tsekk>{$row['laji']} {$row['selitetark']}</td>";
 
     if ($secretcounter == 2) {
       echo "</tr>";
@@ -269,7 +269,6 @@ elseif (isset($lajit) and count($lajit) > 0) {
                   AND laji    IN ('{$asanalaji}', '{$asanalaji2}')
                   AND kieli   = '{$kieli}'";
         $result = pupe_query($query);
-        echo "<br>".$query;
 
         //laitetaan uusi headeri per valittu kieli vain ekalla rivillä
         if ($eka_tuote) $worksheet->write(0, $excelsarake, !empty($asanalaji2) ? $asanalaji2 : $asanalaji." ".strtoupper($kieli), $format_bold);

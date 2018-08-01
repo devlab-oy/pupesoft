@@ -14,6 +14,8 @@ class pupeExcel {
     $query = "CREATE temporary table temporary_excel_data (
               excelrivi int(11) default null,
               excelsarake int(11) default null,
+              excelsheet int(11) default null,
+              sheetname varchar(100) default null,
               type char(1) default null,
               value varchar(100),
               string_id int(11) default null,
@@ -60,7 +62,7 @@ class pupeExcel {
     }
   }
 
-  function writeDate($excelrivi, $excelsarake, $date, $style = array()) {
+  function writeDate($excelrivi, $excelsarake, $date, $style = array(), $sheet = "1", $sheetname = "") {
 
     if ((string) $date == "" or substr($date, 0, 10) == "0000-00-00") {
       return;
@@ -76,13 +78,15 @@ class pupeExcel {
     $query = "INSERT INTO temporary_excel_data SET
               excelrivi   = $excelrivi,
               excelsarake = $excelsarake,
+              excelsheet  = $sheet,
+              sheetname   = '$sheetname',
               type        = 'D',
               value       = '$date',
               style       = '".mysql_real_escape_string(serialize($style))."'";
     $result = pupe_query($query, $this->_exceldblink);
   }
 
-  function writeNumber($excelrivi, $excelsarake, $number, $style = array()) {
+  function writeNumber($excelrivi, $excelsarake, $number, $style = array(), $sheet = 1, $sheetname = "") {
 
     if ((string) $number == "") {
       return;
@@ -95,13 +99,15 @@ class pupeExcel {
     $query = "INSERT INTO temporary_excel_data SET
               excelrivi   = $excelrivi,
               excelsarake = $excelsarake,
+              excelsheet  = $sheet,
+              sheetname   = '$sheetname',
               type        = 'N',
               value       = '$number',
               style       = '".mysql_real_escape_string(serialize($style))."'";
     $result = pupe_query($query, $this->_exceldblink);
   }
 
-  function writeFormula($excelrivi, $excelsarake, $number, $style = array()) {
+  function writeFormula($excelrivi, $excelsarake, $number, $style = array(), $sheet = 1, $sheetname = "") {
 
     if ((string) $number == "") {
       return;
@@ -114,13 +120,15 @@ class pupeExcel {
     $query = "INSERT INTO temporary_excel_data SET
               excelrivi   = $excelrivi,
               excelsarake = $excelsarake,
+              excelsheet  = $sheet,
+              sheetname   = '$sheetname',
               type        = 'F',
               value       = '$number',
               style       = '".mysql_real_escape_string(serialize($style))."'";
     $result = pupe_query($query, $this->_exceldblink);
   }
 
-  function writeString($excelrivi, $excelsarake, $string, $style = array()) {
+  function writeString($excelrivi, $excelsarake, $string, $style = array(), $sheet = 1, $sheetname = "") {
 
     // Indeksit juoksee tässä maailmassa ykkösestä
     $excelrivi++;
@@ -134,6 +142,8 @@ class pupeExcel {
     $query = "INSERT INTO temporary_excel_data SET
               excelrivi   = $excelrivi,
               excelsarake = $excelsarake,
+              excelsheet  = $sheet,
+              sheetname   = '$sheetname',
               type        = 'S',
               value       = '$string_key',
               style       = '".mysql_real_escape_string(serialize($style))."'";
@@ -147,8 +157,8 @@ class pupeExcel {
     $result = pupe_query($query, $this->_exceldblink);
   }
 
-  function write($excelrivi, $excelsarake, $string, $style = array()) {
-    $this->writeString($excelrivi, $excelsarake, $string, $style);
+  function write($excelrivi, $excelsarake, $string, $style = array(), $sheet = 1, $sheetname = "") {
+    $this->writeString($excelrivi, $excelsarake, $string, $style, $sheet, $sheetname);
   }
 
   function close() {
@@ -159,10 +169,82 @@ class pupeExcel {
     $foldername = md5(uniqid(rand(), true));
     exec("cp -r $pupe_root_polku/pupe_xslx_template /tmp/$foldername");
 
-    $sheetDataFile    = "/tmp/".$foldername."/xl/worksheets/sheet1.xml";
-    $sharedStringsFile  = "/tmp/".$foldername."/xl/sharedStrings.xml";
+    // Lasketaan sheettien määrä
+    $query = "SELECT count(distinct excelsheet) count
+              FROM temporary_excel_data";
+    $result = pupe_query($query, $this->_exceldblink);
+    $SheetCount = mysql_fetch_assoc($result);
 
-    $sheetData      = simplexml_load_file($sheetDataFile);
+    // Kurkataan onko välisivut erikseen nimetty
+    $query = "SELECT distinct excelsheet, sheetname
+              FROM temporary_excel_data
+              WHERE sheetname != ''";
+    $result = pupe_query($query, $this->_exceldblink);
+
+    $sheetnames = array();
+    while ($sheetrows = mysql_fetch_assoc($result)) {
+      $sheetnames[$sheetrows['excelsheet']] = $sheetrows['sheetname'];
+    }
+
+    $content_types      = simplexml_load_file("/tmp/".$foldername."/[Content_Types].xml");
+    $workbook_xml_rels  = simplexml_load_file("/tmp/".$foldername."/xl/_rels/workbook.xml.rels");
+    $workbook_xml       = simplexml_load_file("/tmp/".$foldername."/xl/workbook.xml");
+    $app_xml            = simplexml_load_file("/tmp/".$foldername."/docProps/app.xml");
+
+    for ($i = 1; $i <= $SheetCount['count']; $i++) {
+
+      if ($i == 1) {
+        $sheetDataFile[$i] = "/tmp/".$foldername."/xl/worksheets/sheet1.xml";
+
+        if (isset($sheetnames[$i])) {
+          $workbook_xml->sheets->sheet->attributes()->name = $sheetnames[$i];
+        }
+      }
+      else {
+        // uusien sheettien osalta muutama kikka
+        exec("cp -r $pupe_root_polku/pupe_xslx_template/xl/worksheets/sheet1.xml /tmp/$foldername/xl/worksheets/sheet{$i}.xml");
+        $sheetDataFile[$i] = "/tmp/".$foldername."/xl/worksheets/sheet{$i}.xml";
+
+        // Content_Types.xml
+        $_ct = $content_types->addChild("Override");
+        $_ct->addAttribute("ContentType", "application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml");
+        $_ct->addAttribute("PartName", "/xl/worksheets/sheet{$i}.xml");
+
+        // Sheet id alkaa vitosesta atm
+        $e = $i + 3;
+
+        // Workbook.xml
+        if (isset($sheetnames[$i])) {
+          $_sheetname = $sheetnames[$i];
+        }
+        else {
+          $_sheetname = "Sheet {$i}";
+        }
+        $_wb = $workbook_xml->sheets->addChild("sheet");
+        $_wb->addAttribute("name", "{$_sheetname}");
+        $_wb->addAttribute("r:r:id", "rId{$e}");
+        $_wb->addAttribute("sheetId", "{$e}");
+
+        // Workbook.xml.rels
+        $_wbr = $workbook_xml_rels->addChild("Relationship");
+        $_wbr->addAttribute("Id", "rId{$e}");
+        $_wbr->addAttribute("Target", "worksheets/sheet{$i}.xml");
+        $_wbr->addAttribute("Type", "http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet");
+
+        // app.xml
+        $_ap = $app_xml->TitlesOfParts->children('vt', true)->vector->addChild("vt:lpstr", "Sheet {$i}");
+      }
+
+      $sheetData[$i]  = simplexml_load_file($sheetDataFile[$i]);
+      $maxCell[$i]    = 0;
+    }
+
+    file_put_contents("/tmp/".$foldername."/[Content_Types].xml", trim(str_replace("\n", "\r\n", $content_types->asXML())));
+    file_put_contents("/tmp/".$foldername."/xl/_rels/workbook.xml.rels", trim(str_replace("\n", "\r\n", $workbook_xml_rels->asXML())));
+    file_put_contents("/tmp/".$foldername."/xl/workbook.xml", trim(str_replace("\n", "\r\n", $workbook_xml->asXML())));
+    file_put_contents("/tmp/".$foldername."/docProps/app.xml", trim(str_replace("\n", "\r\n", $app_xml->asXML())));
+
+    $sharedStringsFile  = "/tmp/".$foldername."/xl/sharedStrings.xml";
     $sharedStrings = simplexml_load_file($sharedStringsFile);
 
     // Päivitetään excel dataan string_id:t
@@ -190,11 +272,8 @@ class pupeExcel {
     // Tehdään Excel taulukko XML
     $query = "SELECT *
               FROM temporary_excel_data
-              ORDER BY excelrivi, excelsarake";
+              ORDER BY excelsheet, excelrivi, excelsarake";
     $result = pupe_query($query, $this->_exceldblink);
-
-    $rowCount = mysql_num_rows($result);
-    $maxCell  = 0;
 
     $edellinen_excelrivi = -1;
 
@@ -203,12 +282,12 @@ class pupeExcel {
 
       if ($data_row["excelrivi"] != $edellinen_excelrivi) {
         // Create the line
-        $row = $sheetData->sheetData->addChild('row');
+        $row = $sheetData[$data_row["excelsheet"]]->sheetData->addChild('row');
         $row->addAttribute('r', $data_row["excelrivi"]);
         $row->addAttribute('spans', "1:2");
         $row->addAttribute('x14ac:dyDescent', "0.25", "http://schemas.microsoft.com/office/spreadsheetml/2009/9/ac");
 
-        $maxCell = 2;
+        $maxCell[$data_row["excelsheet"]] = 2;
       }
 
       // Cell coordinates
@@ -276,14 +355,26 @@ class pupeExcel {
     }
 
     // Write dimension attribute
-    $maxCellcoordinates = $this->columnChar($maxCell).$rowCount;
-    $sheetData->dimension->attributes()->ref = "A1:$maxCellcoordinates";
+    for ($i = 1; $i <= $SheetCount['count']; $i++) {
+
+      $query = "SELECT count(*) rowcount
+                FROM temporary_excel_data
+                WHERE excelsheet = $i
+                ORDER BY excelsheet, excelrivi, excelsarake";
+      $result = pupe_query($query, $this->_exceldblink);
+      $rowCount_row = mysql_fetch_assoc($result);
+      $rowCount = $rowCount_row['rowcount'];
+
+      $maxCellcoordinates = $this->columnChar($maxCell[$i]).$rowCount;
+      $sheetData[$i]->dimension->attributes()->ref = "A1:$maxCellcoordinates";
+
+      file_put_contents($sheetDataFile[$i], trim(str_replace("\n", "\r\n", $sheetData[$i]->asXML())));
+    }
 
     // Update the count and uniqueCount attributes in sharedStrings XML
     $sharedStrings->attributes()->count = $stringCount;
     $sharedStrings->attributes()->uniqueCount = $stringUniqueCount;
 
-    file_put_contents($sheetDataFile, trim(str_replace("\n", "\r\n", $sheetData->asXML())));
     file_put_contents($sharedStringsFile, trim(str_replace("\n", "\r\n", $sharedStrings->asXML())));
 
     $xlsxfile = md5(uniqid(rand(), true)).".xlsx";

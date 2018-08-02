@@ -155,6 +155,13 @@ if ($tee == "TULOSTA" and $kerayslista > 0) {
     $alku = (int) $alku;
     $loppu = (int) $loppu;
 
+    if ($alku + $loppu == 0) {
+      $from = "KOPIO_KAIKKI";
+    }
+    else {
+      $from = "KOPIO";
+    }
+
     if ($alku < 1) {
       $alku = 1;
     }
@@ -275,7 +282,7 @@ if ($tee == "TULOSTA" and $kerayslista > 0) {
 
       if (!empty($kirrow['komento'])) {
         // Lavakeraystarrat
-        tulosta_lavakeraystarrat_tec($riresult, $rivinumerot, $kirrow["komento"], "KOPIOTULOSTUS");
+        tulosta_lavakeraystarrat_tec($riresult, $rivinumerot, $kirrow["komento"], $from);
       }
     }
   }

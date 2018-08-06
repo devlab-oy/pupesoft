@@ -557,33 +557,33 @@ if ($tee == "tulosta") {
   $ots .= "\r\n";
 
   // Tehdään CSV
-  $csvrivit = "\"Tiedonantaja\";";
-  $csvrivit .= "\"Jakso\";";
-  $csvrivit .= "\"Suunta\";";
-  $csvrivit .= "\"Asiamies\";";
-  $csvrivit .= "\"CN8\";";
-  $csvrivit .= "\"Kauppa\";";
-  $csvrivit .= "\"Jäsenmaa\";";
-  $csvrivit .= "\"Alkuperämaa\";";
-  $csvrivit .= "\"Kuljetusmuoto\";";
-  $csvrivit .= "\"Nettopaino\";";
-  $csvrivit .= "\"Lisäyksiköt\";";
-  $csvrivit .= "\"Laskutusarvo euroissa\";";
-  $csvrivit .= "\"Tilastoarvo euroissa\";";
-  $csvrivit .= "\"Viite\"\n";
+  $csvrivit = "Tiedonantaja;";
+  $csvrivit .= "Jakso;";
+  $csvrivit .= "Suunta;";
+  $csvrivit .= "Asiamies;";
+  $csvrivit .= "CN8;";
+  $csvrivit .= "Kauppa;";
+  $csvrivit .= "Jäsenmaa;";
+  $csvrivit .= "Alkuperämaa;";
+  $csvrivit .= "Kuljetusmuoto;";
+  $csvrivit .= "Nettopaino;";
+  $csvrivit .= "Lisäyksiköt;";
+  $csvrivit .= "Laskutusarvo euroissa;";
+  $csvrivit .= "Tilastoarvo euroissa;";
+  $csvrivit .= "Viite\n";
 
-  $csvrivit .= "\"FI{$ytunnus}{$ylisatunnus}\";";
-  $csvrivit .= "\"{$vv}{$kuuka}\";";
+  $csvrivit .= "FI{$ytunnus}{$ylisatunnus};";
+  $csvrivit .= "{$vv}{$kuuka};";
 
   // tuonti vai vienti
   if ($tapa == "tuonti") {
-    $csvrivit .= "\"1\";";
+    $csvrivit .= "1;";
   }
   else {
-    $csvrivit .= "\"2\";";
+    $csvrivit .= "2;";
   }
 
-  $csvrivit .= "\"\";";
+  $csvrivit .= ";";
   $ekarivi = True;
 
   while ($row = mysql_fetch_array($result)) {
@@ -676,24 +676,24 @@ if ($tee == "tulosta") {
     $nim .= "\r\n";
 
     if (!$ekarivi) {
-      $csvrivit .= "\"\";\"\";\"\";\"\";";
+      $csvrivit .= ";;;;";
     }
 
     $ekarivi = False;
 
-    $csvrivit .= "\"{$row["tullinimike1"]}\";";
-    $csvrivit .= "\"{$row["kauppatapahtuman_luonne"]}\";";
+    $csvrivit .= "{$row["tullinimike1"]};";
+    $csvrivit .= "{$row["kauppatapahtuman_luonne"]};";
 
     if ($tapa == "tuonti") {
-      $csvrivit .= "\"{$row["maalahetys"]}\";";
-      $csvrivit .= "\"{$row["alkuperamaa"]}\";";
+      $csvrivit .= "{$row["maalahetys"]};";
+      $csvrivit .= "{$row["alkuperamaa"]};";
     }
     else {
-      $csvrivit .= "\"{$row["maamaara"]}\";";
-      $csvrivit .= "\"\";";
+      $csvrivit .= "{$row["maamaara"]};";
+      $csvrivit .= ";";
     }
 
-    $csvrivit .= "\"{$row["kuljetusmuoto"]}\";";
+    $csvrivit .= "{$row["kuljetusmuoto"]};";
     $csvrivit .= round($row["paino"]).";";
 
     if ($row["su"] != '') {
@@ -711,7 +711,7 @@ if ($tee == "tulosta") {
     }
 
     $csvrivit .= ";";
-    $csvrivit .= "\"\"\n";
+    $csvrivit .= "\n";
 
     if ($outputti == "tilasto") {
       // tehdään tilastoarvolistausta

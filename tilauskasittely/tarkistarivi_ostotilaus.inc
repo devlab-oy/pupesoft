@@ -63,6 +63,15 @@ if (($trow["epakurantti25pvm"] != '0000-00-00' or $trow["epakurantti50pvm"] != '
   $tilausok++;
 }
 
+//  Pakkokommentoitava tuote
+$_kommentoitava = ($trow["kommentoitava"] == "p");
+
+if ($_kommentoitava and $prow["kommentti"] == "") {
+  $varaosavirhe .= t("VIRHE: Tuotetta on kommentoitava!")."<br>";
+  $riviok++;
+  $tilausok++;
+}
+
 //poistotuotekäsittely
 if (in_array($trow["status"], array('P', 'X')) and $riviok == 0) {
   $varaosavirhe .= t("VIRHE: Tämä on poistotuote, sitä ei voi tilata")."!<br>";

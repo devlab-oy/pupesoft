@@ -60,7 +60,7 @@ else {
 
   $ytunnus = trim($ytunnus);
 
-  if ($tee != '' and $kukarow["extranet"] == '') {
+  if ($tee != '' and $kukarow["extranet"] == '' and isset($ajahinnasto)) {
 
     if (isset($muutparametrit)) {
       $muutparametrit  = unserialize(urldecode($muutparametrit));
@@ -77,7 +77,7 @@ else {
     $asiakas = $asiakasrow["tunnus"];
     $ytunnus = $asiakasrow["ytunnus"];
   }
-  elseif ($kukarow["extranet"] != '') {
+  elseif ($kukarow["extranet"] != '' and isset($ajahinnasto)) {
 
     echo t("VIRHE: Tämä ohjelma ei toimi extranetissä.")."<br><br>";
     exit;
@@ -88,16 +88,18 @@ else {
   echo "<table><form method='post'>";
   echo "<input type='hidden' name='tee' value='kaikki'>";
 
-  if ($asiakas > 0) {
-    echo "<tr><th>".t("Asiakas").":</th><td><input type='hidden' name='ytunnus' value='$ytunnus'>$ytunnus $asiakasrow[nimi]</td></tr>";
+  if ($datatyyppi == "orderform") {
+    if ($asiakas > 0) {
+      echo "<tr><th>".t("Asiakas").":</th><td><input type='hidden' name='ytunnus' value='$ytunnus'>$ytunnus $asiakasrow[nimi]</td></tr>";
 
-    echo "<input type='hidden' name='asiakasid' value='$asiakas'></td></tr>";
-  }
-  else {
-    echo "<tr><th>".t("Asiakas").":</th><td><input type='text' name='ytunnus' size='15' value=''></td></tr>";
+      echo "<input type='hidden' name='asiakasid' value='$asiakas'></td></tr>";
+    }
+    else {
+      echo "<tr><th>".t("Asiakas").":</th><td><input type='text' name='ytunnus' size='15' value=''></td></tr>";
+    }
   }
 
-  echo "<tr><th>".t("Datatyyppi").":</th><td><select name='datatyyppi'>";
+  echo "<tr><th>".t("Datatyyppi").":</th><td><select name='datatyyppi' onchange='submit()'>";
   $sel = "";
   if ($datatyyppi == "orderform") {
     $sel = "SELECTED";
@@ -165,6 +167,7 @@ else {
   if ($asiakas > 0) {
     echo "<form method='post'>";
     echo "<input type='submit' value='Valitse uusi asiakas'>";
+    echo "<input type='hidden' name='datatyyppi' value='$datatyyppi'></td></tr>";
     echo "</form>";
   }
 

@@ -56,7 +56,7 @@ else {
     return array($hrow["hinta"], $hrow["alv"]);
   }
 
-  echo "<font class='head'>".t("Hinnasto asiakashinnoin")."</font><hr>";
+  echo "<font class='head'>".t("Masterdata excel")."</font><hr>";
 
   $ytunnus = trim($ytunnus);
 

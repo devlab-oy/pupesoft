@@ -232,10 +232,6 @@ else {
         $yhtiorow_eta = $yhtiorow = hae_yhtion_parametrit($GLOBALS['eta_yhtio']);
       }
 
-      $_asiakashinnasto_res = t_avainsana("ASIAKASHINNASTO");
-      $_asiakashinnasto_row = mysql_fetch_assoc($_asiakashinnasto_res);
-      $_hintakentta = $_asiakashinnasto_row['selite'];
-
       echo "<br><br><font class='message'>".t("Asiakashinnastoa luodaan...")."</font><br>";
       flush();
 
@@ -492,8 +488,6 @@ else {
           $osuma = true;
         }
 
-        if ($_hintakentta == "") $_hintakentta = 'myyntihinta';
-
         if ($netto == "") {
           $alennukset = generoi_alekentta_php($hinnat, 'M', 'kerto');
 
@@ -503,10 +497,19 @@ else {
           $asiakashinta = hintapyoristys($hinta);
         }
 
-        $veroton         = 0;
-        $verollinen        = 0;
         $asiakashinta_veroton    = 0;
         $asiakashinta_verollinen = 0;
+
+        if ($yhtiorow["alv_kasittely"] == "") {
+          // Hinnat sisältävät arvonlisäveron
+          $asiakashinta_veroton     = round(($asiakashinta/(1+$lis_alv/100)), 2);
+          $asiakashinta_verollinen  = $asiakashinta;
+        }
+        else {
+          // Hinnat ovat nettohintoja joihin lisätään arvonlisävero
+          $asiakashinta_veroton    = $asiakashinta;
+          $asiakashinta_verollinen = round(($asiakashinta*(1+$lis_alv/100)), 2);
+        }
 
         // listahinta EUR
         list($listahinta_eur, $listahinta_eur_alv) = hinnastohinnat($rrow['tuoteno'], "EUR", $laskurow["maa"], $laskurow["vienti_kurssi"], "");
@@ -567,27 +570,6 @@ else {
         if ($myyntieran_npaino  == 'lisatieto_Myyntierän nettopaino')   $myyntieran_npaino = "";
         if ($myyntieran_bpaino  == 'lisatieto_Myyntierän bruttopaino')  $myyntieran_bpaino = "";
         if ($incilista          == 'lisatieto_Incilista')               $incilista = "";
-
-        if ($yhtiorow["alv_kasittely"] == "") {
-          // Hinnat sisältävät arvonlisäveron
-          $verollinen               = $rrow[$_hintakentta];
-          $veroton                  = round(($rrow[$_hintakentta]/(1+$rrow['alv']/100)), 2);
-          $asiakashinta_veroton     = round(($asiakashinta/(1+$lis_alv/100)), 2);
-          $asiakashinta_verollinen  = $asiakashinta;
-        }
-        else {
-          if ($_hintakentta == 'myymalahinta') {
-            $verollinen             = $rrow[$_hintakentta];
-            $veroton                = round(($rrow[$_hintakentta]/(1+$rrow['alv']/100)), 2);
-          }
-          else {
-            // Hinnat ovat nettohintoja joihin lisätään arvonlisävero
-            $verollinen             = round(($rrow[$_hintakentta]*(1+$rrow['alv']/100)), 2);
-            $veroton                = $rrow[$_hintakentta];
-          }
-          $asiakashinta_veroton    = $asiakashinta;
-          $asiakashinta_verollinen = round(($asiakashinta*(1+$lis_alv/100)), 2);
-        }
 
         // Katsotaan, mistä löytyy enari
         if ($rrow["eankoodi"] == '') {
@@ -693,7 +675,7 @@ else {
           $worksheet->writeNumber($excelrivi, $excelsarake, $rrow["minimi_era"], "", $sheet, $rrow["tuotemerkki"]);
           $excelsarake++;
 
-          $worksheet->writeNumber($excelrivi, $excelsarake, $listahinta_eur, "", $sheet, $rrow["tuotemerkki"]);
+          $worksheet->writeNumber($excelrivi, $excelsarake, $asiakashinta_veroton, "", $sheet, $rrow["tuotemerkki"]);
           $excelsarake++;
           $worksheet->writeNumber($excelrivi, $excelsarake, $listahinta_sek, "", $sheet, $rrow["tuotemerkki"]);
           $excelsarake++;

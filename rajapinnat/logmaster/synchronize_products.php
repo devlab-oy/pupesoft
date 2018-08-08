@@ -44,7 +44,9 @@ $query = "SELECT tuote.*, ta.selite AS synkronointi, ta.tunnus AS ta_tunnus, toi
           GROUP BY tuoteno
           HAVING (ta.tunnus IS NOT NULL AND ta.selite = '') OR
                   # jos avainsanaa ei ole olemassa ja status P niin ei haluta näitä tuotteita jatkossakaan
-                 (ta.tunnus IS NULL AND tuote.status != 'P')";
+                 (ta.tunnus IS NULL AND tuote.status != 'P') OR
+                 # paitsi jos kyseessä Velox niin siirretään
+                 (ta.tunnus IS NULL AND '{$ulkoinen_jarjestelma}' = 'L')";
 $res = pupe_query($query);
 
 if (mysql_num_rows($res) > 0) {

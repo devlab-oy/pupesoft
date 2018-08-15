@@ -187,7 +187,7 @@ while ($rivit_row = mysql_fetch_assoc($rivit_res)) {
   $line = $lines->addChild('Line');
   $line->addAttribute('No', $i);
   $line->addChild('TransId',         xml_cleanstring($rivit_row['tunnus']));
-  $line->addChild('ItemNumber',      xml_cleanstring($rivit_row['tuoteno']));
+  $line->addChild('ItemNumber',      xml_cleanstring($rivit_row['tuoteno'], 32));
   $line->addChild('OrderedQuantity', xml_cleanstring($rivit_row['varattu']));
   $line->addChild('Unit',            xml_cleanstring($rivit_row['yksikko']));
   $line->addChild('Price',           xml_cleanstring($rivit_row['hinta']));

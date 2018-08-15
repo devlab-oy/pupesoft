@@ -269,9 +269,15 @@ if (mysql_field_name($result, $i) == "ei_saldoa") {
 
 if (mysql_field_name($result, $i) == "kommentoitava") {
 
-  $sel = $sela = "";
-  if ($trow[$i] != '') {
-    $sel = "SELECTED";
+  $sela = $selb = $selc = $seld ="";
+  if ($trow[$i] == 'o') {
+    $selb = "SELECTED";
+  }
+  elseif ($trow[$i] == 'r') {
+    $selc = "SELECTED";
+  }
+  elseif ($trow[$i] == 'p') {
+    $seld = "SELECTED";
   }
   else {
     $sela = "SELECTED";
@@ -279,8 +285,9 @@ if (mysql_field_name($result, $i) == "kommentoitava") {
 
   $ulos  = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
   $ulos .= "<option value = '' $sela>".t("Normaalikäsittely")."</option>";
-  $ulos .= "<option value = 'o' $sel>".t("Tuotteelle on annettava rivikommentti")."</option>";
-  $ulos .= "<option value = 'r' $sel>".t("Tuotteelle on annettava reklamaatiolla rivikommentti")."</option>";
+  $ulos .= "<option value = 'o' $selb>".t("Tuotteelle on annettava rivikommentti myynnissä")."</option>";
+  $ulos .= "<option value = 'p' $seld>".t("Tuotteelle on annettava rivikommentti myynnissä ja ostossa")."</option>";
+  $ulos .= "<option value = 'r' $selc>".t("Tuotteelle on annettava rivikommentti reklamaatiolla")."</option>";
   $ulos .= "</select></td>";
   $jatko = 0;
 }

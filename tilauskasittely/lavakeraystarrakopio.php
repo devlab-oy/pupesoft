@@ -54,7 +54,7 @@ if ($tee == "") {
 
     while ($row = mysql_fetch_assoc($result)) {
 
-      $query = "SELECT count(*) tilauksia
+      $query = "SELECT group_concat(tunnus) tunnukset, count(*) tilauksia
                 FROM lasku
                 WHERE yhtio = '{$kukarow['yhtio']}'
                 and tila = 'L'
@@ -66,7 +66,7 @@ if ($tee == "") {
                 FROM tilausrivi
                 WHERE yhtio = '{$kukarow['yhtio']}'
                 and tyyppi = 'L'
-                and otunnus = '{$row['tunnus']}'";
+                and otunnus in ({$tilrow['tunnukset']})";
       $tilrivires = pupe_query($query);
       $tilrivirow = mysql_fetch_assoc($tilrivires);
 
@@ -154,6 +154,13 @@ if ($tee == "TULOSTA" and $kerayslista > 0) {
 
     $alku = (int) $alku;
     $loppu = (int) $loppu;
+
+    if ($alku + $loppu == 0) {
+      $from = "KOPIO_KAIKKI";
+    }
+    else {
+      $from = "KOPIO";
+    }
 
     if ($alku < 1) {
       $alku = 1;
@@ -275,7 +282,7 @@ if ($tee == "TULOSTA" and $kerayslista > 0) {
 
       if (!empty($kirrow['komento'])) {
         // Lavakeraystarrat
-        tulosta_lavakeraystarrat_tec($riresult, $rivinumerot, $kirrow["komento"], "KOPIOTULOSTUS");
+        tulosta_lavakeraystarrat_tec($riresult, $rivinumerot, $kirrow["komento"], $from);
       }
     }
   }

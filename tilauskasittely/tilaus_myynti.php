@@ -2081,6 +2081,25 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
                  and alatila = ''";
       $result = pupe_query($query);
 
+      // L‰hetet‰‰nkˆ extranetin hyv‰ksynt‰jonoon laitettavista tilauksista tietoa myyntiosastolle?
+      if ($kukarow["extranet"] != "" and $yhtiorow["hyvaksyttavat_extranet_email"] != "") {
+
+        $tv_laskurow = $laskurow;
+        $tv_laskurow['tilausvahvistus'] = '3SP';
+
+        $params_tilausvahvistus = array(
+          'tee'      => $tee,
+          'toim'     => $toim,
+          'kieli'    => $kieli,
+          'komento'  => "vaintahanemail".$yhtiorow["hyvaksyttavat_extranet_email"],
+          'laskurow' => $tv_laskurow,
+          'naytetaanko_rivihinta'    => "",
+          'extranet_tilausvahvistus' => 1,
+        );
+
+        laheta_tilausvahvistus($params_tilausvahvistus);
+      }
+
       // tilaus ei en‰‰ kesken...
       $query  = "UPDATE kuka set kesken=0 where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]'";
       $result = pupe_query($query);

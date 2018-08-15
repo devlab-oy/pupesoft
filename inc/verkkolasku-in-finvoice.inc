@@ -157,6 +157,7 @@ $osto_rahti_alv = 0;
 $osto_rivi_kulu_alv = 0;
 $ei_oteta_kulua_pois = true;
 $rivien_summa_yhteensa = 0;
+$poistettava_merkit = array("'", '"', "”");
 
 if (count($tuotetiedot) > 0) {
   foreach ($tuotetiedot as $tuotetieto) {
@@ -184,6 +185,7 @@ if (count($tuotetiedot) > 0) {
 
       $rtuoteno[$i]["nimitys"] = xml_string($tuotetieto->ArticleName);
       $rtuoteno[$i]["riviinfo"] = preg_replace("/ {2,}/", " " , xml_string($tuotetieto->ArticleName));
+      $rtuoteno[$i]["riviinfo"] = str_replace($poistettava_merkit, " " , xml_string($tuotetieto->ArticleName));
 
       $rtuoteno[$i]["rivihinta"] = round(xml_float($tuotetieto->RowVatExcludedAmount), 2);
       $rtuoteno[$i]["rivihinta_verolli"] = round(xml_float($tuotetieto->RowAmount), 2);

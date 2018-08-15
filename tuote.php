@@ -643,7 +643,7 @@ if (isset($ajax)) {
             $_return .= "&nbsp;<img src='{$palvelin2}pics/lullacons/info.png' class='tooltip' id='$id'>";
 
             // N‰ytet‰‰n mist‰ tuotteista t‰m‰ on valmistettu
-            $_return .= "<div id='div_$id' class='popup' style='width:200px;'>";
+            $_return .= "<div id='div_$id' class='popup' style='width: 400px;'>";
             $_return .= "<table>";
 
             $query = "SELECT tilausrivi.nimitys,
@@ -685,6 +685,18 @@ if (isset($ajax)) {
                 <td class='tumma' colspan='4'></td>
                 <td class='tumma' align='right'>".sprintf("%.2f", $ressuyhteensa)."</td>
                 </tr>";
+
+            $query = "SELECT valmistuksen_lisatiedot
+                      FROM lasku
+                      WHERE yhtio = '$kukarow[yhtio]'
+                      and tunnus = $prow[laskutunnus]";
+            $rresult = pupe_query($query);
+            $rrow = mysql_fetch_assoc($rresult);
+
+            if (!empty($rrow["valmistuksen_lisatiedot"])) {
+              $_return .= "<tr><td class='tumma' colspan='5'>".t("Kommentit").":</td></tr>";
+              $_return .= "<tr><td colspan='5'>{$rrow["valmistuksen_lisatiedot"]}</td></tr>";
+            }
 
             $_return .= "</table>";
             $_return .= "</div>";

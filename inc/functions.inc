@@ -12806,6 +12806,7 @@ if (!function_exists("liite_popup")) {
 
         $filetype_peukalo_query = "SELECT tunnus peukalokuva, image_width, image_height
                                    FROM liitetiedostot
+                                   USE INDEX (yhtio_liitos_liitostunnus)
                                    WHERE yhtio         = '$kukarow[yhtio]'
                                    AND liitos          = 'tuote'
                                    AND liitostunnus    = '$filetype_row[liitostunnus]'
@@ -14240,9 +14241,11 @@ if (!function_exists("asiakashakuohje")) {
 // Funktio lisää tuotteenalkion dynaamiseen puuhun.
 if (!function_exists("TuotteenAlkiot")) {
   function TuotteenAlkiot($laji, $liitos, $puun_tunnus, $kieli, $mista = '') {
-    global $kukarow;
+    global $kukarow, $yhtiorow;
 
     $mista = empty($mista) ? $laji : $mista;
+
+    $kieli = !empty($kieli) ? $kieli : $yhtiorow['kieli'];
 
     $qu = "INSERT INTO puun_alkio
            SET yhtio  = '$kukarow[yhtio]',
@@ -31367,13 +31370,15 @@ if (!function_exists("tallenna_tiliote_viite")) {
           $onko_vipn = (substr($tilino, 0, 1) == 'S') ? 1 : 0;
           $tilino = substr($tilino, 1, 14);
           fseek($fd, $pointterin_paikka);
-
+          
+          $ppg_uusitilino = trim(substr($tietue, 16, 6));
+            
           if ($onko_vipn) {
             $query = "SELECT tilino
                       FROM yriti
                       WHERE bic      = 'DABAFIHH'
                       AND factoring != ''
-                      LIMIT 1;";
+                      LIMIT 1";
             $f_result = pupe_query($query);
 
             // jos tämä epäonnistuu, virheilmoitus tulee alempana kun tilinumeroa ei löydy
@@ -31382,14 +31387,13 @@ if (!function_exists("tallenna_tiliote_viite")) {
               $tilino = $f_row['tilino'];
             }
           }
-          else {
+          elseif (!empty($ppg_uusitilino)) {
             // Kokeillaan onko kyse PPG:n factoring-aineistosta
-            $uusitilino = substr($tietue, 16, 6);
             $query = "SELECT tilino
                       FROM yriti
-                      WHERE tilino = '$uusitilino'
+                      WHERE tilino = '$ppg_uusitilino'
                       AND kaytossa = ''
-                      LIMIT 1;";
+                      LIMIT 1";
             $fp_result = pupe_query($query);
 
             // jos tämä epäonnistuu, virheilmoitus tulee alempana kun tilinumeroa ei löydy

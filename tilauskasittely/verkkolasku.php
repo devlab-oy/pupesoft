@@ -175,6 +175,13 @@ if ($php_cli) {
   $laskvv   = "";
   $eilinen  = "";
   $eiketjut = "";
+  $viennit  = "";
+
+  // Laskutetaanko myös vientitilauksia
+  if (!empty($argv[3]) and substr($argv[3], 0, 7) == "vienti_") {
+    $argv[3] = substr($argv[3], 7);
+    $viennit = "KYLLA";
+  }
 
   // jos komentorivin kolmas arg on "eilinen" niin edelliselle laskutus päivälle, ohitetaan laskutusviikonpäivät
   if ($argv[3] == "eilinen") {
@@ -500,6 +507,24 @@ else {
       $lasklisa_eikateiset = " JOIN maksuehto ON (lasku.yhtio=maksuehto.yhtio and lasku.maksuehto=maksuehto.tunnus and maksuehto.kateinen='')";
     }
 
+    // Päivitetään laskutettavat vientitilaukset toimitetuiksi
+    if (php_sapi_name() == 'cli' and $viennit == "KYLLA") {
+      $query = "UPDATE lasku
+                JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio and lasku.tunnus = tilausrivi.otunnus and tilausrivi.tyyppi='L')
+                JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno)
+                {$lasklisa_eikateiset}
+                SET lasku.alatila = 'D'
+                WHERE lasku.yhtio = '$kukarow[yhtio]'
+                and lasku.tila = 'L'
+                and lasku.chn != '999'
+                and (tilausrivi.keratty != '' or tuote.ei_saldoa!='')
+                and tilausrivi.varattu != 0
+                and lasku.alatila = 'E'
+                and lasku.vienti != ''
+                {$lasklisa}";
+      pupe_query($query);
+    }
+
     $tulos_ulos_maksusoppari = "";
     $tulos_ulos_sarjanumerot = "";
 
@@ -621,7 +646,7 @@ else {
       }
 
       // SALLITTAAN FIFO PERIAATTELLA SALDOJA
-      if (empty($editil_cli) and $yhtiorow['saldovirhe_esto_laskutus'] == 'K') {
+      if (empty($editil_cli) and ($yhtiorow['saldovirhe_esto_laskutus'] == 'K' or $yhtiorow['saldovirhe_esto_laskutus'] == 'V')) {
 
         // haetaan tilausriveiltä tuotenumero ja summataan varatut kappaleet
         $query = "SELECT tilausrivi.tuoteno, sum(tilausrivi.varattu) varattu
@@ -638,11 +663,21 @@ else {
 
           if (!isset($laskutus_esto_saldot[$tuoteno_varattu_chk_row['tuoteno']])) {
 
-            // haetaan saldo tuotepaikalta
-            $query = "SELECT sum(tuotepaikat.saldo) saldo
-                      FROM tuotepaikat
-                      WHERE tuotepaikat.yhtio = '$kukarow[yhtio]'
-                      AND tuotepaikat.tuoteno = '$tuoteno_varattu_chk_row[tuoteno]'";
+            if ($yhtiorow['saldovirhe_esto_laskutus'] == 'V') {
+              // haetaan saldo tuotepaikoilta vain laskulla olevasta varastosta
+              $query = "SELECT sum(tuotepaikat.saldo) saldo
+                        FROM tuotepaikat
+                        WHERE tuotepaikat.yhtio = '$kukarow[yhtio]'
+                        AND tuotepaikat.tuoteno = '$tuoteno_varattu_chk_row[tuoteno]'
+                        AND tuotepaikat.varasto = '$laskurow[varasto]'";
+            }
+            else {
+              // haetaan saldo tuotepaikoilta kaikista varastoista
+              $query = "SELECT sum(tuotepaikat.saldo) saldo
+                        FROM tuotepaikat
+                        WHERE tuotepaikat.yhtio = '$kukarow[yhtio]'
+                        AND tuotepaikat.tuoteno = '$tuoteno_varattu_chk_row[tuoteno]'";
+            }
             $saldo_chk_res = pupe_query($query);
             $saldo_chk_row = mysql_fetch_assoc($saldo_chk_res);
 

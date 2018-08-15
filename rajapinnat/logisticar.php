@@ -71,7 +71,7 @@ echo "Logisticar siirto: $yhtio\n";
 
 //testausta varten limit
 $limit = "";
-//$limit = "limit 200";
+//$limit = "limit 300";
 
 // Ajetaan kaikki operaatiot
 nimike($limit);
@@ -522,12 +522,12 @@ function varastotapahtumat($limit = '') {
             (tapahtuma.kplhinta * tapahtuma.kpl * -1) myyntiarvo,
             (tapahtuma.kplhinta * tapahtuma.kpl * -1) ostoarvo,
             (tapahtuma.kpl * (tapahtuma.kplhinta - tapahtuma.hinta) * -1) kate,
-            tapahtuma.kpl         tapahtumamaara,
+            tapahtuma.kpl               tapahtumamaara,
             lasku.laskunro              laskunumero,
-            kuka.kuka                  myyjatunnus,
-            lasku.yhtio_toimipaikka    toimipaikka,
+            kuka.kuka                   myyjatunnus,
+            lasku.yhtio_toimipaikka     toimipaikka,
             varastopaikat.tunnus        varastotunnus,
-            tapahtuma.laji        tapahtumatyyppi
+            tapahtuma.laji              tapahtumatyyppi
             FROM tapahtuma
             LEFT JOIN tilausrivi USE INDEX (PRIMARY) ON (tilausrivi.yhtio = tapahtuma.yhtio and tilausrivi.tunnus = tapahtuma.rivitunnus)
             LEFT JOIN lasku USE INDEX (PRIMARY) ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus)
@@ -540,6 +540,7 @@ function varastotapahtumat($limit = '') {
             LEFT JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
               AND varastopaikat.tunnus                          = tuotepaikat.varasto)
             LEFT JOIN kuka ON kuka.tunnus=lasku.myyja and kuka.yhtio=lasku.yhtio
+            
             WHERE tapahtuma.laji                                in ('tulo', 'laskutus', 'siirto', 'valmistus', 'kulutus')
             and tapahtuma.yhtio                                 = '$yhtio'
             $pvmlisa
@@ -565,7 +566,7 @@ function varastotapahtumat($limit = '') {
     'tapahtumamaara'  => null,
     'laskunumero'     => null,
     'myyjatunnus'     => null,
-    'toimipaikka'    => null,
+    'toimipaikka'     => null,
     'varastotunnus'   => null,
     'tapahtumatyyppi' => null
   );
@@ -633,7 +634,17 @@ function varastotapahtumat($limit = '') {
 
 
     }
+    
+    $asquery = "SELECT asiakas.myyjanro, kuka.kuka from asiakas
+              LEFT JOIN kuka ON (kuka.yhtio = asiakas.yhtio and kuka.myyja = asiakas.myyjanro)
+              WHERE asiakas.yhtio = '$yhtio'
+                and asiakas.tunnus = '{$trow[asiakastunnus]}'";
+    $asres = pupe_query($asquery);
 
+    $asrow = mysql_fetch_assoc($asres);
+    
+    if ($asrow['myyjanro'] > 0) $trow['myyjatunnus'] = $asrow['kuka'];
+    
     unset($trow['kate']);
 
     // Siivotaan kent‰t:
@@ -682,7 +693,8 @@ function myynti($limit = '') {
             kuka.kuka myyjatunnus,
             lasku.yhtio_toimipaikka  toimipaikka,
             varastopaikat.tunnus varastotunnus,
-            tilausrivi.toimitettu
+            tilausrivi.toimitettu,
+            date_format(lasku.luontiaika, '%Y-%m-%d') luontipaiva
             FROM tilausrivi
             JOIN lasku USE INDEX (PRIMARY) ON lasku.tunnus=tilausrivi.otunnus and lasku.yhtio=tilausrivi.yhtio
             JOIN tuote ON tuote.tuoteno = tilausrivi.tuoteno and tuote.yhtio = tilausrivi.yhtio
@@ -716,8 +728,9 @@ function myynti($limit = '') {
     'tapahtumamaara'  => null,
     'tilausnro'       => null,
     'myyjatunnus'     => null,
-    'toimipaikka'    => null,
-    'varastotunnus'   => null
+    'toimipaikka'     => null,
+    'varastotunnus'   => null,
+    'luontipaiva'     => null
   );
 
   // tehd‰‰n otsikot

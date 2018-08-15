@@ -287,6 +287,11 @@ if (empty($verkkokauppa_asiakasnro)) {
   $verkkokauppa_asiakasnro = null;
 }
 
+// Estetäänkö asiakkaiden päivitys
+if (empty($magento_asiakaspaivitysesto)) {
+  $magento_asiakaspaivitysesto = 'NO';
+}
+
 // Vaihtoehtoinen varastosaldo Magenton tuotekenttään
 // Array jossa avaimena Magenton tuotekentän nimi, arvona Array jossa varastojen tunnukset
 if (empty($magento_saldot_tuotekenttaan)) {
@@ -374,7 +379,7 @@ $kieliversiot = array("fi"); //oletuskieli
 
 if (isset($tuetut_kieliversiot)) {
   $magento_client->setTuetutKieliversiot($tuetut_kieliversiot);
-    
+
   // tuotteiden hakuun tehdään valmis taulukko kielistä
 
   foreach ($tuetut_kieliversiot as $kieli => $bar) {
@@ -449,6 +454,7 @@ if (in_array('asiakkaat', $magento_ajolista)) {
   $dnsasiakas = tuote_export_hae_asiakkaat($params);
 
   tuote_export_echo("Päivitetään asiakkaat");
+  $magento_client->setAsiakasPaivitysEsto($magento_asiakaspaivitysesto);
   $magento_client->lisaa_asiakkaat($dnsasiakas);
 }
 

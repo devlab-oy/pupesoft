@@ -613,6 +613,25 @@ if (!function_exists('rivi_valmistus')) {
       }
     }
 
+    $vfquery = "SELECT selitetark, selitetark_2
+              FROM avainsana
+              WHERE yhtio = '$kukarow[yhtio]'
+              and laji    = 'VALM_FAKTA'
+              and kieli   in ('$yhtiorow[kieli]', '')";
+    $vfresult = pupe_query($vfquery);
+
+    if (mysql_num_rows($vfresult) == 1) {
+      $vfrow = mysql_fetch_assoc($vfresult);
+      $pvf["height"]    = $vfrow['selitetark'];
+      $pvf["font"]      = "Times-Roman";
+      $vfrivikorkeus    = $vfrow['selitetark_2'];
+    }
+    else {
+      $pvf["height"]    = $p["height"];
+      $pvf["font"]      = $p["font"];
+      $vfrivikorkeus    = $rivinkorkeus;
+    }
+   
     if ($row['tyyppi'] == 'V' and !empty($row['ed_tyyppi']) and $row['ed_tyyppi'] != $row['tyyppi']) {
       $pdf->draw_text(35,  $kala, "Raaka-aineet:",  $thispage, $p);
       $kala -= $rivinkorkeus;
@@ -682,10 +701,10 @@ if (!function_exists('rivi_valmistus')) {
           $tuotantolinja = $row['valmistuslinja']. " - ". t_avainsana('valmistuslinja', $kieli, "and avainsana.selite='$row[valmistuslinja]'", "", "", "selitetark");
           $faktarow["fakta"] = t("Tuotantolinja", $kieli).": ".$tuotantolinja."\n".$faktarow["fakta"];
         }
-
+pupesoft_log('pupe-loki', "{$pvf['height']} {$p['height']} {$vfrivikorkeus}");
         foreach (explode("\n", wordwrap($faktarow["fakta"], 90, "\n")) as $kommentti) {
-          $pdf->draw_text(125,  $kala, $kommentti, $thispage, $p);
-          $kala -= $rivinkorkeus;
+          $pdf->draw_text(125,  $kala, $kommentti, $thispage, $pvf);
+          $kala -= $vfrivikorkeus;
           $lask_valm++;
         }
       }

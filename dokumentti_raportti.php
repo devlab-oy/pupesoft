@@ -6,6 +6,26 @@ require "inc/parametrit.inc";
 
 echo "<font class='head'>".t('Hyv‰ksytyt ja hyl‰tyt dokumentit')."</font><hr><br>";
 
+$dokkarityypit = "";
+
+// Mit‰ dokkarityyppej‰ k‰ytt‰j‰lle saa n‰ytt‰‰
+$query = "SELECT group_concat(hd.tunnus) tyypit
+          FROM hyvaksyttavat_dokumenttityypit_kayttajat hdk
+          JOIN hyvaksyttavat_dokumenttityypit hd ON (hdk.yhtio=hd.yhtio
+            and hdk.doku_tyyppi_tunnus=hd.tunnus)
+          WHERE hdk.yhtio = '$kukarow[yhtio]'
+          AND hdk.kuka = '$kukarow[kuka]'";
+$hvresult = pupe_query($query);
+$hvrow = mysql_fetch_assoc($hvresult);
+
+if (empty($hvrow['tyypit'])) {
+  echo "<font class='error'>".t("VIRHE: Et kuulu mihink‰‰n dokumenttityyppiryhm‰‰n!")."</font>";
+  exit;
+}
+else {
+  $dokkarityypit = $hvrow['tyypit'];
+}
+
 echo "<form method='post'>";
 echo "<input type='hidden' name = 'tee' value = 'raportoi'>";
 
@@ -34,39 +54,42 @@ if ($tee == "raportoi") {
   $tilalisa = "";
 
   if ($tila == "HYVAKS") {
-    $tilalisa = "AND hyvaksyttavat_dokumentit.tila='H'";
+    $tilalisa = "AND hd.tila='H'";
   }
   if ($tila == "HYVTTY") {
-    $tilalisa = "AND hyvaksyttavat_dokumentit.tila='M'";
+    $tilalisa = "AND hd.tila='M'";
   }
   if ($tila == "HYLATT") {
-    $tilalisa = "AND hyvaksyttavat_dokumentit.tila='D'";
+    $tilalisa = "AND hd.tila='D'";
   }
 
-  $query = "SELECT hyvaksyttavat_dokumentit.*,
+  $query = "SELECT hd.*,
             kuka.nimi laatija,
             kuka1.nimi hyvaksyja1,
             kuka2.nimi hyvaksyja2,
             kuka3.nimi hyvaksyja3,
             kuka4.nimi hyvaksyja4,
-            kuka5.nimi hyvaksyja5
-            FROM hyvaksyttavat_dokumentit
-            LEFT JOIN kuka as kuka ON kuka.yhtio = hyvaksyttavat_dokumentit.yhtio and kuka.kuka = hyvaksyttavat_dokumentit.laatija
-            LEFT JOIN kuka as kuka1 ON kuka1.yhtio = hyvaksyttavat_dokumentit.yhtio and kuka1.kuka = hyvaksyttavat_dokumentit.hyvak1
-            LEFT JOIN kuka as kuka2 ON kuka2.yhtio = hyvaksyttavat_dokumentit.yhtio and kuka2.kuka = hyvaksyttavat_dokumentit.hyvak2
-            LEFT JOIN kuka as kuka3 ON kuka3.yhtio = hyvaksyttavat_dokumentit.yhtio and kuka3.kuka = hyvaksyttavat_dokumentit.hyvak3
-            LEFT JOIN kuka as kuka4 ON kuka4.yhtio = hyvaksyttavat_dokumentit.yhtio and kuka4.kuka = hyvaksyttavat_dokumentit.hyvak4
-            LEFT JOIN kuka as kuka5 ON kuka5.yhtio = hyvaksyttavat_dokumentit.yhtio and kuka5.kuka = hyvaksyttavat_dokumentit.hyvak5
-            WHERE hyvaksyttavat_dokumentit.yhtio = '$kukarow[yhtio]'
+            kuka5.nimi hyvaksyja5,
+            hdt.tyyppi
+            FROM hyvaksyttavat_dokumentit hd
+            JOIN hyvaksyttavat_dokumenttityypit hdt ON (hd.yhtio=hdt.yhtio and hd.tiedostotyyppi=hdt.tunnus and hdt.tunnus in ({$dokkarityypit}))
+            LEFT JOIN kuka as kuka ON kuka.yhtio = hd.yhtio and kuka.kuka = hd.laatija
+            LEFT JOIN kuka as kuka1 ON kuka1.yhtio = hd.yhtio and kuka1.kuka = hd.hyvak1
+            LEFT JOIN kuka as kuka2 ON kuka2.yhtio = hd.yhtio and kuka2.kuka = hd.hyvak2
+            LEFT JOIN kuka as kuka3 ON kuka3.yhtio = hd.yhtio and kuka3.kuka = hd.hyvak3
+            LEFT JOIN kuka as kuka4 ON kuka4.yhtio = hd.yhtio and kuka4.kuka = hd.hyvak4
+            LEFT JOIN kuka as kuka5 ON kuka5.yhtio = hd.yhtio and kuka5.kuka = hd.hyvak5
+            WHERE hd.yhtio = '$kukarow[yhtio]'
             {$tilalisa}
-            ORDER BY hyvaksyttavat_dokumentit.tunnus";
+            ORDER BY hd.tunnus";
   $result = pupe_query($query);
 
-  pupe_DataTables(array(array($pupe_DataTables, 6, 6)));
+  pupe_DataTables(array(array($pupe_DataTables, 7, 7)));
 
   echo "<table class='display dataTable' id='$pupe_DataTables'>";
   echo "<thead>";
   echo "<tr>";
+  echo "<th>".t("Tyyppi")."</th>";
   echo "<th>".t("Nimi")."</th>";
   echo "<th>".t("Kuvaus")."</th>";
   echo "<th>".t("Kommentit")."</th>";
@@ -76,6 +99,7 @@ if ($tee == "raportoi") {
   echo "<th>".t("Tila")."</th>";
   echo "</tr>";
   echo "<tr>";
+  echo "<td><input type='text' class='search_field' name='search_tyyppi'></td>";
   echo "<td><input type='text' class='search_field' name='search_nimi'></td>";
   echo "<td><input type='text' class='search_field' name='search_kuvaus'></td>";
   echo "<td><input type='text' class='search_field' name='search_kommentit'></td>";
@@ -90,7 +114,7 @@ if ($tee == "raportoi") {
   while ($trow = mysql_fetch_array($result)) {
 
     echo "<tr class='aktiivi'>";
-
+    echo "<td>$trow[tyyppi]</td>";
     echo "<td>$trow[nimi]</td>";
     echo "<td>$trow[kuvaus]</td>";
     echo "<td>$trow[kommentit]</td>";

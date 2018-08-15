@@ -1148,7 +1148,7 @@ if ($tee == 'MONISTA') {
         case 'directdebitsiirtonumero':
           $values .= ", 0";
 
-          break;  
+          break;
         case 'toimaika':
           if (($kumpi == 'HYVITA' or $kumpi == 'REKLAMA' or $yhtiorow["tilausrivien_toimitettuaika"] == 'X') and $toim != 'OSTOTILAUS') {
             $values .= ", '{$monistarow[$fieldname]}'";
@@ -1231,6 +1231,14 @@ if ($tee == 'MONISTA') {
           }
           else {
             $values .= ", ''";
+          }
+          break;
+        case 'chn':
+          if ($monistarow[$fieldname] == '999' and $monistarow['mapvm'] != '0000-00-00') {
+            $values .= ", '".$asiakrow[$fieldname]."'";
+          }
+          else {
+            $values .= ", '".$monistarow[$fieldname]."'";
           }
           break;
         case 'tunnus':

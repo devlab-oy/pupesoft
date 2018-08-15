@@ -705,7 +705,7 @@ class Unifaun {
 
     // Käytetään vastaanottajan rahtisopimusta: toimitusosoite on eri kuin rahtisopåimuksen omistaja ->
     // kerrotaan Unifaunille myös rahtisopimuksen omistajajn tiedot
-    if ($this->rakir_row['merahti'] == "" and $this->rakir_row["toim_nimi"] != $this->rakir_row["nimi"] and $this->toitarow["virallinen_selite"] == "POF1") { //keijo
+    if ($this->rakir_row['merahti'] == "" and $this->rakir_row["toim_nimi"] != $this->rakir_row["nimi"] and $this->toitarow["virallinen_selite"] == "POF1") {
       $uni_party = $xml->addChild('party');  // Any contents. Mandatory.
 
       $uni_party->addAttribute('ptyid', utf8_encode($this->asiakasrow["tunnus"]));

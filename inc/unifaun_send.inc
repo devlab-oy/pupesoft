@@ -395,8 +395,7 @@ class Unifaun {
     $uni_sender->addAttribute('sndid', $this->pikahakuarvo());
 
     // $uni_snd_val = $uni_sender->addChild('val', str_replace($search, $replace, $this->postirow["yhtio_nimi"])); # Sender's name
-    $_yhtio_nimi = htmlspecialchars(utf8_encode($this->postirow["yhtio_nimi"]), ENT_SUBSTITUTE);
-    $uni_snd_val = $uni_sender->addChild('val', $_yhtio_nimi); // Sender's name
+    $uni_snd_val = $uni_sender->addChild('val', utf8_encode($this->postirow["yhtio_nimi"])); // Sender's name
     $uni_snd_val->addAttribute('n', "name");
 
     $uni_snd_val = $uni_sender->addChild('val', utf8_encode($this->postirow["yhtio_osoite"])); // Address line 1
@@ -602,8 +601,8 @@ class Unifaun {
       $uni_rcv_val->addAttribute('n', "id4user");
     }
 
-    $_toim_nimi = htmlspecialchars(utf8_encode($this->rakir_row["toim_nimi"]), ENT_SUBSTITUTE);
-    $_toim_nimitark = htmlspecialchars(utf8_encode($this->rakir_row["toim_nimitark"]), ENT_SUBSTITUTE);
+    $_toim_nimi = utf8_encode($this->rakir_row["toim_nimi"]);
+    $_toim_nimitark = utf8_encode($this->rakir_row["toim_nimitark"]);
 
     $uni_rcv_val = $uni_receiver->addChild('val', trim($_toim_nimi." ".$_toim_nimitark)); // Receiver's name
     $uni_rcv_val->addAttribute('n', "name");
@@ -706,8 +705,8 @@ class Unifaun {
       $uni_party->addAttribute('ptyid', utf8_encode($this->asiakasrow["tunnus"]));
       $shipment_payer = utf8_encode($this->asiakasrow["tunnus"]);
 
-      $_nimi = htmlspecialchars(utf8_encode($this->rakir_row["nimi"]), ENT_SUBSTITUTE);
-      $_nimitark = htmlspecialchars(utf8_encode($this->rakir_row["nimitark"]), ENT_SUBSTITUTE);
+      $_nimi = utf8_encode($this->rakir_row["nimi"]);
+      $_nimitark = utf8_encode($this->rakir_row["nimitark"]);
 
       $uni_prt_val = $uni_party->addChild('val', trim($_nimi.' '.$_nimitark)); // Party's name
       $uni_prt_val->addAttribute('n', "name");
@@ -1317,8 +1316,7 @@ class Unifaun {
         }
 
         if (isset($vak['tuotenimitys']) and $vak['tuotenimitys'] != '') {
-          $_tuotenimitys = htmlspecialchars(utf8_encode($vak["tuotenimitys"]), ENT_SUBSTITUTE);
-          $uni_par_val = $uni_article->addChild('val', $_tuotenimitys); // UN-number for ADR. Supplied as a 4 digit code.
+          $uni_par_val = $uni_article->addChild('val', utf8_encode($vak["tuotenimitys"])); // UN-number for ADR. Supplied as a 4 digit code.
           $uni_par_val->addAttribute('n', "name");
         }
 
@@ -1374,8 +1372,8 @@ class Unifaun {
         }
 
         if (isset($vak['nimi_ja_kuvaus']) and $vak['nimi_ja_kuvaus'] != '') {
-          $_nimi_ja_kuvaus = htmlspecialchars(utf8_encode($vak["nimi_ja_kuvaus"]), ENT_SUBSTITUTE);
-          $uni_par_val = $uni_article->addChild('val', $_nimi_ja_kuvaus); // Official transport name for item regarding ADR
+          
+          $uni_par_val = $uni_article->addChild('val', utf8_encode($vak["nimi_ja_kuvaus"])); // Official transport name for item regarding ADR
           $uni_par_val->addAttribute('n', "dngdescr");
         }
 

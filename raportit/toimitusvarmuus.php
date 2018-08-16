@@ -241,7 +241,15 @@ if (!empty($etsinappi)) {
     $query .= " ORDER BY 1 ";
   }
   else {
-    $onkomyohassa_sql = "if(left(tilausrivi.toimitettuaika, 10) > 0, left(tilausrivi.toimitettuaika, 10), CURDATE()) ";
+    $onkomyohassa_sql = " if (
+                            left(tilausrivi.toimitettuaika, 10) > 0 and (toimitustapa.nouto is null or toimitustapa.nouto = ''),
+                            left(tilausrivi.toimitettuaika, 10),
+                            if (
+                              left(tilausrivi.kerattyaika, 10) > 0 and toimitustapa.nouto != '',
+                              left(tilausrivi.kerattyaika, 10),
+                              CURDATE()
+                            )
+                          ) ";
 
     if ($raptaso == "yritys") {
       $query = "SELECT
@@ -278,7 +286,13 @@ if (!empty($etsinappi)) {
                 sum(if($onkomyohassa_sql > lasku.toimaika, 1, 0)) myohassa_riveja,
                 from_unixtime(
                   avg(
-                    unix_timestamp(tilausrivi.toimitettuaika)
+                    unix_timestamp(
+                      if (
+                        (toimitustapa.nouto is null or toimitustapa.nouto = ''),
+                        tilausrivi.toimitettuaika,
+                        tilausrivi.kerattyaika
+                      )
+                    )
                   ), '%Y-%m-%d'
                 ) toimitettu,
                 round(avg(
@@ -295,9 +309,10 @@ if (!empty($etsinappi)) {
 
     $query .= " JOIN lasku ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus
                     and (lasku.tila = 'L' $tilalisa))
+                LEFT JOIN toimitustapa ON (toimitustapa.yhtio = lasku.yhtio and toimitustapa.selite = lasku.toimitustapa)
                 JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio and tilausrivi.tuoteno = tuote.tuoteno
                   and tuote.ei_saldoa = '')
-                WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+                WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
                 and tilausrivi.var not in ('P','J','O','S')";
 
     if ($toim == 'AVOIMET') {

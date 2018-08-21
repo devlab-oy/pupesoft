@@ -7170,7 +7170,7 @@ if ($tee == '') {
         }
 
         // Onko puutteita
-        if ($row['var'] == 'P') {
+        if (in_array($row['var'], array('P', 'J'))) {
           $puutetta_on = true;
         }
 

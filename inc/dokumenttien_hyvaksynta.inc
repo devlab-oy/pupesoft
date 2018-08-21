@@ -1,5 +1,23 @@
 <?php
 
+// Mitä dokkarityyppejä käyttäjälle saa näyttää
+$query = "SELECT group_concat(hd.tunnus) tyypit
+          FROM hyvaksyttavat_dokumenttityypit_kayttajat hdk
+          JOIN hyvaksyttavat_dokumenttityypit hd ON (hdk.yhtio=hd.yhtio
+            and hdk.doku_tyyppi_tunnus=hd.tunnus)
+          WHERE hdk.yhtio = '$kukarow[yhtio]'
+          AND hdk.kuka = '$kukarow[kuka]'";
+$hvresult = pupe_query($query);
+$hvrow = mysql_fetch_assoc($hvresult);
+
+if (empty($hvrow['tyypit'])) {
+  echo "<font class='error'>".t("VIRHE: Et kuulu mihinkään dokumenttityyppiryhmään!")."</font>";
+  exit;
+}
+else {
+  $dokkarityypit = $hvrow['tyypit'];
+}
+
 //  Jos olemme tekemässä jotain meillä on oltava kuka tai listaamme kaikki laskut mitä tietokannasta löytyy!
 if ($tee == "T" and strlen(trim($kuka)) == 0) {
   echo "<font class='error'>".t("VIRHE: Hyväksyjä puuttuu")."!</font><br><br>";
@@ -13,11 +31,12 @@ if ($tee == '') {
   $query = "SELECT hyvaksyja_nyt,
             if(kuka.nimi is not null, kuka.nimi, hyvaksyja_nyt) nimi,
             count(*) kpl
-            FROM hyvaksyttavat_dokumentit
-            LEFT JOIN kuka ON kuka.yhtio=hyvaksyttavat_dokumentit.yhtio and kuka.kuka = hyvaksyttavat_dokumentit.hyvaksyja_nyt
-            WHERE hyvaksyttavat_dokumentit.yhtio = '$kukarow[yhtio]'
-            and hyvaksyttavat_dokumentit.tila = 'H'
-            and hyvaksyttavat_dokumentit.hyvaksyja_nyt != ''
+            FROM hyvaksyttavat_dokumentit hd
+            JOIN hyvaksyttavat_dokumenttityypit hdt ON (hd.yhtio=hdt.yhtio and hd.tiedostotyyppi=hdt.tunnus and hdt.tunnus in ({$dokkarityypit}))
+            LEFT JOIN kuka ON kuka.yhtio=hd.yhtio and kuka.kuka = hd.hyvaksyja_nyt
+            WHERE hd.yhtio = '$kukarow[yhtio]'
+            and hd.tila = 'H'
+            and hd.hyvaksyja_nyt != ''
             GROUP BY 1, 2
             ORDER BY nimi";
   $result = pupe_query($query);
@@ -41,9 +60,11 @@ if ($tee == '') {
 if ($tee == 'T') {
   // Muutetaan hyväksyntää
   if ((strlen($mika) > 0) and (strlen($nimi) > 0)) {
-    $query = "SELECT hyvak1, hyvak2, hyvak3, hyvak4, hyvak5, hyvaksyja_nyt, h1time, h2time, h3time, h4time, h5time
-              FROM hyvaksyttavat_dokumentit
-              WHERE tunnus = '$mika' and yhtio = '$kukarow[yhtio]'";
+    $query = "SELECT hd.hyvak1, hd.hyvak2, hd.hyvak3, hd.hyvak4, hd.hyvak5, hd.hyvaksyja_nyt, hd.h1time, hd.h2time, hd.h3time, hd.h4time, hd.h5time
+              FROM hyvaksyttavat_dokumentit hd
+              JOIN hyvaksyttavat_dokumenttityypit hdt ON (hd.yhtio=hdt.yhtio and hd.tiedostotyyppi=hdt.tunnus and hdt.tunnus in ({$dokkarityypit}))
+              WHERE hd.tunnus = '$mika'
+              and hd.yhtio = '$kukarow[yhtio]'";
     $result = pupe_query($query);
 
     if (mysql_num_rows($result) == 0) {
@@ -115,20 +136,22 @@ if ($tee == 'T') {
   }
   $ulos .= "</select>";
 
-  $query = "SELECT hyvaksyttavat_dokumentit.*, kuka.nimi laatija
-            FROM hyvaksyttavat_dokumentit
-            LEFT JOIN kuka ON kuka.yhtio = hyvaksyttavat_dokumentit.yhtio and kuka.kuka = hyvaksyttavat_dokumentit.hyvaksyja_nyt
-            WHERE hyvaksyttavat_dokumentit.hyvaksyja_nyt='$kuka'
-            and hyvaksyttavat_dokumentit.yhtio = '$kukarow[yhtio]'
-            and hyvaksyttavat_dokumentit.tila = 'H'
-            ORDER BY hyvaksyttavat_dokumentit.tunnus";
+  $query = "SELECT hd.*, kuka.nimi laatija, hdt.tyyppi
+            FROM hyvaksyttavat_dokumentit hd
+            JOIN hyvaksyttavat_dokumenttityypit hdt ON (hd.yhtio=hdt.yhtio and hd.tiedostotyyppi=hdt.tunnus and hdt.tunnus in ({$dokkarityypit}))
+            LEFT JOIN kuka ON kuka.yhtio = hd.yhtio and kuka.kuka = hd.hyvaksyja_nyt
+            WHERE hd.hyvaksyja_nyt='$kuka'
+            and hd.yhtio = '$kukarow[yhtio]'
+            and hd.tila = 'H'
+            ORDER BY hd.tunnus";
   $result = pupe_query($query);
 
-  pupe_DataTables(array(array($pupe_DataTables[0], 6, 6)));
+  pupe_DataTables(array(array($pupe_DataTables[0], 7, 7)));
 
   echo "<table class='display dataTable' id='$pupe_DataTables[0]'>";
   echo "<thead>";
   echo "<tr>";
+  echo "<th>".t("Tyyppi")."</th>";
   echo "<th>".t("Nimi")."</th>";
   echo "<th>".t("Kuvaus")."</th>";
   echo "<th>".t("Kommentit")."</th>";
@@ -137,6 +160,7 @@ if ($tee == 'T') {
   echo "<th>".t("Siirrä")."</th>";
   echo "</tr>";
   echo "<tr>";
+  echo "<td><input type='text' class='search_field' name='search_tyyppi'></td>";
   echo "<td><input type='text' class='search_field' name='search_nimi'></td>";
   echo "<td><input type='text' class='search_field' name='search_kuvaus'></td>";
   echo "<td><input type='text' class='search_field' name='search_kommentit'></td>";
@@ -150,7 +174,7 @@ if ($tee == 'T') {
   while ($trow = mysql_fetch_array($result)) {
 
     echo "<tr class='aktiivi'>";
-
+    echo "<td>$trow[tyyppi]</td>";
     echo "<td>$trow[nimi]</td>";
     echo "<td>$trow[kuvaus]</td>";
     echo "<td>$trow[kommentit]</td>";

@@ -2198,6 +2198,19 @@ if ($fieldname == "vientikiellon_ohitus") {
   $jatko = 0;
 }
 
+if ($fieldname == "vientitietojen_autosyotto") {
+
+  $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+  $sel1 = ($trow[$i] == "K") ? "selected" : "";
+
+  $ulos .= "<option value='' >".t("Myyntitilauksen vientitietoja ei kuitata automaattisesti syötetyiksi")."</option>";
+  $ulos .= "<option value='K' $sel1>".t("Myyntitilauksen vientitiedot kuitataan automaattisesti syötetyiksi")."</option>";
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
 if ($fieldname == "vienti_erittelyn_tulostus") {
 
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";

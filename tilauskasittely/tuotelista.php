@@ -79,20 +79,26 @@ $poislisa = " and (tuote.status not in ('P','X')
 list($oleasrow, $valuurow) = hae_oletusasiakas($laskurow);
 
 if (empty($oleasrow['tunnus'])) {
-  echo t("VIRHE: K‰ytt‰j‰tiedoissasi on virhe, oleutsasiakas puuttuu! Ota yhteys j‰rjestelm‰n yll‰pit‰j‰‰n.")."<br><br>";
+  echo t("VIRHE: K‰ytt‰j‰tiedoissasi on virhe, oletusasiakas puuttuu! Ota yhteys j‰rjestelm‰n yll‰pit‰j‰‰n.")."<br><br>";
   exit;
+}
+
+if (!isset($toim_kutsu)) {
+  $toim_kutsu = '';
 }
 
 if ($kukarow["kuka"] != "" and $laskurow["tila"] != "") {
 
   if ($kukarow["extranet"] != "") {
     $tilauskasittely = "";
+    $toim_kutsu = 'EXTRANET';
   }
   else {
     $tilauskasittely = "tilauskasittely/";
   }
 
   echo "<form method='post' action='".$palvelin2.$tilauskasittely."tilaus_myynti.php'>
+        <input type='hidden' name='toim' value='$toim_kutsu'>
         <input type='hidden' name='tilausnumero' value='$kukarow[kesken]'>
         <input type='submit' value='".t("Takaisin tilaukselle")."'>
         </form><br><br>";

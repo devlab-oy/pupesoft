@@ -260,88 +260,65 @@ else {
       if (isset($worksheet) and $datatyyppi == 'masterdata') {
         $worksheet->writeString($excelrivi,  $excelsarake, t("Tuotenimi", $hinkieli), $format_bold);
         $excelsarake++;
-
         $worksheet->writeString($excelrivi,  $excelsarake, t("Tuotekoodi", $hinkieli), $format_bold);
         $excelsarake++;
-
         $worksheet->writeString($excelrivi, $excelsarake, t("EAN-koodi", $hinkieli), $format_bold);
         $excelsarake++;
-
         $worksheet->writeString($excelrivi, $excelsarake, t("Tullinimike", $hinkieli), $format_bold);
+        $excelsarake++;
+        $worksheet->writeString($excelrivi, $excelsarake, t("Alkuperämaa", $hinkieli), $format_bold);
         $excelsarake++;
         $worksheet->writeString($excelrivi, $excelsarake, t("Listahinta EUR", $hinkieli), $format_bold);
         $excelsarake++;
         $worksheet->writeString($excelrivi, $excelsarake, t("OVH EUR", $hinkieli), $format_bold);
         $excelsarake++;
-
         $worksheet->writeString($excelrivi, $excelsarake, t("Listahinta SEK", $hinkieli), $format_bold);
         $excelsarake++;
-
         $worksheet->writeString($excelrivi, $excelsarake, t("RRP SEK", $hinkieli), $format_bold);
         $excelsarake++;
-
         $worksheet->writeString($excelrivi, $excelsarake, t("Listahinta NOK", $hinkieli), $format_bold);
         $excelsarake++;
-
         $worksheet->writeString($excelrivi, $excelsarake, t("RRP NOK", $hinkieli), $format_bold);
         $excelsarake++;
-
         $worksheet->writeString($excelrivi, $excelsarake, t("Listahinta DKK", $hinkieli), $format_bold);
         $excelsarake++;
-
         $worksheet->writeString($excelrivi, $excelsarake, t("RRP DKK", $hinkieli), $format_bold);
         $excelsarake++;
-
         $worksheet->writeString($excelrivi, $excelsarake, t("Tuotekorkeus (cm)", $hinkieli), $format_bold);
         $excelsarake++;
-
         $worksheet->writeString($excelrivi, $excelsarake, t("Tuoteleveys (cm)", $hinkieli), $format_bold);
         $excelsarake++;
-
         $worksheet->writeString($excelrivi, $excelsarake, t("Tuotesyvyys (cm)", $hinkieli), $format_bold);
         $excelsarake++;
-
         $worksheet->writeString($excelrivi, $excelsarake, t("Tuotepaino (g)", $hinkieli), $format_bold);
         $excelsarake++;
-
-        $worksheet->writeString($excelrivi, $excelsarake, t("Tuotteen sisältö (ml)", $hinkieli), $format_bold);
+        $worksheet->writeString($excelrivi, $excelsarake, t("Tuotteen sisältö", $hinkieli), $format_bold);
         $excelsarake++;
-
         $worksheet->writeString($excelrivi, $excelsarake, t("Myyntierän EAN", $hinkieli), $format_bold);
         $excelsarake++;
-
         $worksheet->writeString($excelrivi, $excelsarake, t("Myyntierä", $hinkieli), $format_bold);
         $excelsarake++;
-
         $worksheet->writeString($excelrivi, $excelsarake, t("Myyntierän korkeus (mm)", $hinkieli), $format_bold);
         $excelsarake++;
-
         $worksheet->writeString($excelrivi, $excelsarake, t("Myyntierän leveys (mm)", $hinkieli), $format_bold);
         $excelsarake++;
-
         $worksheet->writeString($excelrivi, $excelsarake, t("Myyntierän syvyys (mm)", $hinkieli), $format_bold);
         $excelsarake++;
-
         $worksheet->writeString($excelrivi, $excelsarake, t("Myyntierän nettopaino (g)", $hinkieli), $format_bold);
         $excelsarake++;
-
         $worksheet->writeString($excelrivi, $excelsarake, t("Myyntierän bruttopaino (g)", $hinkieli), $format_bold);
         $excelsarake++;
-
         $worksheet->writeString($excelrivi, $excelsarake, t("Mainosteksti EN", $hinkieli), $format_bold);
         $excelsarake++;
-
         $worksheet->writeString($excelrivi, $excelsarake, t("Mainosteksti FI", $hinkieli), $format_bold);
         $excelsarake++;
-
         $worksheet->writeString($excelrivi, $excelsarake, t("Mainosteksti SE", $hinkieli), $format_bold);
         $excelsarake++;
-
         $worksheet->writeString($excelrivi, $excelsarake, t("Mainosteksti NO", $hinkieli), $format_bold);
         $excelsarake++;
-
         $worksheet->writeString($excelrivi, $excelsarake, t("Incilista", $hinkieli), $format_bold);
         $excelsarake++;
+
         $excelrivi++;
       }
 
@@ -574,17 +551,16 @@ else {
         if ($myyntieran_bpaino  == 'lisatieto_Myyntierän bruttopaino')  $myyntieran_bpaino = "";
         if ($incilista          == 'lisatieto_Incilista')               $incilista = "";
 
-        // Katsotaan, mistä löytyy enari
-        if ($rrow["eankoodi"] == '') {
-          $query = "SELECT *
-                    FROM tuotteen_toimittajat
-                    WHERE yhtio = '$kukarow[yhtio]'
-                    AND tuoteno = '$rrow[tuoteno]'
-                    ORDER BY if (jarjestys = 0, 9999, jarjestys) limit 1";
-          $tuotetoim_res = pupe_query($query);
-          $tuotetoimrow = mysql_fetch_assoc($tuotetoim_res);
-          $rrow["eankoodi"] = $tuotetoimrow["viivakoodi"];
-        }
+        $query = "SELECT *
+                  FROM tuotteen_toimittajat
+                  WHERE yhtio = '$kukarow[yhtio]'
+                  AND tuoteno = '$rrow[tuoteno]'
+                  ORDER BY if (jarjestys = 0, 9999, jarjestys) limit 1";
+        $tuotetoim_res = pupe_query($query);
+        $tuotetoimrow = mysql_fetch_assoc($tuotetoim_res);
+
+        $rrow["eankoodi"] = empty($rrow["eankoodi"]) ? $tuotetoimrow["viivakoodi"] : $rrow["eankoodi"];
+        $alkuperamaa = $tuotetoimrow['alkuperamaa'];
 
         if (isset($worksheet) and $datatyyppi == 'masterdata') {
 
@@ -597,6 +573,8 @@ else {
           $worksheet->writeString($excelrivi, $excelsarake, $rrow["eankoodi"]);
           $excelsarake++;
           $worksheet->writeString($excelrivi, $excelsarake, $rrow["tullinimike1"]);
+          $excelsarake++;
+          $worksheet->writeString($excelrivi, $excelsarake, $alkuperamaa);
           $excelsarake++;
           $worksheet->writeString($excelrivi, $excelsarake, $listahinta_eur);
           $excelsarake++;

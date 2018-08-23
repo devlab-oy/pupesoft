@@ -307,7 +307,7 @@ if ($row["var"] == "J" and $row["tyyppi"] == "E") {
 }
 
 //  Pakkokommentoitava tuote
-$_kommentoitava_kaikki = ($trow["kommentoitava"] == "o");
+$_kommentoitava_kaikki = (in_array($trow["kommentoitava"], array("o", "p")));
 $_kommentoitava_rekla  = ($trow["kommentoitava"] == "r" and in_array($toim, array("REKLAMAATIO", "EXTRANET_REKLAMAATIO")));
 $_kommentoitava = ($_kommentoitava_kaikki or $_kommentoitava_rekla);
 

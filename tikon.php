@@ -44,9 +44,16 @@ if ($kausi == "") {
   exit;
 }
 
-function teetietue($yhtio, $tosite, $summa, $ltunnus, $tapvm, $tilino, $kustp, $projekti, $ytunnus, $nimi, $selite, $jakso) {
+function teetietue($yhtio, $tosite, $summa, $ltunnus, $tapvm, $tilino, $kustp, $projekti, $ytunnus, $nimi, $selite, $jakso, $toim) {
 
-  $ulos = 'TKB';                                //tietuetyyppi
+  $selite = strip_tags($selite);
+  $selite = str_replace(array("\r\n", "\r", "\n"), "; ",$selite);
+  if ($toim == 'Macea') {
+    $ulos = 'TOT';
+  }
+  else  {
+    $ulos = 'TKB';
+  }                              //tietuetyyppi
   $ulos .= sprintf('%-8s',  $tapvm);                      //päivämäärä
   $ulos .= sprintf('%-08d', $tosite);                     //tositelaji ja tositenumero
   $ulos .= sprintf('%03d', '0');                       //???? tositenumeron tarkenne 1
@@ -94,7 +101,7 @@ function teetietue($yhtio, $tosite, $summa, $ltunnus, $tapvm, $tilino, $kustp, $
   return $palautus;
 }
 
-function rivit($result, $laji, $yhtio, $summataan) {
+function rivit($result, $laji, $yhtio, $summataan, $toim) {
 
   $rivitruudulle   = array();
   $palautus     = "";
@@ -172,7 +179,7 @@ function rivit($result, $laji, $yhtio, $summataan) {
       if ($summataan != '' and ($sltunnus != $vltunnus or $stapvm != $row['tapvm'] or $stilino != $row['tilino'] or $skustp != $row['kustp'] or $sprojekti != $row['projekti'])) {
 
         if ($summa != 0) {
-          $palautus .= teetietue($yhtio, $stosite, $summa, $sltunnus, $stapvm, $stilino, $skustp, $sprojekti, $sytunnus, $snimi, $sselite, $sjakso);
+          $palautus .= teetietue($yhtio, $stosite, $summa, $sltunnus, $stapvm, $stilino, $skustp, $sprojekti, $sytunnus, $snimi, $sselite, $sjakso, $toim);
           $rivitruudulle[] = array("tapvm" => $stapvmcle, "nimi" => $snimi, "summa" => $summa, "tilino" => $stilino, "kustp" => $skustp, "projekti" => $sprojekti, "selite" => $sselite, "laskunro" => $slaskunro, "tosite" => $stosite, "mapvm" => $smapvm);
         }
 
@@ -193,7 +200,7 @@ function rivit($result, $laji, $yhtio, $summataan) {
       }
     }
     else {
-      $palautus .= teetietue($yhtio, $stosite, $summa, $sltunnus, $stapvm, $stilino, $skustp, $sprojekti, $sytunnus, $snimi, $sselite, $sjakso);
+      $palautus .= teetietue($yhtio, $stosite, $summa, $sltunnus, $stapvm, $stilino, $skustp, $sprojekti, $sytunnus, $snimi, $sselite, $sjakso, $toim);
       $rivitruudulle[] = array("tapvm" => $stapvmcle, "nimi" => $snimi, "summa" => $summa, "tilino" => $stilino, "kustp" => $skustp, "projekti" => $sprojekti, "selite" => $sselite, "laskunro" => $slaskunro, "tosite" => $stosite, "mapvm" => $smapvm);
 
       $stosite   = $tosite;
@@ -220,7 +227,7 @@ function rivit($result, $laji, $yhtio, $summataan) {
   }
 
   if ($summa != 0) {
-    $palautus .= teetietue($yhtio, $stosite, $summa, $sltunnus, $stapvm, $stilino, $skustp, $sprojekti, $sytunnus, $snimi, $sselite, $sjakso);
+    $palautus .= teetietue($yhtio, $stosite, $summa, $sltunnus, $stapvm, $stilino, $skustp, $sprojekti, $sytunnus, $snimi, $sselite, $sjakso, $toim);
     $rivitruudulle[] = array("tapvm" => $stapvmcle, "nimi" => $snimi, "summa" => $summa, "tilino" => $stilino, "kustp" => $skustp, "projekti" => $sprojekti, "selite" => $sselite, "laskunro" => $slaskunro, "tosite" => $stosite, "mapvm" => $smapvm);
   }
 
@@ -375,7 +382,7 @@ $query  = "SELECT date_format(tiliointi.tapvm, '%d%m%Y') tapvm, date_format(tili
 $result_ms = pupe_query($query);
 
 if (mysql_num_rows($result_ms) > 0) {
-  list($palautus, $rivitruudulle1) = rivit($result_ms, 91, $kukarow["yhtio"], $summataan);
+  list($palautus, $rivitruudulle1) = rivit($result_ms, 91, $kukarow["yhtio"], $summataan, $toim);
   fwrite($toot, $palautus);
 }
 
@@ -396,7 +403,7 @@ $query  = "SELECT date_format(tiliointi.tapvm, '%d%m%Y') tapvm, date_format(tili
 $result_ov = pupe_query($query);
 
 if (mysql_num_rows($result_ov) > 0) {
-  list($palautus, $rivitruudulle2) = rivit($result_ov, 93, $kukarow["yhtio"], $summataan);
+  list($palautus, $rivitruudulle2) = rivit($result_ov, 93, $kukarow["yhtio"], $summataan, $toim);
   fwrite($toot, $palautus);
 }
 
@@ -417,7 +424,7 @@ $query  = "SELECT date_format(tiliointi.tapvm, '%d%m%Y') tapvm, date_format(tili
 $result_mrt = pupe_query($query);
 
 if (mysql_num_rows($result_mrt) > 0) {
-  list($palautus, $rivitruudulle3) = rivit($result_mrt, 50, $kukarow["yhtio"], $summataan);
+  list($palautus, $rivitruudulle3) = rivit($result_mrt, 50, $kukarow["yhtio"], $summataan, $toim);
   fwrite($toot, $palautus);
 }
 

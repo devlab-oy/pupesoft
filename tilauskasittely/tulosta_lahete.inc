@@ -352,7 +352,12 @@ if (!function_exists('alku_lahete')) {
       $pdf->draw_text(150, 730, $ff_string, $thispage, $ff_font);
 
       $pdf->draw_text(50, 717, t("Y-tunnus", $kieli), $thispage, $boldi);
-      $pdf->draw_text(150, 717, tulosta_ytunnus(preg_replace("/^0037/", "", $laskurow["yhtio_ovttunnus"]), $laskurow["yhtio_maa"], $laskurow["vienti"]), $thispage, $norm);
+      if ($yhtiorow['maa'] == 'EE') {
+        $pdf->draw_text(150, 717, tulosta_ytunnus(preg_replace("/^0037/", "", $yhtiorow["ytunnus"]), $laskurow["yhtio_maa"], $laskurow["vienti"]), $thispage, $norm);
+      }
+      else {
+        $pdf->draw_text(150, 717, tulosta_ytunnus(preg_replace("/^0037/", "", $laskurow["yhtio_ovttunnus"]), $laskurow["yhtio_maa"], $laskurow["vienti"]), $thispage, $norm);
+      }
 
       $pdf->draw_text(50, 704, t("Nimi", $kieli), $thispage, $boldi);
       $pdf->draw_text(150, 704, $yhtiorow["nimi"], $thispage, $norm);
@@ -3643,7 +3648,12 @@ if (!function_exists('loppu_lahete')) {
       $pdf->draw_text(257, 35, $y_www, $thispage, $pieni);
 
       $pdf->draw_text(404, 55, t("Y-tunnus", $kieli).":", $thispage, $pieni);
-      $pdf->draw_text(444, 55, tulosta_ytunnus($y_vatnumero, $y_maa, $laskurow["vienti"]), $thispage, $pieni);
+      if ($yhtiorow["maa"] == 'EE') {
+        $pdf->draw_text(444, 55, tulosta_ytunnus($yhtiorow["ytunnus"], $yhtiorow["maa"], $laskurow["vienti"]), $thispage, $pieni);
+      }
+      else {
+        $pdf->draw_text(444, 55, tulosta_ytunnus($y_vatnumero, $y_maa, $laskurow["vienti"]), $thispage, $pieni);
+      }
       $pdf->draw_text(404, 45, t("Kotipaikka", $kieli).":", $thispage, $pieni);
       $pdf->draw_text(444, 45, $y_kotipaikka, $thispage, $pieni);
       $pdf->draw_text(404, 35, t("Alv.rek", $kieli), $thispage, $pieni);

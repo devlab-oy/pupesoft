@@ -3355,7 +3355,7 @@ if (mysql_num_rows($result) != 0) {
       echo "<table>";
       echo "<tr>";
       echo "<th>".t("Keräyslistan tulostin")."</th>";
-      echo "<td><select name='valittu_tulostin'>";
+      echo "<td><select name='valittu_lavakerayslista_tulostin'>";
       echo "<option value=''>".t("Valitse tulostin")."</option>";
 
       if (empty($hb_kerayslista_tulostin)) {

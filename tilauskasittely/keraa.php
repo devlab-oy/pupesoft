@@ -2542,7 +2542,7 @@ if ($tee == 'P') {
             'lavanumero'        => 0,
             'tilaukset'         => NULL,
             'tee'               => $tee,
-            'thispage'          => NULL,);
+            'firstpage'         => NULL,);
 
 
           foreach ($lavat as $lava => $tilaukset) {

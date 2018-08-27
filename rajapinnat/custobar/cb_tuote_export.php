@@ -48,8 +48,8 @@ if (!empty($argv[2])) {
 else {
   // ajetaan kaikki
   $synkronoi = array(
-    #'customers',
-    #'sales',
+    'customers',
+    'sales',
     'products',
   );
 }

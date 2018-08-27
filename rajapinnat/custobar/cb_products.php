@@ -18,8 +18,6 @@ class CustobarProducts {
 
     $pupesoft_products = $this->pupesoft_all_products;
 
-    echo "var_dump pupesoft_products:<pre>",var_dump($pupesoft_products);
-
     $url = $this->apiurl."/products/upload/";
     $data_json = json_encode(array("products" => $pupesoft_products));
 
@@ -36,9 +34,12 @@ class CustobarProducts {
 
     curl_close($ch);
 
-    echo "\n\nvar_dump products:<pre>",var_dump($response);
-
-    $this->logger->log('---------Tuotteiden päivitys valmis---------');
+    if (strpos($response, '"response":"ok"') !== FALSE) {
+      $this->logger->log("---------Tuotteiden lisääminen epäonnistui!---------");
+    }
+    else {
+      $this->logger->log('---------Tuotteiden päivitys valmis---------');
+    }
   }
 
   public function set_all_products($value) {

@@ -173,11 +173,11 @@ function cb_hae_myynnit() {
     $muutoslisa1 = "AND lasku.laskutettu  >= '{$datetime_checkpoint}'";
   }
   else {
-    $muutoslisa1 = " AND lasku.laskutettu >= '2018-01-01'AND lasku.laskutettu < '2019-01-01'";
+    $muutoslisa1 = " AND lasku.laskutettu >= '2018-01-01'";
   }
 
   // Haetaan laskut
-  $query =  "SELECT tilausrivi.*, lasku.*, lasku.tunnus as laskutunnus, tilausrivi.tunnus as tilausrivitunnus, tilausrivi.alv as tilausrivialv
+  $query =  "SELECT tilausrivi.*, lasku.*, lasku.tunnus as laskutunnus, tilausrivi.tunnus as tilausrivitunnus
              FROM lasku
              JOIN tilausrivi ON (
               tilausrivi.yhtio = lasku.yhtio AND
@@ -189,7 +189,6 @@ function cb_hae_myynnit() {
              AND lasku.tila = 'U'
              AND lasku.alatila = 'X'
              AND lasku.laskunro != 0
-             #and lasku.laskunro = '390907'
              {$muutoslisa1}";
 
   $res = pupe_query($query);
@@ -206,6 +205,8 @@ function cb_hae_myynnit() {
     $maksuehdot[$row['tunnus']] = $row['teksti'];
   }
 
+  $summa = 0;
+
   while ($row = mysql_fetch_array($res)) {
 
     $maksuehdot[$row['maksuehto']]  = str_replace(array('Ä','ä','Ö','ö','Å','å'), array('A','a','O','o','A','a'), trim(pupesoft_cleanstring(pupesoft_csvstring($maksuehdot[$row['maksuehto']]))));
@@ -216,21 +217,22 @@ function cb_hae_myynnit() {
       "sale_external_id"          => $row['laskutunnus'],
       "sale_customer_id"          => $row['liitostunnus'],
       "sale_date"                 => $row['laskutettu'],
-      "sale_total"                => round($row['summa'] * 100, 0),
       "sale_payment_method"       => $maksuehdot[$row['maksuehto']],
       "sale_state"                => "COMPLETE",
       "sale_shop_id"              => $row['ohjelma_moduli'],
-
       "external_id"               => $row['tilausrivitunnus'],
       "product_id"                => $row['tuoteno'],
-
-      "unit_price"                => round($row['rivihinta'] / $row['kpl'] * (1+($row['tilausrivialv'] / 100)) * 100, 0),
+      "unit_price"                => round($row['rivihinta'] / $row['kpl'] * 100, 0),
       "quantity"                  => $row['kpl'],
-      "total"                     => round($row['rivihinta'] * (1+($row['tilausrivialv'] / 100)) * 100, 0),
+      "total"                     => round($row['rivihinta'] * 100, 0),
     );
+
+    $summa = $summa + round($row['rivihinta'] * 100, 0);
 
     unset($row);
   }
+
+  $laskut['sale_total'] = $summa;
 
   cron_aikaleima("CB_MY_CRON", $aloitusaika);
 
@@ -266,31 +268,34 @@ function cb_hae_tuotteet() {
   $query =  "SELECT *
              FROM tuote
              WHERE yhtio = '{$kukarow['yhtio']}'
-             AND tuotetyyppi NOT IN ('A', 'B') and tuoteno = '200420'
+             AND tuotetyyppi NOT IN ('A', 'B') and tuoteno = '200410'
              {$muutoslisa1}";
 
   $res = pupe_query($query);
 
   $tuotteet     = array();
+  $i = 0;
 
   while ($row = mysql_fetch_array($res)) {
 
-    // normaalikuva
-    $query = "SELECT liitetiedostot.tunnus
-              FROM liitetiedostot
-              WHERE liitetiedostot.yhtio = '{$kukarow['yhtio']}'
-              AND liitetiedostot.liitos  = 'tuote'
-              AND liitetiedostot.liitostunnus = '{$row['tunnus']}'
-              AND liitetiedostot.kayttotarkoitus = 'TK'
-              ORDER BY if(liitetiedostot.jarjestys = 0, 9999, liitetiedostot.jarjestys)
-              LIMIT 1";
-    $result = pupe_query($query);
-
     $liite_tk_url = "";
 
-    if (mysql_num_rows($result) == 1) {
-      $liite_row = mysql_fetch_assoc($result);
-      $liite_tk_url = "{$cb_picture_url}/view.php?id={$liite_row['tunnus']}";
+    if (isset($cb_picture_url) and !empty($cb_picture_url)) {
+      // normaalikuva
+      $query = "SELECT liitetiedostot.tunnus
+                FROM liitetiedostot
+                WHERE liitetiedostot.yhtio = '{$kukarow['yhtio']}'
+                AND liitetiedostot.liitos  = 'tuote'
+                AND liitetiedostot.liitostunnus = '{$row['tunnus']}'
+                AND liitetiedostot.kayttotarkoitus = 'TK'
+                ORDER BY if(liitetiedostot.jarjestys = 0, 9999, liitetiedostot.jarjestys)
+                LIMIT 1";
+      $result = pupe_query($query);
+
+      if (mysql_num_rows($result) == 1) {
+        $liite_row = mysql_fetch_assoc($result);
+        $liite_tk_url = "{$cb_picture_url}/view.php?id={$liite_row['tunnus']}";
+      }
     }
 
     $query = "SELECT toimi.nimi, toimi.nimitark, if (tuotteen_toimittajat.jarjestys = 0, 9999, tuotteen_toimittajat.jarjestys) sorttaus
@@ -339,9 +344,10 @@ function cb_hae_tuotteet() {
     }
 
     // lisätään tuotteen lisäämiseen tarvittavat tiedot
-    $tuotteet[] = array(
+    $tuotteet[$i] = array(
       "external_id"               => $row['tuoteno'],
-      "price"                     => round($row['myyntihinta'] * (1+($row['alv'] / 100)) * 100, 0),
+      "price"                     => round($row['myyntihinta'] * 100, 0),
+      "sale_price"                => '',
       "type"                      => $osasto,
       "category"                  => $try,
       "category_id"               => $row['try'],
@@ -367,8 +373,10 @@ function cb_hae_tuotteet() {
     );
 
     if (!empty($row['nettohinta'])) {
-      $tuotteet['sale_price'] = round($row['nettohinta'] * (1+($row['alv'] / 100)) * 100, 0);
+      $tuotteet[$i]['sale_price'] = round($row['nettohinta'] * 100, 0);
     }
+
+    $i++;
   }
 
   cron_aikaleima("CB_TU_CRON", $aloitusaika);

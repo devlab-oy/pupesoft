@@ -17,11 +17,7 @@ class CustobarCustomers {
     $this->logger->log('---------Aloitetaan asiakkaiden päivitys---------');
 
     $pupesoft_customers = $this->pupesoft_all_customers;
-
-    echo "var_dump pupesoft_customers:<pre>",var_dump($pupesoft_customers);
-
     $url = $this->apiurl."/customers/upload/";
-
     $data_json = json_encode(array("customers" => $pupesoft_customers));
 
     $ch = curl_init($url);
@@ -37,9 +33,12 @@ class CustobarCustomers {
 
     curl_close($ch);
 
-    echo "\n\nvar_dump customers:<pre>",var_dump($response);
-
-    $this->logger->log('---------Asiakkaiden päivitys valmis---------');
+    if (strpos($response, '"response":"ok"') !== FALSE) {
+      $this->logger->log("---------Asiakkaiden lisääminen epäonnistui!---------");
+    }
+    else {
+      $this->logger->log('---------Asiakkaiden päivitys valmis---------');
+    }
   }
 
   public function set_all_customers($value) {

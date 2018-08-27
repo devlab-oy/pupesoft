@@ -17,9 +17,6 @@ class CustobarSales {
     $this->logger->log('---------Aloitetaan myyntien päivitys---------');
 
     $pupesoft_sales = $this->pupesoft_all_sales;
-
-    echo "var_dump pupesoft_sales:<pre>",var_dump($pupesoft_sales);
-
     $url = $this->apiurl."/sales/upload/";
     $data_json = json_encode(array("sales" => $pupesoft_sales));
 
@@ -36,9 +33,12 @@ class CustobarSales {
 
     curl_close($ch);
 
-    echo "\n\nvar_dump sales:<pre>",var_dump($response);
-
-    $this->logger->log('---------Myyntien päivitys valmis---------');
+    if (strpos($response, '"response":"ok"') !== FALSE) {
+      $this->logger->log("---------Myyntien lisääminen epäonnistui!---------");
+    }
+    else {
+      $this->logger->log('---------Myyntien päivitys valmis---------');
+    }
   }
 
   public function set_all_sales($value) {

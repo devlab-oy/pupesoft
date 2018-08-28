@@ -21,7 +21,7 @@ function cb_hae_asiakkaat() {
   if ($datetime_checkpoint != "" and $ajetaanko_kaikki == "NO") {
     pupesoft_log("cb_customers", "Haetaan {$datetime_checkpoint} jälkeen muuttuneet");
 
-    $muutoslisa1 = "AND (laadittu  >= '{$datetime_checkpoint}' or muutospvm >= '{$datetime_checkpoint}')";
+    $muutoslisa1 = "AND (luontiaika  >= '{$datetime_checkpoint}' or muutospvm >= '{$datetime_checkpoint}')";
   }
   else {
     $muutoslisa1 = "";

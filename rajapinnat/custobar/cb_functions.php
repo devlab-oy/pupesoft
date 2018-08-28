@@ -340,7 +340,7 @@ function cb_hae_tuotteet() {
       $katepros = 0;
     }
     else {
-      $katepros = $row['kehahin'] / $row['myyntihinta'] * 100;
+      $katepros = 100 - ($row['kehahin'] / $row['myyntihinta'] * 100);
     }
 
     // lis‰t‰‰n tuotteen lis‰‰miseen tarvittavat tiedot

@@ -14,14 +14,14 @@ ini_set("memory_limit", "10G");
 error_reporting(E_ALL);
 date_default_timezone_set('Europe/Helsinki');
 
-require "inc/connect.inc";
-require "inc/functions.inc";
-require_once 'rajapinnat/logger.php';
+require $pupe_root_polku."/inc/connect.inc";
+require $pupe_root_polku."/inc/functions.inc";
+require_once $pupe_root_polku.'/rajapinnat/logger.php';
 
-require "rajapinnat/custobar/cb_functions.php";
-require "rajapinnat/custobar/cb_customers.php";
-require "rajapinnat/custobar/cb_sales.php";
-require "rajapinnat/custobar/cb_products.php";
+require $pupe_root_polku."/rajapinnat/custobar/cb_functions.php";
+require $pupe_root_polku."/rajapinnat/custobar/cb_customers.php";
+require $pupe_root_polku."/rajapinnat/custobar/cb_sales.php";
+require $pupe_root_polku."/rajapinnat/custobar/cb_products.php";
 
 if (empty($argv[1])) {
   die("ERROR! Aja näin:\ncb_tuote_export.php yhtiö [laji,laji,...] [ajentaanko_kaikki]\n");

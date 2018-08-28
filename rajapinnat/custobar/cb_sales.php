@@ -17,6 +17,12 @@ class CustobarSales {
     $this->logger->log('---------Aloitetaan myyntien päivitys---------');
 
     $pupesoft_sales = $this->pupesoft_all_sales;
+
+    if (empty($pupesoft_sales)) {
+      $this->logger->log('---------Ei päivitettäviä myyntejä---------');
+      return "";
+    }
+
     $url = $this->apiurl."/sales/upload/";
     $data_json = json_encode(array("sales" => $pupesoft_sales));
 
@@ -33,7 +39,7 @@ class CustobarSales {
 
     curl_close($ch);
 
-    if (strpos($response, '"response":"ok"') !== FALSE) {
+    if (strpos($response, '"response":"ok"') === FALSE) {
       $this->logger->log("---------Myyntien lisääminen epäonnistui!---------");
     }
     else {

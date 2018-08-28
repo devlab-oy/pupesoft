@@ -232,7 +232,7 @@ function cb_hae_myynnit() {
     unset($row);
   }
 
-  $laskut['sale_total'] = $summa;
+  if (!empty($summa)) $laskut['sale_total'] = $summa;
 
   cron_aikaleima("CB_MY_CRON", $aloitusaika);
 
@@ -268,7 +268,7 @@ function cb_hae_tuotteet() {
   $query =  "SELECT *
              FROM tuote
              WHERE yhtio = '{$kukarow['yhtio']}'
-             AND tuotetyyppi NOT IN ('A', 'B') and tuoteno = '200410'
+             AND tuotetyyppi NOT IN ('A', 'B')
              {$muutoslisa1}";
 
   $res = pupe_query($query);

@@ -17,6 +17,12 @@ class CustobarCustomers {
     $this->logger->log('---------Aloitetaan asiakkaiden päivitys---------');
 
     $pupesoft_customers = $this->pupesoft_all_customers;
+
+    if (empty($pupesoft_customers)) {
+      $this->logger->log('---------Ei päivitettäviä asiakkaita---------');
+      return "";
+    }
+
     $url = $this->apiurl."/customers/upload/";
     $data_json = json_encode(array("customers" => $pupesoft_customers));
 
@@ -33,7 +39,7 @@ class CustobarCustomers {
 
     curl_close($ch);
 
-    if (strpos($response, '"response":"ok"') !== FALSE) {
+    if (strpos($response, '"response":"ok"') === FALSE) {
       $this->logger->log("---------Asiakkaiden lisääminen epäonnistui!---------");
     }
     else {

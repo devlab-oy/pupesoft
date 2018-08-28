@@ -18,6 +18,11 @@ class CustobarProducts {
 
     $pupesoft_products = $this->pupesoft_all_products;
 
+    if (empty($pupesoft_products)) {
+      $this->logger->log('---------Ei päivitettäviä tuotteita---------');
+      return "";
+    }
+
     $url = $this->apiurl."/products/upload/";
     $data_json = json_encode(array("products" => $pupesoft_products));
 

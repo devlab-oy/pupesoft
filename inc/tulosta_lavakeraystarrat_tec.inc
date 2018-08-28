@@ -118,7 +118,7 @@ if (!function_exists("tulosta_lavakeraystarrat_tec")) {
 {PC008;0400,0455,10,10,J,00,B|}
 {RC008;{$rivinumerot[$tilrow['tunnus']]} / {$tilrow['lavanumero']}|}
 *** TULOSTUS  ***
-{XS;I,0001,0002C3200|}
+{XS;I,0001,0002C5200|}
 ";
 
       $_mt400_me1 = ($tuorow['mallitarkenne'] == '400' and $tuorow['myynti_era'] == '1');
@@ -135,7 +135,7 @@ if (!function_exists("tulosta_lavakeraystarrat_tec")) {
 {PC002;0020,0330,15,15,J,00,B|}
 {RC002;{$ed_toimtapa}|}
 *** TULOSTUS  ***
-{XS;I,0001,0002C3200|}";
+{XS;I,0001,0002C5200|}";
 
         // tulostetaan muutama tyhj‰ ennen kuin
         // pyydet‰‰n vaihtamaan lavaa
@@ -145,7 +145,7 @@ if (!function_exists("tulosta_lavakeraystarrat_tec")) {
 {XR;0000,0000,0900,0450,A|}
 {PC000;0300,0190,10,10,I,00,B|}
 *** TULOSTUS  ***
-{XS;I,0001,0002C3200|}";
+{XS;I,0001,0002C5200|}";
 
         $tarrat .= "
 *** TARRA ALKAA ***
@@ -153,7 +153,7 @@ if (!function_exists("tulosta_lavakeraystarrat_tec")) {
 {XR;0000,0000,0900,0450,A|}
 {PC000;0300,0190,10,10,I,00,B|}
 *** TULOSTUS  ***
-{XS;I,0001,0002C3200|}
+{XS;I,0001,0002C5200|}
 {XJ;VAIHDA LAVA|}
 ";
       }
@@ -168,7 +168,7 @@ if (!function_exists("tulosta_lavakeraystarrat_tec")) {
 {PC000;0300,0190,10,10,I,00,B|}
 {RC000;ASIAKAS VAIHTUU|}
 *** TULOSTUS  ***
-{XS;I,0001,0002C3200|}";
+{XS;I,0001,0002C5200|}";
       }
 
       $tulkpl = 1;
@@ -200,7 +200,7 @@ if (!function_exists("tulosta_lavakeraystarrat_tec")) {
 {PC002;0020,0330,15,15,J,00,B|}
 {RC002;{$ed_toimtapa}|}
 *** TULOSTUS  ***
-{XS;I,0001,0002C3200|}
+{XS;I,0001,0002C5200|}
 ";
 
       // tulostetaan muutama tyhj‰ ennen kuin
@@ -211,7 +211,7 @@ if (!function_exists("tulosta_lavakeraystarrat_tec")) {
 {XR;0000,0000,0900,0450,A|}
 {PC000;0300,0190,10,10,I,00,B|}
 *** TULOSTUS  ***
-{XS;I,0001,0002C3200|}";
+{XS;I,0001,0002C5200|}";
 
       $tarrat .= "
 *** TARRA ALKAA ***
@@ -219,7 +219,7 @@ if (!function_exists("tulosta_lavakeraystarrat_tec")) {
 {XR;0000,0000,0900,0450,A|}
 {PC000;0300,0190,10,10,I,00,B|}
 *** TULOSTUS  ***
-{XS;I,0001,0002C3200|}
+{XS;I,0001,0002C5200|}
 ";
     }
 

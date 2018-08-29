@@ -1139,7 +1139,7 @@ if (strpos($_SERVER['SCRIPT_NAME'], "muokkaatilaus.php") !== FALSE) {
 
   $sumhaku = '';
 
-  if (isset($toimipaikka) and "{$toimipaikka}" != "kaikki") {
+  if (isset($toimipaikka) and "{$toimipaikka}" != "kaikki" and "{$toimipaikka}" != "") {
 
     $toimipaikka = (int) $toimipaikka;
 
@@ -2672,7 +2672,7 @@ if (mysql_num_rows($result) != 0) {
         $piilotarivi = "kylla";
       }
     }
-
+    echo "2675: $row[tilaus], piilota= $piilotarivi <br><br>";
     //  Nipuista vain se viimeisin jos niin halutaan
     if (isset($row["tunnusnippu"]) and $row["tunnusnippu"] > 0 and ($whiletoim == "PROJEKTI" or $whiletoim == "TARJOUS")) {
 

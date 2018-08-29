@@ -492,7 +492,7 @@ if (isset($laskurow)) {
 
     for ($i=0; $i < mysql_num_fields($presult)-$miinus; $i++) {
       if (mysql_field_name($presult, $i) == 'tuoteno') {
-        echo "<td><a href='../tuote.php?tee=Z&tuoteno=", urlencode($prow[$i]), "'>{$prow[$i]}</a></td>";
+        echo "<td><a href='#' onclick=\"window.open('{$palvelin2}tuote.php?tee=Z&tuoteno=".urlencode($prow[$i])."', '_blank' ,'toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,left=200,top=100,width=1000,height=800'); return false;\">{$prow[$i]}</a></td>";
       }
       elseif (mysql_field_name($presult, $i) == 'toimaika') {
         echo "<td align='right'><input type='text' name='toimaikarivi[{$prow['tunnus']}]' value='{$prow[$i]}' size='10'></td>";

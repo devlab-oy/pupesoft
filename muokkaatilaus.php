@@ -1139,7 +1139,7 @@ if (strpos($_SERVER['SCRIPT_NAME'], "muokkaatilaus.php") !== FALSE) {
 
   $sumhaku = '';
 
-  if (isset($toimipaikka) and "{$toimipaikka}" != "kaikki") {
+  if (isset($toimipaikka) and "{$toimipaikka}" != "kaikki" and "{$toimipaikka}" != "") {
 
     $toimipaikka = (int) $toimipaikka;
 

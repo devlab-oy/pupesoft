@@ -15,6 +15,26 @@ if (!isset($nayta))          $nayta = "";
 if (!isset($iframe))         $iframe = "";
 if (!isset($iframe_id))      $iframe_id = "";
 
+$dokkarityypit = "";
+
+// Mit‰ dokkarityyppej‰ k‰ytt‰j‰lle saa n‰ytt‰‰
+$query = "SELECT group_concat(hd.tunnus) tyypit
+          FROM hyvaksyttavat_dokumenttityypit_kayttajat hdk
+          JOIN hyvaksyttavat_dokumenttityypit hd ON (hdk.yhtio=hd.yhtio
+            and hdk.doku_tyyppi_tunnus=hd.tunnus)
+          WHERE hdk.yhtio = '$kukarow[yhtio]'
+          AND hdk.kuka = '$kukarow[kuka]'";
+$hvresult = pupe_query($query);
+$hvrow = mysql_fetch_assoc($hvresult);
+
+if (empty($hvrow['tyypit'])) {
+  echo "<font class='error'>".t("VIRHE: Et kuulu mihink‰‰n dokumenttityyppiryhm‰‰n!")."</font>";
+  exit;
+}
+else {
+  $dokkarityypit = $hvrow['tyypit'];
+}
+
 # Halutaan n‰hd‰ hyvaksyttavat_dokumentin kuva oikealla puolella joten tehd‰‰n table
 echo "<table><tr><td class='back ptop'>";
 
@@ -23,10 +43,11 @@ $onko_eka_hyvaksyja = FALSE;
 if ((int) $tunnus != 0) {
   $tunnus = mysql_real_escape_string($tunnus);
 
-  $query = "SELECT hyvak1, h1time, hyvak2, h2time
-            FROM hyvaksyttavat_dokumentit
-            WHERE yhtio = '$kukarow[yhtio]'
-            AND tunnus  = '$tunnus'";
+  $query = "SELECT hd.hyvak1, hd.h1time, hd.hyvak2, hd.h2time
+            FROM hyvaksyttavat_dokumentit hd
+            JOIN hyvaksyttavat_dokumenttityypit hdt ON (hd.yhtio=hdt.yhtio and hd.tiedostotyyppi=hdt.tunnus and hdt.tunnus in ({$dokkarityypit}))
+            WHERE hd.yhtio = '$kukarow[yhtio]'
+            AND hd.tunnus  = '$tunnus'";
   $check_res = pupe_query($query);
 
   if (mysql_num_rows($check_res) == 1) {
@@ -42,13 +63,14 @@ if ((int) $tunnus != 0) {
 
 // Poistamme dokumentin
 if ($tee == 'D' and $oikeurow['paivitys'] == '1') {
-    $hyvaklisa = "hyvaksyja_nyt = '$kukarow[kuka]'";
+    $hyvaklisa = "hd.hyvaksyja_nyt = '$kukarow[kuka]'";
 
-    $query = "SELECT *
-              FROM hyvaksyttavat_dokumentit
+    $query = "SELECT hd.*
+              FROM hyvaksyttavat_dokumentit hd
+              JOIN hyvaksyttavat_dokumenttityypit hdt ON (hd.yhtio=hdt.yhtio and hd.tiedostotyyppi=hdt.tunnus and hdt.tunnus in ({$dokkarityypit}))
               WHERE $hyvaklisa
-              and yhtio            = '$kukarow[yhtio]'
-              and tunnus           = '$tunnus'";
+              and hd.yhtio  = '$kukarow[yhtio]'
+              and hd.tunnus = '$tunnus'";
     $result = pupe_query($query);
 
   if (mysql_num_rows($result) != 1) {
@@ -77,11 +99,12 @@ if ($tee == 'D' and $oikeurow['paivitys'] == '1') {
 
 if ($tee == "palauta") {
 
-  $query = "SELECT *
-            FROM hyvaksyttavat_dokumentit
-            WHERE hyvaksyja_nyt = '$kukarow[kuka]'
-            AND yhtio           = '$kukarow[yhtio]'
-            AND tunnus          = '$tunnus'";
+  $query = "SELECT hd.*
+            FROM hyvaksyttavat_dokumentit hd
+            JOIN hyvaksyttavat_dokumenttityypit hdt ON (hd.yhtio=hdt.yhtio and hd.tiedostotyyppi=hdt.tunnus and hdt.tunnus in ({$dokkarityypit}))
+            WHERE hd.hyvaksyja_nyt = '$kukarow[kuka]'
+            AND hd.yhtio           = '$kukarow[yhtio]'
+            AND hd.tunnus          = '$tunnus'";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) != 1) {
@@ -199,11 +222,12 @@ if ($tee == 'V' and $komm == '') {
 
 // Dokumenttia kommentoidaan
 if ($tee == 'V') {
-  $query = "SELECT *
-            FROM hyvaksyttavat_dokumentit
-            WHERE hyvaksyja_nyt = '$kukarow[kuka]'
-            and yhtio           = '$kukarow[yhtio]'
-            and tunnus          = '$tunnus'";
+  $query = "SELECT hd.*
+            FROM hyvaksyttavat_dokumentit hd
+            JOIN hyvaksyttavat_dokumenttityypit hdt ON (hd.yhtio=hdt.yhtio and hd.tiedostotyyppi=hdt.tunnus and hdt.tunnus in ({$dokkarityypit}))
+            WHERE hd.hyvaksyja_nyt = '$kukarow[kuka]'
+            and hd.yhtio           = '$kukarow[yhtio]'
+            and hd.tunnus          = '$tunnus'";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) != 1) {
@@ -227,11 +251,12 @@ if ($tee == 'V') {
 
 // Hyv‰ksynt‰listaa muutetaan
 if ($tee == 'L') {
-  $query = "SELECT *
-            FROM hyvaksyttavat_dokumentit
-            WHERE tunnus      = '$tunnus'
-            AND yhtio         = '$kukarow[yhtio]'
-            AND hyvaksyja_nyt = '$kukarow[kuka]'";
+  $query = "SELECT hd.*
+            FROM hyvaksyttavat_dokumentit hd
+            JOIN hyvaksyttavat_dokumenttityypit hdt ON (hd.yhtio=hdt.yhtio and hd.tiedostotyyppi=hdt.tunnus and hdt.tunnus in ({$dokkarityypit}))
+            WHERE hd.tunnus      = '$tunnus'
+            AND hd.yhtio         = '$kukarow[yhtio]'
+            AND hd.hyvaksyja_nyt = '$kukarow[kuka]'";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) != 1) {
@@ -281,12 +306,12 @@ if ($tee == 'L') {
 
 // Tarkistetaan samalla, ett‰ dokumentti lˆytyy.
 if ($tee == "H") {
-  $query = "SELECT *
-            FROM hyvaksyttavat_dokumentit
-            WHERE yhtio       = '{$kukarow["yhtio"]}'
-            AND tunnus        = '{$tunnus}'
-            AND hyvaksyja_nyt = '{$kukarow["kuka"]}'";
-
+  $query = "SELECT hd.*
+            FROM hyvaksyttavat_dokumentit hd
+            JOIN hyvaksyttavat_dokumenttityypit hdt ON (hd.yhtio=hdt.yhtio and hd.tiedostotyyppi=hdt.tunnus and hdt.tunnus in ({$dokkarityypit}))
+            WHERE hd.yhtio       = '{$kukarow["yhtio"]}'
+            AND hd.tunnus        = '{$tunnus}'
+            AND hd.hyvaksyja_nyt = '{$kukarow["kuka"]}'";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) != 1) {
@@ -366,11 +391,12 @@ if ($tee == 'H') {
 if (strlen($tunnus) != 0) {
 
   // Dokumentti on valittu ja sit‰ tiliˆid‰‰n
-  $query = "SELECT *,
-            concat_ws('@', laatija, luontiaika) kuka
-            FROM hyvaksyttavat_dokumentit
-            WHERE tunnus = '$tunnus'
-            and yhtio    = '$kukarow[yhtio]'";
+  $query = "SELECT hd.*,
+            concat_ws('@', hd.laatija, hd.luontiaika) kuka
+            FROM hyvaksyttavat_dokumentit hd
+            JOIN hyvaksyttavat_dokumenttityypit hdt ON (hd.yhtio=hdt.yhtio and hd.tiedostotyyppi=hdt.tunnus and hdt.tunnus in ({$dokkarityypit}))
+            WHERE hd.tunnus = '$tunnus'
+            and hd.yhtio    = '$kukarow[yhtio]'";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) == 0) {
@@ -640,13 +666,14 @@ if (strlen($tunnus) != 0) {
 }
 else {
   // T‰ll‰ ollaan, jos olemme vasta valitsemassa dokumenttia
-  $query = "SELECT hyvaksyttavat_dokumentit.*, kuka.nimi laatija
-            FROM hyvaksyttavat_dokumentit
-            LEFT JOIN kuka ON kuka.yhtio = hyvaksyttavat_dokumentit.yhtio and kuka.kuka = hyvaksyttavat_dokumentit.hyvaksyja_nyt
-            WHERE hyvaksyttavat_dokumentit.hyvaksyja_nyt = '$kukarow[kuka]'
-            and hyvaksyttavat_dokumentit.yhtio = '$kukarow[yhtio]'
-            and hyvaksyttavat_dokumentit.tila = 'H'
-            ORDER BY hyvaksyttavat_dokumentit.tunnus";
+  $query = "SELECT hd.*, kuka.nimi laatija, hdt.tyyppi
+            FROM hyvaksyttavat_dokumentit hd
+            JOIN hyvaksyttavat_dokumenttityypit hdt ON (hd.yhtio=hdt.yhtio and hd.tiedostotyyppi=hdt.tunnus)
+            LEFT JOIN kuka ON kuka.yhtio = hd.yhtio and kuka.kuka = hd.hyvaksyja_nyt
+            WHERE hd.hyvaksyja_nyt = '$kukarow[kuka]'
+            and hd.yhtio = '$kukarow[yhtio]'
+            and hd.tila = 'H'
+            ORDER BY hd.tunnus";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) == 0) {
@@ -655,7 +682,7 @@ else {
     exit;
   }
 
-  $sarakkeet = 6;
+  $sarakkeet = 7;
 
   if ($oikeurow['paivitys'] == '1') {
     $sarakkeet++;
@@ -666,6 +693,7 @@ else {
   echo "<table class='display dataTable' id='$pupe_DataTables'>";
   echo "<thead>";
   echo "<tr>";
+  echo "<th>".t("Tyyppi")."</th>";
   echo "<th>".t("Nimi")."</th>";
   echo "<th>".t("Kuvaus")."</th>";
   echo "<th>".t("Kommentit")."</th>";
@@ -678,6 +706,7 @@ else {
 
   while ($trow = mysql_fetch_assoc($result)) {
     echo "<tr class='aktiivi'>";
+    echo "<td valign='top'>{$trow['tyyppi']}</td>";
     echo "<td valign='top'>{$trow['nimi']}</td>";
     echo "<td valign='top'>{$trow['kuvaus']}</td>";
     echo "<td valign='top'>{$trow['kommentit']}</td>";

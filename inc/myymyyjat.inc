@@ -83,6 +83,7 @@ function piirra_myyjien_myynnit($lisa, $pvmalku, $pvmloppu, $toim, $kuluprosentt
   $summa = array();
   $kate = array();
   $myyja_nimi = array();
+  $avoimet = array();
 
   while ($row = mysql_fetch_array($result)) {
     if ($konserni == "") {
@@ -122,17 +123,15 @@ function piirra_myyjien_myynnit($lisa, $pvmalku, $pvmloppu, $toim, $kuluprosentt
               lasku.valkoodi,
               {$osasto_lisa}
               date_format(lasku.luontiaika,'%Y/%m') kausi,
-              round(sum(tilausrivi.tilkpl * tilausrivi.hinta* (1 - tilausrivi.ale1 / 100) * (1 - tilausrivi.ale2 / 100) * (1 - tilausrivi.ale3 / 100)), 2) summa
+              round(sum(tilausrivi.hinta / if('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt)* (1 - tilausrivi.ale1 / 100) * (1 - tilausrivi.ale2 / 100) * (1 - tilausrivi.ale3 / 100)), 2) summa
               FROM lasku use index (yhtio_tila_tapvm)
-              left join tilausrivi on tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus = lasku.tunnus
+              left join tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus = lasku.tunnus  and tilausrivi.tyyppi != 'D')
               LEFT JOIN kuka ON (kuka.yhtio = lasku.yhtio AND kuka.tunnus = lasku.myyja)
               {$tuote_lisa}
               WHERE lasku.yhtio in ($yhtiot)
               {$lisa}
               and lasku.tila   in ('N', 'L')
               and lasku.alatila != 'X'
-              and lasku.luontiaika   >= '$pvmalku'
-              and lasku.luontiaika   <= '$pvmloppu'
               {$q_lisa}
               HAVING summa <> 0
               {$q_lisa2}";
@@ -143,9 +142,8 @@ function piirra_myyjien_myynnit($lisa, $pvmalku, $pvmloppu, $toim, $kuluprosentt
     }
    
     while ($amrow = mysql_fetch_array($amresult)) {
-      $myyja_nimi[$amrow["myyja"]] = $amrow["nimi"];
       $valyhtio = $amrow["yhtio"];
-      $summa[$amrow["nimi"]][$amrow["kausi"]][2] += round($amrow["summa"] * $valuuttakurssi[$valyhtio], 0);      
+      $avoimet[$amrow["nimi"]] += round($amrow["summa"] * $valuuttakurssi[$valyhtio], 0);      
       
     }
   }
@@ -191,7 +189,7 @@ function piirra_myyjien_myynnit($lisa, $pvmalku, $pvmloppu, $toim, $kuluprosentt
   // Piirretään itse data
   $yhteensa_summa_kausi = array();
   $yhteensa_kate_kausi = array();
-  $yhteensa_avoimet_kausi = array();
+  $yhteensa_avoimet = 0;
 
   foreach ($summa as $myyja => $kausi_array) {
 
@@ -218,7 +216,6 @@ function piirra_myyjien_myynnit($lisa, $pvmalku, $pvmloppu, $toim, $kuluprosentt
     }
 
     $yhteensa_summa = 0;
-    $yhteensa_avoimet = 0;
 
     if ($toim == "TARKKA") {
       $yhteensa_kate = array();
@@ -234,9 +231,6 @@ function piirra_myyjien_myynnit($lisa, $pvmalku, $pvmloppu, $toim, $kuluprosentt
       }
       if (!isset($yhteensa_kate_kausi[$kausi])) {
         $yhteensa_kate_kausi[$kausi] = 0;
-      }
-      if (!isset($yhteensa_avoimet_kausi[$kausi])) {
-        $yhteensa_avoimet_kausi[$kausi] = 0;
       }
       $summa = isset($kausi_array[$kausi][1]) ? $kausi_array[$kausi][1] : "";
 
@@ -274,23 +268,9 @@ function piirra_myyjien_myynnit($lisa, $pvmalku, $pvmloppu, $toim, $kuluprosentt
       }
       else {
         echo "<br>{$kate_summa}";
+        if ($konserni != '') echo "<br>&nbsp";
       }
-
-      if ($konserni != "") {
-        if (isset($kausi_array[$kausi][2])) {
-          $avoimetsumma = $kausi_array[$kausi][2];
-        }
-        elseif (isset($kausi_array[$kausi][1])) {
-          $avoimetsumma = "0";
-        }
-        else  {
-          $avoimetsumma = "";
-        } 
-        $yhteensa_avoimet += $avoimetsumma;
-        $yhteensa_avoimet_kausi[$kausi] += $avoimetsumma;
-        echo "<br>&nbsp";
-      }
- 
+      
       echo "</td>";
     }
 
@@ -309,7 +289,17 @@ function piirra_myyjien_myynnit($lisa, $pvmalku, $pvmloppu, $toim, $kuluprosentt
     else {
       echo "<br>{$yhteensa_kate}";
     }
-    if ($konserni != '') echo "<br>{$yhteensa_avoimet}";
+    if ($konserni != '') {
+
+      if ($yhteensa_summa != 0 and isset($avoimet[$myyja])) {
+        $avoimetsumma = $avoimet[$myyja];
+      }
+      else  {
+        $avoimetsumma = 0;
+      }
+      echo "<br>{$avoimetsumma}";
+      $yhteensa_avoimet += $avoimetsumma;
+    }
 
     echo "</td>";
     echo "</tr>";
@@ -330,12 +320,10 @@ function piirra_myyjien_myynnit($lisa, $pvmalku, $pvmloppu, $toim, $kuluprosentt
 
   $yhteensa_summa = 0;
   $yhteensa_kate = 0;
-  $yhteensa_avoimet = 0;
 
   foreach ($rajataulu as $kausi) {
     $yhteensa_summa += $yhteensa_summa_kausi[$kausi];
     $yhteensa_kate += $yhteensa_kate_kausi[$kausi];
-    $yhteensa_avoimet += $yhteensa_avoimet_kausi[$kausi];
 
     if ($yhteensa_summa_kausi[$kausi] != 0) {
       $kate_prosentti = round($yhteensa_kate_kausi[$kausi] / $yhteensa_summa_kausi[$kausi] * 100);
@@ -350,7 +338,7 @@ function piirra_myyjien_myynnit($lisa, $pvmalku, $pvmloppu, $toim, $kuluprosentt
     }
     else {
       echo "<th style='text-align:right;'>$yhteensa_summa_kausi[$kausi]<br>" .
-      round($yhteensa_kate_kausi[$kausi]) . "<br>$kate_prosentti%<br>$yhteensa_avoimet_kausi[$kausi]</th>";
+      round($yhteensa_kate_kausi[$kausi]) . "<br>$kate_prosentti%<br>&nbsp</th>";
     }
   }
 
@@ -364,7 +352,6 @@ function piirra_myyjien_myynnit($lisa, $pvmalku, $pvmloppu, $toim, $kuluprosentt
   echo "</tr>";
   echo "</table>";
 }
-
 function hae_osastojen_nimet() {
   $osasto_result = t_avainsana("OSASTO");
 

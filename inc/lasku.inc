@@ -18,5 +18,10 @@ else {
   $kentat = 'tunnus, laskunro, tapvm, ytunnus, nimi, summa, valkoodi, tunnus';
   $jarjestys = 'laskunro DESC';
 
-  $rajauslisa = " and lasku.tila = 'U' and lasku.alatila='X' and lasku.tapvm >= '$vuosisitten' ";
+  if ($haku[1] == '') {
+    $rajauslisa = " and lasku.tila = 'U' and lasku.alatila='X' and lasku.tapvm >= '$vuosisitten' ";
+  }
+  else {
+    $rajauslisa = " and lasku.tila = 'U' and lasku.alatila='X' ";
+  }
 }

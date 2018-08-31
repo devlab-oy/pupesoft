@@ -1563,18 +1563,18 @@ if (!isset($from_kaikkikorj)) {
       elseif (isset($osatoimitus)) $osatoimitus_force = $forcenap;
     }
 
-    if ($toim != 'KORJAA' and $toim != 'TUTKAA') {
-      if ($toim != 'TUOTE') {
-        echo "<tr>
-              <td colspan='2'>".t("Kommentit").":</td>
-              <td colspan='6'>
-                <input type='hidden' name='valmistuksen_lisatiedot_tilaus' id='hae_lisatiedot_tilaus' value='$row[Tilaus]'>
-                <textarea name='valmistuksen_lisatiedot' id='hae_lisatiedot' rows='5' cols='80'>{$row['valmistuksen_lisatiedot']}</textarea>
-              </td>
-              <td></td>
-              </tr>";
-      }
+    if ($toim == 'KORJAA' or $toim == '') {
+      echo "<tr>
+            <td colspan='2'>".t("Kommentit").":</td>
+            <td colspan='6'>
+              <input type='hidden' name='valmistuksen_lisatiedot_tilaus' id='hae_lisatiedot_tilaus' value='$row[Tilaus]'>
+              <textarea name='valmistuksen_lisatiedot' id='hae_lisatiedot' rows='5' cols='80'>{$row['valmistuksen_lisatiedot']}</textarea>
+            </td>
+            <td></td>
+            </tr>";
+    }
 
+    if ($toim != 'KORJAA' and $toim != 'TUTKAA') {
       echo "<tr><td colspan='9' class='back'><br></td></tr>";
       echo "<tr><td colspan='8'>", t("Valmista syötetyt kappaleet"), ":</td><td><input type='submit' name='osavalmistus' id='osavalmistus' value='".t("Valmista")."'></td>$osavalmistus_force</tr>";
       echo "<tr><td colspan='4'>", t("Valmista prosentti koko tilauksesta"), ":</td><td colspan='4' align='right'><input type='text' name='kokopros' size='5'> % </td><td><input type='submit' name='osavalmistus' id='osavalmistus' value='".t("Valmista")."'></td>$osavalmistuspros_force</tr>";
@@ -1599,17 +1599,17 @@ if (!isset($from_kaikkikorj)) {
 
     echo "<form method='post' autocomplete='off'>";
     echo "<input type='hidden' name='toim'  value='$toim'>";
+    echo "<input type='hidden' name='valmistuksen_lisatiedot_tilaus' id='haetut_lisatiedot_tilaus' value=''>";
+    echo "<input type='hidden' name='valmistuksen_lisatiedot' id='haetut_lisatiedot' value=''>";
 
     if ($toim != 'KORJAA') {
       echo "<input type='hidden' name='tee' value=''>";
-      echo "<input type='hidden' name='valmistuksen_lisatiedot_tilaus' id='haetut_lisatiedot_tilaus' value=''>";
-      echo "<input type='hidden' name='valmistuksen_lisatiedot' id='haetut_lisatiedot' value=''>";
       echo "<input type='submit' name='' value='".t("Valmis")."' onclick='lisatiedot();'>";
     }
     else {
       echo "<input type='hidden' name='tee' value='alakorjaa'>";
       echo "<input type='hidden' name='valmistettavat' value='$valmistettavat'>";
-      echo "<input type='submit' name='' value='".t("Älä korjaa")."'>";
+      echo "<input type='submit' name='' value='".t("Älä korjaa")."' onclick='lisatiedot();'>";
     }
     echo "</form>";
   }

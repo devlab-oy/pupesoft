@@ -208,6 +208,9 @@ if ($toim == "LAVATARRA") {
 if ($toim == "LAVAKERAYSTARRA") {
   $fuse = t("Lavakeraystarra");
 }
+if ($toim == "LAVAKERAYSLISTA") {
+  $fuse = t("Lavakerayslista");
+}
 
 if (isset($muutparametrit) and $muutparametrit != '') {
   $muut = explode('/', $muutparametrit);
@@ -919,14 +922,14 @@ if ($tee == "ETSILASKU") {
     $use = " use index (yhtio_tila_luontiaika) ";
   }
 
-  if ($toim == "LAVAKERAYSTARRA" or $toim == "LAVATARRA") {
+  if ($toim == "LAVAKERAYSTARRA" or $toim == "LAVATARRA" or $toim == "LAVAKERAYSLISTA") {
     //myyntitilaus. Tulostetaan lavatarra-kopio.
 
-    if ($toim == "LAVAKERAYSTARRA") {
-      $where1 .= " lasku.tila = 'L' and lasku.alatila in ('A','B','C','D','E') ";
+    if ($toim == "LAVAKERAYSTARRA" or $toim == "LAVAKERAYSLISTA") {
+      $where1 .= " lasku.tila = 'L' and lasku.alatila in ('A','B','C','D','E','X') ";
     }
     else {
-      $where1 .= " lasku.tila = 'L' and lasku.alatila in ('B','C','D','E') ";
+      $where1 .= " lasku.tila = 'L' and lasku.alatila in ('B','C','D','E','X') ";
     }
 
     $where1 .= " and (lasku.kerayslista = lasku.tunnus or lasku.kerayslista = 0) ";
@@ -1134,7 +1137,7 @@ if ($tee == "ETSILASKU") {
 
     echo "<th valign='top'><a href='{$hreffi}&jarj=lasku.ytunnus'>", t("Ytunnus"), "</a><br><a href='{$hreffi}&jarj=lasku.nimi'>", t("Nimi"), "</a></th>";
 
-    if ($toim == "LAVAKERAYSTARRA" or $toim == "LAVATARRA") {
+    if ($toim == "LAVAKERAYSTARRA" or $toim == "LAVATARRA" or $toim == "LAVAKERAYSLISTA") {
       echo "<th valign='top'><a href='{$hreffi}&jarj=toimitustapa'>", t("Toimitustapa"), "</a></th>";
     }
 
@@ -1190,7 +1193,7 @@ if ($tee == "ETSILASKU") {
       echo "</$ero>";
       echo "<$ero valign='top'>", tarkistahetu($row['ytunnus']), "<br>$row[nimi]<br>$row[nimitark]</$ero>";
 
-      if ($toim == "LAVAKERAYSTARRA" or $toim == "LAVATARRA") {
+      if ($toim == "LAVAKERAYSTARRA" or $toim == "LAVATARRA" or $toim == "LAVAKERAYSLISTA") {
         echo "<$ero valign='top'>$row[toimitustapa]</$ero>";
       }
 
@@ -1375,7 +1378,7 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
   elseif ($toim == "KERAYSLISTA") {
     $tulostimet[0] = 'Keräyslista';
   }
-  elseif ($toim == "LAVAKERAYSTARRA" or $toim == "LAVATARRA") {
+  elseif ($toim == "LAVAKERAYSTARRA" or $toim == "LAVATARRA" or $toim == "LAVAKERAYSLISTA") {
     $tulostimet[0] = 'Lavatarra';
   }
   elseif ($toim == "OSOITELAPPU") {
@@ -2519,12 +2522,15 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
       $tee = '';
     }
 
-    if ($toim == "LAVAKERAYSTARRA" or $toim == "LAVATARRA") {
+    if ($toim == "LAVAKERAYSTARRA" or $toim == "LAVATARRA" or $toim == "LAVAKERAYSLISTA") {
 
       require "inc/lavakeraysparametrit.inc";
 
       if ($toim == "LAVAKERAYSTARRA") {
         require_once "inc/tulosta_lavakeraystarrat_tec.inc";
+      }
+      elseif ($toim == "LAVAKERAYSLISTA") {
+        require_once "lavakerayslista_pdf.inc";
       }
       else {
         require_once "lavatarra_pdf.inc";
@@ -2607,9 +2613,16 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
       $lava_referenssiluku = 0;
       $lavat = array();
       $rivinumerot = array();
+      $tilausnumerot = array();
+      $puuterivit = array();
+
       $kal = 1;
 
       while ($row = mysql_fetch_assoc($riresult)) {
+        if ($row['var'] == "P") {
+          $puuterivit[] = $row;
+        }
+
         if (empty($lavat[$lavanumero][$row['otunnus']])) {
           $lavat[$lavanumero][$row['otunnus']] = 0;
         }
@@ -2627,32 +2640,45 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
         $lavat[$lavanumero][$row['otunnus']] += round(($row['varattu']+$row['kpl'])/$row['myynti_era'], 2);
         $lava_referenssiluku += ($row['tilkpl'] * $row['lavakoko']);
 
+        $tilausnumerot[$row['otunnus']] = $row['otunnus'];
         $rivinumerot[$row["tunnus"]] = $kal;
         $kal++;
       }
+
+      $params_lavatarra = array(
+        'norm'         => $norm,
+        'pieni'        => $pieni,
+        'pieni_boldi'  => $pieni_boldi,
+        'boldi'        => $boldi,
+        'iso'          => $iso,
+        'iso_boldi'    => $iso_boldi,
+        'rectparam'    => $rectparam,
+        'komento'      => $komento["Lavatarra"],
+        'toimitustapa' => $laskurow['toimitustapa'],
+        'pdf'          => NULL,
+        'lavanumero'   => 0,
+        'kala'         => 720,
+        'tilaukset'    => NULL,
+        'tilausnumerot'=> NULL,
+        'tee'          => $tee,
+        'firstpage'    => NULL,
+        'sivunvaihto'  => 30);
 
       if ($toim == "LAVAKERAYSTARRA") {
         // Lavakeraystarrat
         tulosta_lavakeraystarrat_tec($riresult, $rivinumerot, $komento["Lavatarra"]);
       }
+      elseif ($toim == "LAVAKERAYSLISTA") {
+        ksort($tilausnumerot);
+        $params_lavatarra['tilausnumerot'] = $tilausnumerot;
+        $params_lavatarra['lavat'] = $lavat;
+        $params_lavatarra['tulostusaika'] = $laskurow['lahetepvm'];
+        $params_lavatarra['puuterivit'] = $puuterivit;
+        $params_lavatarra = sivu_lavakerayslista($params_lavatarra);
+
+        print_pdf_lavakerayslista($params_lavatarra);
+      }
       else {
-        $params_lavatarra = array(
-          'norm'              => $norm,
-          'pieni'             => $pieni,
-          'pieni_boldi'       => $pieni_boldi,
-          'boldi'             => $boldi,
-          'iso'               => $iso,
-          'iso_boldi'         => $iso_boldi,
-          'rectparam'         => $rectparam,
-          'komento'           => $komento["Lavatarra"],
-          'toimitustapa'      => $laskurow['toimitustapa'],
-          'pdf'               => NULL,
-          'lavanumero'        => 0,
-          'tilaukset'         => NULL,
-          'tee'               => $tee,
-          'thispage'          => NULL,);
-
-
         foreach ($lavat as $lava => $tilaukset) {
           ksort($tilaukset);
           $params_lavatarra['lavanumero'] = $lava;

@@ -457,7 +457,7 @@ if ((int) $chk_row["ok"] == (int) $chk_row["kaikki"] and (int) $chk_row["ok"] !=
 
   $kerayseran_numero = !isset($kerayseran_numero) ? 0 : $kerayseran_numero;
 
-  if ($yhtiorow["lahetteen_tulostustapa"] != "X") {
+  if ($toim != "LAVAKERAYS" and $yhtiorow["lahetteen_tulostustapa"] != "X") {
 
     $pdfdoc = isset($pdf_kaikki_tul) ? $pdf_kaikki_tul : NULL;
     $ekasivu = !empty($vikasivu) ? $vikasivu : 1;
@@ -512,11 +512,6 @@ if ((int) $chk_row["ok"] == (int) $chk_row["kaikki"] and (int) $chk_row["ok"] !=
 
     $valittu_tulostin = !isset($valittu_tulostin) ? '' : $valittu_tulostin;
 
-    if ($toim == "LAVAKERAYS") {
-      // HB-kerayslista tulostin
-      setcookie("hb_kerayslista_tulostin", $valittu_tulostin, time()+60*60*24*90, "/");
-    }
-
     if ($valittu_tulostin == "-88") {
       $komento = "-88";
     }
@@ -531,7 +526,85 @@ if ((int) $chk_row["ok"] == (int) $chk_row["kaikki"] and (int) $chk_row["ok"] !=
     }
   }
 
-  if (!empty($valittu_lavakeraystarra_tulostin)) {
+  if ($toim == "LAVAKERAYS" and !empty($valittu_lavakerayslista_tulostin)) {
+    require_once "lavakerayslista_pdf.inc";
+
+    $query  = "SELECT *
+               FROM kirjoittimet
+               WHERE yhtio = '$kukarow[yhtio]'
+               AND tunnus = '$valittu_lavakerayslista_tulostin'";
+    $kirres = pupe_query($query);
+    $kirrow = mysql_fetch_assoc($kirres);
+
+    $params_lavatarra = array(
+      'norm'         => $norm,
+      'pieni'        => $pieni,
+      'pieni_boldi'  => $pieni_boldi,
+      'boldi'        => $boldi,
+      'iso'          => $iso,
+      'iso_boldi'    => $iso_boldi,
+      'rectparam'    => $rectparam,
+      'komento'      => $kirrow["komento"],
+      'toimitustapa' => $laskurow['toimitustapa'],
+      'pdf'          => NULL,
+      'lavanumero'   => 0,
+      'kala'         => 720,
+      'tilaukset'    => NULL,
+      'tilausnumerot'=> NULL,
+      'tee'          => $tee,
+      'firstpage'    => NULL,
+      'sivunvaihto'  => 30);
+
+    mysql_data_seek($riresult, 0);
+
+    $lavanumero = 1;
+    $lava_referenssiluku = 0;
+    $lavat = array();
+    $rivinumerot = array();
+    $tilausnumerot = array();
+    $puuterivit = array();
+    $kal = 1;
+
+    while ($row = mysql_fetch_assoc($riresult)) {
+      if ($row['var'] == "P") {
+        $puuterivit[] = $row;
+      }
+
+      if (empty($lavat[$lavanumero][$row['otunnus']])) {
+        $lavat[$lavanumero][$row['otunnus']] = 0;
+      }
+
+      if ($lava_referenssiluku >= lavakerayskapasiteetti) {
+        $lavanumero++;
+        $lava_referenssiluku=0;
+      }
+
+      // myynti_era = 1 / mallitarkenne = 400 poikkeus
+      if ((int) $row['myynti_era'] == 1 and (int) $row['mallitarkenne'] == 400) {
+        $row['myynti_era'] = 6;
+      }
+
+      $lavat[$lavanumero][$row['otunnus']] += round(($row['varattu']+$row['kpl'])/$row['myynti_era'], 2);
+      $lava_referenssiluku += ($row['tilkpl'] * $row['lavakoko']);
+
+      $tilausnumerot[$row["otunnus"]] = $row["otunnus"];
+      $rivinumerot[$row["tunnus"]] = $kal;
+      $kal++;
+    }
+
+    $params_lavatarra['tilausnumerot'] = $tilausnumerot;
+    $params_lavatarra['lavat'] = $lavat;
+    $params_lavatarra['tulostusaika'] = date("Y-m-d H:i:s");
+    $params_lavatarra['puuterivit'] = $puuterivit;
+    $params_lavatarra = sivu_lavakerayslista($params_lavatarra);
+
+    print_pdf_lavakerayslista($params_lavatarra);
+
+    // HB-kerayslista tulostin
+    setcookie("hb_kerayslista_tulostin", $valittu_lavakerayslista_tulostin, time()+60*60*24*90, "/");
+  }
+
+  if ($toim == "LAVAKERAYS" and !empty($valittu_lavakeraystarra_tulostin)) {
     $query  = "SELECT *
                FROM kirjoittimet
                WHERE yhtio = '$kukarow[yhtio]'
@@ -547,8 +620,8 @@ if ((int) $chk_row["ok"] == (int) $chk_row["kaikki"] and (int) $chk_row["ok"] !=
     }
   }
 
-  # Tulostetaan lista kerrallaan vain jos ei tulosteta kaikkia listoja kerrallaan
-  if ($komento != "" and $yhtiorow["lahetteen_tulostustapa"] != "X" and empty($pdf_kaikki_tul)) {
+  // Tulostetaan lista kerrallaan vain jos ei tulosteta kaikkia listoja kerrallaan
+  if ($toim != "LAVAKERAYS" and $komento != "" and $yhtiorow["lahetteen_tulostustapa"] != "X" and empty($pdf_kaikki_tul)) {
     // tulostetaan sivu
     $params_kerayslista["komento"] = $komento;
 
@@ -582,10 +655,11 @@ if ((int) $chk_row["ok"] == (int) $chk_row["kaikki"] and (int) $chk_row["ok"] !=
 
     $returnvalue = 0;
   }
+
   elseif ($yhtiorow["lahetteen_tulostustapa"] == "X") {
     $returnvalue = 0;
   }
-  elseif (!empty($pdf_kaikki_tul)) {
+  elseif (!empty($pdf_kaikki_tul) or $toim == "LAVAKERAYS") {
     $returnvalue = 0;
   }
   else {

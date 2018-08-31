@@ -1139,7 +1139,7 @@ if (strpos($_SERVER['SCRIPT_NAME'], "muokkaatilaus.php") !== FALSE) {
 
   $sumhaku = '';
 
-  if (isset($toimipaikka) and "{$toimipaikka}" != "kaikki") {
+  if (isset($toimipaikka) and "{$toimipaikka}" != "kaikki" and "{$toimipaikka}" != "") {
 
     $toimipaikka = (int) $toimipaikka;
 
@@ -2067,7 +2067,7 @@ elseif ($toim == "EXTRANET") {
 }
 elseif ($toim == "LAVAKERAYS") {
 
-  $query = "SELECT DISTINCT lasku.toim_maa maa, lasku.tunnus tilaus, asiakkaan_tilausnumero as 'astilno', $asiakasstring asiakas, asiakas.asiakasnro, lasku.luontiaika, count(tilausrivi.tunnus) riveja, ";
+  $query = "SELECT DISTINCT lasku.toim_maa maa, lasku.tunnus tilaus, asiakkaan_tilausnumero as 'astilno', $asiakasstring asiakas, asiakas.asiakasnro, lasku.luontiaika, sum(tilausrivi.tilkpl) kappaleita, ";
 
   if ($kukarow['hinnat'] == 0) {
     $query .= " round(sum(tilausrivi.hinta
@@ -3355,7 +3355,7 @@ if (mysql_num_rows($result) != 0) {
       echo "<table>";
       echo "<tr>";
       echo "<th>".t("Keräyslistan tulostin")."</th>";
-      echo "<td><select name='valittu_tulostin'>";
+      echo "<td><select name='valittu_lavakerayslista_tulostin'>";
       echo "<option value=''>".t("Valitse tulostin")."</option>";
 
       if (empty($hb_kerayslista_tulostin)) {

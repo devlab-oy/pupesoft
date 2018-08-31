@@ -22,6 +22,26 @@ $iso_boldi["font"] = "Helvetica-Bold";
 
 $rectparam["width"] = 0.3;
 
+if (!function_exists('otsikot_lavatarra')) {
+  function otsikot_lavatarra($params) {
+    global $kukarow, $yhtiorow;
+
+    // Luodaan muuttujat
+    extract($params);
+
+    // sitten aletaan piirtämään itse PDF sisältöä
+    $pdf->draw_text(30, 550, $toimitustapa, $firstpage, $iso_boldi);
+    $pdf->draw_text(30, 530, "Pallet: $lavanumero", $firstpage, $iso);
+    $pdf->draw_text(50, 512, "Order", $firstpage, $boldi);
+    $pdf->draw_text(130, 512, "Pack", $firstpage, $boldi);
+
+    $return = compact(array_keys($params));
+
+    return $return;
+  }
+}
+
+
 if (!function_exists('sivu_lavatarra')) {
   function sivu_lavatarra($params) {
     global $kukarow, $yhtiorow;
@@ -29,7 +49,7 @@ if (!function_exists('sivu_lavatarra')) {
     // Luodaan muuttujat
     extract($params);
 
-    //PDF parametrit
+    // PDF parametrit
     if ($pdf === NULL) {
       $pdf = new pdffile;
       $pdf->set_default('margin-top', 0);
@@ -41,12 +61,9 @@ if (!function_exists('sivu_lavatarra')) {
     $firstpage = $pdf->new_page("a5");
 
     // sitten aletaan piirtämään itse PDF sisältöä
-    $pdf->draw_text(30, 550, $toimitustapa, $firstpage, $iso_boldi);
-
-    $pdf->draw_text(30, 530, "Pallet: $lavanumero", $firstpage, $iso);
-
-    $pdf->draw_text(50, 512, "Order", $firstpage, $boldi);
-    $pdf->draw_text(130, 512, "Pack", $firstpage, $boldi);
+    $return = compact(array_keys($params));
+    $params = otsikot_lavatarra($return);
+    extract($params);
 
     $kala = 500;
     $yhteensa = 0;
@@ -77,10 +94,17 @@ if (!function_exists('sivu_lavatarra')) {
 
       $yhteensa+= $myyntierat;
       $kala-=10;
+
+      if ($kala < 20) {
+        $kala = 500;
+        $pdf->draw_rectangle(580, 15, 15, 400,  $firstpage, $rectparam);
+        $firstpage = $pdf->new_page("a5");
+        $params = otsikot_lavatarra(compact(array_keys($params)));
+        extract($params);
+      }
     }
 
     $pdf->draw_text(200, $kala+10, $yhteensa,  $firstpage, $norm);
-
     $pdf->draw_rectangle(580, 15, 15, 400,  $firstpage, $rectparam);
 
     // Luodaan palautettavat

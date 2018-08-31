@@ -30,12 +30,16 @@ if (!function_exists('otsikot_lavakerayslista')) {
     extract($params);
 
     // sitten aletaan piirtämään itse PDF sisältöä
-    $pdf->draw_text(30, 550, "Lavakeräyslista", $firstpage, $iso_boldi);
-    $pdf->draw_text(50, 512, "Tilausnumero", $firstpage, $boldi);
-    $pdf->draw_text(150, 512, "Asiakkaan tilausnumero", $firstpage, $boldi);
+    $pdf->draw_text(320, 800, "Lavakeräyslista", $firstpage, $iso_boldi);
+    $pdf->draw_text(320, 780, $toimitustapa, $firstpage, $iso);
+    $pdf->draw_text(320, 760, tv1dateconv($tulostusaika, "PITKA"), $firstpage, $iso);
+
+    if ($sivunvaihto == 30) {
+      $pdf->draw_text(50, 732, "Tilausnumero", $firstpage, $boldi);
+      $pdf->draw_text(150, 732, "Asiakkaan tilausnumero", $firstpage, $boldi);
+    }
 
     tulosta_logo_pdf($pdf, $firstpage, "");
-
     return compact(array_keys($params));
   }
 }
@@ -48,9 +52,8 @@ if (!function_exists('sivunvaihto')) {
     extract($params);
 
     if ($kala < $sivunvaihto) {
-      $kala = 500;
-      $pdf->draw_rectangle(580, 15, 15, 400,  $firstpage, $rectparam);
-      $firstpage = $pdf->new_page("a5");
+      $kala = 720;
+      $firstpage = $pdf->new_page("a4");
       $params = otsikot_lavakerayslista(compact(array_keys($params)));
       extract($params);
     }
@@ -76,13 +79,13 @@ if (!function_exists('sivu_lavakerayslista')) {
       $pdf->set_default('margin-right', 0);
     }
 
-    $firstpage = $pdf->new_page("a5");
+    $firstpage = $pdf->new_page("a4");
 
     // sitten aletaan piirtämään itse PDF sisältöä
     $params = otsikot_lavakerayslista(compact(array_keys($params)));
     extract($params);
 
-    $kala = 500;
+    $kala = 720;
     $yhteensa = 0;
 
     foreach($tilausnumerot as $tilaus) {
@@ -115,7 +118,32 @@ if (!function_exists('sivu_lavakerayslista')) {
       extract($params);
     }
 
-    $pdf->draw_rectangle(580, 15, 15, 400,  $firstpage, $rectparam);
+    $params = sivunvaihto(compact(array_keys($params)));
+    extract($params);
+    $sivunvaihto = 30;
+
+    if (count($puuterivit)) {
+      $pdf->draw_text(50, $kala, "Puuterivit:", $firstpage, $boldi);
+      $kala-=10;
+      $pdf->draw_text(50, $kala, "Tilaus", $firstpage, $boldi);
+      $pdf->draw_text(150, $kala, "Tuote", $firstpage, $boldi);
+      $pdf->draw_text(260, $kala, "Määrä", $firstpage, $boldi);
+      $kala-=10;
+    }
+
+    foreach($puuterivit as $puuterivi) {
+
+      $pdf->draw_text(50, $kala, $puuterivi['otunnus'], $firstpage, $norm);
+      $pdf->draw_text(150, $kala, $puuterivi['tuoteno'], $firstpage, $norm);
+
+      $oikpos = $pdf->strlen($puuterivi["tilkpl"], $norm);
+      $pdf->draw_text(280-$oikpos, $kala, $puuterivi["tilkpl"], $firstpage, $norm);
+      $kala-=10;
+
+      $params = sivunvaihto(compact(array_keys($params)));
+      extract($params);
+    }
+
 
     // Luodaan palautettavat
     $return = compact(array_keys($params));

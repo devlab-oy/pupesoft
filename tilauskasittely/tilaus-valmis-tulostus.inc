@@ -548,7 +548,7 @@ if ((int) $chk_row["ok"] == (int) $chk_row["kaikki"] and (int) $chk_row["ok"] !=
       'toimitustapa' => $laskurow['toimitustapa'],
       'pdf'          => NULL,
       'lavanumero'   => 0,
-      'kala'         => 500,
+      'kala'         => 720,
       'tilaukset'    => NULL,
       'tilausnumerot'=> NULL,
       'tee'          => $tee,
@@ -562,9 +562,14 @@ if ((int) $chk_row["ok"] == (int) $chk_row["kaikki"] and (int) $chk_row["ok"] !=
     $lavat = array();
     $rivinumerot = array();
     $tilausnumerot = array();
+    $puuterivit = array();
     $kal = 1;
 
     while ($row = mysql_fetch_assoc($riresult)) {
+      if ($row['var'] == "P") {
+        $puuterivit[] = $row;
+      }
+
       if (empty($lavat[$lavanumero][$row['otunnus']])) {
         $lavat[$lavanumero][$row['otunnus']] = 0;
       }
@@ -589,6 +594,8 @@ if ((int) $chk_row["ok"] == (int) $chk_row["kaikki"] and (int) $chk_row["ok"] !=
 
     $params_lavatarra['tilausnumerot'] = $tilausnumerot;
     $params_lavatarra['lavat'] = $lavat;
+    $params_lavatarra['tulostusaika'] = date("Y-m-d H:i:s");
+    $params_lavatarra['puuterivit'] = $puuterivit;
     $params_lavatarra = sivu_lavakerayslista($params_lavatarra);
 
     print_pdf_lavakerayslista($params_lavatarra);

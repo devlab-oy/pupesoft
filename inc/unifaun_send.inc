@@ -1003,7 +1003,7 @@ class Unifaun {
       $uni_addon = $uni_service->addChild('addon');
       $uni_addon->addAttribute('adnid', "FDNGPP");
 
-      $uni_add_val = $uni_addon->addChild('val', utf8_encode($_yhtio_nimi));
+      $uni_add_val = $uni_addon->addChild('val', utf8_encode($this->postirow["yhtio_nimi"]));
       $uni_add_val->addAttribute('n', 'declarant');
     }
     // Jos meillä on VAK tuotteita tilauksella ja sopiva palvelukoodi, lisätään DNG lisäpalvelu
@@ -1011,7 +1011,7 @@ class Unifaun {
       $uni_addon = $uni_service->addChild('addon');
       $uni_addon->addAttribute('adnid', "DNG");
 
-      $uni_add_val = $uni_addon->addChild('val', utf8_encode($_yhtio_nimi));
+      $uni_add_val = $uni_addon->addChild('val', utf8_encode($this->postirow["yhtio_nimi"]));
       $uni_add_val->addAttribute('n', 'declarant');
     }
 
@@ -1372,7 +1372,7 @@ class Unifaun {
         }
 
         if (isset($vak['nimi_ja_kuvaus']) and $vak['nimi_ja_kuvaus'] != '') {
-          
+
           $uni_par_val = $uni_article->addChild('val', utf8_encode($vak["nimi_ja_kuvaus"])); // Official transport name for item regarding ADR
           $uni_par_val->addAttribute('n', "dngdescr");
         }

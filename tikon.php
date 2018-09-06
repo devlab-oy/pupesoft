@@ -12,6 +12,9 @@ if ($lataa_tiedosto == 1) {
   exit;
 }
 
+if (!isset($toim)) {
+  $toim = '';
+}
 // poimitaan kuluva päivä, raportin timestampille
 $today = date("Y-m-d");
 

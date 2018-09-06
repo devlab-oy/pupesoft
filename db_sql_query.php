@@ -352,7 +352,7 @@ else {
         $liitos = " and tuotteen_toimittajat.liitostunnus = '{$rajaus["tuotteen_toimittajat.liitostunnus"]}'";
       }
 
-      $joinit["tuotteen_toimittajat"] = "\nLEFT JOIN tuotteen_toimittajat ON tuote.yhtio=tuotteen_toimittajat.yhtio and tuote.tuoteno=tuotteen_toimittajat.tuoteno {$liitos}";
+      $joinit["tuotteen_toimittajat"] = "\nJOIN tuotteen_toimittajat ON tuote.yhtio=tuotteen_toimittajat.yhtio and tuote.tuoteno=tuotteen_toimittajat.tuoteno {$liitos}";
 
       foreach ($sarakkeet as $kentta) {
 

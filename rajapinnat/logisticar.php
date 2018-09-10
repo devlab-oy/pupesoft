@@ -540,7 +540,7 @@ function varastotapahtumat($limit = '') {
             LEFT JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
               AND varastopaikat.tunnus                          = tuotepaikat.varasto)
             LEFT JOIN kuka ON kuka.tunnus=lasku.myyja and kuka.yhtio=lasku.yhtio
-            
+
             WHERE tapahtuma.laji                                in ('tulo', 'laskutus', 'siirto', 'valmistus', 'kulutus')
             and tapahtuma.yhtio                                 = '$yhtio'
             $pvmlisa
@@ -634,7 +634,7 @@ function varastotapahtumat($limit = '') {
 
 
     }
-    
+
     $asquery = "SELECT asiakas.myyjanro, kuka.kuka from asiakas
               LEFT JOIN kuka ON (kuka.yhtio = asiakas.yhtio and kuka.myyja = asiakas.myyjanro)
               WHERE asiakas.yhtio = '$yhtio'
@@ -642,9 +642,10 @@ function varastotapahtumat($limit = '') {
     $asres = pupe_query($asquery);
 
     $asrow = mysql_fetch_assoc($asres);
-    
-    if ($asrow['myyjanro'] > 0) $trow['myyjatunnus'] = $asrow['kuka'];
-    
+
+    #Laitetaan tyhjänä jos ei asiakasmyyjää ole
+    $trow['myyjatunnus'] = $asrow['kuka'];
+
     unset($trow['kate']);
 
     // Siivotaan kentät:

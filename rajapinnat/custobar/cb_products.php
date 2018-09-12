@@ -39,8 +39,9 @@ class CustobarProducts {
 
     curl_close($ch);
 
-    if (strpos($response, '"response":"ok"') !== FALSE) {
+    if (strpos($response, '"response":"ok"') === FALSE) {
       $this->logger->log("---------Tuotteiden lisääminen epäonnistui!---------");
+      $this->logger->log($response);
     }
     else {
       $this->logger->log('---------Tuotteiden päivitys valmis---------');

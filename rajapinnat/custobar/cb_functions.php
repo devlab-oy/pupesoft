@@ -143,7 +143,7 @@ function cb_hae_asiakkaat() {
 
   cron_aikaleima("CB_AS_CRON", $aloitusaika);
 
-  pupesoft_log("cb_customers", count($asiakkaat). " tuotetta löytyi");
+  pupesoft_log("cb_customers", count($asiakkaat). " asiakasta löytyi");
 
   return $asiakkaat;
 }

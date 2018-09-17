@@ -143,6 +143,8 @@ function cb_hae_asiakkaat() {
 
   cron_aikaleima("CB_AS_CRON", $aloitusaika);
 
+  pupesoft_log("cb_customers", count($asiakkaat). " asiakasta löytyi");
+
   return $asiakkaat;
 }
 
@@ -205,8 +207,6 @@ function cb_hae_myynnit() {
     $maksuehdot[$row['tunnus']] = $row['teksti'];
   }
 
-  $summa = 0;
-
   while ($row = mysql_fetch_array($res)) {
 
     $maksuehdot[$row['maksuehto']]  = str_replace(array('Ä','ä','Ö','ö','Å','å'), array('A','a','O','o','A','a'), trim(pupesoft_cleanstring(pupesoft_csvstring($maksuehdot[$row['maksuehto']]))));
@@ -218,6 +218,7 @@ function cb_hae_myynnit() {
       "sale_customer_id"          => $row['liitostunnus'],
       "sale_date"                 => $row['laskutettu'],
       "sale_payment_method"       => $maksuehdot[$row['maksuehto']],
+      "sale_total"                => $row['arvo'],
       "sale_state"                => "COMPLETE",
       "sale_shop_id"              => $row['ohjelma_moduli'],
       "external_id"               => $row['tilausrivitunnus'],
@@ -227,14 +228,12 @@ function cb_hae_myynnit() {
       "total"                     => round($row['rivihinta'] * 100, 0),
     );
 
-    $summa = $summa + round($row['rivihinta'] * 100, 0);
-
     unset($row);
   }
 
-  if (!empty($summa)) $laskut['sale_total'] = $summa;
-
   cron_aikaleima("CB_MY_CRON", $aloitusaika);
+
+  pupesoft_log("cb_sales", count($laskut). " laskua löytyi");
 
   return $laskut;
 }
@@ -380,6 +379,8 @@ function cb_hae_tuotteet() {
   }
 
   cron_aikaleima("CB_TU_CRON", $aloitusaika);
+
+  pupesoft_log("cb_products", count($tuotteet). " tuotetta löytyi");
 
   return $tuotteet;
 }

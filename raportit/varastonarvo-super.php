@@ -666,6 +666,7 @@ if (isset($supertee) and $supertee == "RAPORTOI") {
         tuote.yksikko,
         tuote.nimitys,
         tuote.kehahin,
+        tuote.kustp,
         if(tuote.epakurantti100pvm = '0000-00-00', if(tuote.epakurantti75pvm = '0000-00-00', if(tuote.epakurantti50pvm = '0000-00-00', if(tuote.epakurantti25pvm = '0000-00-00', tuote.kehahin, tuote.kehahin * 0.75), tuote.kehahin * 0.5), tuote.kehahin * 0.25), 0) kehahin_nyt,
         tuote.epakurantti25pvm,
         tuote.epakurantti50pvm,
@@ -815,6 +816,8 @@ if (isset($supertee) and $supertee == "RAPORTOI") {
     $worksheet->writeString($excelrivi, $excelsarake, t("Nimitys"),       $format_bold);
     $excelsarake++;
     $worksheet->writeString($excelrivi, $excelsarake, t("Yksikko"),       $format_bold);
+    $excelsarake++;
+    $worksheet->writeString($excelrivi, $excelsarake, t("Kustp"),       $format_bold);
     $excelsarake++;
   }
   else {
@@ -1484,6 +1487,20 @@ if (isset($supertee) and $supertee == "RAPORTOI") {
         $worksheet->writeString($excelrivi, $excelsarake, t_tuotteen_avainsanat($row, 'nimitys'));
         $excelsarake++;
         $worksheet->writeString($excelrivi, $excelsarake, $row["yksikko"]);
+        $excelsarake++;
+        $kpnimi = '';
+        if ($row["kustp"] > 0) {
+          $kpquery = "SELECT koodi, nimi
+                    FROM kustannuspaikka
+                    WHERE kustannuspaikka.yhtio  = '$kukarow[yhtio]'
+                    AND kustannuspaikka.tunnus   = '$row[kustp]'";
+          $kpres = pupe_query($kpquery);
+          if (mysql_num_rows($kpres) == 1) {
+            $kprow = mysql_fetch_assoc($kpres);
+            $kpnimi = $kprow["koodi"].' '.$kprow["nimi"];
+          }
+        }
+        $worksheet->writeString($excelrivi, $excelsarake, $kpnimi);
         $excelsarake++;
       }
       else {

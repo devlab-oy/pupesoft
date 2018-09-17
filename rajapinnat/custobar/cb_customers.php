@@ -41,6 +41,7 @@ class CustobarCustomers {
 
     if (strpos($response, '"response":"ok"') === FALSE) {
       $this->logger->log("---------Asiakkaiden lisääminen epäonnistui!---------");
+      $this->logger->log($response);
     }
     else {
       $this->logger->log('---------Asiakkaiden päivitys valmis---------');

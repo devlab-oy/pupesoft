@@ -41,6 +41,7 @@ class CustobarSales {
 
     if (strpos($response, '"response":"ok"') === FALSE) {
       $this->logger->log("---------Myyntien lisääminen epäonnistui!---------");
+      $this->logger->log($response);
     }
     else {
       $this->logger->log('---------Myyntien päivitys valmis---------');

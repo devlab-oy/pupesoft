@@ -626,6 +626,7 @@ if (isset($supertee) and $supertee == "RAPORTOI") {
                tuote.yksikko,
                tuote.nimitys,
                tuote.kehahin,
+               tuote.kustp,
                if(tuote.epakurantti100pvm = '0000-00-00', if(tuote.epakurantti75pvm = '0000-00-00', if(tuote.epakurantti50pvm = '0000-00-00', if(tuote.epakurantti25pvm = '0000-00-00', tuote.kehahin, tuote.kehahin * 0.75), tuote.kehahin * 0.5), tuote.kehahin * 0.25), 0) kehahin_nyt,
                tuote.epakurantti25pvm,
                tuote.epakurantti50pvm,

@@ -26151,8 +26151,8 @@ if (!function_exists('hae_tuotteen_saapumisaika')) {
           $tulossa_row = mysql_fetch_assoc($tulossa_result);
 
           if (mysql_num_rows($tulossa_result) > 0 and $tulossa_row["paivamaara"] != '') {
-            $tulossalisa[] = "<hr>".t("TULOSSA", $kieli)."!¡!";
-            $tulossalisa[] = t("Arvioitu saapumispäivä", $kieli)."!¡!".tv1dateconv($tulossa_row['paivamaara']);
+            $tulossalisa[] = "<hr>".t("EI TILAUKSESSA", $kieli)."!¡!"."<hr>";
+            $tulossalisa[] = t("Tilausrytmin mukainen saapumispäivä", $kieli)."!¡!".tv1dateconv($tulossa_row['paivamaara']);
           }
         }
       }
@@ -26287,8 +26287,9 @@ if (!function_exists('hae_tuotteen_saapumisaika')) {
           $tulossa_row = mysql_fetch_assoc($tulossa_result);
 
           if (mysql_num_rows($tulossa_result) > 0) {
-            $tulossalisa[] = "<hr>".t("TULOSSA", $kieli)."!¡!"."<hr>";
-            $tulossalisa[] = t("Arvioitu saapumispäivä", $kieli)."!¡!".tv1dateconv($tulossa_row['paivamaara']);
+            $tulossalisa[] = "<hr>".t("EI TILAUKSESSA", $kieli)."!¡!"."<hr>";
+            $tulossalisa[] = t("Tilausrytmin mukainen")."<hr>";
+            $tulossalisa[] = t("saapumispäivä", $kieli)."!¡!".tv1dateconv($tulossa_row['paivamaara']);
           }
         }
       }

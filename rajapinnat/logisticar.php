@@ -638,12 +638,13 @@ function varastotapahtumat($limit = '') {
     $asquery = "SELECT asiakas.myyjanro, kuka.kuka from asiakas
               LEFT JOIN kuka ON (kuka.yhtio = asiakas.yhtio and kuka.myyja = asiakas.myyjanro)
               WHERE asiakas.yhtio = '$yhtio'
+                and asiakas.myyjanro != 0
                 and asiakas.tunnus = '{$trow[asiakastunnus]}'";
     $asres = pupe_query($asquery);
 
     $asrow = mysql_fetch_assoc($asres);
 
-    #Laitetaan tyhj‰n‰ jos ei asiakasmyyj‰‰ ole
+    #Laitetaan myyjatunnus tyhj‰n‰ jos ei asiakasmyyj‰‰ ole asetettu
     $trow['myyjatunnus'] = $asrow['kuka'];
 
     unset($trow['kate']);

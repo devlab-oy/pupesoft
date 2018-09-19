@@ -126,7 +126,7 @@ function rivit($result, $laji, $yhtio, $summataan, $toim) {
   while ($row = mysql_fetch_assoc($result)) {
 
     //Kustannuspaikan koodien haku
-    $query = "SELECT nimi
+    $query = "SELECT nimi, koodi
               FROM kustannuspaikka
               WHERE yhtio = '$yhtio'
               and tunnus  = '$row[kustp]'";
@@ -134,24 +134,24 @@ function rivit($result, $laji, $yhtio, $summataan, $toim) {
     $kustprow = mysql_fetch_assoc($vresult);
 
     //Projekti koodien haku
-    $query = "SELECT nimi
+    $query = "SELECT nimi, koodi
               FROM kustannuspaikka
               WHERE yhtio = '$yhtio'
               and tunnus  = '$row[projekti]'";
     $vresult = pupe_query($query);
     $projprow = mysql_fetch_assoc($vresult);
 
-    if ((int) $kustprow['nimi'] == 0) {
+    if ((int) $kustprow['koodi'] == 0) {
       $row['kustp'] = "";  //tsekataan ettei seurantakohteille  tule turhia etunollia
     }
     else {
-      $row['kustp'] = $kustprow['nimi'];
+      $row['kustp'] = $kustprow['koodi'];
     }
-    if ((int) $projprow['nimi'] == 0) {
+    if ((int) $projprow['koodi'] == 0) {
       $row['projekti'] = "";  //tsekataan ettei seurantakohteille  tule turhia etunollia
     }
     else {
-      $row['projekti'] = $projprow['nimi'];
+      $row['projekti'] = $projprow['koodi'];
     }
 
     if ($row["ltunnus"] != $vltunnus) {

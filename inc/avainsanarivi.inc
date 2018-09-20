@@ -118,7 +118,8 @@ if ($_selitetark_2 and
     $avain_sel["HAE_JA_SELAA"] == "SELECTED" or
     $avain_sel["MYYNTITILASTO"] == "SELECTED" or
     $avain_sel["VALM_FAKTA"] == "SELECTED" or
-    $avain_sel['Y'] == "SELECTED")) {
+    $avain_sel['Y'] == "SELECTED" or
+    $avain_sel["LITETY_LAATUAS"] == "SELECTED")) {
   $tyyppi = 1;
 }
 

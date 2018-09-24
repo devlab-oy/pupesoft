@@ -3,7 +3,7 @@
 function viidakko_hae_tuotteet($tyyppi = "viidakko_tuotteet") {
   global $kukarow, $yhtiorow, $viidakko_varastot, $ajetaanko_kaikki, $viidakko_kuvaurl;
 
-  viidakko_echo("Haetaan kaikki tuotteet ja varastosaldot.");
+  viidakko_echo("Haetaan kaikki tuotteet");
 
   $tuoterajaus = viidakko_tuoterajaus();
 
@@ -99,59 +99,34 @@ function viidakko_hae_tuotteet($tyyppi = "viidakko_tuotteet") {
     cron_aikaleima("VIID_TUOTE_CRON", $aloitusaika);
   }
 
-  $tuotteet = array();
+  $data = array();
 
   while ($row = mysql_fetch_assoc($res)) {
+
     $tuoteno = $row['tuoteno'];
 
     list(, , $myytavissa) = saldo_myytavissa($tuoteno, '', $viidakko_varastot);
 
+    $query = "  SELECT *
+                FROM tuotteen_avainsanat
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND tuoteno = '$tuoteno'
+                AND laji = 'viidakko_tuoteno'";
+    $avainsana_res = pupe_query($query);
+    $avainsana_row = mysql_fetch_assoc($avainsana_res);
+
+    $_id = $avainsana_row['selite'];
+
     if ($tyyppi == "viidakko_saldot") {
-      // normituote
-      $tuotteet[] = array(
-        "product_code"            => $tuoteno,
-        "stock"                   => $myytavissa,
+      $data[] = array(array(
+          "code"  => utf8_encode($tuoteno),
+          "stock" => $myytavissa,
+        )
       );
     }
-    else {
-      $myytavissa = 0;
+    elseif ($tyyppi == "viidakko_kuvat") {
 
-      // haetaan loput tuotetiedot
-      $query = "  SELECT *
-                  FROM tuote
-                  WHERE yhtio = '{$kukarow['yhtio']}'
-                  and tuoteno = '{$tuoteno}'";
-      $res2 = pupe_query($query);
-      $product_row = mysql_fetch_assoc($res2);
-
-      //  haetaan kielikäännökset avainsanoista
-      $query = "  SELECT *
-                  FROM tuotteen_avainsanat
-                  WHERE yhtio = '{$kukarow['yhtio']}'
-                  AND tuoteno = '{$tuoteno}'
-                  AND laji in ('kuvaus', 'nimitys')";
-      $avainsana_res = pupe_query($query);
-      $nimitys_en = $kuvaus_en = "";
-
-      while ($avainsana_row = mysql_fetch_assoc($avainsana_res)) {
-        if ($avainsana_row['laji'] == 'nimitys') {
-          $nimitys_en = $avainsana_row['selite'];
-        }
-        elseif ($avainsana_row['laji'] == 'kuvaus') {
-          $kuvaus_en = $avainsana_row['selite'];
-        }
-      }
-
-      if (empty($nimitys_en)) {
-        $nimitys_en = $product_row['nimitys'];
-      }
-
-      if (empty($nimitys_en)) {
-        $kuvaus_en = $product_row['kuvaus'];
-      }
-
-      $liite_tk_url = "";
-      $liite_th_url = "";
+      $product_row = product_row($tuoteno);
 
       //kuvalinkit tarvittaessa
       if ($viidakko_kuvaurl != '') {
@@ -187,52 +162,103 @@ function viidakko_hae_tuotteet($tyyppi = "viidakko_tuotteet") {
         }
       }
 
-      $tuotteet[] = array(
+      $data[] = array(
+          "id"          => $_id,
+          "code"        => utf8_encode($tuoteno),
+          "stock"       => $myytavissa,
+      );
+    }
+    else {
+
+      $product_row = product_row($tuoteno);
+
+      //  haetaan kielikäännökset avainsanoista
+      $query = "  SELECT *
+                  FROM tuotteen_avainsanat
+                  WHERE yhtio = '{$kukarow['yhtio']}'
+                  AND tuoteno = '{$tuoteno}'
+                  AND laji in ('kuvaus', 'nimitys')
+                  AND kieli = 'en'";
+      $avainsana_res = pupe_query($query);
+      $nimitys_en = $kuvaus_en = "";
+
+      while ($avainsana_row = mysql_fetch_assoc($avainsana_res)) {
+        if ($avainsana_row['laji'] == 'nimitys') {
+          $nimitys_en = $avainsana_row['selite'];
+        }
+        elseif ($avainsana_row['laji'] == 'kuvaus') {
+          $kuvaus_en = $avainsana_row['selite'];
+        }
+      }
+
+      if (empty($nimitys_en)) {
+        $nimitys_en = $product_row['nimitys'];
+      }
+
+      if (empty($kuvaus_en)) {
+        $kuvaus_en = $product_row['kuvaus'];
+      }
+
+      $liite_tk_url = "";
+      $liite_th_url = "";
+
+      $try_res = t_avainsana("TRY", "", "and avainsana.selite  = '{$product_row['try']}'");
+      $try_row = mysql_fetch_assoc($try_res);
+      $try = trim($try_row['selitetark_3']);
+
+      // tyhjä = verolliset, x = verottomat
+      // viidakkoon siirretään verollisena
+      if ($yhtiorow['alv_kasittely'] != '') {
+        $product_row['myyntihinta'] = $product_row['myyntihinta'] * ((100+$product_row['alv'])/100);
+      }
+
+      $data[] = array(
+        "id"                      => $_id,
         "product_code"            => utf8_encode($tuoteno),
-        "category"                => 1, #todo
-        #"ean_code"                => $product_row['eankoodi'],
-        #"stock"                   => $myytavissa,
-        #"ean_code"                => $product_row['eankoodi'],
+        "erp_id"                  => utf8_encode($tuoteno),
+        "category"                => (float)  $try,
+        "ean_code"                => $product_row['eankoodi'],
+        "stock"                   => $myytavissa,
         "names"                   => array(
           array(
             "language" => "FI",
             "name" => utf8_encode($product_row['nimitys'])
           ),
-          #array(
-          #  "language" => "EN",
-          #  "name" => $nimitys_en
-          #),
+          array(
+            "language" => "EN",
+            "name" => utf8_encode($nimitys_en),
+          ),
         ),
-        #"base_price"              => $product_row['myyntihinta'],
-        #"hidden"                  => false,
+        "base_price"              => (float) $product_row['myyntihinta'],
+        "hidden"                  => false,
         #"" => "",
         #"" => "",
         #"" => "",
         #"supplier_code"           => "", #todo
-        #"descriptions"            => array(
-        #  array(
-        #    "language" => "FI",
-        #    "description" => $product_row['kuvaus']
-        #  ),
-        #  array(
-        #    "language" => "EN",
-        #    "description" => $kuvaus_en
-        #  ),
-        #),
-        #"images"                       => array(
-        #  array(
-        #    "language" => "FI",
-        #    "image" => $liite_tk_url
-        #  ),
-        #  array(
-        #    "language" => "EN",
-        #    "image" => $liite_tk_url
-        #  ),
-        #),
-        #"teaser_image"            => $liite_th_url,
-        #"inventory_price"         => $product_row['kehahin'],
+        "descriptions"            => array(
+          array(
+            "language" => "FI",
+            "description" => utf8_encode($product_row['kuvaus']),
+          ),
+          array(
+            "language" => "EN",
+            "description" => utf8_encode($kuvaus_en),
+          ),
+        ),
+        "images"                       => array(
+          array(
+            "language" => "FI",
+            "image" => $liite_tk_url
+          ),
+          array(
+            "language" => "EN",
+            "image" => $liite_tk_url
+          ),
+        ),
+        "teaser_image"            => $liite_th_url,
+        "inventory_price"         => (float) $product_row['kehahin'],
         #"msrp"                    => "",
-        #"vat_percent"             => $product_row['alv'],
+        "vat_percent"             => (float) $product_row['alv'],
         #"use_default_vat_percent" => "",
         #"availability_begins_at"  => "",
         #"availability_ends_at"    => "",
@@ -240,7 +266,7 @@ function viidakko_hae_tuotteet($tyyppi = "viidakko_tuotteet") {
     }
   }
 
-  return $tuotteet;
+  return $data;
 }
 
 function viidakko_tuoterajaus() {
@@ -249,7 +275,8 @@ function viidakko_tuoterajaus() {
                    AND tuote.tuotetyyppi NOT in ('A','B')
                    AND tuote.status != 'P'
                    AND tuote.nimitys != ''
-                   AND tuote.try = '57'
+                   AND tuote.tuoteno = 'TAIGA99'
+                   #AND tuote.try = '57'
                    #AND tuote.hinnastoon in ('W')";
 
   return $tuoterajaus;
@@ -283,4 +310,17 @@ function viidakko_echo($string) {
   }
 
   echo date("d.m.Y @ G:i:s")." - {$string}\n";
+}
+
+function product_row($tuoteno) {
+  global $kukarow;
+
+  // haetaan tuotetiedot
+  $query = "  SELECT *
+              FROM tuote
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              and tuoteno = '{$tuoteno}'";
+  $res2 = pupe_query($query);
+
+  return mysql_fetch_assoc($res2);
 }

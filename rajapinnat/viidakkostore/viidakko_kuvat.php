@@ -1,6 +1,6 @@
 <?php
 
-class ViidakkoStoreTuotteet {
+class ViidakkoStoreKuvat {
   private $apiurl = "";
   private $token = "";
   private $pupesoft_all_products = array();
@@ -13,9 +13,9 @@ class ViidakkoStoreTuotteet {
     $this->logger = new Logger($log_file);
   }
 
-  public function check_products() {
-    $this->logger->log('---------Tarkistetaan onko tuote jo kaupassa---------');
-    echo "\n---------Tarkistetaan onko tuote jo kaupassa---------\n";
+  public function check_pics() {
+    $this->logger->log('---------Tarkistetaan onko kuva jo kaupassa---------');
+    echo "\n---------Tarkistetaan onko kuva jo kaupassa---------\n";
 
     $pupesoft_products = $this->pupesoft_all_products;
     $total = count($pupesoft_products);
@@ -23,7 +23,7 @@ class ViidakkoStoreTuotteet {
 
     foreach ($pupesoft_products as $product) {
 
-      $url = $this->apiurl."/products?codes[]=".$product["product_code"];
+      $url = $this->apiurl."/products/".$product["id"]."/images";
       $ch = curl_init($url);
       curl_setopt($ch, CURLOPT_HTTPHEADER, array('Accept: application/json', 'X-Auth-Token: '.$this->token));
       curl_setopt($ch, CURLOPT_HEADER, FALSE);
@@ -35,8 +35,10 @@ class ViidakkoStoreTuotteet {
       $current++;
       $response_array = json_decode($response);
 
-      #echo "\n check\n";
-      #echo "\nvar_dump products:<pre>",var_dump($response_array);
+      echo "\n kuvat check\n";
+      echo "\n\n\n",var_dump($response_array);
+die;
+
 
       if (isset($response_array->items[0]->id) and !empty($response_array->items[0]->id)) {
         echo "\n---------200---------\n";

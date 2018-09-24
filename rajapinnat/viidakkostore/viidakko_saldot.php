@@ -2,13 +2,13 @@
 
 class ViidakkoStoreSaldot {
   private $apiurl = "";
-  private $userpwd = "";
+  private $token = "";
   private $pupesoft_all_products = array();
   protected $logger = null;
 
-  public function __construct($url, $username, $api_key, $log_file) {
+  public function __construct($url, $token, $log_file) {
     $this->apiurl = $url;
-    $this->userpwd = "{$username}:{$api_key}";
+    $this->token = $token;
 
     $this->logger = new Logger($log_file);
   }
@@ -23,25 +23,27 @@ class ViidakkoStoreSaldot {
 
     foreach ($pupesoft_products as $product_row) {
 
-      $url = $this->apiurl."/api/v1/stock/".$product_row["tuoteno"];
+      $url = $this->apiurl."/stocks";
 
-      $data_json = json_encode(array("enabled" => true,
-                                     "stock" => $product_row['stock']));
+      echo "\nvar_dump stocks:<pre>",var_dump($product_row);
+
+      $data_json = json_encode($product_row);
 
       $ch = curl_init($url);
-      curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PATCH');
-      curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
-      curl_setopt($ch, CURLOPT_USERPWD, $this->userpwd);
-      curl_setopt($ch, CURLOPT_HTTPHEADER, array('Accept: application/json'));
+      curl_setopt($ch, CURLOPT_HTTPHEADER, array('Accept: application/json', 'Content-Type: application/json', 'X-Auth-Token: '.$this->token));
       curl_setopt($ch, CURLOPT_HEADER, TRUE);
+      curl_setopt($ch, CURLOPT_POST, TRUE);
       curl_setopt($ch, CURLOPT_POSTFIELDS, $data_json);
       curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 
       $response = curl_exec($ch);
       curl_close($ch);
 
+      echo "\n stock\n";
+      echo "\nvar_dump stocks:<pre>",var_dump($response);
+
       $current++;
-      $this->logger->log("[{$current}/{$total}] tuote {$product_row["tuoteno"]} saldo {$product_row['saldo']}");
+      $this->logger->log("[{$current}/{$total}] tuote {$product_row["code"]} saldo {$product_row['stock']}");
 
     }
 

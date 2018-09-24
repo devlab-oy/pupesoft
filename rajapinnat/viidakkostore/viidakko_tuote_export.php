@@ -21,6 +21,7 @@ require_once 'rajapinnat/logger.php';
 require "rajapinnat/viidakkostore/viidakko_functions.php";
 require "rajapinnat/viidakkostore/viidakko_saldot.php";
 require "rajapinnat/viidakkostore/viidakko_tuotteet.php";
+require "rajapinnat/viidakkostore/viidakko_kuvat.php";
 require "rajapinnat/viidakkostore/viidakko_tilaukset.php";
 
 if (empty($argv[1])) {
@@ -48,7 +49,10 @@ if (!empty($argv[2])) {
 else {
   // ajetaan kaikki
   $synkronoi = array(
-    'saldot',
+    'tuotteet',
+    #'saldot',
+    'kuvat',
+    #'tilaukset',
   );
 }
 
@@ -108,6 +112,8 @@ if (viidakko_ajetaanko_sykronointi('tuotteet', $synkronoi)) {
   $tyyppi = "viidakko_tuotteet";
   $kaikki_tuotteet = viidakko_hae_tuotteet();
 
+  echo "<pre>",var_dump($kaikki_tuotteet);
+
   viidakko_echo("Siirretään tuotteet.");
   $viidakko_products = new ViidakkoStoreTuotteet($viidakko_url, $viidakko_token, $tyyppi);
 
@@ -120,10 +126,23 @@ if (viidakko_ajetaanko_sykronointi('saldot', $synkronoi)) {
   $kaikki_tuotteet = viidakko_hae_tuotteet($tyyppi);
 
   viidakko_echo("Siirretään saldot.");
-  $viidakko_stocks = new ViidakkoStoreSaldot($viidakko_url, $viidakko_username, $viidakko_api_key, $tyyppi);
+  $viidakko_stocks = new ViidakkoStoreSaldot($viidakko_url, $viidakko_token, $tyyppi);
 
   $viidakko_stocks->set_all_products($kaikki_tuotteet);
   $viidakko_stocks->update_stock();
+}
+
+if (viidakko_ajetaanko_sykronointi('kuvat', $synkronoi)) {
+  $tyyppi = "viidakko_kuvat";
+  $kaikki_tuotteet = viidakko_hae_tuotteet($tyyppi);
+
+  echo "<pre>",var_dump($kaikki_tuotteet);
+
+  viidakko_echo("Siirretään kuvat.");
+  $viidakko_pics = new ViidakkoStoreKuvat($viidakko_url, $viidakko_token, $tyyppi);
+
+  $viidakko_pics->set_all_products($kaikki_tuotteet);
+  $viidakko_pics->check_pics();
 }
 
 if (viidakko_ajetaanko_sykronointi('tilaukset', $synkronoi)) {

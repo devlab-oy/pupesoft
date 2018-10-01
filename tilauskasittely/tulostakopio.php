@@ -926,13 +926,14 @@ if ($tee == "ETSILASKU") {
     //myyntitilaus. Tulostetaan lavatarra-kopio.
 
     if ($toim == "LAVAKERAYSTARRA" or $toim == "LAVAKERAYSLISTA") {
-      $where1 .= " lasku.tila = 'L' and lasku.alatila in ('A','B','C','D','E','X') ";
+      $where1 .= " lasku.tila = 'L' and lasku.alatila in ('A','B','C','D','E','X')
+                  and (lasku.kerayslista = lasku.tunnus or lasku.kerayslista = 0) ";
     }
     else {
-      $where1 .= " lasku.tila = 'L' and lasku.alatila in ('B','C','D','E','X') ";
+      $where1 .= " ((lasku.tila = 'L' and lasku.alatila in ('B','C','D','E','X')
+                  and (lasku.kerayslista = lasku.tunnus or lasku.kerayslista = 0))
+                   or (lasku.tila = 'D' and lasku.kerayslista = lasku.tunnus))";
     }
-
-    $where1 .= " and (lasku.kerayslista = lasku.tunnus or lasku.kerayslista = 0) ";
 
     if ($asiakasid > 0) {
       $where2 .= " and lasku.liitostunnus  = '$asiakasid' ";
@@ -1021,7 +1022,7 @@ if ($tee == "ETSILASKU") {
     $jarj = "ORDER BY {$jarj} {$ascdesc}";
   }
 
-  if ($toim != "HAAMU") {
+  if ($toim != "HAAMU" and $toim != "LAVATARRA") {
     $where4 = " and lasku.tila != 'D' ";
   }
 
@@ -2540,6 +2541,9 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
       $tilausnumeroita = $otunnus;
 
       if ($laskurow['kerayslista'] > 0) {
+        if ($toim == "LAVATARRA" and $laskurow['tila'] == 'D' ) {
+          $laskurow['tila'] = 'L';
+        }
         //haetaan kaikki tälle klöntille kuuluvat otsikot
         $query = "SELECT GROUP_CONCAT(DISTINCT tunnus ORDER BY tunnus SEPARATOR ',') tunnukset
                   FROM lasku

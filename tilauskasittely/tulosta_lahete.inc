@@ -352,8 +352,7 @@ if (!function_exists('alku_lahete')) {
       $pdf->draw_text(150, 730, $ff_string, $thispage, $ff_font);
 
       $pdf->draw_text(50, 717, t("Y-tunnus", $kieli), $thispage, $boldi);
-      pupesoft_log('pupe_loki', $yhtiorow[ytunnus]);
-      pupesoft_log('pupe_loki', $yhtiorow[maa]);
+
       if ($yhtiorow['maa'] == 'EE') {
         $pdf->draw_text(150, 717, tulosta_ytunnus(preg_replace("/^0037/", "", $yhtiorow["ytunnus"]), $laskurow["yhtio_maa"], $laskurow["vienti"]), $thispage, $norm);
       }

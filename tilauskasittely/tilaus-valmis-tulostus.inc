@@ -147,7 +147,8 @@ if ((int) $chk_row["ok"] == (int) $chk_row["kaikki"] and (int) $chk_row["ok"] !=
               if (asiakasnro!='', asiakasnro, ytunnus) asiakasnro,
               asiakasnro as asiakasnro_aito,
               kerayserat,
-              kieli
+              kieli,
+              asiakasviivakoodi
               FROM asiakas
               WHERE tunnus='$laskurow[liitostunnus]' and yhtio='$kukarow[yhtio]'";
     $riresult = pupe_query($query);
@@ -161,6 +162,7 @@ if ((int) $chk_row["ok"] == (int) $chk_row["kaikki"] and (int) $chk_row["ok"] !=
       'asiakasnro_aito' => '',
       'kerayserat' => '',
       'kieli' => '',
+      'asiakasviivakoodi' => '',
     );
   }
 

@@ -1265,3 +1265,15 @@ if ($fieldname == 'kerayserat') {
     $tyyppi = 0;
   }
 }
+if ($fieldname == "asiakasviivakoodi") {
+  $sel    = array();
+  $pv      = $trow[$i];
+  $sel[$pv]  = " selected";
+
+  $ulos = "<td>
+      <select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">
+      <option value='' $sel[0]>".t("Ei as. tilausnumeroa viivakoodina lähetteelle")."</option>
+      <option value='K' $sel[1]>".t("As. tilausnumero viivakoodina lähetteeelle")."</option>
+      </select></td>";
+  $jatko = 0;
+}

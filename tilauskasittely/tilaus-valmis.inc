@@ -567,7 +567,7 @@ else {
               where yhtio  = '$kukarow[yhtio]'
               and otunnus  = '$laskurow[tunnus]'
               and keratty  = ''
-              and var      = 'J'
+              and var     != 'J'
               and tyyppi  != 'D'
               and varattu  > 0";
     $keres = pupe_query($query);

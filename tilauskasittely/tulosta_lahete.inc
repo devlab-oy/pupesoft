@@ -441,8 +441,8 @@ if (!function_exists('alku_lahete')) {
           $rahtirow = hae_rahtisopimusnumero($laskurow["toimitustapa"], $laskurow["ytunnus"], $laskurow["liitostunnus"], false, $laskurow["rahtisopimus"]);
 
           $pdf->draw_text(310, 708, t("Toimitustapa", $kieli)." / ".t("Rahtisopimus", $kieli), $thispage, $pieni);
-          $toimitustapateksti = t_tunnus_avainsanat($laskurow['toimitustapa'], "selite", "TOIMTAPAKV", $kieli)." ".t($rahtivapaa, $kieli)." ".t($kokonaistoimitus, $kieli);
-          $pdf->draw_text(310, 698, $toimitustapateksti." ".$rahtirow["rahtisopimus"],   $thispage, $boldi);
+          $toimitustapateksti = t_tunnus_avainsanat($laskurow['toimitustapa'], "selite", "TOIMTAPAKV", $kieli)." ".t($rahtivapaa, $kieli);
+          $pdf->draw_text(310, 698, $toimitustapateksti." ".$rahtirow["rahtisopimus"]." ".t($kokonaistoimitus, $kieli),   $thispage, $boldi);
 
         }
       }

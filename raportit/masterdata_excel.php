@@ -59,6 +59,7 @@ else {
   echo "<font class='head'>".t("Masterdata excel")."</font><hr>";
 
   $ytunnus = trim($ytunnus);
+  if (isset($masterdataexcel_datatyyppi)) $datatyyppi = $masterdataexcel_datatyyppi;
 
   if ($tee != '' and $kukarow["extranet"] == '' and isset($ajahinnasto)) {
 
@@ -82,6 +83,9 @@ else {
     echo t("VIRHE: Tämä ohjelma ei toimi extranetissä.")."<br><br>";
     exit;
   }
+
+  // jos tultiin asiakashausta ja jouduttiin valitsemaan asiakas monesta
+  if (!isset($asiakasrow["tunnus"]) and isset($asiakasid)) $asiakas = $asiakasid;
 
   //Käyttöliittymä
   echo "<br>";

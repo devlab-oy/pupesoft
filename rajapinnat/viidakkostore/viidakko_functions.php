@@ -128,45 +128,56 @@ function viidakko_hae_tuotteet($tyyppi = "viidakko_tuotteet") {
 
       $product_row = product_row($tuoteno);
 
+      $liite_tk_url = "";
+
       //kuvalinkit tarvittaessa
       if ($viidakko_kuvaurl != '') {
 
         // normaalikuva
-        $query = "SELECT liitetiedostot.*
+        $query = "SELECT liitetiedostot.tunnus,
+                  liitetiedostot.external_id,
+                  if(liitetiedostot.jarjestys = 0, 9999, liitetiedostot.jarjestys) jarjestys,
+                  liitetiedostot.kieli,
+                  liitetiedostot.selite,
+                  liitetiedostot.tunnus
                   FROM liitetiedostot
                   WHERE liitetiedostot.yhtio = '{$kukarow['yhtio']}'
                   AND liitetiedostot.liitos  = 'tuote'
                   AND liitetiedostot.liitostunnus = '{$product_row['tunnus']}'
                   AND liitetiedostot.kayttotarkoitus = 'TK'
-                  ORDER BY if(liitetiedostot.jarjestys = 0, 9999, liitetiedostot.jarjestys)
-                  LIMIT 1";
+                  ORDER BY if(liitetiedostot.jarjestys = 0, 9999, liitetiedostot.jarjestys)";
         $result = pupe_query($query);
-        if (mysql_num_rows($result) == 1) {
-          $liite_row = mysql_fetch_assoc($result);
-          $liite_tk_url = "{$viidakko_kuvaurl}/view.php?id={$liite_row['tunnus']}";
-        }
 
-        // thumbnail
-        $query = "SELECT liitetiedostot.tunnus
-                  FROM liitetiedostot
-                  WHERE liitetiedostot.yhtio = '{$kukarow['yhtio']}'
-                  AND liitetiedostot.liitos  = 'tuote'
-                  AND liitetiedostot.liitostunnus = '{$product_row['tunnus']}'
-                  AND liitetiedostot.kayttotarkoitus = 'TH'
-                  ORDER BY if(liitetiedostot.jarjestys = 0, 9999, liitetiedostot.jarjestys)
-                  LIMIT 1";
-        $result = pupe_query($query);
-        if (mysql_num_rows($result) == 1) {
-          $liite_row = mysql_fetch_assoc($result);
-          $liite_th_url = "{$viidakko_kuvaurl}/view.php?id={$liite_row['tunnus']}";
+        $i = 0;
+
+        while ($liite_row = mysql_fetch_assoc($result)) {
+
+          $liite_tk_url = "{$viidakko_kuvaurl}/view.php?id={$liite_row['tunnus']}";
+
+          $data[$i] = array(
+            "id"          => $_id,
+            "code"        => utf8_encode($tuoteno),
+            "image_id"    => (int) $liite_row['external_id'],
+            "image"       => $liite_tk_url,
+            "title_description" => array(
+              array(
+                "language"=> utf8_encode(strtoupper($liite_row['kieli'])),
+                "title"   => utf8_encode($liite_row['selite'])
+              )
+            ),
+            "position"    => (int) $liite_row['jarjestys'],
+            "is_default"  => (bool) false,
+            "is_teaser"   => (bool) false,
+            "liitetiedostot_tunnus" => $liite_row['tunnus']
+          );
+
+          if ($i == 0) {
+            $data[$i]['is_default'] = (bool) true;
+            $data[$i]['is_teaser'] = (bool) true;
+          }
+          $i++;
         }
       }
-
-      $data[] = array(
-          "id"          => $_id,
-          "code"        => utf8_encode($tuoteno),
-          "stock"       => $myytavissa,
-      );
     }
     else {
 
@@ -198,9 +209,6 @@ function viidakko_hae_tuotteet($tyyppi = "viidakko_tuotteet") {
       if (empty($kuvaus_en)) {
         $kuvaus_en = $product_row['kuvaus'];
       }
-
-      $liite_tk_url = "";
-      $liite_th_url = "";
 
       $try_res = t_avainsana("TRY", "", "and avainsana.selite  = '{$product_row['try']}'");
       $try_row = mysql_fetch_assoc($try_res);
@@ -245,17 +253,6 @@ function viidakko_hae_tuotteet($tyyppi = "viidakko_tuotteet") {
             "description" => utf8_encode($kuvaus_en),
           ),
         ),
-        "images"                       => array(
-          array(
-            "language" => "FI",
-            "image" => $liite_tk_url
-          ),
-          array(
-            "language" => "EN",
-            "image" => $liite_tk_url
-          ),
-        ),
-        "teaser_image"            => $liite_th_url,
         "inventory_price"         => (float) $product_row['kehahin'],
         #"msrp"                    => "",
         "vat_percent"             => (float) $product_row['alv'],

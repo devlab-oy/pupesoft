@@ -21,28 +21,52 @@ class ViidakkoStoreKuvat {
     $total = count($pupesoft_products);
     $current = 0;
 
+    echo "\n\n\n",var_dump($pupesoft_products);
+
     foreach ($pupesoft_products as $product) {
 
-      $url = $this->apiurl."/products/".$product["id"]."/images";
-      $ch = curl_init($url);
-      curl_setopt($ch, CURLOPT_HTTPHEADER, array('Accept: application/json', 'X-Auth-Token: '.$this->token));
-      curl_setopt($ch, CURLOPT_HEADER, FALSE);
-      curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+      // upload image to store
+      if (empty($product['image_id'])) {
+        $this->insert_product($product);
+        continue;
+      }
+      else { // picture already in store
 
-      $response = curl_exec($ch);
-      curl_close($ch);
+        $url = $this->apiurl."/products/".$product["id"]."/images/".$product["image_id"];
+        $ch = curl_init($url);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Accept: application/json', 'X-Auth-Token: '.$this->token));
+        curl_setopt($ch, CURLOPT_HEADER, FALSE);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 
-      $current++;
-      $response_array = json_decode($response);
+        $response = curl_exec($ch);
+        curl_close($ch);
 
-      echo "\n kuvat check\n";
-      echo "\n\n\n",var_dump($response_array);
-die;
+        $current++;
+        $response_array = json_decode($response);
+
+        echo "\n kuvat check\n";
+        echo "\n\n\n",var_dump($response_array);
+
+        continue;
+
+        if (isset($response_array->items) and count($response_array->items) > 0) {
+          foreach ($response_array->items AS $key => $imagedata) {
+
+            echo "\n\n\n",var_dump($imagedata->id);
+
+
+
+          }
+        }
+        die;
+      }
+
+
 
 
       if (isset($response_array->items[0]->id) and !empty($response_array->items[0]->id)) {
         echo "\n---------200---------\n";
-        $this->logger->log("[{$current}/{$total}] tuote {$product["product_code"]} löytyy kaupasta");
+        $this->logger->log("[{$current}/{$total}] tuote {$product["code"]} löytyy kaupasta");
         // lets check store product id
         $this->update_id($product['id'], $response_array->items[0]);
         // lets update product with correct id
@@ -51,29 +75,33 @@ die;
       }
       elseif (isset($response_array->items) and !isset($response_array->items[0])) {
         echo "\n---------404---------\n";
-        $this->logger->log("[{$current}/{$total}] tuote {$product["product_code"]} ei löydy kaupasta | response_code: $response_array->code");
+        $this->logger->log("[{$current}/{$total}] tuote {$product["code"]} ei löydy kaupasta | response: $response");
         // lets insert product
         $this->insert_product($product);
       }
       elseif (isset($response_array->code) and $response_array->code == "400") {
         echo "\n---------400---------\n";
-        $this->logger->log("--> tuote {$product["product_code"]} kysely epäonnistui!");
-        $this->logger->log("syy: {$response_array->message}");
+        $this->logger->log("--> tuote {$product["code"]} kysely epäonnistui!");
+        $this->logger->log("syy: {$response}");
       }
       else {
         echo "\n---------unknown-----\n";
-        $this->logger->log("--> tuote {$product["product_code"]} kysely epäonnistui tuntemattomasta syystä!");
-        $this->logger->log("syy: {$response_array->message}");
+        $this->logger->log("--> tuote {$product["code"]} kysely epäonnistui tuntemattomasta syystä!");
+        $this->logger->log("syy: {$response}");
       }
     }
   }
 
   public function update_product($product) {
-    $url = $this->apiurl."/products/".$product["id"];
+    $url = $this->apiurl."/products/".$product["id"]."/images/".$product["image_id"];
 
-    unset($product['id']);
+    $data_json = json_encode(array(
+      "titles"        => $product['title_description'],
+      "descriptions"  => $product['title_description'],
+      "position"      => $product['position'],
+      "is_default"    => $product['is_default'],
+    ));
 
-    $data_json = json_encode($product);
     echo "\n---------UPDATETAAN---------\n";
     $ch = curl_init($url);
     curl_setopt($ch, CURLOPT_HTTPHEADER, array('Accept: application/json', 'Content-Type: application/json', 'X-Auth-Token: '.$this->token));
@@ -89,24 +117,32 @@ die;
 
     echo "\n update\n";
     echo "\nvar_dump products:<pre>",var_dump($response);
-
+die;
     // response ok/fail vielä tähän
     $this->logger->log("--> tuote {$product["product_code"]} päivitetty");
   }
 
   public function insert_product($product) {
-    $url = $this->apiurl."/products";
+    $url = $this->apiurl."/products/".$product['id']."/images/upload";
 
-    // id:tä ei tarvita insertissä
-    unset($product['id']);
+    #echo "<pre>",var_dump($product);
 
-    echo "<pre>",var_dump($product);
+    $data_json = json_encode(array(
+      "titles"        => $product['title_description'],
+      #"descriptions"  => $product['title_description'],
+      "position"      => $product['position'],
+      "file_url_path" => $product['image'],
+      "is_default"    => $product['is_default'],
+      "is_teaser"     => $product['is_teaser'],
+    ));
 
-    $data_json = json_encode($product);
+    echo "\n<pre>",var_dump(json_decode($data_json));
+
     echo "\n---------INSERTÖIDÄÄN---------\n";
+
     $ch = curl_init($url);
     curl_setopt($ch, CURLOPT_HTTPHEADER, array('Accept: application/json', 'Content-Type: application/json', 'X-Auth-Token: '.$this->token));
-    curl_setopt($ch, CURLOPT_HEADER, TRUE);
+    curl_setopt($ch, CURLOPT_HEADER, FALSE);
     curl_setopt($ch, CURLOPT_POST, TRUE);
     curl_setopt($ch, CURLOPT_POSTFIELDS, $data_json);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -114,19 +150,19 @@ die;
     $response = curl_exec($ch);
     curl_close($ch);
 
-    echo "\n insert\n";
-    echo "\n\nvar_dump products:<pre>",var_dump($response);
+    $response_array = json_decode($response, true);
 
-    $response_array = json_decode($response);
+    echo "\n\nvar_dump kuvat:<pre>",var_dump($response_array);
 
-    if ($response_array->code == "400") {
-      $this->logger->log("--> tuote {$product["product_code"]} lisääminen epäonnistui!");
-      $this->logger->log("syy: {$response_array->message}");
+    if (isset($response_array['items'][0]['id']) and !empty($response_array['items'][0]['id'])) {
+      echo "\n---------200---------\n";
+      $this->logger->log("--> tuotteen {$product["code"]} kuvan lisääminen onnistui! ID: {$response_array['items'][0]['id']}, Pupe-liitetiedostot-tunnus: {$product['liitetiedostot_tunnus']}");
+      $this->update_id($product['image_id'], $response_array['items'][0], $product['liitetiedostot_tunnus']);
     }
     else {
-      $this->logger->log("--> tuote {$product["product_code"]} lisätty");
-
-      // otetaan vielä id talteen
+      echo "\n---------400---------\n";
+      $this->logger->log("--> tuotteen {$product["code"]} kuvan lisäys epäonnistui! Pupe-liitetiedostot-tunnus: {$product['liitetiedostot_tunnus']}");
+      $this->logger->log("syy: {$response}");
     }
   }
 
@@ -136,30 +172,14 @@ die;
     }
   }
 
-  public function update_id($id, $viidakko_product) {
+  public function update_id($id, $viidakko_pic, $liitetiedostot_tunnus) {
     global $yhtiorow;
 
-    if ($id== "") {
-      $query = "  INSERT INTO tuotteen_avainsanat SET
-                  yhtio       = '{$yhtiorow['yhtio']}',
-                  tuoteno     = '{$viidakko_product->product_code}',
-                  laji        = 'viidakko_tuoteno',
-                  selite      = '{$viidakko_product->id}',
-                  laatija     = 'viidakkostore',
-                  luontiaika  = now() ON DUPLICATE KEY UPDATE
-                  muuttaja    = 'viidakkostore',
-                  muutospvm   = now()";
+    if (empty($id) or $id != $viidakko_pic['id']) {
+      $query = "  UPDATE liitetiedostot SET
+                  external_id = '{$viidakko_pic['id']}'
+                  WHERE tunnus = $liitetiedostot_tunnus";
       $insert_res = pupe_query($query);
-    }
-    elseif ($id != $viidakko_product->id) {
-      $query = "  UPDATE tuotteen_avainsanat SET
-                  yhtio       = '{$yhtiorow['yhtio']}',
-                  tuoteno     = '{$viidakko_product->product_code}',
-                  laji        = 'viidakko_tuoteno',
-                  selite      = '{$viidakko_product->id}',
-                  muuttaja    = 'viidakkostore',
-                  muutospvm   = now()";
-      $update_res = pupe_query($query);
     }
   }
 }

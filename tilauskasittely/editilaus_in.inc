@@ -689,7 +689,14 @@ while ($tietue = fgets($fd)) {
   case 'ORFFABONU' :
   case 'OSTOTIL.OT_VIITTEEMME' :
     //Asiakkaan viite
-    $viite .= $tieto. ' ';
+    if (isset($verkkokauppa_puhdas_viite) and !empty($verkkokauppa_puhdas_viite)) {
+      // ei haluta viitteeksi mm tilausnumeroa, vaan puhtaasti se mitä annettu
+      $viite = $tieto;
+    }
+    else {
+      // viite sisältää verkkokaupan tilausnumeron ennen muuta tietoa
+      $viite .= $tieto. ' ';
+    }
 
     // laitetaan tämä myös kohde-kenttään jos se on ennestään tyhjä
     if (empty($ot_verkkokauppa_kohde)) {
@@ -2059,8 +2066,8 @@ while ($tietue = fgets($fd)) {
             }
           }
         }
-      } 
-      if (mysql_num_rows($result) == 0) {     
+      }
+      if (mysql_num_rows($result) == 0) {
         ///* Lisätään tilaukselle dummytuote ja kommentti *///
         $edi_ulos .= t("Rivi")." $rivinumero ".t("Tuote")." '$tieto' ".t("ei löydy")."!\n";
         $tuoteerrortxt .= " $tieto";
@@ -2139,14 +2146,14 @@ while ($tietue = fgets($fd)) {
                     and eankoodi = '$tieto'
                     ORDER BY tunnus";
           $result2 = pupe_query($query2);
-          
+
           if (mysql_num_rows($result2) == 1) {
             $t2row = mysql_fetch_assoc($result2);
             $pos = strpos($t2row["tuoteno"], "-EU");
 
             if ($pos > 0) {
               $tuotetieto = substr($t2row["tuoteno"], 0, $pos);
-              
+
               $query = "SELECT *
                         FROM tuote
                         WHERE tuote.yhtio = '{$kukarow["yhtio"]}'
@@ -2154,7 +2161,7 @@ while ($tietue = fgets($fd)) {
                         $kieltolisa
                         ORDER BY tunnus";
               $result = pupe_query($query);
-            
+
               if (mysql_num_rows($result) == 0) {
                 ///* Lisätään tilaukselle dummytuote ja kommentti *///
                 $edi_ulos .= t("Rivi")." $rivinumero ".t("Tuote")." '$tuotetieto' ".t("ei löydy")."!\n";
@@ -2163,10 +2170,10 @@ while ($tietue = fgets($fd)) {
               }
             }
           }
-        }  
-      } 
-      if (mysql_num_rows($result) == 0) {     
-        
+        }
+      }
+      if (mysql_num_rows($result) == 0) {
+
         ///* Lisätään tilaukselle dummytuote ja kommentti *///
         $edi_ulos .= t("Rivi")." $rivinumero EAN '$tieto' ".t("ei löydy")."!\n";
         $tuoteerrortxt .= " $tieto";

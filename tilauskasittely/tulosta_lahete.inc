@@ -686,9 +686,16 @@ if (!function_exists('alku_lahete')) {
 
     if ($base_lahetetyyppi != "tulosta_lahete_custom.inc") {
       // viivakoodi
-      $data = viivakoodi($laskurow["tunnus"], "code128", 150, 30, "");
-      $image = $pdf->jfif_embed($data);
-      $pdf->image_place($image, 805, 440, $thispage, array("scale" => 0.3));
+      if ($asrow["asiakasviivakoodi"] == 'K') {
+          $data = viivakoodi($laskurow["asiakkaan_tilausnumero"], "code128", 150, 30, "");
+          $image = $pdf->jfif_embed($data);
+          $pdf->image_place($image, 805, 440, $thispage, array("scale" => 0.3));
+      }
+      else {
+        $data = viivakoodi($laskurow["tunnus"], "code128", 150, 30, "");
+        $image = $pdf->jfif_embed($data);
+        $pdf->image_place($image, 805, 440, $thispage, array("scale" => 0.3));
+      }
 
       $pdf->draw_rectangle($kala+30, 20, 20, 580, $thispage, $rectparam);
     }
@@ -889,9 +896,16 @@ if (!function_exists('uusi_sivu_lahete')) {
       }
 
       // viivakoodi
-      $data = viivakoodi($laskurow["tunnus"], "code128", 70, 10, "");
-      $image = $pdf->jfif_embed($data);
-      $pdf->image_place($image, 805, 440, $thispage, array("scale" => 0.3));
+      if ($asrow["asiakasviivakoodi"] == 'K' and is_numeric($laskurow["asiakkaan_tilausnumero"])) {
+          $data = viivakoodi($laskurow["asiakkaan_tilausnumero"], "code128", 70, 10, "");
+          $image = $pdf->jfif_embed($data);
+          $pdf->image_place($image, 805, 440, $thispage, array("scale" => 0.3));
+      }
+      else {
+        $data = viivakoodi($laskurow["tunnus"], "code128", 70, 10, "");
+        $image = $pdf->jfif_embed($data);
+        $pdf->image_place($image, 805, 440, $thispage, array("scale" => 0.3));
+      }
     }
 
     $kala = 715;

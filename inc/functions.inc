@@ -21042,7 +21042,8 @@ if (!function_exists("pupesoft_tulosta_lahete")) {
     $query = "SELECT luokka, puhelin,
               if (asiakasnro!='', asiakasnro, ytunnus) asiakasnro,
               asiakasnro as asiakasnro_aito,
-              kieli
+              kieli,
+              asiakasviivakoodi
               FROM asiakas
               WHERE tunnus = '$laskurow[liitostunnus]'
               and yhtio    = '$kukarow[yhtio]'";

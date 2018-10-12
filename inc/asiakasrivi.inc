@@ -1266,14 +1266,13 @@ if ($fieldname == 'kerayserat') {
   }
 }
 if ($fieldname == "asiakasviivakoodi") {
-  $sel    = array();
-  $pv      = $trow[$i];
-  $sel[$pv]  = " selected";
+  $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
 
-  $ulos = "<td>
-      <select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">
-      <option value='' $sel[0]>".t("Ei as. tilausnumeroa viivakoodina lähetteelle")."</option>
-      <option value='K' $sel[1]>".t("As. tilausnumero viivakoodina lähetteeelle")."</option>
-      </select></td>";
+  $sel = trim($trow[$i]) == 'K' ? ' selected' : '';
+
+  $ulos .= "<option value = ''>".t("Ei as. tilausnumeroa viivakoodina lähetteelle")."</option>";
+  $ulos .= "<option value = 'K' {$sel}>".t("As. tilausnumero viivakoodina lähetteeelle")."</option>";
+  $ulos .= "</select></td>";
+
   $jatko = 0;
 }

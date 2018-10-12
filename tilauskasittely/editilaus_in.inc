@@ -705,6 +705,14 @@ while ($tietue = fgets($fd)) {
 
     break;
 
+  case 'OSTOTIL.OT_VIITTEEMME_PUHDAS' :
+    //Asiakkaan antama viite, semmoisenaan kuin se tulee
+    if (!empty($tieto)) {
+      $viite = $tieto;
+    }
+
+    break;
+
   case 'OSTOTIL.OT_TILAUSVIESTI' :
     //Asiakkaan tilausviesti
     $edi_kommentti .= $tieto." \n";

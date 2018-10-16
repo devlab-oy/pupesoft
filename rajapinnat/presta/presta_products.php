@@ -212,12 +212,12 @@ class PrestaProducts extends PrestaClient {
     // Product type, default to simple
     // Values: simple, pack, virtual
     $product_type = empty($product['ei_saldoa']) ? 'simple' : 'virtual';
-    /*
+
     // First, remove all old child products
     $remove_node = $xml->product->associations->product_bundle;
     $dom_node = dom_import_simplexml($remove_node);
     $dom_node->parentNode->removeChild($dom_node);
-    
+
     // Then add element back
     if (count($product['tuotteen_lapsituotteet']) > 0) {
       $xml->product->associations->addChild('product_bundle');
@@ -233,7 +233,7 @@ class PrestaProducts extends PrestaClient {
         }
       }
     }
-    */
+
     if ($product_type == "virtual") {
       $xml->product->is_virtual = 1;
     }

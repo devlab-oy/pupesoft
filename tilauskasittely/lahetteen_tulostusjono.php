@@ -349,7 +349,7 @@ if ($tee2 == 'TULOSTA') {
       }
       else {
         $keskenrow = mysql_fetch_array($keskenresult);
-        echo t("Tilaus on kesken käyttäjällä").", $keskenrow[nimi], ".t("ota yhteyttä häneen ja käske hänen laittaa vähän vauhtia tähän touhuun")."!<br>";
+        echo t("Tilaus on kesken käyttäjällä").", $keskenrow[nimi], ".t("pyytäisitkö häntä laittamaan tilauksen valmiiksi")."!<br>";
         $tee2 = "";
       }
     }
@@ -531,7 +531,7 @@ if ($tee2 == 'VALITSE') {
     }
     else {
       $keskenrow = mysql_fetch_array($keskenresult);
-      echo t("Tilaus on kesken käyttäjällä").", $keskenrow[nimi], ".t("ota yhteyttä häneen ja käske hänen laittaa vähän vauhtia tähän touhuun")."!<br>";
+      echo t("Tilaus on kesken käyttäjällä").", $keskenrow[nimi], ".t("pyytäisitkö häntä laittamaan tilauksen valmiiksi")."!<br>";
       $tee2 = '';
     }
 

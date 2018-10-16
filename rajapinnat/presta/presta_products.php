@@ -214,13 +214,11 @@ class PrestaProducts extends PrestaClient {
     $product_type = empty($product['ei_saldoa']) ? 'simple' : 'virtual';
 
     // First, remove all old child products
-    $remove_node = $xml->product->associations->product_bundle;
     $dom_node = dom_import_simplexml($remove_node);
     $dom_node->parentNode->removeChild($dom_node);
 
     // Then add element back
     if (count($product['tuotteen_lapsituotteet']) > 0) {
-      $xml->product->associations->addChild('product_bundle');
 
       // Add child products for product bundle
       foreach ($product['tuotteen_lapsituotteet'] as $child_product) {
@@ -309,7 +307,6 @@ class PrestaProducts extends PrestaClient {
       return false;
     }
 
-    $product = $xml->product->associations->product_bundle->addChild('product');
     $product->addChild('id');
     $product->id = $product_id;
     $product->addChild('quantity');

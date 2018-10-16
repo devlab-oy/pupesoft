@@ -501,7 +501,7 @@ if ($tee == '') {
 
   if (mysql_num_rows($result) > 0) {
 
-    echo "<table width='1000'>";
+    echo "<table style='width: 100%; min-width: 600px;'>";
 
     while ($uutinen = mysql_fetch_array($result)) {
 

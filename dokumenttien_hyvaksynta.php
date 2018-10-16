@@ -669,7 +669,7 @@ else {
   $query = "SELECT hd.*, kuka.nimi laatija, hdt.tyyppi
             FROM hyvaksyttavat_dokumentit hd
             JOIN hyvaksyttavat_dokumenttityypit hdt ON (hd.yhtio=hdt.yhtio and hd.tiedostotyyppi=hdt.tunnus)
-            LEFT JOIN kuka ON kuka.yhtio = hd.yhtio and kuka.kuka = hd.hyvaksyja_nyt
+            LEFT JOIN kuka ON (kuka.yhtio = hd.yhtio and kuka.kuka = hd.laatija)
             WHERE hd.hyvaksyja_nyt = '$kukarow[kuka]'
             and hd.yhtio = '$kukarow[yhtio]'
             and hd.tila = 'H'

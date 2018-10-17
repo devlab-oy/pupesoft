@@ -893,8 +893,20 @@ if ($tee == 'add') {
     } // end if löytykö toimitustapa
 
     // Automaattinen vientitietojen kuittaus
-    if ($yhtiorow["vientitietojen_autosyotto"] == "K" and $laskurow['alatila'] != 'X' and ($laskurow['vienti'] == 'E' or $laskurow['vienti'] == 'K')) {
+
+    $query = "SELECT vientitietojen_autosyotto
+              FROM asiakas
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND tunnus  = '{$laskurow['liitostunnus']}'";
+    $asiakas_chk_res = pupe_query($query);
+    $asiakas_chk_row = mysql_fetch_assoc($asiakas_chk_res);
+
+    if (($asiakas_chk_row["vientitietojen_autosyotto"] == 'K' or
+      ($yhtiorow["vientitietojen_autosyotto"] == "K" and $asiakas_chk_row["vientitietojen_autosyotto"] == '')) and
+      $laskurow['alatila'] != 'X' and ($laskurow['vienti'] == 'E' or $laskurow['vienti'] == 'K')) {
+
       viennin_lisatiedot($laskurow['tunnus']);
+
     }
 
     if ($yhtiorow['karayksesta_rahtikirjasyottoon'] != '' and $mista == 'keraa.php') {

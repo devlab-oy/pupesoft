@@ -264,6 +264,7 @@ if (mysql_field_name($result, $i) == "virallinen_selite") {
   $ulos .= "<optgroup label='Unifaun / PostNord'>";
   $ulos .= "<option value='DOMROAD' {$sel["DOMROAD"]}>PostNord Domestic Road</option>";
   $ulos .= "<option value='H48' {$sel["H48"]}>PostNord Logistics InNight</option>";
+  $ulos .= "<option value='P17FI' {$sel["P17FI"]}>PostNord MyPack Home FI</option>";
   $ulos .= "<option value='P19FI' {$sel["P19FI"]}>PostNord Logistics MyPack (Suomi)</option>";
   $ulos .= "<option value='P19FIDPD' {$sel["P19FIDPD"]}>PostNord MyPack Collect FI Pohjoismaiden ulkopuolella</option>";
   $ulos .= "<option value='DPDFI' {$sel["DPDFI"]}>PostNord DPD Classic (Suomi)</option>";

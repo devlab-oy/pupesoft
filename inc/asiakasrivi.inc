@@ -617,8 +617,8 @@ if ($fieldname == "vientitietojen_autosyotto") {
   $sel[$trow[$i]] = "selected";
 
   $ulos .= "<option value = ''>".t("Yhtiön oletus")."</option>";
-  $ulos .= "<option value='E'  $sel[e]>".t("Myyntitilauksen vientitietoja ei kuitata automaattisesti syötetyiksi")."</option>";
-  $ulos .= "<option value='K' $sel[k]>".t("Myyntitilauksen vientitiedot kuitataan automaattisesti syötetyiksi")."</option>";
+  $ulos .= "<option value='E'  $sel[E]>".t("Myyntitilauksen vientitietoja ei kuitata automaattisesti syötetyiksi")."</option>";
+  $ulos .= "<option value='K' $sel[K]>".t("Myyntitilauksen vientitiedot kuitataan automaattisesti syötetyiksi")."</option>";
   $ulos .= "</select></td>";
 
   $jatko = 0;

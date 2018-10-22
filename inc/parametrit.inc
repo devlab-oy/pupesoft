@@ -849,7 +849,6 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
 
         $(document).ready(function(){
           $('form').submit(function(){
-
             if (skippaa_tama_submitti) {
               skippaa_tama_submitti = true;
               return true;
@@ -861,7 +860,7 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
             }
 
             if (!submitattu) {
-              $(this).children('[type=\"submit\"]').each(function() {
+              $(this).find('[type=\"submit\"]').each(function() {
                 $(this).css('width', $(this).outerWidth()).val('Ladataan...');
               });
 

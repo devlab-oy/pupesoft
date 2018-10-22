@@ -960,11 +960,28 @@ elseif ($tee != '') {
   //Jos halutaan failiin
   if ($toim == "VAINRAPORTTI" or $printteri != '') {
     $vaiht = 1;
-  }
+    if ($toim == 'VAINRAPORTTI') {
+      $tanaan = date('Y-m-d',strtotime('now - 7 days'));  #date('Y-m-d', strtotime('-7 days'));
+      $alkupvm = $vva.'-'.$kka.'-'.$ppa;
+      $loppupvm = $vvl.'-'.$kkl.'-'.$ppl;
+        
+      if (strtotime($alkupvm) < strtotime($tanaan)) { 
+        $vva = date("Y");
+        $kka = date("m");
+        $ppa = date("d");
+        echo "<font class='error'>".t("Liian vanha alkup‰iv‰m‰‰r‰")."<br></font>";
+      }
+      if (strtotime($loppupvm) < strtotime($tanaan)) {
+        $vvl = date("Y");
+        $kkl = date("m");
+        $ppl = date("d");
+        echo "<font class='error'>".t("Liian vanha loppup‰iv‰m‰‰r‰")."<br></font>";
+      }
+    }
+ }
   else {
     $vaiht = 0;
   }
-
   $kassat = "";
   $lisa   = "";
   $polisa = "";
@@ -2528,11 +2545,18 @@ if ($toim == "" and $oikeurow['paivitys'] == 1) {
 
   echo "<tr><td class='back'><br></td></tr>";
 }
-
-$query  = "SELECT *
+if ($toim == 'VAINRAPORTTI' and $kukarow['kassamyyja'] != '') {
+  $query  = "SELECT *
+             FROM kassalipas
+             WHERE yhtio = '$kukarow[yhtio]'
+             AND tunnus = $kukarow[kassamyyja]";
+}
+else {
+  $query  = "SELECT *
            FROM kassalipas
            WHERE yhtio = '$kukarow[yhtio]'
            ORDER BY tunnus";
+}
 $vares = pupe_query($query);
 
 while ($varow = mysql_fetch_assoc($vares)) {
@@ -2543,23 +2567,23 @@ while ($varow = mysql_fetch_assoc($vares)) {
   echo "<td colspan='3'><input type='checkbox' name='kassakone[$varow[tunnus]]' value='$varow[tunnus]' $sel> $varow[nimi]</td>";
   echo "</tr>";
 }
-
-$sel = '';
-if ($muutkassat != '') $sel = 'CHECKED';
-
-echo "<tr>";
-echo "<th>".t("N‰yt‰")."</th>";
-echo "<td colspan='3'><input type='checkbox' name='muutkassat' value='MUUT' $sel>".t("Muut kassat")."</td>";
-echo "</tr>";
-
-$sel = '';
-if ($katsuori != '') $sel = 'CHECKED';
-
-echo "<tr>";
-echo "<th>".t("N‰yt‰")."</th>";
-echo "<td colspan='3'><input type='checkbox' name='katsuori' value='MUUT' $sel>".t("K‰teissuoritukset")."</td>";
-echo "</tr>";
-
+if ($toim != 'VAINRAPORTTI') {
+  $sel = '';
+  if ($muutkassat != '') $sel = 'CHECKED';
+  
+  echo "<tr>";
+  echo "<th>".t("N‰yt‰")."</th>";
+  echo "<td colspan='3'><input type='checkbox' name='muutkassat' value='MUUT' $sel>".t("Muut kassat")."</td>";
+  echo "</tr>";
+  
+  $sel = '';
+  if ($katsuori != '') $sel = 'CHECKED';
+  
+  echo "<tr>";
+  echo "<th>".t("N‰yt‰")."</th>";
+  echo "<td colspan='3'><input type='checkbox' name='katsuori' value='MUUT' $sel>".t("K‰teissuoritukset")."</td>";
+  echo "</tr>";
+}
 echo "<tr><td class='back'><br></td></tr>";
 
 echo "<input type='hidden' name='tee' value='kaikki'>";

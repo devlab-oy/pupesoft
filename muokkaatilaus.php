@@ -271,7 +271,7 @@ if ($toim == 'LAVAKERAYS' and $tee == 'KERAA_KAIKKI_LAVAKERAYS' and $lavakerays_
   }
   else {
     $keskenrow = mysql_fetch_array($keskenresult);
-    echo t("Tilaus on kesken k‰ytt‰j‰ll‰").", $keskenrow[nimi], ".t("ota yhteytt‰ h‰neen ja k‰ske h‰nen laittaa v‰h‰n vauhtia t‰h‰n touhuun")."!<br>";
+    echo t("Tilaus on kesken k‰ytt‰j‰ll‰").", $keskenrow[nimi], ".t("pyyt‰isitkˆ h‰nt‰ laittamaan tilauksen valmiiksi")."!<br>";
     $tee2 = "";
   }
 
@@ -1086,7 +1086,10 @@ if (strpos($_SERVER['SCRIPT_NAME'], "muokkaatilaus.php") !== FALSE) {
     $myyntitili_haku = " or tilausrivi.tuoteno like '%{$etsi}%' ";
   }
 
-  if (!empty($etsi) and is_string($etsi)) {
+  if (!empty($etsi) and is_string($etsi) and $toim == "LAVAKERAYS") {
+    $haku = " and (lasku.nimi like '%{$etsi}%' or lasku.nimitark like '%{$etsi}%' or lasku.viesti like '%{$etsi}%' or lasku.toim_nimi like '%{$etsi}%' or lasku.toim_nimitark like '%{$etsi}%') ";
+  }
+  else if (!empty($etsi) and is_string($etsi)) {
     $haku = " and (lasku.nimi like '%{$etsi}%' or lasku.nimitark like '%{$etsi}%' or lasku.viesti like '%{$etsi}%' or lasku.toim_nimi like '%{$etsi}%' or lasku.toim_nimitark like '%{$etsi}%' or lasku.laatija like '%{$etsi}%' or kuka1.nimi like '%{$etsi}%' or kuka2.nimi like '%{$etsi}%' {$myyntitili_haku}) ";
   }
 
@@ -1136,7 +1139,7 @@ if (strpos($_SERVER['SCRIPT_NAME'], "muokkaatilaus.php") !== FALSE) {
 
   $sumhaku = '';
 
-  if (isset($toimipaikka) and "{$toimipaikka}" != "kaikki") {
+  if (isset($toimipaikka) and "{$toimipaikka}" != "kaikki" and "{$toimipaikka}" != "") {
 
     $toimipaikka = (int) $toimipaikka;
 
@@ -2064,7 +2067,7 @@ elseif ($toim == "EXTRANET") {
 }
 elseif ($toim == "LAVAKERAYS") {
 
-  $query = "SELECT DISTINCT lasku.tunnus tilaus, asiakkaan_tilausnumero as 'astilno', $asiakasstring asiakas, asiakas.asiakasnro, lasku.luontiaika, count(tilausrivi.tunnus) riveja, ";
+  $query = "SELECT DISTINCT lasku.toim_maa maa, lasku.tunnus tilaus, asiakkaan_tilausnumero as 'astilno', $asiakasstring asiakas, asiakas.asiakasnro, lasku.luontiaika, sum(tilausrivi.tilkpl) kappaleita, ";
 
   if ($kukarow['hinnat'] == 0) {
     $query .= " round(sum(tilausrivi.hinta
@@ -3256,86 +3259,76 @@ if (mysql_num_rows($result) != 0) {
         if (isset($pv_rajaus)) {
           $lopetus .= "//pv_rajaus=$pv_rajaus";
         }
+      }
 
-        echo "<td class='back'><form method='post' action='muokkaatilaus.php'>";
-        echo "<input type='hidden' name='toim' value='$whiletoim'>";
-        echo "<input type='hidden' name='lopetus' value='$lopetus'>";
-        echo "<input type='hidden' name='tee' value='NAYTATILAUS'>";
-        echo "<input type='hidden' name='tunnus' value='$row[tunnus]'>";
-        echo "<input type='submit' name='$aputoim1' value='".t("N‰yt‰")."'>";
-        echo "</form></td>";
+      if ($whiletoim == "OSTO" or $whiletoim == "OSTOSUPER" or $whiletoim == "HAAMU") {
+        echo "<form method='post' action='tilauskasittely/tilaus_osto.php' $javalisa>
+            <input type='hidden' name='tee' value='AKTIVOI'>";
       }
       else {
-        if ($whiletoim == "OSTO" or $whiletoim == "OSTOSUPER" or $whiletoim == "HAAMU") {
-          echo "<form method='post' action='tilauskasittely/tilaus_osto.php' $javalisa>
-              <input type='hidden' name='tee' value='AKTIVOI'>";
-        }
-        else {
-          echo "<form method='post' class='myyntiformi' id='myyntiformi_{$row['tunnus']}' action='tilauskasittely/tilaus_myynti.php' $javalisa>";
-        }
-
-        //  Projektilla hyp‰t‰‰n aina p‰‰otsikolle..
-        if ($whiletoim == "PROJEKTI") {
-          echo "  <input type='hidden' name='projektilla' value='$row[tunnusnippu]'>";
-        }
-
-        echo "<input type='hidden' name='lopetus' value='$lopetus'>
-              <input type='hidden' name='mista' value='muokkaatilaus'>
-              <input type='hidden' name='toim' value='$aputoim1'>
-              <input type='hidden' name='orig_tila' value='{$row["tila"]}'>
-              <input type='hidden' name='orig_alatila' value='{$row["alatila"]}'>
-              <input type='hidden' class='tilausnumero' name='tilausnumero' value='$row[tunnus]'>
-              <input type='hidden' name='kaytiin_otsikolla' value='NOJOO!' />";
-
-        if ($toim == "VASTAANOTA_REKLAMAATIO") {
-          echo "  <input type='hidden' name='mista' value='vastaanota'>";
-        }
-
-        $_class = $whiletoim == "EXTRANET" ? "check_kesken" : "";
-
-        if ($aputoim2 != "" and ($whiletoim == "" or $whiletoim == "SUPER" or $whiletoim == "SUPER_EITYOM" or $whiletoim == "SUPER_EILUONTITAPATYOM" or $whiletoim == "KESKEN" or $toim == "KESKEN_TAI_TOIMITETTAVISSA" or $toim == "LAVAKERAYS" or $toim == "TOSI_KESKEN" or $whiletoim == "EXTRANET" or $whiletoim == "JTTOIMITA" or $whiletoim == "LASKUTUSKIELTO" or (($whiletoim == "VALMISTUSMYYNTI" or $whiletoim == "VALMISTUSMYYNTISUPER") and $row["tila"] != "V"))) {
-          echo "<input type='submit' class='{$_class}' name='$aputoim2' value='$lisa2' $button_disabled>";
-        }
-
-        echo "<input type='submit' class='{$_class}' name='$aputoim1' value='$lisa1' $button_disabled>";
-        echo "</form></td>";
-
-        if (((($whiletoim == "TARJOUS" or $whiletoim == "TARJOUSSUPER") and $deletarjous)
-            or ($toim == 'SUPER' and $deletilaus)) and $kukarow["mitatoi_tilauksia"] == "") {
-
-          echo "<td class='back'><form method='post' action='muokkaatilaus.php' onSubmit='return tarkista_mitatointi(1, \"{$whiletoim}\");'>";
-          echo "<input type='hidden' name='toim' value='$whiletoim'>";
-          echo "<input type='hidden' name='tee' value='MITATOI_TARJOUS'>";
-          echo "<input type='hidden' name='tilausnumero' value='$row[tunnus]'>";
-          echo "<input type='hidden' name='kaytiin_otsikolla' value='NOJOO!'>";
-          echo "<input type='submit' name='$aputoim1' value='".t("Mit‰tˆi")."'>";
-          echo "</form></td>";
-        }
-
-        //laitetaan tunnukset talteen mitatoi_tarjous_kaikki toiminnallisuutta varten
-        $nakyman_tunnukset[] = $row['tunnus'];
-
-        if ($whiletoim == "ENNAKKO" and in_array($yhtiorow["ennakkotilausten_toimitus"], array('M','K'))) {
-
-          $toimitettavat_ennakot[] = $row["tunnus"];
-
-          if ($yhtiorow["ennakkotilausten_toimitus"] == 'K') {
-            $napin_teksti = t("Siirr‰ myyntitilaukseksi");
-          }
-          else {
-            $napin_teksti = t("Toimita ennakkotilaus");
-          }
-
-          echo "<td class='back'><form method='post' action='muokkaatilaus.php' onSubmit='return verify();'>";
-          echo "<input type='hidden' name='toim' value='$whiletoim'>";
-          echo "<input type='hidden' name='tee' value='TOIMITA_ENNAKKO'>";
-          echo "<input type='hidden' name='toimita_ennakko' value='$row[tunnus]'>";
-          echo "<input type='hidden' name='kaytiin_otsikolla' value='NOJOO!'>";
-          echo "<input type='submit' name='$aputoim1' value='{$napin_teksti}'>";
-          echo "</form></td>";
-        }
+        echo "<form method='post' class='myyntiformi' id='myyntiformi_{$row['tunnus']}' action='tilauskasittely/tilaus_myynti.php' $javalisa>";
       }
 
+      //  Projektilla hyp‰t‰‰n aina p‰‰otsikolle..
+      if ($whiletoim == "PROJEKTI") {
+        echo "  <input type='hidden' name='projektilla' value='$row[tunnusnippu]'>";
+      }
+
+      echo "<input type='hidden' name='lopetus' value='$lopetus'>
+            <input type='hidden' name='mista' value='muokkaatilaus'>
+            <input type='hidden' name='toim' value='$aputoim1'>
+            <input type='hidden' name='orig_tila' value='{$row["tila"]}'>
+            <input type='hidden' name='orig_alatila' value='{$row["alatila"]}'>
+            <input type='hidden' class='tilausnumero' name='tilausnumero' value='$row[tunnus]'>
+            <input type='hidden' name='kaytiin_otsikolla' value='NOJOO!' />";
+
+      if ($toim == "VASTAANOTA_REKLAMAATIO") {
+        echo "  <input type='hidden' name='mista' value='vastaanota'>";
+      }
+
+      $_class = $whiletoim == "EXTRANET" ? "check_kesken" : "";
+
+      if ($aputoim2 != "" and ($whiletoim == "" or $whiletoim == "SUPER" or $whiletoim == "SUPER_EITYOM" or $whiletoim == "SUPER_EILUONTITAPATYOM" or $whiletoim == "KESKEN" or $toim == "KESKEN_TAI_TOIMITETTAVISSA" or $toim == "LAVAKERAYS" or $toim == "TOSI_KESKEN" or $whiletoim == "EXTRANET" or $whiletoim == "JTTOIMITA" or $whiletoim == "LASKUTUSKIELTO" or (($whiletoim == "VALMISTUSMYYNTI" or $whiletoim == "VALMISTUSMYYNTISUPER") and $row["tila"] != "V"))) {
+        echo "<input type='submit' class='{$_class}' name='$aputoim2' value='$lisa2' $button_disabled>";
+      }
+
+      echo "<input type='submit' class='{$_class}' name='$aputoim1' value='$lisa1' $button_disabled>";
+      echo "</form></td>";
+
+      if (((($whiletoim == "TARJOUS" or $whiletoim == "TARJOUSSUPER") and $deletarjous)
+          or ($toim == 'SUPER' and $deletilaus)) and $kukarow["mitatoi_tilauksia"] == "") {
+
+        echo "<td class='back'><form method='post' action='muokkaatilaus.php' onSubmit='return tarkista_mitatointi(1, \"{$whiletoim}\");'>";
+        echo "<input type='hidden' name='toim' value='$whiletoim'>";
+        echo "<input type='hidden' name='tee' value='MITATOI_TARJOUS'>";
+        echo "<input type='hidden' name='tilausnumero' value='$row[tunnus]'>";
+        echo "<input type='hidden' name='kaytiin_otsikolla' value='NOJOO!'>";
+        echo "<input type='submit' name='$aputoim1' value='".t("Mit‰tˆi")."'>";
+        echo "</form></td>";
+      }
+
+      //laitetaan tunnukset talteen mitatoi_tarjous_kaikki toiminnallisuutta varten
+      $nakyman_tunnukset[] = $row['tunnus'];
+
+      if ($whiletoim == "ENNAKKO" and in_array($yhtiorow["ennakkotilausten_toimitus"], array('M','K'))) {
+
+        $toimitettavat_ennakot[] = $row["tunnus"];
+
+        if ($yhtiorow["ennakkotilausten_toimitus"] == 'K') {
+          $napin_teksti = t("Siirr‰ myyntitilaukseksi");
+        }
+        else {
+          $napin_teksti = t("Toimita ennakkotilaus");
+        }
+
+        echo "<td class='back'><form method='post' action='muokkaatilaus.php' onSubmit='return verify();'>";
+        echo "<input type='hidden' name='toim' value='$whiletoim'>";
+        echo "<input type='hidden' name='tee' value='TOIMITA_ENNAKKO'>";
+        echo "<input type='hidden' name='toimita_ennakko' value='$row[tunnus]'>";
+        echo "<input type='hidden' name='kaytiin_otsikolla' value='NOJOO!'>";
+        echo "<input type='submit' name='$aputoim1' value='{$napin_teksti}'>";
+        echo "</form></td>";
+      }
       echo "</tr>";
     }
   }
@@ -3362,7 +3355,7 @@ if (mysql_num_rows($result) != 0) {
       echo "<table>";
       echo "<tr>";
       echo "<th>".t("Ker‰yslistan tulostin")."</th>";
-      echo "<td><select name='valittu_tulostin'>";
+      echo "<td><select name='valittu_lavakerayslista_tulostin'>";
       echo "<option value=''>".t("Valitse tulostin")."</option>";
 
       if (empty($hb_kerayslista_tulostin)) {

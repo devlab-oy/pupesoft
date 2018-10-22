@@ -18,6 +18,7 @@ $select = "";
 if ($nayta_rivit == 'vahvistamattomat') {
   $select = "selected";
 }
+
 // N‰ytet‰‰n muuten vaan sopivia tilauksia
 echo "<form method = 'post'>";
 echo "<br><table>";
@@ -25,6 +26,11 @@ echo "<tr><th>", t("Valitse toimittaja"), ":</th><td style='text-align: top;'><i
 echo "<select name='nayta_rivit'>";
 echo "<option value=''>", t("Kaikki avoimet rivit"), "</option>";
 echo "<option value='vahvistamattomat' {$select}>", t("Vain vahvistamattomia rivej‰"), "</option> ";
+
+if ($nayta_rivit == 'ihankaikki') {
+  echo "<option value='ihankaikki' selected>", t("Kaikki rivit"), "</option> ";
+}
+
 echo "<input type='submit' class='hae_btn' value = '".t("Etsi")."'></td>";
 echo "</tr>";
 
@@ -70,7 +76,7 @@ if ($yhtiorow['toimipaikkakasittely'] == "L" and $toimipaikat_res = hae_yhtion_t
 echo "</table>";
 echo "</form><br>";
 
-if ($ytunnus == "" and isset($nayta_rivit) and $nayta_rivit != "") {
+if ($ytunnus == "" and isset($nayta_rivit) and $nayta_rivit == "vahvistamattomat") {
 
   $toimipaikkalisa = "";
 
@@ -150,6 +156,9 @@ if ($ytunnus != '') {
 
       if ($keikka > 0) {
         $mitkakaikkipvm = " and uusiotunnus = {$keikka} and tyyppi = 'O' and kpl = 0 ";
+      }
+      elseif ($nayta_rivit == "ihankaikki") {
+        $mitkakaikkipvm = " and otunnus in ({$tilaus_otunnukset}) ";
       }
       else {
         $mitkakaikkipvm = " and otunnus in ({$tilaus_otunnukset}) and uusiotunnus=0 ";
@@ -395,7 +404,7 @@ if (isset($laskurow)) {
 
   if ((int) $keikka > 0 and $otunnus == "") {
     $query = "SELECT tilausrivi.otunnus, tilausrivi.tuoteno, tuotteen_toimittajat.toim_tuoteno, tilausrivi.nimitys,
-              concat_ws('/',tilkpl,round(tilkpl*if(tuotteen_toimittajat.tuotekerroin=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin),4)) 'tilattu sis/ulk',
+              concat_ws('/',varattu,round(varattu*if(tuotteen_toimittajat.tuotekerroin=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin),4)) 'tilattu sis/ulk',
               hinta, {$ale_query_select_lisa} round((varattu+jt)*hinta*if(tuotteen_toimittajat.tuotekerroin=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin)*{$query_ale_lisa},'{$yhtiorow['hintapyoristys']}') rivihinta,
               toimaika, tilausrivi.jaksotettu as vahvistettu, tilausrivi.uusiotunnus, tilausrivi.tunnus
               FROM tilausrivi
@@ -409,17 +418,21 @@ if (isset($laskurow)) {
   }
   else {
     $query = "SELECT tilausrivi.otunnus, tilausrivi.tuoteno, tuotteen_toimittajat.toim_tuoteno, tilausrivi.nimitys,
-              concat_ws('/',tilkpl,round(tilkpl*if(tuotteen_toimittajat.tuotekerroin=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin),4)) 'tilattu sis/ulk',
+              concat_ws('/',varattu,round(varattu*if(tuotteen_toimittajat.tuotekerroin=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin),4)) 'tilattu sis/ulk',
               hinta, {$ale_query_select_lisa} round((varattu+jt)*hinta*if(tuotteen_toimittajat.tuotekerroin=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin)*{$query_ale_lisa},'{$yhtiorow['hintapyoristys']}') rivihinta,
               toimaika, tilausrivi.jaksotettu as vahvistettu, tilausrivi.uusiotunnus, tilausrivi.tunnus
               FROM tilausrivi
               LEFT JOIN tuote ON tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno
               LEFT JOIN tuotteen_toimittajat ON tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.liitostunnus='{$toimittajaid}'
               WHERE otunnus in ({$tilaus_otunnukset})
-              and tilausrivi.yhtio='{$kukarow['yhtio']}'
-              and tilausrivi.uusiotunnus=0
-              and tilausrivi.tyyppi='O'
-              ORDER BY {$jarjestys}";
+              and tilausrivi.yhtio='{$kukarow['yhtio']}'";
+
+    if ($nayta_rivit != "ihankaikki") {
+      $query .= " and tilausrivi.uusiotunnus=0 ";
+    }
+
+    $query .= " and tilausrivi.tyyppi='O'
+                ORDER BY {$jarjestys}";
   }
   $presult = pupe_query($query);
 
@@ -479,7 +492,7 @@ if (isset($laskurow)) {
 
     for ($i=0; $i < mysql_num_fields($presult)-$miinus; $i++) {
       if (mysql_field_name($presult, $i) == 'tuoteno') {
-        echo "<td><a href='../tuote.php?tee=Z&tuoteno=", urlencode($prow[$i]), "'>{$prow[$i]}</a></td>";
+        echo "<td><a href='#' onclick=\"window.open('{$palvelin2}tuote.php?tee=Z&tuoteno=".urlencode($prow[$i])."', '_blank' ,'toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,left=200,top=100,width=1000,height=800'); return false;\">{$prow[$i]}</a></td>";
       }
       elseif (mysql_field_name($presult, $i) == 'toimaika') {
         echo "<td align='right'><input type='text' name='toimaikarivi[{$prow['tunnus']}]' value='{$prow[$i]}' size='10'></td>";
@@ -528,8 +541,8 @@ function get_vahvistamattomat_rivit($tilaus_otunnukset, $toimittajaid, $laskurow
   $ale_query_select_lisa = generoi_alekentta_select('erikseen', 'O');
 
   $query = "SELECT tilausrivi.otunnus, tilausrivi.tuoteno, tilausrivi.yksikko, tuotteen_toimittajat.toim_tuoteno, tilausrivi.nimitys,
-            tilkpl,
-            round(tilkpl*if(tuotteen_toimittajat.tuotekerroin=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin),4) ulkkpl,
+            varattu,
+            round(varattu*if(tuotteen_toimittajat.tuotekerroin=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin),4) ulkkpl,
             hinta, {$ale_query_select_lisa} round((varattu+jt)*hinta*if(tuotteen_toimittajat.tuotekerroin=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin)*{$query_ale_lisa},'$yhtiorow[hintapyoristys]') rivihinta,
             toimaika, tilausrivi.jaksotettu as vahvistettu, tilausrivi.tunnus,
             toim_tuoteno

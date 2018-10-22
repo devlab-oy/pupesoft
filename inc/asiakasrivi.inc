@@ -609,6 +609,21 @@ if ($fieldname == "vienti") {
   $jatko = 0;
 }
 
+if ($fieldname == "vientitietojen_autosyotto") {
+
+  $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
+
+  $sel = array();
+  $sel[$trow[$i]] = "selected";
+
+  $ulos .= "<option value = ''>".t("Yhtiön oletus")."</option>";
+  $ulos .= "<option value='E'  $sel[E]>".t("Myyntitilauksen vientitietoja ei kuitata automaattisesti syötetyiksi")."</option>";
+  $ulos .= "<option value='K' $sel[K]>".t("Myyntitilauksen vientitiedot kuitataan automaattisesti syötetyiksi")."</option>";
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
 if ($fieldname == "luokka") {
   $vresult = t_avainsana("ASIAKASLUOKKA");
 
@@ -1264,4 +1279,15 @@ if ($fieldname == 'kerayserat') {
   else {
     $tyyppi = 0;
   }
+}
+if ($fieldname == "asiakasviivakoodi") {
+  $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
+
+  $sel = trim($trow[$i]) == 'K' ? ' selected' : '';
+
+  $ulos .= "<option value = ''>".t("Ei as. tilausnumeroa viivakoodina lähetteelle")."</option>";
+  $ulos .= "<option value = 'K' {$sel}>".t("As. tilausnumero viivakoodina lähetteeelle")."</option>";
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
 }

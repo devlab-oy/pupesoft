@@ -1446,6 +1446,9 @@ if (!function_exists("verkkolasku_in")) {
             $rinfo = isset($rtuoteno[$i]["riviinfo"]) ? $rtuoteno[$i]["riviinfo"] : "";
             $tuote = isset($rtuoteno[$i]["tuoteno"]) ? $rtuoteno[$i]["tuoteno"] : "";
 
+            $rinfo = pupesoft_cleanstring($rinfo);
+            $tuote = pupesoft_cleanstring($tuote);
+
             $query = "SELECT tilino, kustp, alv
                       FROM tiliointisaanto
                       WHERE ttunnus  = '$trow[tunnus]'

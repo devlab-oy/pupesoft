@@ -18,7 +18,7 @@ $id = (int) $_GET["id"];
 $query = "SELECT *
           from liitetiedostot
           where tunnus = '$id'
-          and liitos   in ('kalenteri','tuote','sarjanumeron_lisatiedot','yllapito', 'asiakas', 'dynaaminen_puu')";
+          and liitos   in ('kalenteri','tuote','sarjanumeron_lisatiedot','yllapito', 'asiakas', 'dynaaminen_puu', 'muut_tiedostot')";
 $liiteres = pupe_query($query);
 
 if (mysql_num_rows($liiteres) > 0) {

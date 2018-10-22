@@ -107,8 +107,11 @@ function piirra_formi($valittu_aihealue, $valittu_tiedostotyyppi, $aihealueet) {
     echo "<select id='tiedostotyyppi' name='tiedostotyyppi' onclick='submit();'>";
 
     foreach ($tiedostotyypit as $tiedostotyyppi) {
-      $valittu = $valittu_tiedostotyyppi == $tiedostotyyppi["selitetark"] ? "selected" : "";
-      echo "<option value='{$tiedostotyyppi["selitetark"]}'
+
+      $selitetark = !empty($tiedostotyyppi["selitetark_2"]) ? $tiedostotyyppi["selitetark_2"] : $tiedostotyyppi["selitetark"];
+
+      $valittu = $valittu_tiedostotyyppi == $selitetark ? "selected" : "";
+      echo "<option value='{$selitetark}'
                     {$valittu}>{$tiedostotyyppi["selitetark"]}</option>";
     }
 

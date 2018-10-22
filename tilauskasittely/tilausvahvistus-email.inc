@@ -13,37 +13,42 @@ $tilvahasiakas = mysql_fetch_array($tilvahresult);
 $kieli = strtolower($tilvahasiakas['kieli']);
 
 $virexx = 0;
+$orig_komento = $komento;
 $komento = array();
 
 // asiakkaan sähköpostiin
 if (strpos($laskurow['tilausvahvistus'], 'S') !== FALSE) {
-
-  $query = "SELECT *
-            FROM yhteyshenkilo
-            WHERE yhtio      = '$kukarow[yhtio]'
-            AND liitostunnus = '$laskurow[liitostunnus]'
-            AND nimi         = '$laskurow[tilausyhteyshenkilo]'
-            and tyyppi       = 'A'";
-  $yhteyshenkiloresult = pupe_query($query);
-  $yhteyshenkiloasiakas = mysql_fetch_array($yhteyshenkiloresult);
-
-  if ($yhteyshenkiloasiakas['email'] != '') {
-    $tilvahasiakas['email'] = $yhteyshenkiloasiakas['email'];
-  }
-
-  if ($tilvahasiakas['email'] == '') {
-    $tilvah_nimi = $tilvahasiakas["nimi"];
-    if ($tilvahasiakas["toim_nimi"] != "" and $tilvahasiakas["toim_nimi"] != $tilvahasiakas["nimi"]) {
-      $tilvah_nimi .= " / ".$tilvahasiakas["toim_nimi"];
-    }
-    if ($silent == "") {
-      echo "<font class='error'>".t("TILAUSVAHVISTUS: Asiakkaalla ei ole sähköpostiosoitetta")."! $tilvah_nimi ($tilvahasiakas[ytunnus])</font><br><br>";
-    }
-    $virexx++;
+  if (substr($orig_komento, 0, 14) == 'vaintahanemail') {
+    $komento["Tilausvahvistus"] = "asiakasemail".substr($orig_komento, 14);
   }
   else {
-    // komentoon asiakasemail
-    $komento["Tilausvahvistus"] = "asiakasemail".$tilvahasiakas['email'];
+    $query = "SELECT *
+              FROM yhteyshenkilo
+              WHERE yhtio      = '$kukarow[yhtio]'
+              AND liitostunnus = '$laskurow[liitostunnus]'
+              AND nimi         = '$laskurow[tilausyhteyshenkilo]'
+              and tyyppi       = 'A'";
+    $yhteyshenkiloresult = pupe_query($query);
+    $yhteyshenkiloasiakas = mysql_fetch_array($yhteyshenkiloresult);
+
+    if ($yhteyshenkiloasiakas['email'] != '') {
+      $tilvahasiakas['email'] = $yhteyshenkiloasiakas['email'];
+    }
+
+    if ($tilvahasiakas['email'] == '') {
+      $tilvah_nimi = $tilvahasiakas["nimi"];
+      if ($tilvahasiakas["toim_nimi"] != "" and $tilvahasiakas["toim_nimi"] != $tilvahasiakas["nimi"]) {
+        $tilvah_nimi .= " / ".$tilvahasiakas["toim_nimi"];
+      }
+      if ($silent == "") {
+        echo "<font class='error'>".t("TILAUSVAHVISTUS: Asiakkaalla ei ole sähköpostiosoitetta")."! $tilvah_nimi ($tilvahasiakas[ytunnus])</font><br><br>";
+      }
+      $virexx++;
+    }
+    else {
+      // komentoon asiakasemail
+      $komento["Tilausvahvistus"] = "asiakasemail".$tilvahasiakas['email'];
+    }
   }
 }
 

@@ -107,6 +107,9 @@ class MagentoClient {
   // Poistetaanko tuotteita oletuksena
   private $_magento_poista_tuotteita = false;
 
+  // Estetäänkö asiakkaiden muokkaus
+  private $_magento_asiakaspaivitysesto = "";
+
   // Käsitelläänkö tuotekuvia magentossa
   private $magento_lisaa_tuotekuvat = true;
 
@@ -1220,7 +1223,13 @@ class MagentoClient {
           $this->debug('magento_asiakkaat', $asiakas_data);
         }
       }
-      // Asiakas on jo olemassa, päivitetään
+      // Asiakas on jo olemassa, päivitetään(kö)
+
+      elseif ($this->_magento_asiakaspaivitysesto == "YES") {
+        $this->log('magento_asiakkaat', "Asiakaspäivitys on estetty");
+        // Skipataan tämä asiakas
+        continue;
+      }
       else {
         try {
           $poista_asiakas_defaultit = $this->_magento_poista_asiakasdefaultit;
@@ -1376,6 +1385,10 @@ class MagentoClient {
 
   public function setSisaanluvunEsto($sisaanluvun_esto) {
     $this->_sisaanluvun_esto = $sisaanluvun_esto;
+  }
+
+  public function setAsiakasPaivitysEsto($value) {
+    $this->_magento_asiakaspaivitysesto = $value;
   }
 
   public function setUniversalTuoteryhma($universal_tuoteryhma) {
@@ -1574,7 +1587,7 @@ class MagentoClient {
       }
       $onnistuiko_lisays = true;
     }
-    
+
     if ($onnistuiko_lisays === false) {
       $current = $offset;
       for ($i = $offset; $i <= $total; $i++) {
@@ -1586,7 +1599,7 @@ class MagentoClient {
             'price_per_customer.setPriceForCustomersPerProduct',
             array($magento_tuotenumero, array($hintadata))
           );
-      
+
           $this->log('magento_tuotteet', "({$current}/{$i}/{$total}): Tuotteen {$magento_tuotenumero} asiakaskohtaiset ({$hintadata['customerEmail']}) hinnat lisätty");
           $this->debug('magento_tuotteet', $hintadata);
         }

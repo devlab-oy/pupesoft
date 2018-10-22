@@ -108,6 +108,15 @@ if ($toim == "TARKKA") {
     echo "</td>";
     echo "</tr>";
   }
+  $konserni = '';
+}
+else {
+  if ($yhtiorow["konserni"] != "") {
+    $chk = "";
+    if ($konserni != "") $chk = "CHECKED";
+  
+    echo "<tr><th>".t("Näytä kaikki konserniyhtiöt")."</th><td colspan='3'><input type='checkbox' name='konserni' $chk></td></tr>";
+  }
 }
 
 echo "</table>";
@@ -147,7 +156,7 @@ if ($tee == "tallenna_haku") {
 }
 
 if ($tee != '') {
-  piirra_myyjien_myynnit($lisa, $pvmalku, $pvmloppu, $toim, $kuluprosentti, $osastojen_nimet);
+  piirra_myyjien_myynnit($lisa, $pvmalku, $pvmloppu, $toim, $kuluprosentti, $osastojen_nimet, $konserni);
 }
 
 require "inc/footer.inc";

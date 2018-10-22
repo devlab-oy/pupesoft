@@ -71,6 +71,7 @@ function hae_tiedostot($params) {
   $tiedoston_tyyppi   = isset($params["tiedoston_tyyppi"]) ? $params["tiedoston_tyyppi"] : "";
   $valittu_toimittaja = isset($params["valittu_toimittaja"]) ? $params["valittu_toimittaja"] : "";
   $aihealue           = isset($params["aihealue"]) ? $params["aihealue"] : "";
+  $yleiset_tiedostot  = isset($params["yleiset_tiedostot"]) ? $params["yleiset_tiedostot"] : false;
 
   global $kukarow;
 
@@ -93,14 +94,29 @@ function hae_tiedostot($params) {
               AND tuotteen_toimittajat.liitostunnus = '{$valittu_toimittaja}'
               ORDER BY liitetiedostot.selite";
   }
-  elseif ($aihealue and $tiedoston_tyyppi) {
+  elseif (($aihealue and $tiedoston_tyyppi) or $yleiset_tiedostot) {
+
+    $tiedoston_tyyppi2_lisa = "";
+
+    // Tarkistetaan asiakkaan maa extranetissä
+    if ($yleiset_tiedostot and !empty($kukarow['oletus_asiakas']) and $kukarow['extranet'] == 'X') {
+      $asiakasrow = hae_asiakas($kukarow['oletus_asiakas']);
+      $tiedoston_tyyppi = $asiakasrow['maa'];
+
+      // Tiedoston_tyyppi * = kaikki, eli haetaan ne aina extranetissä
+      $tiedoston_tyyppi2_lisa = " OR liitetiedostot.kayttotarkoitus = '{$aihealue} | *'";
+    }
+
     $query = "SELECT liitetiedostot.tunnus,
               liitetiedostot.kayttotarkoitus,
               liitetiedostot.selite
               FROM liitetiedostot
               WHERE liitetiedostot.liitos        = 'muut_tiedostot'
               AND liitetiedostot.liitostunnus    = 0
-              AND liitetiedostot.kayttotarkoitus = '{$aihealue} | {$tiedoston_tyyppi}'
+              AND (
+                liitetiedostot.kayttotarkoitus = '{$aihealue} | {$tiedoston_tyyppi}'
+                {$tiedoston_tyyppi2_lisa}
+              )
               AND liitetiedostot.yhtio           = '{$kukarow["yhtio"]}'
               ORDER BY liitetiedostot.selite";
   }

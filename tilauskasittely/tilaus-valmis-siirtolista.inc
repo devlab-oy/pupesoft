@@ -753,7 +753,8 @@ else {
                     if (asiakasnro!='', asiakasnro, ytunnus) asiakasnro,
                     asiakasnro as asiakasnro_aito,
                     kerayserat,
-                    kieli
+                    kieli,
+                    asiakasviivakoodi
                     FROM asiakas
                     WHERE tunnus='$laskurow[liitostunnus]' and yhtio='$kukarow[yhtio]'";
           $riresult = pupe_query($query);

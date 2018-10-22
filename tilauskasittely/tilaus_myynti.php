@@ -2081,6 +2081,25 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
                  and alatila = ''";
       $result = pupe_query($query);
 
+      // L‰hetet‰‰nkˆ extranetin hyv‰ksynt‰jonoon laitettavista tilauksista tietoa myyntiosastolle?
+      if ($kukarow["extranet"] != "" and $yhtiorow["hyvaksyttavat_extranet_email"] != "") {
+
+        $tv_laskurow = $laskurow;
+        $tv_laskurow['tilausvahvistus'] = '3SP';
+
+        $params_tilausvahvistus = array(
+          'tee'      => $tee,
+          'toim'     => $toim,
+          'kieli'    => $kieli,
+          'komento'  => "vaintahanemail".$yhtiorow["hyvaksyttavat_extranet_email"],
+          'laskurow' => $tv_laskurow,
+          'naytetaanko_rivihinta'    => "",
+          'extranet_tilausvahvistus' => 1,
+        );
+
+        laheta_tilausvahvistus($params_tilausvahvistus);
+      }
+
       // tilaus ei en‰‰ kesken...
       $query  = "UPDATE kuka set kesken=0 where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]'";
       $result = pupe_query($query);
@@ -2297,6 +2316,22 @@ if ($kukarow["extranet"] == "" and ((($toim == "TYOMAARAYS" or $toim == "TYOMAAR
       ($yhtiorow['reklamaation_kasittely'] == '' or
         ($yhtiorow['reklamaation_kasittely'] == 'X' and $laskurow['tilaustyyppi'] == 'U'))))) {
   require "tyomaarays/tyomaarays.inc";
+}
+
+if ($kukarow["extranet"] == "" and $laskurow['alatila'] == "FF" and $tee == "FFJONOON") {
+  echo "<br>";
+  echo t("Tilaus palautettu lavaker‰ysjonoon!");
+  echo "<br><br>";
+
+  $tee = '';
+  $tilausnumero = '';
+  $laskurow = '';
+  $kukarow['kesken'] = '';
+  $tila = '';
+
+  if ($lopetus != '') {
+    lopetus($lopetus, "META");
+  }
 }
 
 if ($kukarow["extranet"] == "" and $toim == "REKLAMAATIO" and $tee == "LEPAA" and
@@ -7135,7 +7170,7 @@ if ($tee == '') {
         }
 
         // Onko puutteita
-        if ($row['var'] == 'P') {
+        if (in_array($row['var'], array('P', 'J'))) {
           $puutetta_on = true;
         }
 
@@ -10364,6 +10399,22 @@ if ($tee == '') {
                 </form>
               </td>";
       }
+    }
+
+    if ($kukarow["extranet"] == "" and $muokkauslukko == "" and $laskurow['alatila'] == "FF") {
+      echo "  <td class='back ptop'>
+          <form name='tlepaamaan' method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php'>
+          <input type='hidden' name='toim' value='$toim'>
+          <input type='hidden' name='lopetus' value='$lopetus'>
+          <input type='hidden' name='ruutulimit' value = '$ruutulimit'>
+          <input type='hidden' name='projektilla' value='$projektilla'>
+          <input type='hidden' name='tee' value='FFJONOON'>
+          <input type='hidden' name='tilausnumero' value='$tilausnumero'>
+          <input type='hidden' name='mista' value = '$mista'>
+          <input type='hidden' name='orig_tila' value='$orig_tila'>
+          <input type='hidden' name='orig_alatila' value='$orig_alatila'>
+          <input type='submit' value='* ".t("Tilaus lavaker‰ysjonoon")." *'>
+          </form></td>";
     }
 
     if ($kukarow["extranet"] == "" and $muokkauslukko == "" and $toim == "REKLAMAATIO") {

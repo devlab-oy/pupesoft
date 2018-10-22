@@ -581,6 +581,7 @@ elseif ($monta > 1 and $monta <= $limit) {
       echo "<input type='hidden' name='tilaustyyppi' value='$tilaustyyppi'>";
       echo "<input type='hidden' name='toim' value='$toim'>";
       echo "<input type='hidden' name='tuoteno' value='$tuoteno'>";
+      echo "<input type='hidden' name='masterdataexcel_datatyyppi' value='$datatyyppi'>";
       echo "<input type='hidden' name='var' value='$var'>";
       echo "<input type='hidden' name='muutparametrit' value='$muutparametrit'>";
       echo "<input type='hidden' name='vain_toimittamattomat' value='{$vain_toimittamattomat}' />";
@@ -720,6 +721,7 @@ elseif ($monta > 1 and $monta <= $limit) {
       echo "<input type='hidden' name='myyja'       value='$myyja'>";
       echo "<input type='hidden' name='myyjanro'       value='$myyjanro'>";
       echo "<input type='hidden' name='tuoteno'       value='$tuoteno'>";
+      echo "<input type='hidden' name='masterdataexcel_datatyyppi' value='$datatyyppi'>";
       echo "<input type='hidden' name='lasku_yhtio'    value='$asiakas[yhtio]'>";
       echo "<input type='hidden' name='tarra_aineisto'  value='$tarra_aineisto'>";
       echo "<input type='hidden' name='hintojen_vaihto' value='$hintojen_vaihto'>";
@@ -797,6 +799,7 @@ if ($monta != 1) {
       echo "<input type='hidden' name='myyjanro'        value='$myyjanro'>";
       echo "<input type='hidden' name='lasku_yhtio'     value='$asiakas[yhtio]'>";
       echo "<input type='hidden' name='tuoteno'        value='$tuoteno'>";
+      echo "<input type='hidden' name='masterdataexcel_datatyyppi' value='$datatyyppi'>";
       echo "<input type='hidden' name='tarra_aineisto'   value='$tarra_aineisto'>";
       echo "<input type='hidden' name='yhtiotoimipaikka' value='{$yhtiotoimipaikka}' />";
       echo "<input type='hidden' name='tilaustyyppi'     value='{$tilaustyyppi}' />";
@@ -871,6 +874,7 @@ if ($monta != 1) {
     echo "<input type='hidden' name='tilaustyyppi' value='$tilaustyyppi'>";
     echo "<input type='hidden' name='toim' value='$toim'>";
     echo "<input type='hidden' name='tuoteno' value='$tuoteno'>";
+    echo "<input type='hidden' name='masterdataexcel_datatyyppi' value='$datatyyppi'>";
     echo "<input type='hidden' name='var' value='$var'>";
     echo "<input type='hidden' name='muutparametrit' value='{$muutparametrit}'>";
     echo "<input type='hidden' name='vain_toimittamattomat' value='{$vain_toimittamattomat}' />";
@@ -898,6 +902,7 @@ if ($monta != 1) {
     echo "<input type='hidden' name='myyja'            value='$myyja'>";
     echo "<input type='hidden' name='myyjanro'         value='$myyjanro'>";
     echo "<input type='hidden' name='tuoteno'          value='$tuoteno'>";
+    echo "<input type='hidden' name='masterdataexcel_datatyyppi' value='$datatyyppi'>";
     echo "<input type='hidden' name='tarra_aineisto'   value='$tarra_aineisto'>";
     echo "<input type='hidden' name='vain_toimittamattomat' value='{$vain_toimittamattomat}' />";
 

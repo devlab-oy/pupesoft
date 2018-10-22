@@ -227,6 +227,34 @@ if ((!isset($vapauta_tilaus_keraykseen) or !$vapauta_tilaus_keraykseen)
     $myyntikielto_res = pupe_query($query);
 
     echo "<font class='error'>", t("Tilaus laitetaan odottamaan, kunnes ennakkolaskut ovat maksettu"), ".</font><br/><br/>";
+    
+    $_tehdaan_varastosiirto = false;
+    $varastosiirto_tyyppi = 'N';
+
+    if ($kukarow["extranet"] == "" and $yhtiorow["tee_siirtolista_myyntitilaukselta"] == 'K' and $laskurow['tila'] == 'N') {
+      if ($yhtiorow["asiakasvarasto"] == '') {
+        $query = "SELECT tilausrivi.tunnus
+                  FROM tilausrivi
+                  WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+                  AND tilausrivi.otunnus = {$laskurow['tunnus']}
+                  AND tilausrivi.var     = 'S'";
+        $varastosiirto_result = pupe_query($query);
+        
+        if (mysql_num_rows($varastosiirto_result) > 0) {
+          $_tehdaan_varastosiirto = true;
+        }
+      }
+      elseif ($yhtiorow["asiakasvarasto"] != '') {
+        $_tehdaan_varastosiirto = true;
+        $varastosiirto_tyyppi = 'K';
+      }
+    }
+
+    if ($_tehdaan_varastosiirto) {
+      require 'tilauksesta_varastosiirto.inc';
+
+      tilauksesta_varastosiirto($laskurow['tunnus'], $varastosiirto_tyyppi);
+    }
   }
 
   // Laitetaan lopetus tyhjäksi, niin ei refreshata ruutua jos tultiin muokkauksesta tms.

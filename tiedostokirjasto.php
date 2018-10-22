@@ -15,6 +15,7 @@ $aihealue       = isset($aihealue) ? $aihealue : "";
 $tiedostotyyppi = isset($tiedostotyyppi) ? $tiedostotyyppi : "";
 $toimittaja     = isset($toimittaja) ? $toimittaja : "";
 $tee            = isset($tee) ? $tee : "";
+$yleiset_tiedostot = false;
 
 if ($toim == "LAATU") {
   $otsikko     = "Laatu-asiakirjat";
@@ -27,6 +28,15 @@ elseif ($toim == "LUVAT_JA_LISENSSIT") {
   $ylaotsikko  = "Aihealueet";
   $aihealueet  = hae_aihealueet($toim);
   $toimittajat = "";
+}
+elseif ($toim == "YLEISET_TIEDOSTOT") {
+  $otsikko     = "Tiedostot";
+  $ylaotsikko  = "Aihealueet";
+  $aihealueet  = hae_aihealueet($toim);
+  $toimittajat = "";
+  $yleiset_tiedostot = true;
+  $tee            = "hae_tiedostot";
+  $tiedostotyyppi = "extranet";
 }
 elseif ($toim == "ASIAKKAAN_TIEDOSTOT") {
   $otsikko        = "Asiakkaan tiedostot";
@@ -54,7 +64,8 @@ $params = array(
   "toimittajat"            => $toimittajat,
   "aihealueet"             => $aihealueet,
   "valittu_aihealue"       => $aihealue,
-  "valittu_tiedostotyyppi" => $tiedostotyyppi
+  "valittu_tiedostotyyppi" => $tiedostotyyppi,
+  "yleiset_tiedostot"      => $yleiset_tiedostot,
 );
 
 if ($tee == 'hae_tiedostot' and !empty($tiedostotyyppi)) {
@@ -77,6 +88,9 @@ if ($tee == "") {
   elseif ($toim == "LUVAT_JA_LISENSSIT" and empty($aihealueet)) {
     echo "<font class='error'>" . t("Lupia ja lisenssejä ei ole vielä lisätty") . "</font>";
   }
+  elseif ($toim == "YLEISET_TIEDOSTOT" and empty($aihealueet)) {
+    echo "<font class='error'>" . t("Tiedostoja ei ole vielä lisätty") . "</font>";
+  }
   elseif ($toim == "" and empty($toimittajat)) {
     echo "<font class='error'>" . t("Toimittajia ei ole vielä lisätty") . "</font>";
   }
@@ -88,14 +102,13 @@ if ($tee == "") {
 function piirra_formi($params) {
   global $toim;
 
-  $ylaotsikko             = isset($params["ylaotsikko"]) ? $params["ylaotsikko"] : "";
-  $toimittajat            = isset($params["toimittajat"]) ? $params["toimittajat"] : "";
-  $aihealueet             = isset($params["aihealueet"]) ? $params["aihealueet"] : "";
-  $valittu_aihealue       = isset($params["valittu_aihealue"]) ? $params["valittu_aihealue"] : "";
-  $valittu_tiedostotyyppi =
-    isset($params["valittu_tiedostotyyppi"]) ? $params["valittu_tiedostotyyppi"] : "";
-  $valittu_toimittaja     =
-    isset($params["valittu_toimittaja"]) ? $params["valittu_toimittaja"] : "";
+  $ylaotsikko             = isset($params["ylaotsikko"])              ? $params["ylaotsikko"] : "";
+  $toimittajat            = isset($params["toimittajat"])             ? $params["toimittajat"] : "";
+  $aihealueet             = isset($params["aihealueet"])              ? $params["aihealueet"] : "";
+  $valittu_aihealue       = isset($params["valittu_aihealue"])        ? $params["valittu_aihealue"] : "";
+  $valittu_tiedostotyyppi = isset($params["valittu_tiedostotyyppi"])  ? $params["valittu_tiedostotyyppi"] : "";
+  $valittu_toimittaja     = isset($params["valittu_toimittaja"])      ? $params["valittu_toimittaja"] : "";
+  $yleiset_tiedostot      = isset($params["yleiset_tiedostot"])       ? $params["yleiset_tiedostot"] : false;
   $tiedostotyypit         = tiedostotyypit($valittu_aihealue, $toim);
 
   echo "<form method='post'>";
@@ -118,6 +131,8 @@ function piirra_formi($params) {
   }
   elseif ($aihealueet) {
     echo '<select id="ylaotsikko" name="aihealue" onchange="submit();">';
+    echo "<option value=''>".t("Valitse")."</option>";
+
     foreach ($aihealueet as $aihealue) {
       $valittu = $valittu_aihealue == $aihealue['selite'] ? "selected" : "";
       echo "<option {$valittu} value='{$aihealue['selite']}'>{$aihealue['selite']}</option>";
@@ -128,51 +143,55 @@ function piirra_formi($params) {
   echo "</td>";
   echo "</tr>";
 
-  if ($valittu_aihealue and $tiedostotyypit) {
-    echo "<tr>";
-    echo "<td><label for='tiedostotyyppi'>" . t("Tiedoston tyyppi") . "</label></td>";
-    echo "<td>";
-    echo "<select id='tiedostotyyppi' name='tiedostotyyppi' onchange='submit()'>";
+  if (!$yleiset_tiedostot) {
+    if ($valittu_aihealue and $tiedostotyypit) {
+      echo "<tr>";
+      echo "<td><label for='tiedostotyyppi'>" . t("Tiedoston tyyppi") . "</label></td>";
+      echo "<td>";
+      echo "<select id='tiedostotyyppi' name='tiedostotyyppi' onchange='submit()'>";
+      echo "<option value=''>".t("Valitse")."</option>";
 
-    foreach ($tiedostotyypit as $tiedostotyyppi) {
-      $valittu = $valittu_tiedostotyyppi == $tiedostotyyppi['selitetark'] ? "selected" : "";
-      echo "<option value='{$tiedostotyyppi["selitetark"]}'
-                    {$valittu}>{$tiedostotyyppi["selitetark"]}
-            </option>";
+      foreach ($tiedostotyypit as $tiedostotyyppi) {
+        $valittu = $valittu_tiedostotyyppi == $tiedostotyyppi['selitetark'] ? "selected" : "";
+        echo "<option value='{$tiedostotyyppi["selitetark"]}'
+                      {$valittu}>{$tiedostotyyppi["selitetark"]}
+              </option>";
+      }
+
+      echo "</select>";
+      echo "</td>";
+      echo "</tr>";
     }
+    elseif ($tiedostotyypit) {
+      echo "<tr>";
+      echo "<td><label for='tiedostotyyppi'>" . t("Tiedoston tyyppi") . "</label></td>";
+      echo "<td>";
+      echo "<select id='tiedostotyyppi' name='tiedostotyyppi' onchange='submit();'>";
+      echo "<option value=''>".t("Valitse")."</option>";
 
-    echo "</select>";
-    echo "</td>";
-    echo "</tr>";
-  }
-  elseif ($tiedostotyypit) {
-    echo "<tr>";
-    echo "<td><label for='tiedostotyyppi'>" . t("Tiedoston tyyppi") . "</label></td>";
-    echo "<td>";
-    echo "<select id='tiedostotyyppi' name='tiedostotyyppi' onchange='submit();'>";
+      foreach ($tiedostotyypit as $tiedostotyyppi) {
+        $tiedostotyyppinimi =
+          t_avainsana("LITETY", '', "and selite = '{$tiedostotyyppi}'", '', '', "selitetark");
+        $valittu            = $valittu_tiedostotyyppi == $tiedostotyyppi ? "selected" : "";
+        echo "<option value='{$tiedostotyyppi}'
+                      {$valittu}>{$tiedostotyyppinimi}
+              </option>";
+      }
 
-    foreach ($tiedostotyypit as $tiedostotyyppi) {
-      $tiedostotyyppinimi =
-        t_avainsana("LITETY", '', "and selite = '{$tiedostotyyppi}'", '', '', "selitetark");
-      $valittu            = $valittu_tiedostotyyppi == $tiedostotyyppi ? "selected" : "";
-      echo "<option value='{$tiedostotyyppi}'
-                    {$valittu}>{$tiedostotyyppinimi}
-            </option>";
+      echo "</select>";
+      echo "</td>";
+      echo "</tr>";
     }
-
-    echo "</select>";
-    echo "</td>";
-    echo "</tr>";
-  }
-  elseif ($valittu_aihealue) {
-    echo
-    "<tr>
-         <td colspan='2'>
-           <font class='error'>" .
-      t("Tälle aihealueelle ei ole vielä lisätty tiedostotyyppejä") .
-      "</font>
-         </td>
-       </tr>";
+    elseif ($valittu_aihealue) {
+      echo
+      "<tr>
+           <td colspan='2'>
+             <font class='error'>" .
+        t("Tälle aihealueelle ei ole vielä lisätty tiedostotyyppejä") .
+        "</font>
+           </td>
+         </tr>";
+    }
   }
 
   echo "<tr>";
@@ -193,6 +212,16 @@ function piirra_tiedostolista($tiedostot) {
     if ($toim == "ASIAKKAAN_TIEDOSTOT") {
       echo "<font class='error'>";
       echo t("Asiakkaan tiedostoja ei löytynyt");
+      echo "</font>";
+    }
+    elseif ($toim == "YLEISET_TIEDOSTOT") {
+      echo "<font class='error'>";
+      echo t("Valitulle aihealueelle ei löytynyt liitetiedostoja");
+      echo "</font>";
+    }
+    elseif (!empty($toim)) {
+      echo "<font class='error'>";
+      echo t("Valitulle aihealueelle ei löytynyt valitun tyyppisiä liitetiedostoja");
       echo "</font>";
     }
     else {

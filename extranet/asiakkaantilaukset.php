@@ -2,6 +2,8 @@
 
 require "parametrit.inc";
 
+$lisa = '';
+
 //Haetaan asiakkaan tunnuksella
 $query  = "SELECT *
            FROM asiakas
@@ -97,12 +99,17 @@ else {
   $jarj = "ORDER BY lasku.laskunro desc";
 }
 
+if ($toim == "EXT") {
+    $lisa = " and ohjelma_moduli='EXTRANET' ";
+}
+
 if ($otunnus > 0 or $laskunro > 0) {
   $query = "SELECT lasku.tunnus tilaus, laskunro, concat_ws(' ', nimi, nimitark) asiakas, ytunnus, toimaika, laatija, summa, tila, alatila
             FROM lasku
             WHERE yhtio      = '$kukarow[yhtio]'
             and liitostunnus = '$asiakastunnus'
-            and tila         in ('L','N')";
+            and tila         in ('L','N')
+            $lisa";
 
   if ($laskunro > 0) {
     $query .= "and lasku.laskunro='$laskunro'";
@@ -119,6 +126,7 @@ else {
             WHERE yhtio      = '$kukarow[yhtio]'
             and liitostunnus = '$asiakastunnus'
             and tila         in ('L','N')
+            $lisa
             and luontiaika >='$vva-$kka-$ppa 00:00:00'
             and luontiaika <='$vvl-$kkl-$ppl 23:59:59'
             $jarj , tila";

@@ -6,12 +6,12 @@ function echo_myyntiseuranta_table() {
   global $kukarow, $yhtiorow;
 
   $nykyinen_kvartaali = paata_kvartaali();
- 
+
   $tulos_ja_liikevaihto = hae_tulos_ja_liikevaihto($nykyinen_kvartaali);
   $avoimet_tilaukset = hae_avoimet_tilaukset($kukarow['tunnus']);
 
   if (stristr($kukarow['asema'], 'myyjä')) {
-    
+
     $now = date('Y-m-d');
 
     // Hae nykyinen tilikausi
@@ -35,10 +35,9 @@ function echo_myyntiseuranta_table() {
 
   echo "<table>";
   echo "<tr>";
-
   echo "<td class='back'>";
 
-  echo "<table>";
+  echo "<table width='100%'>";
   echo "<tr>";
   echo "<th colspan='2' style='text-align:center;'>{$yhtiorow['nimi']} <br/>".piirra_aikavali($nykyinen_kvartaali)."</th>";
   echo "</tr>";
@@ -61,7 +60,7 @@ function echo_myyntiseuranta_table() {
 
   echo "<br/>";
 
-  echo "<table>";
+  echo "<table width='100%'>";
   echo "<tr>";
   echo "<th style='text-align:center;' colspan='2'>".t("Avoimet tilaukset")."</th>";
   echo "</tr>";
@@ -78,7 +77,7 @@ function echo_myyntiseuranta_table() {
 
   if (stristr($kukarow['asema'], 'myyjä')) {
 
-    echo "<td class='back'>";
+    echo "<td class='back ptop'>";
 
     echo "<table>";
     echo "<tr>";
@@ -125,7 +124,6 @@ function echo_myyntiseuranta_table() {
 
     echo "</td>";
   }
-
   echo "</tr>";
   echo "</table>";
 }
@@ -134,7 +132,7 @@ function hae_tulos_ja_liikevaihto($aikajana) {
   global $kukarow;
 
   $today = date('Y-m-d');
-  
+
   $query = "SELECT
             IFNULL(round(Sum(if (tili.sisainen_taso != '3A', summa, 0)) * -1, 2), 0) AS tulos,
             IFNULL(round(Sum(if (tili.sisainen_taso LIKE '31%', summa, 0)) * -1, 2), 0) AS liikevaihto

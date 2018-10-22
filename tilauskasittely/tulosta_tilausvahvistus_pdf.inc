@@ -1,7 +1,7 @@
 <?php
 
 // Haetaan asiakkaan tiedot
-$query = "SELECT lahetteen_jarjestys, lahetteen_jarjestys_suunta, luokka, puhelin, if(asiakasnro!='', asiakasnro, ytunnus) asiakasnro, asiakasnro as asiakasnro_aito
+$query = "SELECT lahetteen_jarjestys, lahetteen_jarjestys_suunta, luokka, puhelin, if(asiakasnro!='', asiakasnro, ytunnus) asiakasnro, asiakasnro as asiakasnro_aito, asiakasviivakoodi
           FROM asiakas
           WHERE tunnus = '$laskurow[liitostunnus]'
           and yhtio    = '$kukarow[yhtio]'";

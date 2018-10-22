@@ -1051,7 +1051,8 @@ if (!function_exists('tarjous_rivi_hinta_ale')) {
                   AND liitetiedostot.liitos          = 'tuote'
                   AND liitetiedostot.kayttotarkoitus = 'TH')
                 WHERE tuote.yhtio                    = '{$kukarow['yhtio']}'
-                AND tuote.tuoteno                    = '{$row['tuoteno']}'";
+                AND tuote.tuoteno                    = '{$row['tuoteno']}'
+                ORDER BY if(liitetiedostot.jarjestys = 0, 9999, liitetiedostot.jarjestys), liitetiedostot.filename";
       $kuva_res = pupe_query($query);
 
       if (mysql_num_rows($kuva_res) != 0) {

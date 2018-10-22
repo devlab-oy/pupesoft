@@ -2198,6 +2198,19 @@ if ($fieldname == "vientikiellon_ohitus") {
   $jatko = 0;
 }
 
+if ($fieldname == "vientitietojen_autosyotto") {
+
+  $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+  $sel1 = ($trow[$i] == "K") ? "selected" : "";
+
+  $ulos .= "<option value='' >".t("Myyntitilauksen vientitietoja ei kuitata automaattisesti syötetyiksi")."</option>";
+  $ulos .= "<option value='K' $sel1>".t("Myyntitilauksen vientitiedot kuitataan automaattisesti syötetyiksi")."</option>";
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
 if ($fieldname == "vienti_erittelyn_tulostus") {
 
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
@@ -3588,6 +3601,7 @@ if ($fieldname == "saldovirhe_esto_laskutus") {
   $ulos .= "<option value = ''>".t("Ei estetä laskutusta")."</option>";
   $ulos .= "<option value = 'H' $sel[H]>".t("Mikäli laskutuksessa tuotteen varastosaldo vähenee negatiiviseksi, hylätään KAIKKI tilaukset, joilla on kyseistä tuotetta")."</option>";
   $ulos .= "<option value = 'K' $sel[K]>".t("Sallitaan tilauksien laskutus luontijärjestyksessä, kunnes tuotteen varastosaldo loppuu")."</option>";
+  $ulos .= "<option value = 'V' $sel[V]>".t("Sallitaan tilauksien laskutus luontijärjestyksessä, kunnes tuotteen varastosaldo loppuu valitusta varastosta")."</option>";
   $ulos .= "</select></td>";
 
   $jatko = 0;

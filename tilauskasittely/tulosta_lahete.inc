@@ -352,7 +352,13 @@ if (!function_exists('alku_lahete')) {
       $pdf->draw_text(150, 730, $ff_string, $thispage, $ff_font);
 
       $pdf->draw_text(50, 717, t("Y-tunnus", $kieli), $thispage, $boldi);
-      $pdf->draw_text(150, 717, tulosta_ytunnus(preg_replace("/^0037/", "", $laskurow["yhtio_ovttunnus"]), $laskurow["yhtio_maa"], $laskurow["vienti"]), $thispage, $norm);
+
+      if ($yhtiorow['maa'] == 'EE') {
+        $pdf->draw_text(150, 717, tulosta_ytunnus(preg_replace("/^0037/", "", $yhtiorow["ytunnus"]), $laskurow["yhtio_maa"], $laskurow["vienti"]), $thispage, $norm);
+      }
+      else {
+        $pdf->draw_text(150, 717, tulosta_ytunnus(preg_replace("/^0037/", "", $laskurow["yhtio_ovttunnus"]), $laskurow["yhtio_maa"], $laskurow["vienti"]), $thispage, $norm);
+      }
 
       $pdf->draw_text(50, 704, t("Nimi", $kieli), $thispage, $boldi);
       $pdf->draw_text(150, 704, $yhtiorow["nimi"], $thispage, $norm);
@@ -412,12 +418,21 @@ if (!function_exists('alku_lahete')) {
       if ($laskurow['rahtivapaa'] == 'o' and onko_rahtituote_syotetty($laskurow) == 0) {
         $rahtivapaa = "Rahtivapaa";
       }
-
+      
+      if ($tyyppi == "TILAUSVAHVISTUS") {
+        if ($laskurow["osatoimitus"] == 'o') {
+          $kokonaistoimitus = '/ Kokonaistoimitus';
+        }
+        else  {
+          $kokonaistoimitus = '';
+        } 
+      }
+  
       if ($extranet_tilausvahvistus != 1) {
         if ($laskurow["kohdistettu"] == "K" or $lahetetyyppi_avainsana == 1) {
           // Käytetään LÄHETTÄJÄN rahtisopimusta, EI näytetä lähettäjän sopparinumeroa.
           $pdf->draw_text(310, 708, t("Toimitustapa", $kieli), $thispage, $pieni);
-          $toimitustapateksti = t_tunnus_avainsanat($laskurow['toimitustapa'], "selite", "TOIMTAPAKV", $kieli)." ".t($rahtivapaa, $kieli);
+          $toimitustapateksti = t_tunnus_avainsanat($laskurow['toimitustapa'], "selite", "TOIMTAPAKV", $kieli)." ".t($rahtivapaa, $kieli)." ".t($kokonaistoimitus, $kieli);
           $pdf->draw_text(310, 698, $toimitustapateksti, $thispage, $boldi);
 
         }
@@ -427,7 +442,7 @@ if (!function_exists('alku_lahete')) {
 
           $pdf->draw_text(310, 708, t("Toimitustapa", $kieli)." / ".t("Rahtisopimus", $kieli), $thispage, $pieni);
           $toimitustapateksti = t_tunnus_avainsanat($laskurow['toimitustapa'], "selite", "TOIMTAPAKV", $kieli)." ".t($rahtivapaa, $kieli);
-          $pdf->draw_text(310, 698, $toimitustapateksti." ".$rahtirow["rahtisopimus"],   $thispage, $boldi);
+          $pdf->draw_text(310, 698, $toimitustapateksti." ".$rahtirow["rahtisopimus"]." ".t($kokonaistoimitus, $kieli),   $thispage, $boldi);
 
         }
       }
@@ -671,9 +686,16 @@ if (!function_exists('alku_lahete')) {
 
     if ($base_lahetetyyppi != "tulosta_lahete_custom.inc") {
       // viivakoodi
-      $data = viivakoodi($laskurow["tunnus"], "code128", 150, 30, "");
-      $image = $pdf->jfif_embed($data);
-      $pdf->image_place($image, 805, 440, $thispage, array("scale" => 0.3));
+      if ($asrow["asiakasviivakoodi"] == 'K') {
+          $data = viivakoodi($laskurow["asiakkaan_tilausnumero"], "code128", 150, 30, "");
+          $image = $pdf->jfif_embed($data);
+          $pdf->image_place($image, 805, 440, $thispage, array("scale" => 0.3));
+      }
+      else {
+        $data = viivakoodi($laskurow["tunnus"], "code128", 150, 30, "");
+        $image = $pdf->jfif_embed($data);
+        $pdf->image_place($image, 805, 440, $thispage, array("scale" => 0.3));
+      }
 
       $pdf->draw_rectangle($kala+30, 20, 20, 580, $thispage, $rectparam);
     }
@@ -874,9 +896,16 @@ if (!function_exists('uusi_sivu_lahete')) {
       }
 
       // viivakoodi
-      $data = viivakoodi($laskurow["tunnus"], "code128", 70, 10, "");
-      $image = $pdf->jfif_embed($data);
-      $pdf->image_place($image, 805, 440, $thispage, array("scale" => 0.3));
+      if ($asrow["asiakasviivakoodi"] == 'K' and is_numeric($laskurow["asiakkaan_tilausnumero"])) {
+          $data = viivakoodi($laskurow["asiakkaan_tilausnumero"], "code128", 70, 10, "");
+          $image = $pdf->jfif_embed($data);
+          $pdf->image_place($image, 805, 440, $thispage, array("scale" => 0.3));
+      }
+      else {
+        $data = viivakoodi($laskurow["tunnus"], "code128", 70, 10, "");
+        $image = $pdf->jfif_embed($data);
+        $pdf->image_place($image, 805, 440, $thispage, array("scale" => 0.3));
+      }
     }
 
     $kala = 715;
@@ -3646,7 +3675,12 @@ if (!function_exists('loppu_lahete')) {
       $pdf->draw_text(257, 35, $y_www, $thispage, $pieni);
 
       $pdf->draw_text(404, 55, t("Y-tunnus", $kieli).":", $thispage, $pieni);
-      $pdf->draw_text(444, 55, tulosta_ytunnus($y_vatnumero, $y_maa, $laskurow["vienti"]), $thispage, $pieni);
+      if ($yhtiorow["maa"] == 'EE') {
+        $pdf->draw_text(444, 55, tulosta_ytunnus($yhtiorow["ytunnus"], $yhtiorow["maa"], $laskurow["vienti"]), $thispage, $pieni);
+      }
+      else {
+        $pdf->draw_text(444, 55, tulosta_ytunnus($y_vatnumero, $y_maa, $laskurow["vienti"]), $thispage, $pieni);
+      }
       $pdf->draw_text(404, 45, t("Kotipaikka", $kieli).":", $thispage, $pieni);
       $pdf->draw_text(444, 45, $y_kotipaikka, $thispage, $pieni);
       $pdf->draw_text(404, 35, t("Alv.rek", $kieli), $thispage, $pieni);

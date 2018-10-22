@@ -23,11 +23,11 @@ if (isset($_POST['piirtele_valikko'])) {
   // piirrell‰‰n tuotteen_avainsanat-valikko
   echo "<br><br>";
 
-  $query = "SELECT selite, selitetark
+  $query = "SELECT laji, selite, selitetark
             FROM avainsana
             WHERE yhtio = '{$kukarow['yhtio']}'
-            AND laji    = 'PARAMETRI'
-            ORDER BY selite";
+            AND laji    in ('PARAMETRI', 'LISATIETO')
+            ORDER BY laji, selite";
   $result = pupe_query($query);
 
   echo "<form>";
@@ -61,7 +61,7 @@ if (isset($_POST['piirtele_valikko'])) {
       }
     }
 
-    echo "<td align='left' valign='top' nowrap><input type='checkbox' class='lajiboksit' name='lajit[]' value='{$row['selite']}' $tsekk>{$row['selitetark']}</td>";
+    echo "<td align='left' valign='top' nowrap><input type='checkbox' class='lajiboksit' name='lajit[]' value='{$row['laji']}_{$row['selite']}' $tsekk>{$row['laji']} {$row['selitetark']}</td>";
 
     if ($secretcounter == 2) {
       echo "</tr>";
@@ -136,6 +136,7 @@ elseif (isset($lajit) and count($lajit) > 0) {
   array_unshift($kielet, $yhtiorow['kieli']);
 
   mysql_data_seek($tilausrivit_talteen, 0);
+  $rows = array();
 
   while ($row = mysql_fetch_array($tilausrivit_talteen)) {
     $rows[] = $row;
@@ -247,18 +248,30 @@ elseif (isset($lajit) and count($lajit) > 0) {
 
     foreach ($lajit as $asanalaji) {
 
+      // siivotaan datasta ylim‰‰r‰inen "parametri_" mik‰li
+      // avainsanoissa selitteess‰ on annettu ylim‰‰r‰inen "parametri_"
+      $asanalaji = strtolower($asanalaji);
+      $pos = strpos($asanalaji, "_");
+      $_laji = substr($asanalaji, 0, $pos);
+      $asanalaji2 = "";
+
+      // jos kaksi per‰kk‰ist‰ "parametri_" niin siivotaan toinen pois
+      if (substr($asanalaji, $pos + 1, strlen($_laji)) == $_laji) {
+        $asanalaji2 = substr($asanalaji, $pos + 1);
+      }
+
       foreach ($kielet as $kieli) {
         // etsit‰‰n tuotteen avainsanat per valittu laji ja kieli
         $query = "SELECT *
                   FROM tuotteen_avainsanat
                   WHERE yhtio = '{$kukarow['yhtio']}'
                   AND tuoteno = '{$tilausrivi['tuoteno']}'
-                  AND laji    = '{$asanalaji}'
+                  AND laji    IN ('{$asanalaji}', '{$asanalaji2}')
                   AND kieli   = '{$kieli}'";
         $result = pupe_query($query);
 
         //laitetaan uusi headeri per valittu kieli vain ekalla rivill‰
-        if ($eka_tuote) $worksheet->write(0, $excelsarake, $asanalaji." ".strtoupper($kieli), $format_bold);
+        if ($eka_tuote) $worksheet->write(0, $excelsarake, !empty($asanalaji2) ? $asanalaji2 : $asanalaji." ".strtoupper($kieli), $format_bold);
 
         $asanase = mysql_fetch_assoc($result);
         if (is_numeric($asanase['selite'])) $asanase['selite'] = str_replace(".", ",", $asanase['selite']);

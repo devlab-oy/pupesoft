@@ -316,6 +316,7 @@ if ($lopetus == "") {
   if ($asiakaskaynnit != '')    $asiakaskaynnitchk     = "CHECKED";
   if ($liitetiedostot != '')    $liitetiedostotchk    = "CHECKED";
   if ($alv_prosentit != '')    $alv_prosentitchk     = "CHECKED";
+  if ($label != '')             $labelchk              = "CHECKED";
   if ($ytun_laajattied != '')    $ytun_laajattiedchk    = "CHECKED";
   if ($ytun_yhteyshenk != '')    $ytun_yhteyshenkchk    = "CHECKED";
   if ($naytatoimtuoteno != '')  $naytatoimtuotenochk   = "CHECKED";
@@ -780,6 +781,12 @@ if ($lopetus == "") {
   echo "</tr>";
 
   echo "<tr>";
+  echo "<th>".t('Näytä tilauksen luokittelu')."</th>";
+  echo "<td colspan='3'><input type='checkbox' name='label' {$labelchk} /></td>";
+  echo "<td class='back'>".t('(Toimii vain jos listaat tilauksittain)')."</td>";
+  echo "</tr>";
+
+  echo "<tr>";
   echo "<th>";
   echo t('Näytä kumulatiivinen myynti päivästä');
   echo "</th>";
@@ -1099,6 +1106,7 @@ if ((isset($aja_raportti) or isset($valitse_asiakas)) and count($_REQUEST) > 0) 
     $maksuehto_join    = "";
     $toimtuoteno_join  = "";
     $maksupvm_join     = "";
+    $label_join        = "";
 
     // näitä käytetään queryssä
     $sel_osasto = "";
@@ -1657,6 +1665,15 @@ if ((isset($aja_raportti) or isset($valitse_asiakas)) and count($_REQUEST) > 0) 
         $group .= ",lasku.mapvm";
         $select .= "lasku.mapvm maksupvm, ";
       }
+
+      $gluku++;
+      $muutgroups++;
+    }
+
+    if ($label != "") {
+      // Näytetään laskulle tallennettu label
+      $label_join = "LEFT JOIN avainsana AS AV ON (AV.yhtio = lasku.yhtio AND AV.tunnus = lasku.label)";
+      $select .= "AV.selitetark luokittelu, ";
 
       $gluku++;
       $muutgroups++;
@@ -2535,6 +2552,7 @@ if ((isset($aja_raportti) or isset($valitse_asiakas)) and count($_REQUEST) > 0) 
             {$toimtuoteno_join}
             {$lisa_parametri}
             {$maksupvm_join}
+            {$label_join}
             WHERE lasku.yhtio in ({$yhtio})
             and lasku.tila in ({$tila})";
 

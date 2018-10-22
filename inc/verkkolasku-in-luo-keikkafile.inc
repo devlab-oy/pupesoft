@@ -904,7 +904,9 @@ $laskun_numero = $osrow["laskunro"]; // älä mene muuttaamaan tai poistamaan tätä
 
 $lajilisa = strtolower(substr($osrow['ebid'], 0, 3));
 
-if ($osrow['ebid'] == "FINVOICEXML" and $trow['asn_sanomat'] == 'F') {
+// Luodaan saapuminen, jos toimittajalle on määritelty, että verkkolaskulta luodaan saapuminen tai
+// manuaalisesti laskua syötettäessä ruksataan 'Luo saapuminen'
+if (($osrow['ebid'] == "FINVOICEXML" and $trow['asn_sanomat'] == 'F') or $osrow['ebid'] == '') {
   $query  = "LOCK TABLE lasku WRITE, sanakirja WRITE, tiliointi READ";
   $result = pupe_query($query);
 

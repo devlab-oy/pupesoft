@@ -4254,7 +4254,7 @@ if ($fieldname == "asiakasvarasto" ) {
   $sresult = pupe_query($query);
 
   $ulos = "<td><select name='$nimi'>";
-  $ulos .= "<option value=' '>".t("Ei oletusvarastoa valittu")."</option>";
+  $ulos .= "<option value=''>".t("Ei oletusvarastoa valittu")."</option>";
 
   while ($srow = mysql_fetch_array($sresult)) {
     $sel = '';

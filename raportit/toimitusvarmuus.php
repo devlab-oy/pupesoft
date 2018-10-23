@@ -54,9 +54,21 @@ if ($ytunnus != '' or (int) $asiakasid > 0 or (int) $toimittajaid > 0) {
 
   if ($toim == 'MYYNTI' or $toim == 'AVOIMET' or $toim == 'KAIKKIAVOIMET') {
     require "inc/asiakashaku.inc";
+    if (empty($asiakasid)) {
+      unset($etsinappi);
+    }
+    else {
+      $etsinappi = TRUE;
+    }
   }
   elseif ($toim == 'OSTO') {
     require "../inc/kevyt_toimittajahaku.inc";
+    if (empty($toimittajaid)) {
+      unset($etsinappi);
+    }
+    else {
+      $etsinappi = TRUE;
+    }
   }
 }
 

@@ -18,7 +18,7 @@ if (!isset($tee) or $tee == '') {
     require "tervetuloa_".$yhtiorow['konserni'].".inc";
   }
 
-  echo "<table width='100%'>";
+  echo "<table>";
   echo "<tr>";
 
   ///* Uutiset *///

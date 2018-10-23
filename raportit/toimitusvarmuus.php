@@ -733,13 +733,18 @@ if (!empty($etsinappi)) {
     echo "</table>";
 
     $excelnimi = $worksheet->close();
+    $kaunisnimi = "Toimitusvarmuus\_$ppa$kka$vva-$ppl$kkl$vvl.xlsx";
+
+    if ($toim == 'KAIKKIAVOIMET') {
+      $kaunisnimi = "Avoimet_rivit\_$ppl$kkl$vvl.xlsx";
+    }
 
     echo "<br><br><table>";
     echo "<tr><th>".t("Tallenna Excel").":</th><td class='back'>";
     echo "<form method='post' class='multisubmit'>";
     echo "<input type='hidden' name='toim' value='$toim'>";
     echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
-    echo "<input type='hidden' name='kaunisnimi' value='Toimitusvarmuus_$ppa$kka$vva-$ppl$kkl$vvl.xlsx'>";
+    echo "<input type='hidden' name='kaunisnimi' value='$kaunisnimi'>";
     echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";
     echo "<input type='submit' value='".t("Tallenna")."'></form></td></tr>";
     echo "</table><br>";

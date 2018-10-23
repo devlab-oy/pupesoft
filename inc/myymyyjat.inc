@@ -74,6 +74,7 @@ function piirra_myyjien_myynnit($lisa, $pvmalku, $pvmloppu, $toim, $kuluprosentt
             {$q_lisa}
             HAVING summa <> 0 OR kate <> 0
             {$q_lisa2}";
+            query_dump($query);
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) < 1) {
@@ -157,9 +158,9 @@ function piirra_myyjien_myynnit($lisa, $pvmalku, $pvmloppu, $toim, $kuluprosentt
   echo "<tr>";
   echo "<th>" . t("Myyjä") . "</th>";
 
-  if ($toim == "TARKKA") {
+  #if ($toim == "TARKKA") {
     echo "<th></th>";
-  }
+  #}
 
   while ($raja < substr($pvmloppu, 0, 7)) {
 
@@ -214,7 +215,15 @@ function piirra_myyjien_myynnit($lisa, $pvmalku, $pvmloppu, $toim, $kuluprosentt
 
       echo "</td>";
     }
+    else {
+      echo "<td>" . t("Myynti");
 
+      echo "<br>" . t("Kate");
+
+      echo "</td>";
+    }
+      
+      
     $yhteensa_summa = 0;
 
     if ($toim == "TARKKA") {
@@ -314,9 +323,9 @@ function piirra_myyjien_myynnit($lisa, $pvmalku, $pvmloppu, $toim, $kuluprosentt
     echo "<th>" . t("Yhteensä summa") . "<br>" . t("Yhteensä kate") . "<br>" . t("Kateprosentti") . "<br>" . t("Yht. avoimet myynnit") ."</th>";
   }
      
-  if ($toim == "TARKKA") {
+  #if ($toim == "TARKKA") {
     echo "<th></th>";
-  }
+  #}
 
   $yhteensa_summa = 0;
   $yhteensa_kate = 0;

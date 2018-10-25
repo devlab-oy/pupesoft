@@ -5,16 +5,17 @@ function piirra_myyjien_myynnit($lisa, $pvmalku, $pvmloppu, $toim, $kuluprosentt
   global $kukarow, $yhtiorow;
 
   $valuuttakurssi = array();
+  $yhtionimi = array();
   
   if ($konserni != "") {
-    $query = "SELECT yhtio, valkoodi
+    $query = "SELECT yhtio, valkoodi, nimi
               from yhtio
               where konserni  = '$yhtiorow[konserni]'
               and konserni   != ''";
     $result = pupe_query($query);
     
     while ($rivi = mysql_fetch_assoc($result)) {
-      
+      $yhtionimi[$rivi["yhtio"]] = $rivi["nimi"];      
       $valquery = "SELECT yhtio, nimi, kurssi
                 FROM valuu
                 WHERE valuu.yhtio = '$yhtiorow[yhtio]'
@@ -74,7 +75,6 @@ function piirra_myyjien_myynnit($lisa, $pvmalku, $pvmloppu, $toim, $kuluprosentt
             {$q_lisa}
             HAVING summa <> 0 OR kate <> 0
             {$q_lisa2}";
-            query_dump($query);
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) < 1) {
@@ -110,9 +110,9 @@ function piirra_myyjien_myynnit($lisa, $pvmalku, $pvmloppu, $toim, $kuluprosentt
     else {
       $myyja_nimi[$row["myyja"]] = $row["nimi"];
       $valyhtio = $row["yhtio"];
-      $summa[$row["nimi"]][$row["kausi"]][1] += round($row["summa"] * $valuuttakurssi[$valyhtio], 0);      
-      
-      $kate[$row["nimi"]][$row["kausi"]][1] += round($row["kate"] * $valuuttakurssi[$valyhtio], 0);
+      $summa[$row["nimi"]][$row["kausi"]][$row["yhtio"]] += round($row["summa"] * $valuuttakurssi[$valyhtio], 0);      
+
+      $kate[$row["nimi"]][$row["kausi"]][$row["yhtio"]] += round($row["kate"] * $valuuttakurssi[$valyhtio], 0);
     } 
   }
 
@@ -215,10 +215,20 @@ function piirra_myyjien_myynnit($lisa, $pvmalku, $pvmloppu, $toim, $kuluprosentt
 
       echo "</td>";
     }
-    else {
+    elseif ($konserni == '') {
       echo "<td>" . t("Myynti");
 
       echo "<br>" . t("Kate");
+
+      echo "</td>";
+    }
+    else {
+      echo "<td style='white-space:nowrap'>" ;
+      foreach ($yhtionimi as $yht => $yht_nimi) {
+        echo "{$yht_nimi} " . t("Myynti") . "<br>";
+        echo "{$yht_nimi} " . t("Kate") . "<br>";       
+      }  
+      echo "" . t("Avoimet myynnit");
 
       echo "</td>";
     }
@@ -229,84 +239,116 @@ function piirra_myyjien_myynnit($lisa, $pvmalku, $pvmloppu, $toim, $kuluprosentt
     if ($toim == "TARKKA") {
       $yhteensa_kate = array();
     }
+    elseif ($konserni != '') {
+      $yhtio_summa = array();
+      $yhtio_kate = array();
+    }
     else {
       $yhteensa_kate = 0;
     }
 
     foreach ($rajataulu as $kausi) {
 
-      if (!isset($yhteensa_summa_kausi[$kausi])) {
-        $yhteensa_summa_kausi[$kausi] = 0;
-      }
-      if (!isset($yhteensa_kate_kausi[$kausi])) {
-        $yhteensa_kate_kausi[$kausi] = 0;
-      }
-      $summa = isset($kausi_array[$kausi][1]) ? $kausi_array[$kausi][1] : "";
-
-      if ($toim != "TARKKA") {
-        $kate_summa = isset($kate[$myyja][$kausi][1]) ? $kate[$myyja][$kausi][1] : "";
-        $yhteensa_kate += $kate_summa;
-        $yhteensa_kate_kausi[$kausi] += $kate_summa;
-      }
-
-      $yhteensa_summa += $summa;
-
-      $yhteensa_summa_kausi[$kausi] += $summa;
-
-      echo "<td style='text-align:right;'>{$summa}";
-
-      if ($toim == "TARKKA") {
-        $katteet = $kate[$myyja];
-
-        if ($katteet[$kausi]) {
-          foreach ($myyjan_osastot as $osasto) {
-            if ($katteet[$kausi][$osasto]) {
-              $yhteensa_kate[$osasto] += $katteet[$kausi][$osasto];
-              $yhteensa_kate_kausi[$kausi] += $katteet[$kausi][$osasto];
-
-              echo "<br>" . round($katteet[$kausi][$osasto]);
+        if (!isset($yhteensa_summa_kausi[$kausi])) {
+          $yhteensa_summa_kausi[$kausi] = 0;
+        }
+        if (!isset($yhteensa_kate_kausi[$kausi])) {
+          $yhteensa_kate_kausi[$kausi] = 0;
+        }
+        
+      if ($konserni == '') {
+        $summa = isset($kausi_array[$kausi][1]) ? $kausi_array[$kausi][1] : "";
+   
+        if ($toim != "TARKKA") {
+          $kate_summa = isset($kate[$myyja][$kausi][1]) ? $kate[$myyja][$kausi][1] : "";
+          $yhteensa_kate += $kate_summa;
+          $yhteensa_kate_kausi[$kausi] += $kate_summa;
+        }
+        
+        $yhteensa_summa += $summa;
+        
+        $yhteensa_summa_kausi[$kausi] += $summa;
+        
+        echo "<td style='text-align:right;'>{$summa}";
+        
+        if ($toim == "TARKKA") {
+          $katteet = $kate[$myyja];
+        
+          if ($katteet[$kausi]) {
+            foreach ($myyjan_osastot as $osasto) {
+              if ($katteet[$kausi][$osasto]) {
+                $yhteensa_kate[$osasto] += $katteet[$kausi][$osasto];
+                $yhteensa_kate_kausi[$kausi] += $katteet[$kausi][$osasto];
+        
+                echo "<br>" . round($katteet[$kausi][$osasto]);
+              }
+              else {
+                echo "<br>";
+              }
             }
-            else {
-              echo "<br>";
-            }
+        
+            echo "<br><strong style='font-weight:bold'>" . round(array_sum($katteet[$kausi])) .
+              "</strong>";
           }
-
-          echo "<br><strong style='font-weight:bold'>" . round(array_sum($katteet[$kausi])) .
-            "</strong>";
+        }
+        else {
+          echo "<br>{$kate_summa}";
         }
       }
-      else {
-        echo "<br>{$kate_summa}";
-        if ($konserni != '') echo "<br>&nbsp";
+      else  {
+        echo "<td style='text-align:right;'>";
+        foreach ($yhtionimi as $yht => $yht_nimi) {
+
+          $summa = isset($kausi_array[$kausi][$yht]) ? $kausi_array[$kausi][$yht] : "";
+          $kate_summa = isset($kate[$myyja][$kausi][$yht]) ? $kate[$myyja][$kausi][$yht] : "";
+
+          $yhtio_summa[$yht] += $summa;
+          $yhtio_kate[$yht] += $kate_summa;
+        
+          $yhteensa_summa_kausi[$kausi] += $summa;
+          $yhteensa_kate_kausi[$kausi] += $kate_summa;
+          echo "{$summa}<br>";
+          echo "{$kate_summa}<br>";
+
+        }
       }
-      
       echo "</td>";
     }
-
-    echo "<td style='text-align:right;'>{$yhteensa_summa}";
-
-    if ($toim == "TARKKA") {
-      ksort($yhteensa_kate);
-
-      foreach ($yhteensa_kate as $osaston_kate) {
-        echo "<br>" . round($osaston_kate);
+    if ($konserni == '') {
+      echo "<td style='text-align:right;'>{$yhteensa_summa}";
+      
+      if ($toim == "TARKKA") {
+        ksort($yhteensa_kate);
+      
+        foreach ($yhteensa_kate as $osaston_kate) {
+          echo "<br>" . round($osaston_kate);
+        }
+      
+        echo "<br><strong style='font-weight:bold'>" . round(array_sum($yhteensa_kate)) .
+          "</strong>";
       }
-
-      echo "<br><strong style='font-weight:bold'>" . round(array_sum($yhteensa_kate)) .
-        "</strong>";
+      else {
+        echo "<br>{$yhteensa_kate}";
+      }
     }
     else {
-      echo "<br>{$yhteensa_kate}";
-    }
+
+      echo "<td style='text-align:right;'>";
+      foreach ($yhtionimi as $yht => $yht_nimi) {
+        echo "{$yhtio_summa[$yht]}<br>";
+        echo "{$yhtio_kate[$yht]}<br>";
+      }
+    }  
     if ($konserni != '') {
 
-      if ($yhteensa_summa != 0 and isset($avoimet[$myyja])) {
+      if (isset($avoimet[$myyja])) {
         $avoimetsumma = $avoimet[$myyja];
       }
       else  {
         $avoimetsumma = 0;
       }
-      echo "<br>{$avoimetsumma}";
+
+      echo "{$avoimetsumma}";
       $yhteensa_avoimet += $avoimetsumma;
     }
 

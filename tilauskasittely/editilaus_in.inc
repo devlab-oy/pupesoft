@@ -1765,6 +1765,7 @@ while ($tietue = fgets($fd)) {
       // pakotetaan tilaukset tarvittaessa haluttuun toimipaikkaan
       if ($edi_tyyppi == 'magento' and $editilaus_toimipaikka) {
         $kukarow['toimipaikka'] = $editilaus_toimipaikka;
+        $yhtiorow = hae_yhtion_parametrit($yhtiorow["yhtio"]);
       }
 
       // Lis‰t‰‰n otsikko

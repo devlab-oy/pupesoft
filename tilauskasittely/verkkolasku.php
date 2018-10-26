@@ -2819,12 +2819,21 @@ else {
             }
           }
           elseif ($masrow["kateinen"] != '') {
-            if ($silent == "") {
-              $tulos_ulos .= "<br>\n".t("Käteislaskua ei lähetetty")."! $lasrow[laskunro] $lasrow[nimi]<br>\n";
+
+            // halutaan lähettää lasku suoraan asiakkaalle sähköpostilla.. mutta ei nollalaskua
+            // ja nimenomaan etukäteen maksetuissa Magento-verkkokauppatilauksissa
+            if ($lasrow["chn"] == "666" and $lasrow["summa"] != 0 and isset($verkkokauppa_email_kuitti) and $verkkokauppa_email_kuitti == 'JOO' and $lasrow["laatija"] == 'Magento') {
+              $tulostettavat_email[] = $lasrow["tunnus"];
+            }
+            else {
+              if ($silent == "") {
+                $tulos_ulos .= "<br>\n".t("Käteislaskua ei lähetetty")."! $lasrow[laskunro] $lasrow[nimi]<br>\n";
+              }
+
+              // Käteislaskuja ei lähetetä ulos mutta ne halutaan kuitenkin tulostaa itse
+              $tulostettavat[] = $lasrow["tunnus"];
             }
 
-            // Käteislaskuja ei lähetetä ulos mutta ne halutaan kuitenkin tulostaa itse
-            $tulostettavat[] = $lasrow["tunnus"];
             $lask++;
           }
           elseif ($lasrow["vienti"] != '' or $masrow["itsetulostus"] != '' or $lasrow["chn"] == "666" or $lasrow["chn"] == '667') {

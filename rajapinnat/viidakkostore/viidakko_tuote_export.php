@@ -112,7 +112,7 @@ if (viidakko_ajetaanko_sykronointi('tuotteet', $synkronoi)) {
   $tyyppi = "viidakko_tuotteet";
   $kaikki_tuotteet = viidakko_hae_tuotteet();
 
-  echo "<pre>",var_dump($kaikki_tuotteet);
+  #echo "<pre>",var_dump($kaikki_tuotteet);
 
   viidakko_echo("Siirret‰‰n tuotteet.");
   $viidakko_products = new ViidakkoStoreTuotteet($viidakko_url, $viidakko_token, $tyyppi);
@@ -136,7 +136,7 @@ if (viidakko_ajetaanko_sykronointi('kuvat', $synkronoi)) {
   $tyyppi = "viidakko_kuvat";
   $kaikki_tuotteet = viidakko_hae_tuotteet($tyyppi);
 
-  echo "<pre>",var_dump($kaikki_tuotteet);
+  #echo "<pre>",var_dump($kaikki_tuotteet);
 
   viidakko_echo("Siirret‰‰n kuvat.");
   $viidakko_pics = new ViidakkoStoreKuvat($viidakko_url, $viidakko_token, $tyyppi);

@@ -100,6 +100,7 @@ function viidakko_hae_tuotteet($tyyppi = "viidakko_tuotteet") {
   }
 
   $data = array();
+  $i    = 0;
 
   while ($row = mysql_fetch_assoc($res)) {
 
@@ -139,7 +140,14 @@ function viidakko_hae_tuotteet($tyyppi = "viidakko_tuotteet") {
                   if(liitetiedostot.jarjestys = 0, 9999, liitetiedostot.jarjestys) jarjestys,
                   liitetiedostot.kieli,
                   liitetiedostot.selite,
-                  liitetiedostot.tunnus
+                  liitetiedostot.tunnus,
+                  ( SELECT if(max(max.muutospvm) != '0000-00-00 00:00:00', max(max.muutospvm), max(max.luontiaika))
+                    FROM liitetiedostot max
+                    WHERE max.yhtio = liitetiedostot.yhtio
+                    AND max.liitos  = liitetiedostot.liitos
+                    AND max.liitostunnus = liitetiedostot.liitostunnus
+                    AND max.kayttotarkoitus = liitetiedostot.kayttotarkoitus
+                  ) muutospvm
                   FROM liitetiedostot
                   WHERE liitetiedostot.yhtio = '{$kukarow['yhtio']}'
                   AND liitetiedostot.liitos  = 'tuote'
@@ -148,34 +156,61 @@ function viidakko_hae_tuotteet($tyyppi = "viidakko_tuotteet") {
                   ORDER BY if(liitetiedostot.jarjestys = 0, 9999, liitetiedostot.jarjestys)";
         $result = pupe_query($query);
 
-        $i = 0;
+        $ii = 0;
 
         while ($liite_row = mysql_fetch_assoc($result)) {
 
           $liite_tk_url = "{$viidakko_kuvaurl}/view.php?id={$liite_row['tunnus']}";
+
+          // for testing..
+          if ($liite_row['tunnus'] != '24875') $liite_tk_url = "https://www.sprintit.fi/website/image/ir.attachment/5509_4ac6bcc/datas";
+
+          // X = delete all pics and then install
+          // Y = just install, pics have been deleted already
+          // "" = do nothing, no updates
+          $updated = (1==1 or $liite_row['muutospvm'] > $datetime_checkpoint);
+          if ($updated and $ii == 0) {
+            $_updated = "X";
+          }
+          elseif ($updated and $ii > 0) {
+            $_updated = "Y";
+          }
+          else {
+            $_updated = "";
+          }
+
+          if (empty($liite_row['selite'])) $liite_row['selite'] = "Tuotekuva";
 
           $data[$i] = array(
             "id"          => $_id,
             "code"        => utf8_encode($tuoteno),
             "image_id"    => (int) $liite_row['external_id'],
             "image"       => $liite_tk_url,
-            "title_description" => array(
+            "title" => array(
               array(
                 "language"=> utf8_encode(strtoupper($liite_row['kieli'])),
                 "title"   => utf8_encode($liite_row['selite'])
               )
             ),
+            "description" => array(
+              array(
+                "language"    => utf8_encode(strtoupper($liite_row['kieli'])),
+                "description" => utf8_encode($liite_row['selite'])
+              )
+            ),
             "position"    => (int) $liite_row['jarjestys'],
             "is_default"  => (bool) false,
             "is_teaser"   => (bool) false,
-            "liitetiedostot_tunnus" => $liite_row['tunnus']
+            "liitetiedostot_tunnus" => $liite_row['tunnus'],
+            "updated" => $_updated,
           );
 
-          if ($i == 0) {
+          if ($ii == 0) {
             $data[$i]['is_default'] = (bool) true;
             $data[$i]['is_teaser'] = (bool) true;
           }
           $i++;
+          $ii++;
         }
       }
     }
@@ -272,7 +307,7 @@ function viidakko_tuoterajaus() {
                    AND tuote.tuotetyyppi NOT in ('A','B')
                    AND tuote.status != 'P'
                    AND tuote.nimitys != ''
-                   AND tuote.tuoteno = 'TAIGA99'
+                   AND tuote.tuoteno = 'TAIGA99' # for testing..
                    #AND tuote.try = '57'
                    #AND tuote.hinnastoon in ('W')";
 

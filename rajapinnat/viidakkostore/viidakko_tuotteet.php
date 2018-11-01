@@ -45,11 +45,13 @@ class ViidakkoStoreTuotteet {
         $this->update_id($product['id'], $response_array->items[0]);
         // lets update product with correct id
         $product['id'] = $response_array->items[0]->id;
+        #echo "\nvar_dump iidee:<pre>",var_dump($response_array->items[0]);
+        #echo "\nvar_dump products:<pre>",var_dump($product);
         $this->update_product($product);
       }
       elseif (isset($response_array->items) and !isset($response_array->items[0])) {
         echo "\n---------404---------\n";
-        $this->logger->log("[{$current}/{$total}] tuote {$product["product_code"]} ei löydy kaupasta | response_code: $response_array->code");
+        $this->logger->log("[{$current}/{$total}] tuote {$product["code"]} ei löydy kaupasta | response_code: $response_array->code");
         // lets insert product
         $this->insert_product($product);
       }
@@ -73,6 +75,8 @@ class ViidakkoStoreTuotteet {
 
     $data_json = json_encode($product);
     echo "\n---------UPDATETAAN---------\n";
+    echo "<pre>",var_dump($product);
+
     $ch = curl_init($url);
     curl_setopt($ch, CURLOPT_HTTPHEADER, array('Accept: application/json', 'Content-Type: application/json', 'X-Auth-Token: '.$this->token));
     curl_setopt($ch, CURLOPT_HEADER, TRUE);
@@ -104,7 +108,7 @@ class ViidakkoStoreTuotteet {
     echo "\n---------INSERTÖIDÄÄN---------\n";
     $ch = curl_init($url);
     curl_setopt($ch, CURLOPT_HTTPHEADER, array('Accept: application/json', 'Content-Type: application/json', 'X-Auth-Token: '.$this->token));
-    curl_setopt($ch, CURLOPT_HEADER, TRUE);
+    curl_setopt($ch, CURLOPT_HEADER, FALSE);
     curl_setopt($ch, CURLOPT_POST, TRUE);
     curl_setopt($ch, CURLOPT_POSTFIELDS, $data_json);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -117,14 +121,14 @@ class ViidakkoStoreTuotteet {
 
     $response_array = json_decode($response);
 
-    if ($response_array->code == "400") {
-      $this->logger->log("--> tuote {$product["product_code"]} lisääminen epäonnistui!");
-      $this->logger->log("syy: {$response_array->message}");
+    if (isset($response_array->items[0]->id) and !empty($response_array->items[0]->id)) {
+      $this->logger->log("--> tuote {$product["product_code"]} lisätty");
+      $this->update_id("", $response_array->items[0]);
+      echo "\nIIDEE PÄIVITETTY!!!\n";
     }
     else {
-      $this->logger->log("--> tuote {$product["product_code"]} lisätty");
-
-      // otetaan vielä id talteen
+      $this->logger->log("--> tuote {$product["product_code"]} lisääminen epäonnistui!");
+      $this->logger->log("syy: {$response_array->message}");
     }
   }
 

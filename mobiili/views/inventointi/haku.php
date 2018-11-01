@@ -34,7 +34,7 @@
     // Tuotteen viivakoodi autosubmit
     $('#viivakoodi').on('keyup', function() {
       // Autosubmit vain jos on syötetty tarpeeksi pitkä viivakoodi
-      if ($('#viivakoodi').val().length > 8) {
+      if ($('#viivakoodi').val().length > 256) {
         $('#haku_formi').submit();
       }
     });

@@ -26229,6 +26229,29 @@ if (!function_exists("hae_viivakoodilla")) {
                LIMIT 200";
     $chk_res = pupe_query($query);
 
+    if (mysql_num_rows($chk_res) == 0) {
+      $viivakooditark = substr($viivakoodi, 0 , -1);
+      // Haetaan eankoodilla ilman tarkistusnumeroa tuotenumeroa kolmesta eri paikkaa
+      $query = "(SELECT tuoteno, '' liitostunnus
+                 FROM tuote
+                 WHERE yhtio                                      = '{$kukarow['yhtio']}'
+                 AND eankoodi                                     = '{$viivakooditark}')
+                 UNION
+                 (SELECT tuoteno, liitostunnus
+                 FROM tuotteen_toimittajat
+                 WHERE yhtio                                      = '{$kukarow['yhtio']}'
+                 AND viivakoodi                                   = '{$viivakooditark}')
+                 UNION
+                 (SELECT tuotteen_toimittajat.tuoteno, tuotteen_toimittajat.liitostunnus
+                 FROM tuotteen_toimittajat_tuotenumerot
+                 JOIN tuotteen_toimittajat ON (tuotteen_toimittajat_tuotenumerot.yhtio = tuotteen_toimittajat.yhtio
+                 AND tuotteen_toimittajat.tunnus                  = tuotteen_toimittajat_tuotenumerot.toim_tuoteno_tunnus)
+                 WHERE tuotteen_toimittajat_tuotenumerot.yhtio    = '{$kukarow['yhtio']}'
+                 AND tuotteen_toimittajat_tuotenumerot.viivakoodi = '{$viivakooditark}')
+                 LIMIT 200";
+      $chk_res = pupe_query($query);
+    }
+         
     while ($row = mysql_fetch_assoc($chk_res)) {
       $viivakoodit[$row['tuoteno']][] = $row['liitostunnus'];
     }

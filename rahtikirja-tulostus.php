@@ -1288,6 +1288,38 @@ if ($tee == 'tulosta') {
         }
       }
     }
+    
+    // Onko vientitietojen automaattisyöttö käytössä
+    if (!empty($otunnukset)) {
+      $_otunnukset = explode(',', $otunnukset);
+      $viquery = "SELECT group_concat(liitostunnus) astunnukset,
+                group_concat(tunnus) laskutunnukset
+                FROM lasku
+                WHERE tunnus in ($otunnukset)
+                and yhtio    = '$kukarow[yhtio]'
+                and vienti in ('E', 'K')";
+      $viresult = pupe_query($viquery);
+  
+      if (mysql_num_rows($viresult) > 0) {
+        $vilaskurow = mysql_fetch_assoc($viresult);
+        
+        $query = "SELECT vientitietojen_autosyotto
+                       FROM asiakas
+                       WHERE yhtio = '{$kukarow['yhtio']}'
+                       AND tunnus  in ({$vilaskurow['astunnukset']})
+                       AND vientitietojen_autosyotto = 'K'";
+        $asiakas_chk_res = pupe_query($query);
+             
+        if (mysql_num_rows($asiakas_chk_res) > 0 or $yhtiorow["vientitietojen_autosyotto"] == "K") {
+          $viennin_lisatietojen_automsyotto = true;
+          foreach ($_otunnukset as $_otunnus) {
+
+            viennin_lisatiedot($_otunnus, $viennin_lisatietojen_automsyotto);
+          }
+        }
+        $viennin_lisatietojen_automsyotto = false; 
+      }
+    }
 
     if ($toitarow['erittely'] == 't' and $kaikki_lotsikot_per_toimitus != "" and $toitarow['rahtikirja'] != 'rahtikirja_hrx_siirto.inc') {
       $kaikki_lotsikot_per_toimitus = substr($kaikki_lotsikot_per_toimitus , 0 , -2); //poistetaan pilkku ja välilyönti viimosen perästä

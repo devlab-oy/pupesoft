@@ -294,6 +294,7 @@ function viidakko_hae_tuotteet($tyyppi = "viidakko_tuotteet") {
         #"use_default_vat_percent" => "",
         #"availability_begins_at"  => "",
         #"availability_ends_at"    => "",
+        #"delivery_cost_unit" => "",      # product weight!
       );
     }
   }

@@ -147,7 +147,7 @@ if (viidakko_ajetaanko_sykronointi('kuvat', $synkronoi)) {
 
 if (viidakko_ajetaanko_sykronointi('tilaukset', $synkronoi)) {
   viidakko_echo("Haetaan tilaukset.");
-  $viidakko_orders = new ViidakkoStoreTilaukset($viidakko_url, $viidakko_username, $viidakko_api_key, 'viidakko_tilaukset');
+  $viidakko_orders = new ViidakkoStoreTilaukset($viidakko_url, $viidakko_token, 'viidakko_tilaukset');
 
   $viidakko_orders->set_edi_polku($viidakko_edi_folderpath);
   $viidakko_orders->set_ovt_tunnus($viidakko_ovttunnus);
@@ -158,8 +158,9 @@ if (viidakko_ajetaanko_sykronointi('tilaukset', $synkronoi)) {
   $viidakko_orders->set_viidakko_maksuehto_ohjaus(array());
   $viidakko_orders->set_viidakko_erikoiskasittely(array());
 
-
-  $viidakko_orders->fetch_orders();
+  foreach ($viidakko_tilausstatus as $status) {
+    $viidakko_orders->fetch_orders($status);
+  }
 }
 
 

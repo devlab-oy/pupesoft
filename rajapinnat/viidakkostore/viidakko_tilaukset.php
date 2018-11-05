@@ -4,7 +4,7 @@ require_once "rajapinnat/edi.php";
 
 class ViidakkoStoreTilaukset {
   private $apiurl = "";
-  private $userpwd = "";
+  private $token = "";
 
   // Minne hakemistoon EDI-tilaus tallennetaan
   private $edi_polku = '/tmp';
@@ -32,9 +32,9 @@ class ViidakkoStoreTilaukset {
 
   protected $logger = null;
 
-  public function __construct($url, $username, $api_key, $log_file) {
+  public function __construct($url, $token, $log_file) {
     $this->apiurl = $url;
-    $this->userpwd = "{$username}:{$api_key}";
+    $this->token = $token;
 
     $this->logger = new Logger($log_file);
   }
@@ -75,15 +75,37 @@ class ViidakkoStoreTilaukset {
     $this->viidakko_erikoiskasittely = $value;
   }
 
-  public function fetch_orders() {
+  public function update_viidakko_order_status($order_id) {
+    $url = $this->apiurl."/orders/".$order_id."statuses";
+
+    $data_json = json_encode(array(
+      "status"  => "13",
+      "comment" => "Jou",
+    ));
+    echo "\n---------UPDATETAAN---------\n";
+    echo "<pre>",var_dump($product);
+
+    $ch = curl_init($url);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, array('Accept: application/json', 'Content-Type: application/json', 'X-Auth-Token: '.$this->token));
+    curl_setopt($ch, CURLOPT_HEADER, FALSE);
+    curl_setopt($ch, CURLOPT_POST, TRUE);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $data_json);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+    $response = curl_exec($ch);
+    curl_close($ch);
+
+    $response_array = json_decode($response);
+
+    echo "\n edit\n";
+    echo "\nvar_dump edit product:<pre>",var_dump($response);
+
+    // response ok/fail vielä tähän
+    $this->logger->log("--> tilaus {$product["product_code"]} päivitetty");
+  }
+
+  public function fetch_orders($status) {
     $this->logger->log('---------Aloitetaan tilausten haku---------');
-
-    // Haetaan aika jolloin tämä skripti on viimeksi ajettu
-    $datetime_checkpoint = cron_aikaleima("VIID_ORDR_CRON");
-
-    if (empty($datetime_checkpoint)) {
-      $datetime_checkpoint = 1;
-    }
 
     // EDI-tilauksen luontiin tarvittavat parametrit
     $options = array(
@@ -97,13 +119,12 @@ class ViidakkoStoreTilaukset {
       'erikoiskasittely'   => $this->viidakko_erikoiskasittely,
     );
 
-    $url = $this->apiurl."/orders?status=".$viidakko_tilausstatus;
+    $url = $this->apiurl."/orders?status=".$status;
+    #$url = $this->apiurl."/orders";
 
     $ch = curl_init($url);
-    curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
-    curl_setopt($ch, CURLOPT_USERPWD, $this->userpwd);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, array('Accept: application/json'));
-    curl_setopt($ch, CURLOPT_HEADER, TRUE);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, array('Accept: application/json', 'X-Auth-Token: '.$this->token));
+    curl_setopt($ch, CURLOPT_HEADER, FALSE);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 
     $response = curl_exec($ch);
@@ -113,9 +134,12 @@ class ViidakkoStoreTilaukset {
 
     $tilaus = array();
 
-    if ($response_array->code == "200") {
-      $this->logger->log("Tilausten haku onnistui");
+    echo "<pre>",var_dump($response_array);
+    #die;
 
+    if (count($response_array->items) > 0 ) {
+      $this->logger->log("Tilausten haku onnistui");
+      echo "\n\nTilausten haku onnistui\n";
       foreach ($response_array->items as $order) {
 
         // Ostajan tiedot
@@ -183,8 +207,8 @@ class ViidakkoStoreTilaukset {
           $tilaus['shipping_amount'] = (float) $order->delivery->cost;
 
           // Toimitustavan nimi
-          $tilaus['shipping_description'] = $order->delivery->names->fi;
-          $tilaus['shipping_description_line'] = $order->delivery->names->fi;
+          $tilaus['shipping_description'] = $order->delivery->names[0]->name;
+          $tilaus['shipping_description_line'] = $order->delivery->names[0]->name;
 
           // Noutopisteen tiedot: Tallennetaan toimitusosoitteen perään [# ]-tägeihin
           $pickupcode = "";
@@ -195,7 +219,7 @@ class ViidakkoStoreTilaukset {
 
           // Veron määrä (ei toistaiseksi)
           $tilaus['shipping_tax_amount'] = 0;
-          continue;
+          #continue; #vut mitä täs yritetty?
         }
 
         // Tuotteet
@@ -204,53 +228,42 @@ class ViidakkoStoreTilaukset {
         foreach ($order->rows as $product) {
 
           // Maksutavan hinta
-          if (!empty($product->ProductID->attributes()->PaymentID)) {
-            $tilaus['payment']['method'] = "";
-            continue;
-          }
+          #if (!empty($product->ProductID->attributes()->PaymentID)) {
+          #  $tilaus['payment']['method'] = "";
+          #  continue;
+          #}
+
+          $tilaus['payment']['method'] = "131"; #testing
 
           $item = array();
 
-          // Tämä on alennustuote
-          if (!empty($product->ProductID->attributes()->CouponCode) and !empty($GLOBALS["yhtiorow"]["alennus_tuotenumero"])) {
-            // Tuoteno
-            $item['sku'] = $GLOBALS["yhtiorow"]["alennus_tuotenumero"];
+          // Tuoteno
+          $item['sku'] = $product->code;
 
-            // Nimitys
-            $item['name'] = "Alennuskoodi: ".$product->ProductName;
+          // Nimitys
+          $item['name'] = $product->names[0]->name;
 
-            // Hinta ja määräkerroin
-            $kerroin = -1;
-          }
-          else {
-            // Tuoteno
-            $item['sku'] = $product->Code;
-
-            // Nimitys
-            $item['name'] = $product->ProductName;
-
-            // Hinta ja määräkerroin
-            $kerroin = 1;
-          }
+          // Hinta ja määräkerroin
+          $kerroin = 1;
 
           // Määrä
-          $item['qty_ordered'] = $product->Quantity * $kerroin;
+          $item['qty_ordered'] = $product->amount * $kerroin;
 
           $item['base_discount_amount'] = 0;
           $item['discount_percent'] = 0;
 
           // Verollinen yksikköhinta
-          $item['original_price'] = $product->UnitPrice * $kerroin;
+          $item['original_price'] = (float) $product->price * 1.24 * $kerroin;
 
           // Veroton yksikköhinta
-          $item['price'] = ((float) $product->UnitPrice - (float) $product->UnitTax) * $kerroin;
+          $item['price'] = ((float) $product->price) * $kerroin;
 
           // Verokanta
-          $item['tax_percent'] = $product->UnitPrice->attributes()->vat;
+          $item['tax_percent'] = 24; #fiksaa verot
 
           // Yheensäsumma
-          $tilaus['grand_total'] += (float) $product->Total * $kerroin;
-          $tilaus['tax_amount'] += (float) $product->TotalTax * $kerroin;
+          $tilaus['grand_total'] += $item['price'] * $item['qty_ordered'];
+          $tilaus['tax_amount'] += ($item['original_price'] - $item['price']) * $item['qty_ordered'];
 
           // Ei käytössä
           $item['parent_item_id'] = "";
@@ -261,13 +274,16 @@ class ViidakkoStoreTilaukset {
           $tilaus['items'][] = $item;
         }
 
+        #echo "<pre>",var_dump($tilaus);
+        #die;
+
         $filename = Edi::create($tilaus, $options);
 
         // Tallennetaan tämän tilauksen aikaleima
-        $tilausaika = $order->OrderedAt->attributes()->timestamp;
+        $tilausaika = date("Y-m-d H:i:s");
 
         cron_aikaleima("VIID_ORDR_CRON", $tilausaika);
-
+echo "\n\nTallennettiin tilaus";
         $this->logger->log("Tallennettiin tilaus '{$filename}'");
       }
     }

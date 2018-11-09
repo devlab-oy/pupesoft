@@ -1007,6 +1007,7 @@ if (($naytetaan_tilausvahvistusnappi or
 
 if ($toim == "EXTRANET") {
   $otsikko = t("Extranet-Tilaus");
+  require "asiakasvalinta.inc";
 }
 elseif ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA") {
   $otsikko = t("Työmääräys");

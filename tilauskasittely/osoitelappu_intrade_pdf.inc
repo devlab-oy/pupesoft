@@ -256,7 +256,6 @@ else {
 
     // sitten aletaan piirtämään itse PDF sisältöä
     // ensin isot viivat kohilleen
-    $pdf->draw_rectangle(mm_pt(179), mm_pt(21.5), mm_pt(31), mm_pt(126.5), $firstpage, $rectparam);
 
     unset($data);
     if ( (int) $yhtiorow["lasku_logo"] > 0) {

@@ -266,8 +266,13 @@ $(document).ready(function() {
       function(json) {
         var message = JSON && JSON.parse(json) || $.parseJSON(json);
 
-        if (message != "") {
-          $('#tpuh').val(message);
+        console.log(message)
+        if (message.PUH != "") {
+          $('#tpuh').val(message.PUH);
+        }
+
+        if (message.EMAIL != "") {
+          $('#temail').val(message.EMAIL);
         }
 
         // Nollataan käsinsyötetty yhteyshenkilö

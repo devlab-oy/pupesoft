@@ -1481,13 +1481,15 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
 
   while ($laskurow = mysql_fetch_assoc($rrrresult)) {
 
-    //  Haetaan asiakkaan kieli niin hekin ymmärtävät..
-    $query = "SELECT kieli from asiakas WHERE yhtio = '$kukarow[yhtio]' and tunnus='$laskurow[liitostunnus]'";
-    $kielires = pupe_query($query);
-    $kielirow = mysql_fetch_assoc($kielires);
-    if ($kielirow['kieli'] != '') {
-      $kieli = $kielirow['kieli'];
-    }
+    if (empty($kieli) or $kieli == '') {
+      //  Haetaan asiakkaan kieli niin hekin ymmärtävät..
+      $query = "SELECT kieli from asiakas WHERE yhtio = '$kukarow[yhtio]' and tunnus='$laskurow[liitostunnus]'";
+      $kielires = pupe_query($query);
+      $kielirow = mysql_fetch_assoc($kielires);
+      if ($kielirow['kieli'] != '') {
+        $kieli = $kielirow['kieli'];
+      }
+    }  
 
     if ($toim == "TARJOUS") {
       if ($kukarow['toimipaikka'] != $laskurow['yhtio_toimipaikka'] and $yhtiorow['myyntitilauksen_toimipaikka'] == 'A') {

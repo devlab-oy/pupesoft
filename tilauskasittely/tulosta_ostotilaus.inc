@@ -61,18 +61,17 @@ else {
 
   require_once "pdflib/phppdflib.class.php";
 
-  if ($toim == 'OSTO')  {
+  if ($kieli == '') {
+
     $querykiel = "SELECT kieli FROM toimi WHERE yhtio = '$kukarow[yhtio]' and ytunnus = '$laskurow[ytunnus]'";
-  }
-  else {
-    $querykiel = "SELECT kieli FROM asiakas WHERE yhtio = '$kukarow[yhtio]' and ytunnus = '$laskurow[ytunnus]'";
-  }
-  $kielresult = pupe_query($querykiel);
-  $kielnum = mysql_num_rows($kielresult);
-  $kielrow = mysql_fetch_array($kielresult);
     
-  if ($kielrow['kieli'] != '') {
-    $kieli = strtolower($kielrow['kieli']);
+    $kielresult = pupe_query($querykiel);
+    $kielnum = mysql_num_rows($kielresult);
+    $kielrow = mysql_fetch_array($kielresult);
+
+    if ($kielrow['kieli'] != '') {
+      $kieli = strtolower($kielrow['kieli']);
+    }
   }
 
   $norm["height"]     = 10;

@@ -215,6 +215,7 @@ $editilaus_toimitustapa       = "";
 $editilaus_tyyppi             = "L"; // tilausrivi tyyppi
 $editilaus_valuuttakoodi      = "";
 $editilaus_ytunnus            = "";
+$editilaus_toimipaikka        = "";
 $ei_esteta_laskutusta         = true;
 $id                           = "";
 $ketjutus                     = "";
@@ -258,6 +259,7 @@ $verkkokauppavarasto_li       = "";
 $verokanta                    = "";
 $veromaara                    = "";
 $viite                        = "";
+$laskuviite                   = "";
 $yhteyshenkilon_puhelin       = "";
 
 // nollataan kaikki rivin muuttujat (n‰m‰ samat pit‰‰ tehd‰ tuote insertin j‰lkeen)
@@ -674,6 +676,21 @@ while ($tietue = fgets($fd)) {
                   FROM maksuehto
                   WHERE yhtio = '{$kukarow['yhtio']}'
                   AND teksti  = '{$tieto}'";
+        $result = pupe_query($query);
+
+        if (mysql_num_rows($result) == 1) {
+          $editilaus_maksuehto_row = mysql_fetch_assoc($result);
+          $editilaus_maksuehto   = $editilaus_maksuehto_row['tunnus'];
+        }
+      }
+      if ($editilaus_maksuehto != "" and $editilaus_kassalipas != "") {
+        $query = "SELECT *
+                  FROM maksuehto
+                  WHERE yhtio = '{$kukarow['yhtio']}'
+                  AND teksti  = '{$tieto}'
+                  AND kateinen = 'o'
+                  AND kaytossa != 'E'
+                  LIMIT 1";
         $result = pupe_query($query);
 
         if (mysql_num_rows($result) == 1) {
@@ -1210,6 +1227,7 @@ while ($tietue = fgets($fd)) {
         $edi_ulos .= t("J‰lkivaatimus-toimitustapaa ei lˆytynyt")."!\n";
       }
     }
+
     break;
 
   case 'OSTOTIL.OT_SUMMA' :
@@ -1224,6 +1242,20 @@ while ($tietue = fgets($fd)) {
     // halutaan futur ja magento-aineistoista t‰m‰ tieto sisviesti2-kentt‰‰n
     $orig_tieto = pupesoft_cleanstring($orig_tieto, array(";"));
     $lopviesti = trim($orig_tieto);
+    break;
+
+  case 'OSTOTIL.OT_LASKUVIITE':
+    // verkkokaupan tilaukselle halutaan laskutuksessa tietty viite
+    if ($edi_tyyppi == "magento") {
+      $laskuviite = $tieto;
+    }
+    break;
+
+  case 'OSTOTIL.OT_YRITYS_TOIMIPAIKKA':
+    // verkkokaupan tilaukselle halutaan tietty toimipaikka
+    if ($edi_tyyppi == "magento") {
+      $editilaus_toimipaikka = $tieto;
+    }
     break;
 
   case 'OSTOTIL.OT_VEROMAARA':
@@ -1730,6 +1762,12 @@ while ($tietue = fgets($fd)) {
         $valkurssi = 1;
       }
 
+      // pakotetaan tilaukset tarvittaessa haluttuun toimipaikkaan
+      if ($edi_tyyppi == 'magento' and $editilaus_toimipaikka) {
+        $kukarow['toimipaikka'] = $editilaus_toimipaikka;
+        $yhtiorow = hae_yhtion_parametrit($yhtiorow["yhtio"]);
+      }
+
       // Lis‰t‰‰n otsikko
       $query = "INSERT into lasku SET
                 aktiivinen_kuljetus     = '$suunnistus',
@@ -1832,6 +1870,7 @@ while ($tietue = fgets($fd)) {
                 laskutus_postino    = '$arow[laskutus_postino]',
                 laskutus_maa        = '$arow[laskutus_maa]',
                 noutopisteen_tunnus = '{$noutopisteen_tunnus}',
+                kasinsyotetty_viite = '{$laskuviite}',
                 laatija             = '$edi_laatija',
                 luontiaika          = now(),
                 yhtio               = '$kukarow[yhtio]',
@@ -2818,6 +2857,7 @@ while ($tietue = fgets($fd)) {
     $editilaus_tyyppi             = "L"; // tilausrivi tyyppi
     $editilaus_valuuttakoodi      = "";
     $editilaus_ytunnus            = "";
+    $editilaus_toimipaikka        = "";
     $ei_esteta_laskutusta         = true;
     $id                           = "";
     $ketjutus                     = "";
@@ -2860,6 +2900,7 @@ while ($tietue = fgets($fd)) {
     $verokanta                    = "";
     $veromaara                    = "";
     $viite                        = "";
+    $laskuviite                   = "";
     $yhteyshenkilon_puhelin       = "";
     break;
   }

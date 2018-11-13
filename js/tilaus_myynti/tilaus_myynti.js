@@ -266,7 +266,6 @@ $(document).ready(function() {
       function(json) {
         var message = JSON && JSON.parse(json) || $.parseJSON(json);
 
-        console.log(message)
         if (message.PUH != "") {
           $('#tpuh').val(message.PUH);
         }

@@ -41,6 +41,10 @@ if (@include "rajapinnat/logmaster/logmaster-functions.php");
 elseif (@include "logmaster-functions.php");
 else exit;
 
+if ($toim == "EXTRANET") {
+  require "asiakasvalinta.inc";
+}
+
 if ($tila == "YHENKPUHELIN") {
 
   $yhenkilo = utf8_decode($yhenkilo);

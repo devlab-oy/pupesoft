@@ -491,7 +491,7 @@ if (!function_exists('rivi_valm')) {
       $pdf->draw_line($x, $y, $thispage, $rectparam);
     }
 
-    //Haetan sarjanumeron tiedot
+    // Haetan sarjanumeron tiedot
     if ($row["sarjanumeroseuranta"] != "") {
 
       if ($row["tyyppi"] == "V") {
@@ -631,7 +631,7 @@ if (!function_exists('rivi_valmistus')) {
       $pvf["font"]      = $p["font"];
       $vfrivikorkeus    = $rivinkorkeus;
     }
-   
+
     if ($row['tyyppi'] == 'V' and !empty($row['ed_tyyppi']) and $row['ed_tyyppi'] != $row['tyyppi']) {
       $pdf->draw_text(35,  $kala, "Raaka-aineet:",  $thispage, $p);
       $kala -= $rivinkorkeus;
@@ -701,11 +701,24 @@ if (!function_exists('rivi_valmistus')) {
           $tuotantolinja = $row['valmistuslinja']. " - ". t_avainsana('valmistuslinja', $kieli, "and avainsana.selite='$row[valmistuslinja]'", "", "", "selitetark");
           $faktarow["fakta"] = t("Tuotantolinja", $kieli).": ".$tuotantolinja."\n".$faktarow["fakta"];
         }
-pupesoft_log('pupe-loki', "{$pvf['height']} {$p['height']} {$vfrivikorkeus}");
-        foreach (explode("\n", wordwrap($faktarow["fakta"], 90, "\n")) as $kommentti) {
-          $pdf->draw_text(125,  $kala, $kommentti, $thispage, $pvf);
-          $kala -= $vfrivikorkeus;
-          $lask_valm++;
+
+        // Ei piirretä faktaa, kun testataan mahtuuko, koska pitkä fakta osaa vaihtaa sivua ihan itsekin
+        if (!empty($thispage)) {
+          foreach (explode("\n", wordwrap($faktarow["fakta"], 90, "\n")) as $kommentti) {
+            $pdf->draw_text(125,  $kala, $kommentti, $thispage, $pvf);
+            $kala -= $vfrivikorkeus;
+
+            if ($kala <= 85) {
+              $sivu++;
+
+              loppu_valm($thispage, 0);
+
+              $page[$sivu] = uusi_sivu_valm();
+              $thispage    = $page[$sivu];
+            }
+
+            $lask_valm++;
+          }
         }
       }
       else {

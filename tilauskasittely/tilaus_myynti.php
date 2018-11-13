@@ -41,6 +41,10 @@ if (@include "rajapinnat/logmaster/logmaster-functions.php");
 elseif (@include "logmaster-functions.php");
 else exit;
 
+if ($toim == "EXTRANET") {
+  require "asiakasvalinta.inc";
+}
+
 if ($tila == "YHENKPUHELIN") {
 
   $yhenkilo = utf8_decode($yhenkilo);
@@ -1007,7 +1011,6 @@ if (($naytetaan_tilausvahvistusnappi or
 
 if ($toim == "EXTRANET") {
   $otsikko = t("Extranet-Tilaus");
-  require "asiakasvalinta.inc";
 }
 elseif ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA") {
   $otsikko = t("Työmääräys");

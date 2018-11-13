@@ -78,7 +78,7 @@ if ($kukarow["piirit"] != "") {
 
 if (is_numeric($asiakasid) and $asiakasid > 0) {
   // Jos asiakaan tunnus on löydetty niin ei rajata "$asiakasrajaus":lla ollenkaan
-  $query  = "SELECT asiakas.*, yhtio.nimi yhtionimi,
+  $query  = "SELECT asiakas.*, asiakas.email AS toim_email, yhtio.nimi yhtionimi,
              if(asiakas.gsm != '', asiakas.gsm,
                if(asiakas.tyopuhelin != '', asiakas.tyopuhelin,
                  if(asiakas.puhelin != '', asiakas.puhelin, ''))) AS toim_puh
@@ -96,7 +96,7 @@ elseif ($ytunnus != '') {
     $ytunnus = substr($ytunnus, 1);
 
     $query  = "SELECT lasku.nimi, lasku.nimitark, lasku.osoite, lasku.postino, lasku.postitp, lasku.toim_nimi,
-               lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp,
+               lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp, asiakas.email AS toim_email,
                concat('£',lasku.tunnus) ytunnus, concat('£',lasku.tunnus) tunnus, yhtio.nimi yhtionimi,
                if(asiakas.gsm != '', asiakas.gsm,
                 if(asiakas.tyopuhelin != '', asiakas.tyopuhelin,
@@ -119,7 +119,7 @@ elseif ($ytunnus != '') {
 
     // kokeillaan ihan asiakkaan nimellä laskulta
     $query  = "SELECT lasku.nimi, lasku.nimitark, lasku.osoite, lasku.postino, lasku.postitp, lasku.toim_nimi,
-               lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp,
+               lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp, asiakas.email AS toim_email,
                concat('£',max(lasku.tunnus)) ytunnus, concat('£',max(lasku.tunnus)) tunnus, yhtio.nimi yhtionimi,
                 if(asiakas.gsm != '', asiakas.gsm,
                 if(asiakas.tyopuhelin != '', asiakas.tyopuhelin,

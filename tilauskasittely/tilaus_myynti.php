@@ -49,7 +49,7 @@ if ($tila == "YHENKPUHELIN") {
 
   $yhenkilo = utf8_decode($yhenkilo);
 
-  $yhteysquery = "SELECT if(gsm != '', gsm, if(puh != '', puh, '')) AS yht_puh
+  $yhteysquery = "SELECT email AS yht_email, if(gsm != '', gsm, if(puh != '', puh, '')) AS yht_puh
                   FROM yhteyshenkilo
                   WHERE yhtio              = '$kukarow[yhtio]'
                   AND liitostunnus         = '$ltunnus'
@@ -61,7 +61,7 @@ if ($tila == "YHENKPUHELIN") {
   $yres = pupe_query($yhteysquery);
 
   if ($yrow = mysql_fetch_assoc($yres)) {
-    echo json_encode($yrow['yht_puh']);
+    echo json_encode(array("PUH" => $yrow['yht_puh'], "EMAIL" => $yrow['yht_email']));
   }
   else {
     echo json_encode("");

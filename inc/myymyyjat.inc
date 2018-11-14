@@ -194,6 +194,11 @@ function piirra_myyjien_myynnit($lisa, $pvmalku, $pvmloppu, $toim, $kuluprosentt
 
   foreach ($summa as $myyja => $kausi_array) {
 
+    $yhteensa_summa_myyja = array();
+    $yhteensa_kate_myyja = array();
+    $yhteensa_myyja_summa = 0;
+    $yhteensa_myyja_kate = 0;
+
     echo "<tr class='aktiivi'>";
     echo "<td>$myyja_nimi[$myyja] ($myyja)</td>";
 
@@ -226,8 +231,10 @@ function piirra_myyjien_myynnit($lisa, $pvmalku, $pvmloppu, $toim, $kuluprosentt
       echo "<td style='white-space:nowrap'>" ;
       foreach ($yhtionimi as $yht => $yht_nimi) {
         echo "{$yht_nimi} " . t("Myynti") . "<br>";
-        echo "{$yht_nimi} " . t("Kate") . "<br>";       
-      }  
+        echo "{$yht_nimi} " . t("Kate") . "<br>";      
+      } 
+      echo t("Myynti") . "<br>";
+      echo t("Kate") . "<br>"; 
       echo "" . t("Avoimet myynnit");
 
       echo "</td>";
@@ -296,7 +303,7 @@ function piirra_myyjien_myynnit($lisa, $pvmalku, $pvmloppu, $toim, $kuluprosentt
         }
       }
       else  {
-        echo "<td style='text-align:right;'>";
+        echo "<td style='text-align:right;'nowrap>";
         foreach ($yhtionimi as $yht => $yht_nimi) {
 
           $summa = isset($kausi_array[$kausi][$yht]) ? $kausi_array[$kausi][$yht] : "";
@@ -307,10 +314,16 @@ function piirra_myyjien_myynnit($lisa, $pvmalku, $pvmloppu, $toim, $kuluprosentt
         
           $yhteensa_summa_kausi[$kausi] += $summa;
           $yhteensa_kate_kausi[$kausi] += $kate_summa;
+          $yhteensa_summa_myyja[$kausi] += $summa;
+          $yhteensa_kate_myyja[$kausi] += $kate_summa;
           echo "{$summa}<br>";
           echo "{$kate_summa}<br>";
 
         }
+        $yhteensa_myyja_summa += $yhteensa_summa_myyja[$kausi];
+        $yhteensa_myyja_kate += $yhteensa_kate_myyja[$kausi];
+        echo "{$yhteensa_summa_myyja[$kausi]}<br>";
+        echo "{$yhteensa_kate_myyja[$kausi]}<br><br>";
       }
       echo "</td>";
     }
@@ -348,6 +361,8 @@ function piirra_myyjien_myynnit($lisa, $pvmalku, $pvmloppu, $toim, $kuluprosentt
         $avoimetsumma = 0;
       }
 
+      echo "{$yhteensa_myyja_summa}<br>";
+      echo "{$yhteensa_myyja_kate}<br>";
       echo "{$avoimetsumma}";
       $yhteensa_avoimet += $avoimetsumma;
     }

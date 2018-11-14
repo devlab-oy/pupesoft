@@ -332,6 +332,37 @@ function yrityspeli_tuotearvonta($toimittaja, $try = null) {
   }
 
   // katsotaan mitä tuotteita tältä toimittajalta voi tilata, ja arvotaan yksi
+  $query = "SELECT *
+            FROM tuote
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND status != 'P'
+            AND myyntihinta  > 0
+            AND tuotetyyppi NOT in ('A','B')
+            {$trylisa}
+            ORDER BY RAND() LIMIT 0, 1";
+  $result = pupe_query($query);
+  
+  $tuote = mysql_fetch_assoc($result);
+  $supplier_query = "SELECT *
+                     FROM tuotteen_toimittajat
+                     WHERE yhtio = '{$kukarow['yhtio']}'
+                     AND tuoteno = '{$tuote['tuoteno']}'
+                     AND liitostunnus = '{$toimittaja}'";
+  $supplier_result = pupe_query($supplier_query);
+
+  // jos tuoteella ei ole toimittajaa, laitetaan kantaan toimittajaksi
+  if (mysql_num_rows($supplier_result) == 0) {
+    $supplier_create_query = "INSERT INTO tuotteen_toimittajat SET
+                  yhtio        = '{$kukarow['yhtio']}',
+                  tuoteno      = '{$tuote['tuoteno']}',
+                  liitostunnus = '{$toimittaja}',
+                  laatija      = '{$kukarow['kuka']}',
+                  ostohinta    = '{$tuote['myyntihinta']}',
+                  luontiaika   = now(),
+                  muutospvm    = now(),
+                  muuttaja     = '{$kukarow['kuka']}'";
+    pupe_query($supplier_create_query);  
+  }
   $query = "SELECT tuote.*
             FROM tuote
             JOIN tuotteen_toimittajat on (tuotteen_toimittajat.yhtio = tuote.yhtio
@@ -344,11 +375,6 @@ function yrityspeli_tuotearvonta($toimittaja, $try = null) {
             {$trylisa}
             ORDER BY RAND() LIMIT 0, 1";
   $result = pupe_query($query);
-
-  if (mysql_num_rows($result) == 0) {
-    return false;
-  }
-
   return mysql_fetch_assoc($result);
 }
 
@@ -365,7 +391,7 @@ function yrityspeli_tulosta_ostotilaus(Array $params) {
   $silent = 'kyllä';
   $kukarow['toimipaikka'] = $toimipaikkarow['tunnus'];
   $yhtiorow = hae_yhtion_parametrit($kukarow["yhtio"]);
-
+  $nimitykset = "on!";
   require 'tilauskasittely/tulosta_ostotilaus.inc';
 
   return "Lähetettiin ostotilaus {$tunnus} sähköpostilla {$email}";

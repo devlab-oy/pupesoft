@@ -134,7 +134,7 @@ function yrityspeli_hae_tilauksettomat_yhtiot($alkuaika, $loppuaika) {
                     sum((tilausrivi.varattu + tilausrivi.jt) * tilausrivi.hinta) as summa
                     FROM yhtio
                     JOIN asiakas ON (asiakas.yhtio = '{$kukarow['yhtio']}'
-                      AND asiakas.ytunnus = yhtio.ytunnus)
+                      AND REPLACE(asiakas.ytunnus,'-','') = REPLACE(yhtio.ytunnus,'-',''))
                     LEFT JOIN lasku ON (lasku.yhtio = yhtio.yhtio
                       AND lasku.tila IN ('N','L')
                       AND lasku.luontiaika BETWEEN '$alkuaika' AND '$loppuaika')

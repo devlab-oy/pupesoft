@@ -54,7 +54,7 @@ if (mysql_field_name($result, $i) == "selite") {
     //$tem_selite = $trow[$i];
     $ulos = "<td><select name='$nimi' onchange='submit();'>";
     $ulos .= "<option value=''>".t("Valitse")."</option>";
-    $ulos .= "<option value='tilausnumero' $sel[tilausnumero]>".t("Tilausnumero")."</option>";
+    $ulos .= "<option value='CustOrderNumber' $sel[CustOrderNumber]>".t("CustOrderNumber")."</option>";
     $ulos .= "</select></td>";
     $jatko = 0;
   }
@@ -75,7 +75,7 @@ if (mysql_field_name($result, $i) == "selitetark") {
     $ulos .= "</select></td>";
     $jatko = 0;
   }
-  elseif ($tem_selite == 'tilausnumero') {
+  elseif ($tem_selite == 'CustOrderNumber') {
     $sel = array($trow[$i] => "SELECTED");
     $ulos = "<td><select name='$nimi' onchange='submit();'>";
     $ulos .= "<option value='e'>".t("Asiakkaan tilausnumero")."</option>";

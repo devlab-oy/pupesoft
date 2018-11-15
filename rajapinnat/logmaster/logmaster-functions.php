@@ -319,6 +319,16 @@ if (!function_exists('logmaster_outbounddelivery')) {
       $rec_cust_street2 = $looprow['kohde'];
     }
 
+    if ($looprow['ohjelma_moduli'] == 'MAGENTO' and $looprow['ohjausmerkki'] != 'VARASTOTÄYDENNYS') {
+      $tilaustyyppi = 8;
+    }
+    elseif ($looprow['clearing'] == 'ENNAKKOTILAUS') {
+      $tilaustyyppi = 9;
+    }
+    else{
+      $tilaustyyppi = '';
+    }
+
     # Rakennetaan XML
     $xml = simplexml_load_string("<?xml version='1.0' encoding='UTF-8'?><Message></Message>");
 
@@ -332,7 +342,7 @@ if (!function_exists('logmaster_outbounddelivery')) {
     $custpickinglist->addChild('PickingListId',       substr($otunnus, 0, 20));
     $custpickinglist->addChild('CustOrderNumber',     xml_cleanstring($looprow['asiakkaan_tilausnumero'], 20)); // Magentosta?
     $custpickinglist->addChild('CustReference',       xml_cleanstring($looprow['viesti'], 50));
-    $custpickinglist->addChild('OrderCode',          'U');
+    $custpickinglist->addChild('OrderCode',          $tilaustyyppi);
     $custpickinglist->addChild('OrderType',          'SO');
     $custpickinglist->addChild('PickingListDate',    $pickinglistdate);
     $custpickinglist->addChild('DeliveryDate',       $deliverydate);

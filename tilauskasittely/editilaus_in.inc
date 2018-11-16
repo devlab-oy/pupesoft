@@ -50,6 +50,11 @@ if ($php_cli) {
     $edi_tyyppi = 'woo';
   }
 
+  // tunnistetaan woo commerce -tyyppinen käsittely tiedostonimestä
+  if ($edi_tyyppi == 'futursoft' and preg_match("/^apix_/", $verkkokauppa_filename) === 1) {
+    $edi_tyyppi = 'apix_edi';
+  }
+
   // Pupeasennuksen root
   $pupe_root_polku = dirname(dirname(__FILE__));
 }
@@ -199,6 +204,7 @@ $edi_kommentti                = "";
 $editilaus_alatila            = "";
 $editilaus_eilahetetta        = "";
 $editilaus_hyvaksyttava       = "";
+$editilaus_hyvaksyttavaksi    = "";
 $editilaus_kassalipas         = "";
 $editilaus_liitetiedosto      = "";
 $editilaus_loppuhinta         = "";
@@ -311,6 +317,11 @@ $editilaus_hakemisto = dirname(realpath($filename));
 if ($edi_tyyppi == "futursoft") {
   $edi_subj = "Sisääntuleva Futursoft-tilaus";
   $edi_laatija = "FuturSoft";
+}
+elseif ($edi_tyyppi == "apix_edi") {
+  $edi_subj = "Sisääntuleva Apix-EDI -tilaus";
+  $edi_laatija = "Apix";
+  $edi_tyyppi == "futursoft";
 }
 elseif ($edi_tyyppi == "ahkio") {
   $edi_subj = "Sisääntuleva Ahkio -tilaus";
@@ -2438,6 +2449,18 @@ while ($tietue = fgets($fd)) {
             $var = "H";
           }
 
+          // salasanat.php:ssä ylläpidettävä muuttuja, jolla pakotetaan
+          // tilaus hyväksyttäväksi jos tuotetta ei löydy tai myytävissä loppu
+          if ($edi_tyyppi != "magento" and isset($editilaus_hyvaksyttavaksi_jos_virhe) and $editilaus_hyvaksyttavaksi_jos_virhe == "JOO") {
+
+            list($chk_saldo, $chk_hyllyssa, $chk_myytavissa, $chk_true) = saldo_myytavissa($tuoteno, "", $verkkokauppavarasto);
+
+            if ($chk_myytavissa < $kpl) {
+              $editilaus_hyvaksyttavaksi = "JOO";
+              $editilaus_hyvaksyttava = "JOO";
+            }
+          }
+
           // jos tullaan magentosta ja hinta on tiedossa ja kyseessä on rahtikulu, niin uskalletaan luottaa magenton antamaan hintaan
           if ($edi_tyyppi == "magento" and ((isset($verkkokauppa_hinnatedifailista) and $verkkokauppa_hinnatedifailista == "JOO") or strtolower($tuoteno) == strtolower($yhtiorow['rahti_tuotenumero'])) and $editilaus_hinta > 0) {
             $hinta = $editilaus_hinta;
@@ -2606,6 +2629,13 @@ while ($tietue = fgets($fd)) {
 
       } // end jos tuote on löydetty oikein
       else {
+
+        // salasanat.php:ssä ylläpidettävä muuttuja, jolla pakotetaan
+        // tilaus hyväksyttäväksi jos tuotetta ei löydy tai myytävissä loppu
+        if ($edi_tyyppi != "magento" and isset($editilaus_hyvaksyttavaksi_jos_virhe) and $editilaus_hyvaksyttavaksi_jos_virhe == "JOO") {
+          $editilaus_hyvaksyttavaksi = "JOO";
+          $editilaus_hyvaksyttava = "JOO";
+        }
 
         if ($tuoteerror == 2) {
           // Tilausrivin systeemikommentti
@@ -2813,6 +2843,17 @@ while ($tietue = fgets($fd)) {
     }
     elseif ($editilaus_otsikko_ok == "HYVAKSYTTAVAKSI") {
       $edi_ulos .= "\n".t("Merkittiin tilaus hyväksyttäväksi").": {$laskurow['tunnus']}.\n\n";
+
+      // merkitään otsikko hyväksyntäjonoon, ei ole
+      // välttämättä alunperin mennyt
+      if ($editilaus_hyvaksyttavaksi == "JOO") {
+        $query = "UPDATE lasku SET
+                  alatila     = 'F'
+                  WHERE yhtio = '$kukarow[yhtio]'
+                  AND tunnus  = '$id'";
+        pupe_query($query);
+      }
+
     }
     elseif ($editilaus_otsikko_ok == "HYVAKJONOON") {
       $edi_ulos .= "\n".t("Merkittiin tilaus hyväksyttäväksi").": {$laskurow['tunnus']}.\n\n";
@@ -2841,6 +2882,8 @@ while ($tietue = fgets($fd)) {
     $edi_kommentti                = "";
     $editilaus_alatila            = "";
     $editilaus_eilahetetta        = "";
+    $editilaus_hyvaksyttava       = "";
+    $editilaus_hyvaksyttavaksi    = "";
     $editilaus_kassalipas         = "";
     $editilaus_liitetiedosto      = "";
     $editilaus_loppuhinta         = "";

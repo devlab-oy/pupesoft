@@ -70,6 +70,14 @@ if (move_uploaded_file($_FILES['userfile']['tmp_name'], $filename)) {
     echo "</pre>";
   }
 
+  if ($tyyppi == 'apix_edi') {
+    // tarvitaan $filename
+    echo "<pre>";
+    $edi_tyyppi = "apix_edi";
+    require "editilaus_in.inc";
+    echo "</pre>";
+  }
+
   if ($tyyppi == 'magento' or $tyyppi == 'presta' or $tyyppi == 'ahkio' or $tyyppi == 'woo') {
     // tarvitaan $filename
     echo "<pre>";
@@ -119,6 +127,7 @@ else {
          <option value='edi'>".t("Editilaus")."</option>
          <option value='ahkio'>Ahkio</option>
          <option value='futursoft'>Futursoft</option>
+         <option value='apix_edi'>Apix-EDI</option>
          <option value='magento'>Magento</option>
          <option value='presta'>PrestaShop</option>
          <option value='woo'>WooCommerce</option>

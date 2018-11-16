@@ -50,7 +50,7 @@ if ($php_cli) {
     $edi_tyyppi = 'woo';
   }
 
-  // tunnistetaan woo commerce -tyyppinen k‰sittely tiedostonimest‰
+  // tunnistetaan apix-edi -tyyppinen k‰sittely tiedostonimest‰
   if ($edi_tyyppi == 'futursoft' and preg_match("/^apix_/", $verkkokauppa_filename) === 1) {
     $edi_tyyppi = 'apix_edi';
   }
@@ -321,7 +321,7 @@ if ($edi_tyyppi == "futursoft") {
 elseif ($edi_tyyppi == "apix_edi") {
   $edi_subj = "Sis‰‰ntuleva Apix-EDI -tilaus";
   $edi_laatija = "Apix";
-  $edi_tyyppi == "futursoft";
+  $edi_tyyppi = "futursoft";
 }
 elseif ($edi_tyyppi == "ahkio") {
   $edi_subj = "Sis‰‰ntuleva Ahkio -tilaus";

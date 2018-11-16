@@ -319,6 +319,26 @@ if (!function_exists('logmaster_outbounddelivery')) {
       $rec_cust_street2 = $looprow['kohde'];
     }
 
+    $CustOrderNumber = $looprow['asiakkaan_tilausnumero'];
+
+    // Katsotaan onko CustOrderNumber kentt‰‰n erillist‰ m‰‰rityst‰
+    $query = "SELECT *
+              FROM toimitustavan_avainsanat
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND liitostunnus   = '{$toimitustapa_chk_row['tunnus']}'
+              AND laji = 'ulk_var_param'
+              AND selite = 'CustOrderNumber'";
+    $toimitustavan_avainsanat_res = pupe_query($query);
+
+    if (mysql_num_rows($toimitustavan_avainsanat_res) == 1) {
+      $toimitustavan_avainsanat_row = mysql_fetch_assoc($toimitustavan_avainsanat_res);
+
+      // normaali tilausnumero
+      if ($toimitustavan_avainsanat_row['selitetark'] == 'k') {
+        $CustOrderNumber = $otunnus;
+      }
+    }
+
     # Rakennetaan XML
     $xml = simplexml_load_string("<?xml version='1.0' encoding='UTF-8'?><Message></Message>");
 
@@ -330,7 +350,7 @@ if (!function_exists('logmaster_outbounddelivery')) {
     $custpickinglist = $xml->addChild('CustPickingList');
     $custpickinglist->addChild('SalesId',             substr($otunnus, 0, 20));
     $custpickinglist->addChild('PickingListId',       substr($otunnus, 0, 20));
-    $custpickinglist->addChild('CustOrderNumber',     xml_cleanstring($looprow['asiakkaan_tilausnumero'], 20)); // Magentosta?
+    $custpickinglist->addChild('CustOrderNumber',     xml_cleanstring($CustOrderNumber, 20));
     $custpickinglist->addChild('CustReference',       xml_cleanstring($looprow['viesti'], 50));
     $custpickinglist->addChild('OrderCode',          'U');
     $custpickinglist->addChild('OrderType',          'SO');

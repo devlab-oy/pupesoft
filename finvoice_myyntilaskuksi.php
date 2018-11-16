@@ -133,10 +133,8 @@ function kasittele_xml_tiedosto(SimpleXMLElement $xml) {
     require "inc/verkkolasku-in-finvoice.inc";
 
     // Nämä muuttujat kuuluisi olla setattuna:
-    /*
     // kauniimpi linebreak
-    if ($cli) $_lb = "\n";
-    else $_lb = "<br>";
+    $_lb = "\n";
 
     echo "{$_lb}{$_lb}LASKUNTIEDOT:{$_lb}";
     echo "01: ".$yhtio."{$_lb}";
@@ -177,7 +175,6 @@ function kasittele_xml_tiedosto(SimpleXMLElement $xml) {
     echo "32: ".$laskuttajan_toimittajanumero."{$_lb}";
     echo "33: ".$laskuttajan_valkoodi."{$_lb}";
     echo "34: ".$laskun_toimitunnus."{$_lb}";
-    */
 
     #$asiakas = tarkista_asiakas_olemassa($toim_asiakkaantiedot, $ostaja_asiakkaantiedot);
 
@@ -212,6 +209,11 @@ function kasittele_xml_tiedosto(SimpleXMLElement $xml) {
         }
       }
     }
+
+    $laskun_tapvm = substr($laskun_tapvm, 0, 4)."-".substr($laskun_tapvm, 4, 2)."-".substr($laskun_tapvm, 6, 2);
+    $laskun_lapvm = substr($laskun_lapvm, 0, 4)."-".substr($laskun_lapvm, 4, 2)."-".substr($laskun_lapvm, 6, 2);
+    $laskun_erapaiva = substr($laskun_erapaiva, 0, 4)."-".substr($laskun_erapaiva, 4, 2)."-".substr($laskun_erapaiva, 6, 2);
+    $laskun_kapvm = substr($laskun_kapvm, 0, 4)."-".substr($laskun_kapvm, 4, 2)."-".substr($laskun_kapvm, 6, 2);
 
     $query = "INSERT INTO lasku
               SET yhtio          = '{$yhtiorow['yhtio']}',
@@ -258,7 +260,7 @@ function kasittele_xml_tiedosto(SimpleXMLElement $xml) {
     $tunnukset = mysql_insert_id();
 
     $query = "INSERT INTO laskun_lisatiedot
-              SET otunnus = '{$tunnukset}',
+              SET otunnus       = '{$tunnukset}',
               yhtio             = '{$yhtiorow['yhtio']}',
               laskutus_nimi     = '{$ostaja_asiakkaantiedot['nimi']}',
               laskutus_osoite   = '{$ostaja_asiakkaantiedot['osoite']}',

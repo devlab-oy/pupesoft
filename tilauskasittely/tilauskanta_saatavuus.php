@@ -194,11 +194,13 @@ if ($tee == 'aja') {
   echo "<th align='left'>".t("M‰‰r‰")."</th>";
   echo "<th align='left'>".t("Myyt‰viss‰")."</th>";
   echo "<th align='left'>".t("Tilattu")."</th>";
+  echo "<th align='left'>".t("Ennakkomyynti")."</th>";
   echo "</tr></thead>";
 
   $arvot  = 0;
   $myytavissa = array();
   $tilatut = array();
+  $ennakot = array();
 
   echo "<tbody>";
 
@@ -243,24 +245,34 @@ if ($tee == 'aja') {
 
     if (!isset($tilatut[$prow['tuoteno']])) {
       $query = "SELECT
+                tilausrivi.tyyppi,
                 tilausrivi.toimaika,
                 max(tilausrivi.yksikko) yksikko,
-                sum(if(tyyppi = 'O', varattu, 0)) tilattu
+                sum(if(tyyppi = 'O', varattu, 0)) tilattu,
+                sum(if(tilausrivi.tyyppi = 'E' and tilausrivi.var != 'O', tilausrivi.varattu, 0)) ennakot
                 FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika)
                 WHERE yhtio        = '$kukarow[yhtio]'
-                and tyyppi         = 'O'
+                and tyyppi         in ('O','E')
                 and tuoteno        = '$prow[tuoteno]'
                 and laskutettuaika = '0000-00-00'
                 and (varattu+jt > 0)
-                GROUP BY 1";
+                GROUP BY 1, 2";
       $ores = pupe_query($query);
       $tilviesti = array();
+      $ennviesti = array();
       while ($ennp = mysql_fetch_assoc($ores)) {
-        $tilviesti[] = "{$ennp['tilattu']} {$ennp['yksikko']} ".t("tulossa")." ".tv1dateconv($ennp['toimaika']);
+        if ($ennp['tyyppi'] == "O") {
+            $tilviesti[] = "{$ennp['tilattu']} {$ennp['yksikko']} ".t("tulossa")." ".tv1dateconv($ennp['toimaika']);
+        }
+        if ($ennp['tyyppi'] == "E") {
+            $ennviesti[] = "{$ennp['ennakot']} {$ennp['yksikko']} ".t("toimaika")." ".tv1dateconv($ennp['toimaika']);
+        }
       }
       $tilatut[$prow['tuoteno']] = implode(", ", $tilviesti);
+      $ennakot[$prow['tuoteno']] = implode(", ", $ennviesti);
     }
     echo "<td class='ptop text-right'>{$tilatut[$prow['tuoteno']]}</td>";
+    echo "<td class='ptop text-right'>{$ennakot[$prow['tuoteno']]}</td>";
     echo "</tr>";
   }
 

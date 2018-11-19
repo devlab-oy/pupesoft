@@ -76,12 +76,12 @@ if (!empty($tiedostot)) {
         die("Tiedoston {$tiedosto_polku} lukeminen ep‰onnistui\n");
       }
 
-      kasittele_xml_tiedosto($xml, $yhtio);
+      kasittele_xml_tiedosto($xml, $tiedosto_polku);
       unset($xml);
 
-      echo $kasitellyt_tilaukset['tilausnumero_count']." tilausta luotiin ja niihin ".$kasitellyt_tilaukset['tiliointi_count']." tiliˆinti‰\n";
+      echo "K‰siteltiin lasku: {$tiedosto_polku}\n";
 
-      if (!$_REQUEST['debug']) {
+      if (empty($_REQUEST['debug'])) {
         siirra_tiedosto_kansioon($tiedosto_polku, $finvoice_myyntilasku_kansio_valmis);
       }
     }
@@ -123,8 +123,8 @@ function siirra_tiedosto_kansioon($tiedosto_polku, $kansio) {
   exec('rm "'.$tiedosto_polku.'"');
 }
 
-function kasittele_xml_tiedosto(SimpleXMLElement $xml) {
-  global $kukarow, $yhtiorow;
+function kasittele_xml_tiedosto(SimpleXMLElement $xml, $tiedosto_polku) {
+  global $kukarow, $yhtiorow, $finvoice_myyntilasku_kansio_error;
 
   if ($xml !== FALSE) {
     $file = "";
@@ -176,7 +176,13 @@ function kasittele_xml_tiedosto(SimpleXMLElement $xml) {
     echo "33: ".$laskuttajan_valkoodi."{$_lb}";
     echo "34: ".$laskun_toimitunnus."{$_lb}";
 
-    #$asiakas = tarkista_asiakas_olemassa($toim_asiakkaantiedot, $ostaja_asiakkaantiedot);
+    $asiakas = valitse_asiakas($toim_asiakkaantiedot, $ostaja_asiakkaantiedot);
+
+    if (empty($asiakas)) {
+      siirra_tiedosto_kansioon($tiedosto_polku, $finvoice_myyntilasku_kansio_error);
+      echo "VIRHE: Sopivaa asiakasta ei lˆytynyt laskulle: $laskun_numero\n";
+      return;
+    }
 
     // Onko laskuriveill‰ useita alv-verokantoja?
     $ealvi = array_unique($ealvi);
@@ -209,6 +215,8 @@ function kasittele_xml_tiedosto(SimpleXMLElement $xml) {
         }
       }
     }
+
+    $laskunnro = preg_replace("/[^0-9]/", "", $laskun_numero);
 
     $laskun_tapvm = substr($laskun_tapvm, 0, 4)."-".substr($laskun_tapvm, 4, 2)."-".substr($laskun_tapvm, 6, 2);
     $laskun_lapvm = substr($laskun_lapvm, 0, 4)."-".substr($laskun_lapvm, 4, 2)."-".substr($laskun_lapvm, 6, 2);
@@ -244,7 +252,7 @@ function kasittele_xml_tiedosto(SimpleXMLElement $xml) {
               laatija            = 'finvoice_myyntilasku',
               luontiaika         = now(),
               viite              = '{$laskun_pankkiviite}',
-              laskunro           = '{$laskun_numero}',
+              laskunro           = '{$laskunnro}',
               maksuehto          = '14 pv netto',
               tapvm              = '{$laskun_tapvm}',
               erpcm              = '{$laskun_erapaiva}',
@@ -253,6 +261,7 @@ function kasittele_xml_tiedosto(SimpleXMLElement $xml) {
               kerayspvm          = '{$laskun_lapvm}',
               alv                = '{$alv}',
               vienti             = '$vienti',
+              viesti             = '{$laskun_numero}',
               tila               = 'L',
               alatila            = 'X',
               viikorkopros       = '{$yhtiorow['viivastyskorko']}'";
@@ -271,29 +280,44 @@ function kasittele_xml_tiedosto(SimpleXMLElement $xml) {
               luontiaika        = NOW()";
     pupe_query($query);
 
-    # Luodaan rivit
-    // N‰m‰ muuttujat ovat valinnaisia:
-    /*
-    RIVINTIEDOT:
-    $rtuoteno[]["ale"]
-    $rtuoteno[]["alv"]
-    $rtuoteno[]["hinta"]
-    $rtuoteno[]["kauttalaskutus"]
-    $rtuoteno[]["kommentti"]
-    $rtuoteno[]["kpl"]
-    $rtuoteno[]["laskutettuaika"]
-    $rtuoteno[]["nimitys"]
-    $rtuoteno[]["rivihinta"]
-    $rtuoteno[]["rivihinta_verolli"]
-    $rtuoteno[]["riviinfo"]
-    $rtuoteno[]["riviviite"]
-    $rtuoteno[]["tilaajanrivinro"]
-    $rtuoteno[]["tuoteno"]
-    $rtuoteno[]["yksikko"]
-    $rtuoteno[]["tilinumero"]
-    $rtuoteno[]["rivihinta_valuutassa"]
-    */
+    // Luodaan rivit
+    // K‰ytett‰v‰ tuote
+    $query = "SELECT *
+              FROM tuote
+              WHERE yhtio = '$kukarow[yhtio]'
+              AND tuoteno = 'finvoice_myyntilasku'";
+    $tuoteres = pupe_query($query);
+
+    if (mysql_num_rows($tuoteres) == 0) {
+      $query = "INSERT INTO tuote SET
+                yhtio       = '{$yhtiorow['yhtio']}',
+                tuoteno     = 'finvoice_myyntilasku',
+                ei_saldoa   = 'o',
+                nimitys     = 'finvoice_myyntilasku'";
+      pupe_query($query);
+    }
+
     foreach ($rtuoteno as $tuoterivi) {
+      // N‰m‰ muuttujat ovat valinnaisia:
+      #RIVINTIEDOT:
+      echo $tuoterivi["ale"]."\n";
+      echo $tuoterivi["alv"]."\n";
+      echo $tuoterivi["hinta"]."\n";
+      echo $tuoterivi["kauttalaskutus"]."\n";
+      echo $tuoterivi["kommentti"]."\n";
+      echo $tuoterivi["kpl"]."\n";
+      echo $tuoterivi["laskutettuaika"]."\n";
+      echo $tuoterivi["nimitys"]."\n";
+      echo $tuoterivi["rivihinta"]."\n";
+      echo $tuoterivi["rivihinta_verolli"]."\n";
+      echo $tuoterivi["riviinfo"]."\n";
+      echo $tuoterivi["riviviite"]."\n";
+      echo $tuoterivi["tilaajanrivinro"]."\n";
+      echo $tuoterivi["tuoteno"]."\n";
+      echo $tuoterivi["yksikko"]."\n";
+      echo $tuoterivi["tilinumero"]."\n";
+      echo $tuoterivi["rivihinta_valuutassa"]."\n";
+
       $query = "INSERT into tilausrivi set
                 kpl                  = '{$tuoterivi['kpl']}',
                 tilkpl               = '{$tuoterivi['kpl']}',
@@ -309,14 +333,14 @@ function kasittele_xml_tiedosto(SimpleXMLElement $xml) {
                 laskutettu           = 'finvoice_myyntilasku',
                 laskutettuaika       = {$laskun_lapvm},
                 yhtio                = '{$yhtiorow['yhtio']}',
-                tuoteno              = '{$tuoterivi['tuoteno']}',
+                tuoteno              = 'finvoice_myyntilasku',
                 ale1                 = '{$tuoterivi['ale']}',
                 yksikko              = '{$tuoterivi['yksikko']}',
                 try                  = '',
                 osasto               = '',
                 alv                  = '{$tuoterivi['alv']}',
                 hinta                = '{$tuoterivi['hinta']}',
-                nimitys              = '{$tuoterivi['nimitys']}',
+                nimitys              = '{$tuoterivi['tuoteno']} / {$tuoterivi['nimitys']}',
                 kate                 = '0',
                 rivihinta            = '{$tuoterivi['rivihinta']}',
                 rivihinta_valuutassa = '{$tuoterivi['rivihinta']}',
@@ -326,8 +350,6 @@ function kasittele_xml_tiedosto(SimpleXMLElement $xml) {
     }
 
     // Kustannuspaikkak‰sittely
-    #$kustannuspaikka = hae_kustannuspaikka($myyntisaamiset_array['kustp'], $yhtio);
-    #paivita_kustannuspaikka_asiakkaalle($asiakas, $kustannuspaikka);
     $kateinen = "";
 
     // Tehd‰‰n ulasku ja tiliˆid‰‰n lasku
@@ -335,88 +357,41 @@ function kasittele_xml_tiedosto(SimpleXMLElement $xml) {
   }
 }
 
-function konvertoi_maksuehto($maksuehto) {
+function valitse_asiakas($toim_asiakkaantiedot, $ostaja_asiakkaantiedot) {
   global $kukarow, $yhtiorow;
 
-  $maksuehto = (string) $maksuehto;
-
-  // Etsi sopiva maksuehto...
-}
-
-function tarkista_asiakas_olemassa($myyntilasku, $yhtio) {
   $query = "SELECT *
             FROM asiakas
-            WHERE yhtio     = '{$yhtio}'
-            AND asiakasnro  = '{$myyntilasku['asiakasnumero']}'
-            AND laji       != 'P'
-            LIMIT 1";
+            WHERE yhtio = '{$yhtiorow['yhtio']}'
+            AND ytunnus = '{$ostaja_asiakkaantiedot['ytunnus']}'
+            AND concat_ws(' ', nimi, nimitark) = '{$ostaja_asiakkaantiedot['nimi']}'
+            AND osoite = '{$ostaja_asiakkaantiedot["osoite"]}'
+            AND postino = '{$ostaja_asiakkaantiedot["postino"]}'
+            AND postitp = '{$ostaja_asiakkaantiedot["postitp"]}'
+            AND concat_ws(' ', toim_nimi, toim_nimitark) = '{$toim_asiakkaantiedot['nimi']}'
+            AND toim_osoite = '{$toim_asiakkaantiedot["osoite"]}'
+            AND toim_postino = '{$toim_asiakkaantiedot["postino"]}'
+            AND toim_postitp = '{$toim_asiakkaantiedot["postitp"]}'
+            AND laji != 'P'";
   $result = pupe_query($query);
-  if (mysql_num_rows($result) == 0) {
-    //jos asiakasta ei lˆydy tarkistetaan lˆytyisikˆ se finvoice_myyntilaskun puolelta. tarkista_asiakas_finvoice_myyntilaskuista() palauttaa vain yhden asiakasnumeron, jos sille antaa yhden asiakasnumeron
-    $palautetut_asiakasnumerot = tarkista_asiakas_finvoice_myyntilaskuista_ja_tuo_pupesoftiin(array($myyntilasku['asiakasnumero']));
-    if ($palautetut_asiakasnumerot) {
-      echo "Asiakas lˆytyis finvoice_myyntilaskuista ja se tuotiin pupesoftiin ".implode(',', $palautetut_asiakasnumerot).".\n";
-      $query = "SELECT *
-                FROM asiakas
-                WHERE yhtio     = '{$yhtio}'
-                AND asiakasnro  IN ('".implode("','", $palautetut_asiakasnumerot)."')
-                AND laji       != 'P'
-                LIMIT 1";
-      $result = pupe_query($query);
-    }
-    if (mysql_num_rows($result) == 0) {
-      //jos asiakasta ei lˆydy, laskulle laitetaan asiakkaan kenttiin tyhj‰t arvot sek‰ futurista tullut asiakasnumero ytunnus kentt‰‰n, jotta asiakkaan pupesoftiin perustamisen j‰lkeen, asiakas voidaan liitt‰‰ kyseiseen laskuun
-      return array(
-        'tunnus'     => 0,
-        'nimi'       => $myyntilasku['asiakkaan_nimi'].' / '.$myyntilasku['asiakasnumero'],
-        'osoite'     => '',
-        'postino'     => '',
-        'postitp'     => '',
-        'maa'       => '',
-        'toim_nimi'     => '',
-        'toim_osoite'   => '',
-        'toim_postino'   => '',
-        'toim_postitp'   => '',
-        'toim_maa'     => '',
-        'ytunnus'     => $myyntilasku['asiakasnumero'],
-        'liitostunnus'   => 0,
-      );
-    }
-  }
-
-  return mysql_fetch_assoc($result);
-}
-
-function hae_kustannuspaikka($kustannuspaikka_koodi, $yhtio) {
-  $query = "SELECT *
-            FROM kustannuspaikka
-            WHERE yhtio = '{$yhtio}'
-            AND koodi   = '{$kustannuspaikka_koodi}'";
-  $result = pupe_query($query);
+  #echo "$query\n\n";
 
   if (mysql_num_rows($result) == 0) {
-    return null;
+    $query = "SELECT *
+              FROM asiakas
+              WHERE yhtio = '{$yhtiorow['yhtio']}'
+              AND ytunnus = '{$ostaja_asiakkaantiedot['ytunnus']}'
+              AND concat_ws(' ', nimi, nimitark) = '{$ostaja_asiakkaantiedot['nimi']}'
+              AND osoite = '{$ostaja_asiakkaantiedot["osoite"]}'
+              AND postino = '{$ostaja_asiakkaantiedot["postino"]}'
+              AND postitp = '{$ostaja_asiakkaantiedot["postitp"]}'
+              AND laji != 'P'";
+    $result = pupe_query($query);
+    #echo "$query\n\n";
   }
 
-  return mysql_fetch_assoc($result);
-}
-
-function paivita_kustannuspaikka_asiakkaalle($asiakas, $kustannuspaikka) {
-  global $kukarow, $yhtiorow;
-
-  // p‰ivitet‰‰n vain jos asiakkaalla ei t‰ll‰ hetkell‰ ole kustannuspaikkaa
-  $query = "SELECT kustannuspaikka
-            FROM asiakas
-            WHERE asiakas.yhtio = '{$kukarow['yhtio']}'
-            AND asiakas.tunnus  = '{$asiakas['tunnus']}'";
-  $res = pupe_query($query);
-  $kustp_row = mysql_fetch_assoc($res);
-
-  if ($kustp_row['kustannuspaikka'] == 0) {
-    $query = "UPDATE asiakas
-              SET kustannuspaikka = {$kustannuspaikka['tunnus']}
-              WHERE asiakas.yhtio = '{$kukarow['yhtio']}'
-              AND asiakas.tunnus  = '{$asiakas['tunnus']}'";
-    pupe_query($query);
+  if (mysql_num_rows($result) == 1) {
+    return mysql_fetch_assoc($result);
   }
+  return False;
 }

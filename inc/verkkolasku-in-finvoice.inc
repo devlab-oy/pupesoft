@@ -69,7 +69,13 @@ $laskun_toimitunnus = xml_string($xml->SellerPartyDetails->SellerPupesoftId);
 $toim_asiakkaantiedot = array();
 $toim_asiakkaantiedot["toim_ovttunnus"] = xml_string($xml->DeliveryOrganisationUnitNumber);
 $toim_asiakkaantiedot["ytunnus"] = xml_string($xml->DeliveryPartyDetails->DeliveryPartyIdentifier);
-$toim_asiakkaantiedot["nimi"] = xml_string($xml->DeliveryPartyDetails->DeliveryOrganisationName);
+
+$toim_asiakkaantiedot["nimi"] = "";
+foreach($xml->DeliveryPartyDetails->DeliveryOrganisationName as $name) {
+  $toim_asiakkaantiedot["nimi"] .= xml_string($name)." ";
+}
+$toim_asiakkaantiedot["nimi"] = trim($toim_asiakkaantiedot["nimi"]);
+
 $toim_asiakkaantiedot["osoite"] = xml_string($xml->DeliveryPartyDetails->DeliveryPostalAddressDetails->DeliveryStreetName);
 $toim_asiakkaantiedot["postino"] = xml_string($xml->DeliveryPartyDetails->DeliveryPostalAddressDetails->DeliveryPostCodeIdentifier);
 $toim_asiakkaantiedot["postitp"] = xml_string($xml->DeliveryPartyDetails->DeliveryPostalAddressDetails->DeliveryTownName);
@@ -79,7 +85,13 @@ $toim_asiakkaantiedot["maa"] = xml_string($xml->DeliveryPartyDetails->DeliveryPo
 $ostaja_asiakkaantiedot = array();
 $ostaja_asiakkaantiedot["toim_ovttunnus"] = xml_string($xml->BuyerOrganisationUnitNumber);
 $ostaja_asiakkaantiedot["ytunnus"] = xml_string($xml->BuyerPartyDetails->BuyerPartyIdentifier);
-$ostaja_asiakkaantiedot["nimi"] = xml_string($xml->BuyerPartyDetails->BuyerOrganisationName);
+
+$ostaja_asiakkaantiedot["nimi"] = "";
+foreach($xml->BuyerPartyDetails->BuyerOrganisationName as $name) {
+  $ostaja_asiakkaantiedot["nimi"] .= xml_string($name)." ";
+}
+$ostaja_asiakkaantiedot["nimi"] = trim($ostaja_asiakkaantiedot["nimi"]);
+
 $ostaja_asiakkaantiedot["osoite"] = xml_string($xml->BuyerPartyDetails->BuyerPostalAddressDetails->BuyerStreetName);
 $ostaja_asiakkaantiedot["postino"] = xml_string($xml->BuyerPartyDetails->BuyerPostalAddressDetails->BuyerPostCodeIdentifier);
 $ostaja_asiakkaantiedot["postitp"] = xml_string($xml->BuyerPartyDetails->BuyerPostalAddressDetails->BuyerTownName);

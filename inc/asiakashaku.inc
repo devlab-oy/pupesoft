@@ -526,7 +526,7 @@ elseif ($monta > 1 and $monta <= $limit) {
       }
     }
 
-    $vastuumyyja_result = t_avainsana("VASTUUMYYJA", "");
+    $vastuumyyja_result = t_avainsana("VASTUUMYYJA", "", " and avainsana.selite = 'Asiakashaku'");
     $onvastuumyyja   = mysql_num_rows($vastuumyyja_result) !== 0;
     //tämä vain otsik.php:tä varten
     echo $lause;

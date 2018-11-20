@@ -245,7 +245,7 @@ if (!function_exists("avainsanatarkista")) {
         }
       }
 
-      if ($seliteerrori == 1 and trim($t[$i]) == '' and $tem_laji != 'VAKIOVIESTI' and $tem_laji != 'MAINOSTXT_LASKU' and $tem_laji != 'VAKIOVIESTI_TIL' and $tem_laji != 'HINNAT_CRON' and $tem_laji != 'TUOTE_EXP_CRON' and $tem_laji != 'UNIFAUN_REF') {
+      if ($seliteerrori == 1 and trim($t[$i]) == '' and $tem_laji != 'VAKIOVIESTI' and $tem_laji != 'MAINOSTXT_LASKU' and $tem_laji != 'VAKIOVIESTI_TIL' and $tem_laji != 'HINNAT_CRON' and $tem_laji != 'TUOTE_EXP_CRON' and $tem_laji != 'UNIFAUN_REF' and $tem_laji != 'VASTUUMYYJA') {
         $virhe[$i] = t("Selite ja selitetark ei voi olla tyhjiä")."!";
       }
 

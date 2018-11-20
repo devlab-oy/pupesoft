@@ -3803,7 +3803,7 @@ if ($tee == '') {
 
       echo "</td>";
 
-      $vastuumyyja_result = t_avainsana("VASTUUMYYJA", "");
+      $vastuumyyja_result = t_avainsana("VASTUUMYYJA", "", " and avainsana.selite = 'Asiakashaku'");
       $onvastuumyyja   = mysql_num_rows($vastuumyyja_result) !== 0;
       
       if ($onvastuumyyja) {

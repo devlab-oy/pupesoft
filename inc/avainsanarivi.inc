@@ -1726,12 +1726,23 @@ if ($avain_sel['UNIFAUN_REF'] == 'SELECTED') {
     $jatko = 0;
   }
 }
+// Miss‰ vastuumyyj‰ n‰ytet‰‰n
 if ($avain_sel['VASTUUMYYJA'] == "SELECTED") {
-  if ($_selite || $_jarjestys) {
+  // ei n‰ytet‰ selitetarkia tai j‰rjestyst‰
+  if ($_selitetark or $_jarjestys) {
     $tyyppi = 0;
   }
-  elseif ($_selitetark) {
-    $ulos = "<td><textarea name='{$nimi}' rows='10' cols='50'>{$trow[$i]}</textarea></td>";
+
+  if ($_selite) {
+    $sel = $trow[$i] == 'tunnus' ? 'selected' : '';
+
+    $ulos = "<td>";
+    $ulos .= "<select name='{$nimi}'>";
+    $ulos .= "<option value='Asiakashaku'>" . t('Asiakashaku') . "</option>";
+    $ulos .= "<option value='Tulosteet' {$sel}>" . t('Tulosteet') . "</option>";
+    $ulos .= "</select>";
+    $ulos .= "</td>";
+
     $jatko = 0;
   }
 }

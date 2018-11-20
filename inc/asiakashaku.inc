@@ -526,6 +526,8 @@ elseif ($monta > 1 and $monta <= $limit) {
       }
     }
 
+    $vastuumyyja_result = t_avainsana("VASTUUMYYJA", "", " and avainsana.selite = 'Asiakashaku'");
+    $onvastuumyyja   = mysql_num_rows($vastuumyyja_result) !== 0;
     //tämä vain otsik.php:tä varten
     echo $lause;
 
@@ -544,7 +546,9 @@ elseif ($monta > 1 and $monta <= $limit) {
     if ($on_piireja) {
       echo "<th>" . t("piiri") . "</th>";
     }
-
+    if ($onvastuumyyja) {
+      echo "<th>" . t("Vastuumyyjä") . "</th>";
+    }
     if ($yh_match) {
       echo "<th>" . t("yhteyshenkilö") . "</th>";
     }
@@ -692,6 +696,25 @@ elseif ($monta > 1 and $monta <= $limit) {
       if ($on_piireja) {
         if ($asiakas['piiri'] != 0) {
           echo "<td>{$asiakas['piiri']} - {$piirit[$asiakas['piiri']]}</td>";
+        }
+        else {
+          echo "<td></td>";
+        }
+      }  
+      if ($onvastuumyyja) {
+        if ($asiakas['myyjanro'] != 0) {
+          $apuqu = "SELECT *
+                    FROM kuka use index (yhtio_myyja)
+                    WHERE yhtio = '$kukarow[yhtio]'
+                    AND myyja   = '$asiakas[myyjanro]'
+                    AND myyja   > 0";
+          $meapu = pupe_query($apuqu);
+          
+          if (mysql_num_rows($meapu) == 1) {
+            $apuro = mysql_fetch_assoc($meapu);
+            $myyja = $apuro['nimi'];
+          }
+          echo "<td>{$apuro['nimi']}</td>";
         }
         else {
           echo "<td></td>";

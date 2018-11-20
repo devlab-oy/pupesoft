@@ -42,9 +42,9 @@ if (!function_exists('elmaedi_otsik')) {
     fputs($tootedi, "INADSE_PO:$yhtiorow[postino]\n");
     fputs($tootedi, "INADPL_RF:IT @$lasrow[toim_ovttunnus]\n");
     fputs($tootedi, "INADPL_RF:ZZ @$lasrow[ytunnus]\n");
-    fputs($tootedi, "INADPL_NA:$lasrow[toim_nimi]\n");
-    fputs($tootedi, "INADPL_NX:$lasrow[toim_nimitark]\n");
-    fputs($tootedi, "INADPL_SA:$lasrow[toim_osoite]\n");
+    fputs($tootedi, "INADPL_NA:".substr($lasrow["toim_nimi"], 0, 35)."\n");
+    fputs($tootedi, "INADPL_NX:".substr($lasrow["toim_nimitark"], 0, 35)."\n");
+    fputs($tootedi, "INADPL_SA:".substr($lasrow["toim_osoite"], 0, 35)."\n");
     fputs($tootedi, "INADPL_CI:$lasrow[toim_postitp]\n");
     fputs($tootedi, "INADPL_PO:$lasrow[toim_postino]\n");
     fputs($tootedi, "INADIV_NA:$lasrow[nimi]\n");
@@ -52,9 +52,9 @@ if (!function_exists('elmaedi_otsik')) {
     fputs($tootedi, "INADIV_SA:$lasrow[osoite]\n");
     fputs($tootedi, "INADIV_CI:$lasrow[postitp]\n");
     fputs($tootedi, "INADIV_PO:$lasrow[postino]\n");
-    fputs($tootedi, "INADDP_NA:$lasrow[toim_nimi]\n");
-    fputs($tootedi, "INADDP_NX:$lasrow[toim_nimitark]\n");
-    fputs($tootedi, "INADDP_SA:$lasrow[toim_osoite]\n");
+    fputs($tootedi, "INADDP_NA:".substr($lasrow["toim_nimi"], 0, 35)."\n");
+    fputs($tootedi, "INADDP_NX:".substr($lasrow["toim_nimitark"], 0, 35)."\n");
+    fputs($tootedi, "INADDP_SA:".substr($lasrow["toim_osoite"], 0, 35)."\n");
     fputs($tootedi, "INADDP_CI:$lasrow[toim_postitp]\n");
     fputs($tootedi, "INADDP_PO:$lasrow[toim_postino]\n");
     fputs($tootedi, "ICUX1__CR:$yhtiorow[valkoodi]\n");

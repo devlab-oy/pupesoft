@@ -342,6 +342,7 @@ if (mysql_field_name($result, $i) == "laji") {
   if ($lukitse_laji== "" or $lukitse_laji == "MESSENGER_RYHMA") $ulos .= "<option value='MESSENGER_RYHMA' {$avain_sel['MESSENGER_RYHMA']}>".t("Messenger käyttäjäryhmä")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "VALM_FAKTA") $ulos .= "<option value='VALM_FAKTA' {$avain_sel['VALM_FAKTA']}>".t("Valmistuslistan faktan fonttikoko")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "PSHOP_SYNONYMS") $ulos .= "<option value='PSHOP_SYNONYMS' {$avain_sel['PSHOP_SYNONYMS']}>".t("Pupeshop tuotehaun synonyymit")."</option>";
+  if ($lukitse_laji== "" or $lukitse_laji == "VASTUUMYYJA") $ulos .= "<option value='VASTUUMYYJA' {$avain_sel['VASTUUMYYJA']}>".t("Asiakkaan vastuumyyjä")."</option>";
 
   if ($lukitse_laji== "") $ulos .= "</optgroup>";
 
@@ -1722,6 +1723,15 @@ if ($avain_sel['UNIFAUN_REF'] == 'SELECTED') {
     $ulos .= "</select>";
     $ulos .= "</td>";
 
+    $jatko = 0;
+  }
+}
+if ($avain_sel['VASTUUMYYJA'] == "SELECTED") {
+  if ($_selite || $_jarjestys) {
+    $tyyppi = 0;
+  }
+  elseif ($_selitetark) {
+    $ulos = "<td><textarea name='{$nimi}' rows='10' cols='50'>{$trow[$i]}</textarea></td>";
     $jatko = 0;
   }
 }

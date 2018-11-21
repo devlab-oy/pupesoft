@@ -46,12 +46,20 @@ function viidakko_hae_tuotteet($tyyppi = "viidakko_tuotteet") {
     $query =  "(SELECT
                 tuote.tunnus,
                 tuote.tuoteno,
-                tuote.eankoodi
+                tuote.eankoodi,
+                tuotteen_avainsanat.tunnus
                 FROM tapahtuma
                 JOIN tuote ON (tuote.yhtio = tapahtuma.yhtio
                   AND tuote.tuoteno = tapahtuma.tuoteno
                   {$tuoterajaus})
+                LEFT JOIN tuotteen_avainsanat ON (
+                  tuotteen_avainsanat.yhtio = tuote.yhtio
+                  AND tuotteen_avainsanat.tuoteno = tuote.tuoteno
+                  AND tuotteen_avainsanat.laji = 'parametri_variaatio'
+                  AND tuotteen_avainsanat.kieli = 'fi'
+                )
                 WHERE tapahtuma.yhtio = '{$kukarow["yhtio"]}'
+                AND tuotteen_avainsanat.tunnus is null
                 {$muutoslisa1})
 
                 UNION
@@ -59,12 +67,20 @@ function viidakko_hae_tuotteet($tyyppi = "viidakko_tuotteet") {
                 (SELECT
                 tuote.tunnus,
                 tuote.tuoteno,
-                tuote.eankoodi
+                tuote.eankoodi,
+                tuotteen_avainsanat.tunnus
                 FROM tilausrivi
                 JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio
                   AND tuote.tuoteno = tilausrivi.tuoteno
                   {$tuoterajaus})
+                LEFT JOIN tuotteen_avainsanat ON (
+                  tuotteen_avainsanat.yhtio = tuote.yhtio
+                  AND tuotteen_avainsanat.tuoteno = tuote.tuoteno
+                  AND tuotteen_avainsanat.laji = 'parametri_variaatio'
+                  AND tuotteen_avainsanat.kieli = 'fi'
+                )
                 WHERE tilausrivi.yhtio = '{$kukarow["yhtio"]}'
+                AND tuotteen_avainsanat.tunnus is null
                 {$muutoslisa2})
 
                 UNION
@@ -72,9 +88,17 @@ function viidakko_hae_tuotteet($tyyppi = "viidakko_tuotteet") {
                 (SELECT
                 tuote.tunnus,
                 tuote.tuoteno,
-                tuote.eankoodi
+                tuote.eankoodi,
+                tuotteen_avainsanat.tunnus
                 FROM tuote
+                LEFT JOIN tuotteen_avainsanat ON (
+                  tuotteen_avainsanat.yhtio = tuote.yhtio
+                  AND tuotteen_avainsanat.tuoteno = tuote.tuoteno
+                  AND tuotteen_avainsanat.laji = 'parametri_variaatio'
+                  AND tuotteen_avainsanat.kieli = 'fi'
+                )
                 WHERE tuote.yhtio = '{$kukarow["yhtio"]}'
+                AND tuotteen_avainsanat.tunnus is null
                 {$tuoterajaus}
                 {$muutoslisa3})
 
@@ -84,9 +108,17 @@ function viidakko_hae_tuotteet($tyyppi = "viidakko_tuotteet") {
     $query = "SELECT
               tuote.tunnus,
               tuote.tuoteno,
-              tuote.eankoodi
+              tuote.eankoodi,
+              tuotteen_avainsanat.tunnus
               FROM tuote
+              LEFT JOIN tuotteen_avainsanat ON (
+                tuotteen_avainsanat.yhtio = tuote.yhtio
+                AND tuotteen_avainsanat.tuoteno = tuote.tuoteno
+                AND tuotteen_avainsanat.laji = 'parametri_variaatio'
+                AND tuotteen_avainsanat.kieli = 'fi'
+              )
               WHERE tuote.yhtio = '{$kukarow['yhtio']}'
+              AND tuotteen_avainsanat.tunnus is null
               {$tuoterajaus}";
   }
 
@@ -255,6 +287,13 @@ function viidakko_hae_tuotteet($tyyppi = "viidakko_tuotteet") {
         $product_row['myyntihinta'] = $product_row['myyntihinta'] * ((100+$product_row['alv'])/100);
       }
 
+      if ($product_row['status'] == 'P') {
+        $hidden = true;
+      }
+      else {
+        $hidden = false;
+      }
+
       $data[] = array(
         "id"                      => $_id,
         "product_code"            => utf8_encode($tuoteno),
@@ -273,7 +312,7 @@ function viidakko_hae_tuotteet($tyyppi = "viidakko_tuotteet") {
           ),
         ),
         "base_price"              => (float) $product_row['myyntihinta'],
-        "hidden"                  => false,
+        "hidden"                  => $hidden,
         #"" => "",
         #"" => "",
         #"" => "",
@@ -356,4 +395,129 @@ function product_row($tuoteno) {
   $res2 = pupe_query($query);
 
   return mysql_fetch_assoc($res2);
+}
+
+function viidakko_hae_variaatiot() {
+  global $kukarow, $yhtiorow, $viidakko_varastot, $ajetaanko_kaikki, $viidakko_kuvaurl;
+
+  viidakko_echo("Haetaan kaikki variaatiotuotteet");
+
+  $tuoterajaus = viidakko_tuoterajaus();
+
+  if (!is_array($viidakko_varastot)) {
+    die('viidakko varastot ei ole array!');
+  }
+
+  // Haetaan aika nyt
+  $query = "SELECT now() as aika";
+  $result = pupe_query($query);
+  $row = mysql_fetch_assoc($result);
+  $aloitusaika = $row['aika'];
+
+  if (isset($viidakko_kuvaurl) and $viidakko_kuvaurl != '') {
+    if (substr($viidakko_kuvaurl, -1) == '/') {
+      $viidakko_kuvaurl = substr($viidakko_kuvaurl, 0, -1);
+    }
+  }
+  else {
+    $viidakko_kuvaurl = '';
+  }
+
+  $datetime_checkpoint = cron_aikaleima("VIID_VARIA_CRON");
+
+  pupesoft_log($tyyppi, "Aloitetaan variaatioiden tuotehaku {$aloitusaika}");
+
+  if ($datetime_checkpoint != "" and $ajetaanko_kaikki == "NO") {
+    pupesoft_log($tyyppi, "Haetaan {$datetime_checkpoint} jälkeen muuttuneet");
+
+    $muutoslisa1 = "AND tapahtuma.laadittu  >= '{$datetime_checkpoint}'";
+    $muutoslisa2 = "AND tilausrivi.laadittu >= '{$datetime_checkpoint}'";
+    $muutoslisa3 = "AND tuote.muutospvm     >= '{$datetime_checkpoint}'";
+
+    // Haetaan variaatiotuotteet, joille on tehty tunnin sisällä tilausrivi tai tapahtuma
+    $query =  "(SELECT
+                tuote.tunnus,
+                tuote.tuoteno,
+                tuote.eankoodi
+                FROM tapahtuma
+                JOIN tuote ON (
+                  tuote.yhtio = tapahtuma.yhtio
+                  AND tuote.tuoteno = tapahtuma.tuoteno
+                  {$tuoterajaus}
+                )
+                JOIN tuotteen_avainsanat ON (
+                  tuotteen_avainsanat.yhtio = tuote.yhtio
+                  AND tuotteen_avainsanat.tuoteno = tuote.tuoteno
+                  AND tuotteen_avainsanat.laji = 'parametri_variaatio'
+                  AND tuotteen_avainsanat.kieli = 'fi'
+                )
+                WHERE tapahtuma.yhtio = '{$kukarow["yhtio"]}'
+                {$muutoslisa1})
+
+                UNION
+
+                (SELECT
+                tuote.tunnus,
+                tuote.tuoteno,
+                tuote.eankoodi
+                FROM tilausrivi
+                JOIN tuote ON (
+                  tuote.yhtio = tilausrivi.yhtio
+                  AND tuote.tuoteno = tilausrivi.tuoteno
+                  {$tuoterajaus}
+                )
+                JOIN tuotteen_avainsanat ON (
+                  tuotteen_avainsanat.yhtio = tuote.yhtio
+                  AND tuotteen_avainsanat.tuoteno = tuote.tuoteno
+                  AND tuotteen_avainsanat.laji = 'parametri_variaatio'
+                  AND tuotteen_avainsanat.kieli = 'fi'
+                )
+                WHERE tilausrivi.yhtio = '{$kukarow["yhtio"]}'
+                {$muutoslisa2})
+
+                UNION
+
+                (SELECT
+                tuote.tunnus,
+                tuote.tuoteno,
+                tuote.eankoodi
+                FROM tuote
+                JOIN tuotteen_avainsanat ON (
+                  tuotteen_avainsanat.yhtio = tuote.yhtio
+                  AND tuotteen_avainsanat.tuoteno = tuote.tuoteno
+                  AND tuotteen_avainsanat.laji = 'parametri_variaatio'
+                  AND tuotteen_avainsanat.kieli = 'fi'
+                )
+                WHERE tuote.yhtio = '{$kukarow["yhtio"]}'
+                {$tuoterajaus}
+                {$muutoslisa3})
+
+                ORDER BY 1";
+  }
+  else {
+    $query = "SELECT
+              tuote.tunnus,
+              tuote.tuoteno,
+              tuote.eankoodi
+              FROM tuote
+              JOIN tuotteen_avainsanat ON (
+                tuotteen_avainsanat.yhtio = tuote.yhtio
+                AND tuotteen_avainsanat.tuoteno = tuote.tuoteno
+                AND tuotteen_avainsanat.laji = 'parametri_variaatio'
+                AND tuotteen_avainsanat.kieli = 'fi'
+              )
+              WHERE tuote.yhtio = '{$kukarow['yhtio']}'
+              {$tuoterajaus}";
+  }
+
+  $res = pupe_query($query);
+
+  cron_aikaleima("VIID_VARIA_CRON", $aloitusaika);
+
+  $data = array();
+  $i    = 0;
+
+  while ($row = mysql_fetch_assoc($res)) {
+
+  }
 }

@@ -76,7 +76,7 @@ class ViidakkoStoreTilaukset {
   }
 
   public function update_viidakko_order_status($order_id) {
-    $url = $this->apiurl."/orders/".$order_id."statuses";
+    $url = $this->apiurl."/orders/".$order_id."/statuses";
 
     $data_json = json_encode(array(
       "status"  => "13",
@@ -283,8 +283,12 @@ class ViidakkoStoreTilaukset {
         $tilausaika = date("Y-m-d H:i:s");
 
         cron_aikaleima("VIID_ORDR_CRON", $tilausaika);
+
 echo "\n\nTallennettiin tilaus";
+
         $this->logger->log("Tallennettiin tilaus '{$filename}'");
+
+        #update_viidakko_order_status($order->id);
       }
     }
     else {

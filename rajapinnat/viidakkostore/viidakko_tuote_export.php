@@ -22,6 +22,7 @@ require "rajapinnat/viidakkostore/viidakko_functions.php";
 require "rajapinnat/viidakkostore/viidakko_saldot.php";
 require "rajapinnat/viidakkostore/viidakko_tuotteet.php";
 require "rajapinnat/viidakkostore/viidakko_kuvat.php";
+require "rajapinnat/viidakkostore/viidakko_variaatiot.php";
 require "rajapinnat/viidakkostore/viidakko_tilaukset.php";
 
 if (empty($argv[1])) {
@@ -52,6 +53,7 @@ else {
     'tuotteet',
     #'saldot',
     'kuvat',
+    #'variaatiot',
     #'tilaukset',
   );
 }
@@ -143,6 +145,19 @@ if (viidakko_ajetaanko_sykronointi('kuvat', $synkronoi)) {
 
   $viidakko_pics->set_all_products($kaikki_tuotteet);
   $viidakko_pics->check_pics();
+}
+
+if (viidakko_ajetaanko_sykronointi('variaatiot', $synkronoi)) {
+  $tyyppi = "viidakko_variaatiot";
+  $kaikki_variaatiot = viidakko_hae_variaatiot();
+
+  #echo "<pre>",var_dump($kaikki_variaatiot);
+
+  viidakko_echo("Siirretään variaatiot.");
+  $viidakko_variations = new ViidakkoStoreVariaatiot($viidakko_url, $viidakko_token, $tyyppi);
+
+  $viidakko_variations->set_all_variations($kaikki_variaatiot);
+  $viidakko_variations->check_variations();
 }
 
 if (viidakko_ajetaanko_sykronointi('tilaukset', $synkronoi)) {

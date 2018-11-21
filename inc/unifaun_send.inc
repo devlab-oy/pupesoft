@@ -697,9 +697,8 @@ class Unifaun {
     //$uni_par_val = $uni_receiver_partner->addChild('val', "");   # Agent's identity, mandatory value for DBSchenker PrivPak. Normally set by application.
     //$uni_par_val->addAttribute('n', "agentno");
 
-    // Käytetään vastaanottajan rahtisopimusta: toimitusosoite on eri kuin rahtisopåimuksen omistaja ->
-    // kerrotaan Unifaunille myös rahtisopimuksen omistajajn tiedot
-    if ($this->rakir_row['merahti'] == "" and $this->rakir_row["toim_nimi"] != $this->rakir_row["nimi"] and $this->toitarow["virallinen_selite"] == "POF1") {
+    // Käytetään vastaanottajan rahtisopimusta: rahdinmaksajan tiedot aina ilmoitttava sanomalla
+    if ($this->rakir_row['merahti'] == "" and $this->toitarow["virallinen_selite"] == "POF1") {
       $uni_party = $xml->addChild('party');  // Any contents. Mandatory.
 
       $uni_party->addAttribute('ptyid', utf8_encode($this->asiakasrow["tunnus"]));
@@ -746,7 +745,7 @@ class Unifaun {
     $uni_shi_val = $uni_shipment->addChild('val', utf8_encode($this->asiakasrow["tunnus"])); // Defines the receiver. Refers to rcvid value for receiver.
     $uni_shi_val->addAttribute('n', "to");
 
-    if ($this->rakir_row["toim_nimi"] != $this->rakir_row["nimi"] and $this->toitarow['virallinen_selite'] == 'POF1') {
+    if ($this->rakir_row['merahti'] == "" and $this->toitarow['virallinen_selite'] == 'POF1') {
       $uni_shi_val = $uni_shipment->addChild('val', utf8_encode($shipment_payer)); // Defines the receiver. Refers to rcvid value for receiver.
       $uni_shi_val->addAttribute('n', "payerfreight");
     }

@@ -519,5 +519,255 @@ function viidakko_hae_variaatiot() {
 
   while ($row = mysql_fetch_assoc($res)) {
 
+    $tuoteno = $row['tuoteno'];
+
+    list(, , $myytavissa) = saldo_myytavissa($tuoteno, '', $viidakko_varastot);
+
+    $query = "  SELECT *
+                FROM tuotteen_avainsanat
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND tuoteno = '$tuoteno'
+                AND laji = 'viidakko_tuoteno'";
+    $avainsana_res = pupe_query($query);
+    $avainsana_row = mysql_fetch_assoc($avainsana_res);
+
+    $_id = $avainsana_row['selite'];
+
+    $product_row = product_row($tuoteno);
+
+    $liite_tk_url = "";
+
+    //kuvalinkit tarvittaessa
+    if ($viidakko_kuvaurl != '') {
+
+      // normaalikuva
+      $query = "SELECT liitetiedostot.tunnus,
+                liitetiedostot.external_id,
+                if(liitetiedostot.jarjestys = 0, 9999, liitetiedostot.jarjestys) jarjestys,
+                liitetiedostot.kieli,
+                liitetiedostot.selite,
+                liitetiedostot.tunnus,
+                ( SELECT if(max(max.muutospvm) != '0000-00-00 00:00:00', max(max.muutospvm), max(max.luontiaika))
+                  FROM liitetiedostot max
+                  WHERE max.yhtio = liitetiedostot.yhtio
+                  AND max.liitos  = liitetiedostot.liitos
+                  AND max.liitostunnus = liitetiedostot.liitostunnus
+                  AND max.kayttotarkoitus = liitetiedostot.kayttotarkoitus
+                ) muutospvm
+                FROM liitetiedostot
+                WHERE liitetiedostot.yhtio = '{$kukarow['yhtio']}'
+                AND liitetiedostot.liitos  = 'tuote'
+                AND liitetiedostot.liitostunnus = '{$product_row['tunnus']}'
+                AND liitetiedostot.kayttotarkoitus = 'TK'
+                ORDER BY if(liitetiedostot.jarjestys = 0, 9999, liitetiedostot.jarjestys)";
+      $result = pupe_query($query);
+
+      $ii = 0;
+
+      while ($liite_row = mysql_fetch_assoc($result)) {
+
+        $liite_tk_url = "{$viidakko_kuvaurl}/view.php?id={$liite_row['tunnus']}";
+
+        // for testing..
+        if ($liite_row['tunnus'] != '24875') $liite_tk_url = "https://www.sprintit.fi/website/image/ir.attachment/5509_4ac6bcc/datas";
+
+        // X = delete all pics and then install
+        // Y = just install, pics have been deleted already
+        // "" = do nothing, no updates
+        $updated = (1==1 or $liite_row['muutospvm'] > $datetime_checkpoint);
+        if ($updated and $ii == 0) {
+          $_updated = "X";
+        }
+        elseif ($updated and $ii > 0) {
+          $_updated = "Y";
+        }
+        else {
+          $_updated = "";
+        }
+
+        if (empty($liite_row['selite'])) $liite_row['selite'] = "Tuotekuva";
+
+        $data[$i] = array(
+          "id"          => $_id,
+          "code"        => utf8_encode($tuoteno),
+          "image_id"    => (int) $liite_row['external_id'],
+          "image"       => $liite_tk_url,
+          "title" => array(
+            array(
+              "language"=> utf8_encode(strtoupper($liite_row['kieli'])),
+              "title"   => utf8_encode($liite_row['selite'])
+            )
+          ),
+          "description" => array(
+            array(
+              "language"    => utf8_encode(strtoupper($liite_row['kieli'])),
+              "description" => utf8_encode($liite_row['selite'])
+            )
+          ),
+          "position"    => (int) $liite_row['jarjestys'],
+          "is_default"  => (bool) false,
+          "is_teaser"   => (bool) false,
+          "liitetiedostot_tunnus" => $liite_row['tunnus'],
+          "updated" => $_updated,
+        );
+
+        if ($ii == 0) {
+          $data[$i]['is_default'] = (bool) true;
+          $data[$i]['is_teaser'] = (bool) true;
+        }
+        $i++;
+        $ii++;
+      }
+    }
+
+    $product_row = product_row($tuoteno);
+
+    //  haetaan kielikäännökset avainsanoista
+    $query = "  SELECT *
+                FROM tuotteen_avainsanat
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND tuoteno = '{$tuoteno}'
+                AND laji in ('kuvaus', 'nimitys')
+                AND kieli = 'en'";
+    $avainsana_res = pupe_query($query);
+    $nimitys_en = $kuvaus_en = "";
+
+    while ($avainsana_row = mysql_fetch_assoc($avainsana_res)) {
+      if ($avainsana_row['laji'] == 'nimitys') {
+        $nimitys_en = $avainsana_row['selite'];
+      }
+      elseif ($avainsana_row['laji'] == 'kuvaus') {
+        $kuvaus_en = $avainsana_row['selite'];
+      }
+    }
+
+    if (empty($nimitys_en)) {
+      $nimitys_en = $product_row['nimitys'];
+    }
+
+    if (empty($kuvaus_en)) {
+      $kuvaus_en = $product_row['kuvaus'];
+    }
+
+    $try_res = t_avainsana("TRY", "", "and avainsana.selite  = '{$product_row['try']}'");
+    $try_row = mysql_fetch_assoc($try_res);
+    $try = trim($try_row['selitetark_3']);
+
+    // tyhjä = verolliset, x = verottomat
+    // viidakkoon siirretään verollisena
+    if ($yhtiorow['alv_kasittely'] != '') {
+      $product_row['myyntihinta'] = $product_row['myyntihinta'] * ((100+$product_row['alv'])/100);
+    }
+
+    if ($product_row['status'] == 'P') {
+      $hidden = true;
+    }
+    else {
+      $hidden = false;
+    }
+
+    $data[] = array(
+      "id"                      => $_id,
+      "product_code"            => utf8_encode($tuoteno),
+      "erp_id"                  => utf8_encode($tuoteno),
+      "category"                => (float)  $try,
+      "ean_code"                => $product_row['eankoodi'],
+      "stock"                   => $myytavissa,
+      "names"                   => array(
+        array(
+          "language" => "FI",
+          "name" => utf8_encode($product_row['nimitys'])
+        ),
+        array(
+          "language" => "EN",
+          "name" => utf8_encode($nimitys_en),
+        ),
+      ),
+      "base_price"              => (float) $product_row['myyntihinta'],
+      "hidden"                  => $hidden,
+      #"" => "",
+      #"" => "",
+      #"" => "",
+      #"supplier_code"           => "", #todo
+      "descriptions"            => array(
+        array(
+          "language" => "FI",
+          "description" => utf8_encode($product_row['kuvaus']),
+        ),
+        array(
+          "language" => "EN",
+          "description" => utf8_encode($kuvaus_en),
+        ),
+      ),
+      "inventory_price"         => (float) $product_row['kehahin'],
+      #"msrp"                    => "",
+      "vat_percent"             => (float) $product_row['alv'],
+      #"use_default_vat_percent" => "",
+      #"availability_begins_at"  => "",
+      #"availability_ends_at"    => "",
+      #"delivery_cost_unit" => "",      # product weight!
+    );
+
+
+
+/*
+group_id  integer <int64>
+product_id  integer <int64>
+type  string
+color string Nullable
+size  string Nullable
+image string
+variation_code  string
+hidden  boolean
+href  string
+properties  Array of object
+names required Array of object
+descriptions  Array of object
+additional_price  number <float>
+stock required integer <int64>
+erp_id  string Nullable
+*/
+
+  $data[] = array(
+    "group_id"                => "",
+    "product_id"              => $_id,
+    "type"                    => "",
+    "color"                   => "",
+    "size"                    => "",
+    "image"                   => "",
+    "variation_code"          => "",
+    "hidden"                  => $hidden,
+    "href"                    => "",
+    "properties"                   => array(
+      array(
+        "language" => "FI",
+        "name" => utf8_encode($product_row['nimitys'])
+      ),
+    ),
+    "names"                   => array(
+      array(
+        "language" => "FI",
+        "name" => utf8_encode($product_row['nimitys'])
+      ),
+      array(
+        "language" => "EN",
+        "name" => utf8_encode($nimitys_en),
+      ),
+    ),
+    "descriptions"            => array(
+      array(
+        "language" => "FI",
+        "description" => utf8_encode($product_row['kuvaus']),
+      ),
+      array(
+        "language" => "EN",
+        "description" => utf8_encode($kuvaus_en),
+      ),
+    ),
+    "additional_price"        => "",
+    "stock"                   => $myytavissa,
+    "erp_id"                  => utf8_encode($tuoteno),
+  );
+
   }
 }

@@ -6,7 +6,17 @@ $useslave = 1;
 // DataTables p‰‰lle
 $pupe_DataTables = "tilauskanta";
 
-require '../inc/parametrit.inc';
+if (isset($_POST["tee"])) {
+  if ($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
+  if ($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/", "", $_POST["kaunisnimi"]);
+}
+
+require "../inc/parametrit.inc";
+
+if (isset($tee) and $tee == "lataa_tiedosto") {
+  readfile("/tmp/".$tmpfilenimi);
+  exit;
+}
 
 echo "<font class='head'>".t("Tilauskanta")."/".t("Saatavuus")."</font><hr>";
 
@@ -148,7 +158,7 @@ if ($tee == 'aja') {
 
   $query = "  SELECT
               lasku.toimaika,
-              concat(concat(lasku.nimi,'<br>'),if(lasku.nimitark!='',concat(lasku.nimitark,'<br>'),''), if(lasku.toim_nimi!='',if(lasku.toim_nimi!=lasku.nimi,concat(lasku.toim_nimi,'<br>'),''),''),if(lasku.toim_nimitark!='',if(lasku.toim_nimitark!=lasku.nimitark,concat(lasku.toim_nimitark,'<br>'),''),'')) as 'nimi',
+              concat(concat(lasku.nimi,' '),if(lasku.nimitark!='',concat(lasku.nimitark,' '),''), if(lasku.toim_nimi!='',if(lasku.toim_nimi!=lasku.nimi,concat(lasku.toim_nimi,' '),''),''),if(lasku.toim_nimitark!='',if(lasku.toim_nimitark!=lasku.nimitark,concat(lasku.toim_nimitark,' '),''),'')) as 'nimi',
               lasku.tunnus as 'Tilausnro',
               lasku.tilaustyyppi Tyyppi,
               lasku.viesti as viesti,
@@ -178,10 +188,17 @@ if ($tee == 'aja') {
               ORDER BY 1, 3";
   $result = pupe_query($query);
 
-  pupe_DataTables(array(array($pupe_DataTables, 12, 12, false, false)));
+  pupe_DataTables(array(array($pupe_DataTables, 13, 13, true, false)));
+
+  include 'inc/pupeExcel.inc';
+
+  $worksheet   = new pupeExcel();
+  $excelrivi   = 0;
+  $excelsarake = 0;
+
+  $format_bold = array("bold" => TRUE);
 
   echo "<table class='display dataTable' id='$pupe_DataTables'><thead><tr>";
-
   echo "<th align='left'>".t("Toimitusaika")."</th>";
   echo "<th align='left'>".t("Nimi / Toim. Nimi")."</th>";
   echo "<th align='left'>".t("Tilausnumero")."</th>";
@@ -191,13 +208,40 @@ if ($tee == 'aja') {
   echo "<th align='left'>".t("Myyj‰")."</th>";
   echo "<th align='left'>".t("Tuoteno")."</th>";
   echo "<th align='left'>".t("Nimitys")."</th>";
-  echo "<th align='left'>".t("M‰‰r‰")."</th>";
-  echo "<th align='left'>".t("Myyt‰viss‰")."</th>";
   echo "<th align='left'>".t("Tilattu")."</th>";
+  echo "<th align='left'>".t("Myyt‰viss‰")."</th>";
+  echo "<th align='left'>".t("Tulossa")."</th>";
   echo "<th align='left'>".t("Ennakkomyynti")."</th>";
   echo "</tr></thead>";
 
-  $arvot  = 0;
+  $worksheet->write($excelrivi, $excelsarake, t("Toimitusaika"), $format_bold);
+  $excelsarake++;
+  $worksheet->write($excelrivi, $excelsarake, t("Nimi / Toim. Nimi"), $format_bold);
+  $excelsarake++;
+  $worksheet->write($excelrivi, $excelsarake, t("Tilausnumero"), $format_bold);
+  $excelsarake++;
+  $worksheet->write($excelrivi, $excelsarake, t("Tyyppi"), $format_bold);
+  $excelsarake++;
+  $worksheet->write($excelrivi, $excelsarake, t("Viesti"), $format_bold);
+  $excelsarake++;
+  $worksheet->write($excelrivi, $excelsarake, t("Rivihinta"), $format_bold);
+  $excelsarake++;
+  $worksheet->write($excelrivi, $excelsarake, t("Myyj‰"), $format_bold);
+  $excelsarake++;
+  $worksheet->write($excelrivi, $excelsarake, t("Tuoteno"), $format_bold);
+  $excelsarake++;
+  $worksheet->write($excelrivi, $excelsarake, t("Nimitys"), $format_bold);
+  $excelsarake++;
+  $worksheet->write($excelrivi, $excelsarake, t("Tilattu"), $format_bold);
+  $excelsarake++;
+  $worksheet->write($excelrivi, $excelsarake, t("Myyt‰viss‰"), $format_bold);
+  $excelsarake++;
+  $worksheet->write($excelrivi, $excelsarake, t("Tulossa"), $format_bold);
+  $excelsarake++;
+  $worksheet->write($excelrivi, $excelsarake, t("Ennakkomyynti"), $format_bold);
+  $excelsarake = 0;
+  $excelrivi++;
+
   $myytavissa = array();
   $tilatut = array();
   $ennakot = array();
@@ -208,7 +252,6 @@ if ($tee == 'aja') {
     $out = js_openUrlNewWindow("{$palvelin2}tilauskasittely/tilauskanta.php?tee=NAYTATILAUS&tunnus={$prow['Tilausnro']}", $prow['Tilausnro'], NULL, 1000, 800);
 
     echo "<tr class='aktiivi'>";
-
     echo "<td class='top'>".pupe_DataTablesEchoSort($prow['toimaika']).tv1dateconv($prow['toimaika'])."</td>";
     echo "<td class='ptop text-right'>{$prow['nimi']}</td>";
     echo "<td class='ptop'>{$out}</td>";
@@ -216,7 +259,7 @@ if ($tee == 'aja') {
     $laskutyyppi = $prow["tila"];
     $alatila     = $prow["alatila"];
 
-    //tehd‰‰n selv‰kielinen tila/alatila
+    // tehd‰‰n selv‰kielinen tila/alatila
     require "inc/laskutyyppi.inc";
 
     $tarkenne = "";
@@ -228,7 +271,7 @@ if ($tee == 'aja') {
       $tarkenne = " (".t("Varastoon").") ";
     }
 
-    echo "<td valign='top'>".t("$laskutyyppi")."$tarkenne".t("$alatila")."</td>";
+    echo "<td valign='top'>".t("$laskutyyppi")." $tarkenne ".t("$alatila")."</td>";
     echo "<td class='ptop text-right'>{$prow['viesti']}</td>";
     echo "<td class='ptop text-right'>".str_replace(".", ",", $prow['rivihinta'])."</td>";
     echo "<td class='ptop text-right'>{$prow['myyja']}</td>";
@@ -246,6 +289,7 @@ if ($tee == 'aja') {
     if (!isset($tilatut[$prow['tuoteno']])) {
       $query = "SELECT
                 tilausrivi.tyyppi,
+                tilausrivi.otunnus,
                 tilausrivi.toimaika,
                 max(tilausrivi.yksikko) yksikko,
                 sum(if(tyyppi = 'O', varattu, 0)) tilattu,
@@ -256,16 +300,16 @@ if ($tee == 'aja') {
                 and tuoteno        = '$prow[tuoteno]'
                 and laskutettuaika = '0000-00-00'
                 and (varattu+jt > 0)
-                GROUP BY 1, 2";
+                GROUP BY 1, 2, 3";
       $ores = pupe_query($query);
       $tilviesti = array();
       $ennviesti = array();
       while ($ennp = mysql_fetch_assoc($ores)) {
         if ($ennp['tyyppi'] == "O") {
-            $tilviesti[] = "{$ennp['tilattu']} {$ennp['yksikko']} ".t("tulossa")." ".tv1dateconv($ennp['toimaika']);
+            $tilviesti[] = "{$ennp['otunnus']}: {$ennp['tilattu']} {$ennp['yksikko']} ".t("tulossa")." ".tv1dateconv($ennp['toimaika']);
         }
         if ($ennp['tyyppi'] == "E") {
-            $ennviesti[] = "{$ennp['ennakot']} {$ennp['yksikko']} ".t("toimaika")." ".tv1dateconv($ennp['toimaika']);
+            $ennviesti[] = "{$ennp['otunnus']}: {$ennp['ennakot']} {$ennp['yksikko']} ".t("toimaika")." ".tv1dateconv($ennp['toimaika']);
         }
       }
       $tilatut[$prow['tuoteno']] = implode(", ", $tilviesti);
@@ -274,15 +318,50 @@ if ($tee == 'aja') {
     echo "<td class='ptop text-right'>{$tilatut[$prow['tuoteno']]}</td>";
     echo "<td class='ptop text-right'>{$ennakot[$prow['tuoteno']]}</td>";
     echo "</tr>";
+
+    $worksheet->writeDate($excelrivi, $excelsarake, $prow['toimaika']);
+    $excelsarake++;
+    $worksheet->write($excelrivi, $excelsarake, $prow['nimi']);
+    $excelsarake++;
+    $worksheet->write($excelrivi, $excelsarake, $prow['Tilausnro']);
+    $excelsarake++;
+    $worksheet->write($excelrivi, $excelsarake, t("$laskutyyppi")." $tarkenne ".t("$alatila"));
+    $excelsarake++;
+    $worksheet->write($excelrivi, $excelsarake, $prow['viesti']);
+    $excelsarake++;
+    $worksheet->write($excelrivi, $excelsarake, $prow['rivihinta']);
+    $excelsarake++;
+    $worksheet->write($excelrivi, $excelsarake, $prow['myyja']);
+    $excelsarake++;
+    $worksheet->write($excelrivi, $excelsarake, $prow['tuoteno']);
+    $excelsarake++;
+    $worksheet->write($excelrivi, $excelsarake, $prow['nimitys']);
+    $excelsarake++;
+    $worksheet->write($excelrivi, $excelsarake, $prow['varattu']);
+    $excelsarake++;
+    $worksheet->write($excelrivi, $excelsarake, $myytavissa[$prow['tuoteno']]);
+    $excelsarake++;
+    $worksheet->write($excelrivi, $excelsarake, $tilatut[$prow['tuoteno']]);
+    $excelsarake++;
+    $worksheet->write($excelrivi, $excelsarake, $ennakot[$prow['tuoteno']]);
+    $excelsarake = 0;
+    $excelrivi++;
+
   }
 
   echo "</tbody>";
+  echo "</table><br><br>";
 
-  echo "<tfoot>";
-  echo "<tr><td class='back' colspan='4'><th>".t("Veroton").":</th><td class='tumma' align='right' id='arvo_yhteensa'>".sprintf('%.2f', $arvot)."</th></tr>";
-  echo "</tfoot>";
+  $excelnimi = $worksheet->close();
 
-  echo "</table><br><br><br><br>";
+  echo "<br><br><table>";
+  echo "<tr><th>".t("Tallenna tulos").":</th>";
+  echo "<form method='post' class='multisubmit'>";
+  echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
+  echo "<input type='hidden' name='kaunisnimi' value='Tilauskanta_saatavuus.xlsx'>";
+  echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";
+  echo "<td class='back'><input type='submit' value='".t("Tallenna excel")."'></td></tr></form>";
+  echo "</table><br>";
 }
 
 require "../inc/footer.inc";

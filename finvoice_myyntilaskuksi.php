@@ -176,7 +176,7 @@ function kasittele_xml_tiedosto(SimpleXMLElement $xml, $tiedosto_polku) {
     echo "33: ".$laskuttajan_valkoodi."{$_lb}";
     echo "34: ".$laskun_toimitunnus."{$_lb}";
 
-    $asiakas = valitse_asiakas($toim_asiakkaantiedot, $ostaja_asiakkaantiedot);
+    $asiakas = finvoice_myyntilaskuksi_valitse_asiakas($toim_asiakkaantiedot, $ostaja_asiakkaantiedot);
 
     if (empty($asiakas)) {
       siirra_tiedosto_kansioon($tiedosto_polku, $finvoice_myyntilasku_kansio_error);
@@ -355,43 +355,4 @@ function kasittele_xml_tiedosto(SimpleXMLElement $xml, $tiedosto_polku) {
     // Tehdään ulasku ja tiliöidään lasku
     require "tilauskasittely/teeulasku.inc";
   }
-}
-
-function valitse_asiakas($toim_asiakkaantiedot, $ostaja_asiakkaantiedot) {
-  global $kukarow, $yhtiorow;
-
-  $query = "SELECT *
-            FROM asiakas
-            WHERE yhtio = '{$yhtiorow['yhtio']}'
-            AND ytunnus = '{$ostaja_asiakkaantiedot['ytunnus']}'
-            AND concat_ws(' ', nimi, nimitark) = '{$ostaja_asiakkaantiedot['nimi']}'
-            AND osoite = '{$ostaja_asiakkaantiedot["osoite"]}'
-            AND postino = '{$ostaja_asiakkaantiedot["postino"]}'
-            AND postitp = '{$ostaja_asiakkaantiedot["postitp"]}'
-            AND concat_ws(' ', toim_nimi, toim_nimitark) = '{$toim_asiakkaantiedot['nimi']}'
-            AND toim_osoite = '{$toim_asiakkaantiedot["osoite"]}'
-            AND toim_postino = '{$toim_asiakkaantiedot["postino"]}'
-            AND toim_postitp = '{$toim_asiakkaantiedot["postitp"]}'
-            AND laji != 'P'";
-  $result = pupe_query($query);
-  #echo "$query\n\n";
-
-  if (mysql_num_rows($result) == 0) {
-    $query = "SELECT *
-              FROM asiakas
-              WHERE yhtio = '{$yhtiorow['yhtio']}'
-              AND ytunnus = '{$ostaja_asiakkaantiedot['ytunnus']}'
-              AND concat_ws(' ', nimi, nimitark) = '{$ostaja_asiakkaantiedot['nimi']}'
-              AND osoite = '{$ostaja_asiakkaantiedot["osoite"]}'
-              AND postino = '{$ostaja_asiakkaantiedot["postino"]}'
-              AND postitp = '{$ostaja_asiakkaantiedot["postitp"]}'
-              AND laji != 'P'";
-    $result = pupe_query($query);
-    #echo "$query\n\n";
-  }
-
-  if (mysql_num_rows($result) == 1) {
-    return mysql_fetch_assoc($result);
-  }
-  return False;
 }

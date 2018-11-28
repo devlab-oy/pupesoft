@@ -529,11 +529,13 @@ if ($error == 0 and $tee == "file") {
                           AND liitos  = '$vantuoteno'";
                 pupe_query($query);
 
-                $query = "DELETE FROM puun_alkio
-                          WHERE yhtio = '$kukarow[yhtio]'
-                          AND laji    = 'Tuote'
-                          AND liitos  = '$vantuoteno'";
-                pupe_query($query);
+				if ($uusi_on_jo != "SAMA") {
+                  $query = "DELETE FROM puun_alkio
+                            WHERE yhtio = '$kukarow[yhtio]'
+                            AND laji    = 'Tuote'
+                            AND liitos  = '$vantuoteno'";
+                  pupe_query($query);
+				}
               }
               elseif ($taulu == 'asn_sanomat') {
                 $query = "UPDATE asn_sanomat

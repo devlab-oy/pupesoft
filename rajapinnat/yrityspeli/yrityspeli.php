@@ -6,11 +6,11 @@ require '../../inc/parametrit.inc';
 require 'rajapinnat/yrityspeli/yrityspeli_functions.php';
 
 if (empty($alkuaika))          $alkuaika = date("Y-m-d", strtotime('monday this week'));
-if (empty($kokonaiskustannus)) $kokonaiskustannus = 1000;
+if (empty($kokonaiskustannus)) $kokonaiskustannus = 1500;
 if (empty($loppuaika))         $loppuaika = date("Y-m-d", strtotime('sunday this week'));
 if (empty($response))          $response = array();
 if (empty($tee))               $tee = '';
-if (empty($tilausmaara))       $tilausmaara = 3;
+if (empty($tilausmaara))       $tilausmaara = 1;
 if (empty($valitut_tryt))      $valitut_tryt = array();
 if (empty($toimipaikat))       $toimipaikat = array();
 

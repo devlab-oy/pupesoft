@@ -79,7 +79,7 @@ if ($datetime_checkpoint != "" and $ajetaanko_kaikki == "NO") {
                 AND tuote.status      != 'P'
                 AND tuote.tuotetyyppi  NOT in ('A','B')
                 AND tuote.tuoteno     != ''
-                AND (tuote.nakyvyys != '' or tuote.hinnastoon = 'W'))
+                AND (tuote.nakyvyys != '' or tuote.hinnastoon = 'W' or tuote.hinnastoon = 'V'))
               WHERE tapahtuma.yhtio    = '{$kukarow["yhtio"]}'
               $muutoslisa1)
 
@@ -92,7 +92,7 @@ if ($datetime_checkpoint != "" and $ajetaanko_kaikki == "NO") {
                 AND tuote.status      != 'P'
                 AND tuote.tuotetyyppi  NOT in ('A','B')
                 AND tuote.tuoteno     != ''
-                AND (tuote.nakyvyys != '' or tuote.hinnastoon = 'W'))
+                AND (tuote.nakyvyys != '' or tuote.hinnastoon = 'W' or tuote.hinnastoon = 'V'))
               WHERE tilausrivi.yhtio   = '{$kukarow["yhtio"]}'
               $muutoslisa2)
 
@@ -104,7 +104,7 @@ if ($datetime_checkpoint != "" and $ajetaanko_kaikki == "NO") {
               AND tuote.status        != 'P'
               AND tuote.tuotetyyppi    NOT in ('A','B')
               AND tuote.tuoteno       != ''
-              AND (tuote.nakyvyys != '' or tuote.hinnastoon = 'W')
+              AND (tuote.nakyvyys != '' or tuote.hinnastoon = 'W' or tuote.hinnastoon = 'V')
               $muutoslisa3)
 
               ORDER BY 1";
@@ -116,7 +116,7 @@ else {
              AND tuote.status      != 'P'
              AND tuote.tuotetyyppi  NOT in ('A','B')
              AND tuote.tuoteno     != ''
-             AND (tuote.nakyvyys != '' or tuote.hinnastoon = 'W')";
+             AND (tuote.nakyvyys != '' or tuote.hinnastoon = 'W' or tuote.hinnastoon = 'V')";
 }
 
 $result = pupe_query($query);

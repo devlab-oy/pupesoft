@@ -18,6 +18,7 @@ if (mysql_field_name($result, $i) == "laji") {
   $ulos = "<td><select name='$nimi' onchange='submit();'>";
   $ulos .= "<option value=''>".t("Valitse")."</option>";
   $ulos .= "<option value='unifaun_lisapalvelu' $sel[unifaun_lisapalvelu]>".t("Unifaun lis‰palvelu")."</option>";
+  $ulos .= "<option value='ulk_var_param' $sel[ulk_var_param]>".t("Ulkoisen varaston parametri")."</option>";
   $ulos .= "</select></td>";
   $jatko = 0;
 }
@@ -47,6 +48,17 @@ if (mysql_field_name($result, $i) == "selite") {
     $ulos .= "</select></td>";
     $jatko = 0;
   }
+  elseif ($tem_laji == 'ulk_var_param') {
+
+    $sel = array($trow[$i] => "SELECTED");
+    //$tem_selite = $trow[$i];
+    $ulos = "<td><select name='$nimi' onchange='submit();'>";
+    $ulos .= "<option value=''>".t("Valitse")."</option>";
+    $ulos .= "<option value='CustOrderNumber' $sel[CustOrderNumber]>".t("CustOrderNumber")."</option>";
+    $ulos .= "</select></td>";
+    $jatko = 0;
+  }
+
   else {
     $ulos = "<td><textarea rows=10 cols=50 name='$nimi'>{$trow[$i]}</textarea></td>";
     $jatko = 0;
@@ -60,6 +72,14 @@ if (mysql_field_name($result, $i) == "selitetark") {
     $ulos = "<td><select name='$nimi' onchange='submit();'>";
     $ulos .= "<option value='e'>".t("Ei p‰‰ll‰")."</option>";
     $ulos .= "<option value='k' $sel[k]>".t("P‰‰ll‰")."</option>";
+    $ulos .= "</select></td>";
+    $jatko = 0;
+  }
+  elseif ($tem_selite == 'CustOrderNumber') {
+    $sel = array($trow[$i] => "SELECTED");
+    $ulos = "<td><select name='$nimi' onchange='submit();'>";
+    $ulos .= "<option value='e'>".t("Asiakkaan tilausnumero")."</option>";
+    $ulos .= "<option value='k' $sel[k]>".t("Pupesoft tilausnumero")."</option>";
     $ulos .= "</select></td>";
     $jatko = 0;
   }

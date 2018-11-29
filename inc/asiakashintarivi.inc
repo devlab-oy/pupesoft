@@ -11,7 +11,8 @@ if ($i == 0) {   //yhtiötä ei näytetä
 if (mysql_field_name($result, $i) == "piiri") {
   $preq = "SELECT avainsana.selite piiri, avainsana.selitetark selitetark
            FROM avainsana
-           WHERE avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji='piiri'";
+           WHERE avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji='piiri'
+           and avainsana.kieli = '$yhtiorow[kieli]'";
   $preres = pupe_query($preq);
 
   $ulos = "<td><select id='piiri' name='$nimi'>";

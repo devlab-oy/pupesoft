@@ -14,7 +14,7 @@ if (!function_exists('logmaster_send_email')) {
 
     switch ($log_name) {
     case 'logmaster_outbound_delivery_confirmation':
-      $subject = t("Logmaster: Keräyksen kuittaus");
+      $subject = t("Logmaster: KerÃ¤yksen kuittaus");
       break;
 
     case 'logmaster_inbound_delivery_confirmation':
@@ -42,10 +42,10 @@ if (!function_exists('logmaster_send_email')) {
     );
 
     if (pupesoft_sahkoposti($args)) {
-      pupesoft_log($log_name, "Sähköposti lähetetty onnistuneesti osoitteeseen {$email}");
+      pupesoft_log($log_name, "SÃ¤hkÃ¶posti lÃ¤hetetty onnistuneesti osoitteeseen {$email}");
     }
     else {
-      pupesoft_log($log_name, "Sähköpostin lähetys epäonnistui osoitteeseen {$email}");
+      pupesoft_log($log_name, "SÃ¤hkÃ¶postin lÃ¤hetys epÃ¤onnistui osoitteeseen {$email}");
     }
   }
 }
@@ -54,10 +54,10 @@ if (!function_exists('logmaster_send_file')) {
   function logmaster_send_file($filename, $binary = FALSE) {
     global $kukarow, $yhtiorow, $logmaster;
 
-    // Lähetetään aina UTF-8 muodossa
+    // LÃ¤hetetÃ¤Ã¤n aina UTF-8 muodossa
     $ftputf8 = true;
 
-    # Ei haluta että tulostetaan mitään ruudulle
+    # Ei haluta ettÃ¤ tulostetaan mitÃ¤Ã¤n ruudulle
     $tulos_ulos = "foobar";
 
     $ftphost = $logmaster['host'];
@@ -115,7 +115,7 @@ if (!function_exists('logmaster_mark_as_sent')) {
 
     switch ($laskurow['tila']) {
     case 'N':
-      # Tällä yhtiön parametrilla pystytään ohittamaan tulostus
+      # TÃ¤llÃ¤ yhtiÃ¶n parametrilla pystytÃ¤Ã¤n ohittamaan tulostus
       $yhtiorow["lahetteen_tulostustapa"] = "X";
       $laskuja = 1;
       $tilausnumeroita = $laskurow['tunnus'];
@@ -132,7 +132,7 @@ if (!function_exists('logmaster_mark_as_sent')) {
     case 'G':
       $toim         = "SIIRTOLISTA";
       $tulostetaan  = "OK";
-      # Tällä yhtiön parametrilla pystytään ohittamaan keräyslistan tulostus
+      # TÃ¤llÃ¤ yhtiÃ¶n parametrilla pystytÃ¤Ã¤n ohittamaan kerÃ¤yslistan tulostus
       $yhtiorow['tulosta_valmistus_tulosteet'] = 'foobar';
 
       ob_start();
@@ -178,7 +178,7 @@ if (!function_exists('logmaster_field')) {
 
         break;
     default:
-      die(t('Annettu arvo ei ole käytössä'));
+      die(t('Annettu arvo ei ole kÃ¤ytÃ¶ssÃ¤'));
     }
 
     return mysql_real_escape_string($key);
@@ -271,7 +271,7 @@ if (!function_exists('logmaster_outbounddelivery')) {
     $loopres = pupe_query($query);
 
     if (mysql_num_rows($loopres) == 0) {
-      pupesoft_log('logmaster_outbound_delivery', "Yhtään riviä ei löytynyt tilaukselle {$otunnus}. Sanoman luonti epäonnistui.");
+      pupesoft_log('logmaster_outbound_delivery', "YhtÃ¤Ã¤n riviÃ¤ ei lÃ¶ytynyt tilaukselle {$otunnus}. Sanoman luonti epÃ¤onnistui.");
 
       return false;
     }
@@ -288,12 +288,12 @@ if (!function_exists('logmaster_outbounddelivery')) {
       $uj_nimi = "PostNord";
       break;
     default:
-      pupesoft_log('logmaster_outbound_delivery', "Tilauksen {$otunnus} varaston ulkoinen järjestelmä oli virheellinen.");
+      pupesoft_log('logmaster_outbound_delivery', "Tilauksen {$otunnus} varaston ulkoinen jÃ¤rjestelmÃ¤ oli virheellinen.");
 
       return false;
     }
 
-    # Säädetaan muuttujia kuntoon
+    # SÃ¤Ã¤detaan muuttujia kuntoon
     $query = "SELECT tunnus
               FROM toimitustapa
               WHERE yhtio = '{$kukarow['yhtio']}'
@@ -319,14 +319,34 @@ if (!function_exists('logmaster_outbounddelivery')) {
       $rec_cust_street2 = $looprow['kohde'];
     }
 
-    if ($looprow['ohjelma_moduli'] == 'MAGENTO' and $looprow['ohjausmerkki'] != 'VARASTOTÄYDENNYS') {
+    if ($looprow['ohjelma_moduli'] == 'MAGENTO' and $looprow['ohjausmerkki'] != 'VARASTOTÃ„YDENNYS') {
       $tilaustyyppi = 8;
     }
     elseif ($looprow['clearing'] == 'ENNAKKOTILAUS') {
       $tilaustyyppi = 9;
     }
-    else{
+    else {
       $tilaustyyppi = '';
+    }
+    
+    $CustOrderNumber = $looprow['asiakkaan_tilausnumero'];
+
+    // Katsotaan onko CustOrderNumber kenttÃ¤Ã¤n erillistÃ¤ mÃ¤Ã¤ritystÃ¤
+    $query = "SELECT *
+              FROM toimitustavan_avainsanat
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND liitostunnus   = '{$toimitustapa_chk_row['tunnus']}'
+              AND laji = 'ulk_var_param'
+              AND selite = 'CustOrderNumber'";
+    $toimitustavan_avainsanat_res = pupe_query($query);
+
+    if (mysql_num_rows($toimitustavan_avainsanat_res) == 1) {
+      $toimitustavan_avainsanat_row = mysql_fetch_assoc($toimitustavan_avainsanat_res);
+
+      // normaali tilausnumero
+      if ($toimitustavan_avainsanat_row['selitetark'] == 'k') {
+        $CustOrderNumber = $otunnus;
+      }
     }
 
     # Rakennetaan XML
@@ -340,7 +360,7 @@ if (!function_exists('logmaster_outbounddelivery')) {
     $custpickinglist = $xml->addChild('CustPickingList');
     $custpickinglist->addChild('SalesId',             substr($otunnus, 0, 20));
     $custpickinglist->addChild('PickingListId',       substr($otunnus, 0, 20));
-    $custpickinglist->addChild('CustOrderNumber',     xml_cleanstring($looprow['asiakkaan_tilausnumero'], 20)); // Magentosta?
+    $custpickinglist->addChild('CustOrderNumber',     xml_cleanstring($CustOrderNumber, 20));
     $custpickinglist->addChild('CustReference',       xml_cleanstring($looprow['viesti'], 50));
     $custpickinglist->addChild('OrderCode',          $tilaustyyppi);
     $custpickinglist->addChild('OrderType',          'SO');
@@ -407,7 +427,7 @@ if (!function_exists('logmaster_outbounddelivery')) {
     $logmaster_itemnumberfield = logmaster_field('ItemNumber');
 
     while ($looprow = mysql_fetch_assoc($loopres)) {
-      // Laitetaan kappalemäärät kuntoon
+      // Laitetaan kappalemÃ¤Ã¤rÃ¤t kuntoon
       $looprow['kpl'] = $looprow['var'] == 'J' ? 0 : $looprow['kpl'];
 
       if ($uj_nimi == 'PostNord' and $looprow['ei_saldoa'] == 'o') continue;
@@ -457,17 +477,17 @@ if (!function_exists('logmaster_outbounddelivery')) {
       $_line_i++;
     }
 
-    pupesoft_log('logmaster_outbound_delivery', "Tilauksen {$otunnus} sanomalle lisätty ".($_line_i - 1)." riviä.");
+    pupesoft_log('logmaster_outbound_delivery', "Tilauksen {$otunnus} sanomalle lisÃ¤tty ".($_line_i - 1)." riviÃ¤.");
 
     $_name = substr("out_{$otunnus}_".md5(uniqid()), 0, 25);
     $filename = $pupe_root_polku."/dataout/{$_name}.xml";
 
     if (file_put_contents($filename, $xml->asXML())) {
-      pupesoft_log('logmaster_outbound_delivery', "Tilauksen {$otunnus} sanoman luonti {$uj_nimi} -järjestelmään onnistui.");
+      pupesoft_log('logmaster_outbound_delivery', "Tilauksen {$otunnus} sanoman luonti {$uj_nimi} -jÃ¤rjestelmÃ¤Ã¤n onnistui.");
       return $filename;
     }
 
-    pupesoft_log('logmaster_outbound_delivery', "Tilauksen {$otunnus} sanoman luonti {$uj_nimi} -järjestelmään epäonnistui.");
+    pupesoft_log('logmaster_outbound_delivery', "Tilauksen {$otunnus} sanoman luonti {$uj_nimi} -jÃ¤rjestelmÃ¤Ã¤n epÃ¤onnistui.");
     return false;
   }
 }
@@ -564,7 +584,7 @@ if (!function_exists('logmaster_verify_row')) {
     }
 
     # Sarjanumerollisia tuotteita ei tueta
-    # Tilausrivien täytyy sisältää vain kokonaislukuja
+    # Tilausrivien tÃ¤ytyy sisÃ¤ltÃ¤Ã¤ vain kokonaislukuja
     $logmaster_rivi_res = logmaster_fetch_rows($tunnus);
 
     if ($logmaster_rivi_res === false) {
@@ -598,7 +618,7 @@ if (!function_exists('logmaster_verify_order')) {
       return array();
     }
 
-    # Maksuehto ei saa olla jälkivaatimus
+    # Maksuehto ei saa olla jÃ¤lkivaatimus
     $query = "SELECT lasku.*, maksuehto.jv
               FROM lasku
               LEFT JOIN maksuehto ON (
@@ -610,7 +630,7 @@ if (!function_exists('logmaster_verify_order')) {
     $laskures = pupe_query($query);
     $laskurow = mysql_fetch_assoc($laskures);
 
-    # Tarkistetaan onko Logmasteriin meneviä tilausrivejä
+    # Tarkistetaan onko Logmasteriin meneviÃ¤ tilausrivejÃ¤
     $logmaster_rivi_res = logmaster_fetch_rows(0, $tunnus);
 
     if ($logmaster_rivi_res === false) {
@@ -618,7 +638,7 @@ if (!function_exists('logmaster_verify_order')) {
     }
 
     if (mysql_num_rows($logmaster_rivi_res) > 0 and $laskurow['jv'] != '') {
-      $errors[] = t("VIRHE: Jälkivaatimuksia ei sallita ulkoisessa varastossa")."!";
+      $errors[] = t("VIRHE: JÃ¤lkivaatimuksia ei sallita ulkoisessa varastossa")."!";
     }
 
     return $errors;

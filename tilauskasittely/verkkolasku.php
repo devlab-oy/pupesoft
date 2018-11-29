@@ -720,7 +720,7 @@ else {
         $lasklisa .= " and lasku.tunnus != '$laskurow[tunnus]' ";
 
         if ($silent == "" or $silent == "VIENTI") {
-          $tulos_ulos_sarjanumerot .= sprintf(t("Tilauksella %s oli JT-rivejä ja osatoimitusta ei tehdä, eli se jätettiin odottamaan JT-tuotteita."), $laskurow["tunnus"])."<br>\n";
+          $tulos_ulos .= "<br>\n".sprintf(t("Tilauksella %s oli JT-rivejä ja osatoimitusta ei tehdä, eli se jätettiin odottamaan JT-tuotteita."), $laskurow["tunnus"])."<br>\n";
         }
       }
 
@@ -767,7 +767,7 @@ else {
             $lasklisa .= " and lasku.tunnus != '$laskurow[tunnus]' ";
 
             if ($silent == "" or $silent == "VIENTI") {
-              $tulos_ulos_sarjanumerot .= "<font class='error'>".t("Tilausta ei voida laskuttaa arvioidulla keskihankintahinnalla").": $laskurow[tunnus] $srow1[tuoteno]!!!</font><br>\n";
+              $tulos_ulos .= "<br>\n"."<font class='error'>".t("Tilausta ei voida laskuttaa arvioidulla keskihankintahinnalla").": $laskurow[tunnus] $srow1[tuoteno]!!!</font><br>\n";
             }
           }
         }
@@ -784,7 +784,7 @@ else {
           $lasklisa .= " and lasku.tunnus != '$laskurow[tunnus]' ";
 
           if ($silent == "" or $silent == "VIENTI") {
-            $tulos_ulos_sarjanumerot .= t("Tilauksella virheellisiä verokantoja").": $laskurow[tunnus] $srow1[tuoteno] $srow1[alv]!!!<br>\n";
+            $tulos_ulos .= "<br>\n".t("Tilauksella virheellisiä verokantoja").": $laskurow[tunnus] $srow1[tuoteno] $srow1[alv]!!!<br>\n";
           }
         }
 

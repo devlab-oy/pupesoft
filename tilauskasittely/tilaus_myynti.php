@@ -3803,7 +3803,28 @@ if ($tee == '') {
 
       echo "</td>";
 
-      echo "<th align='left'>".t("Toimitustapa").":</th>";
+      $vastuumyyja_result = t_avainsana("VASTUUMYYJA", "", " and avainsana.selite = 'Asiakashaku'");
+      $onvastuumyyja   = mysql_num_rows($vastuumyyja_result) !== 0;
+      
+      if ($onvastuumyyja) {
+        if ($asiakasrow['myyjanro'] != 0) {
+          $apuqu = "SELECT *
+                    FROM kuka use index (yhtio_myyja)
+                    WHERE yhtio = '$kukarow[yhtio]'
+                    AND myyja   = '$asiakasrow[myyjanro]'
+                    AND myyja   > 0";
+          $meapu = pupe_query($apuqu);
+          
+          if (mysql_num_rows($meapu) == 1) {
+            $apuro = mysql_fetch_assoc($meapu);
+            $myyjanimi = $apuro['myyja']. " " .$apuro['nimi'];
+          }
+        }
+        echo "<th align='left'>".t("Toimitustapa").": <br><br>".t("Vastuumyyjä").": </th>";
+      }
+      else {
+        echo "<th align='left'>".t("Toimitustapa").":</th>";
+      }
 
       // Lukitaan rahtikirjaan vaikuttavat tiedot jos/kun rahtikirja on tulostettu
       $query = "SELECT *
@@ -3896,7 +3917,9 @@ if ($tee == '') {
           echo " <a href='{$palvelin2}yllapito.php?toim=rahtisopimukset&uusi=1&ytunnus={$laskurow['ytunnus']}&toimitustapa={$laskurow['toimitustapa']}&lopetus={$tilmyy_lopetus}//from=LASKUTATILAUS'>".t("Uusi Rahtisopimus")."</a>";
         }
       }
-
+      if ($onvastuumyyja) {
+        echo "<br><br>{$myyjanimi}";
+      }
       echo "</td>";
     }
 

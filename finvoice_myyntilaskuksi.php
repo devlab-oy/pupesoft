@@ -81,7 +81,7 @@ if (!empty($tiedostot)) {
 
       echo "Käsiteltiin lasku: {$tiedosto_polku}\n";
 
-      if (empty($_REQUEST['debug'])) {
+      if (empty($_REQUEST['debug']) and file_exists($tiedosto_polku)) {
         siirra_tiedosto_kansioon($tiedosto_polku, $finvoice_myyntilasku_kansio_valmis);
       }
     }
@@ -223,6 +223,14 @@ function kasittele_xml_tiedosto(SimpleXMLElement $xml, $tiedosto_polku) {
     $laskun_erapaiva = substr($laskun_erapaiva, 0, 4)."-".substr($laskun_erapaiva, 4, 2)."-".substr($laskun_erapaiva, 6, 2);
     $laskun_kapvm = substr($laskun_kapvm, 0, 4)."-".substr($laskun_kapvm, 4, 2)."-".substr($laskun_kapvm, 6, 2);
 
+    $maksuehto = valitse_maksuehto($laskun_lapvm, $laskun_erapaiva);
+
+    if (empty($maksuehto)) {
+      siirra_tiedosto_kansioon($tiedosto_polku, $finvoice_myyntilasku_kansio_error);
+      echo "VIRHE: Sopivaa maksuehtoa ei löytynyt laskulle: $laskun_numero\n";
+      return;
+    }
+
     $query = "INSERT INTO lasku
               SET yhtio          = '{$yhtiorow['yhtio']}',
               yhtio_nimi         = '{$yhtiorow['nimi']}',
@@ -230,7 +238,7 @@ function kasittele_xml_tiedosto(SimpleXMLElement $xml, $tiedosto_polku) {
               yhtio_postino      = '{$yhtiorow['postino']}',
               yhtio_postitp      = '{$yhtiorow['postitp']}',
               yhtio_maa          = '{$yhtiorow['maa']}',
-              liitostunnus       = '19535',
+              liitostunnus       = '{$asiakas['tunnus']}',
               ytunnus            = '{$ostaja_asiakkaantiedot['ytunnus']}',
               nimi               = '{$ostaja_asiakkaantiedot['nimi']}',
               osoite             = '{$ostaja_asiakkaantiedot['osoite']}',
@@ -253,7 +261,7 @@ function kasittele_xml_tiedosto(SimpleXMLElement $xml, $tiedosto_polku) {
               luontiaika         = now(),
               viite              = '{$laskun_pankkiviite}',
               laskunro           = '{$laskunnro}',
-              maksuehto          = '14 pv netto',
+              maksuehto          = '{$maksuehto['tunnus']}',
               tapvm              = '{$laskun_tapvm}',
               erpcm              = '{$laskun_erapaiva}',
               lapvm              = '{$laskun_lapvm}',
@@ -284,7 +292,7 @@ function kasittele_xml_tiedosto(SimpleXMLElement $xml, $tiedosto_polku) {
     // Käytettävä tuote
     $query = "SELECT *
               FROM tuote
-              WHERE yhtio = '$kukarow[yhtio]'
+              WHERE yhtio = '{$yhtiorow['yhtio']}'
               AND tuoteno = 'finvoice_myyntilasku'";
     $tuoteres = pupe_query($query);
 
@@ -354,5 +362,42 @@ function kasittele_xml_tiedosto(SimpleXMLElement $xml, $tiedosto_polku) {
 
     // Tehdään ulasku ja tiliöidään lasku
     require "tilauskasittely/teeulasku.inc";
+
+    $tquery = " UPDATE lasku
+                SET alatila = 'X'
+                WHERE tunnus = '{$uusiotunnus}'
+                and yhtio = '{$yhtiorow['yhtio']}'";
+    pupe_query($tquery);
+  }
+}
+
+function valitse_maksuehto($laskun_erapaiva, $laskun_lapvm) {
+  global $kukarow, $yhtiorow;
+
+  $maksuaika_sek =  strtotime($laskun_lapvm) - strtotime($laskun_erapaiva);
+
+  if (!empty($maksuaika_sek)) {
+    $maksuaika = round($maksuaika_sek/86400);
+
+    $query = "SELECT *
+              FROM maksuehto
+              WHERE yhtio = '{$yhtiorow['yhtio']}'
+              AND rel_pvm = '$maksuaika'
+              AND kassa_relpvm = '0'";
+    $maksuehtores = pupe_query($query);
+
+    if (mysql_num_rows($maksuehtores) == 0) {
+      $query = "SELECT *
+                FROM maksuehto
+                WHERE yhtio = '{$yhtiorow['yhtio']}'
+                AND rel_pvm = '0'
+                AND kassa_relpvm = '0'";
+      $maksuehtores = pupe_query($query);
+    }
+
+    if (mysql_num_rows($maksuehtores) == 1) {
+      return mysql_fetch_assoc($maksuehtores);
+    }
+    return False;
   }
 }

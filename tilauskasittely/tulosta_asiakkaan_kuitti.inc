@@ -136,7 +136,7 @@ function tulosta_asiakkaan_kuitti($laskunro, $tulostimen_tunnus, $params = array
 
     $firstpage = $pdf->new_page("204x$korkeus");
 
-    tulosta_logo_pdf($pdf, $firstpage, "", $korkeus-10, 42, 40, 120);
+    tulosta_logo_pdf($pdf, $firstpage, "", $korkeus-10, -204, 40, 120);
 
     $kala = $korkeus-60;
 

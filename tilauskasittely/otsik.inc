@@ -4186,7 +4186,7 @@ if (isset($jatka)) {
       $toimitustapa = $apuro['selite'];
     }
 
-    $kassalipas = $kukarow["kassamyyja"];
+    $kassalipas = !empty($laskurow['kassalipas']) ? $laskurow['kassalipas'] : $kukarow["kassamyyja"];
   }
 
   // jos kyseessä oli käsin syötetty eräpäivä ja maksuehto on väärin laitetaan oikea maksuehto... hakee järjestyksessä ekan

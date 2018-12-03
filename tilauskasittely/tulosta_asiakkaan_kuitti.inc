@@ -114,6 +114,9 @@ function tulosta_asiakkaan_kuitti($laskunro, $tulostimen_tunnus, $params = array
     $pieni["height"] = 8;
     $pieni["font"] = "Helvetica";
 
+    $fixedwidth["height"] = 8;
+    $fixedwidth["font"] = "Courier";
+
     $pdf = new pdffile;
     $pdf->set_default('margin-top', 0);
     $pdf->set_default('margin-bottom', 0);
@@ -273,8 +276,10 @@ function tulosta_asiakkaan_kuitti($laskunro, $tulostimen_tunnus, $params = array
     // Maksupäätetapahtumat
     foreach ($maksupaatetapahtumat as $tapahtuma) {
       if ($tapahtuma['asiakkaan_kuitti']) {
-        $pdf->draw_text(0, $kala, "{$tapahtuma['asiakkaan_kuitti']}", $firstpage, $norm);
-        $kala-=10;
+        foreach(explode("\n", $tapahtuma['asiakkaan_kuitti']) as $kuittirivi) {
+          $pdf->draw_text(0, $kala, utf8_decode($kuittirivi), $firstpage, $fixedwidth);
+          $kala-=10;
+        }
       }
     }
 

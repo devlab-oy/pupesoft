@@ -2228,6 +2228,24 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
               </table><br>";
       }
 
+      if ($maksupaate_kassamyynti and
+        $maksuehtorow["kateinen"] != "" and
+        $kukarow['kuittitulostin'] == '-88'
+      ) {
+        require_once "tilauskasittely/tulosta_asiakkaan_kuitti.inc";
+
+        $kuitti_params = array(
+          "pdf_kuitti" => true,
+          "pdf_kuitti_printdialog" => true,
+          "avaa_lipas_lopuksi" => true
+        );
+
+        $kuittiurl = tulosta_asiakkaan_kuitti($laskurow["laskunro"], "", $kuitti_params);
+
+        // Tulostusdialogi
+        echo js_openPrintDialog($kuittiurl, "Tulosta kuitti");
+      }
+
       if (($kukarow["kassamyyja"] != '' or
           $kukarow["dynaaminen_kassamyynti"] != "" or
           $yhtiorow["dynaaminen_kassamyynti"] != "") and
@@ -3805,7 +3823,7 @@ if ($tee == '') {
 
       $vastuumyyja_result = t_avainsana("VASTUUMYYJA", "", " and avainsana.selite = 'Asiakashaku'");
       $onvastuumyyja   = mysql_num_rows($vastuumyyja_result) !== 0;
-      
+
       if ($onvastuumyyja) {
         if ($asiakasrow['myyjanro'] != 0) {
           $apuqu = "SELECT *
@@ -3814,7 +3832,7 @@ if ($tee == '') {
                     AND myyja   = '$asiakasrow[myyjanro]'
                     AND myyja   > 0";
           $meapu = pupe_query($apuqu);
-          
+
           if (mysql_num_rows($meapu) == 1) {
             $apuro = mysql_fetch_assoc($meapu);
             $myyjanimi = $apuro['myyja']. " " .$apuro['nimi'];

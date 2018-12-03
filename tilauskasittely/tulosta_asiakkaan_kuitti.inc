@@ -124,8 +124,15 @@ function tulosta_asiakkaan_kuitti($laskunro, $tulostimen_tunnus, $params = array
     $pdf->set_default('margin-right', 0);
 
     $korkeus = "404";
-
     $korkeus += count($tilausrivit) * 30;
+    $korkeus += count(explode("\n", $comments)) * 10;
+    $korkeus += count(explode("\n", $verorivit)) * 10;
+
+    foreach ($maksupaatetapahtumat as $tapahtuma) {
+      if ($tapahtuma['asiakkaan_kuitti']) {
+        $korkeus += count(explode("\n", $tapahtuma['asiakkaan_kuitti'])) * 10;
+      }
+    }
 
     $firstpage = $pdf->new_page("204x$korkeus");
 

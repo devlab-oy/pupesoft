@@ -114,6 +114,9 @@ function tulosta_asiakkaan_kuitti($laskunro, $tulostimen_tunnus, $params = array
     $pieni["height"] = 8;
     $pieni["font"] = "Helvetica";
 
+    $fixedwidth["height"] = 8;
+    $fixedwidth["font"] = "Courier";
+
     $pdf = new pdffile;
     $pdf->set_default('margin-top', 0);
     $pdf->set_default('margin-bottom', 0);
@@ -121,12 +124,19 @@ function tulosta_asiakkaan_kuitti($laskunro, $tulostimen_tunnus, $params = array
     $pdf->set_default('margin-right', 0);
 
     $korkeus = "404";
-
     $korkeus += count($tilausrivit) * 30;
+    $korkeus += count(explode("\n", $comments)) * 10;
+    $korkeus += count(explode("\n", $verorivit)) * 10;
+
+    foreach ($maksupaatetapahtumat as $tapahtuma) {
+      if ($tapahtuma['asiakkaan_kuitti']) {
+        $korkeus += count(explode("\n", $tapahtuma['asiakkaan_kuitti'])) * 10;
+      }
+    }
 
     $firstpage = $pdf->new_page("204x$korkeus");
 
-    tulosta_logo_pdf($pdf, $firstpage, "", $korkeus-10, 42, 40, 120);
+    tulosta_logo_pdf($pdf, $firstpage, "", $korkeus-10, -204, 40, 120);
 
     $kala = $korkeus-60;
 
@@ -273,8 +283,10 @@ function tulosta_asiakkaan_kuitti($laskunro, $tulostimen_tunnus, $params = array
     // Maksupäätetapahtumat
     foreach ($maksupaatetapahtumat as $tapahtuma) {
       if ($tapahtuma['asiakkaan_kuitti']) {
-        $pdf->draw_text(0, $kala, "{$tapahtuma['asiakkaan_kuitti']}", $firstpage, $norm);
-        $kala-=10;
+        foreach(explode("\n", $tapahtuma['asiakkaan_kuitti']) as $kuittirivi) {
+          $pdf->draw_text(0, $kala, $kuittirivi, $firstpage, $fixedwidth);
+          $kala-=10;
+        }
       }
     }
 

@@ -13466,6 +13466,13 @@ if (!function_exists("tulosta_logo_pdf")) {
           $logoparam['scale'] = $lasku_logo_koko_y  / $isizelogo[1];
         }
 
+        # Keskelle
+        if ((int) $lasku_logo_positio_x < 0) {
+          $keskikohta = $lasku_logo_positio_x / 2 * -1;
+          $kuvanleveys = $logoparam['scale']*$isizelogo[0];
+          $lasku_logo_positio_x = round($keskikohta - ($kuvanleveys / 2));
+        }
+
         $placement = $pdf->image_place($image, $lasku_logo_positio_y-($logoparam['scale']*$isizelogo[1]), $lasku_logo_positio_x, $thispage, $logoparam);
         return $lasku_logo_positio_y-($logoparam['scale']*$isizelogo[1]);
       }
@@ -31394,9 +31401,9 @@ if (!function_exists("tallenna_tiliote_viite")) {
           $onko_vipn = (substr($tilino, 0, 1) == 'S') ? 1 : 0;
           $tilino = substr($tilino, 1, 14);
           fseek($fd, $pointterin_paikka);
-          
+
           $ppg_uusitilino = trim(substr($tietue, 16, 6));
-            
+
           if ($onko_vipn) {
             $query = "SELECT tilino
                       FROM yriti
@@ -34720,7 +34727,7 @@ if (!function_exists("viennin_lisatiedot")) {
     $result = pupe_query($query);
     $asiakasrow = mysql_fetch_assoc($result);
 
-    if (!$viennin_lisatietojen_automsyotto or ($viennin_lisatietojen_automsyotto and ($asiakasrow["vientitietojen_autosyotto"] == "K" or 
+    if (!$viennin_lisatietojen_automsyotto or ($viennin_lisatietojen_automsyotto and ($asiakasrow["vientitietojen_autosyotto"] == "K" or
       $yhtiorow["vientitietojen_autosyotto"]  == "K"))) {
       // otetaan defaultit asiakkaalta jos laskulla ei ole mit‰‰n
       if ($laskurow["poistumistoimipaikka_koodi"]       == "") $laskurow["poistumistoimipaikka_koodi"]       = $asiakasrow["poistumistoimipaikka_koodi"];
@@ -34733,9 +34740,9 @@ if (!function_exists("viennin_lisatiedot")) {
       if ($laskurow["sisamaan_kuljetus_kansallisuus"]   == "") $laskurow["sisamaan_kuljetus_kansallisuus"]   = $asiakasrow["sisamaan_kuljetus_kansallisuus"];
       if ($laskurow["sisamaan_kuljetus"]                == "") $laskurow["sisamaan_kuljetus"]                = $asiakasrow["sisamaan_kuljetus"];
       if ($laskurow["maa_maara"]                        == "") $laskurow["maa_maara"]                        = $asiakasrow["maa_maara"];
-      
+
       $maa_maara = $laskurow["maa_maara"];
-      
+
       if ($laskurow["vienti"] == "K") {
         $sisamaan_kuljetus = $laskurow["sisamaan_kuljetus"];
         $sisamaan_kuljetus_kansallisuus = $laskurow["sisamaan_kuljetus_kansallisuus"];
@@ -34744,38 +34751,38 @@ if (!function_exists("viennin_lisatiedot")) {
         $aktiivinen_kuljetus = $laskurow["aktiivinen_kuljetus"];
         $aktiivinen_kuljetus_kansallisuus = $laskurow["aktiivinen_kuljetus_kansallisuus"];
       }
-      
+
       $kauppatapahtuman_luonne = $laskurow["kauppatapahtuman_luonne"];
       $kuljetusmuoto = $laskurow["kuljetusmuoto"];
-      
+
       if ($laskurow["vienti"] == "K") {
         $vresult = t_avainsana("TULLI");
-      
+
         while ($vrow = mysql_fetch_assoc($vresult)) {
           if ($laskurow["poistumistoimipaikka_koodi"] == $vrow["selite"]) {
             $poistumistoimipaikka = "$vrow[selitetark]##$vrow[selite]";
           }
         }
-      
+
         if ($laskurow["lisattava_era"] == 0) {
           $laskurow["lisattava_era"] = $yhtiorow["tulli_lisattava_era"];
         }
         if ($laskurow["vahennettava_era"] == 0) {
           $laskurow["vahennettava_era"] = $yhtiorow["tulli_vahennettava_era"];
         }
-      
+
         $vahennettava_era = $laskurow["vahennettava_era"];
         $lisattava_era = $laskurow["lisattava_era"];
       }
-      
+
       $bruttopaino = $laskurow["bruttopaino"];
       $lomake_lisatiedot = $laskurow["comments"];
       $aiotut_rajatoimipaikat = $laskurow["aiotut_rajatoimipaikat"];
       $maaratoimipaikka = $laskurow["maaratoimipaikka"];
-      
+
       # P‰ivitet‰‰n viennin lis‰tiedot
       require "tilauskasittely/vientitilauksen_lisatiedot.php";
-      
+
       $query = "SELECT alatila
                 FROM lasku
                 WHERE tunnus = $otunnus

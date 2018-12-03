@@ -277,7 +277,7 @@ function tulosta_asiakkaan_kuitti($laskunro, $tulostimen_tunnus, $params = array
     foreach ($maksupaatetapahtumat as $tapahtuma) {
       if ($tapahtuma['asiakkaan_kuitti']) {
         foreach(explode("\n", $tapahtuma['asiakkaan_kuitti']) as $kuittirivi) {
-          $pdf->draw_text(0, $kala, utf8_decode($kuittirivi), $firstpage, $fixedwidth);
+          $pdf->draw_text(0, $kala, $kuittirivi, $firstpage, $fixedwidth);
           $kala-=10;
         }
       }

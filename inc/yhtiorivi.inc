@@ -113,6 +113,7 @@ if ((mysql_field_name($result, $i) == "kassa") or
   (mysql_field_name($result, $i) == "ostolasku_ei_eu_rahti") or
   (mysql_field_name($result, $i) == "ostolasku_ei_eu_vaihto_omaisuus") or
   (mysql_field_name($result, $i) == "ostolasku_ei_eu_raaka_aine") or
+  (mysql_field_name($result, $i) == "ennakkoon_maksettujen_varastotili") or
   (mysql_field_name($result, $i) == "raaka_ainevarasto") or
   (mysql_field_name($result, $i) == "raaka_ainevarastonmuutos") or
   (mysql_field_name($result, $i) == "varastonmuutos_valmistuksesta") or

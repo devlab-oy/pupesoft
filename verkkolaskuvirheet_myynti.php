@@ -33,13 +33,17 @@ if (isset($livesearch_tee) and $livesearch_tee == "ASIAKASHAKU") {
 
 if ($_REQUEST["tee"] == "NAYTATILAUS" and isset($_REQUEST["xml"])) {
   $xml = urldecode($_REQUEST["xml"]);
-
   $xml = str_replace("\"Finvoice.dtd\"", "\"{$palvelin2}datain/Finvoice.dtd\"", $xml);
   $xml = str_replace("\"Finvoice.xsl\"", "\"{$palvelin2}datain/Finvoice.xsl\"", $xml);
 
-  $xml = str_replace("\"datain/Finvoice.dtd\"", "\"{$palvelin2}datain/Finvoice.dtd\"", $xml);
-  $xml = str_replace("\"datain/Finvoice.xsl\"", "\"{$palvelin2}datain/Finvoice.xsl\"", $xml);
-
+  if (stripos($xml, "Finvoice.dtd") === FALSE) {
+    $xml = str_replace(
+      "<?xml version='1.0' encoding='UTF-8'?>",
+      "<!DOCTYPE Finvoice SYSTEM '{$palvelin2}datain/Finvoice.dtd'>
+      <?xml-stylesheet type='text/xsl' href='{$palvelin2}datain/Finvoice.xsl'?>",
+      $xml
+    );
+  }
   echo $xml;
   exit;
 }
@@ -85,30 +89,18 @@ if (isset($tiedosto)) {
   }
 
   if ($tapa == 'U_JA_P') {
-    // Päivitetään asiakasn tunnus aineistoon, niin saadaan lasku reskontraan
-    if ($kumpivoice == "FINVOICE") {
-      $finkkari = simplexml_load_file($verkkolaskuvirheet_vaarat."/".$tiedosto);
+    // Päivitetään asiakkaan tunnus aineistoon, niin saadaan lasku reskontraan
+    $finkkari = simplexml_load_file($verkkolaskuvirheet_vaarat."/".$tiedosto);
 
-      if (!isset($asiakas_haku)) {
-        $finkkari->SellerPartyDetails->addChild('SellerPupesoftId', $tunnus);
-        $muutos_ok = true;
-      }
-      else {
-        $asiakas = hae_asiakas($asiakas_haku);
-
-        if (!empty($asiakas['tunnus'])) {
-          $finkkari->SellerPartyDetails->addChild('SellerPupesoftId', $asiakas['tunnus']);
-          $muutos_ok = true;
-        }
-        //unsetataan, ettei päivity domin formeihin
-        unset($asiakas_haku);
-      }
+    if (!isset($asiakas_haku)) {
+      $finkkari->SellerPartyDetails->addChild('SellerPupesoftId', $tunnus);
+      $muutos_ok = true;
     }
-    elseif ($kumpivoice == 'TECCOM') {
+    else {
       $asiakas = hae_asiakas($asiakas_haku);
 
-      if (isset($finkkari->InvoiceHeader->SellerParty->PartyNumber) and !empty($asiakas['asiakasnro'])) {
-        $finkkari->InvoiceHeader->SellerParty->PartyNumber = $asiakas['asiakasnro'];
+      if (!empty($asiakas['tunnus'])) {
+        $finkkari->SellerPartyDetails->addChild('SellerPupesoftId', $asiakas['tunnus']);
         $muutos_ok = true;
       }
       //unsetataan, ettei päivity domin formeihin

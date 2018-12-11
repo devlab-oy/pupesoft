@@ -93,14 +93,14 @@ if (isset($tiedosto)) {
     $finkkari = simplexml_load_file($verkkolaskuvirheet_vaarat."/".$tiedosto);
 
     if (!isset($asiakas_haku)) {
-      $finkkari->SellerPartyDetails->addChild('SellerPupesoftId', $tunnus);
+      $finkkari->BuyerPartyDetails->addChild('BuyerPupesoftId', $tunnus);
       $muutos_ok = true;
     }
     else {
       $asiakas = hae_asiakas($asiakas_haku);
 
       if (!empty($asiakas['tunnus'])) {
-        $finkkari->SellerPartyDetails->addChild('SellerPupesoftId', $asiakas['tunnus']);
+        $finkkari->BuyerPartyDetails->addChild('BuyerPupesoftId', $asiakas['tunnus']);
         $muutos_ok = true;
       }
       //unsetataan, ettei päivity domin formeihin
@@ -154,7 +154,7 @@ if ($handle = opendir($verkkolaskuvirheet_vaarat)) {
       echo "<td>$laskuttajan_nimi</td>";
       echo "<td nowrap>";
 
-      $asiakas = finvoice_myyntilaskuksi_valitse_asiakas($toim_asiakkaantiedot, $ostaja_asiakkaantiedot, $laskun_toimitunnus);
+      $asiakas = finvoice_myyntilaskuksi_valitse_asiakas($toim_asiakkaantiedot, $ostaja_asiakkaantiedot, $laskun_asiakaspupetunnus);
 
       if ($asiakas["tunnus"] == 0) {
         echo "<form name='asiakashaku_form' action='' method='POST'>";

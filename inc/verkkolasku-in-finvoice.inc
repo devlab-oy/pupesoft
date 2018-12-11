@@ -35,6 +35,7 @@ if (strpos($file, "maventa") !== false) {
 $yhtio = xml_string($xml->InvoiceRecipientOrganisationUnitNumber);
 $verkkotunnus_vas = xml_string($xml->BuyerPartyDetails->BuyerOrganisationTaxCode);
 $verkkotunnus_vas_inv = xml_string($xml->InvoiceRecipientPartyDetails->InvoiceRecipientOrganisationTaxCode);
+
 $laskun_tyyppi = xml_string($xml->InvoiceDetails->InvoiceTypeCode);
 $laskun_tyyppi_teksti = xml_string($xml->InvoiceDetails->InvoiceTypeText);
 $laskun_numero = xml_string($xml->InvoiceDetails->InvoiceNumber);
@@ -60,6 +61,8 @@ if (xml_string($xml->EpiDetails->EpiPartyDetails->EpiBfiPartyDetails->EpiBfiIden
 }
 
 $laskun_asiakastunnus = xml_string($xml->BuyerPartyDetails->BuyerPartyIdentifier);
+$laskun_asiakaspupetunnus = xml_string($xml->BuyerPartyDetails->BuyerPupesoftId);
+
 $laskun_summa_eur = xml_float($xml->EpiDetails->EpiPaymentInstructionDetails->EpiInstructedAmount);
 $laskun_tilausviite = xml_string($xml->InvoiceDetails->AgreementIdentifier);
 $laskun_asiakkaan_tilausnumero = xml_string($xml->InvoiceDetails->OrderIdentifier);

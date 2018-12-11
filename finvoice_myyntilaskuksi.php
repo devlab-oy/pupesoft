@@ -119,8 +119,8 @@ function siirra_tiedosto_kansioon($tiedosto_polku, $kansio) {
     $uusi_filename = $tiedosto_array2[$hakemiston_syvyys - 1].'_'.date('YmdHis').'.'.$tiedosto_array[1];
   }
 
-  exec('cp "'.$tiedosto_polku.'" "'.$kansio.$uusi_filename.'"');
-  exec('rm "'.$tiedosto_polku.'"');
+  rename($tiedosto_polku, $kansio.$uusi_filename);
+  system("chown -R :apache ".$kansio.$uusi_filename.";");
 }
 
 function kasittele_xml_tiedosto(SimpleXMLElement $xml, $tiedosto_polku) {
@@ -224,7 +224,7 @@ function kasittele_xml_tiedosto(SimpleXMLElement $xml, $tiedosto_polku) {
     $laskun_erapaiva = substr($laskun_erapaiva, 0, 4)."-".substr($laskun_erapaiva, 4, 2)."-".substr($laskun_erapaiva, 6, 2);
     $laskun_kapvm = substr($laskun_kapvm, 0, 4)."-".substr($laskun_kapvm, 4, 2)."-".substr($laskun_kapvm, 6, 2);
 
-    $maksuehto = valitse_maksuehto($laskun_lapvm, $laskun_erapaiva);
+    $maksuehto = finvoice_myyntilaskuksi_valitse_maksuehto($laskun_lapvm, $laskun_erapaiva);
 
     if (empty($maksuehto)) {
       siirra_tiedosto_kansioon($tiedosto_polku, $finvoice_myyntilasku_kansio_error);
@@ -372,33 +372,4 @@ function kasittele_xml_tiedosto(SimpleXMLElement $xml, $tiedosto_polku) {
   }
 }
 
-function valitse_maksuehto($laskun_erapaiva, $laskun_lapvm) {
-  global $kukarow, $yhtiorow;
 
-  $maksuaika_sek =  strtotime($laskun_lapvm) - strtotime($laskun_erapaiva);
-
-  if (!empty($maksuaika_sek)) {
-    $maksuaika = round($maksuaika_sek/86400);
-
-    $query = "SELECT *
-              FROM maksuehto
-              WHERE yhtio = '{$yhtiorow['yhtio']}'
-              AND rel_pvm = '$maksuaika'
-              AND kassa_relpvm = '0'";
-    $maksuehtores = pupe_query($query);
-
-    if (mysql_num_rows($maksuehtores) == 0) {
-      $query = "SELECT *
-                FROM maksuehto
-                WHERE yhtio = '{$yhtiorow['yhtio']}'
-                AND rel_pvm = '0'
-                AND kassa_relpvm = '0'";
-      $maksuehtores = pupe_query($query);
-    }
-
-    if (mysql_num_rows($maksuehtores) == 1) {
-      return mysql_fetch_assoc($maksuehtores);
-    }
-    return False;
-  }
-}

@@ -35144,6 +35144,39 @@ if (!function_exists('tuetut_pankit')) {
   }
 }
 
+if (!function_exists('finvoice_myyntilaskuksi_valitse_maksuehto')) {
+  function finvoice_myyntilaskuksi_valitse_maksuehto($laskun_erapaiva, $laskun_lapvm) {
+    global $kukarow, $yhtiorow;
+
+    $maksuaika_sek = strtotime($laskun_lapvm) - strtotime($laskun_erapaiva);
+
+    if (!empty($maksuaika_sek)) {
+      $maksuaika = round($maksuaika_sek/86400);
+
+      $query = "SELECT *
+                FROM maksuehto
+                WHERE yhtio = '{$yhtiorow['yhtio']}'
+                AND rel_pvm = '$maksuaika'
+                AND kassa_relpvm = '0'";
+      $maksuehtores = pupe_query($query);
+
+      if (mysql_num_rows($maksuehtores) == 0) {
+        $query = "SELECT *
+                  FROM maksuehto
+                  WHERE yhtio = '{$yhtiorow['yhtio']}'
+                  AND rel_pvm = '0'
+                  AND kassa_relpvm = '0'";
+        $maksuehtores = pupe_query($query);
+      }
+
+      if (mysql_num_rows($maksuehtores) == 1) {
+        return mysql_fetch_assoc($maksuehtores);
+      }
+      return False;
+    }
+  }
+}
+
 if (!function_exists('finvoice_myyntilaskuksi_valitse_asiakas')) {
   function finvoice_myyntilaskuksi_valitse_asiakas($toim_asiakkaantiedot, $ostaja_asiakkaantiedot, $laskun_asiakaspupetunnus) {
     global $kukarow, $yhtiorow;

@@ -132,7 +132,13 @@ if ($handle = opendir($verkkolaskuvirheet_vaarat)) {
   require "inc/verkkolasku-in.inc";
 
   echo "<table><tr>";
-  echo "<th>".t("Laskuttaja")."</th><th>".t("Toiminto")."</th><th>".t("Ovttunnus")."<br>".t("Y-tunnus")."</th><th>".t("Asiakas")."</th><th>".t("Laskunumero")."<br>".t("Maksutili")."<br>".t("Summa")."</th><th>".t("Pvm")."</th></tr><tr>";
+  echo "<th>".t("Laskuttaja")."</th>
+    <th>".t("Toiminto")."</th>
+    <th>".t("Ovttunnus")."<br>".t("Y-tunnus")."</th>
+    <th>".t("Asiakas")."</th>
+    <th>".t("Maksuehto")."</th>
+    <th>".t("Laskunumero")."<br>".t("Maksutili")."<br>".t("Summa")."</th>
+    <th>".t("Pvm")."</th></tr><tr>";
 
   while (($file = readdir($handle)) !== FALSE) {
 
@@ -200,20 +206,29 @@ if ($handle = opendir($verkkolaskuvirheet_vaarat)) {
 
       echo "<td>$ostaja_asiakkaantiedot[ytunnus]</td>";
       echo "<td>$ostaja_asiakkaantiedot[nimi]<br>$ostaja_asiakkaantiedot[osoite]<br>$ostaja_asiakkaantiedot[postino]<br>$ostaja_asiakkaantiedot[postitp]<br>$ostaja_asiakkaantiedot[maa]</td>";
-      echo "<td>$laskun_numero<br>$laskun_summa_eur<br>";
 
+      $laskun_tapvm = substr($laskun_tapvm, 0, 4)."-".substr($laskun_tapvm, 4, 2)."-".substr($laskun_tapvm, 6, 2);
+      $laskun_lapvm = substr($laskun_lapvm, 0, 4)."-".substr($laskun_lapvm, 4, 2)."-".substr($laskun_lapvm, 6, 2);
+      $laskun_erapaiva = substr($laskun_erapaiva, 0, 4)."-".substr($laskun_erapaiva, 4, 2)."-".substr($laskun_erapaiva, 6, 2);
+      $laskun_kapvm = substr($laskun_kapvm, 0, 4)."-".substr($laskun_kapvm, 4, 2)."-".substr($laskun_kapvm, 6, 2);
+
+      $maksuehto = finvoice_myyntilaskuksi_valitse_maksuehto($laskun_lapvm, $laskun_erapaiva);
+
+      if (empty($maksuehto)) {
+        echo "<td>".t("VIRHE: Sopivaa maksuehtoa ei löydy!").": $laskun_maksuehtoteksti<br>";
+      }
+      else {
+        echo "<td>$maksuehto<br>";
+      }
+
+      echo "<td>$laskun_numero<br>$laskun_summa_eur<br>";
       echo "<form id='form_2_$valitutlaskut' name='form_2_$valitutlaskut' method='post'>
       <input type='hidden' name = 'tee' value ='NAYTATILAUS'>
       <input type='hidden' name = 'xml' value ='".urlencode($xmlstr)."'>
       <input type='submit' value = '".t("Näytä Finvoice")."' onClick=\"js_openFormInNewWindow('form_2_$valitutlaskut', 'form_2_$valitutlaskut'); return false;\"></form>";
-
       echo "</td>";
 
-      $tpp = substr($laskun_tapvm, 6, 2);
-      $tpk = substr($laskun_tapvm, 4, 2);
-      $tpv = substr($laskun_tapvm, 0, 4);
-
-      echo "<td>".tv1dateconv($tpv."-".$tpk."-".$tpp)."</td>";
+      echo "<td>".tv1dateconv($laskun_tapvm)."</td>";
       echo "</tr>";
     }
   }

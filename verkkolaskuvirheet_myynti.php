@@ -218,7 +218,7 @@ if ($handle = opendir($verkkolaskuvirheet_vaarat)) {
         echo "<td>".t("VIRHE: Sopivaa maksuehtoa ei löydy!").": $laskun_maksuehtoteksti<br>";
       }
       else {
-        echo "<td>$maksuehto<br>";
+        echo "<td>$maksuehto[teksti]<br>";
       }
 
       echo "<td>$laskun_numero<br>$laskun_summa_eur<br>";

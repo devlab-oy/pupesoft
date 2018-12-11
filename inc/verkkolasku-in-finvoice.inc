@@ -140,7 +140,7 @@ if ($laskun_erapaiva == "") {
   $laskun_erapaiva = xml_string($xml->PaymentTermsDetails->InvoiceDueDate);
 }
 
-$laskun_maksuehtoteksti = xml_string($xml->PaymentTermsDetails->PaymentTermsFreeText);
+$laskun_maksuehtoteksti = xml_string($xml->InvoiceDetails->PaymentTermsDetails->PaymentTermsFreeText);
 
 if ($laskun_pankkiviite == "") {
   $laskun_pankkiviite = xml_string($xml->EpiDetails->EpiIdentificationDetails->EpiReference);

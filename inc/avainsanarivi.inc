@@ -343,6 +343,7 @@ if (mysql_field_name($result, $i) == "laji") {
   if ($lukitse_laji== "" or $lukitse_laji == "VALM_FAKTA") $ulos .= "<option value='VALM_FAKTA' {$avain_sel['VALM_FAKTA']}>".t("Valmistuslistan faktan fonttikoko")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "PSHOP_SYNONYMS") $ulos .= "<option value='PSHOP_SYNONYMS' {$avain_sel['PSHOP_SYNONYMS']}>".t("Pupeshop tuotehaun synonyymit")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "VASTUUMYYJA") $ulos .= "<option value='VASTUUMYYJA' {$avain_sel['VASTUUMYYJA']}>".t("Asiakkaan vastuumyyjä")."</option>";
+  if ($lukitse_laji== "" or $lukitse_laji == "MAKSUKP") $ulos .= "<option value='MAKSUKP' {$avain_sel['MAKSUKP']}>".t("Maksatuksessa kustannuspaikka")."</option>";
 
   if ($lukitse_laji== "") $ulos .= "</optgroup>";
 

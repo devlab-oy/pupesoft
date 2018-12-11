@@ -154,7 +154,7 @@ if ($handle = opendir($verkkolaskuvirheet_vaarat)) {
       echo "<td>$laskuttajan_nimi</td>";
       echo "<td nowrap>";
 
-      $asiakas = finvoice_myyntilaskuksi_valitse_asiakas($toim_asiakkaantiedot, $ostaja_asiakkaantiedot);
+      $asiakas = finvoice_myyntilaskuksi_valitse_asiakas($toim_asiakkaantiedot, $ostaja_asiakkaantiedot, $laskun_toimitunnus);
 
       if ($asiakas["tunnus"] == 0) {
         echo "<form name='asiakashaku_form' action='' method='POST'>";

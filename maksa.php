@@ -1090,6 +1090,7 @@ if ($tee == 'DM') {
         <th class='ptop'>".t("Laskunro")."</th>
         <th class='ptop'>".t("Maksutili")."</th>
         <th class='ptop'>".t("Viite")." / ".t("Viesti")."</th>
+        <th class='ptop'>".t("Kp")."</th>
         <th class='ptop'>".t("Ebid")."</th>
         <th style='display:none;'></th>
         </tr>
@@ -1102,6 +1103,7 @@ if ($tee == 'DM') {
         <td><input type='text' class='search_field' name='search_laskunro'></td>
         <td><input type='text' class='search_field' name='search_maksutili'></td>
         <td><input type='text' class='search_field' name='search_viite'></td>
+        <td><input type='text' class='search_field' name='search_kustpaikka'></td>
         <td></td>
         <td class='back'></td>
         </tr>
@@ -1257,6 +1259,7 @@ if ($tee == 'DM') {
 if ($tee == 'S') {
 
   $lisa = "";
+  $kplisa = "";
 
   if ($valuu != '') {
     $lisa .= " and valkoodi = '$valuu'";
@@ -1275,6 +1278,8 @@ if ($tee == 'S') {
     $lisa .= " and lasku.nimi like '%$nimihaku%'";
   }
 
+  $kplisa = ", (select tiliointi.kustp from tiliointi where lasku.yhtio=tiliointi.yhtio and lasku.tunnus = tiliointi.ltunnus and tiliointi.kustp != 0 limit 1) kustpaikka ";
+
   $query = "SELECT lasku.nimi, lasku.kapvm, lasku.erpcm, lasku.valkoodi,
             lasku.summa - lasku.kasumma kasumma,
             lasku.summa,
@@ -1289,6 +1294,7 @@ if ($tee == 'S') {
             h4time,
             h5time,
             lasku.liitostunnus, lasku.ytunnus, lasku.ovttunnus, lasku.viesti, lasku.comments, lasku.viite, lasku.vanhatunnus, lasku.arvo, lasku.maa, if(lasku.laskunro = 0, '', lasku.laskunro) laskunro
+            $kplisa
             FROM lasku use index (yhtio_tila_mapvm)
             JOIN valuu ON lasku.yhtio=valuu.yhtio and lasku.valkoodi = valuu.nimi
             WHERE lasku.yhtio  = '$kukarow[yhtio]'
@@ -1304,7 +1310,7 @@ if ($tee == 'S') {
   }
   else {
 
-    pupe_DataTables(array(array($pupe_DataTables, 7, 11)));
+    pupe_DataTables(array(array($pupe_DataTables, 8, 12)));
 
     // N‰ytet‰‰n valitut laskut
     echo "<br><font class='message'>".t("Maksuvalmiit laskut")."</font><hr>";
@@ -1320,6 +1326,7 @@ if ($tee == 'S') {
         <th class='ptop'>".t("Summa")."</th>
         <th class='ptop'>".t("Laskunro")."</th>
         <th class='ptop'>".t("Viite")." / ".t("Viesti")."</th>
+        <th class='ptop'>".t("Kp")."</th>
         <th class='ptop'>".t("Ebid")."</th>
         <th class='ptop'>".t("Maksatus")."</th>
         <th class='ptop'>".t("Lis‰tieto")."</th>
@@ -1333,6 +1340,7 @@ if ($tee == 'S') {
         <td><input type='text' class='search_field' name='search_summa'></td>
         <td><input type='text' class='search_field' name='search_laskunro'></td>
         <td><input type='text' class='search_field' name='search_viite'></td>
+        <td><input type='text' class='search_field' name='search_kustpaikka'></td>
         <td></td>
         <td></td>
         <td></td>
@@ -1445,6 +1453,8 @@ if ($tee == 'S') {
 
       echo "</td>";
 
+      echo "<td class='ptop'>$trow[kustpaikka]</td>";
+      
       // tehd‰‰n lasku linkki
       echo "<td nowrap class='ptop'>";
 

@@ -35145,14 +35145,14 @@ if (!function_exists('tuetut_pankit')) {
 }
 
 if (!function_exists('finvoice_myyntilaskuksi_valitse_asiakas')) {
-  function finvoice_myyntilaskuksi_valitse_asiakas($toim_asiakkaantiedot, $ostaja_asiakkaantiedot, $laskun_toimitunnus) {
+  function finvoice_myyntilaskuksi_valitse_asiakas($toim_asiakkaantiedot, $ostaja_asiakkaantiedot, $laskun_asiakaspupetunnus) {
     global $kukarow, $yhtiorow;
 
-    if (!empty($laskun_toimitunnus)) {
+    if (!empty($laskun_asiakaspupetunnus)) {
       $query = "SELECT *
                 FROM asiakas
                 WHERE yhtio = '{$yhtiorow['yhtio']}'
-                AND tunnus = '{$laskun_toimitunnus}'";
+                AND tunnus = '{$laskun_asiakaspupetunnus}'";
       $result = pupe_query($query);
       #echo "$query\n\n";
     }

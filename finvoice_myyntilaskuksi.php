@@ -175,8 +175,9 @@ function kasittele_xml_tiedosto(SimpleXMLElement $xml, $tiedosto_polku) {
     echo "32: ".$laskuttajan_toimittajanumero."{$_lb}";
     echo "33: ".$laskuttajan_valkoodi."{$_lb}";
     echo "34: ".$laskun_toimitunnus."{$_lb}";
+    echo "35: ".$laskun_asiakaspupetunnus."{$_lb}";
 
-    $asiakas = finvoice_myyntilaskuksi_valitse_asiakas($toim_asiakkaantiedot, $ostaja_asiakkaantiedot, $laskun_toimitunnus);
+    $asiakas = finvoice_myyntilaskuksi_valitse_asiakas($toim_asiakkaantiedot, $ostaja_asiakkaantiedot, $laskun_asiakaspupetunnus);
 
     if (empty($asiakas)) {
       siirra_tiedosto_kansioon($tiedosto_polku, $finvoice_myyntilasku_kansio_error);

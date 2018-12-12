@@ -24,14 +24,14 @@ echo "<font class='head'>".t("Laskujen maksatus")."</font><hr>";
 
 $oletusmaksupaiva_kasittely = "if(kapvm >= curdate() and kapvm < erpcm, kapvm, if(erpcm >= curdate(), erpcm, curdate()))";
 // Näytetäänkö kustannuspaikka maksatuksessa
-$kpquery = "SELECT selitetark
+$kpquery = "SELECT selite
           FROM avainsana
           WHERE yhtio  = '$kukarow[yhtio]'
           AND laji     = 'MAKSUKP'";
 $avainsana_result = pupe_query($kpquery);
 $avainsana_row = mysql_fetch_assoc($avainsana_result);
 
-if (mysql_num_rows($avainsana_result) == 0) {
+if (mysql_num_rows($avainsana_result) == 0 or $avainsana_row["selite"] == 'Ei') {
   $kpmaksatuksessa = false;
 }
 else {
@@ -1291,8 +1291,10 @@ if ($tee == 'S') {
   }
   
   if ($kpmaksatuksessa == true) {
-    $kplisa = ", (select tiliointi.kustp from tiliointi where lasku.yhtio=tiliointi.yhtio and lasku.tunnus = tiliointi.ltunnus and tiliointi.kustp != 0 limit 1) kustpaikka ";
-  }
+    $kplisa = ", (select kustannuspaikka.nimi from tiliointi 
+left join kustannuspaikka on tiliointi.yhtio = kustannuspaikka.yhtio and kustannuspaikka.tyyppi = 'K' and kustannuspaikka.tunnus = tiliointi.kustp
+where lasku.yhtio=tiliointi.yhtio and lasku.tunnus = tiliointi.ltunnus and tiliointi.kustp != 0 limit 1) kustnimi ";
+  }  
 
   $query = "SELECT lasku.nimi, lasku.kapvm, lasku.erpcm, lasku.valkoodi,
             lasku.summa - lasku.kasumma kasumma,
@@ -1360,7 +1362,7 @@ if ($tee == 'S') {
           <td><input type='text' class='search_field' name='search_summa'></td>
           <td><input type='text' class='search_field' name='search_laskunro'></td>
           <td><input type='text' class='search_field' name='search_viite'></td>
-          <td><input type='text' class='search_field' name='search_kustpaikka'></td>
+          <td><input type='text' class='search_field' name='search_kustnimi'></td>
           <td></td>
           <td></td>
           <td></td>
@@ -1504,7 +1506,7 @@ if ($tee == 'S') {
       echo "</td>";
 
       if ($kpmaksatuksessa == true) {
-        echo "<td class='ptop'>$trow[kustpaikka]</td>";
+        echo "<td class='ptop'>$trow[kustnimi]</td>";
       }
       
       // tehdään lasku linkki

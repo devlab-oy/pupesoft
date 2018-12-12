@@ -1747,3 +1747,22 @@ if ($avain_sel['VASTUUMYYJA'] == "SELECTED") {
     $jatko = 0;
   }
 }
+if ($avain_sel["MAKSUKP"] == "SELECTED") {
+  // ei näytetä selitetarkia tai järjestystä
+  if ($_selitetark or $_jarjestys) {
+    $tyyppi = 0;
+  }
+
+  if ($_selite) {
+    $sel = $trow[$i] == 'Kylla' ? 'selected' : '';
+
+    $ulos = "<td>";
+    $ulos .= "<select name='{$nimi}'>";
+    $ulos .= "<option value='Ei'>" . t('Ei') . "</option>";
+    $ulos .= "<option value='Kylla' {$sel}>" . t('Kyllä') . "</option>";
+    $ulos .= "</select>";
+    $ulos .= "</td>";
+
+    $jatko = 0;
+  }
+}

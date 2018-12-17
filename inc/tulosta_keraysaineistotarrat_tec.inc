@@ -1,6 +1,6 @@
 <?php
 
-//Kun tullaan tänne tarvitaan $komento joka on se komento jolla tulostetaan esim. lpr -P tarrakirjoitin
+//Kun tullaan tänne tarvitaan $komento jolla komento jolla tulostetaan esim. lpr -P tarrakirjoitin
 $lasktarrat  = 0;
 $lisa      = '';
 $alatila    = '';

@@ -57,6 +57,9 @@ if (!function_exists('finvoice_otsik')) {
     case 'ITELFIHH':
       $tulostuspalvelu  = "TULOSTUSPALVELU";
       break;
+    case 'FITEK':
+      $tulostuspalvelu  = "PRINT";
+      break;
     default:
       $tulostuspalvelu  = "";
       break;

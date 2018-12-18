@@ -654,7 +654,11 @@ if ($tee == 'TULOSTA' and isset($tulosta)) {
   }
 
   //hakulause, tämä on sama kaikilla vaihtoehdolilla ja group by lause joka on sama kaikilla
-  $select  = " tuote.tuoteno, tuote.nimitys, tuote.sarjanumeroseuranta, tuotepaikat.oletus, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso, tuote.nimitys, tuote.yksikko, concat_ws(' ',tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso) varastopaikka, inventointiaika, tuotepaikat.saldo, tuotepaikat.tunnus as tuotepaikkatunnus,
+  $select  = " tuote.tuoteno, tuote.nimitys, tuote.sarjanumeroseuranta, tuotepaikat.oletus, tuotepaikat.hyllyalue, tuotepaikat.hyllynro,
+               tuotepaikat.hyllyvali, tuotepaikat.hyllytaso, tuote.nimitys, tuote.yksikko,
+               concat_ws(' ',tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso) varastopaikka,
+               concat_ws('-',tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso) varastopaikka_excel,
+               inventointiaika, tuotepaikat.saldo, tuotepaikat.tunnus as tuotepaikkatunnus,
   $sorttauskentan_jarjestys sorttauskentta";
   $groupby = " tuote.tuoteno, tuote.nimitys, tuote.sarjanumeroseuranta, tuotepaikat.oletus, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso, tuote.nimitys, tuote.yksikko, varastopaikka, inventointiaika, tuotepaikat.saldo ";
 
@@ -1287,7 +1291,7 @@ if ($tee == 'TULOSTA' and isset($tulosta)) {
       }
 
       $prn .= sprintf('%-18.14s',   $tuoterow["varastopaikka"]);
-      $excelrivit[$xr]['varastopaikka'] =  $tuoterow["varastopaikka"];
+      $excelrivit[$xr]['varastopaikka'] =  $tuoterow["varastopaikka_excel"];
 
       $prn .= sprintf('%-21.21s',   $tuoterow["tuoteno"]);
       $excelrivit[$xr]['tuoteno'] =  $tuoterow["tuoteno"];

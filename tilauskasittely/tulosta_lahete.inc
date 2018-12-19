@@ -418,16 +418,16 @@ if (!function_exists('alku_lahete')) {
       if ($laskurow['rahtivapaa'] == 'o' and onko_rahtituote_syotetty($laskurow) == 0) {
         $rahtivapaa = "Rahtivapaa";
       }
-      
+
       if ($tyyppi == "TILAUSVAHVISTUS") {
         if ($laskurow["osatoimitus"] == 'o') {
           $kokonaistoimitus = '/ Kokonaistoimitus';
         }
         else  {
           $kokonaistoimitus = '';
-        } 
+        }
       }
-  
+
       if ($extranet_tilausvahvistus != 1) {
         if ($laskurow["kohdistettu"] == "K" or $lahetetyyppi_avainsana == 1) {
           // Käytetään LÄHETTÄJÄN rahtisopimusta, EI näytetä lähettäjän sopparinumeroa.
@@ -3675,14 +3675,14 @@ if (!function_exists('loppu_lahete')) {
       $pdf->draw_text(257, 35, $y_www, $thispage, $pieni);
 
       $piilota_tiedot = (isset($lahete_piilota_ytunnus_toimipaikka));
-      $piilota_tiedot = ($piilota_tiedot and in_array($laskurow["yhtio_toimipaikka"], $lahete_piilota_ytunnus_toimipaikka);
+      $piilota_tiedot = ($piilota_tiedot and in_array($laskurow["yhtio_toimipaikka"], $lahete_piilota_ytunnus_toimipaikka));
 
       if (!$piilota_tiedot) {
-        
+
         $pdf->draw_text(404, 55, t("Y-tunnus", $kieli).":", $thispage, $pieni);
-        
+
         if ($yhtiorow["maa"] == 'EE') {
-          $pdf->draw_text(444, 55, tulosta_ytunnus($yhtiorow["ytunnus"], $yhtiorow["maa"], $laskurow["vienti"]), $thispage, $ pieni);
+          $pdf->draw_text(444, 55, tulosta_ytunnus($yhtiorow["ytunnus"], $yhtiorow["maa"], $laskurow["vienti"]), $thispage, $pieni);
         }
         else {
           $pdf->draw_text(444, 55, tulosta_ytunnus($y_vatnumero, $y_maa, $laskurow["vienti"]), $thispage, $pieni);

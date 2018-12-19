@@ -3516,7 +3516,7 @@ if (!function_exists('rivi_viivakoodi_lahete_ean13')) {
 
 if (!function_exists('loppu_lahete')) {
   function loppu_lahete($params) {
-    global $kukarow, $yhtiorow;
+    global $kukarow, $yhtiorow, $lahete_piilota_ytunnus_toimipaikka;
 
     if (skippa_lahete_pdf($params)) {
       // Luodaan palautettavat
@@ -3674,16 +3674,24 @@ if (!function_exists('loppu_lahete')) {
       $pdf->draw_text(217, 35, t("Web", $kieli).":", $thispage, $pieni);
       $pdf->draw_text(257, 35, $y_www, $thispage, $pieni);
 
-      $pdf->draw_text(404, 55, t("Y-tunnus", $kieli).":", $thispage, $pieni);
-      if ($yhtiorow["maa"] == 'EE') {
-        $pdf->draw_text(444, 55, tulosta_ytunnus($yhtiorow["ytunnus"], $yhtiorow["maa"], $laskurow["vienti"]), $thispage, $pieni);
+      $piilota_tiedot = (isset($lahete_piilota_ytunnus_toimipaikka));
+      $piilota_tiedot = ($piilota_tiedot and in_array($laskurow["yhtio_toimipaikka"], $lahete_piilota_ytunnus_toimipaikka);
+
+      if (!$piilota_tiedot) {
+        
+        $pdf->draw_text(404, 55, t("Y-tunnus", $kieli).":", $thispage, $pieni);
+        
+        if ($yhtiorow["maa"] == 'EE') {
+          $pdf->draw_text(444, 55, tulosta_ytunnus($yhtiorow["ytunnus"], $yhtiorow["maa"], $laskurow["vienti"]), $thispage, $ pieni);
+        }
+        else {
+          $pdf->draw_text(444, 55, tulosta_ytunnus($y_vatnumero, $y_maa, $laskurow["vienti"]), $thispage, $pieni);
+        }
+
+        $pdf->draw_text(404, 45, t("Kotipaikka", $kieli).":", $thispage, $pieni);
+        $pdf->draw_text(444, 45, $y_kotipaikka, $thispage, $pieni);
+        $pdf->draw_text(404, 35, t("Alv.rek", $kieli), $thispage, $pieni);
       }
-      else {
-        $pdf->draw_text(444, 55, tulosta_ytunnus($y_vatnumero, $y_maa, $laskurow["vienti"]), $thispage, $pieni);
-      }
-      $pdf->draw_text(404, 45, t("Kotipaikka", $kieli).":", $thispage, $pieni);
-      $pdf->draw_text(444, 45, $y_kotipaikka, $thispage, $pieni);
-      $pdf->draw_text(404, 35, t("Alv.rek", $kieli), $thispage, $pieni);
     }
 
     if ($tots == 1 and $summa != 0) {

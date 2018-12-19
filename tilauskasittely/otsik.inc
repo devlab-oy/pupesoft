@@ -2094,6 +2094,13 @@ if ($tila == "" and !isset($jatka)) {
       $myyjanro = "";
     }
 
+    if ($yhtiorow['asiakasmyyja_tilaukselle'] == 'A' and $asiarow['myyjanro'] != 0) {
+      $asiakasmyyja = true;
+    }
+    else {
+      $asiakasmyyja = false;
+    }
+
     $oikea_sarake[$oikea] = "<td>".t("Myyjä")."</td>";
     $oikea_sarake[$oikea] .= "<td><select name='myyja'>";
 
@@ -2113,7 +2120,12 @@ if ($tila == "" and !isset($jatka)) {
     while ($row = mysql_fetch_assoc($yresult)) {
 
       $sel = "";
-      if ($srow['myyja'] == '' or $srow['myyja'] == 0) {
+
+      if ($asiakasmyyja and $asiarow['myyjanro'] == $row['myyja']) {
+        $myyjanro = $row['myyja'];
+        $sel = 'selected';
+      }
+      elseif ($srow['myyja'] == '' or $srow['myyja'] == 0) {
         if ($row['nimi'] == $kukarow['nimi']) {
           $sel = 'selected';
         }

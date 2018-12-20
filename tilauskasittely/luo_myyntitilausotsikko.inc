@@ -129,6 +129,21 @@ if (!function_exists("luo_myyntitilausotsikko")) {
         $myyja = $kukarow["tunnus"];
       }
 
+      if ($yhtiorow['asiakasmyyja_tilaukselle'] == 'A' and $asiakasrow['myyjanro'] != 0) {
+
+        $apuqu = "SELECT *
+                  from kuka use index (yhtio_myyja)
+                  where yhtio = '$kukarow[yhtio]'
+                  and myyja   = '{$asiakasrow["myyjanro"]}'
+                  AND myyja   > 0";
+        $meapu = pupe_query($apuqu);
+
+        if (mysql_num_rows($meapu) == 1) {
+          $apuro = mysql_fetch_assoc($meapu);
+          $myyja = $apuro['tunnus'];
+        }
+      }
+
       $alv         = $asiakasrow["alv"];
       $ovttunnus       = $asiakasrow["ovttunnus"];
       $toim_ovttunnus   = $asiakasrow["toim_ovttunnus"];

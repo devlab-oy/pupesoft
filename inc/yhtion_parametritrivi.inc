@@ -2656,6 +2656,21 @@ if ($fieldname == "myyntitilauksen_liitteet") {
   $jatko = 0;
 }
 
+if ($fieldname == "asiakasmyyja_tilaukselle") {
+
+  $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+  $sel = array();
+  $apu = $trow[$i];
+  $sel[$apu] = "SELECTED";
+
+  $ulos .= "<option value = ''>".t("K‰ytet‰‰n ensisijaisesti tilauksen laatijaa myyj‰n‰")."</option>";
+  $ulos .= "<option value = 'A' $sel[A]>".t("K‰ytet‰‰n ensisijaisesti asiakkaan myyj‰‰ myyj‰n‰")."</option>";
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
 if ($fieldname == "myyntitilauksen_toimipaikka") {
 
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";

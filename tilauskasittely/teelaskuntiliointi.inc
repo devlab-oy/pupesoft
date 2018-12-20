@@ -394,6 +394,23 @@ else {
         $muutostili = $yhtiorow["varastonmuutos"];
       }
 
+      // Jos kyseessä on 100% ennakkolaskun loppulaskutus, ja
+      // ollaan käytetty asiakasvarasto-ominaisuutta, vaihdetaan
+      // varastotiliksi toinen
+      if (!empty($yhtiorow["ennakkolaskun_asiakasvarasto"]) and !empty($yhtiorow["asiakasvarasto"])) {
+
+        $query = "SELECT *
+                  FROM maksupositio
+                  WHERE otunnus = '{$lasku['jaksotettu']}'
+                  AND osuus = 100
+                  AND yhtio   = '{$kukarow['yhtio']}'";
+        $result = pupe_query($query);
+
+        if (mysql_num_rows($result) == 1) {
+          $tilinumero = $yhtiorow["ennakkolaskun_asiakasvarasto"];
+        }
+      }
+
       //Kirjataan 'varasto'-tilille
       $query = "INSERT into tiliointi set
                 yhtio            = '$kukarow[yhtio]',

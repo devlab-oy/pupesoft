@@ -234,8 +234,19 @@ if ((!isset($vapauta_tilaus_keraykseen) or !$vapauta_tilaus_keraykseen)
       $varastosiirto_tyyppi = '';
 
       if ($yhtiorow["asiakasvarasto"] != '') {
-        $_tehdaan_varastosiirto = true;
-        $varastosiirto_tyyppi = 'K';
+
+        // Tarkistetaan että on 100% ennakko
+        $query = "SELECT tunnus
+                  FROM maksupositio
+                  WHERE otunnus = '{$myyntitilaus['tunnus']}'
+                  AND osuus = 100
+                  and yhtio   = '{$kukarow['yhtio']}'";
+        $result = pupe_query($query);
+
+        if (mysql_num_rows($result) == 1) {
+          $_tehdaan_varastosiirto = true;
+          $varastosiirto_tyyppi = 'K';
+        }
       }
 
       if ($_tehdaan_varastosiirto) {

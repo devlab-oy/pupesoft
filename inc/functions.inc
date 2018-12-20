@@ -27233,6 +27233,47 @@ if (!function_exists('hyllysiirto')) {
             }
           }
 
+          // Jos tiliöidään ennakkolaskun varastosiirto eri tilille
+          // Katsotaan ensiksi että parametrit mahdollistaa tämän
+          if (!empty($yhtiorow["ennakkolaskun_asiakasvarasto"]) and !empty($yhtiorow["asiakasvarasto"]) and !empty($tun)) {
+
+            // Tarkistetaan vielä et siirtorivi on linkattu
+            // myyntitilausriviin ja kyseisellä myyntitilauksella
+            // on maksupositioita (100%) = ennakkolaskun kautta
+            // muodostunut varastosiirto (100% ennakkolasku)
+
+            $query = "SELECT tilausrivilinkki
+                      FROM tilausrivin_lisatiedot
+                      WHERE tilausrivitunnus = '$tun'
+                      and yhtio   = '$kukarow[yhtio]'";
+            $result = pupe_query($query);
+
+            if (mysql_num_rows($result) == 1) {
+              $siirtolisatieto_row = mysql_fetch_assoc($result);
+
+              $query = "SELECT otunnus
+                        FROM tilausrivi
+                        WHERE tunnus = '{$siirtolisatieto_row['tilausrivilinkki']}'
+                        and yhtio   = '{$kukarow['yhtio']}'";
+              $result = pupe_query($query);
+
+              if (mysql_num_rows($result) == 1) {
+                $mytil_row = mysql_fetch_assoc($result);
+
+                $query = "SELECT tunnus
+                          FROM maksupositio
+                          WHERE otunnus = '{$mytil_row['otunnus']}'
+                          AND osuus = 100
+                          and yhtio   = '{$kukarow['yhtio']}'";
+                $result = pupe_query($query);
+
+                if (mysql_num_rows($result) == 1) {
+                  $varastotili = $yhtiorow["ennakkolaskun_asiakasvarasto"];
+                }
+              }
+            }
+          }
+
 
           // Mistä varasto
           $query = "INSERT into tiliointi set
@@ -31372,9 +31413,9 @@ if (!function_exists("tallenna_tiliote_viite")) {
           $onko_vipn = (substr($tilino, 0, 1) == 'S') ? 1 : 0;
           $tilino = substr($tilino, 1, 14);
           fseek($fd, $pointterin_paikka);
-          
+
           $ppg_uusitilino = trim(substr($tietue, 16, 6));
-            
+
           if ($onko_vipn) {
             $query = "SELECT tilino
                       FROM yriti

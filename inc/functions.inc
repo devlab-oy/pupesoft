@@ -35190,10 +35190,12 @@ if (!function_exists('finvoice_myyntilaskuksi_valitse_asiakas')) {
       #echo "$query\n\n";
     }
     else {
+      $ytunnus = str_replace("-", "", $ostaja_asiakkaantiedot['ytunnus']);
+
       $query = "SELECT *
                 FROM asiakas
                 WHERE yhtio = '{$yhtiorow['yhtio']}'
-                AND ytunnus = '{$ostaja_asiakkaantiedot['ytunnus']}'
+                AND REPLACE(ytunnus, '-', '') = '{$ytunnus}'
                 AND concat_ws(' ', nimi, nimitark) = '{$ostaja_asiakkaantiedot['nimi']}'
                 AND osoite = '{$ostaja_asiakkaantiedot["osoite"]}'
                 AND postino = '{$ostaja_asiakkaantiedot["postino"]}'
@@ -35211,7 +35213,7 @@ if (!function_exists('finvoice_myyntilaskuksi_valitse_asiakas')) {
       $query = "SELECT *
                 FROM asiakas
                 WHERE yhtio = '{$yhtiorow['yhtio']}'
-                AND ytunnus = '{$ostaja_asiakkaantiedot['ytunnus']}'
+                AND REPLACE(ytunnus, '-', '') = '{$ytunnus}'
                 AND concat_ws(' ', nimi, nimitark) = '{$ostaja_asiakkaantiedot['nimi']}'
                 AND osoite = '{$ostaja_asiakkaantiedot["osoite"]}'
                 AND postino = '{$ostaja_asiakkaantiedot["postino"]}'

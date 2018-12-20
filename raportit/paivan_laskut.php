@@ -121,6 +121,10 @@ if (isset($teerappari)) {
           echo "<font class='ok'>", t("Pupevoice Servinet"), "</font>";
           $operaattorille++;
         }
+        elseif ($yhtiorow['verkkolasku_lah'] == 'fitek') {
+          echo "<font class='ok'>", t("Pupevoice Fitek"), "</font>";
+          $operaattorille++;
+        }
         else {
           echo "<font class='ok'>", t("Pupevoice Itella"), "</font>";
           $operaattorille++;

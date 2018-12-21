@@ -238,7 +238,7 @@ if ((!isset($vapauta_tilaus_keraykseen) or !$vapauta_tilaus_keraykseen)
         // Tarkistetaan että on 100% ennakko
         $query = "SELECT tunnus
                   FROM maksupositio
-                  WHERE otunnus = '{$myyntitilaus['tunnus']}'
+                  WHERE otunnus = '{$laskurow['tunnus']}'
                   AND osuus = 100
                   and yhtio   = '{$kukarow['yhtio']}'";
         $result = pupe_query($query);

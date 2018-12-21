@@ -228,7 +228,7 @@ if ((!isset($vapauta_tilaus_keraykseen) or !$vapauta_tilaus_keraykseen)
 
     echo "<font class='error'>", t("Tilaus laitetaan odottamaan, kunnes ennakkolaskut ovat maksettu"), ".</font><br/><br/>";
 
-    if ($kukarow["extranet"] == "" and $yhtiorow["tee_siirtolista_myyntitilaukselta"] == 'K') {
+    if ($kukarow["extranet"] == "") {
 
       $_tehdaan_varastosiirto = false;
       $varastosiirto_tyyppi = '';

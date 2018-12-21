@@ -35047,7 +35047,6 @@ if (!function_exists("tilauksen_seurantalinkit")) {
 
           $seurantakoodit[] = array(
             "id" => $nro,
-            "link" => "http://mhhkiweb1.matkahuolto.fi/scripts/loginetyleinen.wsc/002tapahtuma_new?spacketnum={$nro}"
           );
         }
       }

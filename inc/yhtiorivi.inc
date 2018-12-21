@@ -113,7 +113,8 @@ if ((mysql_field_name($result, $i) == "kassa") or
   (mysql_field_name($result, $i) == "ostolasku_ei_eu_rahti") or
   (mysql_field_name($result, $i) == "ostolasku_ei_eu_vaihto_omaisuus") or
   (mysql_field_name($result, $i) == "ostolasku_ei_eu_raaka_aine") or
-  (mysql_field_name($result, $i) == "ennakkoon_maksettujen_varastotili") or
+  (mysql_field_name($result, $i) == "ennakkolaskun_asiakasvarasto") or
+  (mysql_field_name($result, $i) == "varastonmuutos_rahti") or
   (mysql_field_name($result, $i) == "raaka_ainevarasto") or
   (mysql_field_name($result, $i) == "raaka_ainevarastonmuutos") or
   (mysql_field_name($result, $i) == "varastonmuutos_valmistuksesta") or
@@ -126,8 +127,7 @@ if ((mysql_field_name($result, $i) == "kassa") or
   (mysql_field_name($result, $i) == "osto_rahti") or
   (mysql_field_name($result, $i) == "osto_kulu") or
   (mysql_field_name($result, $i) == "osto_rivi_kulu") or
-  (mysql_field_name($result, $i) == "tilino_triang") or
-  (mysql_field_name($result, $i) == "myynti_maksettu")) {
+  (mysql_field_name($result, $i) == "tilino_triang")) {
 
   if ($ulosarray[$i] != '') {
     $ulos=$ulosarray[$i];
@@ -192,7 +192,8 @@ if ((mysql_field_name($result, $i) == "kassa") or
       elseif (mysql_field_name($result, $i) == "konsernivelat")           $query .= " and nimi regexp 'kons' and nimi regexp '(velka|velat)'  ";
       elseif (mysql_field_name($result, $i) == "konserniostovelat")         $query .= " and nimi regexp 'kons' and nimi regexp '(osto|hankin)' and nimi regexp '(velka|velat)'  ";
       elseif (mysql_field_name($result, $i) == "konsernimyyntisaamiset")       $query .= " and nimi regexp 'kons' and nimi regexp 'saam' ";
-      elseif (mysql_field_name($result, $i) == "myynti_maksettu")       $query .= " and nimi regexp 'myyn' and nimi regexp 'maks' ";
+      elseif (mysql_field_name($result, $i) == "ennakkolaskun_asiakasvarasto")       $query .= " and nimi regexp 'enna' and nimi regexp 'asiakas' ";
+      elseif (mysql_field_name($result, $i) == "varastonmuutos_rahti")       $query .= " and nimi regexp 'var' and nimi regexp 'muut' and nimi regexp 'rahti' ";
       else $query = "";
 
       if ($query != "") {

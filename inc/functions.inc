@@ -35047,6 +35047,7 @@ if (!function_exists("tilauksen_seurantalinkit")) {
 
           $seurantakoodit[] = array(
             "id" => $nro,
+            "link" => "https://www.matkahuolto.fi/seuranta/tilanne/?package_code={$nro}"
           );
         }
       }

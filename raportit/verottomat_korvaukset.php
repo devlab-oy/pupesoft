@@ -163,7 +163,7 @@ if ($tee == "NAYTA") {
                 JOIN tuote ON (tuote.yhtio = lasku.yhtio and tuote.tuoteno = tilausrivi.tuoteno and tuote.tuotetyyppi IN ('A','B') and tuote.kuvaus = '$row[kuvaus]')
                 LEFT JOIN kuka ON (kuka.yhtio = lasku.yhtio and kuka.kuka = lasku.toim_ovttunnus)
                 WHERE lasku.yhtio      = '$kukarow[yhtio]'
-                AND lasku.tila         = 'Y'
+                AND lasku.tila         in ('Y','M','P','Q')
                 AND lasku.tilaustyyppi = 'M'
                 AND lasku.tapvm        >= '$vv-01-01'
                 AND lasku.tapvm        <= '$vv-12-31'

@@ -25,6 +25,8 @@ class ViidakkoStoreSaldot {
 
       $url = $this->apiurl."/stocks";
 
+      unset($product_row['original_product_code']);
+
       echo "\nvar_dump stocks:<pre>",var_dump($product_row);
 
       $data_json = json_encode($product_row);

@@ -35,14 +35,25 @@ class ViidakkoStoreTuotteet {
       $current++;
       $response_array = json_decode($response);
 
-      #echo "\n check\n";
-      #echo "\nvar_dump products:<pre>",var_dump($response_array);
+      echo "\n check\n";
+      echo "\nvar_dump products:<pre>",var_dump($response_array);
 
       if (isset($response_array->items[0]->id) and !empty($response_array->items[0]->id)) {
+
         echo "\n---------200---------\n";
         $this->logger->log("[{$current}/{$total}] tuote {$product["product_code"]} löytyy kaupasta");
+
         // lets check store product id
-        $this->update_id($product['id'], $response_array->items[0]);
+        // if original_product_code then us it
+        if (!empty($product['original_product_code'])) {
+          $product_code = $product['original_product_code'];
+        }
+        else {
+          $product_code = $product['product_code'];
+        }
+
+        $this->update_id($product['id'], $product_code, $response_array->items[0]->id);
+
         // lets update product with correct id
         $product['id'] = $response_array->items[0]->id;
         #echo "\nvar_dump iidee:<pre>",var_dump($response_array->items[0]);
@@ -71,7 +82,9 @@ class ViidakkoStoreTuotteet {
   public function update_product($product) {
     $url = $this->apiurl."/products/".$product["id"];
 
+    // id:t ym ei tarvita updatessa
     unset($product['id']);
+    unset($product['original_product_code']);
 
     $data_json = json_encode($product);
     echo "\n---------UPDATETAAN---------\n";
@@ -99,8 +112,17 @@ class ViidakkoStoreTuotteet {
   public function insert_product($product) {
     $url = $this->apiurl."/products";
 
-    // id:tä ei tarvita insertissä
+    // if original_product_code then us it
+    if (!empty($product['original_product_code'])) {
+      $product_code = $product['original_product_code'];
+    }
+    else {
+      $product_code = $product['product_code'];
+    }
+
+    // id:tä ym ei tarvita insertissä
     unset($product['id']);
+    unset($product['original_product_code']);
 
     echo "<pre>",var_dump($product);
 
@@ -123,7 +145,7 @@ class ViidakkoStoreTuotteet {
 
     if (isset($response_array->items[0]->id) and !empty($response_array->items[0]->id)) {
       $this->logger->log("--> tuote {$product["product_code"]} lisätty");
-      $this->update_id("", $response_array->items[0]);
+      $this->update_id("", $product_code, $response_array->items[0]->id);
       echo "\nIIDEE PÄIVITETTY!!!\n";
     }
     else {
@@ -138,27 +160,27 @@ class ViidakkoStoreTuotteet {
     }
   }
 
-  public function update_id($id, $viidakko_product) {
+  public function update_id($id, $viidakko_productcode, $viidakko_id) {
     global $yhtiorow;
 
     if ($id== "") {
       $query = "  INSERT INTO tuotteen_avainsanat SET
                   yhtio       = '{$yhtiorow['yhtio']}',
-                  tuoteno     = '{$viidakko_product->product_code}',
+                  tuoteno     = '{$viidakko_productcode}',
                   laji        = 'viidakko_tuoteno',
-                  selite      = '{$viidakko_product->id}',
+                  selite      = '{$viidakko_id}',
                   laatija     = 'viidakkostore',
                   luontiaika  = now() ON DUPLICATE KEY UPDATE
                   muuttaja    = 'viidakkostore',
                   muutospvm   = now()";
       $insert_res = pupe_query($query);
     }
-    elseif ($id != $viidakko_product->id) {
+    elseif ($id != $viidakko_id) {
       $query = "  UPDATE tuotteen_avainsanat SET
                   yhtio       = '{$yhtiorow['yhtio']}',
-                  tuoteno     = '{$viidakko_product->product_code}',
+                  tuoteno     = '{$viidakko_productcode}',
                   laji        = 'viidakko_tuoteno',
-                  selite      = '{$viidakko_product->id}',
+                  selite      = '{$viidakko_id}',
                   muuttaja    = 'viidakkostore',
                   muutospvm   = now()";
       $update_res = pupe_query($query);

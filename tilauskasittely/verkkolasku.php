@@ -393,6 +393,7 @@ else {
               liitetiedostot READ,
               maat READ,
               maksuehto READ,
+              maksupositio READ,
               pakkaus READ,
               pankkiyhteystiedot READ,
               panttitili WRITE,

@@ -1139,6 +1139,12 @@ if ($tee == 'MUUTA') {
             "</option>";
         }
 
+        $sel = '';
+        if ($krow["kuittitulostin"] == "-88") {
+            $sel = 'selected';
+        }
+        echo "<option value='-88' {$sel}>".t("PDF-Ruudulle")."</option>";
+
         echo "</select></td></tr>";
 
         echo "<tr><th align='left'>", t("Lähetetulostin"), ":</th>";

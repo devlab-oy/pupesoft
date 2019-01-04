@@ -59,8 +59,33 @@ else {
   echo "<font class='head'>".t("Masterdata excel")."</font><hr>";
 
   $ytunnus = trim($ytunnus);
+  if (isset($masterdataexcel_datatyyppi)) $datatyyppi = $masterdataexcel_datatyyppi;
 
-  if ($tee != '' and $kukarow["extranet"] == '' and isset($ajahinnasto)) {
+  $jointilausrivi = "";
+
+  // tarkistetaan tilausnumero, jos annettu
+  if (isset($tilausnumero) and !empty($tilausnumero)) {
+
+    $query = "  SELECT tunnus
+                FROM lasku
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND tunnus = '$tilausnumero'
+                ";
+    $tilres = pupe_query($query);
+
+    if (mysql_num_rows($tilres) == 1) {
+      $jointilausrivi = " JOIN tilausrivi ON (tilausrivi.yhtio = tuote.yhtio AND tilausrivi.otunnus = '$tilausnumero' AND tilausrivi.tuoteno = tuote.tuoteno AND tilausrivi.tyyppi = 'L' AND tilausrivi.var not in ('O','S'))";
+    }
+    else {
+      $tee = "";
+      echo "<br><br><font class='error'>".t("Tilausnumerolla ei löytynyt yhtään tilausta!")."</font><br>";
+    }
+  }
+  else {
+    $tilausnumero = "";
+  }
+
+  if ($tee != '' and $kukarow["extranet"] == '' and isset($ajahinnasto) and empty($jointilausrivi)) {
 
     if (isset($muutparametrit)) {
       $muutparametrit  = unserialize(urldecode($muutparametrit));
@@ -83,21 +108,13 @@ else {
     exit;
   }
 
+  // jos tultiin asiakashausta ja jouduttiin valitsemaan asiakas monesta
+  if (!isset($asiakasrow["tunnus"]) and isset($asiakasid)) $asiakas = $asiakasid;
+
   //Käyttöliittymä
   echo "<br>";
   echo "<table><form method='post'>";
   echo "<input type='hidden' name='tee' value='kaikki'>";
-
-  if ($datatyyppi == "orderform") {
-    if ($asiakas > 0) {
-      echo "<tr><th>".t("Asiakas").":</th><td><input type='hidden' name='ytunnus' value='$ytunnus'>$ytunnus $asiakasrow[nimi]</td></tr>";
-
-      echo "<input type='hidden' name='asiakasid' value='$asiakas'></td></tr>";
-    }
-    else {
-      echo "<tr><th>".t("Asiakas").":</th><td><input type='text' name='ytunnus' size='15' value=''></td></tr>";
-    }
-  }
 
   echo "<tr><th>".t("Datatyyppi").":</th><td><select name='datatyyppi' onchange='submit()'>";
   $sel = "";
@@ -129,6 +146,20 @@ else {
 
   if (!isset($hinkieli)) {
     $hinkieli = $yhtiorow['kieli'];
+  }
+
+  if ($datatyyppi == "orderform") {
+    if ($asiakas > 0) {
+      echo "<tr><th>".t("Asiakas").":</th><td><input type='hidden' name='ytunnus' value='$ytunnus'>$ytunnus $asiakasrow[nimi]</td></tr>";
+
+      echo "<input type='hidden' name='asiakasid' value='$asiakas'></td></tr>";
+    }
+    else {
+      echo "<tr><th>".t("Asiakas").":</th><td><input type='text' name='ytunnus' size='15' value=''></td></tr>";
+    }
+  }
+  else {
+    echo "<tr><th>".t("Tilausnumero").":<br>(".t("rajaus tilauksen tuotteilla, valinnainen").")</th><td><input type='text' name='tilausnumero' size='15' value='$tilausnumero'>$tilausnumero</td></tr>";
   }
 
   // Monivalintalaatikot (osasto, try tuotemerkki...)
@@ -212,6 +243,7 @@ else {
 
     $query = "SELECT tuote.*
               FROM tuote
+              {$jointilausrivi}
               WHERE tuote.yhtio      = '{$kukarow['yhtio']}'
               and tuote.status       NOT IN ('P','X')
               and tuote.tuotetyyppi  NOT IN ('A', 'B')

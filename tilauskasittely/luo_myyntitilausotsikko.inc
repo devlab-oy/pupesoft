@@ -43,6 +43,7 @@ if (!function_exists("luo_myyntitilausotsikko")) {
       $tpostitp          = $asiakasrow["toim_postitp"];
       $toim_maa          = $asiakasrow["toim_maa"];
       $tpuh              = $asiakasrow["toim_puh"];
+      $temail            = $asiakasrow["email"];
       $laskutus_nimi     = $asiakasrow["laskutus_nimi"];
       $laskutus_nimitark = $asiakasrow["laskutus_nimitark"];
       $laskutus_osoite   = $asiakasrow["laskutus_osoite"];
@@ -126,6 +127,21 @@ if (!function_exists("luo_myyntitilausotsikko")) {
 
       if (!isset($myyja) or $myyja == 0) {
         $myyja = $kukarow["tunnus"];
+      }
+
+      if ($yhtiorow['asiakasmyyja_tilaukselle'] == 'A' and $asiakasrow['myyjanro'] != 0) {
+
+        $apuqu = "SELECT *
+                  from kuka use index (yhtio_myyja)
+                  where yhtio = '$kukarow[yhtio]'
+                  and myyja   = '{$asiakasrow["myyjanro"]}'
+                  AND myyja   > 0";
+        $meapu = pupe_query($apuqu);
+
+        if (mysql_num_rows($meapu) == 1) {
+          $apuro = mysql_fetch_assoc($meapu);
+          $myyja = $apuro['tunnus'];
+        }
       }
 
       $alv         = $asiakasrow["alv"];

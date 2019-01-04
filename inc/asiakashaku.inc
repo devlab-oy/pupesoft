@@ -78,7 +78,7 @@ if ($kukarow["piirit"] != "") {
 
 if (is_numeric($asiakasid) and $asiakasid > 0) {
   // Jos asiakaan tunnus on löydetty niin ei rajata "$asiakasrajaus":lla ollenkaan
-  $query  = "SELECT asiakas.*, yhtio.nimi yhtionimi,
+  $query  = "SELECT asiakas.*, asiakas.email AS toim_email, yhtio.nimi yhtionimi,
              if(asiakas.gsm != '', asiakas.gsm,
                if(asiakas.tyopuhelin != '', asiakas.tyopuhelin,
                  if(asiakas.puhelin != '', asiakas.puhelin, ''))) AS toim_puh
@@ -96,7 +96,7 @@ elseif ($ytunnus != '') {
     $ytunnus = substr($ytunnus, 1);
 
     $query  = "SELECT lasku.nimi, lasku.nimitark, lasku.osoite, lasku.postino, lasku.postitp, lasku.toim_nimi,
-               lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp,
+               lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp, asiakas.email AS toim_email,
                concat('£',lasku.tunnus) ytunnus, concat('£',lasku.tunnus) tunnus, yhtio.nimi yhtionimi,
                if(asiakas.gsm != '', asiakas.gsm,
                 if(asiakas.tyopuhelin != '', asiakas.tyopuhelin,
@@ -119,7 +119,7 @@ elseif ($ytunnus != '') {
 
     // kokeillaan ihan asiakkaan nimellä laskulta
     $query  = "SELECT lasku.nimi, lasku.nimitark, lasku.osoite, lasku.postino, lasku.postitp, lasku.toim_nimi,
-               lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp,
+               lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp, asiakas.email AS toim_email,
                concat('£',max(lasku.tunnus)) ytunnus, concat('£',max(lasku.tunnus)) tunnus, yhtio.nimi yhtionimi,
                 if(asiakas.gsm != '', asiakas.gsm,
                 if(asiakas.tyopuhelin != '', asiakas.tyopuhelin,
@@ -526,6 +526,8 @@ elseif ($monta > 1 and $monta <= $limit) {
       }
     }
 
+    $vastuumyyja_result = t_avainsana("VASTUUMYYJA", "", " and avainsana.selite = 'Asiakashaku'");
+    $onvastuumyyja   = mysql_num_rows($vastuumyyja_result) !== 0;
     //tämä vain otsik.php:tä varten
     echo $lause;
 
@@ -544,7 +546,9 @@ elseif ($monta > 1 and $monta <= $limit) {
     if ($on_piireja) {
       echo "<th>" . t("piiri") . "</th>";
     }
-
+    if ($onvastuumyyja) {
+      echo "<th>" . t("Vastuumyyjä") . "</th>";
+    }
     if ($yh_match) {
       echo "<th>" . t("yhteyshenkilö") . "</th>";
     }
@@ -581,6 +585,7 @@ elseif ($monta > 1 and $monta <= $limit) {
       echo "<input type='hidden' name='tilaustyyppi' value='$tilaustyyppi'>";
       echo "<input type='hidden' name='toim' value='$toim'>";
       echo "<input type='hidden' name='tuoteno' value='$tuoteno'>";
+      echo "<input type='hidden' name='masterdataexcel_datatyyppi' value='$datatyyppi'>";
       echo "<input type='hidden' name='var' value='$var'>";
       echo "<input type='hidden' name='muutparametrit' value='$muutparametrit'>";
       echo "<input type='hidden' name='vain_toimittamattomat' value='{$vain_toimittamattomat}' />";
@@ -695,6 +700,25 @@ elseif ($monta > 1 and $monta <= $limit) {
         else {
           echo "<td></td>";
         }
+      }  
+      if ($onvastuumyyja) {
+        if ($asiakas['myyjanro'] != 0) {
+          $apuqu = "SELECT *
+                    FROM kuka use index (yhtio_myyja)
+                    WHERE yhtio = '$kukarow[yhtio]'
+                    AND myyja   = '$asiakas[myyjanro]'
+                    AND myyja   > 0";
+          $meapu = pupe_query($apuqu);
+          
+          if (mysql_num_rows($meapu) == 1) {
+            $apuro = mysql_fetch_assoc($meapu);
+            $myyja = $apuro['nimi'];
+          }
+          echo "<td>{$apuro['nimi']}</td>";
+        }
+        else {
+          echo "<td></td>";
+        }
       }
 
       $hintojen_vaihto = isset($hintojen_vaihto) ? $hintojen_vaihto : 'JOO';
@@ -720,6 +744,7 @@ elseif ($monta > 1 and $monta <= $limit) {
       echo "<input type='hidden' name='myyja'       value='$myyja'>";
       echo "<input type='hidden' name='myyjanro'       value='$myyjanro'>";
       echo "<input type='hidden' name='tuoteno'       value='$tuoteno'>";
+      echo "<input type='hidden' name='masterdataexcel_datatyyppi' value='$datatyyppi'>";
       echo "<input type='hidden' name='lasku_yhtio'    value='$asiakas[yhtio]'>";
       echo "<input type='hidden' name='tarra_aineisto'  value='$tarra_aineisto'>";
       echo "<input type='hidden' name='hintojen_vaihto' value='$hintojen_vaihto'>";
@@ -797,6 +822,7 @@ if ($monta != 1) {
       echo "<input type='hidden' name='myyjanro'        value='$myyjanro'>";
       echo "<input type='hidden' name='lasku_yhtio'     value='$asiakas[yhtio]'>";
       echo "<input type='hidden' name='tuoteno'        value='$tuoteno'>";
+      echo "<input type='hidden' name='masterdataexcel_datatyyppi' value='$datatyyppi'>";
       echo "<input type='hidden' name='tarra_aineisto'   value='$tarra_aineisto'>";
       echo "<input type='hidden' name='yhtiotoimipaikka' value='{$yhtiotoimipaikka}' />";
       echo "<input type='hidden' name='tilaustyyppi'     value='{$tilaustyyppi}' />";
@@ -871,6 +897,7 @@ if ($monta != 1) {
     echo "<input type='hidden' name='tilaustyyppi' value='$tilaustyyppi'>";
     echo "<input type='hidden' name='toim' value='$toim'>";
     echo "<input type='hidden' name='tuoteno' value='$tuoteno'>";
+    echo "<input type='hidden' name='masterdataexcel_datatyyppi' value='$datatyyppi'>";
     echo "<input type='hidden' name='var' value='$var'>";
     echo "<input type='hidden' name='muutparametrit' value='{$muutparametrit}'>";
     echo "<input type='hidden' name='vain_toimittamattomat' value='{$vain_toimittamattomat}' />";
@@ -898,6 +925,7 @@ if ($monta != 1) {
     echo "<input type='hidden' name='myyja'            value='$myyja'>";
     echo "<input type='hidden' name='myyjanro'         value='$myyjanro'>";
     echo "<input type='hidden' name='tuoteno'          value='$tuoteno'>";
+    echo "<input type='hidden' name='masterdataexcel_datatyyppi' value='$datatyyppi'>";
     echo "<input type='hidden' name='tarra_aineisto'   value='$tarra_aineisto'>";
     echo "<input type='hidden' name='vain_toimittamattomat' value='{$vain_toimittamattomat}' />";
 

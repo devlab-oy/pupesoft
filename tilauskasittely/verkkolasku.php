@@ -393,6 +393,7 @@ else {
               liitetiedostot READ,
               maat READ,
               maksuehto READ,
+              maksupositio READ,
               pakkaus READ,
               pankkiyhteystiedot READ,
               panttitili WRITE,
@@ -720,7 +721,7 @@ else {
         $lasklisa .= " and lasku.tunnus != '$laskurow[tunnus]' ";
 
         if ($silent == "" or $silent == "VIENTI") {
-          $tulos_ulos_sarjanumerot .= sprintf(t("Tilauksella %s oli JT-rivejä ja osatoimitusta ei tehdä, eli se jätettiin odottamaan JT-tuotteita."), $laskurow["tunnus"])."<br>\n";
+          $tulos_ulos .= "<br>\n".sprintf(t("Tilauksella %s oli JT-rivejä ja osatoimitusta ei tehdä, eli se jätettiin odottamaan JT-tuotteita."), $laskurow["tunnus"])."<br>\n";
         }
       }
 
@@ -767,7 +768,7 @@ else {
             $lasklisa .= " and lasku.tunnus != '$laskurow[tunnus]' ";
 
             if ($silent == "" or $silent == "VIENTI") {
-              $tulos_ulos_sarjanumerot .= "<font class='error'>".t("Tilausta ei voida laskuttaa arvioidulla keskihankintahinnalla").": $laskurow[tunnus] $srow1[tuoteno]!!!</font><br>\n";
+              $tulos_ulos .= "<br>\n"."<font class='error'>".t("Tilausta ei voida laskuttaa arvioidulla keskihankintahinnalla").": $laskurow[tunnus] $srow1[tuoteno]!!!</font><br>\n";
             }
           }
         }
@@ -784,7 +785,7 @@ else {
           $lasklisa .= " and lasku.tunnus != '$laskurow[tunnus]' ";
 
           if ($silent == "" or $silent == "VIENTI") {
-            $tulos_ulos_sarjanumerot .= t("Tilauksella virheellisiä verokantoja").": $laskurow[tunnus] $srow1[tuoteno] $srow1[alv]!!!<br>\n";
+            $tulos_ulos .= "<br>\n".t("Tilauksella virheellisiä verokantoja").": $laskurow[tunnus] $srow1[tuoteno] $srow1[alv]!!!<br>\n";
           }
         }
 
@@ -2819,12 +2820,21 @@ else {
             }
           }
           elseif ($masrow["kateinen"] != '') {
-            if ($silent == "") {
-              $tulos_ulos .= "<br>\n".t("Käteislaskua ei lähetetty")."! $lasrow[laskunro] $lasrow[nimi]<br>\n";
+
+            // halutaan lähettää lasku suoraan asiakkaalle sähköpostilla.. mutta ei nollalaskua
+            // ja nimenomaan etukäteen maksetuissa Magento-verkkokauppatilauksissa
+            if ($lasrow["chn"] == "666" and $lasrow["summa"] != 0 and isset($verkkokauppa_email_kuitti) and $verkkokauppa_email_kuitti == 'JOO' and $lasrow["laatija"] == 'Magento') {
+              $tulostettavat_email[] = $lasrow["tunnus"];
+            }
+            else {
+              if ($silent == "") {
+                $tulos_ulos .= "<br>\n".t("Käteislaskua ei lähetetty")."! $lasrow[laskunro] $lasrow[nimi]<br>\n";
+              }
+
+              // Käteislaskuja ei lähetetä ulos mutta ne halutaan kuitenkin tulostaa itse
+              $tulostettavat[] = $lasrow["tunnus"];
             }
 
-            // Käteislaskuja ei lähetetä ulos mutta ne halutaan kuitenkin tulostaa itse
-            $tulostettavat[] = $lasrow["tunnus"];
             $lask++;
           }
           elseif ($lasrow["vienti"] != '' or $masrow["itsetulostus"] != '' or $lasrow["chn"] == "666" or $lasrow["chn"] == '667') {

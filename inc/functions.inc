@@ -13466,6 +13466,13 @@ if (!function_exists("tulosta_logo_pdf")) {
           $logoparam['scale'] = $lasku_logo_koko_y  / $isizelogo[1];
         }
 
+        # Keskelle
+        if ((int) $lasku_logo_positio_x < 0) {
+          $keskikohta = $lasku_logo_positio_x / 2 * -1;
+          $kuvanleveys = $logoparam['scale']*$isizelogo[0];
+          $lasku_logo_positio_x = round($keskikohta - ($kuvanleveys / 2));
+        }
+
         $placement = $pdf->image_place($image, $lasku_logo_positio_y-($logoparam['scale']*$isizelogo[1]), $lasku_logo_positio_x, $thispage, $logoparam);
         return $lasku_logo_positio_y-($logoparam['scale']*$isizelogo[1]);
       }
@@ -21042,7 +21049,8 @@ if (!function_exists("pupesoft_tulosta_lahete")) {
     $query = "SELECT luokka, puhelin,
               if (asiakasnro!='', asiakasnro, ytunnus) asiakasnro,
               asiakasnro as asiakasnro_aito,
-              kieli
+              kieli,
+              asiakasviivakoodi
               FROM asiakas
               WHERE tunnus = '$laskurow[liitostunnus]'
               and yhtio    = '$kukarow[yhtio]'";
@@ -26645,6 +26653,28 @@ if (!function_exists("hae_viivakoodilla")) {
                LIMIT 200";
     $chk_res = pupe_query($query);
 
+    if (mysql_num_rows($chk_res) == 0) {
+      $viivakooditark = substr($viivakoodi, 0 , -1);
+      // Haetaan eankoodilla ilman tarkistusnumeroa tuotenumeroa kolmesta eri paikkaa
+      $query = "(SELECT tuoteno, '' liitostunnus
+                 FROM tuote
+                 WHERE yhtio                                      = '{$kukarow['yhtio']}'
+                 AND eankoodi                                     = '{$viivakooditark}')
+                 UNION
+                 (SELECT tuoteno, liitostunnus
+                 FROM tuotteen_toimittajat
+                 WHERE yhtio                                      = '{$kukarow['yhtio']}'
+                 AND viivakoodi                                   = '{$viivakooditark}')
+                 UNION
+                 (SELECT tuotteen_toimittajat.tuoteno, tuotteen_toimittajat.liitostunnus
+                 FROM tuotteen_toimittajat_tuotenumerot
+                 JOIN tuotteen_toimittajat ON (tuotteen_toimittajat_tuotenumerot.yhtio = tuotteen_toimittajat.yhtio
+                 AND tuotteen_toimittajat.tunnus                  = tuotteen_toimittajat_tuotenumerot.toim_tuoteno_tunnus)
+                 WHERE tuotteen_toimittajat_tuotenumerot.yhtio    = '{$kukarow['yhtio']}'
+                 AND tuotteen_toimittajat_tuotenumerot.viivakoodi = '{$viivakooditark}')
+                 LIMIT 200";
+      $chk_res = pupe_query($query);
+    }
     while ($row = mysql_fetch_assoc($chk_res)) {
       $viivakoodit[$row['tuoteno']][] = $row['liitostunnus'];
     }
@@ -27082,8 +27112,53 @@ if (!function_exists('hyllysiirto')) {
       $result = pupe_query($query);
     }
 
+    $asiakasvarasto_case = false;
+
+    // Jos tiliöidään ennakkolaskun varastosiirto eri tilille
+    // Katsotaan ensiksi että parametrit mahdollistaa tämän
+    if (!empty($yhtiorow["ennakkolaskun_asiakasvarasto"]) and !empty($yhtiorow["asiakasvarasto"]) and !empty($tun)) {
+
+      // Tarkistetaan vielä et siirtorivi on linkattu
+      // myyntitilausriviin ja kyseisellä myyntitilauksella
+      // on maksupositioita (100%) = ennakkolaskun kautta
+      // muodostunut varastosiirto (100% ennakkolasku)
+
+      $query = "SELECT tilausrivilinkki
+                FROM tilausrivin_lisatiedot
+                WHERE tilausrivitunnus = '$tun'
+                and yhtio   = '$kukarow[yhtio]'";
+      $result = pupe_query($query);
+
+      if (mysql_num_rows($result) == 1) {
+        $siirtolisatieto_row = mysql_fetch_assoc($result);
+
+        $query = "SELECT otunnus
+                  FROM tilausrivi
+                  WHERE tunnus = '{$siirtolisatieto_row['tilausrivilinkki']}'
+                  and yhtio   = '{$kukarow['yhtio']}'";
+        $result = pupe_query($query);
+
+        if (mysql_num_rows($result) == 1) {
+
+          $mytil_row = mysql_fetch_assoc($result);
+
+          $query = "SELECT tunnus
+                      FROM maksupositio
+                      WHERE yhtio = '{$kukarow['yhtio']}'
+                      AND otunnus = '{$mytil_row['otunnus']}'
+                      AND osuus = '100.00'";
+
+          $result = pupe_query($query);
+
+          if (mysql_num_rows($result) == 1) {
+            $asiakasvarasto_case = true;
+          }
+        }
+      }
+    }
+
     // Tehdään kirjanpito
-    if ($yhtiorow["tarkenteiden_prioriteetti"] == "T") {
+    if ($yhtiorow["tarkenteiden_prioriteetti"] == "T" or $asiakasvarasto_case) {
       // Lähettävä varasto
       $mistavarasto = kuuluukovarastoon($mistarow['hyllyalue'], $mistarow['hyllynro']);
       $minnevarasto = kuuluukovarastoon($minnerow['hyllyalue'], $minnerow['hyllynro']);
@@ -27132,7 +27207,7 @@ if (!function_exists('hyllysiirto')) {
         if ($mista_projekti == 0) $mista_projekti = $toimirow['projekti'];
       }
 
-      if ($mista_kustp > 0 or $mista_kohde > 0 or $mista_projekti > 0) {
+      if ($mista_kustp > 0 or $mista_kohde > 0 or $mista_projekti > 0 or $asiakasvarasto_case) {
         $minne_kustp    = 0;
         $minne_kohde    = 0;
         $minne_projekti = 0;
@@ -27174,7 +27249,7 @@ if (!function_exists('hyllysiirto')) {
         $varastonmuutos = round($kappaleet * $keskihankintahinta, 2);
         $varastonmuutos_neg = round(-1 * $kappaleet * $keskihankintahinta, 2);
 
-        if ($varastonmuutos != 0 and $mennaanko) {
+        if (($varastonmuutos != 0 and $mennaanko) or $asiakasvarasto_case) {
 
           $laskuid = 0;
 
@@ -27231,7 +27306,6 @@ if (!function_exists('hyllysiirto')) {
               $varastonmuutostili = $yhtiorow["raaka_ainevarastonmuutos"];
             }
           }
-
 
           // Mistä varasto
           $query = "INSERT into tiliointi set
@@ -27306,6 +27380,10 @@ if (!function_exists('hyllysiirto')) {
                       laatija         = '$kukarow[kuka]',
                       laadittu        = now()";
             $result = pupe_query($query);
+          }
+
+          if ($asiakasvarasto_case) {
+            $varastotili = $yhtiorow["ennakkolaskun_asiakasvarasto"];
           }
 
           // Minne varasto
@@ -31371,9 +31449,9 @@ if (!function_exists("tallenna_tiliote_viite")) {
           $onko_vipn = (substr($tilino, 0, 1) == 'S') ? 1 : 0;
           $tilino = substr($tilino, 1, 14);
           fseek($fd, $pointterin_paikka);
-          
+
           $ppg_uusitilino = trim(substr($tietue, 16, 6));
-            
+
           if ($onko_vipn) {
             $query = "SELECT tilino
                       FROM yriti
@@ -34662,7 +34740,7 @@ if (!function_exists("laskun_hyvaksyjia")) {
 }
 
 if (!function_exists("viennin_lisatiedot")) {
-  function viennin_lisatiedot($otunnus) {
+  function viennin_lisatiedot($otunnus, $viennin_lisatietojen_automsyotto) {
     global $kukarow, $yhtiorow;
 
     $from_viennin_lisatiedot_funktio = True;
@@ -34697,68 +34775,71 @@ if (!function_exists("viennin_lisatiedot")) {
     $result = pupe_query($query);
     $asiakasrow = mysql_fetch_assoc($result);
 
-    // otetaan defaultit asiakkaalta jos laskulla ei ole mitään
-    if ($laskurow["poistumistoimipaikka_koodi"]       == "") $laskurow["poistumistoimipaikka_koodi"]       = $asiakasrow["poistumistoimipaikka_koodi"];
-    if ($laskurow["kuljetusmuoto"]                    ==  0) $laskurow["kuljetusmuoto"]                    = $asiakasrow["kuljetusmuoto"];
-    if ($laskurow["kauppatapahtuman_luonne"]          ==  0) $laskurow["kauppatapahtuman_luonne"]          = $asiakasrow["kauppatapahtuman_luonne"];
-    if ($laskurow["aktiivinen_kuljetus_kansallisuus"] == "") $laskurow["aktiivinen_kuljetus_kansallisuus"] = $asiakasrow["aktiivinen_kuljetus_kansallisuus"];
-    if ($laskurow["aktiivinen_kuljetus"]              == "") $laskurow["aktiivinen_kuljetus"]              = $asiakasrow["aktiivinen_kuljetus"];
-    if ($laskurow["kontti"]                           ==  0) $laskurow["kontti"]                           = $asiakasrow["kontti"];
-    if ($laskurow["sisamaan_kuljetusmuoto"]           ==  0) $laskurow["sisamaan_kuljetusmuoto"]           = $asiakasrow["sisamaan_kuljetusmuoto"];
-    if ($laskurow["sisamaan_kuljetus_kansallisuus"]   == "") $laskurow["sisamaan_kuljetus_kansallisuus"]   = $asiakasrow["sisamaan_kuljetus_kansallisuus"];
-    if ($laskurow["sisamaan_kuljetus"]                == "") $laskurow["sisamaan_kuljetus"]                = $asiakasrow["sisamaan_kuljetus"];
-    if ($laskurow["maa_maara"]                        == "") $laskurow["maa_maara"]                        = $asiakasrow["maa_maara"];
+    if (!$viennin_lisatietojen_automsyotto or ($viennin_lisatietojen_automsyotto and ($asiakasrow["vientitietojen_autosyotto"] == "K" or
+      $yhtiorow["vientitietojen_autosyotto"]  == "K"))) {
+      // otetaan defaultit asiakkaalta jos laskulla ei ole mitään
+      if ($laskurow["poistumistoimipaikka_koodi"]       == "") $laskurow["poistumistoimipaikka_koodi"]       = $asiakasrow["poistumistoimipaikka_koodi"];
+      if ($laskurow["kuljetusmuoto"]                    ==  0) $laskurow["kuljetusmuoto"]                    = $asiakasrow["kuljetusmuoto"];
+      if ($laskurow["kauppatapahtuman_luonne"]          ==  0) $laskurow["kauppatapahtuman_luonne"]          = $asiakasrow["kauppatapahtuman_luonne"];
+      if ($laskurow["aktiivinen_kuljetus_kansallisuus"] == "") $laskurow["aktiivinen_kuljetus_kansallisuus"] = $asiakasrow["aktiivinen_kuljetus_kansallisuus"];
+      if ($laskurow["aktiivinen_kuljetus"]              == "") $laskurow["aktiivinen_kuljetus"]              = $asiakasrow["aktiivinen_kuljetus"];
+      if ($laskurow["kontti"]                           ==  0) $laskurow["kontti"]                           = $asiakasrow["kontti"];
+      if ($laskurow["sisamaan_kuljetusmuoto"]           ==  0) $laskurow["sisamaan_kuljetusmuoto"]           = $asiakasrow["sisamaan_kuljetusmuoto"];
+      if ($laskurow["sisamaan_kuljetus_kansallisuus"]   == "") $laskurow["sisamaan_kuljetus_kansallisuus"]   = $asiakasrow["sisamaan_kuljetus_kansallisuus"];
+      if ($laskurow["sisamaan_kuljetus"]                == "") $laskurow["sisamaan_kuljetus"]                = $asiakasrow["sisamaan_kuljetus"];
+      if ($laskurow["maa_maara"]                        == "") $laskurow["maa_maara"]                        = $asiakasrow["maa_maara"];
 
-    $maa_maara = $laskurow["maa_maara"];
+      $maa_maara = $laskurow["maa_maara"];
 
-    if ($laskurow["vienti"] == "K") {
-      $sisamaan_kuljetus = $laskurow["sisamaan_kuljetus"];
-      $sisamaan_kuljetus_kansallisuus = $laskurow["sisamaan_kuljetus_kansallisuus"];
-      $sisamaan_kuljetusmuoto = $laskurow["sisamaan_kuljetusmuoto"];
-      $kontti = $laskurow["kontti"];
-      $aktiivinen_kuljetus = $laskurow["aktiivinen_kuljetus"];
-      $aktiivinen_kuljetus_kansallisuus = $laskurow["aktiivinen_kuljetus_kansallisuus"];
-    }
+      if ($laskurow["vienti"] == "K") {
+        $sisamaan_kuljetus = $laskurow["sisamaan_kuljetus"];
+        $sisamaan_kuljetus_kansallisuus = $laskurow["sisamaan_kuljetus_kansallisuus"];
+        $sisamaan_kuljetusmuoto = $laskurow["sisamaan_kuljetusmuoto"];
+        $kontti = $laskurow["kontti"];
+        $aktiivinen_kuljetus = $laskurow["aktiivinen_kuljetus"];
+        $aktiivinen_kuljetus_kansallisuus = $laskurow["aktiivinen_kuljetus_kansallisuus"];
+      }
 
-    $kauppatapahtuman_luonne = $laskurow["kauppatapahtuman_luonne"];
-    $kuljetusmuoto = $laskurow["kuljetusmuoto"];
+      $kauppatapahtuman_luonne = $laskurow["kauppatapahtuman_luonne"];
+      $kuljetusmuoto = $laskurow["kuljetusmuoto"];
 
-    if ($laskurow["vienti"] == "K") {
-      $vresult = t_avainsana("TULLI");
+      if ($laskurow["vienti"] == "K") {
+        $vresult = t_avainsana("TULLI");
 
-      while ($vrow = mysql_fetch_assoc($vresult)) {
-        if ($laskurow["poistumistoimipaikka_koodi"] == $vrow["selite"]) {
-          $poistumistoimipaikka = "$vrow[selitetark]##$vrow[selite]";
+        while ($vrow = mysql_fetch_assoc($vresult)) {
+          if ($laskurow["poistumistoimipaikka_koodi"] == $vrow["selite"]) {
+            $poistumistoimipaikka = "$vrow[selitetark]##$vrow[selite]";
+          }
         }
+
+        if ($laskurow["lisattava_era"] == 0) {
+          $laskurow["lisattava_era"] = $yhtiorow["tulli_lisattava_era"];
+        }
+        if ($laskurow["vahennettava_era"] == 0) {
+          $laskurow["vahennettava_era"] = $yhtiorow["tulli_vahennettava_era"];
+        }
+
+        $vahennettava_era = $laskurow["vahennettava_era"];
+        $lisattava_era = $laskurow["lisattava_era"];
       }
 
-      if ($laskurow["lisattava_era"] == 0) {
-        $laskurow["lisattava_era"] = $yhtiorow["tulli_lisattava_era"];
-      }
-      if ($laskurow["vahennettava_era"] == 0) {
-        $laskurow["vahennettava_era"] = $yhtiorow["tulli_vahennettava_era"];
-      }
+      $bruttopaino = $laskurow["bruttopaino"];
+      $lomake_lisatiedot = $laskurow["comments"];
+      $aiotut_rajatoimipaikat = $laskurow["aiotut_rajatoimipaikat"];
+      $maaratoimipaikka = $laskurow["maaratoimipaikka"];
 
-      $vahennettava_era = $laskurow["vahennettava_era"];
-      $lisattava_era = $laskurow["lisattava_era"];
+      # Päivitetään viennin lisätiedot
+      require "tilauskasittely/vientitilauksen_lisatiedot.php";
+
+      $query = "SELECT alatila
+                FROM lasku
+                WHERE tunnus = $otunnus
+                and tila = 'L'
+                AND vienti  in ('K','E')
+                and yhtio = '$kukarow[yhtio]'";
+      $result = pupe_query($query);
+      $alatila = mysql_fetch_assoc($result);
     }
-
-    $bruttopaino = $laskurow["bruttopaino"];
-    $lomake_lisatiedot = $laskurow["comments"];
-    $aiotut_rajatoimipaikat = $laskurow["aiotut_rajatoimipaikat"];
-    $maaratoimipaikka = $laskurow["maaratoimipaikka"];
-
-    # Päivitetään viennin lisätiedot
-    require "tilauskasittely/vientitilauksen_lisatiedot.php";
-
-    $query = "SELECT alatila
-              FROM lasku
-              WHERE tunnus = $otunnus
-              and tila = 'L'
-              AND vienti  in ('K','E')
-              and yhtio = '$kukarow[yhtio]'";
-    $result = pupe_query($query);
-    $alatila = mysql_fetch_assoc($result);
 
     return $alatila['alatila'];
   }
@@ -35014,7 +35095,7 @@ if (!function_exists("tilauksen_seurantalinkit")) {
 
           $seurantakoodit[] = array(
             "id" => $nro,
-            "link" => "http://mhhkiweb1.matkahuolto.fi/scripts/loginetyleinen.wsc/002tapahtuma_new?spacketnum={$nro}"
+            "link" => "https://www.matkahuolto.fi/seuranta/tilanne/?package_code={$nro}"
           );
         }
       }

@@ -38,6 +38,9 @@ elseif ($toim == 'AVOIMET') {
 elseif ($toim == 'OSTO') {
   echo "<font class='head'>".t("Toimitusvarmuus / toimittajat").":</font><hr>";
 }
+elseif ($toim == 'KAIKKIAVOIMET') {
+  echo "<font class='head'>".t("Kaikki avoimet toimitusrivit").":</font><hr>";
+}
 
 if (isset($vaihda)) {
   unset($asiakasid);
@@ -49,11 +52,23 @@ if ($ytunnus != '' or (int) $asiakasid > 0 or (int) $toimittajaid > 0) {
 
   $muutparametrit = $vva."/".$kka."/".$ppa."/".$vvl."/".$kkl."/".$ppl."/".$tuoteno;
 
-  if ($toim == 'MYYNTI' or $toim == 'AVOIMET') {
+  if ($toim == 'MYYNTI' or $toim == 'AVOIMET' or $toim == 'KAIKKIAVOIMET') {
     require "inc/asiakashaku.inc";
+    if (empty($asiakasid)) {
+      unset($etsinappi);
+    }
+    else {
+      $etsinappi = TRUE;
+    }
   }
   elseif ($toim == 'OSTO') {
     require "../inc/kevyt_toimittajahaku.inc";
+    if (empty($toimittajaid)) {
+      unset($etsinappi);
+    }
+    else {
+      $etsinappi = TRUE;
+    }
   }
 }
 
@@ -70,9 +85,11 @@ function vaihdaClick() {
 </script>";
 
 //Etsi-kenttä
-echo "<br><table><form method='post' id='etsiform' name='etsiform'>
+echo "<br>
+    <form method='post' id='etsiform' name='etsiform'>
     <input type='hidden' name='toim' value='$toim'>
-    <input type='hidden' name='tee' value='ETSI'>";
+    <input type='hidden' name='tee' value='ETSIX'>
+    <table>";
 
 if ($kka == '')
   $kka = date("m", mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
@@ -88,7 +105,7 @@ if ($vvl == '')
 if ($ppl == '')
   $ppl = date("d");
 
-if ($toim == 'MYYNTI' or $toim == 'AVOIMET') {
+if ($toim == 'MYYNTI' or $toim == 'AVOIMET' or $toim == 'KAIKKIAVOIMET') {
   echo "<tr><th>".t("Asiakas").":</th>";
 }
 if ($toim == 'OSTO') {
@@ -96,7 +113,7 @@ if ($toim == 'OSTO') {
 }
 
 if ((int) $asiakasid > 0 or (int) $toimittajaid > 0) {
-  if ($toim == 'MYYNTI' or $toim == 'AVOIMET') {
+  if ($toim == 'MYYNTI' or $toim == 'AVOIMET' or $toim == 'KAIKKIAVOIMET') {
     echo "<td colspan='3'>";
     echo "$asiakasrow[nimi] $asiakasrow[nimitark]";
     echo "<input type='hidden' name='asiakasid' value='$asiakasid'>";
@@ -120,8 +137,8 @@ else {
 }
 
 echo "</tr>";
-echo "  <tr><th>".t("Syötä tuotenumero").":</th>
-    <td colspan='3'>";
+echo "<tr><th>".t("Syötä tuotenumero").":</th>
+      <td colspan='3'>";
 
 if (isset($tuoteno) and trim($ulos) != '') {
   echo $ulos;
@@ -130,29 +147,41 @@ else {
   echo "<input type='text' name='tuoteno' value='$tuoteno' size='20'>";
 }
 
-echo "</td></tr>";
+echo "</td>";
 
-if ($toim != 'AVOIMET') {
-  echo "<tr><th>".t("Syötä alkupäivämäärä (pp-kk-vvvv)")."</th>
-      <td><input type='text' name='ppa' value='$ppa' size='3'></td>
-      <td><input type='text' name='kka' value='$kka' size='3'></td>
-      <td><input type='text' name='vva' value='$vva' size='5'></td>
-      </tr><tr><th>".t("Syötä loppupäivämäärä (pp-kk-vvvv)")."</th>
-      <td><input type='text' name='ppl' value='$ppl' size='3'></td>
-      <td><input type='text' name='kkl' value='$kkl' size='3'></td>
-      <td><input type='text' name='vvl' value='$vvl' size='5'></td>";
+if ($toim != 'AVOIMET' and $toim != 'KAIKKIAVOIMET') {
+  echo "</tr><tr><th>".t("Syötä alkupäivämäärä (pp-kk-vvvv)")."</th>
+        <td><input type='text' name='ppa' value='$ppa' size='3'></td>
+        <td><input type='text' name='kka' value='$kka' size='3'></td>
+        <td><input type='text' name='vva' value='$vva' size='5'></td>
+        </tr><tr><th>".t("Syötä loppupäivämäärä (pp-kk-vvvv)")."</th>
+        <td><input type='text' name='ppl' value='$ppl' size='3'></td>
+        <td><input type='text' name='kkl' value='$kkl' size='3'></td>
+        <td><input type='text' name='vvl' value='$vvl' size='5'></td>";
 }
 
-$tasoselected = array_fill_keys(array($raptaso), " selected") + array_fill_keys(array('yritys', 'partneri', 'tilaus'), '');
+if ($toim != 'KAIKKIAVOIMET') {
+  $tasoselected = array_fill_keys(array($raptaso), " selected") + array_fill_keys(array('yritys', 'partneri', 'tilaus', 'rivi'), '');
 
-echo "</tr><tr><th>".t("Raportointitaso")."</th>
-  <td colspan='3'><select name='raptaso'>
-    <option value='yritys' {$tasoselected['yritys']}>".t("Yhteenveto")."</option>
-    <option value='partneri' {$tasoselected['partneri']}>".t("Asiakas/toimittaja")."</option>
-    <option value='tilaus' {$tasoselected['tilaus']}>".t("Tilaus")."</option>
-  </select></td>";
+  echo "</tr><tr><th>".t("Raportointitaso")."</th>
+        <td colspan='3'><select name='raptaso'>
+        <option value='yritys' {$tasoselected['yritys']}>".t("Yhteenveto")."</option>
+        <option value='partneri' {$tasoselected['partneri']}>".t("Asiakas/toimittaja")."</option>
+        <option value='tilaus' {$tasoselected['tilaus']}>".t("Tilaus")."</option>";
 
-echo "<td class='back'><input id='etsinappi' name='etsinappi' type='submit' value='".t("Näytä")."'></td></tr></form></table>";
+  if ($toim == 'KAIKKIAVOIMET') {
+    echo "<option value='rivi' {$tasoselected['rivi']}>".t("Rivi")."</option>";
+  }
+
+  echo "</select></td>";
+}
+else {
+  $raptaso = "rivi";
+}
+
+echo "<td class='back'><input type='submit' id='etsinappi' name='etsinappi' value='".t("Näytä")."'></td></tr>";
+echo "</table>";
+echo "</form>";
 
 if (!empty($etsinappi)) {
 
@@ -275,6 +304,23 @@ if (!empty($etsinappi)) {
                 ), 1) myohassa_pva
                 ";
     }
+    elseif ($raptaso == "rivi") {
+      $query_ale_lisa = generoi_alekentta('M');
+
+      $query = "SELECT
+                lasku.liitostunnus,
+                lasku.tunnus tilaus,
+                lasku.viesti,
+                lasku.nimi,
+                tilausrivi.tuoteno,
+                tilausrivi.nimitys,
+                tilausrivi.varattu,
+                tilausrivi.yksikko,
+                round(tilausrivi.hinta, 2) hinta,
+                round(tilausrivi.hinta * tilausrivi.varattu * {$query_ale_lisa}, 2) AS rivihinta,
+                tilausrivi.toimaika
+                ";
+    }
     else {
       $query = "SELECT
                 lasku.nimi,
@@ -303,7 +349,7 @@ if (!empty($etsinappi)) {
 
     $query .= " FROM tilausrivi";
 
-    if ($toim == 'AVOIMET') {
+    if ($toim == 'AVOIMET' or $toim == 'KAIKKIAVOIMET') {
       $tilalisa = "or (lasku.tila='V' and tilaustyyppi = 'V')";
     }
 
@@ -321,6 +367,11 @@ if (!empty($etsinappi)) {
                   and tilausrivi.toimitettuaika = '0000-00-00 00:00:00'
                   and tilausrivi.laskutettuaika = '0000-00-00'
                   and tilausrivi.toimaika < CURDATE()";
+    }
+    elseif ($toim == 'KAIKKIAVOIMET') {
+      $query .= " and tilausrivi.tyyppi in ('L','M','W')
+                  and (tilausrivi.varattu + tilausrivi.jt) != 0
+                  and tilausrivi.laskutettuaika = '0000-00-00'";
     }
     else {
       $query .= " and tilausrivi.tyyppi = 'L'
@@ -427,11 +478,58 @@ if (!empty($etsinappi)) {
       $worksheet->write($excelrivi, $i++, t("Myöhässä / pvä"), $format_bold);
       $excelrivi++;
     }
+    elseif ($raptaso == "rivi") {
+      pupe_DataTables(array(array($pupe_DataTables, 10, 10, false, true)));
+
+      echo "<table class='display dataTable' id='$pupe_DataTables'>";
+      echo "<thead>";
+      echo "<tr>";
+
+      echo "<th>".t("Asiakas")."</th>";
+      echo "<th>".t("Tilaus")."</th>";
+      echo "<th>".t("Tilausviite")."</th>";
+      echo "<th>".t("Tuoteno")."</th>";
+      echo "<th>".t("Nimitys")."</th>";
+      echo "<th>".t("Määrä")."</th>";
+      echo "<th>".t("Yksikkö")."</th>";
+      echo "<th>".t("Hinta")."</th>";
+      echo "<th>".t("Rivihinta")."</th>";
+      echo "<th>".t("Toimaika")."</th>";
+
+      echo "</tr>";
+      echo "<tr>";
+      echo "<td><input type='text' class='search_field' name='search_asiakas'></td>";
+      echo "<td><input type='text' class='search_field' name='search_tilaus'></td>";
+      echo "<td><input type='text' class='search_field' name='search_tilausviite'></td>";
+      echo "<td><input type='text' class='search_field' name='search_tuoteno'></td>";
+      echo "<td><input type='text' class='search_field' name='search_nimitys'></td>";
+      echo "<td><input type='text' class='search_field' name='search_maara'></td>";
+      echo "<td><input type='text' class='search_field' name='search_yksikko'></td>";
+      echo "<td><input type='text' class='search_field' name='search_hinta'></td>";
+      echo "<td><input type='text' class='search_field' name='search_rivihinta'></td>";
+      echo "<td><input type='text' class='search_field' name='search_toimaika'></td>";
+      echo "</tr>";
+      echo "</thead>";
+
+      $i=0;
+
+      $worksheet->write($excelrivi, $i++, t("Asiakas"), $format_bold);
+      $worksheet->write($excelrivi, $i++, t("Tilaus"), $format_bold);
+      $worksheet->write($excelrivi, $i++, t("Tilausviite"), $format_bold);
+      $worksheet->write($excelrivi, $i++, t("Tuoteno"), $format_bold);
+      $worksheet->write($excelrivi, $i++, t("Nimitys"), $format_bold);
+      $worksheet->write($excelrivi, $i++, t("Määrä"), $format_bold);
+      $worksheet->write($excelrivi, $i++, t("Yksikkö"), $format_bold);
+      $worksheet->write($excelrivi, $i++, t("Hinta"), $format_bold);
+      $worksheet->write($excelrivi, $i++, t("Rivihinta"), $format_bold);
+      $worksheet->write($excelrivi, $i++, t("Toimaika"), $format_bold);
+      $excelrivi++;
+    }
     else {
 
       $sarakkeet = 7;
 
-      if ($toim == "MYYNTI" or $toim == 'AVOIMET') {
+      if ($toim == "MYYNTI" or $toim == 'AVOIMET' or $toim == 'KAIKKIAVOIMET') {
         $editoikkarit = tarkista_oikeus('tilaus_myynti.php', 'RIVISYOTTO');
         $sarakkeet++;
 
@@ -527,7 +625,7 @@ if (!empty($etsinappi)) {
         $pros_myohassa_til = round($row['myohassa_tilauksia'] / $row['tilauksia'] * 100, 1);
         $pros_myohassa_riv = round($row['myohassa_riveja'] / $row['riveja'] * 100, 1);
 
-        if ($toim == "MYYNTI" or $toim == 'AVOIMET') {
+        if ($toim == "MYYNTI" or $toim == 'AVOIMET' or $toim == 'KAIKKIAVOIMET') {
           $plisa = "&asiakasid=$row[liitostunnus]";
         }
         else {
@@ -552,6 +650,31 @@ if (!empty($etsinappi)) {
         $worksheet->write($excelrivi, $i++, $row['myohassa_riveja']);
         $worksheet->write($excelrivi, $i++, $pros_myohassa_riv);
         $worksheet->write($excelrivi, $i++, $row['myohassa_pva']);
+        $excelrivi++;
+      }
+      elseif ($raptaso == "rivi") {
+        echo "<td>{$row['nimi']}</td>";
+        echo "<td>{$row['tilaus']}</td>";
+        echo "<td>{$row['viesti']}</td>";
+        echo "<td>{$row['tuoteno']}</td>";
+        echo "<td>{$row['nimitys']}</td>";
+        echo "<td align='right'>{$row['varattu']}</td>";
+        echo "<td>{$row['yksikko']}</td>";
+        echo "<td align='right'>{$row['hinta']}</td>";
+        echo "<td align='right'>{$row['rivihinta']}</td>";
+        echo "<td align='right'>".pupe_DataTablesEchoSort($row['toimaika']).tv1dateconv($row["toimaika"])."</td>";
+
+        $i=0;
+        $worksheet->write($excelrivi, $i++, $row['nimi']);
+        $worksheet->write($excelrivi, $i++, $row['tilaus']);
+        $worksheet->write($excelrivi, $i++, $row['viesti']);
+        $worksheet->write($excelrivi, $i++, $row['tuoteno']);
+        $worksheet->write($excelrivi, $i++, $row['nimitys']);
+        $worksheet->write($excelrivi, $i++, $row['varattu']);
+        $worksheet->write($excelrivi, $i++, $row['yksikko']);
+        $worksheet->write($excelrivi, $i++, $row['hinta']);
+        $worksheet->write($excelrivi, $i++, $row['rivihinta']);
+        $worksheet->write($excelrivi, $i++, $row['toimaika']);
         $excelrivi++;
       }
       else {
@@ -610,13 +733,18 @@ if (!empty($etsinappi)) {
     echo "</table>";
 
     $excelnimi = $worksheet->close();
+    $kaunisnimi = "Toimitusvarmuus\_$ppa$kka$vva-$ppl$kkl$vvl.xlsx";
+
+    if ($toim == 'KAIKKIAVOIMET') {
+      $kaunisnimi = "Avoimet_rivit\_$ppl$kkl$vvl.xlsx";
+    }
 
     echo "<br><br><table>";
     echo "<tr><th>".t("Tallenna Excel").":</th><td class='back'>";
     echo "<form method='post' class='multisubmit'>";
     echo "<input type='hidden' name='toim' value='$toim'>";
     echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
-    echo "<input type='hidden' name='kaunisnimi' value='Toimitusvarmuus_$ppa$kka$vva-$ppl$kkl$vvl.xlsx'>";
+    echo "<input type='hidden' name='kaunisnimi' value='$kaunisnimi'>";
     echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";
     echo "<input type='submit' value='".t("Tallenna")."'></form></td></tr>";
     echo "</table><br>";

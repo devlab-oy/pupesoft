@@ -2656,6 +2656,21 @@ if ($fieldname == "myyntitilauksen_liitteet") {
   $jatko = 0;
 }
 
+if ($fieldname == "asiakasmyyja_tilaukselle") {
+
+  $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+  $sel = array();
+  $apu = $trow[$i];
+  $sel[$apu] = "SELECTED";
+
+  $ulos .= "<option value = ''>".t("K‰ytet‰‰n ensisijaisesti tilauksen laatijaa myyj‰n‰")."</option>";
+  $ulos .= "<option value = 'A' $sel[A]>".t("K‰ytet‰‰n ensisijaisesti asiakkaan myyj‰‰ myyj‰n‰")."</option>";
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
 if ($fieldname == "myyntitilauksen_toimipaikka") {
 
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
@@ -4246,6 +4261,27 @@ if ($fieldname == 'ennakkolaskun_tyyppi') {
   $jatko = 0;
 }
 
+if ($fieldname == "asiakasvarasto" ) {
+  $query = "SELECT tunnus, nimitys
+            FROM varastopaikat
+            WHERE yhtio = '$kukarow[yhtio]' AND tyyppi != 'P'
+            ORDER BY tyyppi, nimitys";
+  $sresult = pupe_query($query);
+
+  $ulos = "<td><select name='$nimi'>";
+  $ulos .= "<option value=''>".t("Ei oletusvarastoa valittu")."</option>";
+
+  while ($srow = mysql_fetch_array($sresult)) {
+    $sel = '';
+    if ($trow[$i] == $srow['tunnus']) {
+      $sel = "selected";
+    }
+    $ulos .= "<option value='$srow[tunnus]' $sel>".$srow['nimitys']."</option>";
+  }
+  $ulos .= "</select></td>";
+  $jatko = 0;
+}
+
 if ($fieldname == 'raaka_aineet_valmistusmyynti') {
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
 
@@ -4557,7 +4593,7 @@ if ($fieldname == 'ennakkolasku_myyntitilaukselta') {
 
   $ulos .= "<option value = ''>".t("Myyntitilauksella ei voi tehd‰ ennakkolaskua pikan‰pp‰imell‰")."</option>";
   $ulos .= "<option value = 'A' {$sel['A']}>".t("Myyntitilauksella voi tehd‰ ennakkolaskun pikan‰pp‰imell‰")."</option>";
-  $ulos .= "<option value = 'B' {$sel['B']}>".t("Myyntitilauksella voi tehd‰ ennakkolaskun ja sis‰isen ennakklaskun pikan‰pp‰imell‰")."</option>";
+  $ulos .= "<option value = 'B' {$sel['B']}>".t("Myyntitilauksella voi tehd‰ ennakkolaskun ja sis‰isen ennakkolaskun pikan‰pp‰imell‰")."</option>";
   $ulos .= "</select></td>";
 
   $jatko = 0;

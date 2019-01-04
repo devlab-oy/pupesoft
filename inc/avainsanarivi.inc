@@ -118,7 +118,8 @@ if ($_selitetark_2 and
     $avain_sel["HAE_JA_SELAA"] == "SELECTED" or
     $avain_sel["MYYNTITILASTO"] == "SELECTED" or
     $avain_sel["VALM_FAKTA"] == "SELECTED" or
-    $avain_sel['Y'] == "SELECTED")) {
+    $avain_sel['Y'] == "SELECTED" or
+    $avain_sel["LITETY_LAATUAS"] == "SELECTED")) {
   $tyyppi = 1;
 }
 
@@ -341,6 +342,8 @@ if (mysql_field_name($result, $i) == "laji") {
   if ($lukitse_laji== "" or $lukitse_laji == "MESSENGER_RYHMA") $ulos .= "<option value='MESSENGER_RYHMA' {$avain_sel['MESSENGER_RYHMA']}>".t("Messenger k‰ytt‰j‰ryhm‰")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "VALM_FAKTA") $ulos .= "<option value='VALM_FAKTA' {$avain_sel['VALM_FAKTA']}>".t("Valmistuslistan faktan fonttikoko")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "PSHOP_SYNONYMS") $ulos .= "<option value='PSHOP_SYNONYMS' {$avain_sel['PSHOP_SYNONYMS']}>".t("Pupeshop tuotehaun synonyymit")."</option>";
+  if ($lukitse_laji== "" or $lukitse_laji == "VASTUUMYYJA") $ulos .= "<option value='VASTUUMYYJA' {$avain_sel['VASTUUMYYJA']}>".t("Asiakkaan vastuumyyj‰")."</option>";
+  if ($lukitse_laji== "" or $lukitse_laji == "MAKSUKP") $ulos .= "<option value='MAKSUKP' {$avain_sel['MAKSUKP']}>".t("Maksatuksessa kustannuspaikka")."</option>";
 
   if ($lukitse_laji== "") $ulos .= "</optgroup>";
 
@@ -1718,6 +1721,45 @@ if ($avain_sel['UNIFAUN_REF'] == 'SELECTED') {
     $ulos .= "<select name='{$nimi}'>";
     $ulos .= "<option value='viesti'>" . t('Tilausviite') . "</option>";
     $ulos .= "<option value='tunnus' {$sel}>" . t('Tilausnumero') . "</option>";
+    $ulos .= "</select>";
+    $ulos .= "</td>";
+
+    $jatko = 0;
+  }
+}
+// Miss‰ vastuumyyj‰ n‰ytet‰‰n
+if ($avain_sel['VASTUUMYYJA'] == "SELECTED") {
+  // ei n‰ytet‰ selitetarkia tai j‰rjestyst‰
+  if ($_selitetark or $_jarjestys) {
+    $tyyppi = 0;
+  }
+
+  if ($_selite) {
+    $sel = $trow[$i] == 'tunnus' ? 'selected' : '';
+
+    $ulos = "<td>";
+    $ulos .= "<select name='{$nimi}'>";
+    $ulos .= "<option value='Asiakashaku'>" . t('Asiakashaku') . "</option>";
+    $ulos .= "<option value='Tulosteet' {$sel}>" . t('Tulosteet') . "</option>";
+    $ulos .= "</select>";
+    $ulos .= "</td>";
+
+    $jatko = 0;
+  }
+}
+if ($avain_sel["MAKSUKP"] == "SELECTED") {
+  // ei n‰ytet‰ selitetarkia tai j‰rjestyst‰
+  if ($_selitetark or $_jarjestys) {
+    $tyyppi = 0;
+  }
+
+  if ($_selite) {
+    $sel = $trow[$i] == 'Kylla' ? 'selected' : '';
+
+    $ulos = "<td>";
+    $ulos .= "<select name='{$nimi}'>";
+    $ulos .= "<option value='Ei'>" . t('Ei') . "</option>";
+    $ulos .= "<option value='Kylla' {$sel}>" . t('Kyll‰') . "</option>";
     $ulos .= "</select>";
     $ulos .= "</td>";
 

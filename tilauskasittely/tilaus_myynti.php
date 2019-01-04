@@ -41,11 +41,15 @@ if (@include "rajapinnat/logmaster/logmaster-functions.php");
 elseif (@include "logmaster-functions.php");
 else exit;
 
+if ($toim == "EXTRANET") {
+  require "asiakasvalinta.inc";
+}
+
 if ($tila == "YHENKPUHELIN") {
 
   $yhenkilo = utf8_decode($yhenkilo);
 
-  $yhteysquery = "SELECT if(gsm != '', gsm, if(puh != '', puh, '')) AS yht_puh
+  $yhteysquery = "SELECT email AS yht_email, if(gsm != '', gsm, if(puh != '', puh, '')) AS yht_puh
                   FROM yhteyshenkilo
                   WHERE yhtio              = '$kukarow[yhtio]'
                   AND liitostunnus         = '$ltunnus'
@@ -57,7 +61,7 @@ if ($tila == "YHENKPUHELIN") {
   $yres = pupe_query($yhteysquery);
 
   if ($yrow = mysql_fetch_assoc($yres)) {
-    echo json_encode($yrow['yht_puh']);
+    echo json_encode(array("PUH" => $yrow['yht_puh'], "EMAIL" => $yrow['yht_email']));
   }
   else {
     echo json_encode("");
@@ -2224,6 +2228,24 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
               </table><br>";
       }
 
+      if ($maksupaate_kassamyynti and
+        $maksuehtorow["kateinen"] != "" and
+        $kukarow['kuittitulostin'] == '-88'
+      ) {
+        require_once "tilauskasittely/tulosta_asiakkaan_kuitti.inc";
+
+        $kuitti_params = array(
+          "pdf_kuitti" => true,
+          "pdf_kuitti_printdialog" => true,
+          "avaa_lipas_lopuksi" => true
+        );
+
+        $kuittiurl = tulosta_asiakkaan_kuitti($laskurow["laskunro"], "", $kuitti_params);
+
+        // Tulostusdialogi
+        echo js_openPrintDialog($kuittiurl, "Tulosta kuitti");
+      }
+
       if (($kukarow["kassamyyja"] != '' or
           $kukarow["dynaaminen_kassamyynti"] != "" or
           $yhtiorow["dynaaminen_kassamyynti"] != "") and
@@ -3799,7 +3821,28 @@ if ($tee == '') {
 
       echo "</td>";
 
-      echo "<th align='left'>".t("Toimitustapa").":</th>";
+      $vastuumyyja_result = t_avainsana("VASTUUMYYJA", "", " and avainsana.selite = 'Asiakashaku'");
+      $onvastuumyyja   = mysql_num_rows($vastuumyyja_result) !== 0;
+
+      if ($onvastuumyyja) {
+        if ($asiakasrow['myyjanro'] != 0) {
+          $apuqu = "SELECT *
+                    FROM kuka use index (yhtio_myyja)
+                    WHERE yhtio = '$kukarow[yhtio]'
+                    AND myyja   = '$asiakasrow[myyjanro]'
+                    AND myyja   > 0";
+          $meapu = pupe_query($apuqu);
+
+          if (mysql_num_rows($meapu) == 1) {
+            $apuro = mysql_fetch_assoc($meapu);
+            $myyjanimi = $apuro['myyja']. " " .$apuro['nimi'];
+          }
+        }
+        echo "<th align='left'>".t("Toimitustapa").": <br><br>".t("Vastuumyyjä").": </th>";
+      }
+      else {
+        echo "<th align='left'>".t("Toimitustapa").":</th>";
+      }
 
       // Lukitaan rahtikirjaan vaikuttavat tiedot jos/kun rahtikirja on tulostettu
       $query = "SELECT *
@@ -3892,7 +3935,9 @@ if ($tee == '') {
           echo " <a href='{$palvelin2}yllapito.php?toim=rahtisopimukset&uusi=1&ytunnus={$laskurow['ytunnus']}&toimitustapa={$laskurow['toimitustapa']}&lopetus={$tilmyy_lopetus}//from=LASKUTATILAUS'>".t("Uusi Rahtisopimus")."</a>";
         }
       }
-
+      if ($onvastuumyyja) {
+        echo "<br><br>{$myyjanimi}";
+      }
       echo "</td>";
     }
 

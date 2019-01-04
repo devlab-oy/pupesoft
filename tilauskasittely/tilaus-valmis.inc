@@ -227,6 +227,33 @@ if ((!isset($vapauta_tilaus_keraykseen) or !$vapauta_tilaus_keraykseen)
     $myyntikielto_res = pupe_query($query);
 
     echo "<font class='error'>", t("Tilaus laitetaan odottamaan, kunnes ennakkolaskut ovat maksettu"), ".</font><br/><br/>";
+
+    if ($kukarow["extranet"] == "") {
+
+      $_tehdaan_varastosiirto = false;
+      $varastosiirto_tyyppi = '';
+
+      if ($yhtiorow["asiakasvarasto"] != '') {
+
+        // Tarkistetaan että on 100% ennakko
+        $query = "SELECT tunnus
+                  FROM maksupositio
+                  WHERE otunnus = '{$laskurow['tunnus']}'
+                  AND osuus = 100
+                  and yhtio   = '{$kukarow['yhtio']}'";
+        $result = pupe_query($query);
+
+        if (mysql_num_rows($result) == 1) {
+          $_tehdaan_varastosiirto = true;
+          $varastosiirto_tyyppi = 'K';
+        }
+      }
+
+      if ($_tehdaan_varastosiirto) {
+        require 'tilauksesta_varastosiirto.inc';
+        tilauksesta_varastosiirto($laskurow['tunnus'], $varastosiirto_tyyppi);
+      }
+    }
   }
 
   // Laitetaan lopetus tyhjäksi, niin ei refreshata ruutua jos tultiin muokkauksesta tms.
@@ -567,7 +594,7 @@ else {
               where yhtio  = '$kukarow[yhtio]'
               and otunnus  = '$laskurow[tunnus]'
               and keratty  = ''
-              and var      = 'J'
+              and var     != 'J'
               and tyyppi  != 'D'
               and varattu  > 0";
     $keres = pupe_query($query);

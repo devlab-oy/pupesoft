@@ -1288,6 +1288,17 @@ if ($tee == 'tulosta') {
         }
       }
     }
+    
+    // Tarkistetaan onko vientitietojen automaattisyöttö käytössä
+    if (!empty($otunnukset)) {
+      $_otunnukset = explode(',', $otunnukset);
+      $viennin_lisatietojen_automsyotto = true;
+      foreach ($_otunnukset as $_otunnus) {
+      
+        viennin_lisatiedot($_otunnus, $viennin_lisatietojen_automsyotto);
+      }
+      $viennin_lisatietojen_automsyotto = false;
+    }
 
     if ($toitarow['erittely'] == 't' and $kaikki_lotsikot_per_toimitus != "" and $toitarow['rahtikirja'] != 'rahtikirja_hrx_siirto.inc') {
       $kaikki_lotsikot_per_toimitus = substr($kaikki_lotsikot_per_toimitus , 0 , -2); //poistetaan pilkku ja välilyönti viimosen perästä

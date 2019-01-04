@@ -892,9 +892,10 @@ if ($tee == 'add') {
 
     } // end if löytykö toimitustapa
 
-    // Automaattinen vientitietojen kuittaus
+    // Automaattinen vientitietojen kuittaus kun koontirahtikirjaa ei tulosteta
     if ($yhtiorow["vientitietojen_autosyotto"] == "K" and $laskurow['alatila'] != 'X' and ($laskurow['vienti'] == 'E' or $laskurow['vienti'] == 'K')) {
       viennin_lisatiedot($laskurow['tunnus']);
+
     }
 
     if ($yhtiorow['karayksesta_rahtikirjasyottoon'] != '' and $mista == 'keraa.php') {

@@ -4,12 +4,38 @@ if ($kukarow['extranet'] == '') die(t("K‰ytt‰j‰n parametrit - T‰m‰ ominaisuus to
 
 if (isset($toiminto) and $toiminto == 'vaihda_oletusasiakkuus' and $asiakasvalinta != '') {
   paivita_kayttajan_oletusasiakkuus($asiakasvalinta);
+
+  // p‰ivitet‰‰n kukarow kesken jos on vaihdettu asiakas
+  $til_qry = "SELECT tunnus
+              FROM lasku
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND laatija  = '{$kukarow['laatija']}'
+              AND ohjelma_moduli = 'EXTRANET'
+              AND tila = 'N'
+              AND alatila = ''
+              AND liitostunnus = '{$asiakasvalinta}'
+              ORDER BY tunnus desc
+              LIMIT 1";
+  $til_res = pupe_query($til_qry);
+  if (mysql_num_rows($til_res) == 1) {
+    $tilrow = mysql_fetch_assoc($til_res);
+    $kukarow['kesken'] == $tilrow['tunnus'];
+
+    $query  = "UPDATE kuka set kesken='{$tilrow['tunnus']}' where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]'";
+    $result = pupe_query($query);
+  }
+  else {
+    $kukarow['kesken'] == 0;
+
+    $query  = "UPDATE kuka set kesken='0' where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]'";
+    $result = pupe_query($query);
+  }
 }
 
 piirra_multiasiakkuusdropdown();
 
 function piirra_multiasiakkuusdropdown() {
-  global $kukarow;
+  global $kukarow, $toim;
 
   // Haetaan k‰ytt‰j‰n asiakkuudet
   $query = "SELECT asiakas.tunnus, asiakas.nimi, asiakas.nimitark, asiakas.selaus
@@ -32,6 +58,7 @@ function piirra_multiasiakkuusdropdown() {
   $row = mysql_fetch_assoc($result);
   echo "<form>";
   echo "<input type='hidden' name='toiminto' value='vaihda_oletusasiakkuus'>";
+  echo "<input type='hidden' name='toim'     value='$toim'>";
 
   // Piirret‰‰n dropdown
   echo "<table><tr>";

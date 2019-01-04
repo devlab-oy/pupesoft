@@ -212,6 +212,7 @@ if ($tila == "vaihdaasiakas") {
             toim_postitp        = '',
             toim_maa            = '',
             toim_puh            = '',
+            toim_email          = '',
             laskutusvkopv       = '',
             chn                 = '',
             verkkotunnus        = '',
@@ -732,7 +733,7 @@ if ($tila == "" and !isset($jatka)) {
     //Asiakas vaihtuu
     if ($from == "vaihdaasiakas" and $asiakasid != "") {
       // asiakashaussa pitää olla vakio columni kohdistettu, jonka arvo on O että saadaan OLETUS toimitustapa haettua asiakashaunkin yhteydessä
-      $squery = "SELECT *, 'O' kohdistettu,
+      $squery = "SELECT *, asiakas.email AS toim_email, 'O' kohdistettu,
                  if(asiakas.gsm != '', asiakas.gsm,
                     if(asiakas.tyopuhelin != '', asiakas.tyopuhelin,
                       if(asiakas.puhelin != '', asiakas.puhelin, ''))) AS toim_puh
@@ -742,7 +743,7 @@ if ($tila == "" and !isset($jatka)) {
       $assresult = pupe_query($squery);
       $assrow = mysql_fetch_assoc($assresult);
 
-      $yhtquery = "SELECT nimi, if(gsm != '', gsm,
+      $yhtquery = "SELECT nimi, email AS yht_email, if(gsm != '', gsm,
                     if(puh != '', puh, '')) AS yht_puh
                    FROM yhteyshenkilo
                    WHERE yhtio              = '$kukarow[yhtio]'
@@ -757,6 +758,10 @@ if ($tila == "" and !isset($jatka)) {
 
       if (!empty($yht['yht_puh'])) {
         $assrow['toim_puh'] = $yht['yht_puh'];
+      }
+
+      if (!empty($yht['yht_email'])) {
+        $assrow['toim_email'] = $yht['yht_email'];
       }
 
       if (!checkdate($toimkk, $toimpp, $toimvv)) {
@@ -819,6 +824,7 @@ if ($tila == "" and !isset($jatka)) {
                 toim_postitp        = '$assrow[toim_postitp]',
                 toim_maa            = '$assrow[toim_maa]',
                 toim_puh            = '$assrow[toim_puh]',
+                toim_email          = '$assrow[toim_email]',
                 laskutusvkopv       = '$assrow[laskutusvkopv]',
                 chn                 = '$assrow[chn]',
                 verkkotunnus        = '$assrow[verkkotunnus]',
@@ -892,7 +898,7 @@ if ($tila == "" and !isset($jatka)) {
         $puhlisa = "";
       }
 
-      $squery = "SELECT asiakas.*, tilaus_viesti as viesti, myynti_kommentti1 as comments,
+      $squery = "SELECT asiakas.*, asiakas.email AS toim_email, tilaus_viesti as viesti, myynti_kommentti1 as comments,
                  $puhlisa
                  asiakas.tunnus liitostunnus,
                  'O' kohdistettu, '' kohde, '' kauppatapahtuman_luonne,
@@ -955,7 +961,7 @@ if ($tila == "" and !isset($jatka)) {
     if (isset($toim_asiakasid) and $toim_asiakasid != 0) {
 
       $toim_asiakasid = mysql_real_escape_string($toim_asiakasid);
-      $toimasiakas_query = "SELECT *,
+      $toimasiakas_query = "SELECT *, asiakas.email AS toim_email,
                             if(asiakas.gsm != '', asiakas.gsm,
                               if(asiakas.tyopuhelin != '', asiakas.tyopuhelin,
                                 if(asiakas.puhelin != '', asiakas.puhelin, ''))) AS toim_puh
@@ -984,6 +990,7 @@ if ($tila == "" and !isset($jatka)) {
 
       $srow["toimitustapa"] = $toimasiakas_row["toimitustapa"];
       $srow["toim_puh"]     = $toimasiakas_row["toim_puh"];
+      $srow["toim_email"]   = $toimasiakas_row["toim_email"];
 
       if ($tilausnumero == 0) {
         echo "<font class='message'>".t("HUOM: Tilauksen oletustiedot haettu laskutusasiakkaan asiakasrekisteristä.")."</font><br>";
@@ -1439,6 +1446,7 @@ if ($tila == "" and !isset($jatka)) {
         $srow['toim_postino']   = $krow['postino'];
         $srow['toim_postitp']   = $krow['postitp'];
         $srow['toim_puh']       = $krow['puhelin'];
+        $srow['toim_email']     = $krow['email'];
       }
 
       $kohde_ui .= "<option value = '{$krow['tunnus']}' $sel>{$krow["nimi"]}</option>";
@@ -2086,6 +2094,13 @@ if ($tila == "" and !isset($jatka)) {
       $myyjanro = "";
     }
 
+    if ($yhtiorow['asiakasmyyja_tilaukselle'] == 'A' and $asiarow['myyjanro'] != 0) {
+      $asiakasmyyja = true;
+    }
+    else {
+      $asiakasmyyja = false;
+    }
+
     $oikea_sarake[$oikea] = "<td>".t("Myyjä")."</td>";
     $oikea_sarake[$oikea] .= "<td><select name='myyja'>";
 
@@ -2105,7 +2120,12 @@ if ($tila == "" and !isset($jatka)) {
     while ($row = mysql_fetch_assoc($yresult)) {
 
       $sel = "";
-      if ($srow['myyja'] == '' or $srow['myyja'] == 0) {
+
+      if ($asiakasmyyja and $asiarow['myyjanro'] == $row['myyja']) {
+        $myyjanro = $row['myyja'];
+        $sel = 'selected';
+      }
+      elseif ($srow['myyja'] == '' or $srow['myyja'] == 0) {
         if ($row['nimi'] == $kukarow['nimi']) {
           $sel = 'selected';
         }
@@ -3615,7 +3635,7 @@ if ($tila == "" and !isset($jatka)) {
 
     echo "<tr><td>".t("Tilausyhteyshenkilö").":</td>";
 
-    $yhteysquery = "SELECT *, if(gsm != '', gsm,
+    $yhteysquery = "SELECT *, email AS yht_email, if(gsm != '', gsm,
                     if(puh != '', puh, '')) AS yht_puh
                     FROM yhteyshenkilo
                     WHERE yhtio              = '$kukarow[yhtio]'
@@ -3642,6 +3662,10 @@ if ($tila == "" and !isset($jatka)) {
 
         if (!empty($yhteysrow["yht_puh"])) {
           $srow['toim_puh'] = $yhteysrow["yht_puh"];
+        }
+
+        if (!empty($yhteysrow["yht_email"])) {
+          $srow['toim_email'] = $yhteysrow["yht_email"];
         }
       }
 
@@ -3671,7 +3695,7 @@ if ($tila == "" and !isset($jatka)) {
       $_vahvistusviesti_asiakkaalle = " + ".t("vahvistusviesti asiakkaalle");
     }
 
-    echo "<tr class='otsik_laaja_kommentit' $hiddenlisa2><td>".t("Email toimitukseen").":</td><td><input type='text' size='43' name='temail' value='$srow[toim_email]'</td><td>".t("toimitusvahvistus").$_vahvistusviesti_asiakkaalle."</td></tr>";
+    echo "<tr class='otsik_laaja_kommentit' $hiddenlisa2><td>".t("Email toimitukseen").":</td><td><input type='text' size='43' name='temail' id='temail' value='$srow[toim_email]'</td><td>".t("toimitusvahvistus").$_vahvistusviesti_asiakkaalle."</td></tr>";
 
     echo "<tr class='otsik_laaja_kommentit' $hiddenlisa2><td>".t("Kommentti")." 1:</td><td><textarea name='comments'   rows='2' cols='40'>$srow[comments]</textarea></td><td>".t("tilausvahvistus")." + ".t("keräyslista")." + ".t("valmistus")." + ".t("työmääräys")." + ".t("lähete")." + ".t("tarjous")."</td></tr>";
 
@@ -4174,7 +4198,7 @@ if (isset($jatka)) {
       $toimitustapa = $apuro['selite'];
     }
 
-    $kassalipas = $kukarow["kassamyyja"];
+    $kassalipas = !empty($laskurow['kassalipas']) ? $laskurow['kassalipas'] : $kukarow["kassamyyja"];
   }
 
   // jos kyseessä oli käsin syötetty eräpäivä ja maksuehto on väärin laitetaan oikea maksuehto... hakee järjestyksessä ekan

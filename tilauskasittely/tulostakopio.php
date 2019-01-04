@@ -926,13 +926,14 @@ if ($tee == "ETSILASKU") {
     //myyntitilaus. Tulostetaan lavatarra-kopio.
 
     if ($toim == "LAVAKERAYSTARRA" or $toim == "LAVAKERAYSLISTA") {
-      $where1 .= " lasku.tila = 'L' and lasku.alatila in ('A','B','C','D','E','X') ";
+      $where1 .= " lasku.tila = 'L' and lasku.alatila in ('A','B','C','D','E','X')
+                  and (lasku.kerayslista = lasku.tunnus or lasku.kerayslista = 0) ";
     }
     else {
-      $where1 .= " lasku.tila = 'L' and lasku.alatila in ('B','C','D','E','X') ";
+      $where1 .= " ((lasku.tila = 'L' and lasku.alatila in ('B','C','D','E','X')
+                  and (lasku.kerayslista = lasku.tunnus or lasku.kerayslista = 0))
+                   or (lasku.tila = 'D' and lasku.kerayslista = lasku.tunnus))";
     }
-
-    $where1 .= " and (lasku.kerayslista = lasku.tunnus or lasku.kerayslista = 0) ";
 
     if ($asiakasid > 0) {
       $where2 .= " and lasku.liitostunnus  = '$asiakasid' ";
@@ -1021,7 +1022,7 @@ if ($tee == "ETSILASKU") {
     $jarj = "ORDER BY {$jarj} {$ascdesc}";
   }
 
-  if ($toim != "HAAMU") {
+  if ($toim != "HAAMU" and $toim != "LAVATARRA") {
     $where4 = " and lasku.tila != 'D' ";
   }
 
@@ -1480,13 +1481,15 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
 
   while ($laskurow = mysql_fetch_assoc($rrrresult)) {
 
-    //  Haetaan asiakkaan kieli niin hekin ymmärtävät..
-    $query = "SELECT kieli from asiakas WHERE yhtio = '$kukarow[yhtio]' and tunnus='$laskurow[liitostunnus]'";
-    $kielires = pupe_query($query);
-    $kielirow = mysql_fetch_assoc($kielires);
-    if ($kielirow['kieli'] != '') {
-      $kieli = $kielirow['kieli'];
-    }
+    if (empty($kieli) or $kieli == '') {
+      //  Haetaan asiakkaan kieli niin hekin ymmärtävät..
+      $query = "SELECT kieli from asiakas WHERE yhtio = '$kukarow[yhtio]' and tunnus='$laskurow[liitostunnus]'";
+      $kielires = pupe_query($query);
+      $kielirow = mysql_fetch_assoc($kielires);
+      if ($kielirow['kieli'] != '') {
+        $kieli = $kielirow['kieli'];
+      }
+    }  
 
     if ($toim == "TARJOUS") {
       if ($kukarow['toimipaikka'] != $laskurow['yhtio_toimipaikka'] and $yhtiorow['myyntitilauksen_toimipaikka'] == 'A') {
@@ -2299,7 +2302,8 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
                 if (asiakasnro!='', asiakasnro, ytunnus) asiakasnro,
                 asiakasnro as asiakasnro_aito,
                 kerayserat,
-                kieli
+                kieli,
+                asiakasviivakoodi
                 FROM asiakas
                 WHERE tunnus = '$laskurow[liitostunnus]'
                 and yhtio    = '$kukarow[yhtio]'";
@@ -2540,6 +2544,9 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
       $tilausnumeroita = $otunnus;
 
       if ($laskurow['kerayslista'] > 0) {
+        if ($toim == "LAVATARRA" and $laskurow['tila'] == 'D' ) {
+          $laskurow['tila'] = 'L';
+        }
         //haetaan kaikki tälle klöntille kuuluvat otsikot
         $query = "SELECT GROUP_CONCAT(DISTINCT tunnus ORDER BY tunnus SEPARATOR ',') tunnukset
                   FROM lasku

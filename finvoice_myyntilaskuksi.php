@@ -224,7 +224,7 @@ function kasittele_xml_tiedosto(SimpleXMLElement $xml, $tiedosto_polku) {
     $laskun_erapaiva = substr($laskun_erapaiva, 0, 4)."-".substr($laskun_erapaiva, 4, 2)."-".substr($laskun_erapaiva, 6, 2);
     $laskun_kapvm = substr($laskun_kapvm, 0, 4)."-".substr($laskun_kapvm, 4, 2)."-".substr($laskun_kapvm, 6, 2);
 
-    $maksuehto = finvoice_myyntilaskuksi_valitse_maksuehto($laskun_lapvm, $laskun_erapaiva);
+    $maksuehto = finvoice_myyntilaskuksi_valitse_maksuehto($laskun_maksuehtoteksti, $laskun_lapvm, $laskun_erapaiva);
 
     if (empty($maksuehto)) {
       siirra_tiedosto_kansioon($tiedosto_polku, $finvoice_myyntilasku_kansio_error);

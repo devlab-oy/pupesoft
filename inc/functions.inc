@@ -35145,7 +35145,7 @@ if (!function_exists('tuetut_pankit')) {
 }
 
 if (!function_exists('finvoice_myyntilaskuksi_valitse_maksuehto')) {
-  function finvoice_myyntilaskuksi_valitse_maksuehto($laskun_erapaiva, $laskun_lapvm) {
+  function finvoice_myyntilaskuksi_valitse_maksuehto($laskun_maksuehtoteksti, $laskun_erapaiva, $laskun_lapvm) {
     global $kukarow, $yhtiorow;
 
     $maksuaika_sek = strtotime($laskun_lapvm) - strtotime($laskun_erapaiva);
@@ -35173,6 +35173,18 @@ if (!function_exists('finvoice_myyntilaskuksi_valitse_maksuehto')) {
         return mysql_fetch_assoc($maksuehtores);
       }
       return False;
+    }
+    else {
+      // Haetaan maksuehdon nimellä
+      $query = "SELECT *
+                FROM maksuehto
+                WHERE yhtio = '{$yhtiorow['yhtio']}'
+                AND teksti = '$laskun_maksuehtoteksti'";
+      $maksuehtores = pupe_query($query);
+
+      if (mysql_num_rows($maksuehtores) == 1) {
+        return mysql_fetch_assoc($maksuehtores);
+      }
     }
   }
 }

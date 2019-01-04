@@ -212,7 +212,7 @@ if ($handle = opendir($verkkolaskuvirheet_vaarat)) {
       $laskun_erapaiva = substr($laskun_erapaiva, 0, 4)."-".substr($laskun_erapaiva, 4, 2)."-".substr($laskun_erapaiva, 6, 2);
       $laskun_kapvm = substr($laskun_kapvm, 0, 4)."-".substr($laskun_kapvm, 4, 2)."-".substr($laskun_kapvm, 6, 2);
 
-      $maksuehto = finvoice_myyntilaskuksi_valitse_maksuehto($laskun_lapvm, $laskun_erapaiva);
+      $maksuehto = finvoice_myyntilaskuksi_valitse_maksuehto($laskun_maksuehtoteksti, $laskun_lapvm, $laskun_erapaiva);
 
       if (empty($maksuehto)) {
         echo "<td>".t("VIRHE: Sopivaa maksuehtoa ei löydy!").": $laskun_maksuehtoteksti<br>";

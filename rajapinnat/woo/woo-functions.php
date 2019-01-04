@@ -3,7 +3,7 @@
 require 'inc/pupenext_functions.inc';
 
 function woo_commerce_toimita_tilaus($params) {
-  global $woo_config;
+  global $woo_config, $yhtiorow, $sprintit_woocommerce_sh_location;
 
   // jos Woo Commerce API ei käytössä
   if (empty($woo_config)
@@ -22,20 +22,36 @@ function woo_commerce_toimita_tilaus($params) {
   $woo_tilausnumerot = woo_commerce_hae_woo_tilausnumerot($pupesoft_tunnukset);
 
   foreach ($woo_tilausnumerot as $order_number) {
-    // rakennetaan woo request
-    $woo_parameters = array(
-      "access_token"    => $woo_config["access_token"],
-      "store_url"       => $woo_config["store_url"],
-      "consumer_key"    => $woo_config["consumer_key"],
-      "consumer_secret" => $woo_config["consumer_secret"],
-      "order"           => array(
-        "order_number"  => $order_number,
-        "tracking_code" => $tracking_code,
-      ),
-    );
 
-    // tehdään request
-    pupenext_rest($woo_parameters, "woo_complete_order");
+    if (!empty($sprintit_woocommerce_sh_location)) {
+
+      if (substr($sprintit_woocommerce_sh_location, -1) == "/") $sprintit_woocommerce_sh_location = substr($sprintit_woocommerce_sh_location, 0, -1);
+
+      $query = "SELECT *
+                FROM yhtio
+                WHERE yhtio = '{$yhtiorow['yhtio']}'";
+      $result = pupe_query($query);
+      $_yhtiorow = mysql_fetch_assoc($result);
+
+      exec("/bin/bash {$sprintit_woocommerce_sh_location}/woocommerce.sh --ajo paivitatilaus --store_url '{$woo_config["store_url"]}' --key '{$woo_config["consumer_key"]}' --secret '{$woo_config["consumer_secret"]}' --yhtio {$_yhtiorow['tunnus']} --tilausnumero {$order_number} --seurantakoodi '{$tracking_code}'");
+    }
+    else {
+
+      // rakennetaan woo request
+      $woo_parameters = array(
+        "access_token"    => $woo_config["access_token"],
+        "store_url"       => $woo_config["store_url"],
+        "consumer_key"    => $woo_config["consumer_key"],
+        "consumer_secret" => $woo_config["consumer_secret"],
+        "order"           => array(
+          "order_number"  => $order_number,
+          "tracking_code" => $tracking_code,
+        ),
+      );
+
+      // tehdään request
+      pupenext_rest($woo_parameters, "woo_complete_order");
+    }
   }
 }
 

@@ -179,7 +179,8 @@ while (false !== ($file = readdir($handle))) {
                   WHERE yhtio                 = '{$kukarow['yhtio']}'
                   AND tunnus                  = '{$tilausnumero}'
                   AND ohjelma_moduli          = 'MAGENTO'
-                  AND asiakkaan_tilausnumero  != ''";
+                  AND asiakkaan_tilausnumero  != ''
+                  AND laatija                 = 'Magento'";
         $mageres = pupe_query($query);
 
         while ($magerow = mysql_fetch_assoc($mageres)) {

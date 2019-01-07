@@ -61,7 +61,8 @@ function woo_commerce_hae_woo_tilausnumerot($pupesoft_tunnukset) {
             WHERE yhtio = '{$kukarow['yhtio']}'
             AND tunnus in ({$tunnukset})
             AND ohjelma_moduli = 'MAGENTO'
-            AND asiakkaan_tilausnumero  != ''";
+            AND asiakkaan_tilausnumero  != ''
+            AND laatija = 'WooCommerce'";
   $result = pupe_query($query);
 
   while ($row = mysql_fetch_assoc($result)) {

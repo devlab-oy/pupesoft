@@ -342,7 +342,13 @@ if (in_array($row["tyyppi"], array('V', 'W')) and $row["perheid"] == 0 and $toim
   $tilausok++;
 }
 
-if ($row["var"] != '' and $toim == "SIIRTOTYOMAARAYS") {
+if ($row["var"] != '' and $toim == "PIKATILAUS") {
+  $varaosavirhe .= t("VIRHE: Myyntitilauksella Var ei voi olla O!")."<br>";
+  $riviok++;
+  $tilausok++;
+}
+
+if ($row["var"] == 'O' and $toim == "SIIRTOTYOMAARAYS") {
   $varaosavirhe .= t("VIRHE: Sisäisellä työmääräyksellä Var pitää olla tyhjä!")."<br>";
   $riviok++;
   $tilausok++;

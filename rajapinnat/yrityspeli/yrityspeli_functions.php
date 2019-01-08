@@ -212,6 +212,7 @@ function yrityspeli_generoi_ostotilaus(Array $params) {
   $asiakas = hae_asiakas($asiakas);
   $toimittaja = yrityspeli_hae_toimittaja();
   $hintacounter = 0;
+  $tuotecounter = 0;
   $response = array();
 
   if ($toimittaja === false) {
@@ -271,9 +272,13 @@ function yrityspeli_generoi_ostotilaus(Array $params) {
 
       return $response;
     }
-
-    $kpl = rand(1, 3);
+    if (tuotecounter < 5) {
+    $kpl = ceil((($kokonaiskustannus - $hintacounter)/2)/$trow['myyntihinta']);
+    } else {
+    $kpl = ceil(($kokonaiskustannus - $hintacounter)/$trow['myyntihinta']);
+    }
     $hintacounter += ($trow['myyntihinta'] * $kpl);
+    $tuotecounter += 1;
 
     $params = array(
       'kpl'      => $kpl,

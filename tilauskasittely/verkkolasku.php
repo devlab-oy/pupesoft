@@ -329,9 +329,8 @@ else {
     elseif ($yhtiorow["verkkolasku_lah"] == "apix") {
       $nimifinvoice = "/tmp/laskutus-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(), true))."_finvoice.xml";
     }
-    //  Fitek vaatii siirtoon vähän oman nimen eikä halua soapia..
+    //  Fitek ei halua soapia..
     elseif ($yhtiorow["verkkolasku_lah"] == "fitek") {
-      $nimifinvoice = "$pupe_root_polku/dataout/MERCANT-INVOICE--".date("Ymd")."-".md5(uniqid(rand(), true))."_finvoice.xml";
       $nosoap = 'NOSOAP';
     }
     else {

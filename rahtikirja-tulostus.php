@@ -1136,7 +1136,8 @@ if ($tee == 'tulosta') {
                   WHERE yhtio                 = '$kukarow[yhtio]'
                   AND tunnus                  IN ($otunnukset)
                   AND ohjelma_moduli          = 'MAGENTO'
-                  AND asiakkaan_tilausnumero  != ''";
+                  AND asiakkaan_tilausnumero  != ''
+                  AND laatija                 = 'Magento'";
         $mageres = pupe_query($query);
 
         while ($magerow = mysql_fetch_assoc($mageres)) {
@@ -1288,13 +1289,13 @@ if ($tee == 'tulosta') {
         }
       }
     }
-    
+
     // Tarkistetaan onko vientitietojen automaattisyöttö käytössä
     if (!empty($otunnukset)) {
       $_otunnukset = explode(',', $otunnukset);
       $viennin_lisatietojen_automsyotto = true;
       foreach ($_otunnukset as $_otunnus) {
-      
+
         viennin_lisatiedot($_otunnus, $viennin_lisatietojen_automsyotto);
       }
       $viennin_lisatietojen_automsyotto = false;

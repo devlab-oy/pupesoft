@@ -1108,6 +1108,16 @@ if (!function_exists("talenom_queue")) {
   }
 }
 
+if (!function_exists("fitek_queue")) {
+  function fitek_queue($invoice_number, $xmlstring, $kieli) {
+    global $kukarow, $yhtiorow, $pupe_root_polku;
+
+    // Siirret‰‰n l‰hetysjonoon
+    file_put_contents("{$pupe_root_polku}/dataout/fitek_error/laskutus-$kukarow[yhtio]-".date("Ymd")."-$invoice_number.xml", $xmlstring);
+    return "Lasku siirretty l‰hetysjonoon";
+  }
+}
+
 if (!function_exists("apix_queue")) {
   function apix_queue($apix_finvoice, $apix_invoicenum, $kieli, $liitteet = array()) {
     global $kukarow, $yhtiorow, $pupe_root_polku;

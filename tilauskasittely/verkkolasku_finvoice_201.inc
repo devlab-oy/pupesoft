@@ -65,6 +65,9 @@ if (!function_exists('finvoice_otsik')) {
     case 'ITELFIHH':
       $tulostuspalvelu  = "TULOSTUSPALVELU";
       break;
+    case 'FITEK':
+        $tulostuspalvelu  = "PRINT";
+        break;
     default:
       // Katsotaan löytyykö avainsanoista sopivaa, muuten laitetaan tyhjäksi
       $avainsana       = t_avainsana("FINV_TULPALVELU", '', "AND selite = '{$senderintermediator}'", '', '', "selitetark");

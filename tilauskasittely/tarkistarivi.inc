@@ -342,7 +342,7 @@ if (in_array($row["tyyppi"], array('V', 'W')) and $row["perheid"] == 0 and $toim
   $tilausok++;
 }
 
-if ($row["var"] == 'O' and $toim == "PIKATILAUS") {
+if ($row["var"] == 'O' and !in_array($toim, array('PIKATILAUS', 'RIVISYOTTO'))) {
   $varaosavirhe .= t("VIRHE: Myyntitilauksella Var ei voi olla O!")."<br>";
   $riviok++;
   $tilausok++;

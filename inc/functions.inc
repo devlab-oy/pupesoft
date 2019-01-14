@@ -35301,7 +35301,7 @@ if (!function_exists('finvoice_myyntilaskuksi_valitse_asiakas')) {
       #echo "$query\n\n";
     }
 
-    if (mysql_num_rows($result) == 0) {
+    if (mysql_num_rows($result) != 1) {
       $query = "SELECT *
                 FROM asiakas
                 WHERE yhtio = '{$yhtiorow['yhtio']}'
@@ -35310,6 +35310,24 @@ if (!function_exists('finvoice_myyntilaskuksi_valitse_asiakas')) {
                 AND osoite = '{$ostaja_asiakkaantiedot["osoite"]}'
                 AND postino = '{$ostaja_asiakkaantiedot["postino"]}'
                 AND postitp = '{$ostaja_asiakkaantiedot["postitp"]}'
+                AND laji != 'P'";
+      $result = pupe_query($query);
+      #echo "$query\n\n";
+    }
+
+    if (mysql_num_rows($result) != 1) {
+      $query = "SELECT *
+                FROM asiakas
+                WHERE yhtio = '{$yhtiorow['yhtio']}'
+                AND REPLACE(ytunnus, '-', '') = '{$ytunnus}'
+                AND concat_ws(' ', nimi, nimitark) = '{$ostaja_asiakkaantiedot['nimi']}'
+                AND osoite = '{$ostaja_asiakkaantiedot["osoite"]}'
+                AND postino = '{$ostaja_asiakkaantiedot["postino"]}'
+                AND postitp = '{$ostaja_asiakkaantiedot["postitp"]}'
+                AND toim_nimi = ''
+                AND toim_osoite = ''
+                AND toim_postino = ''
+                AND toim_postitp = ''
                 AND laji != 'P'";
       $result = pupe_query($query);
       #echo "$query\n\n";

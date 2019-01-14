@@ -22,6 +22,9 @@ function woo_commerce_toimita_tilaus($params) {
   $woo_tilausnumerot = woo_commerce_hae_woo_tilausnumerot($pupesoft_tunnukset);
 
   foreach ($woo_tilausnumerot as $order_number) {
+
+    pupesoft_log("woocommerce_orders", "P‰ivitet‰‰n tilaus $order_number toimitetuiksi.");
+
     // rakennetaan woo request
     $woo_parameters = array(
       "access_token"    => $woo_config["access_token"],
@@ -51,8 +54,6 @@ function woo_commerce_hae_woo_tilausnumerot($pupesoft_tunnukset) {
 
   // tehd‰‰n tunnuksista stringi
   $tunnukset = implode(",", $pupesoft_tunnukset);
-
-  pupesoft_log("woocommerce_orders", "P‰ivitet‰‰n tilaukset $tunnukset toimitetuiksi.");
 
   // tehd‰‰n request tilaus kerrallaan
   // ainoastaan jos moduli on magento ja asiakkaan tilausnumero lˆytyy

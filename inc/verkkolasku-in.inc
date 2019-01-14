@@ -75,12 +75,14 @@ if (!function_exists("verkkolasku_in")) {
     echo "23: ".$toim_asiakkaantiedot["osoite"]."{$_lb}";
     echo "24: ".$toim_asiakkaantiedot["postino"]."{$_lb}";
     echo "25: ".$toim_asiakkaantiedot["postitp"]."{$_lb}";
+    echo "25: ".$toim_asiakkaantiedot["maa"]."{$_lb}";
     echo "26: ".$ostaja_asiakkaantiedot["toim_ovttunnus"]."{$_lb}";
     echo "27: ".$ostaja_asiakkaantiedot["ytunnus"]."{$_lb}";
     echo "28: ".$ostaja_asiakkaantiedot["nimi"]."{$_lb}";
     echo "29: ".$ostaja_asiakkaantiedot["osoite"]."{$_lb}";
     echo "30: ".$ostaja_asiakkaantiedot["postino"]."{$_lb}";
     echo "31: ".$ostaja_asiakkaantiedot["postitp"]."{$_lb}";
+    echo "31: ".$ostaja_asiakkaantiedot["maa"]."{$_lb}";
     echo "32: ".$laskuttajan_toimittajanumero."{$_lb}";
     echo "33: ".$laskuttajan_valkoodi."{$_lb}";
     echo "34: ".$laskun_toimitunnus."{$_lb}";

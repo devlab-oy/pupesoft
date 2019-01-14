@@ -39,9 +39,7 @@ function woo_commerce_toimita_tilaus($params) {
     );
 
     // tehd‰‰n request
-    $response = pupenext_rest($woo_parameters, "woo_complete_order");
-
-    pupesoft_log("woocommerce_orders", "Response tilaukselle {$order_number}: $response.");
+    pupenext_rest($woo_parameters, "woo_complete_order");
   }
 }
 

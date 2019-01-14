@@ -35,6 +35,7 @@ if (strpos($file, "maventa") !== false) {
 $yhtio = xml_string($xml->InvoiceRecipientOrganisationUnitNumber);
 $verkkotunnus_vas = xml_string($xml->BuyerPartyDetails->BuyerOrganisationTaxCode);
 $verkkotunnus_vas_inv = xml_string($xml->InvoiceRecipientPartyDetails->InvoiceRecipientOrganisationTaxCode);
+
 $laskun_tyyppi = xml_string($xml->InvoiceDetails->InvoiceTypeCode);
 $laskun_tyyppi_teksti = xml_string($xml->InvoiceDetails->InvoiceTypeText);
 $laskun_numero = xml_string($xml->InvoiceDetails->InvoiceNumber);
@@ -60,6 +61,8 @@ if (xml_string($xml->EpiDetails->EpiPartyDetails->EpiBfiPartyDetails->EpiBfiIden
 }
 
 $laskun_asiakastunnus = xml_string($xml->BuyerPartyDetails->BuyerPartyIdentifier);
+$laskun_asiakaspupetunnus = xml_string($xml->BuyerPartyDetails->BuyerPupesoftId);
+
 $laskun_summa_eur = xml_float($xml->EpiDetails->EpiPaymentInstructionDetails->EpiInstructedAmount);
 $laskun_tilausviite = xml_string($xml->InvoiceDetails->AgreementIdentifier);
 $laskun_asiakkaan_tilausnumero = xml_string($xml->InvoiceDetails->OrderIdentifier);
@@ -69,18 +72,34 @@ $laskun_toimitunnus = xml_string($xml->SellerPartyDetails->SellerPupesoftId);
 $toim_asiakkaantiedot = array();
 $toim_asiakkaantiedot["toim_ovttunnus"] = xml_string($xml->DeliveryOrganisationUnitNumber);
 $toim_asiakkaantiedot["ytunnus"] = xml_string($xml->DeliveryPartyDetails->DeliveryPartyIdentifier);
-$toim_asiakkaantiedot["nimi"] = xml_string($xml->DeliveryPartyDetails->DeliveryOrganisationName);
+
+$toim_asiakkaantiedot["nimi"] = "";
+foreach($xml->DeliveryPartyDetails->DeliveryOrganisationName as $name) {
+  $toim_asiakkaantiedot["nimi"] .= xml_string($name)." ";
+}
+$toim_asiakkaantiedot["nimi"] = trim($toim_asiakkaantiedot["nimi"]);
+
 $toim_asiakkaantiedot["osoite"] = xml_string($xml->DeliveryPartyDetails->DeliveryPostalAddressDetails->DeliveryStreetName);
 $toim_asiakkaantiedot["postino"] = xml_string($xml->DeliveryPartyDetails->DeliveryPostalAddressDetails->DeliveryPostCodeIdentifier);
 $toim_asiakkaantiedot["postitp"] = xml_string($xml->DeliveryPartyDetails->DeliveryPostalAddressDetails->DeliveryTownName);
+$toim_asiakkaantiedot["maa"] = xml_string($xml->DeliveryPartyDetails->DeliveryPostalAddressDetails->CountryCode);
+
 
 $ostaja_asiakkaantiedot = array();
 $ostaja_asiakkaantiedot["toim_ovttunnus"] = xml_string($xml->BuyerOrganisationUnitNumber);
 $ostaja_asiakkaantiedot["ytunnus"] = xml_string($xml->BuyerPartyDetails->BuyerPartyIdentifier);
-$ostaja_asiakkaantiedot["nimi"] = xml_string($xml->BuyerPartyDetails->BuyerOrganisationName);
+
+$ostaja_asiakkaantiedot["nimi"] = "";
+foreach($xml->BuyerPartyDetails->BuyerOrganisationName as $name) {
+  $ostaja_asiakkaantiedot["nimi"] .= xml_string($name)." ";
+}
+$ostaja_asiakkaantiedot["nimi"] = trim($ostaja_asiakkaantiedot["nimi"]);
+
 $ostaja_asiakkaantiedot["osoite"] = xml_string($xml->BuyerPartyDetails->BuyerPostalAddressDetails->BuyerStreetName);
 $ostaja_asiakkaantiedot["postino"] = xml_string($xml->BuyerPartyDetails->BuyerPostalAddressDetails->BuyerPostCodeIdentifier);
 $ostaja_asiakkaantiedot["postitp"] = xml_string($xml->BuyerPartyDetails->BuyerPostalAddressDetails->BuyerTownName);
+$ostaja_asiakkaantiedot["maa"] = xml_string($xml->BuyerPartyDetails->BuyerPostalAddressDetails->CountryCode);
+
 
 if ($laskuttajan_vat == "" and $laskuttajan_identifier != "") {
   $laskuttajan_vat = $laskuttajan_identifier;
@@ -120,6 +139,8 @@ if (strlen($yhtio) != 18 or strtoupper(substr($yhtio, 0, 2)) != "FI") {
 if ($laskun_erapaiva == "") {
   $laskun_erapaiva = xml_string($xml->PaymentTermsDetails->InvoiceDueDate);
 }
+
+$laskun_maksuehtoteksti = xml_string($xml->InvoiceDetails->PaymentTermsDetails->PaymentTermsFreeText);
 
 if ($laskun_pankkiviite == "") {
   $laskun_pankkiviite = xml_string($xml->EpiDetails->EpiIdentificationDetails->EpiReference);

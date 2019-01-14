@@ -89,16 +89,10 @@ if (!function_exists("tulosta_lavakeraystarrat_tec")) {
 
       $pvm = date("d.m.Y");
 
-      //M‰‰ritet‰‰n mik‰ setti viivakoodille k‰yttˆss‰: Code C >5, Code B >6, Code A >7
-
-      if (fmod($lasrow['asiakkaan_tilausnumero'], 2) == 1) {
-        $viivakoodi1  = ">50";
-      }
-      else {
-        $viivakoodi1  = ">5";
-      }
-
-      $viivakoodi1 .= $lasrow['asiakkaan_tilausnumero'];
+      $viivakoodi1  = ">6";
+      $viivakoodi1 .= substr($lasrow['asiakkaan_tilausnumero'], 0, 1);
+      $viivakoodi1 .= ">5";
+      $viivakoodi1 .= substr($lasrow['asiakkaan_tilausnumero'], 1);
 
       // t‰ss‰ tehd‰‰n aineisto jota TEC tulostin tajuaa
       $tarra = "

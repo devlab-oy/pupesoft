@@ -156,7 +156,6 @@ while (false !== ($file = readdir($handle))) {
 
     // Jos Magento on käytössä, merkataan tilaus toimitetuksi Magentoon kun rahtikirja tulostetaan
     if ($_magento_kaytossa) {
-      pupesoft_log('logmaster_tracking_code', "Päivitetään toimitetuksi Magentoon");
 
       $query = "SELECT toimitustapa
                 FROM rahtikirjat
@@ -184,6 +183,9 @@ while (false !== ($file = readdir($handle))) {
         $mageres = pupe_query($query);
 
         while ($magerow = mysql_fetch_assoc($mageres)) {
+
+          pupesoft_log('logmaster_tracking_code', "Päivitetään tilaus {$magerow["tunnus"]} toimitetuksi Magentoon");
+
           $magento_api_met = $toitarow['virallinen_selite'] != '' ? $toitarow['virallinen_selite'] : $toitarow['selite'];
           $magento_api_rak = $seurantakoodi;
           $magento_api_ord = $magerow["asiakkaan_tilausnumero"];

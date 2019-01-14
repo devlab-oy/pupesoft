@@ -121,7 +121,7 @@ if ($tee == 'TOIMINNOT') {
             WHERE lasku.yhtio = '$kukarow[yhtio]'
             and lasku.tila = 'U'
             and lasku.tapvm > date_sub(CURDATE(), interval 6 month)
-            and year(lasku.tapvm) = year(curdate())
+            and substring(lasku.directdebitsiirtonumero, 1, 4) = year(curdate())
             and lasku.alatila = 'X'
             and lasku.summa != 0
             and lasku.directdebitsiirtonumero > 0

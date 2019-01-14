@@ -47,7 +47,7 @@ $path = rtrim($path, '/').'/';
 $handle = opendir($path);
 
 if ($handle === false) {
-  exit;
+  exit("VIRHE: Handle on false, eli opendir {$path} ei onnistunut!");
 }
 
 $_magento_kaytossa = (!empty($magento_api_tt_url) and !empty($magento_api_tt_usr) and !empty($magento_api_tt_pas));
@@ -59,6 +59,7 @@ while (false !== ($file = readdir($handle))) {
   $is_txt = check_file_extension($full_filepath, 'TXT');
 
   if ($is_tc === false and $is_txt === false) {
+    pupesoft_log('logmaster_tracking_code', "Tiedosto ei ole TC eikä TXT päätteinen, skipataan {$full_filepath}");
     continue;
   }
 

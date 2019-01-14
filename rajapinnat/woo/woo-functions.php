@@ -11,6 +11,7 @@ function woo_commerce_toimita_tilaus($params) {
       or empty($woo_config["consumer_key"])
       or empty($woo_config["consumer_secret"])
       or empty($woo_config["store_url"])) {
+    pupesoft_log("woocommerce_orders", "WooCommerce config ei ole kunnossa.");
     return false;
   }
 
@@ -38,7 +39,9 @@ function woo_commerce_toimita_tilaus($params) {
     );
 
     // tehd‰‰n request
-    pupenext_rest($woo_parameters, "woo_complete_order");
+    $response = pupenext_rest($woo_parameters, "woo_complete_order");
+
+    pupesoft_log("woocommerce_orders", "Response tilaukselle {$order_number}: $response.");
   }
 }
 

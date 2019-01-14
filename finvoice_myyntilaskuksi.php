@@ -134,48 +134,47 @@ function kasittele_xml_tiedosto(SimpleXMLElement $xml, $tiedosto_polku) {
 
     // Nämä muuttujat kuuluisi olla setattuna:
     // kauniimpi linebreak
-    $_lb = "\n";
-
-    echo "{$_lb}{$_lb}LASKUNTIEDOT:{$_lb}";
-    echo "01: ".$yhtio."{$_lb}";
-    echo "02: ".$verkkotunnus_vas."{$_lb}";
-    echo "03: ".$laskun_tyyppi."{$_lb}";
-    echo "04: ".$laskun_numero."{$_lb}";
-    echo "05: ".$laskun_ebid."{$_lb}";
-    echo "06: ".$laskun_tapvm."{$_lb}";
-    echo "07: ".$laskun_lapvm."{$_lb}";
-    echo "08: ".$laskun_erapaiva."{$_lb}";
-    echo "09: ".$laskun_kapvm."{$_lb}";
-    echo "10: ".$laskun_kasumma."{$_lb}";
-    echo "11: ".$laskuttajan_ovt."{$_lb}";
-    echo "12: ".$laskuttajan_nimi."{$_lb}";
-    echo "13: ".$laskuttajan_vat."{$_lb}";
-    echo "14: ".$laskun_pankkiviite."{$_lb}";
-    echo "14.2: ".$laskun_iban."{$_lb}";
-    echo "14.4: ".$laskun_bic."{$_lb}";
-    echo "15: ".$laskun_asiakastunnus."{$_lb}";
-    echo "16: ".$laskun_summa_eur."{$_lb}";
-    echo "17: ".$laskun_tilausviite."{$_lb}";
-    echo "18: ".$kauttalaskutus."{$_lb}";
-    echo "19: ".$laskun_asiakkaan_tilausnumero."{$_lb}";
-    echo "20: ".$toim_asiakkaantiedot["toim_ovttunnus"]."{$_lb}";
-    echo "21: ".$toim_asiakkaantiedot["ytunnus"]."{$_lb}";
-    echo "22: ".$toim_asiakkaantiedot["nimi"]."{$_lb}";
-    echo "23: ".$toim_asiakkaantiedot["osoite"]."{$_lb}";
-    echo "24: ".$toim_asiakkaantiedot["postino"]."{$_lb}";
-    echo "25: ".$toim_asiakkaantiedot["postitp"]."{$_lb}";
-    echo "25: ".$toim_asiakkaantiedot["maa"]."{$_lb}";
-    echo "26: ".$ostaja_asiakkaantiedot["toim_ovttunnus"]."{$_lb}";
-    echo "27: ".$ostaja_asiakkaantiedot["ytunnus"]."{$_lb}";
-    echo "28: ".$ostaja_asiakkaantiedot["nimi"]."{$_lb}";
-    echo "29: ".$ostaja_asiakkaantiedot["osoite"]."{$_lb}";
-    echo "30: ".$ostaja_asiakkaantiedot["postino"]."{$_lb}";
-    echo "31: ".$ostaja_asiakkaantiedot["postitp"]."{$_lb}";
-    echo "31: ".$ostaja_asiakkaantiedot["maa"]."{$_lb}";
-    echo "32: ".$laskuttajan_toimittajanumero."{$_lb}";
-    echo "33: ".$laskuttajan_valkoodi."{$_lb}";
-    echo "34: ".$laskun_toimitunnus."{$_lb}";
-    echo "35: ".$laskun_asiakaspupetunnus."{$_lb}";
+    #$_lb = "\n";
+    #echo "{$_lb}{$_lb}LASKUNTIEDOT:{$_lb}";
+    #echo "01: ".$yhtio."{$_lb}";
+    #echo "02: ".$verkkotunnus_vas."{$_lb}";
+    #echo "03: ".$laskun_tyyppi."{$_lb}";
+    #echo "04: ".$laskun_numero."{$_lb}";
+    #echo "05: ".$laskun_ebid."{$_lb}";
+    #echo "06: ".$laskun_tapvm."{$_lb}";
+    #echo "07: ".$laskun_lapvm."{$_lb}";
+    #echo "08: ".$laskun_erapaiva."{$_lb}";
+    #echo "09: ".$laskun_kapvm."{$_lb}";
+    #echo "10: ".$laskun_kasumma."{$_lb}";
+    #echo "11: ".$laskuttajan_ovt."{$_lb}";
+    #echo "12: ".$laskuttajan_nimi."{$_lb}";
+    #echo "13: ".$laskuttajan_vat."{$_lb}";
+    #echo "14: ".$laskun_pankkiviite."{$_lb}";
+    #echo "14.2: ".$laskun_iban."{$_lb}";
+    #echo "14.4: ".$laskun_bic."{$_lb}";
+    #echo "15: ".$laskun_asiakastunnus."{$_lb}";
+    #echo "16: ".$laskun_summa_eur."{$_lb}";
+    #echo "17: ".$laskun_tilausviite."{$_lb}";
+    #echo "18: ".$kauttalaskutus."{$_lb}";
+    #echo "19: ".$laskun_asiakkaan_tilausnumero."{$_lb}";
+    #echo "20: ".$toim_asiakkaantiedot["toim_ovttunnus"]."{$_lb}";
+    #echo "21: ".$toim_asiakkaantiedot["ytunnus"]."{$_lb}";
+    #echo "22: ".$toim_asiakkaantiedot["nimi"]."{$_lb}";
+    #echo "23: ".$toim_asiakkaantiedot["osoite"]."{$_lb}";
+    #echo "24: ".$toim_asiakkaantiedot["postino"]."{$_lb}";
+    #echo "25: ".$toim_asiakkaantiedot["postitp"]."{$_lb}";
+    #echo "25: ".$toim_asiakkaantiedot["maa"]."{$_lb}";
+    #echo "26: ".$ostaja_asiakkaantiedot["toim_ovttunnus"]."{$_lb}";
+    #echo "27: ".$ostaja_asiakkaantiedot["ytunnus"]."{$_lb}";
+    #echo "28: ".$ostaja_asiakkaantiedot["nimi"]."{$_lb}";
+    #echo "29: ".$ostaja_asiakkaantiedot["osoite"]."{$_lb}";
+    #echo "30: ".$ostaja_asiakkaantiedot["postino"]."{$_lb}";
+    #echo "31: ".$ostaja_asiakkaantiedot["postitp"]."{$_lb}";
+    #echo "31: ".$ostaja_asiakkaantiedot["maa"]."{$_lb}";
+    #echo "32: ".$laskuttajan_toimittajanumero."{$_lb}";
+    #echo "33: ".$laskuttajan_valkoodi."{$_lb}";
+    #echo "34: ".$laskun_toimitunnus."{$_lb}";
+    #echo "35: ".$laskun_asiakaspupetunnus."{$_lb}";
 
     $asiakas = finvoice_myyntilaskuksi_valitse_asiakas($toim_asiakkaantiedot, $ostaja_asiakkaantiedot, $laskun_asiakaspupetunnus);
 
@@ -309,23 +308,23 @@ function kasittele_xml_tiedosto(SimpleXMLElement $xml, $tiedosto_polku) {
     foreach ($rtuoteno as $tuoterivi) {
       // Nämä muuttujat ovat valinnaisia:
       #RIVINTIEDOT:
-      echo $tuoterivi["ale"]."\n";
-      echo $tuoterivi["alv"]."\n";
-      echo $tuoterivi["hinta"]."\n";
-      echo $tuoterivi["kauttalaskutus"]."\n";
-      echo $tuoterivi["kommentti"]."\n";
-      echo $tuoterivi["kpl"]."\n";
-      echo $tuoterivi["laskutettuaika"]."\n";
-      echo $tuoterivi["nimitys"]."\n";
-      echo $tuoterivi["rivihinta"]."\n";
-      echo $tuoterivi["rivihinta_verolli"]."\n";
-      echo $tuoterivi["riviinfo"]."\n";
-      echo $tuoterivi["riviviite"]."\n";
-      echo $tuoterivi["tilaajanrivinro"]."\n";
-      echo $tuoterivi["tuoteno"]."\n";
-      echo $tuoterivi["yksikko"]."\n";
-      echo $tuoterivi["tilinumero"]."\n";
-      echo $tuoterivi["rivihinta_valuutassa"]."\n";
+      #echo $tuoterivi["ale"]."\n";
+      #echo $tuoterivi["alv"]."\n";
+      #echo $tuoterivi["hinta"]."\n";
+      #echo $tuoterivi["kauttalaskutus"]."\n";
+      #echo $tuoterivi["kommentti"]."\n";
+      #echo $tuoterivi["kpl"]."\n";
+      #echo $tuoterivi["laskutettuaika"]."\n";
+      #echo $tuoterivi["nimitys"]."\n";
+      #echo $tuoterivi["rivihinta"]."\n";
+      #echo $tuoterivi["rivihinta_verolli"]."\n";
+      #echo $tuoterivi["riviinfo"]."\n";
+      #echo $tuoterivi["riviviite"]."\n";
+      #echo $tuoterivi["tilaajanrivinro"]."\n";
+      #echo $tuoterivi["tuoteno"]."\n";
+      #echo $tuoterivi["yksikko"]."\n";
+      #echo $tuoterivi["tilinumero"]."\n";
+      #echo $tuoterivi["rivihinta_valuutassa"]."\n";
 
       $query = "INSERT into tilausrivi set
                 kpl                  = '{$tuoterivi['kpl']}',

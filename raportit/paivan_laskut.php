@@ -122,7 +122,7 @@ if (isset($teerappari)) {
           $operaattorille++;
         }
         elseif ($yhtiorow['verkkolasku_lah'] == 'fitek') {
-          echo "<font class='ok'>", t("Pupevoice Fitek"), "</font>";
+          echo "<font class='ok'>", t("Fitek-verkkolaskut"), "</font>";
           $operaattorille++;
         }
         else {

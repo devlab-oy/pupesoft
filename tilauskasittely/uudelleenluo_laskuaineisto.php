@@ -50,12 +50,6 @@ if (isset($tee) and $tee == "trustpoint_siirto") {
   echo "Lasku siirretty l‰hetysjonoon";
 }
 
-if (isset($tee) and $tee == "fitek_siirto") {
-  // Siirret‰‰n l‰hetysjonoon
-  rename("{$pupe_root_polku}/dataout/".basename($filenimi), "{$pupe_root_polku}/dataout/fitek_error/".basename($filenimi));
-  echo "Lasku siirretty l‰hetysjonoon";
-}
-
 if (isset($tee) and $tee == "ppg_siirto") {
   // Splitataan file ja l‰hetet‰‰n YKSI lasku kerrallaan
   $ppg_laskuarray = explode("<SOAP-ENV:Envelope", file_get_contents("{$pupe_root_polku}/dataout/".basename($filenimi)));
@@ -70,6 +64,24 @@ if (isset($tee) and $tee == "ppg_siirto") {
       $status = ppg_queue($invoice_number[1], "<SOAP-ENV:Envelope".$ppg_laskuarray[$a], $kieli);
 
       echo "PPG-lasku $invoice_number[1]: $status<br>\n";
+    }
+  }
+}
+
+if (isset($tee) and $tee == "fitek_siirto") {
+  // Splitataan file ja l‰hetet‰‰n YKSI lasku kerrallaan
+  $fitek_laskuarray = explode('<?xml version="1.0" encoding', file_get_contents("{$pupe_root_polku}/dataout/".basename($filenimi)));
+  $fitek_laskumaara = count($fitek_laskuarray);
+
+  if ($fitek_laskumaara > 0) {
+    require_once "tilauskasittely/tulosta_lasku.inc";
+
+    for ($a = 1; $a < $fitek_laskumaara; $a++) {
+      preg_match("/\<InvoiceNumber\>(.*?)\<\/InvoiceNumber\>/i", $fitek_laskuarray[$a], $invoice_number);
+
+      $status = fitek_queue($invoice_number[1], '<?xml version="1.0" encoding'.$fitek_laskuarray[$a], $kieli);
+
+      echo "Fitek-lasku $invoice_number[1]: $status<br>\n";
     }
   }
 }
@@ -484,6 +496,9 @@ if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumer
         $toimaikarow["maxt"] = date("Y-m-d");
       }
 
+      // Laskun kaikki tilaukset
+      $lasrow['tilausnumerot'] = hae_tilausnumero($lasrow["laskunro"]);
+
       //Kirjoitetaan failiin laskun otsikkotiedot
       if ($lasrow["chn"] == "111") {
         elmaedi_otsik($tootedi, $lasrow, $masrow, $tyyppi, $timestamppi, $toimaikarow);
@@ -641,15 +656,16 @@ if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumer
                 WHERE tilausrivi.yhtio      = '$kukarow[yhtio]'
                 and (tilausrivi.perheid = 0 or tilausrivi.perheid=tilausrivi.tunnus or tilausrivin_lisatiedot.ei_nayteta !='E' or tilausrivin_lisatiedot.ei_nayteta is null)
                 and tilausrivi.kpl         != 0
+                and tilausrivi.tyyppi      = 'L'
                 and tilausrivi.uusiotunnus  = '$lasrow[tunnus]'
                 GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23
                 ORDER BY tilausrivi.otunnus, if(tilausrivi.tuoteno in ('$yhtiorow[kuljetusvakuutus_tuotenumero]','$yhtiorow[laskutuslisa_tuotenumero]'), 2, 1), $pjat_sortlisa sorttauskentta $order_sorttaus, tilausrivi.tunnus";
       $tilres = pupe_query($query);
 
-      $rivinumerot = array(0 => 0);
-      $rivilaskuri = 1;
-      $rivimaara   = mysql_num_rows($tilres);
-      $rivigrouppaus   = FALSE;
+      $rivinumerot   = array(0 => 0);
+      $rivilaskuri   = 1;
+      $rivimaara     = mysql_num_rows($tilres);
+      $rivigrouppaus = FALSE;
 
       while ($tilrow = mysql_fetch_assoc($tilres)) {
 

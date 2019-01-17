@@ -36,6 +36,7 @@ if ($fieldname == "verkkolasku_lah") {
   $sel7 = "";
   $sel8 = "";
   $sel9 = "";
+  $selC = "";
 
   if ($trow[$i] == 'iPost') {
     $sel3 = "selected";
@@ -62,7 +63,7 @@ if ($fieldname == "verkkolasku_lah") {
     $sel9 = "selected";
   }
   elseif ($trow[$i] == 'fitek') {
-    $sel10 = "selected";
+    $selC = "selected";
   }
   else {
     $sel1 = "selected";
@@ -77,7 +78,7 @@ if ($fieldname == "verkkolasku_lah") {
   $ulos .= "<option value = 'trustpoint' $sel7>".t("Trustpoint-verkkolaskut");
   $ulos .= "<option value = 'ppg' $sel8>".t("PPG Laskutuspalvelu");
   $ulos .= "<option value = 'sepa' $sel9>".t("SEPA-pankkiyhteys");
-  $ulos .= "<option value = 'fitek' $sel10>".t("Fitek-verkkolaskut");
+  $ulos .= "<option value = 'fitek' $selC>".t("Fitek-verkkolaskut");
   $ulos .= "</select></td>";
 
   $jatko = 0;

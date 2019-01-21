@@ -162,6 +162,8 @@ if (!function_exists("korjaalaskut")) {
         $uusi_varastonmuutos_kp = round($uusi_varastonmuutos, 2);
         $uusi_varasto_kp = round($uusi_varastonmuutos * -1, 2);
 
+        $_tilino = " tilino = '{$varastotili}',";
+
         // jos on asiakasvarasto-ominaisuudet käytössä, niin
         // varastotili voi mahdollisesti olla toinen.
         if (!empty($yhtiorow["ennakkolaskun_asiakasvarasto"]) and !empty($yhtiorow["asiakasvarasto"])) {
@@ -176,9 +178,6 @@ if (!function_exists("korjaalaskut")) {
           if (mysql_num_rows($result) == 1) {
             $_tilino = " tilino = '{$yhtiorow["ennakkolaskun_asiakasvarasto"]}',";
           }
-        }
-        else {
-          $_tilino = " tilino = '{$varastotili}',";
         }
 
         // Kirjataan 'varasto'-tilille

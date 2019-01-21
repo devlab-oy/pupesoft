@@ -2961,14 +2961,14 @@ else {
       }
       elseif ($yhtiorow["verkkolasku_lah"] == "fitek" and file_exists(realpath($nimifinvoice))) {
         // Splitataan file ja l‰hetet‰‰n YKSI lasku kerrallaan
-        $fitek_laskuarray = explode('<?xml version="1.0" encoding', file_get_contents($nimifinvoice));
+        $fitek_laskuarray = explode("<?xml version=", file_get_contents($nimifinvoice));
         $fitek_laskumaara = count($fitek_laskuarray);
 
         if ($fitek_laskumaara > 0) {
           for ($a = 1; $a < $fitek_laskumaara; $a++) {
             preg_match("/\<InvoiceNumber\>(.*?)\<\/InvoiceNumber\>/i", $fitek_laskuarray[$a], $invoice_number);
 
-            $status = fitek_queue($invoice_number[1], $fitek_laskuarray[$a], $kieli);
+            $status = fitek_queue($invoice_number[1], "<?xml version=".$fitek_laskuarray[$a], $kieli);
 
             $tulos_ulos .= "Fitek-lasku $invoice_number[1]: $status<br>\n";
           }

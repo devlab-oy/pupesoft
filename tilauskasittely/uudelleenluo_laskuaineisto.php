@@ -70,7 +70,7 @@ if (isset($tee) and $tee == "ppg_siirto") {
 
 if (isset($tee) and $tee == "fitek_siirto") {
   // Splitataan file ja l‰hetet‰‰n YKSI lasku kerrallaan
-  $fitek_laskuarray = explode('<?xml version="1.0" encoding', file_get_contents("{$pupe_root_polku}/dataout/".basename($filenimi)));
+  $fitek_laskuarray = explode("<?xml version=", file_get_contents("{$pupe_root_polku}/dataout/".basename($filenimi)));
   $fitek_laskumaara = count($fitek_laskuarray);
 
   if ($fitek_laskumaara > 0) {
@@ -79,7 +79,7 @@ if (isset($tee) and $tee == "fitek_siirto") {
     for ($a = 1; $a < $fitek_laskumaara; $a++) {
       preg_match("/\<InvoiceNumber\>(.*?)\<\/InvoiceNumber\>/i", $fitek_laskuarray[$a], $invoice_number);
 
-      $status = fitek_queue($invoice_number[1], '<?xml version="1.0" encoding'.$fitek_laskuarray[$a], $kieli);
+      $status = fitek_queue($invoice_number[1], "<?xml version=".$fitek_laskuarray[$a], $kieli);
 
       echo "Fitek-lasku $invoice_number[1]: $status<br>\n";
     }

@@ -35347,6 +35347,46 @@ if (!function_exists('finvoice_myyntilaskuksi_valitse_asiakas')) {
       #echo "$query\n\n";
     }
 
+    if (mysql_num_rows($result) != 1) {
+      # Haiskahtaako laskutusosoitteelta?
+      $ytunnus = str_replace("-", "", $ostaja_asiakkaantiedot['ytunnus']);
+
+      # Odoossa on t‰ss‰ tapauksessa ostajan nimen‰: "ostajan nimi, laskutusoositteen nimi", eli j‰tet‰‰n se pois ehdoista
+      # ja toimitusositteessa joko toimitusosite tai ostajan osoite jos toimitusositetta ei ole
+
+      $query = "SELECT *
+                FROM asiakas
+                WHERE yhtio = '{$yhtiorow['yhtio']}'
+                AND REPLACE(ytunnus, '-', '') = '{$ytunnus}'
+                AND laskutus_osoite = '{$ostaja_asiakkaantiedot["osoite"]}'
+                AND laskutus_postino = '{$ostaja_asiakkaantiedot["postino"]}'
+                AND laskutus_postitp = '{$ostaja_asiakkaantiedot["postitp"]}'
+                AND concat_ws(' ', toim_nimi, toim_nimitark) = '{$toim_asiakkaantiedot['nimi']}'
+                AND toim_osoite = '{$toim_asiakkaantiedot["osoite"]}'
+                AND toim_postino = '{$toim_asiakkaantiedot["postino"]}'
+                AND toim_postitp = '{$toim_asiakkaantiedot["postitp"]}'
+                AND laji != 'P'";
+      $result = pupe_query($query);
+      #echo "$query\n\n";
+
+      if (mysql_num_rows($result) != 1) {
+        $query = "SELECT *
+                  FROM asiakas
+                  WHERE yhtio = '{$yhtiorow['yhtio']}'
+                  AND REPLACE(ytunnus, '-', '') = '{$ytunnus}'
+                  AND laskutus_osoite = '{$ostaja_asiakkaantiedot["osoite"]}'
+                  AND laskutus_postino = '{$ostaja_asiakkaantiedot["postino"]}'
+                  AND laskutus_postitp = '{$ostaja_asiakkaantiedot["postitp"]}'
+                  AND concat_ws(' ', nimi, nimitark) = '{$toim_asiakkaantiedot['nimi']}'
+                  AND osoite = '{$toim_asiakkaantiedot["osoite"]}'
+                  AND postino = '{$toim_asiakkaantiedot["postino"]}'
+                  AND postitp = '{$toim_asiakkaantiedot["postitp"]}'
+                  AND laji != 'P'";
+        $result = pupe_query($query);
+        #echo "$query\n\n";
+      }
+    }
+
     if (mysql_num_rows($result) != 1 and !empty($ostaja_asiakkaantiedot['ytunnus'])) {
       $ytunnus = str_replace("-", "", $ostaja_asiakkaantiedot['ytunnus']);
 

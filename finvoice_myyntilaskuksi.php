@@ -225,6 +225,30 @@ function kasittele_xml_tiedosto(SimpleXMLElement $xml, $tiedosto_polku) {
 
     $maksuehto = finvoice_myyntilaskuksi_valitse_maksuehto($laskun_maksuehtoteksti, $laskun_lapvm, $laskun_erapaiva);
 
+    // Käytetään Pupen asiakkaan tietoja, jos ei löydetty maksuehtoa
+    if (empty($maksuehto)) {
+      $query = "SELECT rel_pvm
+                FROM maksuehto
+                WHERE yhtio = '{$yhtiorow['yhtio']}'
+                AND tunnus = '{$asiakas['maksuehto']}}'";
+      $maksuehtores = pupe_query($query);
+
+      if (mysql_num_rows($maksuehtores) == 1) {
+        $maksuehtorow = mysql_fetch_assoc($maksuehtores);
+
+        $query = "SELECT *
+                  FROM maksuehto
+                  WHERE yhtio = '{$yhtiorow['yhtio']}'
+                  AND rel_pvm = '{$maksuehtorow['rel_pvm']}}'
+                  AND kassa_relpvm = 0";
+        $maksuehtores = pupe_query($query);
+
+        if (mysql_num_rows($maksuehtores) == 1) {
+          $maksuehto = mysql_fetch_assoc($maksuehtores);
+        }
+      }
+    }
+
     if (empty($maksuehto)) {
       siirra_tiedosto_kansioon($tiedosto_polku, $finvoice_myyntilasku_kansio_error);
       echo "VIRHE: Sopivaa maksuehtoa ei löytynyt laskulle: $laskun_numero\n";
@@ -370,5 +394,3 @@ function kasittele_xml_tiedosto(SimpleXMLElement $xml, $tiedosto_polku) {
     pupe_query($tquery);
   }
 }
-
-

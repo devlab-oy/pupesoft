@@ -928,15 +928,35 @@ elseif (!$variaaritorivi and $kukarow["extranet"] != '') {
     $toimppa = substr($toimaika, 8, 2);
   }
 
+  for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+    echo "<td valign='top'>";
+
+    if (strpos((string) $yhtiorow['myynnin_alekentat_muokkaus'], (string) $alepostfix) !== FALSE) {
+      echo "<input type='text' name='ale{$alepostfix}' size='5' maxlength='6' value='", ${'ale'.$alepostfix}, "' />";
+    }
+    else {
+      echo "<input type='hidden' name='ale{$alepostfix}' value='", ${'ale'.$alepostfix}, "' />", ${'ale'.$alepostfix};
+    }
+
+    echo "</td>";
+  }
+
   echo "<input type='hidden' name='myy_sarjatunnus' value='{$myy_sarjatunnus}'>";
 
   echo "<table>
-      <tr>$jarjlisa
-        <th align='left'>".t("Tuotenumero")."</th>
-        <th align='left'>".t("M‰‰r‰")."</th>
-        <td valign='top' class='back'></td>
-      </tr>
-    <tr>$jarjlisa";
+      <tr>$jarjlisa";
+
+      echo "  <th align='left'>".t("Tuotenumero")."</th>
+          <th align='left'>".t("M‰‰r‰")."</th>";
+
+      for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+        echo "<th align='left'>".t("Ale")."{$alepostfix}</th>";
+      }
+
+
+    echo"<tr>$jarjlisa";
+
+
 
   echo "<input type='hidden' name='var' value='$var'>";
 

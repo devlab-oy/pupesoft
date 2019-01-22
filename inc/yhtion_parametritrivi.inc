@@ -4072,6 +4072,7 @@ if ($fieldname == "myynnin_alekentat") {
   $ulos .= "<option value = '1'{$sel[1]}>".t("Myynniss‰ k‰ytet‰‰n yht‰ alennuskentt‰‰")."</option>";
   $ulos .= "<option value = '2'{$sel[2]}>".t("Myynniss‰ k‰ytet‰‰n kahta alennuskentt‰‰")."</option>";
   $ulos .= "<option value = '3'{$sel[3]}>".t("Myynniss‰ k‰ytet‰‰n kolmea alennuskentt‰‰")."</option>";
+  $ulos .= "<option value = '4'{$sel[4]}>".t("Myynniss‰ k‰ytet‰‰n kolmea alennuskentt‰‰, extranetiss‰ yksi")."</option>";
   $ulos .= "</select></td>";
 
   $jatko = 0;

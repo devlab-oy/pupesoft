@@ -35381,6 +35381,27 @@ if (!function_exists('finvoice_myyntilaskuksi_valitse_asiakas')) {
                   AND osoite = '{$toim_asiakkaantiedot["osoite"]}'
                   AND postino = '{$toim_asiakkaantiedot["postino"]}'
                   AND postitp = '{$toim_asiakkaantiedot["postitp"]}'
+                  AND toim_nimi = ''
+                  AND toim_osoite = ''
+                  AND toim_postino = ''
+                  AND toim_postitp = ''
+                  AND laji != 'P'";
+        $result = pupe_query($query);
+        #echo "$query\n\n";
+      }
+
+      if (mysql_num_rows($result) != 1) {
+        $query = "SELECT *
+                  FROM asiakas
+                  WHERE yhtio = '{$yhtiorow['yhtio']}'
+                  AND REPLACE(ytunnus, '-', '') = '{$ytunnus}'
+                  AND laskutus_osoite = '{$ostaja_asiakkaantiedot["osoite"]}'
+                  AND laskutus_postino = '{$ostaja_asiakkaantiedot["postino"]}'
+                  AND laskutus_postitp = '{$ostaja_asiakkaantiedot["postitp"]}'
+                  AND concat_ws(' ', nimi, nimitark) = '{$toim_asiakkaantiedot['nimi']}'
+                  AND osoite = '{$toim_asiakkaantiedot["osoite"]}'
+                  AND postino = '{$toim_asiakkaantiedot["postino"]}'
+                  AND postitp = '{$toim_asiakkaantiedot["postitp"]}'
                   AND laji != 'P'";
         $result = pupe_query($query);
         #echo "$query\n\n";

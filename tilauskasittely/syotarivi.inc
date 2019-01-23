@@ -936,8 +936,10 @@ elseif (!$variaaritorivi and $kukarow["extranet"] != '') {
   echo "  <th align='left'>".t("Tuotenumero")."</th>
       <th align='left'>".t("M‰‰r‰")."</th>";
 
-  for ($alepostfix = 1; $alepostfix <= 1; $alepostfix++) {
-    echo "<th align='left'>".t("Ale")."{$alepostfix}</th>";
+  if (isset($extranet_alennukset) and $extranet_alennukset == 'JOO') {
+    for ($alepostfix = 1; $alepostfix <= 1; $alepostfix++) {
+      echo "<th align='left'>".t("Ale")."{$alepostfix}</th>";
+    }
   }
 
   echo"<tr>$jarjlisa";
@@ -962,8 +964,10 @@ elseif (!$variaaritorivi and $kukarow["extranet"] != '') {
 
   echo "  <td valign='top'><input type='text' name='kpl' size='5' maxlength='13' value='$kpl'></td>";
 
-  for ($alepostfix = 1; $alepostfix <= 1; $alepostfix++) {
-    echo "<td align='top'><input type='text' name='ale{$alepostfix}' size='5' maxlength='6' value='", ${'ale'.$alepostfix}, "' </td>";
+  if (isset($extranet_alennukset) and $extranet_alennukset == 'JOO') {
+    for ($alepostfix = 1; $alepostfix <= 1; $alepostfix++) {
+      echo "<td align='top'><input type='text' name='ale{$alepostfix}' size='5' maxlength='6' value='", ${'ale'.$alepostfix}, "' </td>";
+    }
   }
 
   echo "

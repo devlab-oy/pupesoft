@@ -968,6 +968,8 @@ elseif (!$variaaritorivi and $kukarow["extranet"] != '') {
     for ($alepostfix = 1; $alepostfix <= 1; $alepostfix++) {
       echo "<td align='top'><input type='text' name='ale{$alepostfix}' size='5' maxlength='6' value='", ${'ale'.$alepostfix}, "' </td>";
     }
+    $_th_lisa = "<th></th>";
+    $_td_lisa = "<td></td>";
   }
 
   echo "
@@ -975,17 +977,17 @@ elseif (!$variaaritorivi and $kukarow["extranet"] != '') {
       <td valign='top' class='back'><input type='submit' class='poista_btn' name='tyhjenna' value='".t("Tyhjennä")."'> <font class='error'>$varaosavirhe</font></td>
     </tr>";
 
-  echo "<tr colspan='4'><th colspan='2'>".t("Toimitusaika")."</th></tr>";
+  echo "<tr colspan='4'><th colspan='2'>".t("Toimitusaika")."</th>{$_th_lisa}</tr>";
   echo "<tr>";
   echo "<td valign='top' colspan='2'>";
   echo "<input type='text' size='3' name='toimppa' value='$toimppa'>";
   echo "<input type='text' size='3' name='toimkka' value='$toimkka'>";
   echo "<input type='text' size='5' name='toimvva' value='$toimvva'>";
-  echo "</td></tr>";
+  echo "</td>{$_td_lisa}</tr>";
 
-  echo "<tr>$jarjlisa<th colspan='2'>".t("Rivikommentti").":</th></tr>";
+  echo "<tr>$jarjlisa<th colspan='2'>".t("Rivikommentti").":</th>{$_th_lisa}</tr>";
   echo "<tr>$jarjlisa<td valign='top' colspan='2'><textarea name='kommentti' cols='30' rows='2' wrap='soft'>$kommentti</textarea>";
-  echo "</td></tr></table></form>";
+  echo "</td>{$_td_lisa}</tr></table></form>";
 }
 
 // Kursorinohjausta

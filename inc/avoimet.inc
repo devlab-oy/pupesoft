@@ -923,7 +923,14 @@ if ($tee != '' and isset($ajaraportti)) {
       $worksheet->write($excelrivi,  9, t("Avoin saldo"), $format_bold);
       $worksheet->write($excelrivi, 10, t("Val"), $format_bold);
 
-      if (!empty($karhutieto)) {
+      if ($maksutekstinakyviin) {
+        $worksheet->write($excelrivi, 11, t("Maksuteksti"), $format_bold);
+        if (!empty($karhutieto)) {
+            $worksheet->write($excelrivi, 12, t("Maksukehotuksia"), $format_bold);
+            $worksheet->write($excelrivi, 13, t("Viimeisin maksukehotus"), $format_bold);
+        }
+      }
+      elseif (!empty($karhutieto)) {
         $worksheet->write($excelrivi, 11, t("Maksukehotuksia"), $format_bold);
         $worksheet->write($excelrivi, 12, t("Viimeisin maksukehotus"), $format_bold);
       }
@@ -1046,8 +1053,14 @@ if ($tee != '' and isset($ajaraportti)) {
             $worksheet->writeNumber($excelrivi, 9, (float) $trow["tiliointiavoinsaldo"]);
             $worksheet->write($excelrivi, 10, $yhtiorow["valkoodi"]);
           }
-
-          if (!empty($karhutieto) and !empty($karhutieto_array)) {
+          if ($maksutekstinakyviin) {
+            $worksheet->writeString($excelrivi, 11, $trow["maksuteksti"]);
+            if (!empty($karhutieto) and !empty($karhutieto_array)) {
+              $worksheet->writeNumber($excelrivi, 12, (int) $karhutieto_array["karhukerrat"]);
+              $worksheet->write($excelrivi, 13, $karhutieto_array["karhupvm"]);
+            }
+          }
+          elseif (!empty($karhutieto) and !empty($karhutieto_array)) {
             $worksheet->writeNumber($excelrivi, 11, (int) $karhutieto_array["karhukerrat"]);
             $worksheet->write($excelrivi, 12, $karhutieto_array["karhupvm"]);
           }

@@ -933,18 +933,14 @@ elseif (!$variaaritorivi and $kukarow["extranet"] != '') {
   echo "<table>
       <tr>$jarjlisa";
 
-      echo "  <th align='left'>".t("Tuotenumero")."</th>
-          <th align='left'>".t("M‰‰r‰")."</th>";
+  echo "  <th align='left'>".t("Tuotenumero")."</th>
+      <th align='left'>".t("M‰‰r‰")."</th>";
 
-      for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
-        echo "<th align='left'>".t("Ale")."{$alepostfix}
-        <input type='text' name='ale{$alepostfix}' size='5' maxlength='6' value='", ${'ale'.$alepostfix}, "' </th>";
-      }
+  for ($alepostfix = 1; $alepostfix <= 1; $alepostfix++) {
+    echo "<th align='left'>".t("Ale")."{$alepostfix}</th>";
+  }
 
-
-    echo"<tr>$jarjlisa";
-
-
+  echo"<tr>$jarjlisa";
 
   echo "<input type='hidden' name='var' value='$var'>";
 
@@ -964,7 +960,13 @@ elseif (!$variaaritorivi and $kukarow["extranet"] != '') {
     echo "<td valign='top'>$ulos</td>";
   }
 
-  echo "  <td valign='top'><input type='text' name='kpl' size='5' maxlength='13' value='$kpl'></td>
+  echo "  <td valign='top'><input type='text' name='kpl' size='5' maxlength='13' value='$kpl'></td>";
+
+  for ($alepostfix = 1; $alepostfix <= 1; $alepostfix++) {
+    echo "<td align='top'><input type='text' name='ale{$alepostfix}' size='5' maxlength='6' value='", ${'ale'.$alepostfix}, "' </td>";
+  }
+
+  echo "
       <td valign='top' class='back'><input type='submit' class='lisaa_btn' value='".t("Lis‰‰")."'></td>
       <td valign='top' class='back'><input type='submit' class='poista_btn' name='tyhjenna' value='".t("Tyhjenn‰")."'> <font class='error'>$varaosavirhe</font></td>
     </tr>";

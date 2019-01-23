@@ -32,7 +32,9 @@ if (isset($toiminto) and $toiminto == 'vaihda_oletusasiakkuus' and $asiakasvalin
   }
 }
 
-piirra_multiasiakkuusdropdown();
+if (!isset($livesearch_tee)) {
+  piirra_multiasiakkuusdropdown();
+}
 
 function piirra_multiasiakkuusdropdown() {
   global $kukarow, $toim;
@@ -41,7 +43,8 @@ function piirra_multiasiakkuusdropdown() {
   $query = "SELECT asiakas.tunnus, asiakas.nimi, asiakas.nimitark, asiakas.selaus
             FROM customers_users
             JOIN asiakas ON (customers_users.customer_id = asiakas.tunnus)
-            WHERE user_id = '{$kukarow['tunnus']}'";
+            WHERE user_id = '{$kukarow['tunnus']}'
+            ORDER BY asiakas.nimi, asiakas.nimitark, asiakas.selaus";
   $multiresult = pupe_query($query);
 
   // Jos ei ole linkattu mit‰‰n asiakkaita, ei piirret‰ mit‰‰n

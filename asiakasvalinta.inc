@@ -70,7 +70,9 @@ function piirra_multiasiakkuusdropdown() {
 
   while ($multirow = mysql_fetch_assoc($multiresult)) {
     if (empty($multirow['selaus']))  {
-      echo "<option value='{$multirow['tunnus']}'>".$multirow['nimi'].', '.$row['nimitark']."</option>";
+
+      $_nimitark = (!empty($row['nimitark']) ? ', '.$row['nimitark'] : '');
+      echo "<option value='{$multirow['tunnus']}'>".$multirow['nimi'].$_nimitark."</option>";
     }
     else {
       echo "<option value='{$multirow['tunnus']}'>".$multirow['selaus']."</option>";
@@ -82,7 +84,8 @@ function piirra_multiasiakkuusdropdown() {
 
   if (isset($row['nimi'])) {
     if (empty($row['selaus'])) {
-      echo "<td class='back'>".$row['nimi'].', '.$row['nimitark']."</td>";
+      $_nimitark = (!empty($row['nimitark']) ? ', '.$row['nimitark'] : '');
+      echo "<td class='back'>".$row['nimi'].$_nimitark."</td>";
     }
     else {
       echo "<td class='back'>".$row['selaus']."</td>";

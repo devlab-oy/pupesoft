@@ -443,7 +443,8 @@ if ($handle = opendir($kansio)) {
 
     // Nimet‰‰n tiedostot uusiksi:
     // MERCANT-INVOICE*
-    $uusinimi = preg_replace("/laskutus/", "MERCANT-INVOICE", $lasku);
+    $vainlaskunumero = preg_replace("/laskutus\-(.*?)\-2[0-9]{7,7}\-/", "", $lasku);
+    $uusinimi = "MERCANT.INVOICE.".date("Ymd").".".$vainlaskunumero;
     rename($kansio.$lasku, $kansio.$uusinimi);
     $lasku = $uusinimi;
 

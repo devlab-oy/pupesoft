@@ -391,7 +391,8 @@ if ($handle = opendir($ftpget_dest[$operaattori])) {
                     WHERE yhtio                 = '{$kukarow['yhtio']}'
                     AND tunnus                  IN ({$otunnukset})
                     AND ohjelma_moduli          = 'MAGENTO'
-                    AND asiakkaan_tilausnumero  != ''";
+                    AND asiakkaan_tilausnumero  != ''
+                    AND laatija                 = 'Magento'";
           $mageres = pupe_query($query);
 
           while ($magerow = mysql_fetch_assoc($mageres)) {

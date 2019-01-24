@@ -1108,6 +1108,16 @@ if (!function_exists("talenom_queue")) {
   }
 }
 
+if (!function_exists("fitek_queue")) {
+  function fitek_queue($invoice_number, $xmlstring, $kieli) {
+    global $kukarow, $yhtiorow, $pupe_root_polku;
+
+    // Siirret‰‰n l‰hetysjonoon
+    file_put_contents("{$pupe_root_polku}/dataout/fitek_error/laskutus-$kukarow[yhtio]-".date("Ymd")."-$invoice_number.xml", $xmlstring);
+    return "Lasku siirretty l‰hetysjonoon";
+  }
+}
+
 if (!function_exists("apix_queue")) {
   function apix_queue($apix_finvoice, $apix_invoicenum, $kieli, $liitteet = array()) {
     global $kukarow, $yhtiorow, $pupe_root_polku;
@@ -35221,6 +35231,199 @@ if (!function_exists('tuetut_pankit')) {
         "lyhyt_nimi" => "shb",
       ),
     );
+  }
+}
+
+if (!function_exists('finvoice_myyntilaskuksi_valitse_maksuehto')) {
+  function finvoice_myyntilaskuksi_valitse_maksuehto($laskun_maksuehtoteksti, $laskun_erapaiva, $laskun_lapvm) {
+    global $kukarow, $yhtiorow;
+
+    $maksuaika_sek = strtotime($laskun_lapvm) - strtotime($laskun_erapaiva);
+
+    if (!empty($maksuaika_sek)) {
+      $maksuaika = round($maksuaika_sek/86400);
+
+      $query = "SELECT *
+                FROM maksuehto
+                WHERE yhtio = '{$yhtiorow['yhtio']}'
+                AND rel_pvm = '$maksuaika'
+                AND kassa_relpvm = '0'";
+      $maksuehtores = pupe_query($query);
+
+      if (mysql_num_rows($maksuehtores) == 0) {
+        $query = "SELECT *
+                  FROM maksuehto
+                  WHERE yhtio = '{$yhtiorow['yhtio']}'
+                  AND rel_pvm = '0'
+                  AND kassa_relpvm = '0'";
+        $maksuehtores = pupe_query($query);
+      }
+
+      if (mysql_num_rows($maksuehtores) == 1) {
+        return mysql_fetch_assoc($maksuehtores);
+      }
+      return False;
+    }
+    else {
+      // Haetaan maksuehdon nimell‰
+      $query = "SELECT *
+                FROM maksuehto
+                WHERE yhtio = '{$yhtiorow['yhtio']}'
+                AND teksti = '$laskun_maksuehtoteksti'";
+      $maksuehtores = pupe_query($query);
+
+      if (mysql_num_rows($maksuehtores) == 1) {
+        return mysql_fetch_assoc($maksuehtores);
+      }
+    }
+  }
+}
+
+if (!function_exists('finvoice_myyntilaskuksi_valitse_asiakas')) {
+  function finvoice_myyntilaskuksi_valitse_asiakas($toim_asiakkaantiedot, $ostaja_asiakkaantiedot, $laskun_asiakaspupetunnus) {
+    global $kukarow, $yhtiorow;
+
+    if (!empty($laskun_asiakaspupetunnus)) {
+      $query = "SELECT *
+                FROM asiakas
+                WHERE yhtio = '{$yhtiorow['yhtio']}'
+                AND tunnus = '{$laskun_asiakaspupetunnus}'";
+      $result = pupe_query($query);
+      #echo "$query\n\n";
+    }
+    else {
+      $ytunnus = str_replace("-", "", $ostaja_asiakkaantiedot['ytunnus']);
+
+      $query = "SELECT *
+                FROM asiakas
+                WHERE yhtio = '{$yhtiorow['yhtio']}'
+                AND REPLACE(ytunnus, '-', '') = '{$ytunnus}'
+                AND concat_ws(' ', nimi, nimitark) = '{$ostaja_asiakkaantiedot['nimi']}'
+                AND osoite = '{$ostaja_asiakkaantiedot["osoite"]}'
+                AND postino = '{$ostaja_asiakkaantiedot["postino"]}'
+                AND postitp = '{$ostaja_asiakkaantiedot["postitp"]}'
+                AND concat_ws(' ', toim_nimi, toim_nimitark) = '{$toim_asiakkaantiedot['nimi']}'
+                AND toim_osoite = '{$toim_asiakkaantiedot["osoite"]}'
+                AND toim_postino = '{$toim_asiakkaantiedot["postino"]}'
+                AND toim_postitp = '{$toim_asiakkaantiedot["postitp"]}'
+                AND laji != 'P'";
+      $result = pupe_query($query);
+      #echo "$query\n\n";
+    }
+
+    if (mysql_num_rows($result) != 1) {
+      $ytunnus = str_replace("-", "", $ostaja_asiakkaantiedot['ytunnus']);
+
+      $query = "SELECT *
+                FROM asiakas
+                WHERE yhtio = '{$yhtiorow['yhtio']}'
+                AND REPLACE(ytunnus, '-', '') = '{$ytunnus}'
+                AND concat_ws(' ', nimi, nimitark) = '{$ostaja_asiakkaantiedot['nimi']}'
+                AND osoite = '{$ostaja_asiakkaantiedot["osoite"]}'
+                AND postino = '{$ostaja_asiakkaantiedot["postino"]}'
+                AND postitp = '{$ostaja_asiakkaantiedot["postitp"]}'
+                AND laji != 'P'";
+      $result = pupe_query($query);
+      #echo "$query\n\n";
+    }
+
+    if (mysql_num_rows($result) != 1) {
+      $ytunnus = str_replace("-", "", $ostaja_asiakkaantiedot['ytunnus']);
+
+      $query = "SELECT *
+                FROM asiakas
+                WHERE yhtio = '{$yhtiorow['yhtio']}'
+                AND REPLACE(ytunnus, '-', '') = '{$ytunnus}'
+                AND concat_ws(' ', nimi, nimitark) = '{$ostaja_asiakkaantiedot['nimi']}'
+                AND osoite = '{$ostaja_asiakkaantiedot["osoite"]}'
+                AND postino = '{$ostaja_asiakkaantiedot["postino"]}'
+                AND postitp = '{$ostaja_asiakkaantiedot["postitp"]}'
+                AND toim_nimi = ''
+                AND toim_osoite = ''
+                AND toim_postino = ''
+                AND toim_postitp = ''
+                AND laji != 'P'";
+      $result = pupe_query($query);
+      #echo "$query\n\n";
+    }
+
+    if (mysql_num_rows($result) != 1) {
+      # Haiskahtaako laskutusosoitteelta?
+      $ytunnus = str_replace("-", "", $ostaja_asiakkaantiedot['ytunnus']);
+
+      # Odoossa on t‰ss‰ tapauksessa ostajan nimen‰: "ostajan nimi, laskutusoositteen nimi", eli j‰tet‰‰n se pois ehdoista
+      # ja toimitusositteessa joko toimitusosite tai ostajan osoite jos toimitusositetta ei ole
+
+      $query = "SELECT *
+                FROM asiakas
+                WHERE yhtio = '{$yhtiorow['yhtio']}'
+                AND REPLACE(ytunnus, '-', '') = '{$ytunnus}'
+                AND laskutus_osoite = '{$ostaja_asiakkaantiedot["osoite"]}'
+                AND laskutus_postino = '{$ostaja_asiakkaantiedot["postino"]}'
+                AND laskutus_postitp = '{$ostaja_asiakkaantiedot["postitp"]}'
+                AND concat_ws(' ', toim_nimi, toim_nimitark) = '{$toim_asiakkaantiedot['nimi']}'
+                AND toim_osoite = '{$toim_asiakkaantiedot["osoite"]}'
+                AND toim_postino = '{$toim_asiakkaantiedot["postino"]}'
+                AND toim_postitp = '{$toim_asiakkaantiedot["postitp"]}'
+                AND laji != 'P'";
+      $result = pupe_query($query);
+      #echo "$query\n\n";
+
+      if (mysql_num_rows($result) != 1) {
+        $query = "SELECT *
+                  FROM asiakas
+                  WHERE yhtio = '{$yhtiorow['yhtio']}'
+                  AND REPLACE(ytunnus, '-', '') = '{$ytunnus}'
+                  AND laskutus_osoite = '{$ostaja_asiakkaantiedot["osoite"]}'
+                  AND laskutus_postino = '{$ostaja_asiakkaantiedot["postino"]}'
+                  AND laskutus_postitp = '{$ostaja_asiakkaantiedot["postitp"]}'
+                  AND concat_ws(' ', nimi, nimitark) = '{$toim_asiakkaantiedot['nimi']}'
+                  AND osoite = '{$toim_asiakkaantiedot["osoite"]}'
+                  AND postino = '{$toim_asiakkaantiedot["postino"]}'
+                  AND postitp = '{$toim_asiakkaantiedot["postitp"]}'
+                  AND toim_nimi = ''
+                  AND toim_osoite = ''
+                  AND toim_postino = ''
+                  AND toim_postitp = ''
+                  AND laji != 'P'";
+        $result = pupe_query($query);
+        #echo "$query\n\n";
+      }
+
+      if (mysql_num_rows($result) != 1) {
+        $query = "SELECT *
+                  FROM asiakas
+                  WHERE yhtio = '{$yhtiorow['yhtio']}'
+                  AND REPLACE(ytunnus, '-', '') = '{$ytunnus}'
+                  AND laskutus_osoite = '{$ostaja_asiakkaantiedot["osoite"]}'
+                  AND laskutus_postino = '{$ostaja_asiakkaantiedot["postino"]}'
+                  AND laskutus_postitp = '{$ostaja_asiakkaantiedot["postitp"]}'
+                  AND concat_ws(' ', nimi, nimitark) = '{$toim_asiakkaantiedot['nimi']}'
+                  AND osoite = '{$toim_asiakkaantiedot["osoite"]}'
+                  AND postino = '{$toim_asiakkaantiedot["postino"]}'
+                  AND postitp = '{$toim_asiakkaantiedot["postitp"]}'
+                  AND laji != 'P'";
+        $result = pupe_query($query);
+        #echo "$query\n\n";
+      }
+    }
+
+    if (mysql_num_rows($result) != 1 and !empty($ostaja_asiakkaantiedot['ytunnus'])) {
+      $ytunnus = str_replace("-", "", $ostaja_asiakkaantiedot['ytunnus']);
+
+      $query = "SELECT *
+                FROM asiakas
+                WHERE yhtio = '{$yhtiorow['yhtio']}'
+                AND REPLACE(ytunnus, '-', '') = '{$ytunnus}'
+                AND laji != 'P'";
+      $result = pupe_query($query);
+      #echo "$query\n\n";
+    }
+
+    if (mysql_num_rows($result) == 1) {
+      return mysql_fetch_assoc($result);
+    }
+    return False;
   }
 }
 

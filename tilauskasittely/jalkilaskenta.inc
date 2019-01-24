@@ -62,7 +62,7 @@ if (!function_exists("korjaalaskut")) {
     while ($tilausrivi = mysql_fetch_assoc($tilausriviresult)) {
 
       // haetaan laskun tiedot
-      $query = "SELECT maa, yhtio_toimipaikka, laskunro, nimi, tapvm, tunnus
+      $query = "SELECT maa, yhtio_toimipaikka, laskunro, nimi, tapvm, tunnus, jaksotettu
                 FROM lasku
                 WHERE yhtio = '$kukarow[yhtio]'
                 AND tunnus  = '$tilausrivi[ltunnus]'";
@@ -162,11 +162,29 @@ if (!function_exists("korjaalaskut")) {
         $uusi_varastonmuutos_kp = round($uusi_varastonmuutos, 2);
         $uusi_varasto_kp = round($uusi_varastonmuutos * -1, 2);
 
+        $_tilino = " tilino = '{$varastotili}',";
+
+        // jos on asiakasvarasto-ominaisuudet käytössä, niin
+        // varastotili voi mahdollisesti olla toinen.
+        if (!empty($yhtiorow["ennakkolaskun_asiakasvarasto"]) and !empty($yhtiorow["asiakasvarasto"])) {
+
+          $query = "SELECT *
+                    FROM maksupositio
+                    WHERE otunnus = '{$lasku['jaksotettu']}'
+                    AND osuus = 100
+                    AND yhtio = '{$kukarow['yhtio']}'";
+          $result = pupe_query($query);
+
+          if (mysql_num_rows($result) == 1) {
+            $_tilino = " tilino = '{$yhtiorow["ennakkolaskun_asiakasvarasto"]}',";
+          }
+        }
+
         // Kirjataan 'varasto'-tilille
         $query = "INSERT into tiliointi set
                   yhtio    = '$kukarow[yhtio]',
                   ltunnus  = '$lasku[tunnus]',
-                  tilino   = '{$varastotili}',
+                  $_tilino
                   kustp    = '{$kustp_ins}',
                   kohde    = '{$kohde_ins}',
                   projekti = '{$projekti_ins}',
@@ -224,12 +242,23 @@ if (!function_exists("korjaalaskut")) {
 
         $tiliointi1 = mysql_fetch_assoc($result);
 
+        // jos on asiakasvarasto-ominaisuudet käytössä, niin
+        // varastotili voi mahdollisesti olla toinen.
+        // koitetaan siis hakea myös sillä (ei voi olla molempia
+        // samanaikaisesti tositteella).
+        if (!empty($yhtiorow["ennakkolaskun_asiakasvarasto"]) and !empty($yhtiorow["asiakasvarasto"])) {
+          $_tilino = " AND tilino in ('{$varastotili}','{$yhtiorow["ennakkolaskun_asiakasvarasto"]}')";
+        }
+        else {
+          $_tilino = " AND tilino = '{$varastotili}'";
+        }
+
         // Etsitään varastotiliöinti
         $query = "SELECT *
                   FROM tiliointi
                    WHERE yhtio = '$kukarow[yhtio]'
                   and ltunnus  = '$tilausrivi[ltunnus]'
-                  and tilino   = '{$varastotili}'
+                  $_tilino
                   and kustp    = '$xrivi[kustp]'
                   and kohde    = '$xrivi[kohde]'
                   and projekti = '$xrivi[projekti]'
@@ -244,7 +273,7 @@ if (!function_exists("korjaalaskut")) {
                     FROM tiliointi
                      WHERE yhtio = '$kukarow[yhtio]'
                     and ltunnus  = '$tilausrivi[ltunnus]'
-                    and tilino   = '{$varastotili}'
+                    $_tilino
                     and korjattu = ''
                     ORDER BY tapvm DESC, tunnus DESC
                     LIMIT 1";

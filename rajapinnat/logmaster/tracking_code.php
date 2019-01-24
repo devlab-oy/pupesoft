@@ -47,7 +47,7 @@ $path = rtrim($path, '/').'/';
 $handle = opendir($path);
 
 if ($handle === false) {
-  exit;
+  exit("VIRHE: Handle on false, eli opendir {$path} ei onnistunut!");
 }
 
 $_magento_kaytossa = (!empty($magento_api_tt_url) and !empty($magento_api_tt_usr) and !empty($magento_api_tt_pas));
@@ -59,6 +59,7 @@ while (false !== ($file = readdir($handle))) {
   $is_txt = check_file_extension($full_filepath, 'TXT');
 
   if ($is_tc === false and $is_txt === false) {
+    pupesoft_log('logmaster_tracking_code', "Tiedosto ei ole TC eikä TXT päätteinen, skipataan {$full_filepath}");
     continue;
   }
 
@@ -156,7 +157,6 @@ while (false !== ($file = readdir($handle))) {
 
     // Jos Magento on käytössä, merkataan tilaus toimitetuksi Magentoon kun rahtikirja tulostetaan
     if ($_magento_kaytossa) {
-      pupesoft_log('logmaster_tracking_code', "Päivitetään toimitetuksi Magentoon");
 
       $query = "SELECT toimitustapa
                 FROM rahtikirjat
@@ -179,10 +179,14 @@ while (false !== ($file = readdir($handle))) {
                   WHERE yhtio                 = '{$kukarow['yhtio']}'
                   AND tunnus                  = '{$tilausnumero}'
                   AND ohjelma_moduli          = 'MAGENTO'
-                  AND asiakkaan_tilausnumero  != ''";
+                  AND asiakkaan_tilausnumero  != ''
+                  AND laatija                 = 'Magento'";
         $mageres = pupe_query($query);
 
         while ($magerow = mysql_fetch_assoc($mageres)) {
+
+          pupesoft_log('logmaster_tracking_code', "Päivitetään tilaus {$magerow["tunnus"]} toimitetuksi Magentoon");
+
           $magento_api_met = $toitarow['virallinen_selite'] != '' ? $toitarow['virallinen_selite'] : $toitarow['selite'];
           $magento_api_rak = $seurantakoodi;
           $magento_api_ord = $magerow["asiakkaan_tilausnumero"];

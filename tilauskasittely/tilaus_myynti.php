@@ -6157,7 +6157,8 @@ if ($tee == '') {
           }
 
           if ($kukarow["yhtio"] == "srs") {
-            echo "<tr><th>".t("Hinta 25% katteella")."</th><td align='right'>".hintapyoristys($tuote['kehahin'] / 0.75)." $yhtiorow[valkoodi]</td></tr>";
+            echo "<tr><th>".t("Hinta 35% katteella")."</th><td align='right'>".hintapyoristys($tuote['kehahin'] / 0.65)." $yhtiorow[valkoodi]</td></tr>";
+            echo "<tr><th>".t("Hinta 5% katteella")."</th><td align='right'>".hintapyoristys($tuote['kehahin'] / 0.95)." $yhtiorow[valkoodi]</td></tr>";
           }
 
           echo "<tr><th>".t("Keskihankintahinta")." $epakurpantti</th><td align='right'>".hintapyoristys($tuote['kehahin'])." $yhtiorow[valkoodi]</td></tr>";

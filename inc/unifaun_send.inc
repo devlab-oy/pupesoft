@@ -555,6 +555,7 @@ class Unifaun {
         'MH10_SPTR',
         'MH30_SPTR',
         'P83FI',
+        'SBTLFIEXP',
       );
 
       $allowed_opay = array(
@@ -698,7 +699,14 @@ class Unifaun {
     //$uni_par_val->addAttribute('n', "agentno");
 
     // Käytetään vastaanottajan rahtisopimusta: rahdinmaksajan tiedot aina ilmoitttava sanomalla
-    if ($this->rakir_row['merahti'] == "" and $this->toitarow["virallinen_selite"] == "POF1") {
+    $_nimi = utf8_encode($this->rakir_row["nimi"]);
+    $_nimitark = utf8_encode($this->rakir_row["nimitark"]);
+    $_osoite = utf8_encode($this->rakir_row["osoite"]);
+    $_toim_osoite = utf8_encode($this->rakir_row["toim_osoite"]);
+    
+    if ($this->rakir_row['merahti'] == "" and ($this->toitarow["virallinen_selite"] == "POF1"
+      or $this->toitarow["virallinen_selite"] == "SBTLFIEXP") 
+      and ($_nimi != $_toim_nimi or $_nimitark != $_toim_nimitark or $_osoite != $_toim_osoite)) {
       $uni_party = $xml->addChild('party');  // Any contents. Mandatory.
 
       $uni_party->addAttribute('ptyid', utf8_encode($this->asiakasrow["tunnus"]));
@@ -745,7 +753,8 @@ class Unifaun {
     $uni_shi_val = $uni_shipment->addChild('val', utf8_encode($this->asiakasrow["tunnus"])); // Defines the receiver. Refers to rcvid value for receiver.
     $uni_shi_val->addAttribute('n', "to");
 
-    if ($this->rakir_row['merahti'] == "" and $this->toitarow['virallinen_selite'] == 'POF1') {
+    if ($this->rakir_row['merahti'] == "" and ($this->toitarow['virallinen_selite'] == 'POF1'
+       or $this->toitarow["virallinen_selite"] == "SBTLFIEXP")) {
       $uni_shi_val = $uni_shipment->addChild('val', utf8_encode($shipment_payer)); // Defines the receiver. Refers to rcvid value for receiver.
       $uni_shi_val->addAttribute('n', "payerfreight");
     }

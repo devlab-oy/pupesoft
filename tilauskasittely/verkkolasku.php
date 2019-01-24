@@ -176,6 +176,7 @@ if ($php_cli) {
   $eilinen  = "";
   $eiketjut = "";
   $viennit  = "";
+  $nosoap = "";
 
   // Laskutetaanko myös vientitilauksia
   if (!empty($argv[3]) and substr($argv[3], 0, 7) == "vienti_") {
@@ -338,6 +339,10 @@ else {
     }
     elseif ($yhtiorow["verkkolasku_lah"] == "apix") {
       $nimifinvoice = "/tmp/laskutus-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(), true))."_finvoice.xml";
+    }
+    elseif ($yhtiorow["verkkolasku_lah"] == "fitek") {
+      $nimifinvoice = "$pupe_root_polku/dataout/laskutus-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(), true))."_finvoice.xml";
+      $nosoap = 'NOSOAP';
     }
     else {
       $nimifinvoice = "$pupe_root_polku/dataout/laskutus-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(), true))."_finvoice.xml";
@@ -2365,8 +2370,8 @@ else {
             elseif ($lasrow["chn"] == "112") {
               finvoice_otsik($tootsisainenfinvoice, $lasrow, $kieli, $pankkitiedot, $masrow, $myyrow, $tyyppi, $toimaikarow, $tulos_ulos, $silent);
             }
-            elseif (in_array($yhtiorow["verkkolasku_lah"], array("iPost", "finvoice", "maventa", "trustpoint", "ppg", "apix", "sepa", "talenom", "arvato"))) {
-              finvoice_otsik($tootfinvoice, $lasrow, $kieli, $pankkitiedot, $masrow, $myyrow, $tyyppi, $toimaikarow, $tulos_ulos, $silent);
+            elseif (in_array($yhtiorow["verkkolasku_lah"], array("iPost", "finvoice", "maventa", "trustpoint", "ppg", "apix", "sepa", "talenom", "arvato", "fitek"))) {
+              finvoice_otsik($tootfinvoice, $lasrow, $kieli, $pankkitiedot, $masrow, $myyrow, $tyyppi, $toimaikarow, $tulos_ulos, $silent, $nosoap);
             }
             else {
               pupevoice_otsik($tootxml, $lasrow, $laskun_kieli, $pankkitiedot, $masrow, $myyrow, $tyyppi, $toimaikarow);
@@ -2420,7 +2425,7 @@ else {
               elseif ($lasrow["chn"] == "112") {
                 finvoice_alvierittely($tootsisainenfinvoice, $lasrow, $alvrow);
               }
-              elseif (in_array($yhtiorow["verkkolasku_lah"], array("iPost", "finvoice", "maventa", "trustpoint", "ppg", "apix", "sepa", "talenom", "arvato"))) {
+              elseif (in_array($yhtiorow["verkkolasku_lah"], array("iPost", "finvoice", "maventa", "trustpoint", "ppg", "apix", "sepa", "talenom", "arvato", "fitek"))) {
                 finvoice_alvierittely($tootfinvoice, $lasrow, $alvrow);
               }
               else {
@@ -2435,7 +2440,7 @@ else {
             elseif ($lasrow["chn"] == "112") {
               finvoice_otsikko_loput($tootsisainenfinvoice, $lasrow, $masrow, $pankkitiedot);
             }
-            elseif (in_array($yhtiorow["verkkolasku_lah"], array("iPost", "finvoice", "maventa", "trustpoint", "ppg", "apix", "sepa", "talenom", "arvato"))) {
+            elseif (in_array($yhtiorow["verkkolasku_lah"], array("iPost", "finvoice", "maventa", "trustpoint", "ppg", "apix", "sepa", "talenom", "arvato", "fitek"))) {
               finvoice_otsikko_loput($tootfinvoice, $lasrow, $masrow, $pankkitiedot);
             }
 
@@ -2759,7 +2764,7 @@ else {
               elseif ($lasrow["chn"] == "112") {
                 finvoice_rivi($tootsisainenfinvoice, $tilrow, $lasrow, $vatamount, $laskutyyppi);
               }
-              elseif (in_array($yhtiorow["verkkolasku_lah"], array("iPost", "finvoice", "maventa", "trustpoint", "ppg", "apix", "sepa", "talenom", "arvato"))) {
+              elseif (in_array($yhtiorow["verkkolasku_lah"], array("iPost", "finvoice", "maventa", "trustpoint", "ppg", "apix", "sepa", "talenom", "arvato", "fitek"))) {
                 finvoice_rivi($tootfinvoice, $tilrow, $lasrow, $vatamount, $laskutyyppi);
               }
               else {
@@ -2784,7 +2789,7 @@ else {
               //Nämä menee verkkolaskuputkeen
               $verkkolaskuputkeen_suora[$lasrow["laskunro"]] = $lasrow["nimi"];
             }
-            elseif (in_array($yhtiorow["verkkolasku_lah"], array("iPost", "finvoice", "maventa", "trustpoint", "ppg", "apix", "sepa", "talenom", "arvato"))) {
+            elseif (in_array($yhtiorow["verkkolasku_lah"], array("iPost", "finvoice", "maventa", "trustpoint", "ppg", "apix", "sepa", "talenom", "arvato", "fitek"))) {
               $liitteet  = hae_liitteet_verkkolaskuun($yhtiorow["verkkolasku_lah"], $laskutettavat);
               $liitteita = !empty($liitteet);
 
@@ -3069,6 +3074,21 @@ else {
             $status = talenom_queue($invoice_number[1], "<SOAP-ENV:Envelope".$talenom_laskuarray[$a], $kieli);
 
             $tulos_ulos .= "Talenom-lasku $invoice_number[1]: $status<br>\n";
+          }
+        }
+      }
+      elseif ($yhtiorow["verkkolasku_lah"] == "fitek" and file_exists(realpath($nimifinvoice))) {
+        // Splitataan file ja lähetetään YKSI lasku kerrallaan
+        $fitek_laskuarray = explode("<?xml version=", file_get_contents($nimifinvoice));
+        $fitek_laskumaara = count($fitek_laskuarray);
+
+        if ($fitek_laskumaara > 0) {
+          for ($a = 1; $a < $fitek_laskumaara; $a++) {
+            preg_match("/\<InvoiceNumber\>(.*?)\<\/InvoiceNumber\>/i", $fitek_laskuarray[$a], $invoice_number);
+
+            $status = fitek_queue($invoice_number[1], "<?xml version=".$fitek_laskuarray[$a], $kieli);
+
+            $tulos_ulos .= "Fitek-lasku $invoice_number[1]: $status<br>\n";
           }
         }
       }

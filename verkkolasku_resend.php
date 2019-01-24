@@ -510,6 +510,52 @@ if ($handle = opendir($kansio)) {
   closedir($handle);
 }
 
+// Fitek Viro
+$kansio = "{$pupe_root_polku}/dataout/fitek_error/";
+
+if ($handle = opendir($kansio)) {
+  while (($lasku = readdir($handle)) !== FALSE) {
+
+    // Ei k‰sitell‰ kun Finvoice tiedostoja
+    if (!preg_match("/laskutus\-(.*?)\-2/", $lasku, $yhtio)) {
+      continue;
+    }
+
+    $yhtio = $yhtio[1];
+    $yhtiorow = hae_yhtion_parametrit($yhtio);
+    $kukarow = hae_kukarow('admin', $yhtio);
+
+    // Jos lasku on liian vanha, ei k‰sitell‰, l‰hetet‰‰n maililla
+    if (onko_lasku_liian_vanha($kansio.$lasku)) {
+      continue;
+    }
+
+    // Nimet‰‰n tiedostot uusiksi:
+    // MERCANT-INVOICE*
+    $vainlaskunumero = preg_replace("/laskutus\-(.*?)\-2[0-9]{7,7}\-/", "", $lasku);
+    $uusinimi = "MERCANT.INVOICE.".date("Ymd").".".$vainlaskunumero;
+    rename($kansio.$lasku, $kansio.$uusinimi);
+    $lasku = $uusinimi;
+
+    // Logitetaan ajo
+    cron_log("{$pupe_root_polku}/dataout/$lasku");
+
+    $ftphost = "sftp.arved.ee";
+    $ftpuser = $yhtiorow['verkkotunnus_lah'];
+    $ftppass = $yhtiorow['verkkosala_lah'];
+    //$ftppath = "test/invoice/finvoice/";
+    $ftppath = "in/";
+    $ftpfile = $kansio.$lasku;
+    $ftpsucc = "{$pupe_root_polku}/dataout/";
+
+    $tulos_ulos = "";
+
+    require "inc/sftp-send.inc";
+  }
+
+  closedir($handle);
+}
+
 function onko_lasku_liian_vanha($filename) {
   global $kukarow, $yhtiorow;
 

@@ -1089,7 +1089,7 @@ if (!function_exists("ppg_queue")) {
 }
 
 if (!function_exists("fitek_queue")) {
-  function fitek_queue($invoice_number, $xmlstring, $kieli) {
+  function fitek_queue($fitek_invoice, $fitek_invoicenum, $kieli) {
     global $kukarow, $yhtiorow, $pupe_root_polku;
 
     $fitek_ulos = "";

@@ -763,7 +763,7 @@ if ($tee != '' and isset($ajaraportti)) {
       $query = "SELECT
                 lasku.liitostunnus,
                 lasku.ytunnus,
-                if(asiakas.asiakasnro = 0 or asiakas.asiakasnro = asiakas.ytunnus, '', asiakas.asiakasnro) asiakasnro,
+                if(asiakas.asiakasnro = '' or asiakas.asiakasnro = asiakas.ytunnus, '', asiakas.asiakasnro) asiakasnro,
                 lasku.maa,
                 lasku.valkoodi,
                 lasku.maksuteksti,
@@ -785,7 +785,7 @@ if ($tee != '' and isset($ajaraportti)) {
     else {
       $query = "SELECT
                 lasku.ytunnus,
-                if(asiakas.asiakasnro = 0 or asiakas.asiakasnro = asiakas.ytunnus, '', asiakas.asiakasnro) asiakasnro,
+                if(asiakas.asiakasnro = '' or asiakas.asiakasnro = asiakas.ytunnus, '', asiakas.asiakasnro) asiakasnro,
                 lasku.maa,
                 lasku.valkoodi,
                 lasku.maksuteksti,
@@ -1078,7 +1078,7 @@ if ($tee != '' and isset($ajaraportti)) {
       //Listataan vielä kohdistamattomat
       $query = "SELECT asiakas.tunnus,
                 asiakas.ytunnus,
-                if(asiakas.asiakasnro = 0 or asiakas.asiakasnro = asiakas.ytunnus, '', asiakas.asiakasnro) asiakasnro,
+                if(asiakas.asiakasnro = '' or asiakas.asiakasnro = asiakas.ytunnus, '', asiakas.asiakasnro) asiakasnro,
                 if(asiakas.nimi is not null, asiakas.nimi, suoritus.nimi_maksaja) nimi_maksaja,
                 asiakas.maa,
                 suoritus.viite,

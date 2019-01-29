@@ -2042,7 +2042,7 @@ if (!function_exists('print_pdf_tarjous')) {
     elseif ($komento == 'email' or substr($komento, 0, 12) == 'asiakasemail') {
       $liite = $pdf_tarjousfilenimi;
 
-      $kutsu = t("Tarjous", $kieli);
+      $kutsu = t("Tarjous", $kieli)." ".$laskurow["tunnus"];
 
       if ($yhtiorow["liitetiedostojen_nimeaminen"] == "N") {
         $kutsu .= ", ".trim($laskurow["nimi"]);

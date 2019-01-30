@@ -10544,7 +10544,9 @@ if (!function_exists("livesearch_asiakashaku")) {
         $haku_query .= " or asiakas.laskutus_nimi like ('%$haku%') or asiakas.laskutus_nimitark like ('%$haku%') or asiakas.laskutus_postitp like ('%$haku%')) ";
       }
 
-      $query = "SELECT *, if (toim_nimi != nimi and toim_nimi != '', concat(nimi, ' ', nimitark, ' / ', toim_nimi, ' ', toim_nimitark), concat(nimi, ' ', nimitark)) asiakkaan_tieto,
+      $query = "SELECT *,
+                if (toim_nimi != '' and concat(nimi, nimitark) != concat(toim_nimi, toim_nimitark), concat(nimi, ' ', nimitark, ' / ', toim_nimi, ' ', toim_nimitark), concat_ws(' ', nimi, nimitark)) asiakkaan_tieto,
+                if (toim_nimi != '', toim_postitp, '') toim_postitp,
                 if (asiakas.ytunnus = '$haku', 1, if(left(asiakas.ytunnus, length('$haku')) = '$haku', 2, 3)) jarjestys,
                 if (asiakas.asiakasnro = '$haku', 1, if(left(asiakas.asiakasnro, length('$haku')) = '$haku', 2, 3)) jarjestys2,
                 if (asiakas.nimi = '$haku', 1, if(left(asiakas.nimi, length('$haku')) = '$haku', 2, 3)) jarjestys3,
@@ -10580,7 +10582,13 @@ if (!function_exists("livesearch_asiakashaku")) {
           echo "\"
                 style='padding:2px;'>
                 <span class='livesearch_rivispan_{$hakuid}'>
-                <font style='font-weight:bold'>$row[ytunnus] &raquo; $row[asiakkaan_tieto]</font>
+                <font style='font-weight:bold'>$row[ytunnus] &raquo; $row[asiakkaan_tieto]";
+
+          if (!empty($row['toim_postitp'])) {
+            echo " ({$row['toim_postitp']})";
+          }
+
+          echo "</font>
                 </span>
               </div><div name='selectValues$hakuid' id='$row[tunnus]'></div>";
           $limit++;

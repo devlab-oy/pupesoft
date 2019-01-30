@@ -1723,7 +1723,7 @@ while ($tietue = fgets($fd)) {
         $editilaus_alatila = 'F';
       }
 
-      if (($editilaus_hyvaksyttava != "") or (isset($editilaus_hyvaksyttavaksi_aina) and $editilaus_hyvaksyttavaksi_aina = "JOO")) {
+      if (($editilaus_hyvaksyttava != "") or (isset($editilaus_hyvaksyttavaksi_aina) and $editilaus_hyvaksyttavaksi_aina = "JOO" and $edi_tyyppi == 'futursoft')) {
         $editilaus_alatila = 'F';
         $editilaus_hyvaksyttava = "JOO";
       }

@@ -1723,8 +1723,9 @@ while ($tietue = fgets($fd)) {
         $editilaus_alatila = 'F';
       }
 
-      if ($editilaus_hyvaksyttava != "") {
+      if (($editilaus_hyvaksyttava != "") or (isset($editilaus_hyvaksyttavaksi_aina) and $editilaus_hyvaksyttavaksi_aina = "JOO")) {
         $editilaus_alatila = 'F';
+        $editilaus_hyvaksyttava = "JOO";
       }
 
       // Jos asiakas on syöttänyt verkkokaupassa oman tilausnumeron tai viitteen yliajetaan viesti

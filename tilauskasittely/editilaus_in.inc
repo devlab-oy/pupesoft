@@ -402,7 +402,10 @@ while ($tietue = fgets($fd)) {
   if ($edi_tyyppi == "futursoft" or $edi_tyyppi == "magento") {
 
     if (substr($tietue, 0, 1) != '*') {
-      list($tunnus, $tieto)  = explode(':', $tietue);
+      $tietue_array  = explode(':', $tietue);
+      $tunnus = $tietue_array[0];
+      unset($tietue_array[0]);
+      $tieto = implode(":", $tietue_array);
     }
     else {
       $tunnus = $tietue;

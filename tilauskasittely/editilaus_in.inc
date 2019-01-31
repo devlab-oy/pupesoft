@@ -205,6 +205,7 @@ $editilaus_alatila            = "";
 $editilaus_eilahetetta        = "";
 $editilaus_hyvaksyttava       = "";
 $editilaus_hyvaksyttavaksi    = "";
+$editilaus_laatija            = "";
 $editilaus_kassalipas         = "";
 $editilaus_liitetiedosto      = "";
 $editilaus_loppuhinta         = "";
@@ -996,6 +997,10 @@ while ($tietue = fgets($fd)) {
     $editilaus_hyvaksyttava = trim($tieto);
     break;
 
+  case 'OSTOTIL.OT_CUSTOM_LAATIJA':
+    $editilaus_laatija = trim($tieto);
+    break;
+
   case 'ONADPL_PC' :
     // Asiakkaan joku toimitus ovttunnus tms... t‰‰ ylikirjottaa kaiken...
     if ($tieto != "") {
@@ -1778,6 +1783,9 @@ while ($tietue = fgets($fd)) {
         $kukarow['toimipaikka'] = $editilaus_toimipaikka;
         $yhtiorow = hae_yhtion_parametrit($yhtiorow["yhtio"]);
       }
+
+      // jos annettu custom laatija
+      if (isset($editilaus_laatija)) $edi_laatija = $editilaus_laatija;
 
       // Lis‰t‰‰n otsikko
       $query = "INSERT into lasku SET
@@ -2884,6 +2892,7 @@ while ($tietue = fgets($fd)) {
     $editilaus_eilahetetta        = "";
     $editilaus_hyvaksyttava       = "";
     $editilaus_hyvaksyttavaksi    = "";
+    $editilaus_laatija            = "";
     $editilaus_kassalipas         = "";
     $editilaus_liitetiedosto      = "";
     $editilaus_loppuhinta         = "";

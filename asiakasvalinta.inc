@@ -33,17 +33,36 @@ if (isset($toiminto) and $toiminto == 'vaihda_oletusasiakkuus' and $asiakasvalin
 }
 
 if (!isset($livesearch_tee)) {
-  piirra_multiasiakkuusdropdown();
+  piirra_multiasiakkuusdropdown($asiakasvalikko_rajaus);
 }
 
-function piirra_multiasiakkuusdropdown() {
-  global $kukarow, $toim;
+function piirra_multiasiakkuusdropdown($asiakasvalikko_rajaus = "") {
+  global $kukarow, $toim, $palvelin2, $tilauskaslisa;
+
+  echo "<form>";
+  echo "<th>
+          <label for='asiakasvalikko_rajaus'>" . t("Rajaa alasvetovalikkoa") . ":</label>
+        </th>";
+  echo "<br><td>
+          <input type='text'
+                 name='asiakasvalikko_rajaus'
+                 id='asiakasvalikko_rajaus'
+                 value='$asiakasvalikko_rajaus'>
+          <input type='submit' value='" . t("Rajaa") . "'>
+        </td>";
+  echo "<input type='hidden' name='toim'     value='$toim'>";
+  echo "</form><br><br>";
+
+  if (!empty($asiakasvalikko_rajaus)) {
+    $wherelisa = " AND concat(asiakas.nimi, asiakas.nimitark) LIKE '%{$asiakasvalikko_rajaus}%'";
+  }
 
   // Haetaan käyttäjän asiakkuudet
   $query = "SELECT asiakas.tunnus, asiakas.nimi, asiakas.nimitark, asiakas.selaus
             FROM customers_users
             JOIN asiakas ON (customers_users.customer_id = asiakas.tunnus)
             WHERE user_id = '{$kukarow['tunnus']}'
+            {$wherelisa}
             ORDER BY asiakas.nimi, asiakas.nimitark, asiakas.selaus";
   $multiresult = pupe_query($query);
 
@@ -71,7 +90,7 @@ function piirra_multiasiakkuusdropdown() {
   while ($multirow = mysql_fetch_assoc($multiresult)) {
     if (empty($multirow['selaus']))  {
 
-      $_nimitark = (!empty($row['nimitark']) ? ', '.$row['nimitark'] : '');
+      $_nimitark = !empty($multirow['nimitark']) ? ', '.$multirow['nimitark'] : '';
       echo "<option value='{$multirow['tunnus']}'>".$multirow['nimi'].$_nimitark."</option>";
     }
     else {
@@ -84,7 +103,7 @@ function piirra_multiasiakkuusdropdown() {
 
   if (isset($row['nimi'])) {
     if (empty($row['selaus'])) {
-      $_nimitark = (!empty($row['nimitark']) ? ', '.$row['nimitark'] : '');
+      $_nimitark = !empty($row['nimitark']) ? ', '.$row['nimitark'] : '';
       echo "<td class='back'>".$row['nimi'].$_nimitark."</td>";
     }
     else {

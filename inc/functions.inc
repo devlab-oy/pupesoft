@@ -1076,6 +1076,16 @@ if (!function_exists("maventa_invoice_put_file")) {
 }
 
 if (!function_exists("ppg_queue")) {
+  function ppg_queue($invoice_number, $xmlstring, $kieli) {
+    global $kukarow, $yhtiorow, $pupe_root_polku;
+
+    // Siirret‰‰n l‰hetysjonoon
+    file_put_contents("{$pupe_root_polku}/dataout/ppg_error/laskutus-$kukarow[yhtio]-".date("Ymd")."-$invoice_number.xml", $xmlstring);
+    return "Lasku siirretty l‰hetysjonoon";
+  }
+}
+
+if (!function_exists("fitek_queue")) {
   function fitek_queue($fitek_invoice, $fitek_invoicenum, $kieli) {
     global $kukarow, $yhtiorow, $pupe_root_polku;
 
@@ -1123,16 +1133,6 @@ if (!function_exists("ppg_queue")) {
     return $fitek_ulos;
 
       // Kirjoitetaan finvoiceaineisto dirikkaan
-    // Siirret‰‰n l‰hetysjonoon
-    file_put_contents("{$pupe_root_polku}/dataout/fitek_error/laskutus-$kukarow[yhtio]-".date("Ymd")."-$invoice_number.xml", $xmlstring);
-    return "Lasku siirretty l‰hetysjonoon";
-  }
-}
-
-if (!function_exists("fitek_queue")) {
-  function fitek_queue($invoice_number, $xmlstring, $kieli) {
-    global $kukarow, $yhtiorow, $pupe_root_polku;
-
     // Siirret‰‰n l‰hetysjonoon
     file_put_contents("{$pupe_root_polku}/dataout/fitek_error/laskutus-$kukarow[yhtio]-".date("Ymd")."-$invoice_number.xml", $xmlstring);
     return "Lasku siirretty l‰hetysjonoon";

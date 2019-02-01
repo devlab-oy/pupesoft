@@ -331,7 +331,7 @@ else {
     }
     //  Fitek vaatii siirtoon vähän oman nimen eikä halua soapia..
     elseif ($yhtiorow["verkkolasku_lah"] == "fitek") {
-      $nimifinvoice = "/tmp/dataout/laskutus-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(), true))."_finvoice.xml";
+      $nimifinvoice = "$pupe_root_polku/dataout/laskutus-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(), true))."_finvoice.xml";
       $nosoap = 'NOSOAP';
     }
     else {
@@ -2965,13 +2965,12 @@ else {
         $fitek_laskumaara = count($fitek_laskuarray);
 
         if ($fitek_laskumaara > 0) {
-          require_once "tilauskasittely/tulosta_lasku.inc";
           for ($a = 1; $a < $fitek_laskumaara; $a++) {
             preg_match("/\<InvoiceNumber\>(.*?)\<\/InvoiceNumber\>/i", $fitek_laskuarray[$a], $invoice_number);
 
-            $fitek_invoice = "<?xml version=".$fitek_laskuarray[$a];
-            
-            $tulos_ulos = fitek_queue($fitek_invoice, $invoice_number[1], $kieli);
+            $status = fitek_queue($invoice_number[1], "<?xml version=".$fitek_laskuarray[$a], $kieli);
+
+            $tulos_ulos .= "Fitek-lasku $invoice_number[1]: $status<br>\n";
           }
         }
       }

@@ -1089,9 +1089,53 @@ if (!function_exists("ppg_queue")) {
 }
 
 if (!function_exists("fitek_queue")) {
-  function fitek_queue($invoice_number, $xmlstring, $kieli) {
+  function fitek_queue($fitek_invoice, $fitek_invoicenum, $kieli) {
     global $kukarow, $yhtiorow, $pupe_root_polku;
 
+    $fitek_ulos = "";
+
+    // Filenimi
+    $fitekzipfile = "laskutus_".$yhtiorow['yhtio']."_invoices_".$fitek_invoicenum."_".md5(uniqid(rand(), true)).".zip";
+    
+    // Luodaan temppidirikka jonne tyˆnnet‰‰n t‰n kiekan kaikki fitek-filet
+    list($usec, $sec) = explode(' ', microtime());
+    mt_srand((float) $sec + ((float) $usec * 100000));
+    $fitek_tmpdirnimi = "/tmp/fitek-".md5(uniqid(mt_rand(), true));
+
+    if (mkdir($fitek_tmpdirnimi)) {
+
+      // Kirjoitetaan finvoiceaineisto dirikkaan
+      if (!file_put_contents($fitek_tmpdirnimi."/MERCANT.INVOICE.".date("Ymd").".$fitek_invoicenum.xml", $fitek_invoice)) {
+        $fitek_ulos .= "Fitek finvoicewrite feilasi!";
+      }
+
+      // Luodaan laskupdf:‰
+      $fitektmpfile = tulosta_lasku("LASKU:".$fitek_invoicenum, "fi", "VERKKOLASKU_FITEK", "", "", "", "", "");
+      
+
+      // Siirret‰‰n faili fitektemppiin
+      if (!rename($fitektmpfile, $fitek_tmpdirnimi."/MERCANT.INVOICE.".date("Ymd").".$fitek_invoicenum.pdf")) {
+        $fitek_ulos .= "FITEK tmpmove MERCANT.INVOICE_$fitek_invoicenum.pdf feilas!";
+      }
+
+      // Tehd‰‰n apixzippi
+      exec("cd $fitek_tmpdirnimi; zip $fitekzipfile *;");
+
+      // Aineisto l‰hetysjonoon
+      exec("cp $fitek_tmpdirnimi/$fitekzipfile {$pupe_root_polku}/dataout/fitek_error/");
+
+      // Poistetaan apix-tmpdir
+      #exec("rm -rf $fitek_tmpdirnimi");
+
+      $fitek_ulos .= "Lasku $fitek_invoicenum siirretty l‰hetysjonoon<br>\n";
+    }
+    else {
+      $fitek_ulos .= "FITEK tmpdirrin teko feilas!<br>\n";
+    }
+
+    return $fitek_ulos;
+
+      // Kirjoitetaan finvoiceaineisto dirikkaan
     // Siirret‰‰n l‰hetysjonoon
     file_put_contents("{$pupe_root_polku}/dataout/fitek_error/laskutus-$kukarow[yhtio]-".date("Ymd")."-$invoice_number.xml", $xmlstring);
     return "Lasku siirretty l‰hetysjonoon";

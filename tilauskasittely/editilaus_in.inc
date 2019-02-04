@@ -1789,7 +1789,7 @@ while ($tietue = fgets($fd)) {
       }
 
       // jos annettu custom laatija
-      if (isset($editilaus_laatija)) $edi_laatija = $editilaus_laatija;
+      if (isset($editilaus_laatija) and trim($editilaus_laatija) != "") $edi_laatija = $editilaus_laatija;
 
       // Lis‰t‰‰n otsikko
       $query = "INSERT into lasku SET

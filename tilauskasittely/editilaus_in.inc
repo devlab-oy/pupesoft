@@ -677,6 +677,7 @@ while ($tietue = fgets($fd)) {
     $edi_kommentti .= $tieto." \n";
     break;
 
+  case 'OSTOTIL.OT_SISAINEN_VIESTI'  :
   case 'ORFFCR_NU'  :
     //Kommentteja
     $merkkitieto = $tieto;

@@ -325,6 +325,9 @@ if (!function_exists('logmaster_outbounddelivery')) {
     elseif ($looprow['clearing'] == 'ENNAKKOTILAUS') {
       $tilaustyyppi = 9;
     }
+    elseif ($looprow['tilaustyyppi'] == 'U') {
+      $tilaustyyppi = 7;
+    }
     else {
       $tilaustyyppi = '';
     }

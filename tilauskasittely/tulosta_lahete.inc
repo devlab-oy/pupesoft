@@ -712,8 +712,13 @@ if (!function_exists('alku_lahete')) {
     while ($row = mysql_fetch_assoc($riviresult)) {
       $rivinumerot[$row["tunnus"]] = $row["tunnus"];
 
-      $tuotenopituus += $pdf->strlen($row["tuoteno"], $norm);
-      $nimityspituus += $pdf->strlen($row["nimitys"], $norm);
+      $tuotenopituus = $pdf->strlen($row["tuoteno"], $norm);
+      $nimityspituus = $pdf->strlen($row["nimitys"], $norm);
+
+      // Jos tuotenumerot ja nimitykset ovat hyvin pitkät
+      if ($tuotenopituus + $nimityspituus > 280) {
+        $pitkattuotteet = TRUE;
+      }
     }
 
     sort($rivinumerot);
@@ -723,11 +728,6 @@ if (!function_exists('alku_lahete')) {
     foreach ($rivinumerot as $rivino) {
       $rivinumerot[$rivino] = $kal;
       $kal++;
-    }
-
-    // Jos tuotenumerot ja nimitykset ovat hyvin pitkät
-    if (($tuotenopituus / mysql_num_rows($riviresult)) + ($nimityspituus / mysql_num_rows($riviresult)) > 280) {
-      $pitkattuotteet = TRUE;
     }
 
     $tuotenopituus = round($tuotenopituus/($tuotenopituus+$nimityspituus), 2);

@@ -219,6 +219,10 @@ if ($kollityht > 0) {
 
     $parcelOrder["kollit"] = $kollityht;
 
+    if ($parcelOrder["toim_puh"] != '') {
+      $parcelOrder["yhteyshenkilo_puh"] = $parcelOrder["toim_puh"];
+    }
+
     //  Luodaan aineostoformaatti
     if (!is_array($delisprintFileFormat)) {
 

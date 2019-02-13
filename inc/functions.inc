@@ -1092,7 +1092,7 @@ if (!function_exists("fitek_queue")) {
     $fitek_ulos = "";
 
     // Filenimi
-    $fitekzipfile = "laskutus_".$yhtiorow['yhtio']."_invoices_".$fitek_invoicenum."_".md5(uniqid(rand(), true)).".zip";
+    $fitekzipfile = "laskutus-".$yhtiorow['yhtio']."-invoices-".$fitek_invoicenum."-".md5(uniqid(rand(), true)).".zip";
     
     // Luodaan temppidirikka jonne tyˆnnet‰‰n t‰n kiekan kaikki fitek-filet
     list($usec, $sec) = explode(' ', microtime());
@@ -1115,7 +1115,7 @@ if (!function_exists("fitek_queue")) {
         $fitek_ulos .= "FITEK tmpmove MERCANT.INVOICE_$fitek_invoicenum.pdf feilas!";
       }
 
-      // Tehd‰‰n apixzippi
+      // Tehd‰‰n fitekzippi
       exec("cd $fitek_tmpdirnimi; zip $fitekzipfile *;");
 
       // Aineisto l‰hetysjonoon

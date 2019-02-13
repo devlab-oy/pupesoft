@@ -79,7 +79,9 @@ if (isset($tee) and $tee == "fitek_siirto") {
     for ($a = 1; $a < $fitek_laskumaara; $a++) {
       preg_match("/\<InvoiceNumber\>(.*?)\<\/InvoiceNumber\>/i", $fitek_laskuarray[$a], $invoice_number);
 
-      $status = fitek_queue($invoice_number[1], "<?xml version=".$fitek_laskuarray[$a], $kieli);
+      $fitek_invoice = "<?xml version=".$fitek_laskuarray[$a];
+    
+      $status = fitek_queue($fitek_invoice, $invoice_number[1], $kieli);
 
       echo "Fitek-lasku $invoice_number[1]: $status<br>\n";
     }

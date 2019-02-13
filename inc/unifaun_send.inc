@@ -443,7 +443,7 @@ class Unifaun {
     $uni_par_val->addAttribute('n', "custno");
 
     // DPDFI (PostNord DPD Classic) keississä laitetaan vähän extraa
-    if ($this->toitarow['rahdinkuljettaja'] == 'DPDFI') {
+    if ($this->toitarow['rahdinkuljettaja'] == 'DPDFI' or $this->toitarow['rahdinkuljettaja'] == 'PLSCM') {
       $uni_par_val = $uni_sender_partner->addChild('val', "Z14");   // custnoissuercode
       $uni_par_val->addAttribute('n', "custnoissuercode");
     }

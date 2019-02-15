@@ -60,19 +60,11 @@ function viidakko_hae_tuotteet($tyyppi = "viidakko_tuotteet") {
                 tuote.tunnus,
                 tuote.tuoteno,
                 tuote.eankoodi
-                #,tuotteen_avainsanat.tunnus
                 FROM tilausrivi
                 JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio
                   AND tuote.tuoteno = tilausrivi.tuoteno
                   {$tuoterajaus})
-                #LEFT JOIN tuotteen_avainsanat ON (
-                #  tuotteen_avainsanat.yhtio = tuote.yhtio
-                #  AND tuotteen_avainsanat.tuoteno = tuote.tuoteno
-                #  AND tuotteen_avainsanat.laji = 'parametri_variaatio'
-                #  AND tuotteen_avainsanat.kieli = 'fi'
-                #)
                 WHERE tilausrivi.yhtio = '{$kukarow["yhtio"]}'
-                #AND tuotteen_avainsanat.tunnus is null
                 {$muutoslisa2})
 
                 UNION
@@ -81,16 +73,8 @@ function viidakko_hae_tuotteet($tyyppi = "viidakko_tuotteet") {
                 tuote.tunnus,
                 tuote.tuoteno,
                 tuote.eankoodi
-                #,tuotteen_avainsanat.tunnus
                 FROM tuote
-                #LEFT JOIN tuotteen_avainsanat ON (
-                #  tuotteen_avainsanat.yhtio = tuote.yhtio
-                #  AND tuotteen_avainsanat.tuoteno = tuote.tuoteno
-                #  AND tuotteen_avainsanat.laji = 'parametri_variaatio'
-                #  AND tuotteen_avainsanat.kieli = 'fi'
-                #)
                 WHERE tuote.yhtio = '{$kukarow["yhtio"]}'
-                #AND tuotteen_avainsanat.tunnus is null
                 {$tuoterajaus}
                 {$muutoslisa3})
 
@@ -101,16 +85,8 @@ function viidakko_hae_tuotteet($tyyppi = "viidakko_tuotteet") {
               tuote.tunnus,
               tuote.tuoteno,
               tuote.eankoodi
-              #,tuotteen_avainsanat.tunnus
               FROM tuote
-              #LEFT JOIN tuotteen_avainsanat ON (
-              #  tuotteen_avainsanat.yhtio = tuote.yhtio
-              #  AND tuotteen_avainsanat.tuoteno = tuote.tuoteno
-              #  AND tuotteen_avainsanat.laji = 'parametri_variaatio'
-              #  AND tuotteen_avainsanat.kieli = 'fi'
-              #)
               WHERE tuote.yhtio = '{$kukarow['yhtio']}'
-              #AND tuotteen_avainsanat.tunnus is null
               {$tuoterajaus}";
   }
 
@@ -155,7 +131,9 @@ function viidakko_hae_tuotteet($tyyppi = "viidakko_tuotteet") {
                 ORDER BY tuotteen_avainsanat_variaatio.selite asc, tuotteen_avainsanat_variaatio.selitetark desc, tuote.tunnus asc
                 LIMIT 1";
     $variaatio_res = pupe_query($query);
-#               ORDER BY variation asc, variation_group_id desc, tuote.tunnus asc
+
+    // jos variaationippuun lisätään myöhemmin tuote, joka on perustettu ennen "päätuotetta",
+    // niin perustanee uuden variaationipun? ei saisi, pitäisi hoksata tilanne. todo
 
     $variaatio_isa = "";
     $variatiotuote = false;
@@ -169,7 +147,6 @@ function viidakko_hae_tuotteet($tyyppi = "viidakko_tuotteet") {
       // skipataan kaikki muut paitsi päätuote
       if ($variaatio_row['tuoteno'] != $tuoteno) continue;
 
-      //tarviiko variaatiolle tehä jotai erilaist? saldo? kuvat?
       $variaatio_isa = $variaatio_row['variaatio'];
     }
 
@@ -397,7 +374,7 @@ function viidakko_tuoterajaus() {
                    AND tuote.tuotetyyppi NOT in ('A','B')
                    AND tuote.status != 'P'
                    AND tuote.nimitys != ''
-                   AND tuote.tuoteno in ('KOKK01','KOKK02','KOKK00','TAIGA99')
+                   AND (tuote.tuoteno in ('TAIGA99','TAIGA06') or tuote.tuoteno like 'kokk01_%')
                    #AND tuote.hinnastoon in ('W')
                    ";
 
@@ -489,6 +466,7 @@ function viidakko_hae_variaatiot() {
                 tuote.tunnus,
                 tuote.tuoteno,
                 tuote.eankoodi,
+                tuote.myyntihinta,
                 tuotteen_avainsanat.selite AS variation,
                 tuotteen_avainsanat.selitetark AS variation_group_id
                 FROM tapahtuma
@@ -512,6 +490,7 @@ function viidakko_hae_variaatiot() {
                 tuote.tunnus,
                 tuote.tuoteno,
                 tuote.eankoodi,
+                tuote.myyntihinta,
                 tuotteen_avainsanat.selite AS variation,
                 tuotteen_avainsanat.selitetark AS variation_group_id
                 FROM tilausrivi
@@ -535,6 +514,7 @@ function viidakko_hae_variaatiot() {
                 tuote.tunnus,
                 tuote.tuoteno,
                 tuote.eankoodi,
+                tuote.myyntihinta,
                 tuotteen_avainsanat.selite AS variation,
                 tuotteen_avainsanat.selitetark AS variation_group_id
                 FROM tuote
@@ -555,6 +535,7 @@ function viidakko_hae_variaatiot() {
               tuote.tunnus,
               tuote.tuoteno,
               tuote.eankoodi,
+              tuote.myyntihinta,
               tuotteen_avainsanat.selite AS variation,
               tuotteen_avainsanat.selitetark AS variation_group_id
               FROM tuote
@@ -577,6 +558,8 @@ function viidakko_hae_variaatiot() {
   $variation_check = array();
   $_id = "";
   $variation_group_id = "";
+  $isanhinta = 0;
+  $counter = 0;
 
   while ($row = mysql_fetch_assoc($res)) {
 
@@ -587,10 +570,16 @@ function viidakko_hae_variaatiot() {
     // variaatioiden isätuote
     if (!in_array($row['variation'], $variation_check)) {
       $isatuote = true;
+      $counter = 1;
+      // isän hinta nollataan aina uuden variaationipun kohdalla
+      $isanhinta = $row['myyntihinta'];
       array_push($variation_check, $row['variation']);
     }
 
     list(, , $myytavissa) = saldo_myytavissa($tuoteno, '', $viidakko_varastot);
+
+    // for testing
+    $myytavissa = 10;
 
     // lapsituotteita ei ole erikseen perustettu, ei ole tuote-id:tä
     if ($isatuote) {
@@ -598,7 +587,9 @@ function viidakko_hae_variaatiot() {
                   FROM tuotteen_avainsanat
                   WHERE yhtio = '{$kukarow['yhtio']}'
                   AND tuoteno = '$tuoteno'
-                  AND laji = 'viidakko_tuoteno'";
+                  AND laji = 'viidakko_tuoteno'
+                  ORDER BY tunnus desc
+                  LIMIT 1";
       $avainsana_res = pupe_query($query);
       $avainsana_row = mysql_fetch_assoc($avainsana_res);
 
@@ -620,6 +611,11 @@ function viidakko_hae_variaatiot() {
     $variation_id = $avainsana_row['selite'];
 
     $product_row = product_row($tuoteno);
+
+    if (in_array($row['variation'], $variation_check)) {
+      // additional price, tästä on vähennetty isän hinta
+      $product_row['myyntihinta'] -= $isanhinta;
+    }
 
     $liite_tk_url = "";
 
@@ -658,6 +654,9 @@ function viidakko_hae_variaatiot() {
 
       }
     }
+
+    // for testing
+    $liite_tk_url = "https://www.sprintit.fi/website/image/ir.attachment/5509_4ac6bcc/datas";
 
     //  haetaan kielikäännökset avainsanoista
     $query = "  SELECT *
@@ -703,7 +702,7 @@ function viidakko_hae_variaatiot() {
       $hidden = false;
     }
 
-    $query = "  SELECT variaatio_jako.laji, variaatio_jotain.selite
+    $query = "  SELECT variaatio_jotain.laji, variaatio_jotain.selite
                 FROM tuotteen_avainsanat AS variaatio_jako
                 JOIN tuotteen_avainsanat AS variaatio_jotain ON (
                   variaatio_jotain.yhtio    = variaatio_jako.yhtio AND
@@ -724,21 +723,29 @@ function viidakko_hae_variaatiot() {
     if (mysql_num_rows($avainsana_res) == 1) {
       $variaatio_row = mysql_fetch_assoc($avainsana_res);
 
-      if ($variaatio_row['laji'] == 'koko') {
+      if ($variaatio_row['laji'] == 'parametri_koko') {
         $size = $variaatio_row['selite'];
         $color = "";
+        $product_row['nimitys'] = $size;
+        $variation_name = "Koko";
+        $variation_name_en = "Size";
       }
-      elseif ($variaatio_row['laji'] == 'vari') {
+      elseif ($variaatio_row['laji'] == 'parametri_vari') {
         $size = "";
         $color = $variaatio_row['selite'];
+        $product_row['nimitys'] = $color;
+        $variation_name = "Väri";
+        $variation_name_en = "Color";
       }
     }
 
+    // for testing
+    $color = "onecolor";
 
     $data[$row['variation']][] = array(
-      "group_id"                => $variation_group_id,
-      "variation_id"            => $variation_id,
-      "product_id"              => $_id,
+      "group_id"                => (float) $variation_group_id,
+      "variation_id"            => (float) $variation_id,
+      "product_id"              => (float) $_id,
       "type"                    => "string",
       "color"                   => utf8_encode($color),
       "size"                    => utf8_encode($size),
@@ -772,25 +779,31 @@ function viidakko_hae_variaatiot() {
           "description" => utf8_encode($kuvaus_en),
         ),
       ),
-      "additional_price"        => "",
+      "additional_price"        => (float) $product_row['myyntihinta'],
       "stock"                   => $myytavissa,
       "erp_id"                  => utf8_encode($tuoteno),
+      "ean_code"                => $product_row['eankoodi'],
       "variation_group_array"   => array(
         "names"                 => array(
           array(
             "language" => "FI",
-            "name" => utf8_encode($product_row['nimitys'])
+            "name" => utf8_encode($variation_name)
           ),
           array(
             "language" => "EN",
-            "name" => utf8_encode($nimitys_en),
+            "name" => utf8_encode($variation_name_en),
           ),
         ),
         "code"                  => utf8_encode($row['variation']),
-        "required"              => true,
-        "position"              => 1,
+        "required"              => false,
+        "position"              => $counter,
         "hide_product_if_no_stock" => false,
       )
     );
+    $counter++;
   }
+
+  return $data;
+
+  $variation_check = array();
 }

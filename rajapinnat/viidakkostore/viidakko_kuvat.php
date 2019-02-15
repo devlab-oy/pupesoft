@@ -15,7 +15,8 @@ class ViidakkoStoreKuvat {
 
   public function check_pics() {
     $this->logger->log('---------Tarkistetaan onko kuva jo kaupassa---------');
-    echo "\n---------Tarkistetaan onko kuva jo kaupassa---------\n";
+
+    #echo "\n---------Tarkistetaan onko kuva jo kaupassa---------\n";
 
     $pupesoft_products = $this->pupesoft_all_products;
     $total = count($pupesoft_products);
@@ -23,7 +24,7 @@ class ViidakkoStoreKuvat {
     $store_image_ids = array();
     $insert_these_products = array();
 
-    echo "\nkuvadata:<pre>",var_dump($pupesoft_products);
+    #echo "\nkuvadata:",var_dump($pupesoft_products);
 
     // looppaa kaupan kuvat ja poista kaikki,
     // jos tuotteen kuvia on pupessa muutettu,
@@ -33,6 +34,7 @@ class ViidakkoStoreKuvat {
 
       // only first product pic has updated value "X"
       if ($product['updated'] == 'X') {
+
         // fetch and delete all pictures of given product
         $url = $this->apiurl."/products/".$product["id"]."/images/";
         $ch = curl_init($url);
@@ -46,8 +48,8 @@ class ViidakkoStoreKuvat {
         $current++;
         $response_array = json_decode($response);
 
-        echo "\n kuvaresponse:";
-        echo "\n<pre>",var_dump($response_array);
+        #echo "\n kuvaresponse:";
+        #echo "\n",var_dump($response_array);
 
         if (isset($response_array->items[0]->id) and !empty($response_array->items[0]->id)) {
           foreach ($response_array->items as $key => $value) {
@@ -104,7 +106,7 @@ class ViidakkoStoreKuvat {
   public function insert_image($product) {
     $url = $this->apiurl."/products/".$product['id']."/images/upload";
 
-    echo "just ennen inserttiä product:<pre>",var_dump($product);
+    #echo "just ennen inserttiä product:",var_dump($product);
 
     $data_json = json_encode(array(
       "titles"        => $product['title'],
@@ -115,8 +117,8 @@ class ViidakkoStoreKuvat {
       "is_teaser"     => $product['is_teaser'],
     ));
 
-    echo "\n---------INSERTÖIDÄÄN---------{$product['id']}\n";
-    echo "\ninsert json data:<pre>",var_dump(json_decode($data_json));
+    #echo "\n---------INSERTÖIDÄÄN---------{$product['id']}\n";
+    #echo "\ninsert json data:",var_dump(json_decode($data_json));
 
     $ch = curl_init($url);
     curl_setopt($ch, CURLOPT_HTTPHEADER, array('Accept: application/json', 'Content-Type: application/json', 'X-Auth-Token: '.$this->token));
@@ -130,17 +132,15 @@ class ViidakkoStoreKuvat {
 
     $response_array = json_decode($response, true);
 
-    echo "\ninsert response_array:<pre>",var_dump($response_array);
-    echo "\ninsert response:<pre>",var_dump($response);
+    #echo "\ninsert response_array:",var_dump($response_array);
 
     if (isset($response_array['items'][0]['id']) and !empty($response_array['items'][0]['id'])) {
-    #if (isset($response_array->items[0]->id) and !empty($response_array->items[0]->id)) {
-      echo "\n---------200---------\n";
+      #echo "\n---------200---------\n";
       $this->logger->log("--> tuotteen {$product["code"]} kuvan lisääminen onnistui! ID: {$response_array['items'][0]['id']}, Pupe-liitetiedostot-tunnus: {$product['liitetiedostot_tunnus']}");
       $this->update_id($product['image_id'], $response_array['items'][0]['id'], $product['liitetiedostot_tunnus']);
     }
     else {
-      echo "\n---------400---------\n";
+      #echo "\n---------400---------\n";
       $this->logger->log("--> tuotteen {$product["code"]} kuvan lisäys epäonnistui! Pupe-liitetiedostot-tunnus: {$product['liitetiedostot_tunnus']}");
       $this->logger->log("syy: {$response}");
     }
@@ -160,7 +160,7 @@ class ViidakkoStoreKuvat {
                   external_id = '{$viidakko_pic_id}'
                   WHERE tunnus = $liitetiedostot_tunnus";
       $insert_res = pupe_query($query);
-      echo "\nIIDEE UPDATETTU!\n\n";
+      #echo "\nIIDEE UPDATETTU!\n\n";
     }
     elseif (!empty($product['image_id']) and $viidakko_pic_id == "" and $liitetiedostot_tunnus == "") {
       $query = "  UPDATE liitetiedostot SET
@@ -172,7 +172,7 @@ class ViidakkoStoreKuvat {
                   AND external_id = '{$product['image_id']}'
                   ";
       $insert_res = pupe_query($query);
-      echo "\nIIDEE UPDATETTU!\n\n";
+      #echo "\nIIDEE UPDATETTU!\n\n";
     }
   }
 }

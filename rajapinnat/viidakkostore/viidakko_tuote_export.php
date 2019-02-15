@@ -114,7 +114,7 @@ if (viidakko_ajetaanko_sykronointi('tuotteet', $synkronoi)) {
   $tyyppi = "viidakko_tuotteet";
   $kaikki_tuotteet = viidakko_hae_tuotteet();
 
-  echo "<pre>",var_dump($kaikki_tuotteet);
+  #echo "<pre>",var_dump($kaikki_tuotteet);
 
   viidakko_echo("Siirret‰‰n tuotteet.");
   $viidakko_products = new ViidakkoStoreTuotteet($viidakko_url, $viidakko_token, $tyyppi);
@@ -126,6 +126,8 @@ if (viidakko_ajetaanko_sykronointi('tuotteet', $synkronoi)) {
 if (viidakko_ajetaanko_sykronointi('saldot', $synkronoi)) {
   $tyyppi = "viidakko_saldot";
   $kaikki_tuotteet = viidakko_hae_tuotteet($tyyppi);
+
+  #echo "kaikki_tuotteet: <pre>",var_dump($kaikki_tuotteet);
 
   viidakko_echo("Siirret‰‰n saldot.");
   $viidakko_stocks = new ViidakkoStoreSaldot($viidakko_url, $viidakko_token, $tyyppi);
@@ -149,15 +151,20 @@ if (viidakko_ajetaanko_sykronointi('kuvat', $synkronoi)) {
 
 if (viidakko_ajetaanko_sykronointi('variaatiot', $synkronoi)) {
   $tyyppi = "viidakko_variaatiot";
-  $kaikki_variaatiot = viidakko_hae_variaatiot();
+  $kaikki_variaatiot = viidakko_hae_variaatiot($tyyppi);
 
-  echo "<pre>",var_dump($kaikki_variaatiot);
+  #echo "KAIKKI VARIAATIOT:<pre>",var_dump($kaikki_variaatiot);
 
-  viidakko_echo("Siirret‰‰n variaatiot.");
-  $viidakko_variations = new ViidakkoStoreVariaatiot($viidakko_url, $viidakko_token, $tyyppi);
+  if (!empty($kaikki_variaatiot)) {
+    viidakko_echo("Siirret‰‰n variaatiot.");
+    $viidakko_variations = new ViidakkoStoreVariaatiot($viidakko_url, $viidakko_token, $tyyppi);
 
-  $viidakko_variations->set_all_variations($kaikki_variaatiot);
-  $viidakko_variations->check_variations();
+    $viidakko_variations->set_all_variations($kaikki_variaatiot);
+    $viidakko_variations->check_variations();
+  }
+  else {
+    viidakko_echo("Ei yht‰‰n siirrett‰v‰‰ variaatiota.");
+  }
 }
 
 if (viidakko_ajetaanko_sykronointi('tilaukset', $synkronoi)) {

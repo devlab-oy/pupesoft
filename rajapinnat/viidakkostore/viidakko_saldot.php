@@ -18,22 +18,17 @@ class ViidakkoStoreSaldot {
 
     $pupesoft_products = $this->pupesoft_all_products;
 
-    $current = 0;
-    $total = count($pupesoft_products);
-
     foreach ($pupesoft_products as $product_row) {
 
       $url = $this->apiurl."/stocks";
 
-      unset($product_row['original_product_code']);
-
-      echo "\nvar_dump stocks:<pre>",var_dump($product_row);
+      #echo "\nvar_dump stocks:",var_dump($product_row);
 
       $data_json = json_encode($product_row);
 
       $ch = curl_init($url);
       curl_setopt($ch, CURLOPT_HTTPHEADER, array('Accept: application/json', 'Content-Type: application/json', 'X-Auth-Token: '.$this->token));
-      curl_setopt($ch, CURLOPT_HEADER, TRUE);
+      curl_setopt($ch, CURLOPT_HEADER, FALSE);
       curl_setopt($ch, CURLOPT_POST, TRUE);
       curl_setopt($ch, CURLOPT_POSTFIELDS, $data_json);
       curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -41,11 +36,20 @@ class ViidakkoStoreSaldot {
       $response = curl_exec($ch);
       curl_close($ch);
 
-      echo "\n stock\n";
-      echo "\nvar_dump stocks:<pre>",var_dump($response);
+      #echo "\n stock\n";
+      $response_array = json_decode($response);
+      #echo "\nvar_dump stocks:",var_dump($response_array);
 
-      $current++;
-      $this->logger->log("[{$current}/{$total}] tuote {$product_row["code"]} saldo {$product_row['stock']}");
+
+      if (isset($response_array->items[0]->id) and !empty($response_array->items[0]->id)) {
+        #echo "\n---------200---------\n";
+        $this->logger->log("--> tuotteen {$response_array->items[0]->code} saldon päivitys onnistui! ID: {$response_array->items[0]->id}, saldo: {$response_array->items[0]->stock}");
+      }
+      else {
+        #echo "\n---------400---------\n";
+        $this->logger->log("--> tuotteen {$product_row[0]["code"]} saldon päivitys epäonnistui!");
+        $this->logger->log("syy: {$response}");
+      }
 
     }
 

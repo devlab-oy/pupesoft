@@ -14,8 +14,10 @@ class ViidakkoStoreVariaatiot {
   }
 
   public function check_variations() {
+
     $this->logger->log('---------Tarkistetaan onko variaatio jo kaupassa---------');
-    echo "\n---------Tarkistetaan onko variaatio jo kaupassa---------\n";
+
+    #echo "\n---------Tarkistetaan onko variaatio jo kaupassa---------\n";
 
     $pupesoft_variations = $this->pupesoft_all_variations;
     $total = count($pupesoft_variations);
@@ -23,27 +25,45 @@ class ViidakkoStoreVariaatiot {
 
     foreach ($pupesoft_variations as $variationcode => $data) {
 
-      if (empty($data['group_id'])) {
+      if (empty($data[0]['group_id'])) {
+
+        #echo "\n\n if empty group_id\n";
+        #echo "<pre>",var_dump($variationcode);
+        #echo "<pre>",var_dump($data[0]);
 
         // POST
         // Add new variation group
-        $group_id = $this->insert_variation_group($variationcode, $data);
-        // todnäk tarvitaan group_id variaatioiden lisäykseen
+        $data[0]['group_id'] = $this->insert_variation_group($variationcode, $data);
       }
 
-      if (empty($group_id)) continue;
-
-      if (empty($data['variation_id'])) {
-
-        // POST
-        // Add new variation to specified product
-        $this->insert_variation($variationcode, $data);
+      if (empty($data[0]['group_id'])) {
+        continue;
       }
       else {
 
-        // PUT
-        // Edit specified variation
-        $this->edit_variation($variationcode, $data);
+        // luupataan variaatiot läpi
+        foreach ($data as $variaatio) {
+
+          // siirretään group_id kaikille variaatoille
+          $variaatio['group_id'] = (float) $data[0]['group_id'];
+
+          if (empty($variaatio['variation_id'])) {
+
+            #echo "\n\n if empty variation_id\n";
+
+            // POST
+            // Add new variation to specified product
+            $this->insert_variation($variationcode, $variaatio);
+          }
+          else {
+
+            #echo "\n\n if not empty variation_id\n";
+
+            // PUT
+            // Edit specified variation
+            $this->edit_variation($variationcode, $variaatio);
+          }
+        }
       }
     }
   }
@@ -57,11 +77,11 @@ class ViidakkoStoreVariaatiot {
     unset($data['properties']);
     unset($data['href']);
     unset($data['variation_group_array']);
-    unset($data['variation_group_array']);
 
     $data_json = json_encode($data);
-    echo "\n---------UPDATETAAN---------\n";
-    echo "<pre>",var_dump($variation);
+
+    #echo "\n---------UPDATETAAN---------\n";
+    #echo "<pre>",var_dump($data);
 
     $ch = curl_init($url);
     curl_setopt($ch, CURLOPT_HTTPHEADER, array('Accept: application/json', 'Content-Type: application/json', 'X-Auth-Token: '.$this->token));
@@ -75,17 +95,17 @@ class ViidakkoStoreVariaatiot {
 
     $response_array = json_decode($response);
 
-    echo "\n update\n";
-    echo "\nvar_dump variations edit:<pre>",var_dump($response);
+    #echo "\n update\n";
+    #echo "\nvar_dump variations edit:",var_dump($response_array);
 
     if (isset($response_array->items[0]->id) and $response_array->items[0]->id == $id) {
-      // response ok/fail vielä tähän
       $this->logger->log("--> variaatiokoodin {$data["variation_code"]} variaatio {$data["erp_id"]} päivitetty");
-      echo "\n onnistuneesti päivitetty variaatiokoodin {$data["variation_code"]} variaatio {$data["erp_id"]}";
+      $this->update_id($id, $response_array->items[0]);
+      #echo "\n onnistuneesti päivitetty variaatiokoodin {$data["variation_code"]} variaatio {$data["erp_id"]}";
     }
     else {
       $this->logger->log("--> Jokin meni pieleen variaatiokoodin {$data["variation_code"]} variaation {$data["erp_id"]} kanssa");
-      echo "\n Jokin meni pieleen variaatiokoodin {$data["variation_code"]} variaation {$data["erp_id"]} kanssa";
+      #echo "\n Jokin meni pieleen variaatiokoodin {$data["variation_code"]} variaation {$data["erp_id"]} kanssa";
     }
   }
 
@@ -98,9 +118,9 @@ class ViidakkoStoreVariaatiot {
     unset($data['variation_id']);
     unset($data['variation_group_array']);
 
-    echo "<pre>",var_dump($variation);
+    echo "<pre>",var_dump($data);
 
-    $data_json = json_encode($variation);
+    $data_json = json_encode($data);
     echo "\n---------INSERTÖIDÄÄN---------\n";
     $ch = curl_init($url);
     curl_setopt($ch, CURLOPT_HTTPHEADER, array('Accept: application/json', 'Content-Type: application/json', 'X-Auth-Token: '.$this->token));
@@ -113,30 +133,31 @@ class ViidakkoStoreVariaatiot {
     curl_close($ch);
 
     echo "\n insert\n";
-    echo "\n\nvar_dump insert variations:<pre>",var_dump($response);
-
     $response_array = json_decode($response);
 
-    if (isset($response_array->items[0]->properties->id) and !empty($response_array->items[0]->properties->id)) {
+    echo "\n\nvar_dump insert variations:<pre>",var_dump($response_array);
+
+    if (isset($response_array->items[0]->id) and !empty($response_array->items[0]->id)) {
       $this->logger->log("--> variaatio {$data["erp_id"]} lisätty");
-      $this->update_id($id, $response_array->items[0]);
+      $this->update_id("", $response_array->items[0]);
       echo "\nIIDEE LISÄTTY!!!\n";
     }
     else {
       $this->logger->log("--> variaatio {$data["erp_id"]} lisääminen epäonnistui!");
       $this->logger->log("syy: {$response_array->message}");
+      echo "\nvariaation {$data["erp_id"]} lisääminen epäonnistui. syy: {$response_array->message}\n";
     }
   }
 
   public function insert_variation_group($variationcode, $data) {
     $url = $this->apiurl."/variationgroups";
 
-    echo "<pre>",var_dump($data['variation_group_array']);
+    #echo "<pre>",var_dump($data[0]['variation_group_array']);
 
-    $id = $data['variation_id'];
+    $data_json = json_encode($data[0]['variation_group_array']);
 
-    $data_json = json_encode($data['variation_group_array']);
-    echo "\n---------INSERTÖIDÄÄN---------\n";
+    #echo "\n---------INSERTÖIDÄÄN---------\n";
+
     $ch = curl_init($url);
     curl_setopt($ch, CURLOPT_HTTPHEADER, array('Accept: application/json', 'Content-Type: application/json', 'X-Auth-Token: '.$this->token));
     curl_setopt($ch, CURLOPT_HEADER, FALSE);
@@ -147,16 +168,22 @@ class ViidakkoStoreVariaatiot {
     $response = curl_exec($ch);
     curl_close($ch);
 
-    echo "\n insert\n";
-    echo "\n\nvar_dump insert variationgroups:<pre>",var_dump($response);
+    #echo "\n insert\n";
 
     $response_array = json_decode($response);
 
+    #echo "\n\nvar_dump insert variationgroups:<pre>",var_dump($response_array);
+
     if (isset($response_array->items[0]->id) and !empty($response_array->items[0]->id)) {
+
       $this->logger->log("--> variaatiogroup {$variationcode} lisätty");
-      $id = $this->update_group_id($id, $data['erp_id'], $response_array->items[0]->id);
-      echo "\nIIDEE LISÄTTY!!! $id\n";
-      return $id;
+
+      foreach ($data as $variaatiodata) {
+        $this->update_group_id($variaatiodata['erp_id'], $response_array->items[0]->id);
+        #echo "\nIIDEE LISÄTTY!!! {$response_array->items[0]->id} tuottelle {$variaatiodata['erp_id']}\n";
+      }
+
+      return $response_array->items[0]->id;
     }
     else {
       $this->logger->log("--> variaatiogroup {$variationcode} lisääminen epäonnistui!");
@@ -179,51 +206,41 @@ class ViidakkoStoreVariaatiot {
                   yhtio       = '{$yhtiorow['yhtio']}',
                   tuoteno     = '{$viidakko_product->erp_id}',
                   laji        = 'viidakko_variation_id',
-                  selite      = '{$viidakko_product->properties->id}',
+                  selite      = '{$viidakko_product->id}',
                   laatija     = 'viidakkostore',
                   luontiaika  = now() ON DUPLICATE KEY UPDATE
                   muuttaja    = 'viidakkostore',
                   muutospvm   = now()";
       $insert_res = pupe_query($query);
+
+      #echo "\n\ninsertöitiin update_id!\n\n";
     }
-    elseif ($id != $viidakko_product->properties->id) {
+    elseif ($id != $viidakko_product->id) {
       $query = "  UPDATE tuotteen_avainsanat SET
-                  yhtio       = '{$yhtiorow['yhtio']}',
-                  tuoteno     = '{$viidakko_product->erp_id}',
-                  laji        = 'viidakko_variation_id',
-                  selite      = '{$viidakko_product->properties->id}',
+                  selite      = '{$viidakko_product->id}',
                   muuttaja    = 'viidakkostore',
-                  muutospvm   = now()";
+                  muutospvm   = now()
+                  WHERE
+                  yhtio       = '{$yhtiorow['yhtio']}' AND
+                  tuoteno     = '{$viidakko_product->erp_id}' AND
+                  laji        = 'viidakko_variation_id'";
       $update_res = pupe_query($query);
+
+      #echo "\n\updatettiin update_id!\n\n";
     }
   }
 
-  public function update_group_id($id, $tuoteno, $viidakko_id) {
+  public function update_group_id($tuoteno, $viidakko_id) { //todo
     global $yhtiorow;
 
-    if ($id == "") {
-      $query = "  INSERT INTO tuotteen_avainsanat SET
-                  yhtio       = '{$yhtiorow['yhtio']}',
-                  tuoteno     = '{$tuoteno}',
-                  laji        = 'parametri_variaatio'
-                  selitetark  = '{$viidakko_id}',
-                  laatija     = 'viidakkostore',
-                  luontiaika  = now() ON DUPLICATE KEY UPDATE
-                  muuttaja    = 'viidakkostore',
-                  muutospvm   = now()";
-      $insert_res = pupe_query($query);
-    }
-    elseif ($id != $viidakko_id) {
-      $query = "  UPDATE tuotteen_avainsanat SET
-                  yhtio       = '{$yhtiorow['yhtio']}',
-                  tuoteno     = '{$tuoteno}',
-                  laji        = 'parametri_variaatio',
-                  selitetark  = '{$viidakko_id}',
-                  muuttaja    = 'viidakkostore',
-                  muutospvm   = now()";
-      $update_res = pupe_query($query);
-    }
-
-    return $viidakko_id;
+    $query = "  UPDATE tuotteen_avainsanat SET
+                selitetark  = '{$viidakko_id}',
+                muuttaja    = 'viidakkostore',
+                muutospvm   = now()
+                WHERE
+                yhtio       = '{$yhtiorow['yhtio']}' AND
+                tuoteno     = '{$tuoteno}' AND
+                laji        = 'parametri_variaatio'";
+    $update_res = pupe_query($query);
   }
 }

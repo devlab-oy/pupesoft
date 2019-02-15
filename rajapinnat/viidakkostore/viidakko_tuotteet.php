@@ -14,8 +14,9 @@ class ViidakkoStoreTuotteet {
   }
 
   public function check_products() {
+
     $this->logger->log('---------Tarkistetaan onko tuote jo kaupassa---------');
-    echo "\n---------Tarkistetaan onko tuote jo kaupassa---------\n";
+    #echo "\n---------Tarkistetaan onko tuote jo kaupassa---------\n";
 
     $pupesoft_products = $this->pupesoft_all_products;
     $total = count($pupesoft_products);
@@ -35,12 +36,13 @@ class ViidakkoStoreTuotteet {
       $current++;
       $response_array = json_decode($response);
 
-      echo "\n check\n";
-      echo "\nvar_dump products:<pre>",var_dump($response_array);
+      #echo "\n check\n";
+      #echo "\nvar_dump products:",var_dump($response_array);
 
       if (isset($response_array->items[0]->id) and !empty($response_array->items[0]->id)) {
 
-        echo "\n---------200---------\n";
+        #echo "\n---------200---------\n";
+
         $this->logger->log("[{$current}/{$total}] tuote {$product["product_code"]} lˆytyy kaupasta");
 
         // lets check store product id
@@ -56,23 +58,25 @@ class ViidakkoStoreTuotteet {
 
         // lets update product with correct id
         $product['id'] = $response_array->items[0]->id;
+
         #echo "\nvar_dump iidee:<pre>",var_dump($response_array->items[0]);
         #echo "\nvar_dump products:<pre>",var_dump($product);
+
         $this->update_product($product);
       }
       elseif (isset($response_array->items) and !isset($response_array->items[0])) {
-        echo "\n---------404---------\n";
-        $this->logger->log("[{$current}/{$total}] tuote {$product["code"]} ei lˆydy kaupasta | response_code: $response_array->code");
+        #echo "\n---------404---------\n";
+        $this->logger->log("[{$current}/{$total}] tuote {$product["product_code"]} ei lˆydy kaupasta");
         // lets insert product
         $this->insert_product($product);
       }
       elseif (isset($response_array->code) and $response_array->code == "400") {
-        echo "\n---------400---------\n";
+        #echo "\n---------400---------\n";
         $this->logger->log("--> tuote {$product["product_code"]} kysely ep‰onnistui!");
         $this->logger->log("syy: {$response_array->message}");
       }
       else {
-        echo "\n---------unknown-----\n";
+        #echo "\n---------unknown-----\n";
         $this->logger->log("--> tuote {$product["product_code"]} kysely ep‰onnistui tuntemattomasta syyst‰!");
         $this->logger->log("syy: {$response_array->message}");
       }
@@ -87,12 +91,13 @@ class ViidakkoStoreTuotteet {
     unset($product['original_product_code']);
 
     $data_json = json_encode($product);
-    echo "\n---------UPDATETAAN---------\n";
-    echo "<pre>",var_dump($product);
+
+    #echo "\n---------UPDATETAAN---------\n";
+    #echo "",var_dump($product);
 
     $ch = curl_init($url);
     curl_setopt($ch, CURLOPT_HTTPHEADER, array('Accept: application/json', 'Content-Type: application/json', 'X-Auth-Token: '.$this->token));
-    curl_setopt($ch, CURLOPT_HEADER, TRUE);
+    curl_setopt($ch, CURLOPT_HEADER, FALSE);
     curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "PUT");
     curl_setopt($ch, CURLOPT_POSTFIELDS, $data_json);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -102,8 +107,8 @@ class ViidakkoStoreTuotteet {
 
     $response_array = json_decode($response);
 
-    echo "\n update\n";
-    echo "\nvar_dump products:<pre>",var_dump($response);
+    #echo "\n update\n";
+    #echo "\nvar_dump products:",var_dump($response_array);
 
     // response ok/fail viel‰ t‰h‰n
     $this->logger->log("--> tuote {$product["product_code"]} p‰ivitetty");
@@ -124,10 +129,12 @@ class ViidakkoStoreTuotteet {
     unset($product['id']);
     unset($product['original_product_code']);
 
-    echo "<pre>",var_dump($product);
+    #echo "<pre>",var_dump($product);
 
     $data_json = json_encode($product);
-    echo "\n---------INSERT÷IDƒƒN---------\n";
+
+    #echo "\n---------INSERT÷IDƒƒN---------\n";
+
     $ch = curl_init($url);
     curl_setopt($ch, CURLOPT_HTTPHEADER, array('Accept: application/json', 'Content-Type: application/json', 'X-Auth-Token: '.$this->token));
     curl_setopt($ch, CURLOPT_HEADER, FALSE);
@@ -138,15 +145,16 @@ class ViidakkoStoreTuotteet {
     $response = curl_exec($ch);
     curl_close($ch);
 
-    echo "\n insert\n";
-    echo "\n\nvar_dump products:<pre>",var_dump($response);
+    #echo "\n insert\n";
 
     $response_array = json_decode($response);
+
+    #echo "\n\nvar_dump products:",var_dump($response_array);
 
     if (isset($response_array->items[0]->id) and !empty($response_array->items[0]->id)) {
       $this->logger->log("--> tuote {$product["product_code"]} lis‰tty");
       $this->update_id("", $product_code, $response_array->items[0]->id);
-      echo "\nIIDEE PƒIVITETTY!!!\n";
+      #echo "\nIIDEE PƒIVITETTY!!!\n";
     }
     else {
       $this->logger->log("--> tuote {$product["product_code"]} lis‰‰minen ep‰onnistui!");
@@ -177,12 +185,13 @@ class ViidakkoStoreTuotteet {
     }
     elseif ($id != $viidakko_id) {
       $query = "  UPDATE tuotteen_avainsanat SET
-                  yhtio       = '{$yhtiorow['yhtio']}',
-                  tuoteno     = '{$viidakko_productcode}',
-                  laji        = 'viidakko_tuoteno',
                   selite      = '{$viidakko_id}',
                   muuttaja    = 'viidakkostore',
-                  muutospvm   = now()";
+                  muutospvm   = now()
+                  WHERE
+                  yhtio       = '{$yhtiorow['yhtio']}' AND
+                  tuoteno     = '{$viidakko_productcode}' AND
+                  laji        = 'viidakko_tuoteno'";
       $update_res = pupe_query($query);
     }
   }

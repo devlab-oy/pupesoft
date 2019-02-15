@@ -141,8 +141,8 @@ if (!function_exists('rivi_erittely')) {
         $pdf->draw_text(62, $kala-48, $laskurow['toim_postino']." ".$laskurow['toim_postitp'],  $firstpage, $kirj);
       }
 
-      $query = "SELECT yhteyshenkilo.nimi,
-                IF(yhteyshenkilo.puh != '', yhteyshenkilo.puh, IF(yhteyshenkilo.gsm != '', yhteyshenkilo.gsm, '')) puh
+      $query = "SELECT yhteyshenkilo.nimi, lasku.toim_puh,
+                IF(lasku.toim_puh != '', lasku.toim_puh, IF(yhteyshenkilo.puh != '', yhteyshenkilo.puh, IF(yhteyshenkilo.gsm != '', yhteyshenkilo.gsm, ''))) puh
                 FROM lasku
                 JOIN yhteyshenkilo ON (yhteyshenkilo.yhtio = lasku.yhtio AND yhteyshenkilo.nimi = lasku.tilausyhteyshenkilo AND yhteyshenkilo.tyyppi = 'A')
                 WHERE lasku.yhtio              = '{$kukarow['yhtio']}'

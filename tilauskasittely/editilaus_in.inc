@@ -681,6 +681,9 @@ while ($tietue = fgets($fd)) {
   case 'ORFFCR_NU'  :
     //Kommentteja
     $merkkitieto = $tieto;
+
+    $merkkitieto = str_replace("!!!###!!!", "\n", $merkkitieto);
+
     break;
 
   case 'OSTOTIL.OT_MAKSUEHTO' :

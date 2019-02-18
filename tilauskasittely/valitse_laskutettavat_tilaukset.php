@@ -668,8 +668,16 @@ if ($tee == "VALITSE") {
           }
         }
 
+        // Muutetaan rahtihinta laskun valuuttaan, koska rahtihinta tulee matriisista aina yhtiön kotivaluutassa
+        if ($row["valkoodi"] != '' and trim(strtoupper($row["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
+          $rah_hinta_laskun_valuutassa = round(laskuval($rah_hinta, $row["vienti_kurssi"]), 2);
+        }
+        else {
+          $rah_hinta_laskun_valuutassa = $rah_hinta;
+        }
+
         if ($row["kohdistettu"] == "K") {
-          $rahti_hinta = "(" . (float) $rah_hinta ." $row[valkoodi]$rah_alet)";
+          $rahti_hinta = "(" . (float) $rah_hinta_laskun_valuutassa ." $row[valkoodi]$rah_alet)";
         }
         else {
           $rahti_hinta = "(".t("vastaanottaja").")";
@@ -1376,6 +1384,7 @@ function hae_tilaukset_result($query_ale_lisa, $tunnukset, $alatilat, $vientilis
             lasku.liitostunnus,
             lasku.tila,
             lasku.vienti,
+            lasku.vienti_kurssi,
             lasku.alv,
             lasku.kohdistettu,
             lasku.jaksotettu,

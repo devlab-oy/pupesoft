@@ -11617,6 +11617,11 @@ if (!function_exists("hae_rahtimaksu")) {
       $hirow = mysql_fetch_assoc($rares);
       $ale_kaikki_array = array();
 
+      // Rahtimaksut ovat yhtion valuutassa, se pit‰‰ muuttaa laskun valuuttaan
+      if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
+        $hirow['rahtihinta'] = round(laskuval($hirow['rahtihinta'], $laskurow["vienti_kurssi"]), 2);
+      }
+
       if ($rahtituoteno_toimitustavalta) {
         // Etsit‰‰n spessuhintaa/alennuksia jos toimitustavan takana oli oma rahti_tuotenumero
         list($lis_hinta, $lis_netto, $lis_ale_kaikki, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $rahti_tuoteno_row, 1, '', '', '');

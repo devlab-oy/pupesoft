@@ -10,40 +10,56 @@ function yrityspeli_kayttoliittyma(Array $params) {
   $valitut_tryt          = $params['valitut_tryt'];
   $toimipaikat           = $params['toimipaikat'];
   echo "<font class='head'>";
-  echo t("L√§het√§ ostotilauksia yrityksille");
+  echo t("L‰het‰ ostotilauksia yrityksille");
   echo "</font>";
   echo "<hr>";
   foreach ($messages as $message) {
     echo "<font class='error'>{$message}</font><br>";
   }
-  echo "<font class='message'>Aikav√§li {$alkuaika} - {$loppuaika}</font><br><br>";
+  echo "<font class='message'>Aikav‰li {$alkuaika} - {$loppuaika}</font><br><br>";
   echo "<form method='post'>";
   echo "<input type='hidden' name='tee' value='GENEROI'>";
   echo "<table>";
   echo "<tr>";
-  echo "<th>".t('Tilausten lukum√§√§r√§ per yritys')."</th>";
+  echo "<th>".t('Tilausten lukum‰‰r‰ per yritys')."</th>";
   echo "<td>";
   echo "<input type='text' name='tilausmaara' size='10' value='${tilausmaara}'/>";
   echo "</td>";
   echo "</tr>";
   echo "<tr>";
-  echo "<th>".t('Tilausten keskim√§√§r√§inen arvo')."</th>";
+  echo "<th>".t('Tilausten keskim‰‰r‰inen arvo')."</th>";
   echo "<td>";
   echo "<input type='text' name='kokonaiskustannus' size='10' value='{$kokonaiskustannus}'/>";
   echo "</td>";
   echo "</tr>";
   echo "</table>";
   echo "<br>";
-  echo "<font class='message'>".t('Valitse yritykset')."</font><br><br>";
+    echo "<font class='message'>".t('Valitse yritykset')."    </font>";
+  echo "<input type='checkbox' name='select-all' id='select-all'/> <font class='message'> (Valitse kaikki)</font> <br><br>";
+  
+print " <SCRIPT TYPE=\"text/javascript\" LANGUAGE=\"JavaScript\">
+$('#select-all').click(function(event) {   
+    if(this.checked) {
+        // Iterate each checkbox
+        $(':checkbox').each(function() {
+            this.checked = true;                        
+        });
+    } else {
+        $(':checkbox').each(function() {
+            this.checked = false;                       
+        });
+    }
+});
+</script>";
   echo "<table>";
   echo "<tr>";
-  echo "<th>yhti√∂</th>";
+  echo "<th>yhtiˆ</th>";
   echo "<th>asiakas</th>";
   echo "<th>ytunnus</th>";
   echo "<th>email</th>";
   echo "<th>tilauksia</th>";
   echo "<th>summa</th>";
-  echo "<th>Tuoteryhm√§</th>";
+  echo "<th>Tuoteryhm‰</th>";
   echo "<th>toimipaikka</th>";
   echo "<th></th>";
   echo "</tr>";
@@ -83,24 +99,24 @@ function yrityspeli_kayttoliittyma(Array $params) {
     echo "</tr>";
   }
   if (count($tilauksettomat_yhtiot) == 0) {
-    echo t('Yht√§√§n tilauksetonta yrityst√§ ei l√∂ytynyt');
+    echo t('Yht‰‰n tilauksetonta yrityst‰ ei lˆytynyt');
   }
   echo "</table>";
   echo "<br>";
-  echo "<input type='submit' value='".t('L√§het√§ ostotilaukset yrityksille')."'>";
+  echo "<input type='submit' value='".t('L‰het‰ ostotilaukset yrityksille')."'>";
   echo "</form>";
 }
 function yrityspeli_hae_tilauksettomat_yhtiot($alkuaika, $loppuaika) {
   global $kukarow, $yhtiorow;
   $tilauksettomat_yhtiot = array();
-  // Etsit√§√§n samasta tietokannasta kaikki muut yhti√∂t
+  // Etsit‰‰n samasta tietokannasta kaikki muut yhtiˆt
   $query = "SELECT *
             FROM yhtio
             WHERE yhtio != '{$kukarow['yhtio']}'";
   $result = pupe_query($query);
   while ($row = mysql_fetch_assoc($result)) {
-    // katsotaan l√∂ytyyk√∂ t√§m√§ yhti√∂ meilt√§ asiakkaana (ytunnuksen mukaan)
-    // lasketaan yhti√∂n avointen tilausten arvo (varattu * hinta)
+    // katsotaan lˆytyykˆ t‰m‰ yhtiˆ meilt‰ asiakkaana (ytunnuksen mukaan)
+    // lasketaan yhtiˆn avointen tilausten arvo (varattu * hinta)
     $tilausquery = "SELECT yhtio.nimi as yhtio_nimi,
                     asiakas.nimi as asiakas_nimi,
                     asiakas.ytunnus as asiakas_ytunnus,
@@ -147,7 +163,7 @@ function yrityspeli_generoi_ostotilauksia(Array $params) {
   $toimipaikat       = $params['toimipaikat'];
   $response = array();
   if (empty($asiakkaat)) {
-    $response[] = "Et valinnut yht√§√§n asiakasta";
+    $response[] = "Et valinnut yht‰‰n asiakasta";
     return $response;
   }
   foreach ($asiakkaat as $asiakas) {
@@ -178,7 +194,7 @@ function yrityspeli_generoi_ostotilaus(Array $params) {
   $hintacounter = 0;
   $response = array();
   if ($toimittaja === false) {
-    $response[] = "Yrityksell√§ {$yhtiorow['nimi']} ei ole yht√§√§n toimittajaa.";
+    $response[] = "Yrityksell‰ {$yhtiorow['nimi']} ei ole yht‰‰n toimittajaa.";
     return $response;
   }
   $params = array(
@@ -221,7 +237,7 @@ function yrityspeli_generoi_ostotilaus(Array $params) {
   while ($hintacounter < $kokonaiskustannus) {
     $trow = yrityspeli_tuotearvonta($toimittaja['tunnus'], $try);
     if ($trow === false) {
-      $response[] = "Yrityksell√§ {$yhtiorow['nimi']} ei ole sopivia tuotteita, jota voi tilata toimittajalta {$toimittaja['nimi']}.";
+      $response[] = "Yrityksell‰ {$yhtiorow['nimi']} ei ole sopivia tuotteita, jota voi tilata toimittajalta {$toimittaja['nimi']}.";
       return $response;
     }
     $kpl = rand(1, 3);
@@ -234,15 +250,15 @@ function yrityspeli_generoi_ostotilaus(Array $params) {
     );
     lisaa_rivi($params);
   }
-  // p√§ivitet√§√§n tilaus valmiiksi
+  // p‰ivitet‰‰n tilaus valmiiksi
   $query = "UPDATE lasku SET alatila = 'A' WHERE tunnus='{$ostotilaus['tunnus']}'";
   $result = pupe_query($query);
   $response[] = "Tehtiin ostotilaus {$ostotilaus['tunnus']} yritykselle {$asiakas['nimi']}<br>";
 
     $viesti = "Hei,\n\n
-Liitteen√§ l√∂yd√§tte yhden toimipaikkamme teille l√§hett√§m√§n ostotilauksen.\n\n
+Liitteen‰ lˆyd‰tte yhden toimipaikkamme teille l‰hett‰m‰n ostotilauksen.\n\n
 Terveisin,\n
-Kauppakeskus Myyr√§";
+Kauppakeskus Myyr‰";
 
   $params = array(
     'otunnus'        => $ostotilaus['tunnus'],
@@ -275,7 +291,7 @@ function yrityspeli_tuotearvonta($toimittaja, $try = null) {
   else {
     $trylisa = "";
   }
-  // katsotaan mit√§ tuotteita t√§lt√§ toimittajalta voi tilata, ja arvotaan yksi
+  // katsotaan mit‰ tuotteita t‰lt‰ toimittajalta voi tilata, ja arvotaan yksi
   $query = "SELECT tuote.*
             FROM tuote
             JOIN tuotteen_toimittajat on (tuotteen_toimittajat.yhtio = tuote.yhtio
@@ -294,7 +310,7 @@ function yrityspeli_tuotearvonta($toimittaja, $try = null) {
   return mysql_fetch_assoc($result);
 }
 function yrityspeli_tulosta_ostotilaus(Array $params) {
-  // komento pit√§√§ olla global, jotta tulosta_ostotilaus funkkarit saa siit√§ kiinni
+  // komento pit‰‰ olla global, jotta tulosta_ostotilaus funkkarit saa siit‰ kiinni
   global $kukarow, $yhtiorow, $komento;
   $otunnus        = $params['otunnus'];
   $email          = $params['email'];
@@ -303,9 +319,9 @@ function yrityspeli_tulosta_ostotilaus(Array $params) {
   $toimipaikkarow = $params['toimipaikkarow'];
   $kieli = 'fi';
   $komento = array('Ostotilaus' => "toimittajaemail{$email}");
-  $silent = 'kyll√§';
+  $silent = 'kyll‰';
   $kukarow['toimipaikka'] = $toimipaikkarow['tunnus'];
   $yhtiorow = hae_yhtion_parametrit($kukarow["yhtio"]);
   require 'tilauskasittely/tulosta_ostotilaus.inc';
-  return "L√§hetettiin ostotilaus {$tunnus} s√§hk√∂postilla {$email}";
+  return "L‰hetettiin ostotilaus {$tunnus} s‰hkˆpostilla {$email}";
 }

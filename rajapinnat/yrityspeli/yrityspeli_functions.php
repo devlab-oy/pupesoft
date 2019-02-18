@@ -45,7 +45,23 @@ function yrityspeli_kayttoliittyma(Array $params) {
   echo "</table>";
   echo "<br>";
 
-  echo "<font class='message'>".t('Valitse yritykset')."</font><br><br>";
+  echo "<font class='message'>".t('Valitse yritykset')."    </font>";
+  echo "<input type='checkbox' name='select-all' id='select-all'/> <font class='message'> (Valitse kaikki)</font> <br><br>";
+  
+print " <SCRIPT TYPE=\"text/javascript\" LANGUAGE=\"JavaScript\">
+$('#select-all').click(function(event) {   
+    if(this.checked) {
+        // Iterate each checkbox
+        $(':checkbox').each(function() {
+            this.checked = true;                        
+        });
+    } else {
+        $(':checkbox').each(function() {
+            this.checked = false;                       
+        });
+    }
+});
+</script>";
 
   echo "<table>";
   echo "<tr>";

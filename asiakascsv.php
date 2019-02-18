@@ -123,8 +123,7 @@ else {
               and tuote.status       NOT IN ('P','X')
               and tuote.tuotetyyppi  NOT IN ('A', 'B')
               {$ohitettavat_brandit}
-              {$ohitettavat_tryt}
-              limit 100";
+              {$ohitettavat_tryt}";
     $rresult = pupe_query($query);
 
     if (mysql_num_rows($rresult) == 0) {

@@ -312,10 +312,16 @@ function yrityspeli_generoi_ostotilaus(Array $params) {
 
   $response[] = "Tehtiin ostotilaus {$ostotilaus['tunnus']} yritykselle {$asiakas['nimi']}<br>";
 
+  $viesti = "Hei,\n\n
+Liitteenä löydätte yhden toimipaikkamme teille lähettämän ostotilauksen.\n\n
+Terveisin,\n
+Kauppakeskus Myyrä";
+
   $params = array(
     'otunnus'        => $ostotilaus['tunnus'],
     'email'          => $asiakas['email'],
     'toimipaikkarow' => $toimipaikkarow,
+    'content_body'   => $viesti, 
   );
 
   $response[] = yrityspeli_tulosta_ostotilaus($params);
@@ -406,6 +412,7 @@ function yrityspeli_tulosta_ostotilaus(Array $params) {
   $otunnus        = $params['otunnus'];
   $email          = $params['email'];
   $toimipaikkarow = $params['toimipaikkarow'];
+  $content_body = $params['content_body'];
 
   $kieli = 'fi';
   $komento = array('Ostotilaus' => "toimittajaemail{$email}");

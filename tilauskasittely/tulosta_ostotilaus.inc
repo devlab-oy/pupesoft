@@ -664,10 +664,10 @@ else {
   if (!function_exists('print_pdf')) {
     function print_pdf($params) {
       global $kukarow, $yhtiorow, $komento, $tee, $tulosta_ostotilaus_ulos;
-
+      #echo var_dump($params);
       // Luodaan muuttujat
       extract($params);
-
+      #echo $content_body;
       if ($komento["Ostotilaus"] != '' or $tee == 'NAYTATILAUS') {
         //keksitään uudelle failille joku varmasti uniikki nimi:
         list($usec, $sec) = explode(' ', microtime());
@@ -786,6 +786,13 @@ else {
   $sivu  = 1;
   $total = 0;
 
+  if(isset ($content_body ) ){
+    $content_body = $content_body;
+    }
+else {
+    $content_body = ''; 
+    }
+
   $params = array(
     'boldi'                     => $boldi,
     'iso'                       => $iso,
@@ -808,6 +815,7 @@ else {
     'rivinumerot'               => $rivinumerot,
     'laitetaanko_yhteensarivi'  => 0,
     'total'                     => 0,
+    'content_body'              => $content_body,
   );
 
   // Aloitellaan lähetteen teko

@@ -84,7 +84,7 @@ if ($tee == "raportoi") {
             ORDER BY hd.tunnus";
   $result = pupe_query($query);
 
-  pupe_DataTables(array(array($pupe_DataTables, 7, 7)));
+  pupe_DataTables(array(array($pupe_DataTables, 8, 8)));
 
   echo "<table class='display dataTable' id='$pupe_DataTables'>";
   echo "<thead>";

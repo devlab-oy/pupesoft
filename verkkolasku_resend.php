@@ -517,7 +517,7 @@ if ($handle = opendir($kansio)) {
   while (($lasku = readdir($handle)) !== FALSE) {
 
     // Ei käsitellä kun Finvoice tiedostoja
-    if (!preg_match("/laskutus\-(.*?)\-2/", $lasku, $yhtio)) {
+    if (!preg_match("/laskutus\-(.*?)\-invoices/", $lasku, $yhtio)) {
       continue;
     }
 

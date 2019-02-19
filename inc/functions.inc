@@ -11617,7 +11617,7 @@ if (!function_exists("hae_rahtimaksu")) {
       $hirow = mysql_fetch_assoc($rares);
       $ale_kaikki_array = array();
 
-      // Rahtimaksut ovat yhtion valuutassa, se pitää muuttaa laskun valuuttaan
+      // Rahtimaksut ovat yhtion valuutassa, se pitää muuttaa laskun valuuttaan, koska alehinta funktio käsittelee hintoja kuin ne olisi syötetty laskun valuutassa
       if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
         $hirow['rahtihinta'] = round(laskuval($hirow['rahtihinta'], $laskurow["vienti_kurssi"]), 2);
       }

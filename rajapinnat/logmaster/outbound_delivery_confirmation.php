@@ -29,6 +29,8 @@ error_reporting(E_ALL);
 require "inc/connect.inc";
 require "inc/functions.inc";
 require "rajapinnat/logmaster/logmaster-functions.php";
+require "rajapinnat/woo/woo-functions.php";
+require "rajapinnat/mycashflow/mycf_toimita_tilaus.php";
 
 // Logitetaan ajo
 cron_log();

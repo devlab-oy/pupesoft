@@ -359,6 +359,8 @@ while (false !== ($file = readdir($handle))) {
                  viesti         = ''";
       $result_rk = pupe_query($query);
 
+      $rahtikirjantunnus = mysql_insert_id();
+
       if ($paivitettiin_tilausrivi_onnistuneesti) {
 
         if ($laskurow["tila"] == "G") {
@@ -392,6 +394,18 @@ while (false !== ($file = readdir($handle))) {
 
           $tilausnumero = $laskurow['tunnus'];
           $seurantakoodi = $tracking_code;
+
+          $query = "SELECT toimitusvahvistus
+                    FROM asiakas
+                    WHERE yhtio = '{$kukarow['yhtio']}'
+                    AND tunnus  = '{$laskurow['liitostunnus']}'";
+          $toimitusvahvistus_res = pupe_query($query);
+          $toimitusvahvistus_row = mysql_fetch_assoc($toimitusvahvistus_res);
+
+          // L‰hetet‰‰n toimitusvahvistus
+          if ($toimitusvahvistus_row['toimitusvahvistus'] != '') {
+            pupesoft_toimitusvahvistus($tilausnumero, $rahtikirjantunnus, $seurantakoodi);
+          }
 
           // Merkaatan woo-commerce tilaukset toimitetuiksi kauppaan
           $woo_params = array(

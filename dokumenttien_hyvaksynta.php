@@ -208,7 +208,7 @@ if ($tee == "palauta") {
       }
     }
     else die("Hyväksyjä ei kelpaa");
-    
+
     $query = "SELECT *
               FROM kuka
               WHERE yhtio = '$kukarow[yhtio]'

@@ -82,6 +82,7 @@ if (!empty($tee) and $tee == "lisaa_tiedosto" and !empty($sub_button)) {
               tiedostotyyppi = '{$tiedostotyyppi}',
               nimi           = '{$nimi}',
               kuvaus         = '{$kuvaus}',
+              kommentit      = '',
               hyvak1         = '{$hyvak[1]}',
               hyvak2         = '{$hyvak[2]}',
               hyvak3         = '{$hyvak[3]}',

@@ -119,13 +119,15 @@ if ($tee == "palauta") {
 
     if ($formilta == "true") {
       if ((int) $hyvaksyja == 0) echo "<font class='error'>".t("Valitse kenelle dokumentti palautetaan.")."</font><br>";
-      if (trim($viesti) == "") echo "<font class='error'>".t("Anna syy palautukseen.")."</font><br>";
+      if (trim($viesti) == "") echo "<font class='error'>".t("Anna palautukseen syy.")."</font><br>";
     }
 
     $hyvaksyjat = "<table>
                   <tr>
                     <th>".t("Kenelle dokumentti palautetaan")."</th>
                   </tr>";
+
+    $hyvaksyneet_hyvaksyjat = array();
 
     // Valitse kenelle palautetaan
     for ($i=1; $i<5; $i++) {
@@ -141,6 +143,8 @@ if ($tee == "palauta") {
         $result = pupe_query($query);
         $krow = mysql_fetch_assoc($result);
 
+        $hyvaksyneet_hyvaksyjat[] = $i;
+
         if ($hyvaksyja == $i) {
           $sel = "checked";
         }
@@ -154,11 +158,15 @@ if ($tee == "palauta") {
 
     $hyvaksyjat .= "</table><br>";
 
+    // Pakataan array stringiin, että saadaan se nätisti läpi
+    $hyvaksyneet_hyvaksyjat = implode(" ", $hyvaksyneet_hyvaksyjat);
+
     echo "  <form method='post'>
         <input type='hidden' name='lopetus' value='$lopetus'>
         <input type='hidden' name='tee' value='$tee'>
         <input type='hidden' name='formilta' value='true'>
         <input type='hidden' name='tunnus' value='$tunnus'>
+        <input type='hidden' name='hyvaksyneet_hyvaksyjat' value='$hyvaksyneet_hyvaksyjat'>
         <br>
         $hyvaksyjat
         <br>
@@ -187,6 +195,17 @@ if ($tee == "palauta") {
     if ((int) $hyvaksyja > 0) {
       $upd = "h{$hyvaksyja}time = '0000-00-00 00:00:00', hyvaksyja_nyt = '".$lrow["hyvak{$hyvaksyja}"]."'";
       $kukahyvak = $lrow["hyvak{$hyvaksyja}"];
+
+      // Hajotetaan stringi takaisin arrayksi käsittelyä varten
+      $hyvaksyneet_hyvaksyjat = explode (" ", $hyvaksyneet_hyvaksyjat);
+
+      // Katsotaan ketkä ovat nykyisen hyväksyjän ja valitun hyväksyjän välissä hyväksyneet ja nollataan myös heidän hyväksymisensä, 
+      // jotta saadaan dokumentti käymään hyväksymisketju tavalliseen tapaan läpi
+      for ($i = 0; $i < count($hyvaksyneet_hyvaksyjat); $i = $i + 1) {
+        if ((int)$hyvaksyneet_hyvaksyjat[$i] > $hyvaksyja) {
+          $upd = $upd.", h{$hyvaksyneet_hyvaksyjat[$i]}time = '0000-00-00 00:00:00'";
+        }
+      }
     }
     else die("Hyväksyjä ei kelpaa");
 
@@ -594,6 +613,13 @@ if (strlen($tunnus) != 0) {
         <input type='submit' value='".t("Hyväksy dokumentti")."'>
         </form>";
 
+    if ($dokumenttirow["h1time"] != "0000-00-00 00:00:00") {
+      echo "<form method='post'>
+            <input type='hidden' name='tee' value='palauta'>
+            <input type='hidden' name='tunnus' value='$tunnus'>
+            <input type='submit' value='".t("Palauta dokumentti edelliselle hyväksyjälle")."'>
+            </form><br>";
+    }
 
     echo "</td><td width='30px' class='back'></td>";
   }

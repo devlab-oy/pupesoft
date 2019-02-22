@@ -494,6 +494,7 @@ if (in_array('tilaukset', $magento_ajolista)) {
   $magento_tilaus_client->set_rahtikulu_nimitys($rahtikulu_nimitys);
   $magento_tilaus_client->set_rahtikulu_tuoteno($rahtikulu_tuoteno);
   $magento_tilaus_client->set_verkkokauppa_asiakasnro($verkkokauppa_asiakasnro);
+  $magento_tilaus_client->set_verollisen_hinnan_kentta($verkkokauppa_verollisen_hinnan_kentta);
   $magento_tilaus_client->setSisaanluvunEsto($magento_sisaanluvun_esto);
 
   $magento_tilaus_client->tallenna_tilaukset();

@@ -21,6 +21,8 @@ if (@include_once "../inc/parametrit.inc");
 elseif (@include_once "inc/parametrit.inc");
 
 $errors = array();
+$invraja = date('Y');
+$invraja = $invraja.'-01-01 00:00:00';
 
 // Haetaan tuotteita tai tuotepaikkaa
 function hae($viivakoodi='', $tuoteno='', $tuotepaikka='') {
@@ -50,13 +52,20 @@ function hae($viivakoodi='', $tuoteno='', $tuotepaikka='') {
   }
 
   $osumat = array();
+  $oletusvarasto_rajaus = '';
 
   if (!empty($params)) {
 
     $haku_ehto = implode($params, " AND ");
+    
+    if ($kukarow['yhtio'] = 'mergr' and $kukarow['oletus_varasto'] != 0) {
+      $oletusvarasto_rajaus = " AND tuotepaikat.varasto = '{$kukarow['oletus_varasto']}'";
+    }
 
     $query = "SELECT
-              tuote.tuoteno,
+              tuote.tuoteno, 
+              tuotepaikat.saldo,
+              tuotepaikat.inventointiaika,
               inventointilistarivi.otunnus as inventointilista,
               inventointilistarivi.aika as inventointilista_aika,
               concat(  lpad(upper(tuotepaikat.hyllyalue), 5, '0'),
@@ -76,6 +85,7 @@ function hae($viivakoodi='', $tuoteno='', $tuotepaikka='') {
                 AND inventointilistarivi.tuotepaikkatunnus = tuotepaikat.tunnus
                 AND inventointilistarivi.tila              = 'A')
               WHERE tuotepaikat.yhtio                      = '{$kukarow['yhtio']}'
+              $oletusvarasto_rajaus
               AND $haku_ehto
               LIMIT 200";
     $result = pupe_query($query);
@@ -282,6 +292,7 @@ if ($tee == 'laske' or $tee == 'inventoi') {
               tuotepaikat.hyllynro,
               tuotepaikat.hyllyvali,
               tuotepaikat.hyllytaso,
+              tuotepaikat.inventointiaika,
               inventointilista.tunnus as inventointilista,
               inventointilista.naytamaara as inventointilista_naytamaara,
               tuotepaikat.tyyppi,
@@ -316,9 +327,11 @@ if ($tee == 'laske' or $tee == 'inventoi') {
               tuote.nimitys,
               tuote.tuoteno,
               tuote.yksikko,
+              tuotepaikat.saldo,
               tuotepaikat.tyyppi,
               tuotepaikat.hyllyalue,
               tuotepaikat.hyllynro,
+              tuotepaikat.inventointiaika,
               concat_ws('-',tuotepaikat.hyllyalue, tuotepaikat.hyllynro,
                     tuotepaikat.hyllyvali, tuotepaikat.hyllytaso) as tuotepaikka
               FROM tuotepaikat
@@ -477,7 +490,8 @@ if ($tee == 'inventoidaan') {
             hyllyalue,
             hyllynro,
             hyllyvali,
-            hyllytaso
+            hyllytaso,
+            saldo
             FROM tuotepaikat
             WHERE tuoteno='{$tuoteno}'
             AND yhtio='{$kukarow['yhtio']}'

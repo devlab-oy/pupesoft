@@ -8,6 +8,9 @@
     <tr>
       <th>Tuoteno</th>
       <th>Tuotepaikka</th>
+      <?php 
+      if ($kukarow['yhtio'] = 'mergr') 
+        ?><th>Inventoitu</th>
     </tr>
 
     <?php foreach($tuotteet as $tuote) { ?>
@@ -26,6 +29,7 @@
         <tr>
           <td><a href='inventointi.php?<?php echo $url ?>'><?php echo $tuote['tuoteno'] ?></a></td>
           <td><?php echo $tuote['tuotepaikka'] ?></td>
+          <td style='padding-right: 10px'><?php if ($kukarow['yhtio'] = 'mergr' and $tuote['inventointiaika'] > $invraja) echo $tuote['inventointiaika'] ?></td>
           <td><?php if($tuote['inventointilista'] !== null) echo "(listalla {$tuote['inventointilista']})" ?></td>
         </tr>
       <?php } ?>

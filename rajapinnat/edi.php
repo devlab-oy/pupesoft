@@ -20,6 +20,7 @@ class Edi {
     $rahtikulu_tuoteno             = $options['rahtikulu_tuoteno'];
     $rahtikulu_nimitys             = $options['rahtikulu_nimitys'];
     $verkkokauppa_erikoiskasittely = $options['erikoiskasittely'];
+    $verkkokauppa_verollisen_hinnan_kentta = $options['verkkokauppa_verollisen_hinnan_kentta'];
 
     if (empty($magento_api_ht_edi) or empty($ovt_tunnus) or empty($pupesoft_tilaustyyppi)) {
       die("Parametrejä puuttuu\n");

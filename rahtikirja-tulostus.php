@@ -6,6 +6,8 @@ if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-tulostus.php") !== FALSE) {
 
 require_once "rajapinnat/woo/woo-functions.php";
 require_once "rajapinnat/mycashflow/mycf_toimita_tilaus.php";
+require_once 'rajapinnat/logger.php';
+require_once "rajapinnat/viidakkostore/viidakko_tilaukset.php";
 
 $logistiikka_yhtio = '';
 $logistiikka_yhtiolisa = '';
@@ -1146,6 +1148,13 @@ if ($tee == 'tulosta') {
 
           require "magento_toimita_tilaus.php";
         }
+      }
+
+      $_viidakko_kaytossa = (isset($viidakko_url) and isset($viidakko_token) and !empty($viidakko_url) and !empty($viidakko_token));
+
+      if ($_viidakko_kaytossa and (!$_onko_unifaun or $_onko_unifaun_xp)) {
+        $viidakko_orders = new ViidakkoStoreTilaukset($viidakko_url, $viidakko_token, 'viidakko_tilaukset');
+        viidakko_tracking_code($otunnukset, $rahtikirjanro, $viidakko_orders);
       }
 
       // Tulostetaan DGD

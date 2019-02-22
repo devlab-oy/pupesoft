@@ -34192,7 +34192,7 @@ if (!function_exists('tuoteperheiden_hintojen_paivitys')) {
       );
       $kertoimet = tuoteperheen_lapsien_kertoimet($_params);
       $laskettu_hinta = 0;
- 
+
       $hinnoittelu_isatuotteella = (in_array($kertoimet[0]['hintatyyppi'], array('I', 'L')));
 
       // Jos meillä ei ole isätuotteeseen perustuva hinnoitelu, ei tarvitse tehdä mitään,
@@ -35113,6 +35113,24 @@ if (!function_exists('tuetut_pankit')) {
         "lyhyt_nimi" => "shb",
       ),
     );
+  }
+}
+
+if (!function_exists('viidakko_tracking_code')) {
+  function viidakko_tracking_code($otunnukset, $tracking_code, $viidakko_orders) {
+    global $kukarow, $yhtiorow;
+
+    $query = "SELECT kohde, tunnus
+              FROM lasku
+              WHERE yhtio                 = '$kukarow[yhtio]'
+              AND tunnus                  IN ($otunnukset)
+              AND ohjelma_moduli          = 'MAGENTO'
+              AND kohde                  != ''";
+    $viidres = pupe_query($query);
+
+    while ($viidrow = mysql_fetch_assoc($viidres)) {
+      $viidakko_orders->update_viidakko_tracking_code($viidrow['kohde'], $tracking_code);
+    }
   }
 }
 

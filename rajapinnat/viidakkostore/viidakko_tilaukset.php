@@ -75,6 +75,42 @@ class ViidakkoStoreTilaukset {
     $this->viidakko_erikoiskasittely = $value;
   }
 
+  public function update_viidakko_tracking_code($order_id, $tracking_code) {
+    $url = $this->apiurl."/orders/".$order_id;
+
+    $data_json = json_encode(array(
+      "tracking_code"  => $tracking_code,
+    ));
+
+    echo "\n---------INSERTÖIDÄÄN---------\n";
+    echo "<pre>",var_dump($product);
+
+    $ch = curl_init($url);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, array('Accept: application/json', 'Content-Type: application/json', 'X-Auth-Token: '.$this->token));
+    curl_setopt($ch, CURLOPT_HEADER, FALSE);
+    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "PUT");
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $data_json);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+    $response = curl_exec($ch);
+    curl_close($ch);
+
+    $response_array = json_decode($response);
+
+    echo "\n update_viidakko_tracking_code\n";
+    echo "\n",var_dump($response);
+
+    if (isset($response_array->items[0]->id) and !empty($response_array->items[0]->id)) {
+      $this->logger->log("--> Verkkokaupan tilaus {$response_array->items[0]->id} päivitettiin tracking_code $tracking_code");
+      echo "\ntilaus {$response_array->items[0]->id} päivitettiin tracking_code $tracking_code!!!\n";
+    }
+    else {
+      $this->logger->log("--> tilauksen tracking_code päivitys verkkokauppaan epäonnistui!");
+      $this->logger->log("syy: {$response_array->message}");
+      echo "\ntilauksen tracking_code päivitys verkkokauppaan epäonnistui!. syy: {$response_array->message}\n";
+    }
+  }
+
   public function update_viidakko_order_status($order_id) {
     $url = $this->apiurl."/orders/".$order_id."/statuses";
 
@@ -97,11 +133,18 @@ class ViidakkoStoreTilaukset {
 
     $response_array = json_decode($response);
 
-    echo "\n edit\n";
-    echo "\nvar_dump edit product:<pre>",var_dump($response);
+    echo "\n update_viidakko_order_status\n";
+    echo "\n",var_dump($response);
 
-    // response ok/fail vielä tähän
-    $this->logger->log("--> tilaus {$product["product_code"]} päivitetty");
+    if (isset($response_array->items[0]->id) and !empty($response_array->items[0]->id)) {
+      $this->logger->log("--> Verkkokaupan tilaus {$response_array->items[0]->id} päivitetty");
+      echo "\ntilaus {$response_array->items[0]->id} päivitetty noudon jälkeen!!!\n";
+    }
+    else {
+      $this->logger->log("--> tilauksen tilan päivitys verkkokauppaan epäonnistui!");
+      $this->logger->log("syy: {$response_array->message}");
+      echo "\ntilauksen tilan päivitys verkkokauppaan epäonnistui!. syy: {$response_array->message}\n";
+    }
   }
 
   public function fetch_orders($status) {
@@ -138,8 +181,10 @@ class ViidakkoStoreTilaukset {
     #die;
 
     if (count($response_array->items) > 0 ) {
+
       $this->logger->log("Tilausten haku onnistui");
       echo "\n\nTilausten haku onnistui\n";
+
       foreach ($response_array->items as $order) {
 
         // Ostajan tiedot
@@ -183,8 +228,10 @@ class ViidakkoStoreTilaukset {
 
         // Ei käytössä
         $tilaus['reference_number'] = "";
-        $tilaus['target'] = "";
         $tilaus['webtex_giftcard'] = "";
+
+        // Kohde (jolla myöhemmin osataan lähettää tracking_code takaisin)
+        $tilaus['target'] = $order->id;
 
         // Asiakasnumero
         $tilaus['customer_id'] = $order->company;
@@ -284,11 +331,11 @@ class ViidakkoStoreTilaukset {
 
         cron_aikaleima("VIID_ORDR_CRON", $tilausaika);
 
-echo "\n\nTallennettiin tilaus";
+        echo "\n\nTallennettiin tilaus";
 
         $this->logger->log("Tallennettiin tilaus '{$filename}'");
 
-        #update_viidakko_order_status($order->id);
+        update_viidakko_order_status($order->id);
       }
     }
     else {

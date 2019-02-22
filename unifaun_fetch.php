@@ -40,6 +40,8 @@ if ($php_cli and count(debug_backtrace()) <= 1) {
 
 require_once "rajapinnat/woo/woo-functions.php";
 require_once "rajapinnat/mycashflow/mycf_toimita_tilaus.php";
+require_once 'rajapinnat/logger.php';
+require_once "rajapinnat/viidakkostore/viidakko_tilaukset.php";
 
 // Sallitaan vain yksi instanssi tästä skriptistä kerrallaan
 pupesoft_flock();
@@ -377,7 +379,7 @@ if ($handle = opendir($ftpget_dest[$operaattori])) {
         // Merkaatan MyCashflow tilaukset toimitetuiksi kauppaan
         $mycf_params = array(
           "pupesoft_tunnukset" => explode(",", $otunnukset),
-          "tracking_code" => $seurantakoodi,
+          "tracking_code" => $sscc_ulkoinen,
         );
 
         mycf_toimita_tilaus($mycf_params);
@@ -402,6 +404,13 @@ if ($handle = opendir($ftpget_dest[$operaattori])) {
 
             require "magento_toimita_tilaus.php";
           }
+        }
+
+        $_viidakko_kaytossa = (isset($viidakko_url) and isset($viidakko_token) and !empty($viidakko_url) and !empty($viidakko_token));
+
+        if ($_viidakko_kaytossa) {
+          $viidakko_orders = new ViidakkoStoreTilaukset($viidakko_url, $viidakko_token, 'viidakko_tilaukset');
+          viidakko_tracking_code($otunnukset, $sscc_ulkoinen, $viidakko_orders);
         }
       }
 

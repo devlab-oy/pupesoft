@@ -27,6 +27,8 @@ require "inc/functions.inc";
 require "rajapinnat/logmaster/logmaster-functions.php";
 require "rajapinnat/woo/woo-functions.php";
 require "rajapinnat/mycashflow/mycf_toimita_tilaus.php";
+require_once 'rajapinnat/logger.php';
+require_once "rajapinnat/viidakkostore/viidakko_tilaukset.php";
 
 // Logitetaan ajo
 cron_log();
@@ -191,6 +193,13 @@ while (false !== ($file = readdir($handle))) {
           require "magento_toimita_tilaus.php";
         }
       }
+    }
+
+    $_viidakko_kaytossa = (isset($viidakko_url) and isset($viidakko_token) and !empty($viidakko_url) and !empty($viidakko_token));
+
+    if ($_viidakko_kaytossa) {
+      $viidakko_orders = new ViidakkoStoreTilaukset($viidakko_url, $viidakko_token, 'viidakko_tilaukset');
+      viidakko_tracking_code($tilausnumero, $seurantakoodi, $viidakko_orders);
     }
   }
 

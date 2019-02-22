@@ -45,6 +45,11 @@
       <th>Tuotepaikka</th>
       <td><?php echo $tuote['tuotepaikka'] ?></td>
     </tr>
+    <?php if ($kukarow['yhtio'] = 'mergr') ?>
+      <tr>
+      <th>Saldo</th>
+      <td><?php echo $tuote['saldo'] ?></td>
+    </tr>
     <tr>
       <th>Inventointi selite</th>
       <td>

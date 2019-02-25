@@ -507,6 +507,31 @@ if ($tee == "VALITSE") {
 
     mysql_data_seek($res, 0);
 
+    // Onko kassalippaita, ja mahollisesti samaa pelkästään?
+    $kassalippaita = array();
+    $maksuehtoja = array();
+
+    while ($row = mysql_fetch_assoc($res)) {
+      $kassalippaita[$row["kassalipas"]] = $row["kassalipas"];
+      $maksuehtoja[$row["maksuehto"]] = $row["maksuehto"];
+    }
+
+    $kassalippaita_check = array_unique($kassalippaita);
+
+    if (count($kassalippaita_check) == 1) {
+      $kassalipas = reset($kassalippaita_check);
+
+      // tarkistetaan myös maksuehto
+      $maksuehtoja_check = array_unique($maksuehtoja);
+
+      if (count($maksuehtoja_check) == 1) {
+        $maksuehto = reset($maksuehtoja_check);
+      }
+
+    }
+
+    mysql_data_seek($res, 0);
+
     if ((float) $yhtiorow['koontilaskut_alarajasumma'] > 0) {
       echo "<table>";
       echo "<tr>";
@@ -668,16 +693,8 @@ if ($tee == "VALITSE") {
           }
         }
 
-        // Muutetaan rahtihinta laskun valuuttaan, koska rahtihinta tulee matriisista aina yhtiön kotivaluutassa
-        if ($row["valkoodi"] != '' and trim(strtoupper($row["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
-          $rah_hinta_laskun_valuutassa = round(laskuval($rah_hinta, $row["vienti_kurssi"]), 2);
-        }
-        else {
-          $rah_hinta_laskun_valuutassa = $rah_hinta;
-        }
-
         if ($row["kohdistettu"] == "K") {
-          $rahti_hinta = "(" . (float) $rah_hinta_laskun_valuutassa ." $row[valkoodi]$rah_alet)";
+          $rahti_hinta = "(" . (float) $rah_hinta ." $row[valkoodi]$rah_alet)";
         }
         else {
           $rahti_hinta = "(".t("vastaanottaja").")";
@@ -775,6 +792,8 @@ if ($tee == "VALITSE") {
         $query = "SELECT * FROM kassalipas WHERE yhtio='$kukarow[yhtio]'";
         $kassares = pupe_query($query);
 
+        echo "<br>kassalipas nyt: $kassalipas<br>";
+
         echo "<select name='kassalipas'>";
         echo "<option value=''>".t("Ei kassalipasta")."</option>";
 
@@ -805,15 +824,18 @@ if ($tee == "VALITSE") {
         $maksuehtores = pupe_query($query_maksuehto);
 
         if (!$kaytetaan_maksupaatetta and mysql_num_rows($maksuehtores) > 1) {
-          echo "<tr><th>".t("Maksutapa")."</th><td colspan='3'>";
+          echo "<tr><th>".t("Maksutapa 123")."</th><td colspan='3'>";
+
+          echo "<br>maksuehto nyt: {$maksuehto}<br>";
 
           echo "<select name='maksutapa'>";
-
           while ($maksuehtorow = mysql_fetch_array($maksuehtores)) {
 
             $sel = "";
-
-            if ($maksuehtorow["tunnus"] == $row["maksuehto"]) {
+            if (isset($maksuehto) and !empty($maksuehto) and $maksuehtorow["tunnus"] == $maksuehto) {
+              $sel = "selected";
+            }
+            elseif ($maksuehtorow["tunnus"] == $row["maksuehto"]) {
               $sel = "selected";
             }
             echo "<option value='$maksuehtorow[tunnus]' $sel>".t_tunnus_avainsanat($maksuehtorow, "teksti", "MAKSUEHTOKV")."</option>";
@@ -1384,13 +1406,14 @@ function hae_tilaukset_result($query_ale_lisa, $tunnukset, $alatilat, $vientilis
             lasku.liitostunnus,
             lasku.tila,
             lasku.vienti,
-            lasku.vienti_kurssi,
             lasku.alv,
             lasku.kohdistettu,
             lasku.jaksotettu,
             lasku.verkkotunnus,
             lasku.erikoisale,
             lasku.hinta,
+            lasku.kassalipas,
+            lasku.maksuehto,
             round(sum(tilausrivi.hinta / if('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}),2) arvo,
             round(sum(tilausrivi.hinta * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}),2) summa
             FROM lasku use index (tila_index)

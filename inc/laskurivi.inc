@@ -102,6 +102,10 @@ if (mysql_field_name($result, $i) == "nimi" or
   $tyyppi = 1;
 }
 
+if (mysql_field_name($result, $i) == "toimaika") {
+  $tyyppi = 1.5;
+}
+
 if (mysql_field_name($result, $i) == "sisviesti1") {
   $ulos = "<td><textarea cols='45' rows='5' name='$nimi'>$trow[$i]</textarea></td>";
   $jatko = 0;

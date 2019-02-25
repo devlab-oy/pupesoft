@@ -79,6 +79,7 @@ if (!function_exists("laheta_excel_koontilahete")) {
                 ON asiakaskommentti.yhtio = tilausrivi.yhtio
                 AND asiakaskommentti.ytunnus = lasku.ytunnus
                 AND asiakaskommentti.tuoteno = tilausrivi.tuoteno
+                AND asiakaskommentti.tyyppi = ''
               LEFT JOIN tuotteen_avainsanat AS avainsana_nimitys
                 ON avainsana_nimitys.yhtio = tuote.yhtio
                 AND avainsana_nimitys.kieli = asiakas.kieli
@@ -1137,7 +1138,8 @@ if ($tee == 'tulosta') {
                   WHERE yhtio                 = '$kukarow[yhtio]'
                   AND tunnus                  IN ($otunnukset)
                   AND ohjelma_moduli          = 'MAGENTO'
-                  AND asiakkaan_tilausnumero  != ''";
+                  AND asiakkaan_tilausnumero  != ''
+                  AND laatija                 = 'Magento'";
         $mageres = pupe_query($query);
 
         while ($magerow = mysql_fetch_assoc($mageres)) {
@@ -1295,6 +1297,17 @@ if ($tee == 'tulosta') {
           laheta_excel_koontilahete(array($_otunnus), $toitarow);
         }
       }
+    }
+
+    // Tarkistetaan onko vientitietojen automaattisyöttö käytössä
+    if (!empty($otunnukset)) {
+      $_otunnukset = explode(',', $otunnukset);
+      $viennin_lisatietojen_automsyotto = true;
+      foreach ($_otunnukset as $_otunnus) {
+
+        viennin_lisatiedot($_otunnus, $viennin_lisatietojen_automsyotto);
+      }
+      $viennin_lisatietojen_automsyotto = false;
     }
 
     if ($toitarow['erittely'] == 't' and $kaikki_lotsikot_per_toimitus != "" and $toitarow['rahtikirja'] != 'rahtikirja_hrx_siirto.inc') {

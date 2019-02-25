@@ -395,8 +395,7 @@ class Unifaun {
     $uni_sender->addAttribute('sndid', $this->pikahakuarvo());
 
     // $uni_snd_val = $uni_sender->addChild('val', str_replace($search, $replace, $this->postirow["yhtio_nimi"])); # Sender's name
-    $_yhtio_nimi = htmlspecialchars($this->postirow["yhtio_nimi"]);
-    $uni_snd_val = $uni_sender->addChild('val', utf8_encode($_yhtio_nimi)); // Sender's name
+    $uni_snd_val = $uni_sender->addChild('val', utf8_encode($this->postirow["yhtio_nimi"])); // Sender's name
     $uni_snd_val->addAttribute('n', "name");
 
     $uni_snd_val = $uni_sender->addChild('val', utf8_encode($this->postirow["yhtio_osoite"])); // Address line 1
@@ -438,14 +437,13 @@ class Unifaun {
     // Lähettäjän rahtisopimustiedot
     $uni_sender_partner = $uni_sender->addChild('partner'); // Attribute parid corresponds to carrier's ID. See SUP-112-Services-en.xls.
     $uni_sender_partner->addAttribute('parid', utf8_encode($this->toitarow['rahdinkuljettaja']));
-
     $lahettajan_sopimusnro = $this->toitarow['sopimusnro'] != "" ? $this->toitarow['sopimusnro'] : "n/a";
 
     $uni_par_val = $uni_sender_partner->addChild('val', utf8_encode($lahettajan_sopimusnro));   // Customer number
     $uni_par_val->addAttribute('n', "custno");
 
     // DPDFI (PostNord DPD Classic) keississä laitetaan vähän extraa
-    if ($this->toitarow['rahdinkuljettaja'] == 'DPDFI') {
+    if ($this->toitarow['rahdinkuljettaja'] == 'DPDFI' or $this->toitarow['rahdinkuljettaja'] == 'PLSCM') {
       $uni_par_val = $uni_sender_partner->addChild('val', "Z14");   // custnoissuercode
       $uni_par_val->addAttribute('n', "custnoissuercode");
     }
@@ -557,6 +555,7 @@ class Unifaun {
         'MH10_SPTR',
         'MH30_SPTR',
         'P83FI',
+        'SBTLFIEXP',
       );
 
       $allowed_opay = array(
@@ -603,10 +602,10 @@ class Unifaun {
       $uni_rcv_val->addAttribute('n', "id4user");
     }
 
-    $_toim_nimi = htmlspecialchars($this->rakir_row["toim_nimi"]);
-    $_toim_nimitark = htmlspecialchars($this->rakir_row["toim_nimitark"]);
+    $_toim_nimi = utf8_encode($this->rakir_row["toim_nimi"]);
+    $_toim_nimitark = utf8_encode($this->rakir_row["toim_nimitark"]);
 
-    $uni_rcv_val = $uni_receiver->addChild('val', utf8_encode(trim($_toim_nimi." ".$_toim_nimitark))); // Receiver's name
+    $uni_rcv_val = $uni_receiver->addChild('val', trim($_toim_nimi." ".$_toim_nimitark)); // Receiver's name
     $uni_rcv_val->addAttribute('n', "name");
 
     $uni_rcv_val = $uni_receiver->addChild('val', utf8_encode($this->rakir_row["toim_osoite"])); // Address line 1
@@ -699,6 +698,39 @@ class Unifaun {
     //$uni_par_val = $uni_receiver_partner->addChild('val', "");   # Agent's identity, mandatory value for DBSchenker PrivPak. Normally set by application.
     //$uni_par_val->addAttribute('n', "agentno");
 
+    // Käytetään vastaanottajan rahtisopimusta: rahdinmaksajan tiedot aina ilmoitttava sanomalla
+    $_nimi = utf8_encode($this->rakir_row["nimi"]);
+    $_nimitark = utf8_encode($this->rakir_row["nimitark"]);
+    $_osoite = utf8_encode($this->rakir_row["osoite"]);
+    $_toim_osoite = utf8_encode($this->rakir_row["toim_osoite"]);
+    
+    if ($this->rakir_row['merahti'] == "" and ($this->toitarow["virallinen_selite"] == "POF1"
+      or $this->toitarow["virallinen_selite"] == "SBTLFIEXP") 
+      and ($_nimi != $_toim_nimi or $_nimitark != $_toim_nimitark or $_osoite != $_toim_osoite)) {
+      $uni_party = $xml->addChild('party');  // Any contents. Mandatory.
+
+      $uni_party->addAttribute('ptyid', utf8_encode($this->asiakasrow["tunnus"]));
+      $shipment_payer = utf8_encode($this->asiakasrow["tunnus"]);
+
+      $_nimi = utf8_encode($this->rakir_row["nimi"]);
+      $_nimitark = utf8_encode($this->rakir_row["nimitark"]);
+
+      $uni_prt_val = $uni_party->addChild('val', trim($_nimi.' '.$_nimitark)); // Party's name
+      $uni_prt_val->addAttribute('n', "name");
+
+      $uni_prt_val = $uni_party->addChild('val', utf8_encode($this->rakir_row["osoite"])); // Party's name
+      $uni_prt_val->addAttribute('n', "address1");
+
+      $uni_prt_val = $uni_party->addChild('val', utf8_encode($this->rakir_row["postino"])); // Party's name
+      $uni_prt_val->addAttribute('n', "zipcode");
+
+      $uni_prt_val = $uni_party->addChild('val', utf8_encode($this->rakir_row["postitp"])); // Party's name
+      $uni_prt_val->addAttribute('n', "city");
+
+      $uni_prt_val = $uni_party->addChild('val', utf8_encode($this->rakir_row["maa"])); // Party's name
+      $uni_prt_val->addAttribute('n', "country");
+
+    }
     // Lähetyksen tiedot
     $uni_shipment = $xml->addChild('shipment');  // Unique order number. Any contents. Mandatory. Order number is searchable in the system but not printed on shipping documents.
     $uni_shipment->addAttribute('orderno', utf8_encode($this->postirow["shipment_unique_id"]));
@@ -720,6 +752,12 @@ class Unifaun {
 
     $uni_shi_val = $uni_shipment->addChild('val', utf8_encode($this->asiakasrow["tunnus"])); // Defines the receiver. Refers to rcvid value for receiver.
     $uni_shi_val->addAttribute('n', "to");
+
+    if ($this->rakir_row['merahti'] == "" and ($this->toitarow['virallinen_selite'] == 'POF1'
+       or $this->toitarow["virallinen_selite"] == "SBTLFIEXP")) {
+      $uni_shi_val = $uni_shipment->addChild('val', utf8_encode($shipment_payer)); // Defines the receiver. Refers to rcvid value for receiver.
+      $uni_shi_val->addAttribute('n', "payerfreight");
+    }
 
     if ($this->toitarow['virallinen_selite'] == 'PO2711') {
 
@@ -973,7 +1011,7 @@ class Unifaun {
       $uni_addon = $uni_service->addChild('addon');
       $uni_addon->addAttribute('adnid', "FDNGPP");
 
-      $uni_add_val = $uni_addon->addChild('val', utf8_encode($_yhtio_nimi));
+      $uni_add_val = $uni_addon->addChild('val', utf8_encode($this->postirow["yhtio_nimi"]));
       $uni_add_val->addAttribute('n', 'declarant');
     }
     // Jos meillä on VAK tuotteita tilauksella ja sopiva palvelukoodi, lisätään DNG lisäpalvelu
@@ -981,7 +1019,7 @@ class Unifaun {
       $uni_addon = $uni_service->addChild('addon');
       $uni_addon->addAttribute('adnid', "DNG");
 
-      $uni_add_val = $uni_addon->addChild('val', utf8_encode($_yhtio_nimi));
+      $uni_add_val = $uni_addon->addChild('val', utf8_encode($this->postirow["yhtio_nimi"]));
       $uni_add_val->addAttribute('n', 'declarant');
     }
 
@@ -1157,6 +1195,15 @@ class Unifaun {
       $uni_opt_val = $uni_option->addChild('val', "");
       $uni_opt_val->addAttribute('n', "bcc");
 
+      // Haetaan avainsanoista ennakkoilmoituksen vakioviesti
+
+      if ($message_avainsanasta = t_avainsana("UNIFAUN_MESSAGE", '', '', '', '', "selitetark")) {
+        $message = $message_avainsanasta;
+
+        $uni_opt_val = $uni_option->addChild('val', utf8_encode($message));
+        $uni_opt_val->addAttribute('n', "message");
+      }
+
       /*
       $uni_opt_val = $uni_option->addChild('val', "messagea tähän");
       $uni_opt_val->addAttribute('n', "message");
@@ -1277,8 +1324,7 @@ class Unifaun {
         }
 
         if (isset($vak['tuotenimitys']) and $vak['tuotenimitys'] != '') {
-          $_tuotenimitys = htmlspecialchars($vak["tuotenimitys"]);
-          $uni_par_val = $uni_article->addChild('val', utf8_encode($_tuotenimitys)); // UN-number for ADR. Supplied as a 4 digit code.
+          $uni_par_val = $uni_article->addChild('val', utf8_encode($vak["tuotenimitys"])); // UN-number for ADR. Supplied as a 4 digit code.
           $uni_par_val->addAttribute('n', "name");
         }
 
@@ -1334,8 +1380,8 @@ class Unifaun {
         }
 
         if (isset($vak['nimi_ja_kuvaus']) and $vak['nimi_ja_kuvaus'] != '') {
-          $_nimi_ja_kuvaus = htmlspecialchars($vak["nimi_ja_kuvaus"]);
-          $uni_par_val = $uni_article->addChild('val', utf8_encode($_nimi_ja_kuvaus)); // Official transport name for item regarding ADR
+
+          $uni_par_val = $uni_article->addChild('val', utf8_encode($vak["nimi_ja_kuvaus"])); // Official transport name for item regarding ADR
           $uni_par_val->addAttribute('n', "dngdescr");
         }
 

@@ -770,7 +770,8 @@ if (!function_exists('rivi_tarjous')) {
                      from asiakaskommentti
                      where yhtio = '{$kukarow['yhtio']}'
                      and tuoteno = '{$row['tuoteno']}'
-                     and ytunnus = '{$laskurow['ytunnus']}'";
+                     and ytunnus = '{$laskurow['ytunnus']}'
+                     and tyyppi  = ''";
       $askomresul = pupe_query($askomquery);
 
       if (mysql_num_rows($askomresul) > 0) {
@@ -1050,7 +1051,8 @@ if (!function_exists('tarjous_rivi_hinta_ale')) {
                   AND liitetiedostot.liitos          = 'tuote'
                   AND liitetiedostot.kayttotarkoitus = 'TH')
                 WHERE tuote.yhtio                    = '{$kukarow['yhtio']}'
-                AND tuote.tuoteno                    = '{$row['tuoteno']}'";
+                AND tuote.tuoteno                    = '{$row['tuoteno']}'
+                ORDER BY if(liitetiedostot.jarjestys = 0, 9999, liitetiedostot.jarjestys), liitetiedostot.filename";
       $kuva_res = pupe_query($query);
 
       if (mysql_num_rows($kuva_res) != 0) {
@@ -2040,7 +2042,7 @@ if (!function_exists('print_pdf_tarjous')) {
     elseif ($komento == 'email' or substr($komento, 0, 12) == 'asiakasemail') {
       $liite = $pdf_tarjousfilenimi;
 
-      $kutsu = t("Tarjous", $kieli);
+      $kutsu = t("Tarjous", $kieli)." ".$laskurow["tunnus"];
 
       if ($yhtiorow["liitetiedostojen_nimeaminen"] == "N") {
         $kutsu .= ", ".trim($laskurow["nimi"]);

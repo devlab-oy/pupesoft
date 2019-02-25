@@ -61,7 +61,7 @@ if ($tee == "NAYTA") {
             JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus)
             JOIN tuote ON (tuote.yhtio = lasku.yhtio and tuote.tuoteno = tilausrivi.tuoteno and tuote.tuotetyyppi IN ('A', 'B') and tuote.kuvaus in ('50', '56'))
             WHERE lasku.yhtio      = '$kukarow[yhtio]'
-            AND lasku.tila         = 'Y'
+            AND lasku.tila         in ('Y','M','P','Q')
             AND lasku.tilaustyyppi = 'M'
             AND lasku.tapvm        >= '$vv-01-01'
             AND lasku.tapvm        <= '$vv-12-31'
@@ -163,7 +163,7 @@ if ($tee == "NAYTA") {
                 JOIN tuote ON (tuote.yhtio = lasku.yhtio and tuote.tuoteno = tilausrivi.tuoteno and tuote.tuotetyyppi IN ('A','B') and tuote.kuvaus = '$row[kuvaus]')
                 LEFT JOIN kuka ON (kuka.yhtio = lasku.yhtio and kuka.kuka = lasku.toim_ovttunnus)
                 WHERE lasku.yhtio      = '$kukarow[yhtio]'
-                AND lasku.tila         = 'Y'
+                AND lasku.tila         in ('Y','M','P','Q')
                 AND lasku.tilaustyyppi = 'M'
                 AND lasku.tapvm        >= '$vv-01-01'
                 AND lasku.tapvm        <= '$vv-12-31'
@@ -217,7 +217,7 @@ if ($tee == "NAYTA") {
     $file = "";
     $lask = 1;
     $ytunnus = tulosta_ytunnus($yhtiorow['ytunnus']);
-    
+
     // Aikaleima pakollinen 13.6.2017 alkaen
     $date = new DateTime('now');
     $aikaleima = date_format($date, 'dmYHis');
@@ -253,7 +253,7 @@ if ($tee == "NAYTA") {
 
     $filenimi = "VSPSERIE-$kukarow[yhtio]-".date("dmy-His").".txt";
     file_put_contents("/tmp/".$filenimi, $file);
-    
+
     if (PUPE_UNICODE) {
          exec("recode -f UTF8..ISO-8859-15 '/tmp/{$filenimi}'");
     }

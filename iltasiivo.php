@@ -170,14 +170,16 @@ $laskuri = 0;
 $query = "SELECT lasku.tunnus laskutunnus,
           lasku.tila,
           count(*) kaikki,
-          sum(if (tilausrivi.tyyppi='D' or tilausrivi.var='P', 1, 0)) dellatut
+          sum(if (tilausrivi.tyyppi='D' or tilausrivi.var='P', 1, 0)) dellatut,
+          asiakas.kerayserat keraysera
           FROM lasku
+          LEFT JOIN asiakas on asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus
           JOIN tilausrivi on tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus
           WHERE lasku.yhtio  = '$kukarow[yhtio]'
           AND lasku.tila     in ('N','E','L','G')
           AND lasku.alatila != 'X'
           GROUP BY 1,2
-          HAVING dellatut > 0 and kaikki = dellatut";
+          HAVING dellatut > 0 and kaikki = dellatut  and keraysera != 'H'";
 $result = pupe_query($query);
 
 while ($row = mysql_fetch_assoc($result)) {

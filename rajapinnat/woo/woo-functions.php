@@ -11,6 +11,7 @@ function woo_commerce_toimita_tilaus($params) {
       or empty($woo_config["consumer_key"])
       or empty($woo_config["consumer_secret"])
       or empty($woo_config["store_url"])) {
+    pupesoft_log("woocommerce_orders", "WooCommerce config ei ole kunnossa.");
     return false;
   }
 
@@ -22,6 +23,9 @@ function woo_commerce_toimita_tilaus($params) {
   $woo_tilausnumerot = woo_commerce_hae_woo_tilausnumerot($pupesoft_tunnukset);
 
   foreach ($woo_tilausnumerot as $order_number) {
+
+    pupesoft_log("woocommerce_orders", "P‰ivitet‰‰n tilaus $order_number toimitetuiksi.");
+
     // rakennetaan woo request
     $woo_parameters = array(
       "access_token"    => $woo_config["access_token"],
@@ -52,8 +56,6 @@ function woo_commerce_hae_woo_tilausnumerot($pupesoft_tunnukset) {
   // tehd‰‰n tunnuksista stringi
   $tunnukset = implode(",", $pupesoft_tunnukset);
 
-  pupesoft_log("woocommerce_orders", "P‰ivitet‰‰n tilaukset $tunnukset toimitetuiksi.");
-
   // tehd‰‰n request tilaus kerrallaan
   // ainoastaan jos moduli on magento ja asiakkaan tilausnumero lˆytyy
   $query = "SELECT asiakkaan_tilausnumero
@@ -61,7 +63,8 @@ function woo_commerce_hae_woo_tilausnumerot($pupesoft_tunnukset) {
             WHERE yhtio = '{$kukarow['yhtio']}'
             AND tunnus in ({$tunnukset})
             AND ohjelma_moduli = 'MAGENTO'
-            AND asiakkaan_tilausnumero  != ''";
+            AND asiakkaan_tilausnumero  != ''
+            AND laatija = 'WooCommerce'";
   $result = pupe_query($query);
 
   while ($row = mysql_fetch_assoc($result)) {

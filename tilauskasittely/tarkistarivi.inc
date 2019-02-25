@@ -125,8 +125,32 @@ if ($_onko_param and $_onko_myynti and $kukarow['extranet'] == '') {
   }
 }
 
+$_onko_param = ($yhtiorow['myynti_jt_huom'] == 'T');
+
+if ($_onko_param and $_onko_myynti and $kukarow['extranet'] == '') {
+
+
+  $query = "SELECT *
+            FROM lasku
+            JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio
+              AND tilausrivi.otunnus  = lasku.tunnus
+              AND tilausrivi.tuoteno  = '{$row['tuoteno']}'
+              AND tilausrivi.tyyppi   = 'T'
+              AND tilausrivi.tunnus  != '{$row['tunnus']}'
+            )
+            WHERE lasku.yhtio         = '{$kukarow['yhtio']}'
+            AND lasku.liitostunnus    = '{$laskurow['liitostunnus']}'
+            AND lasku.tunnus         != '{$laskurow['tunnus']}'
+            AND (lasku.tila = 'T' AND lasku.alatila IN ('','A'))";
+  $chk_res = pupe_query($query);
+
+  if (mysql_num_rows($chk_res) != 0) {
+    $varaosavirhe .= t("HUOM: tuotetta on tarjouksella")."<br>";
+  }
+}
+
 if (isset($alkupera_trow) and $yhtiorow["korvaavat_hyvaksynta"] != "" and strtoupper($alkupera_trow["tuoteno"]) != strtoupper($row["tuoteno"])
-  and strtoupper($row["tuoteno"]) == strtoupper($krow2["tuoteno"]) 
+  and strtoupper($row["tuoteno"]) == strtoupper($krow2["tuoteno"])
   and (!isset($from_mikrotilaus) or (isset($from_mikrotilaus) and !$from_mikrotilaus))
   and !in_array($row["var2"], array("OK", "PK")) and $korvattiin_korvaavalla == "HIIOHEI!") {
   $varaosavirhe .= t("HUOM: t‰m‰ on korvaava tuote, haluatko hyv‰ksy‰?")."<br>";
@@ -186,7 +210,7 @@ $tilausrivin_kateraja = $yhtiorow["tilausrivin_kateraja"];
 $tilausrivin_kate = laske_tilausrivin_kate($row, $kotisumma_alviton, $row["kehahin"], $kpl, $arow);
 
 if ($tilausrivin_kateraja > 0 and
-  $tilausrivin_kate < $tilausrivin_kateraja and $row["var2"] != "OK"
+  $tilausrivin_kate < $tilausrivin_kateraja and $row["var2"] != "OK" and $row["tyyppi"] != "G"
 ) {
   $varaosavirhe .= t("HUOM: Kate alhainen!")."<br>";
   $riviok++;
@@ -283,7 +307,7 @@ if ($row["var"] == "J" and $row["tyyppi"] == "E") {
 }
 
 //  Pakkokommentoitava tuote
-$_kommentoitava_kaikki = ($trow["kommentoitava"] == "o");
+$_kommentoitava_kaikki = (in_array($trow["kommentoitava"], array("o", "p")));
 $_kommentoitava_rekla  = ($trow["kommentoitava"] == "r" and in_array($toim, array("REKLAMAATIO", "EXTRANET_REKLAMAATIO")));
 $_kommentoitava = ($_kommentoitava_kaikki or $_kommentoitava_rekla);
 
@@ -314,6 +338,12 @@ if (!in_array($row["var"], array('', 'P', 'J', 'H', 'S', 'T', 'U', 'V', 'A', 'B'
 
 if (in_array($row["tyyppi"], array('V', 'W')) and $row["perheid"] == 0 and $toim == "VALMISTAVARASTOON") {
   $varaosavirhe .= t("VIRHE: Tuote ei kuulu mihink‰‰n reseptiin!")."<br>";
+  $riviok++;
+  $tilausok++;
+}
+
+if ($row["var"] == "O" and in_array($toim, array('PIKATILAUS', 'RIVISYOTTO')) and $kukarow["extranet"] == "") {
+  $varaosavirhe .= t("VIRHE: Myyntitilauksella Var ei voi olla O!")."<br>";
   $riviok++;
   $tilausok++;
 }

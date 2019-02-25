@@ -113,6 +113,8 @@ if ((mysql_field_name($result, $i) == "kassa") or
   (mysql_field_name($result, $i) == "ostolasku_ei_eu_rahti") or
   (mysql_field_name($result, $i) == "ostolasku_ei_eu_vaihto_omaisuus") or
   (mysql_field_name($result, $i) == "ostolasku_ei_eu_raaka_aine") or
+  (mysql_field_name($result, $i) == "ennakkolaskun_asiakasvarasto") or
+  (mysql_field_name($result, $i) == "varastonmuutos_rahti") or
   (mysql_field_name($result, $i) == "raaka_ainevarasto") or
   (mysql_field_name($result, $i) == "raaka_ainevarastonmuutos") or
   (mysql_field_name($result, $i) == "varastonmuutos_valmistuksesta") or
@@ -190,6 +192,8 @@ if ((mysql_field_name($result, $i) == "kassa") or
       elseif (mysql_field_name($result, $i) == "konsernivelat")           $query .= " and nimi regexp 'kons' and nimi regexp '(velka|velat)'  ";
       elseif (mysql_field_name($result, $i) == "konserniostovelat")         $query .= " and nimi regexp 'kons' and nimi regexp '(osto|hankin)' and nimi regexp '(velka|velat)'  ";
       elseif (mysql_field_name($result, $i) == "konsernimyyntisaamiset")       $query .= " and nimi regexp 'kons' and nimi regexp 'saam' ";
+      elseif (mysql_field_name($result, $i) == "ennakkolaskun_asiakasvarasto")       $query .= " and nimi regexp 'enna' and nimi regexp 'asiakas' ";
+      elseif (mysql_field_name($result, $i) == "varastonmuutos_rahti")       $query .= " and nimi regexp 'var' and nimi regexp 'muut' and nimi regexp 'rahti' ";
       else $query = "";
 
       if ($query != "") {

@@ -107,14 +107,38 @@ $toimires = pupe_query($query);
 $toimirow = mysql_fetch_assoc($toimires);
 
 // haetaan tilausrivit
-$query = "SELECT *
+$query = "SELECT varastopaikat.*, tilausrivi.*
           FROM tilausrivi
-          WHERE yhtio     = '{$kukarow['yhtio']}'
-          AND tyyppi      = 'O'
+          JOIN varastopaikat ON (
+            varastopaikat.yhtio   = tilausrivi.yhtio AND
+            varastopaikat.tunnus  = tilausrivi.varasto AND
+            varastopaikat.tyyppi != 'P' AND
+            varastopaikat.ulkoinen_jarjestelma IN ('L','P')
+          )
+          WHERE tilausrivi.yhtio     = '{$kukarow['yhtio']}'
+          AND tilausrivi.tyyppi      = 'O'
           AND kpl         = 0
           AND varattu     > 0
           AND uusiotunnus = '{$saapumisnro}'";
 $rivit_res = pupe_query($query);
+$varasto_check = array();
+
+while ($rivit_row = mysql_fetch_array($rivit_res)) {
+  $varasto_check[$rivit_row['ulkoinen_jarjestelma']]++;
+}
+
+mysql_data_seek($rivit_res, 0);
+
+if ($varasto_check['L'] > 0 and $varasto_check['P'] == 0) {
+  $uj_nimi = "Velox";
+}
+elseif ($varasto_check['L'] == 0 and $varasto_check['P'] > 0) {
+  $uj_nimi = "Postnord";
+}
+else {
+  pupesoft_log('logmaster_inbound_delivery', "Saapuminen {$row['laskunro']} sis‰lt‰‰ useamman ulkoisen varaston tuotteita. Ei saa sis‰lt‰‰ kuin yht‰.");
+  exit("Saapuminen {$row['laskunro']} sis‰lt‰‰ useamman ulkoisen varaston tuotteita. Ei saa sis‰lt‰‰ kuin yht‰.");
+}
 
 # Rakennetaan XML
 $xml = simplexml_load_string("<?xml version='1.0' encoding='UTF-8'?><Message></Message>");
@@ -131,6 +155,9 @@ $body->addChild('OrderCode',        $ordercode);
 $body->addChild('OrderType',        'PO');
 $body->addChild('ReceiptsListDate', tv1dateconv($row['luontiaika']));
 $body->addChild('DeliveryDate',     tv1dateconv($tilasnumero_row['toimaika']));
+if ($uj_nimi == "Velox") {
+  $body->addChild('Comments',        xml_cleanstring($row['comments']));
+}
 $body->addChild('Warehouse',        '');
 
 $vendor = $body->addChild('Vendor');
@@ -160,7 +187,7 @@ while ($rivit_row = mysql_fetch_assoc($rivit_res)) {
   $line = $lines->addChild('Line');
   $line->addAttribute('No', $i);
   $line->addChild('TransId',         xml_cleanstring($rivit_row['tunnus']));
-  $line->addChild('ItemNumber',      xml_cleanstring($rivit_row['tuoteno']));
+  $line->addChild('ItemNumber',      xml_cleanstring($rivit_row['tuoteno'], 32));
   $line->addChild('OrderedQuantity', xml_cleanstring($rivit_row['varattu']));
   $line->addChild('Unit',            xml_cleanstring($rivit_row['yksikko']));
   $line->addChild('Price',           xml_cleanstring($rivit_row['hinta']));

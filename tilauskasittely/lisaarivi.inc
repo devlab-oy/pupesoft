@@ -1835,15 +1835,22 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
 
           // Jos homma on ok niin lisätään rivi
           if ($perheok == 0) {
+
             $_myytavat_paikat = count($myynama)-1;
+            $_magento = (isset($kutsuja) and $kutsuja == "EDITILAUS" and isset($edi_tyyppi) and $edi_tyyppi == "magento");
 
             foreach ($myynama as $_indeksiluku => $indeksi) {
+
               //Käsinsyötetyt hinnat ja alennukset eivät päde korvaaviin tuotteisiin, eikä tuoteperheiden lapsiin
               if (strtoupper($myy_tuoteno[$indeksi]) != strtoupper($alkupera_trow["tuoteno"])) {
+
                 $hinta  = "";
 
-                for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
-                  ${'ale'.$alepostfix} = "";
+                // magento-casessa emme halua tyhjentää alennusta
+                if (!$_magento) {
+                  for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+                    ${'ale'.$alepostfix} = "";
+                  }
                 }
 
                 $netto  = "";
@@ -1899,6 +1906,10 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
 
                 if (!empty($lis_hinta_chk) and $lis_hinta > $lis_hinta_chk) {
                   $lis_hinta = $lis_hinta_chk;
+                  $lis_netto = $lis_netto_chk;
+                  $lis_ale_kaikki = $lis_ale_kaikki_chk;
+                  $alehinta_alv = $alehinta_alv_chk;
+                  $alehinta_val = $alehinta_val_chk;
                 }
               }
 
@@ -2910,6 +2921,10 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
 
         if (!empty($lis_hinta_chk) and $lis_hinta > $lis_hinta_chk) {
           $lis_hinta = $lis_hinta_chk;
+          $lis_netto = $lis_netto_chk;
+          $lis_ale_kaikki = $lis_ale_kaikki_chk;
+          $alehinta_alv = $alehinta_alv_chk;
+          $alehinta_val = $alehinta_val_chk;
         }
       }
 

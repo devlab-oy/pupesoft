@@ -1058,11 +1058,16 @@ if ($tee == 'E' or $tee == 'F') {
     echo "<tr><th>".t("Mapvm")."</th><td>".tv1dateconv($trow["mapvm"])."</td></tr>";
     echo "<tr><th nowrap>".t("Summa")." $trow[valkoodi]</th><td align='right'>$trow[summa_valuutassa]</td></tr>";
 
-    if ($trow["kasumma"] != 0) echo "<tr><th nowrap>".t("Kassa-ale")." $trow[valkoodi]</th><td align='right'>$trow[kasumma]</td></tr>";
+    if ($trow["valkoodi"] == $yhtiorow["valkoodi"]) {
+      if ($trow["kasumma"] != 0) echo "<tr><th nowrap>".t("Kassa-ale")." $trow[valkoodi]</th><td align='right'>$trow[kasumma]</td></tr>";
+    }
+    else {
+      if ($trow["kasumma_valuutassa"] != 0) echo "<tr><th nowrap>".t("Kassa-ale")." $trow[valkoodi]</th><td align='right'>$trow[kasumma_valuutassa]</td></tr>";
+    }
 
     if ($trow["valkoodi"] != $yhtiorow["valkoodi"]) {
-      echo "<tr><th nowrap>".t("Summa")." $yhtiorow[valkoodi]</th><td align='right'>".sprintf("%.02f", $trow["summa_valuutassa"] * $kurssi)."</td></tr>";
-      if ($trow["kasumma"] != 0) echo "<tr><th nowrap>".t("Kassa-ale")." $yhtiorow[valkoodi]</th><td align='right'>".sprintf("%.02f", $trow["kasumma"] * $kurssi)."</td></tr>";
+      echo "<tr><th nowrap>".t("Summa")." $yhtiorow[valkoodi]</th><td align='right'>".sprintf("%.02f", $trow["summa"])."</td></tr>";
+      if ($trow["kasumma"] != 0) echo "<tr><th nowrap>".t("Kassa-ale")." $yhtiorow[valkoodi]</th><td align='right'>".sprintf("%.02f", $trow["kasumma"])."</td></tr>";
     }
     echo "</table>";
     echo "</form>";

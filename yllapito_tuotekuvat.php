@@ -483,6 +483,15 @@ echo "<tr><td><input type='checkbox' name='mul_ext[]' value='jpeg' ", $mul_check
 
 $mul_check = '';
 if ($mul_ext != '') {
+  if (in_array('jpg', $mul_ext)) {
+    $mul_check = 'CHECKED';
+  }
+}
+
+echo "<tr><td><input type='checkbox' name='mul_ext[]' value='jpg' ", $mul_check, "></td><td nowrap>".t("Jpg")."</td></tr>";
+
+$mul_check = '';
+if ($mul_ext != '') {
   if (in_array('gif', $mul_ext)) {
     $mul_check = 'CHECKED';
   }

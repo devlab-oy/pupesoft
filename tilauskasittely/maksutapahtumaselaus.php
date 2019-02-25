@@ -237,7 +237,7 @@ function piirra_tilaus_table($tilaukset, $rajaus, $pupe_DataTables) {
     echo "<td class='text-right'>{$tilaus["summa"]}</td>";
     echo "<td class='text-right'>{$tilaus["viesti"]}</td>";
 
-    if ($maksupaate_kassamyynti) {
+    if ($maksupaate_kassamyynti and $kukarow['kuittitulostin'] != '-88') {
       echo "<td class='back'>";
       echo "<form>";
       echo "<input type='hidden' name='rajaus[alku][vuosi]' value='{$rajaus["alku"]["vuosi"]}'>";

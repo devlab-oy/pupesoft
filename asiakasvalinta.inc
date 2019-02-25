@@ -4,18 +4,66 @@ if ($kukarow['extranet'] == '') die(t("K‰ytt‰j‰n parametrit - T‰m‰ ominaisuus to
 
 if (isset($toiminto) and $toiminto == 'vaihda_oletusasiakkuus' and $asiakasvalinta != '') {
   paivita_kayttajan_oletusasiakkuus($asiakasvalinta);
+
+  // p‰ivitet‰‰n kukarow kesken jos on vaihdettu asiakas
+  $til_qry = "SELECT tunnus
+              FROM lasku
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND laatija  = '{$kukarow['laatija']}'
+              AND ohjelma_moduli = 'EXTRANET'
+              AND tila = 'N'
+              AND alatila = ''
+              AND liitostunnus = '{$asiakasvalinta}'
+              ORDER BY tunnus desc
+              LIMIT 1";
+  $til_res = pupe_query($til_qry);
+  if (mysql_num_rows($til_res) == 1) {
+    $tilrow = mysql_fetch_assoc($til_res);
+    $kukarow['kesken'] == $tilrow['tunnus'];
+
+    $query  = "UPDATE kuka set kesken='{$tilrow['tunnus']}' where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]'";
+    $result = pupe_query($query);
+  }
+  else {
+    $kukarow['kesken'] == 0;
+
+    $query  = "UPDATE kuka set kesken='0' where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]'";
+    $result = pupe_query($query);
+  }
 }
 
-piirra_multiasiakkuusdropdown();
+if (!isset($livesearch_tee)) {
+  piirra_multiasiakkuusdropdown($asiakasvalikko_rajaus);
+}
 
-function piirra_multiasiakkuusdropdown() {
-  global $kukarow;
+function piirra_multiasiakkuusdropdown($asiakasvalikko_rajaus = "") {
+  global $kukarow, $toim, $palvelin2, $tilauskaslisa;
+
+  echo "<form>";
+  echo "<th>
+          <label for='asiakasvalikko_rajaus'>" . t("Rajaa alasvetovalikkoa") . ":</label>
+        </th>";
+  echo "<br><td>
+          <input type='text'
+                 name='asiakasvalikko_rajaus'
+                 id='asiakasvalikko_rajaus'
+                 value='$asiakasvalikko_rajaus'>
+          <input type='submit' value='" . t("Rajaa") . "'>
+        </td>";
+  echo "<input type='hidden' name='toim'     value='$toim'>";
+  echo "</form><br><br>";
+
+  if (!empty($asiakasvalikko_rajaus)) {
+    $wherelisa = " AND concat(asiakas.nimi, asiakas.nimitark) LIKE '%{$asiakasvalikko_rajaus}%'";
+  }
 
   // Haetaan k‰ytt‰j‰n asiakkuudet
   $query = "SELECT asiakas.tunnus, asiakas.nimi, asiakas.nimitark, asiakas.selaus
             FROM customers_users
             JOIN asiakas ON (customers_users.customer_id = asiakas.tunnus)
-            WHERE user_id = '{$kukarow['tunnus']}'";
+            WHERE user_id = '{$kukarow['tunnus']}'
+            {$wherelisa}
+            ORDER BY asiakas.nimi, asiakas.nimitark, asiakas.selaus";
   $multiresult = pupe_query($query);
 
   // Jos ei ole linkattu mit‰‰n asiakkaita, ei piirret‰ mit‰‰n
@@ -32,6 +80,7 @@ function piirra_multiasiakkuusdropdown() {
   $row = mysql_fetch_assoc($result);
   echo "<form>";
   echo "<input type='hidden' name='toiminto' value='vaihda_oletusasiakkuus'>";
+  echo "<input type='hidden' name='toim'     value='$toim'>";
 
   // Piirret‰‰n dropdown
   echo "<table><tr>";
@@ -40,7 +89,9 @@ function piirra_multiasiakkuusdropdown() {
 
   while ($multirow = mysql_fetch_assoc($multiresult)) {
     if (empty($multirow['selaus']))  {
-      echo "<option value='{$multirow['tunnus']}'>".$multirow['nimi'].', '.$row['nimitark']."</option>";
+
+      $_nimitark = !empty($multirow['nimitark']) ? ', '.$multirow['nimitark'] : '';
+      echo "<option value='{$multirow['tunnus']}'>".$multirow['nimi'].$_nimitark."</option>";
     }
     else {
       echo "<option value='{$multirow['tunnus']}'>".$multirow['selaus']."</option>";
@@ -52,7 +103,8 @@ function piirra_multiasiakkuusdropdown() {
 
   if (isset($row['nimi'])) {
     if (empty($row['selaus'])) {
-      echo "<td class='back'>".$row['nimi'].', '.$row['nimitark']."</td>";
+      $_nimitark = !empty($row['nimitark']) ? ', '.$row['nimitark'] : '';
+      echo "<td class='back'>".$row['nimi'].$_nimitark."</td>";
     }
     else {
       echo "<td class='back'>".$row['selaus']."</td>";

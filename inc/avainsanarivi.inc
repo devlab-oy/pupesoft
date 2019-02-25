@@ -117,7 +117,9 @@ if ($_selitetark_2 and
     $avain_sel["RELEX_TUOTEPAR"] == "SELECTED" or
     $avain_sel["HAE_JA_SELAA"] == "SELECTED" or
     $avain_sel["MYYNTITILASTO"] == "SELECTED" or
-    $avain_sel['Y'] == "SELECTED")) {
+    $avain_sel["VALM_FAKTA"] == "SELECTED" or
+    $avain_sel['Y'] == "SELECTED" or
+    $avain_sel["LITETY_LAATUAS"] == "SELECTED")) {
   $tyyppi = 1;
 }
 
@@ -333,10 +335,17 @@ if (mysql_field_name($result, $i) == "laji") {
   if ($lukitse_laji== "" or $lukitse_laji == "HUOLTOP_EMAIL") $ulos .= "<option value='HUOLTOP_EMAIL' {$avain_sel['HUOLTOP_EMAIL']}>".t("RMA portaalin huoltopyyntöemail")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "POSTEN_TKOODI")   $ulos .= "<option value='POSTEN_TKOODI' {$avain_sel['POSTEN_TKOODI']}>".t("Logmaster OutboundDelivery ja MaterialMaster sanomien kentät")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "UNIFAUN_REF") $ulos .= "<option value='UNIFAUN_REF' {$avain_sel['UNIFAUN_REF']}>".t("Unifaun lähettäjän viite")."</option>";
+  if ($lukitse_laji== "" or $lukitse_laji == "UNIFAUN_MESSAGE") $ulos .= "<option value='UNIFAUN_MESSAGE' {$avain_sel['UNIFAUN_MESSAGE']}>".t("Unifaun ENOT viesti")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "KUITIN_VAKTEXT") $ulos .= "<option value='KUITIN_VAKTEXT' {$avain_sel['KUITIN_VAKTEXT']}>".t("Kuitin vakioteksti")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "STCK_LST_FLTR") $ulos .= "<option value='STCK_LST_FLTR' {$avain_sel['STCK_LST_FLTR']}>".t("Varastosaldoraportin rajaus")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "PIIRI_ALENNUS") $ulos .= "<option value='PIIRI_ALENNUS' {$avain_sel['PIIRI_ALENNUS']}>".t("Piiriin sidottu hinnoittelu")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "MESSENGER_RYHMA") $ulos .= "<option value='MESSENGER_RYHMA' {$avain_sel['MESSENGER_RYHMA']}>".t("Messenger käyttäjäryhmä")."</option>";
+  if ($lukitse_laji== "" or $lukitse_laji == "VALM_FAKTA") $ulos .= "<option value='VALM_FAKTA' {$avain_sel['VALM_FAKTA']}>".t("Valmistuslistan faktan fonttikoko")."</option>";
+  if ($lukitse_laji== "" or $lukitse_laji == "PSHOP_SYNONYMS") $ulos .= "<option value='PSHOP_SYNONYMS' {$avain_sel['PSHOP_SYNONYMS']}>".t("Pupeshop tuotehaun synonyymit")."</option>";
+  if ($lukitse_laji== "" or $lukitse_laji == "VASTUUMYYJA") $ulos .= "<option value='VASTUUMYYJA' {$avain_sel['VASTUUMYYJA']}>".t("Asiakkaan vastuumyyjä")."</option>";
+  if ($lukitse_laji== "" or $lukitse_laji == "MAKSUKP") $ulos .= "<option value='MAKSUKP' {$avain_sel['MAKSUKP']}>".t("Maksatuksessa kustannuspaikka")."</option>";
+  if ($lukitse_laji== "" or $lukitse_laji == "MAKSUMS") $ulos .= "<option value='MAKSUMS' {$avain_sel['MAKSUMS']}>".t("Maksuteksti näkyviin avoimissa myyntilaskuissa")."</option>";
+
   if ($lukitse_laji== "") $ulos .= "</optgroup>";
 
   if ($lukitse_laji== "") $ulos .= "<optgroup label='".t("Verkkokaupan avainsanat")."'>";
@@ -1065,6 +1074,11 @@ if (($avain_sel["OSASTO"] == "SELECTED"
   $jatko = 0;
 }
 
+if (($avain_sel["PSHOP_SYNONYMS"] == "SELECTED") and $_selitetark) {
+  $ulos = "<td><textarea rows=10 cols=50 name='$nimi'>$trow[$i]</textarea></td>";
+  $jatko = 0;
+}
+
 if (($avain_sel['LASKUTUS_SAATE'] == "SELECTED" or $avain_sel['PALAUTUS_SAATE'] == "SELECTED" or $avain_sel['KAANTALVVIESTI'] == "SELECTED") and $_selitetark_2) {
   $ulos = "<td><textarea rows=30 cols=50 name='$nimi'>$trow[$i]</textarea></td>";
   $jatko = 0;
@@ -1523,6 +1537,17 @@ if ($avain_sel['KUITIN_VAKTEXT'] == "SELECTED") {
   }
 }
 
+// Unifaun ennakkoilmoitus vakioteksti
+if ($avain_sel['UNIFAUN_MESSAGE'] == "SELECTED") {
+  if ($_selite || $_jarjestys) {
+    $tyyppi = 0;
+  }
+  elseif ($_selitetark) {
+    $ulos = "<td><textarea name='{$nimi}' rows='10' cols='50'>{$trow[$i]}</textarea></td>";
+    $jatko = 0;
+  }
+}
+
 if ($avain_sel['STCK_LST_FLTR'] == "SELECTED") {
   if ($_selite) {
     $sel = array();
@@ -1657,7 +1682,32 @@ if ($avain_sel['MESSENGER_RYHMA'] == 'SELECTED') {
     $jatko = 0;
   }
 }
+// Valmistuslistan tuoteperheen faktan fonttikoko raportilla
+if ($avain_sel["VALM_FAKTA"] == "SELECTED") {
+  if ($_selitetark) {
 
+    $sel = array();
+    $sel[$trow[$i]] = "SELECTED";
+
+    $ulos = "<td><select name = '$nimi'>";
+    $ulos .= "<option value = '8' $sel[8]>".'8'."</option>";
+    $ulos .= "<option value = '6' $sel[6]>".'6'."</option>";
+    $ulos .= "</select></td>";
+    $jatko = 0;
+  }
+  // Valmistuslistan tuoteperheen rivikorkeus raportilla
+  elseif ($_selitetark_2) {
+
+    $sel = array();
+    $sel[$trow[$i]] = "SELECTED";
+
+    $ulos = "<td><select name = '$nimi'>";
+    $ulos .= "<option value = '12' $sel[12]>".'12'."</option>";
+    $ulos .= "<option value = '10' $sel[10]>".'10'."</option>";
+    $ulos .= "</select></td>";
+    $jatko = 0;
+  }
+}
 // Unifaun lähettäjän viite
 if ($avain_sel['UNIFAUN_REF'] == 'SELECTED') {
   // ei näytetä selitetarkia tai järjestystä
@@ -1672,6 +1722,65 @@ if ($avain_sel['UNIFAUN_REF'] == 'SELECTED') {
     $ulos .= "<select name='{$nimi}'>";
     $ulos .= "<option value='viesti'>" . t('Tilausviite') . "</option>";
     $ulos .= "<option value='tunnus' {$sel}>" . t('Tilausnumero') . "</option>";
+    $ulos .= "</select>";
+    $ulos .= "</td>";
+
+    $jatko = 0;
+  }
+}
+// Missä vastuumyyjä näytetään
+if ($avain_sel['VASTUUMYYJA'] == "SELECTED") {
+  // ei näytetä selitetarkia tai järjestystä
+  if ($_selitetark or $_jarjestys) {
+    $tyyppi = 0;
+  }
+
+  if ($_selite) {
+    $sel = $trow[$i] == 'tunnus' ? 'selected' : '';
+
+    $ulos = "<td>";
+    $ulos .= "<select name='{$nimi}'>";
+    $ulos .= "<option value='Asiakashaku'>" . t('Asiakashaku') . "</option>";
+    $ulos .= "<option value='Tulosteet' {$sel}>" . t('Tulosteet') . "</option>";
+    $ulos .= "</select>";
+    $ulos .= "</td>";
+
+    $jatko = 0;
+  }
+}
+if ($avain_sel["MAKSUKP"] == "SELECTED") {
+  // ei näytetä selitetarkia tai järjestystä
+  if ($_selitetark or $_jarjestys) {
+    $tyyppi = 0;
+  }
+
+  if ($_selite) {
+    $sel = $trow[$i] == 'Kylla' ? 'selected' : '';
+
+    $ulos = "<td>";
+    $ulos .= "<select name='{$nimi}'>";
+    $ulos .= "<option value='Ei'>" . t('Ei') . "</option>";
+    $ulos .= "<option value='Kylla' {$sel}>" . t('Kyllä') . "</option>";
+    $ulos .= "</select>";
+    $ulos .= "</td>";
+
+    $jatko = 0;
+  }
+}
+
+if ($avain_sel["MAKSUMS"] == "SELECTED") {
+  // ei näytetä selitetarkia tai järjestystä
+  if ($_selitetark or $_jarjestys) {
+    $tyyppi = 0;
+  }
+
+  if ($_selite) {
+    $sel = $trow[$i] == 'Kylla' ? 'selected' : '';
+
+    $ulos = "<td>";
+    $ulos .= "<select name='{$nimi}'>";
+    $ulos .= "<option value='Ei'>" . t('Ei') . "</option>";
+    $ulos .= "<option value='Kylla' {$sel}>" . t('Kyllä') . "</option>";
     $ulos .= "</select>";
     $ulos .= "</td>";
 

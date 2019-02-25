@@ -50,6 +50,11 @@ if ($php_cli) {
     $edi_tyyppi = 'woo';
   }
 
+  // tunnistetaan apix-edi -tyyppinen käsittely tiedostonimestä
+  if ($edi_tyyppi == 'futursoft' and preg_match("/^apix_/", $verkkokauppa_filename) === 1) {
+    $edi_tyyppi = 'apix_edi';
+  }
+
   // Pupeasennuksen root
   $pupe_root_polku = dirname(dirname(__FILE__));
 }
@@ -199,6 +204,8 @@ $edi_kommentti                = "";
 $editilaus_alatila            = "";
 $editilaus_eilahetetta        = "";
 $editilaus_hyvaksyttava       = "";
+$editilaus_hyvaksyttavaksi    = "";
+$editilaus_laatija            = "";
 $editilaus_kassalipas         = "";
 $editilaus_liitetiedosto      = "";
 $editilaus_loppuhinta         = "";
@@ -215,6 +222,7 @@ $editilaus_toimitustapa       = "";
 $editilaus_tyyppi             = "L"; // tilausrivi tyyppi
 $editilaus_valuuttakoodi      = "";
 $editilaus_ytunnus            = "";
+$editilaus_toimipaikka        = "";
 $ei_esteta_laskutusta         = true;
 $id                           = "";
 $ketjutus                     = "";
@@ -258,6 +266,7 @@ $verkkokauppavarasto_li       = "";
 $verokanta                    = "";
 $veromaara                    = "";
 $viite                        = "";
+$laskuviite                   = "";
 $yhteyshenkilon_puhelin       = "";
 
 // nollataan kaikki rivin muuttujat (nämä samat pitää tehdä tuote insertin jälkeen)
@@ -309,6 +318,11 @@ $editilaus_hakemisto = dirname(realpath($filename));
 if ($edi_tyyppi == "futursoft") {
   $edi_subj = "Sisääntuleva Futursoft-tilaus";
   $edi_laatija = "FuturSoft";
+}
+elseif ($edi_tyyppi == "apix_edi") {
+  $edi_subj = "Sisääntuleva Apix-EDI -tilaus";
+  $edi_laatija = "Apix";
+  $edi_tyyppi = "futursoft";
 }
 elseif ($edi_tyyppi == "ahkio") {
   $edi_subj = "Sisääntuleva Ahkio -tilaus";
@@ -388,7 +402,10 @@ while ($tietue = fgets($fd)) {
   if ($edi_tyyppi == "futursoft" or $edi_tyyppi == "magento") {
 
     if (substr($tietue, 0, 1) != '*') {
-      list($tunnus, $tieto)  = explode(':', $tietue);
+      $tietue_array  = explode(':', $tietue);
+      $tunnus = $tietue_array[0];
+      unset($tietue_array[0]);
+      $tieto = implode(":", $tietue_array);
     }
     else {
       $tunnus = $tietue;
@@ -660,9 +677,13 @@ while ($tietue = fgets($fd)) {
     $edi_kommentti .= $tieto." \n";
     break;
 
+  case 'OSTOTIL.OT_SISAINEN_VIESTI'  :
   case 'ORFFCR_NU'  :
     //Kommentteja
     $merkkitieto = $tieto;
+
+    $merkkitieto = str_replace("!!!###!!!", "\n", $merkkitieto);
+
     break;
 
   case 'OSTOTIL.OT_MAKSUEHTO' :
@@ -681,6 +702,21 @@ while ($tietue = fgets($fd)) {
           $editilaus_maksuehto   = $editilaus_maksuehto_row['tunnus'];
         }
       }
+      if ($editilaus_maksuehto != "" and $editilaus_kassalipas != "") {
+        $query = "SELECT *
+                  FROM maksuehto
+                  WHERE yhtio = '{$kukarow['yhtio']}'
+                  AND teksti  = '{$tieto}'
+                  AND kateinen = 'o'
+                  AND kaytossa != 'E'
+                  LIMIT 1";
+        $result = pupe_query($query);
+
+        if (mysql_num_rows($result) == 1) {
+          $editilaus_maksuehto_row = mysql_fetch_assoc($result);
+          $editilaus_maksuehto   = $editilaus_maksuehto_row['tunnus'];
+        }
+      }
 
       $editilaus_maksuteksti .= $tieto;
     }
@@ -689,11 +725,26 @@ while ($tietue = fgets($fd)) {
   case 'ORFFABONU' :
   case 'OSTOTIL.OT_VIITTEEMME' :
     //Asiakkaan viite
-    $viite .= $tieto. ' ';
+    if (isset($verkkokauppa_puhdas_viite) and !empty($verkkokauppa_puhdas_viite)) {
+      // ei haluta viitteeksi mm tilausnumeroa, vaan puhtaasti se mitä annettu
+      $viite = $tieto;
+    }
+    else {
+      // viite sisältää verkkokaupan tilausnumeron ennen muuta tietoa
+      $viite .= $tieto. ' ';
+    }
 
     // laitetaan tämä myös kohde-kenttään jos se on ennestään tyhjä
     if (empty($ot_verkkokauppa_kohde)) {
       $ot_verkkokauppa_kohde = $tieto;
+    }
+
+    break;
+
+  case 'OSTOTIL.OT_VIITTEEMME_PUHDAS' :
+    //Asiakkaan antama viite, semmoisenaan kuin se tulee
+    if (!empty($tieto)) {
+      $viite = $tieto;
     }
 
     break;
@@ -953,6 +1004,10 @@ while ($tietue = fgets($fd)) {
     $editilaus_hyvaksyttava = trim($tieto);
     break;
 
+  case 'OSTOTIL.OT_CUSTOM_LAATIJA':
+    $editilaus_laatija = trim($tieto);
+    break;
+
   case 'ONADPL_PC' :
     // Asiakkaan joku toimitus ovttunnus tms... tää ylikirjottaa kaiken...
     if ($tieto != "") {
@@ -1195,6 +1250,7 @@ while ($tietue = fgets($fd)) {
         $edi_ulos .= t("Jälkivaatimus-toimitustapaa ei löytynyt")."!\n";
       }
     }
+
     break;
 
   case 'OSTOTIL.OT_SUMMA' :
@@ -1209,6 +1265,20 @@ while ($tietue = fgets($fd)) {
     // halutaan futur ja magento-aineistoista tämä tieto sisviesti2-kenttään
     $orig_tieto = pupesoft_cleanstring($orig_tieto, array(";"));
     $lopviesti = trim($orig_tieto);
+    break;
+
+  case 'OSTOTIL.OT_LASKUVIITE':
+    // verkkokaupan tilaukselle halutaan laskutuksessa tietty viite
+    if ($edi_tyyppi == "magento") {
+      $laskuviite = $tieto;
+    }
+    break;
+
+  case 'OSTOTIL.OT_YRITYS_TOIMIPAIKKA':
+    // verkkokaupan tilaukselle halutaan tietty toimipaikka
+    if ($edi_tyyppi == "magento") {
+      $editilaus_toimipaikka = $tieto;
+    }
     break;
 
   case 'OSTOTIL.OT_VEROMAARA':
@@ -1665,8 +1735,9 @@ while ($tietue = fgets($fd)) {
         $editilaus_alatila = 'F';
       }
 
-      if ($editilaus_hyvaksyttava != "") {
+      if (($editilaus_hyvaksyttava != "") or (isset($editilaus_hyvaksyttavaksi_aina) and $editilaus_hyvaksyttavaksi_aina = "JOO" and $edi_tyyppi == 'futursoft')) {
         $editilaus_alatila = 'F';
+        $editilaus_hyvaksyttava = "JOO";
       }
 
       // Jos asiakas on syöttänyt verkkokaupassa oman tilausnumeron tai viitteen yliajetaan viesti
@@ -1714,6 +1785,15 @@ while ($tietue = fgets($fd)) {
         $valkoodi = $yhtiorow['valkoodi'];
         $valkurssi = 1;
       }
+
+      // pakotetaan tilaukset tarvittaessa haluttuun toimipaikkaan
+      if ($edi_tyyppi == 'magento' and $editilaus_toimipaikka) {
+        $kukarow['toimipaikka'] = $editilaus_toimipaikka;
+        $yhtiorow = hae_yhtion_parametrit($yhtiorow["yhtio"]);
+      }
+
+      // jos annettu custom laatija
+      if (isset($editilaus_laatija) and trim($editilaus_laatija) != "") $edi_laatija = $editilaus_laatija;
 
       // Lisätään otsikko
       $query = "INSERT into lasku SET
@@ -1817,6 +1897,7 @@ while ($tietue = fgets($fd)) {
                 laskutus_postino    = '$arow[laskutus_postino]',
                 laskutus_maa        = '$arow[laskutus_maa]',
                 noutopisteen_tunnus = '{$noutopisteen_tunnus}',
+                kasinsyotetty_viite = '{$laskuviite}',
                 laatija             = '$edi_laatija',
                 luontiaika          = now(),
                 yhtio               = '$kukarow[yhtio]',
@@ -2039,6 +2120,28 @@ while ($tietue = fgets($fd)) {
       $result = pupe_query($query);
 
       if (mysql_num_rows($result) == 0) {
+        // Spessukase
+        if ($yhtiorow["yhtio"] == "mast" and $arow["kerayserat"] == 'H') {
+          $pos = strpos($tieto, "-EU");
+          if ($pos > 0) {
+            $tuotetieto = substring($tieto, 0, $pos - 1);
+            $query = "SELECT *
+                      FROM tuote
+                      WHERE tuote.yhtio = '{$kukarow["yhtio"]}'
+                      and tuote.tuoteno = '{$tuotetieto}'
+                      {$kieltolisa}";
+            $result = pupe_query($query);
+
+            if (mysql_num_rows($result) == 0) {
+              ///* Lisätään tilaukselle dummytuote ja kommentti *///
+              $edi_ulos .= t("Rivi")." $rivinumero ".t("Tuote")." '$tieto' ".t("ei löydy")."!\n";
+              $tuoteerrortxt .= " $tieto";
+              $tuoteerror = 1;
+            }
+          }
+        }
+      }
+      if (mysql_num_rows($result) == 0) {
         ///* Lisätään tilaukselle dummytuote ja kommentti *///
         $edi_ulos .= t("Rivi")." $rivinumero ".t("Tuote")." '$tieto' ".t("ei löydy")."!\n";
         $tuoteerrortxt .= " $tieto";
@@ -2109,6 +2212,42 @@ while ($tietue = fgets($fd)) {
       $result = pupe_query($query);
 
       if (mysql_num_rows($result) == 0) {
+        // Spessukase
+        if ($yhtiorow["yhtio"] == "mast" and $arow["kerayserat"] == 'H') {
+          $query2 = "SELECT *
+                    FROM tuote USE INDEX (yhtio_eankoodi_index)
+                    WHERE yhtio  = '$kukarow[yhtio]'
+                    and eankoodi = '$tieto'
+                    ORDER BY tunnus";
+          $result2 = pupe_query($query2);
+
+          if (mysql_num_rows($result2) == 1) {
+            $t2row = mysql_fetch_assoc($result2);
+            $pos = strpos($t2row["tuoteno"], "-EU");
+
+            if ($pos > 0) {
+              $tuotetieto = substr($t2row["tuoteno"], 0, $pos);
+
+              $query = "SELECT *
+                        FROM tuote
+                        WHERE tuote.yhtio = '{$kukarow["yhtio"]}'
+                        and tuote.tuoteno = '{$tuotetieto}'
+                        $kieltolisa
+                        ORDER BY tunnus";
+              $result = pupe_query($query);
+
+              if (mysql_num_rows($result) == 0) {
+                ///* Lisätään tilaukselle dummytuote ja kommentti *///
+                $edi_ulos .= t("Rivi")." $rivinumero ".t("Tuote")." '$tuotetieto' ".t("ei löydy")."!\n";
+                $tuoteerrortxt .= " $tuotetieto";
+                $tuoteerror = 1;
+              }
+            }
+          }
+        }
+      }
+      if (mysql_num_rows($result) == 0) {
+
         ///* Lisätään tilaukselle dummytuote ja kommentti *///
         $edi_ulos .= t("Rivi")." $rivinumero EAN '$tieto' ".t("ei löydy")."!\n";
         $tuoteerrortxt .= " $tieto";
@@ -2326,6 +2465,18 @@ while ($tietue = fgets($fd)) {
             $var = "H";
           }
 
+          // salasanat.php:ssä ylläpidettävä muuttuja, jolla pakotetaan
+          // tilaus hyväksyttäväksi jos tuotetta ei löydy tai myytävissä loppu
+          if ($edi_tyyppi != "magento" and isset($editilaus_hyvaksyttavaksi_jos_virhe) and $editilaus_hyvaksyttavaksi_jos_virhe == "JOO") {
+
+            list($chk_saldo, $chk_hyllyssa, $chk_myytavissa, $chk_true) = saldo_myytavissa($tuoteno, "", $verkkokauppavarasto);
+
+            if ($chk_myytavissa < $kpl) {
+              $editilaus_hyvaksyttavaksi = "JOO";
+              $editilaus_hyvaksyttava = "JOO";
+            }
+          }
+
           // jos tullaan magentosta ja hinta on tiedossa ja kyseessä on rahtikulu, niin uskalletaan luottaa magenton antamaan hintaan
           if ($edi_tyyppi == "magento" and ((isset($verkkokauppa_hinnatedifailista) and $verkkokauppa_hinnatedifailista == "JOO") or strtolower($tuoteno) == strtolower($yhtiorow['rahti_tuotenumero'])) and $editilaus_hinta > 0) {
             $hinta = $editilaus_hinta;
@@ -2494,6 +2645,13 @@ while ($tietue = fgets($fd)) {
 
       } // end jos tuote on löydetty oikein
       else {
+
+        // salasanat.php:ssä ylläpidettävä muuttuja, jolla pakotetaan
+        // tilaus hyväksyttäväksi jos tuotetta ei löydy tai myytävissä loppu
+        if ($edi_tyyppi != "magento" and isset($editilaus_hyvaksyttavaksi_jos_virhe) and $editilaus_hyvaksyttavaksi_jos_virhe == "JOO") {
+          $editilaus_hyvaksyttavaksi = "JOO";
+          $editilaus_hyvaksyttava = "JOO";
+        }
 
         if ($tuoteerror == 2) {
           // Tilausrivin systeemikommentti
@@ -2701,6 +2859,17 @@ while ($tietue = fgets($fd)) {
     }
     elseif ($editilaus_otsikko_ok == "HYVAKSYTTAVAKSI") {
       $edi_ulos .= "\n".t("Merkittiin tilaus hyväksyttäväksi").": {$laskurow['tunnus']}.\n\n";
+
+      // merkitään otsikko hyväksyntäjonoon, ei ole
+      // välttämättä alunperin mennyt
+      if ($editilaus_hyvaksyttavaksi == "JOO") {
+        $query = "UPDATE lasku SET
+                  alatila     = 'F'
+                  WHERE yhtio = '$kukarow[yhtio]'
+                  AND tunnus  = '$id'";
+        pupe_query($query);
+      }
+
     }
     elseif ($editilaus_otsikko_ok == "HYVAKJONOON") {
       $edi_ulos .= "\n".t("Merkittiin tilaus hyväksyttäväksi").": {$laskurow['tunnus']}.\n\n";
@@ -2729,6 +2898,9 @@ while ($tietue = fgets($fd)) {
     $edi_kommentti                = "";
     $editilaus_alatila            = "";
     $editilaus_eilahetetta        = "";
+    $editilaus_hyvaksyttava       = "";
+    $editilaus_hyvaksyttavaksi    = "";
+    $editilaus_laatija            = "";
     $editilaus_kassalipas         = "";
     $editilaus_liitetiedosto      = "";
     $editilaus_loppuhinta         = "";
@@ -2745,6 +2917,7 @@ while ($tietue = fgets($fd)) {
     $editilaus_tyyppi             = "L"; // tilausrivi tyyppi
     $editilaus_valuuttakoodi      = "";
     $editilaus_ytunnus            = "";
+    $editilaus_toimipaikka        = "";
     $ei_esteta_laskutusta         = true;
     $id                           = "";
     $ketjutus                     = "";
@@ -2787,6 +2960,7 @@ while ($tietue = fgets($fd)) {
     $verokanta                    = "";
     $veromaara                    = "";
     $viite                        = "";
+    $laskuviite                   = "";
     $yhteyshenkilon_puhelin       = "";
     break;
   }

@@ -55,16 +55,14 @@ if (!isset($tee) or $tee == '') {
     $result = pupe_query($query);
 
     if ((mysql_num_rows($result) > 0) or ($piilorow[0] > 0)) {
-
-      echo "<table width='100%'>";
-
       // ei näytetä suotta firman nimeä, jos käyttäjä kuuluu vaan yhteen firmaan
       if (mysql_num_rows($kukres) == 1) $kukrow["nimi"] = "";
-
-      echo "<tr><td colspan='".mysql_num_fields($result)."' class='back'><font class='head'>".t("Hyväksyttävät laskusi")." $kukrow[nimi]</font><hr></td></tr>";
+      echo t("Hyväksyttävät laskusi")." $kukrow[nimi]<br>";
 
       if ($piilorow[0] > 0)
-        echo "<tr><td colspan='".mysql_num_fields($result)."' class='back'>". sprintf(t('Sinulla on %d pysäytettyä laskua'), $piilorow[0]) . "</tr>";
+        echo sprintf(t('Sinulla on %d pysäytettyä laskua'), $piilorow[0]) . "<br>";
+
+      echo "<table width='100%'>";
 
       if (mysql_num_rows($result) > 0) {
 
@@ -140,6 +138,65 @@ if (!isset($tee) or $tee == '') {
       echo "<br><br>";
     }
 
+  }
+
+  ///* Hyväksyttävät dokumentit*///
+  $query = "SELECT hd.*, kuka.nimi laatija, hdt.tyyppi
+            FROM hyvaksyttavat_dokumentit hd
+            JOIN hyvaksyttavat_dokumenttityypit hdt ON (hd.yhtio=hdt.yhtio and hd.tiedostotyyppi=hdt.tunnus)
+            JOIN kuka ON (kuka.yhtio = hd.yhtio and kuka.kuka = hd.laatija)
+            WHERE hd.hyvaksyja_nyt = '$kukarow[kuka]'
+            and hd.yhtio = '$kukarow[yhtio]'
+            and hd.tila = 'H'
+            ORDER BY hd.tunnus";
+  $result = pupe_query($query);
+
+  if (mysql_num_rows($result)) {
+    echo t("Hyväksyttävät dokumenttisi")."<br>";
+
+    echo "<table>";
+    echo "<thead>";
+    echo "<tr>";
+    echo "<th>".t("Tyyppi")."</th>";
+    echo "<th>".t("Nimi")."</th>";
+    echo "<th>".t("Kuvaus")."</th>";
+    echo "<th>".t("Kommentit")."</th>";
+    echo "<th>".t("Laatija")."</th>";
+    echo "<th>".t("Tiedosto")."</th>";
+    echo "</tr>";
+    echo "</thead>";
+
+    echo "<tbody>";
+
+    while ($trow = mysql_fetch_assoc($result)) {
+      echo "<tr class='aktiivi'>";
+      echo "<td valign='top'>{$trow['tyyppi']}</td>";
+      echo "<td valign='top'><a href='dokumenttien_hyvaksynta.php?tunnus={$trow['tunnus']}'>{$trow['nimi']}</a></td>";
+      echo "<td valign='top'>{$trow['kuvaus']}</td>";
+      echo "<td valign='top'>{$trow['kommentit']}</td>";
+      echo "<td valign='top'>{$trow['laatija']}</td>";
+
+      $query = "SELECT tunnus, filename, selite
+                from liitetiedostot
+                where liitostunnus = '{$trow['tunnus']}'
+                and liitos = 'hyvaksyttavat_dokumentit'
+                and yhtio = '{$kukarow['yhtio']}'
+                ORDER BY tunnus";
+      $res = pupe_query($query);
+
+      echo "<td>";
+
+      while ($row = mysql_fetch_assoc($res)) {
+        echo "<div id='div_$row[tunnus]' class='popup'>$row[filename]<br>$row[selite]</div>";
+        echo js_openUrlNewWindow("{$palvelin2}view.php?id=$row[tunnus]", t('Liite').": $row[filename]", "class='tooltip' id='$row[tunnus]'")."<br>";
+      }
+
+      echo "</td>";
+      echo "</tr>";
+    }
+
+    echo "</tbody>";
+    echo "</table><br>";
   }
 
   ///* MUISTUTUKSET *///

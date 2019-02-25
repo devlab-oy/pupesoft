@@ -107,6 +107,9 @@ class MagentoClient {
   // Poistetaanko tuotteita oletuksena
   private $_magento_poista_tuotteita = false;
 
+  // Estetäänkö asiakkaiden muokkaus
+  private $_magento_asiakaspaivitysesto = "";
+
   // Käsitelläänkö tuotekuvia magentossa
   private $magento_lisaa_tuotekuvat = true;
 
@@ -133,6 +136,9 @@ class MagentoClient {
 
   // Mikä on EDI-tilauksella asiakasnumero, jolle tilaus tehdään
   private $verkkokauppa_asiakasnro = null;
+
+  // Tilausrivin poikkeava kenttä verolliselle hinnalle (jos Magentoa customoitu configurable-tuotteiden osalta)
+  private $verkkokauppa_verollisen_hinnan_kentta = null;
 
   // Minne hakemistoon EDI-tilaus tallennetaan
   private $edi_polku = '/tmp';
@@ -975,6 +981,7 @@ class MagentoClient {
       'asiakasnro'         => $this->verkkokauppa_asiakasnro,
       'maksuehto_ohjaus'   => $this->magento_maksuehto_ohjaus,
       'erikoiskasittely'   => $this->magento_erikoiskasittely,
+      'verkkokauppa_verollisen_hinnan_kentta' => $this->verkkokauppa_verollisen_hinnan_kentta,
     );
 
     // Haetaan tilaukset magentosta
@@ -1220,7 +1227,13 @@ class MagentoClient {
           $this->debug('magento_asiakkaat', $asiakas_data);
         }
       }
-      // Asiakas on jo olemassa, päivitetään
+      // Asiakas on jo olemassa, päivitetään(kö)
+
+      elseif ($this->_magento_asiakaspaivitysesto == "YES") {
+        $this->log('magento_asiakkaat', "Asiakaspäivitys on estetty");
+        // Skipataan tämä asiakas
+        continue;
+      }
       else {
         try {
           $poista_asiakas_defaultit = $this->_magento_poista_asiakasdefaultit;
@@ -1378,6 +1391,10 @@ class MagentoClient {
     $this->_sisaanluvun_esto = $sisaanluvun_esto;
   }
 
+  public function setAsiakasPaivitysEsto($value) {
+    $this->_magento_asiakaspaivitysesto = $value;
+  }
+
   public function setUniversalTuoteryhma($universal_tuoteryhma) {
     $this->_universal_tuoteryhma = $universal_tuoteryhma;
   }
@@ -1446,6 +1463,10 @@ class MagentoClient {
 
   public function set_verkkokauppa_asiakasnro($value) {
     $this->verkkokauppa_asiakasnro = $value;
+  }
+
+  public function set_verollisen_hinnan_kentta($value) {
+    $this->verkkokauppa_verollisen_hinnan_kentta = $value;
   }
 
   public function set_edi_polku($value) {
@@ -1574,7 +1595,7 @@ class MagentoClient {
       }
       $onnistuiko_lisays = true;
     }
-    
+
     if ($onnistuiko_lisays === false) {
       $current = $offset;
       for ($i = $offset; $i <= $total; $i++) {
@@ -1586,7 +1607,7 @@ class MagentoClient {
             'price_per_customer.setPriceForCustomersPerProduct',
             array($magento_tuotenumero, array($hintadata))
           );
-      
+
           $this->log('magento_tuotteet', "({$current}/{$i}/{$total}): Tuotteen {$magento_tuotenumero} asiakaskohtaiset ({$hintadata['customerEmail']}) hinnat lisätty");
           $this->debug('magento_tuotteet', $hintadata);
         }

@@ -1108,6 +1108,59 @@ if (!function_exists("talenom_queue")) {
   }
 }
 
+if (!function_exists("fitek_queue")) {
+  function fitek_queue($fitek_invoice, $fitek_invoicenum, $kieli) {
+    global $kukarow, $yhtiorow, $pupe_root_polku;
+
+    $fitek_ulos = "";
+
+    // Filenimi
+    $fitekzipfile = "laskutus-".$yhtiorow['yhtio']."-invoices-".$fitek_invoicenum."-".md5(uniqid(rand(), true)).".zip";
+
+    // Luodaan temppidirikka jonne tyˆnnet‰‰n t‰n kiekan kaikki fitek-filet
+    list($usec, $sec) = explode(' ', microtime());
+    mt_srand((float) $sec + ((float) $usec * 100000));
+    $fitek_tmpdirnimi = "/tmp/fitek-".md5(uniqid(mt_rand(), true));
+
+    if (mkdir($fitek_tmpdirnimi)) {
+
+      // Kirjoitetaan finvoiceaineisto dirikkaan
+      if (!file_put_contents($fitek_tmpdirnimi."/MERCANT.INVOICE.".date("Ymd").".$fitek_invoicenum.xml", $fitek_invoice)) {
+        $fitek_ulos .= "Fitek finvoicewrite feilasi!";
+      }
+
+      // Luodaan laskupdf:‰
+      $fitektmpfile = tulosta_lasku("LASKU:".$fitek_invoicenum, "fi", "VERKKOLASKU_FITEK", "", "", "", "", "");
+
+      // Siirret‰‰n faili fitektemppiin
+      if (!rename($fitektmpfile, $fitek_tmpdirnimi."/MERCANT.INVOICE.".date("Ymd").".$fitek_invoicenum.pdf")) {
+        $fitek_ulos .= "FITEK tmpmove MERCANT.INVOICE_$fitek_invoicenum.pdf feilas!";
+      }
+
+      // Tehd‰‰n fitekzippi
+      exec("cd $fitek_tmpdirnimi; zip $fitekzipfile *;");
+
+      // Aineisto l‰hetysjonoon
+      exec("cp $fitek_tmpdirnimi/$fitekzipfile {$pupe_root_polku}/dataout/fitek_error/");
+
+      // Poistetaan apix-tmpdir
+      #exec("rm -rf $fitek_tmpdirnimi");
+
+      $fitek_ulos .= "Lasku $fitek_invoicenum siirretty l‰hetysjonoon<br>\n";
+    }
+    else {
+      $fitek_ulos .= "FITEK tmpdirrin teko feilas!<br>\n";
+    }
+
+    return $fitek_ulos;
+
+      // Kirjoitetaan finvoiceaineisto dirikkaan
+    // Siirret‰‰n l‰hetysjonoon
+    file_put_contents("{$pupe_root_polku}/dataout/fitek_error/laskutus-$kukarow[yhtio]-".date("Ymd")."-$invoice_number.xml", $xmlstring);
+    return "Lasku siirretty l‰hetysjonoon";
+  }
+}
+
 if (!function_exists("apix_queue")) {
   function apix_queue($apix_finvoice, $apix_invoicenum, $kieli, $liitteet = array()) {
     global $kukarow, $yhtiorow, $pupe_root_polku;
@@ -7790,6 +7843,28 @@ if (!function_exists("paivita_toimitukset")) {
   }
 }
 
+if (!function_exists("tallenna_ostotilaus_vahvistus")) {
+  function tallenna_ostotilaus_vahvistus($rivitunnus, $paiv_toimiaika, $vahvistus = false) {
+    global $yhtiorow, $kukarow;
+
+    if ($vahvistus) {
+      $vahvistettu = 'vahvistettu = 1,';
+    }
+
+    $query = "INSERT INTO ostorivien_vahvistus SET
+              yhtio                = '$kukarow[yhtio]',
+              tilausrivin_tunnus   = '$rivitunnus',
+              vahvistettuaika      = '$paiv_toimiaika',
+              $vahvistettu
+              laatija              = '$kukarow[kuka]',
+              luontiaika           = now()";
+    pupe_query($query);
+
+
+
+
+  }
+}
 if (!function_exists("tulosta_ytunnus")) {
   function tulosta_ytunnus($ytunnus, $maa = "", $vienti = "", $hetu_tarkenne = false) {
     global $yhtiorow, $kukarow;
@@ -10512,7 +10587,9 @@ if (!function_exists("livesearch_asiakashaku")) {
         $haku_query .= " or asiakas.laskutus_nimi like ('%$haku%') or asiakas.laskutus_nimitark like ('%$haku%') or asiakas.laskutus_postitp like ('%$haku%')) ";
       }
 
-      $query = "SELECT *, if (toim_nimi != nimi and toim_nimi != '', concat(nimi, ' ', nimitark, ' / ', toim_nimi, ' ', toim_nimitark), concat(nimi, ' ', nimitark)) asiakkaan_tieto,
+      $query = "SELECT *,
+                if (toim_nimi != '' and concat(nimi, nimitark) != concat(toim_nimi, toim_nimitark), concat(nimi, ' ', nimitark, ' / ', toim_nimi, ' ', toim_nimitark), concat_ws(' ', nimi, nimitark)) asiakkaan_tieto,
+                if (toim_nimi != '', toim_postitp, '') toim_postitp,
                 if (asiakas.ytunnus = '$haku', 1, if(left(asiakas.ytunnus, length('$haku')) = '$haku', 2, 3)) jarjestys,
                 if (asiakas.asiakasnro = '$haku', 1, if(left(asiakas.asiakasnro, length('$haku')) = '$haku', 2, 3)) jarjestys2,
                 if (asiakas.nimi = '$haku', 1, if(left(asiakas.nimi, length('$haku')) = '$haku', 2, 3)) jarjestys3,
@@ -10548,7 +10625,13 @@ if (!function_exists("livesearch_asiakashaku")) {
           echo "\"
                 style='padding:2px;'>
                 <span class='livesearch_rivispan_{$hakuid}'>
-                <font style='font-weight:bold'>$row[ytunnus] &raquo; $row[asiakkaan_tieto]</font>
+                <font style='font-weight:bold'>$row[ytunnus] &raquo; $row[asiakkaan_tieto]";
+
+          if (!empty($row['toim_postitp'])) {
+            echo " ({$row['toim_postitp']})";
+          }
+
+          echo "</font>
                 </span>
               </div><div name='selectValues$hakuid' id='$row[tunnus]'></div>";
           $limit++;
@@ -11576,6 +11659,11 @@ if (!function_exists("hae_rahtimaksu")) {
     if (mysql_num_rows($rares) == 1) {
       $hirow = mysql_fetch_assoc($rares);
       $ale_kaikki_array = array();
+
+      // Rahtimaksut ovat yhtion valuutassa, se pit‰‰ muuttaa laskun valuuttaan, koska alehinta funktio k‰sittelee hintoja kuin ne olisi syˆtetty laskun valuutassa
+      if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
+        $hirow['rahtihinta'] = round(laskuval($hirow['rahtihinta'], $laskurow["vienti_kurssi"]), 2);
+      }
 
       if ($rahtituoteno_toimitustavalta) {
         // Etsit‰‰n spessuhintaa/alennuksia jos toimitustavan takana oli oma rahti_tuotenumero
@@ -12784,6 +12872,7 @@ if (!function_exists("liite_popup")) {
 
         $filetype_peukalo_query = "SELECT tunnus peukalokuva, image_width, image_height
                                    FROM liitetiedostot
+                                   USE INDEX (yhtio_liitos_liitostunnus)
                                    WHERE yhtio         = '$kukarow[yhtio]'
                                    AND liitos          = 'tuote'
                                    AND liitostunnus    = '$filetype_row[liitostunnus]'
@@ -13441,6 +13530,13 @@ if (!function_exists("tulosta_logo_pdf")) {
         }
         else {
           $logoparam['scale'] = $lasku_logo_koko_y  / $isizelogo[1];
+        }
+
+        # Keskelle
+        if ((int) $lasku_logo_positio_x < 0) {
+          $keskikohta = $lasku_logo_positio_x / 2 * -1;
+          $kuvanleveys = $logoparam['scale']*$isizelogo[0];
+          $lasku_logo_positio_x = round($keskikohta - ($kuvanleveys / 2));
         }
 
         $placement = $pdf->image_place($image, $lasku_logo_positio_y-($logoparam['scale']*$isizelogo[1]), $lasku_logo_positio_x, $thispage, $logoparam);
@@ -14218,9 +14314,11 @@ if (!function_exists("asiakashakuohje")) {
 // Funktio lis‰‰ tuotteenalkion dynaamiseen puuhun.
 if (!function_exists("TuotteenAlkiot")) {
   function TuotteenAlkiot($laji, $liitos, $puun_tunnus, $kieli, $mista = '') {
-    global $kukarow;
+    global $kukarow, $yhtiorow;
 
     $mista = empty($mista) ? $laji : $mista;
+
+    $kieli = !empty($kieli) ? $kieli : $yhtiorow['kieli'];
 
     $qu = "INSERT INTO puun_alkio
            SET yhtio  = '$kukarow[yhtio]',
@@ -21017,7 +21115,8 @@ if (!function_exists("pupesoft_tulosta_lahete")) {
     $query = "SELECT luokka, puhelin,
               if (asiakasnro!='', asiakasnro, ytunnus) asiakasnro,
               asiakasnro as asiakasnro_aito,
-              kieli
+              kieli,
+              asiakasviivakoodi
               FROM asiakas
               WHERE tunnus = '$laskurow[liitostunnus]'
               and yhtio    = '$kukarow[yhtio]'";
@@ -26126,8 +26225,8 @@ if (!function_exists('hae_tuotteen_saapumisaika')) {
           $tulossa_row = mysql_fetch_assoc($tulossa_result);
 
           if (mysql_num_rows($tulossa_result) > 0 and $tulossa_row["paivamaara"] != '') {
-            $tulossalisa[] = "<hr>".t("TULOSSA", $kieli)."!°!";
-            $tulossalisa[] = t("Arvioitu saapumisp‰iv‰", $kieli)."!°!".tv1dateconv($tulossa_row['paivamaara']);
+            $tulossalisa[] = "<hr>".t("EI TILAUKSESSA", $kieli)."!°!"."<hr>";
+            $tulossalisa[] = t("Tilausrytmin mukainen saapumisp‰iv‰", $kieli)."!°!".tv1dateconv($tulossa_row['paivamaara']);
           }
         }
       }
@@ -26262,8 +26361,9 @@ if (!function_exists('hae_tuotteen_saapumisaika')) {
           $tulossa_row = mysql_fetch_assoc($tulossa_result);
 
           if (mysql_num_rows($tulossa_result) > 0) {
-            $tulossalisa[] = "<hr>".t("TULOSSA", $kieli)."!°!"."<hr>";
-            $tulossalisa[] = t("Arvioitu saapumisp‰iv‰", $kieli)."!°!".tv1dateconv($tulossa_row['paivamaara']);
+            $tulossalisa[] = "<hr>".t("EI TILAUKSESSA", $kieli)."!°!"."<hr>";
+            $tulossalisa[] = t("Tilausrytmin mukainen")."<hr>";
+            $tulossalisa[] = t("saapumisp‰iv‰", $kieli)."!°!".tv1dateconv($tulossa_row['paivamaara']);
           }
         }
       }
@@ -26619,6 +26719,28 @@ if (!function_exists("hae_viivakoodilla")) {
                LIMIT 200";
     $chk_res = pupe_query($query);
 
+    if (mysql_num_rows($chk_res) == 0) {
+      $viivakooditark = substr($viivakoodi, 0 , -1);
+      // Haetaan eankoodilla ilman tarkistusnumeroa tuotenumeroa kolmesta eri paikkaa
+      $query = "(SELECT tuoteno, '' liitostunnus
+                 FROM tuote
+                 WHERE yhtio                                      = '{$kukarow['yhtio']}'
+                 AND eankoodi                                     = '{$viivakooditark}')
+                 UNION
+                 (SELECT tuoteno, liitostunnus
+                 FROM tuotteen_toimittajat
+                 WHERE yhtio                                      = '{$kukarow['yhtio']}'
+                 AND viivakoodi                                   = '{$viivakooditark}')
+                 UNION
+                 (SELECT tuotteen_toimittajat.tuoteno, tuotteen_toimittajat.liitostunnus
+                 FROM tuotteen_toimittajat_tuotenumerot
+                 JOIN tuotteen_toimittajat ON (tuotteen_toimittajat_tuotenumerot.yhtio = tuotteen_toimittajat.yhtio
+                 AND tuotteen_toimittajat.tunnus                  = tuotteen_toimittajat_tuotenumerot.toim_tuoteno_tunnus)
+                 WHERE tuotteen_toimittajat_tuotenumerot.yhtio    = '{$kukarow['yhtio']}'
+                 AND tuotteen_toimittajat_tuotenumerot.viivakoodi = '{$viivakooditark}')
+                 LIMIT 200";
+      $chk_res = pupe_query($query);
+    }
     while ($row = mysql_fetch_assoc($chk_res)) {
       $viivakoodit[$row['tuoteno']][] = $row['liitostunnus'];
     }
@@ -27056,8 +27178,53 @@ if (!function_exists('hyllysiirto')) {
       $result = pupe_query($query);
     }
 
+    $asiakasvarasto_case = false;
+
+    // Jos tiliˆid‰‰n ennakkolaskun varastosiirto eri tilille
+    // Katsotaan ensiksi ett‰ parametrit mahdollistaa t‰m‰n
+    if (!empty($yhtiorow["ennakkolaskun_asiakasvarasto"]) and !empty($yhtiorow["asiakasvarasto"]) and !empty($tun)) {
+
+      // Tarkistetaan viel‰ et siirtorivi on linkattu
+      // myyntitilausriviin ja kyseisell‰ myyntitilauksella
+      // on maksupositioita (100%) = ennakkolaskun kautta
+      // muodostunut varastosiirto (100% ennakkolasku)
+
+      $query = "SELECT tilausrivilinkki
+                FROM tilausrivin_lisatiedot
+                WHERE tilausrivitunnus = '$tun'
+                and yhtio   = '$kukarow[yhtio]'";
+      $result = pupe_query($query);
+
+      if (mysql_num_rows($result) == 1) {
+        $siirtolisatieto_row = mysql_fetch_assoc($result);
+
+        $query = "SELECT otunnus
+                  FROM tilausrivi
+                  WHERE tunnus = '{$siirtolisatieto_row['tilausrivilinkki']}'
+                  and yhtio   = '{$kukarow['yhtio']}'";
+        $result = pupe_query($query);
+
+        if (mysql_num_rows($result) == 1) {
+
+          $mytil_row = mysql_fetch_assoc($result);
+
+          $query = "SELECT tunnus
+                      FROM maksupositio
+                      WHERE yhtio = '{$kukarow['yhtio']}'
+                      AND otunnus = '{$mytil_row['otunnus']}'
+                      AND osuus = '100.00'";
+
+          $result = pupe_query($query);
+
+          if (mysql_num_rows($result) == 1) {
+            $asiakasvarasto_case = true;
+          }
+        }
+      }
+    }
+
     // Tehd‰‰n kirjanpito
-    if ($yhtiorow["tarkenteiden_prioriteetti"] == "T") {
+    if ($yhtiorow["tarkenteiden_prioriteetti"] == "T" or $asiakasvarasto_case) {
       // L‰hett‰v‰ varasto
       $mistavarasto = kuuluukovarastoon($mistarow['hyllyalue'], $mistarow['hyllynro']);
       $minnevarasto = kuuluukovarastoon($minnerow['hyllyalue'], $minnerow['hyllynro']);
@@ -27106,7 +27273,7 @@ if (!function_exists('hyllysiirto')) {
         if ($mista_projekti == 0) $mista_projekti = $toimirow['projekti'];
       }
 
-      if ($mista_kustp > 0 or $mista_kohde > 0 or $mista_projekti > 0) {
+      if ($mista_kustp > 0 or $mista_kohde > 0 or $mista_projekti > 0 or $asiakasvarasto_case) {
         $minne_kustp    = 0;
         $minne_kohde    = 0;
         $minne_projekti = 0;
@@ -27148,7 +27315,7 @@ if (!function_exists('hyllysiirto')) {
         $varastonmuutos = round($kappaleet * $keskihankintahinta, 2);
         $varastonmuutos_neg = round(-1 * $kappaleet * $keskihankintahinta, 2);
 
-        if ($varastonmuutos != 0 and $mennaanko) {
+        if (($varastonmuutos != 0 and $mennaanko) or $asiakasvarasto_case) {
 
           $laskuid = 0;
 
@@ -27205,7 +27372,6 @@ if (!function_exists('hyllysiirto')) {
               $varastonmuutostili = $yhtiorow["raaka_ainevarastonmuutos"];
             }
           }
-
 
           // Mist‰ varasto
           $query = "INSERT into tiliointi set
@@ -27280,6 +27446,10 @@ if (!function_exists('hyllysiirto')) {
                       laatija         = '$kukarow[kuka]',
                       laadittu        = now()";
             $result = pupe_query($query);
+          }
+
+          if ($asiakasvarasto_case) {
+            $varastotili = $yhtiorow["ennakkolaskun_asiakasvarasto"];
           }
 
           // Minne varasto
@@ -31346,12 +31516,14 @@ if (!function_exists("tallenna_tiliote_viite")) {
           $tilino = substr($tilino, 1, 14);
           fseek($fd, $pointterin_paikka);
 
+          $ppg_uusitilino = trim(substr($tietue, 16, 6));
+
           if ($onko_vipn) {
             $query = "SELECT tilino
                       FROM yriti
                       WHERE bic      = 'DABAFIHH'
                       AND factoring != ''
-                      LIMIT 1;";
+                      LIMIT 1";
             $f_result = pupe_query($query);
 
             // jos t‰m‰ ep‰onnistuu, virheilmoitus tulee alempana kun tilinumeroa ei lˆydy
@@ -31360,14 +31532,13 @@ if (!function_exists("tallenna_tiliote_viite")) {
               $tilino = $f_row['tilino'];
             }
           }
-          else {
+          elseif (!empty($ppg_uusitilino)) {
             // Kokeillaan onko kyse PPG:n factoring-aineistosta
-            $uusitilino = substr($tietue, 16, 6);
             $query = "SELECT tilino
                       FROM yriti
-                      WHERE tilino = '$uusitilino'
+                      WHERE tilino = '$ppg_uusitilino'
                       AND kaytossa = ''
-                      LIMIT 1;";
+                      LIMIT 1";
             $fp_result = pupe_query($query);
 
             // jos t‰m‰ ep‰onnistuu, virheilmoitus tulee alempana kun tilinumeroa ei lˆydy
@@ -34635,7 +34806,7 @@ if (!function_exists("laskun_hyvaksyjia")) {
 }
 
 if (!function_exists("viennin_lisatiedot")) {
-  function viennin_lisatiedot($otunnus) {
+  function viennin_lisatiedot($otunnus, $viennin_lisatietojen_automsyotto) {
     global $kukarow, $yhtiorow;
 
     $from_viennin_lisatiedot_funktio = True;
@@ -34670,68 +34841,71 @@ if (!function_exists("viennin_lisatiedot")) {
     $result = pupe_query($query);
     $asiakasrow = mysql_fetch_assoc($result);
 
-    // otetaan defaultit asiakkaalta jos laskulla ei ole mit‰‰n
-    if ($laskurow["poistumistoimipaikka_koodi"]       == "") $laskurow["poistumistoimipaikka_koodi"]       = $asiakasrow["poistumistoimipaikka_koodi"];
-    if ($laskurow["kuljetusmuoto"]                    ==  0) $laskurow["kuljetusmuoto"]                    = $asiakasrow["kuljetusmuoto"];
-    if ($laskurow["kauppatapahtuman_luonne"]          ==  0) $laskurow["kauppatapahtuman_luonne"]          = $asiakasrow["kauppatapahtuman_luonne"];
-    if ($laskurow["aktiivinen_kuljetus_kansallisuus"] == "") $laskurow["aktiivinen_kuljetus_kansallisuus"] = $asiakasrow["aktiivinen_kuljetus_kansallisuus"];
-    if ($laskurow["aktiivinen_kuljetus"]              == "") $laskurow["aktiivinen_kuljetus"]              = $asiakasrow["aktiivinen_kuljetus"];
-    if ($laskurow["kontti"]                           ==  0) $laskurow["kontti"]                           = $asiakasrow["kontti"];
-    if ($laskurow["sisamaan_kuljetusmuoto"]           ==  0) $laskurow["sisamaan_kuljetusmuoto"]           = $asiakasrow["sisamaan_kuljetusmuoto"];
-    if ($laskurow["sisamaan_kuljetus_kansallisuus"]   == "") $laskurow["sisamaan_kuljetus_kansallisuus"]   = $asiakasrow["sisamaan_kuljetus_kansallisuus"];
-    if ($laskurow["sisamaan_kuljetus"]                == "") $laskurow["sisamaan_kuljetus"]                = $asiakasrow["sisamaan_kuljetus"];
-    if ($laskurow["maa_maara"]                        == "") $laskurow["maa_maara"]                        = $asiakasrow["maa_maara"];
+    if (!$viennin_lisatietojen_automsyotto or ($viennin_lisatietojen_automsyotto and ($asiakasrow["vientitietojen_autosyotto"] == "K" or
+      $yhtiorow["vientitietojen_autosyotto"]  == "K"))) {
+      // otetaan defaultit asiakkaalta jos laskulla ei ole mit‰‰n
+      if ($laskurow["poistumistoimipaikka_koodi"]       == "") $laskurow["poistumistoimipaikka_koodi"]       = $asiakasrow["poistumistoimipaikka_koodi"];
+      if ($laskurow["kuljetusmuoto"]                    ==  0) $laskurow["kuljetusmuoto"]                    = $asiakasrow["kuljetusmuoto"];
+      if ($laskurow["kauppatapahtuman_luonne"]          ==  0) $laskurow["kauppatapahtuman_luonne"]          = $asiakasrow["kauppatapahtuman_luonne"];
+      if ($laskurow["aktiivinen_kuljetus_kansallisuus"] == "") $laskurow["aktiivinen_kuljetus_kansallisuus"] = $asiakasrow["aktiivinen_kuljetus_kansallisuus"];
+      if ($laskurow["aktiivinen_kuljetus"]              == "") $laskurow["aktiivinen_kuljetus"]              = $asiakasrow["aktiivinen_kuljetus"];
+      if ($laskurow["kontti"]                           ==  0) $laskurow["kontti"]                           = $asiakasrow["kontti"];
+      if ($laskurow["sisamaan_kuljetusmuoto"]           ==  0) $laskurow["sisamaan_kuljetusmuoto"]           = $asiakasrow["sisamaan_kuljetusmuoto"];
+      if ($laskurow["sisamaan_kuljetus_kansallisuus"]   == "") $laskurow["sisamaan_kuljetus_kansallisuus"]   = $asiakasrow["sisamaan_kuljetus_kansallisuus"];
+      if ($laskurow["sisamaan_kuljetus"]                == "") $laskurow["sisamaan_kuljetus"]                = $asiakasrow["sisamaan_kuljetus"];
+      if ($laskurow["maa_maara"]                        == "") $laskurow["maa_maara"]                        = $asiakasrow["maa_maara"];
 
-    $maa_maara = $laskurow["maa_maara"];
+      $maa_maara = $laskurow["maa_maara"];
 
-    if ($laskurow["vienti"] == "K") {
-      $sisamaan_kuljetus = $laskurow["sisamaan_kuljetus"];
-      $sisamaan_kuljetus_kansallisuus = $laskurow["sisamaan_kuljetus_kansallisuus"];
-      $sisamaan_kuljetusmuoto = $laskurow["sisamaan_kuljetusmuoto"];
-      $kontti = $laskurow["kontti"];
-      $aktiivinen_kuljetus = $laskurow["aktiivinen_kuljetus"];
-      $aktiivinen_kuljetus_kansallisuus = $laskurow["aktiivinen_kuljetus_kansallisuus"];
-    }
+      if ($laskurow["vienti"] == "K") {
+        $sisamaan_kuljetus = $laskurow["sisamaan_kuljetus"];
+        $sisamaan_kuljetus_kansallisuus = $laskurow["sisamaan_kuljetus_kansallisuus"];
+        $sisamaan_kuljetusmuoto = $laskurow["sisamaan_kuljetusmuoto"];
+        $kontti = $laskurow["kontti"];
+        $aktiivinen_kuljetus = $laskurow["aktiivinen_kuljetus"];
+        $aktiivinen_kuljetus_kansallisuus = $laskurow["aktiivinen_kuljetus_kansallisuus"];
+      }
 
-    $kauppatapahtuman_luonne = $laskurow["kauppatapahtuman_luonne"];
-    $kuljetusmuoto = $laskurow["kuljetusmuoto"];
+      $kauppatapahtuman_luonne = $laskurow["kauppatapahtuman_luonne"];
+      $kuljetusmuoto = $laskurow["kuljetusmuoto"];
 
-    if ($laskurow["vienti"] == "K") {
-      $vresult = t_avainsana("TULLI");
+      if ($laskurow["vienti"] == "K") {
+        $vresult = t_avainsana("TULLI");
 
-      while ($vrow = mysql_fetch_assoc($vresult)) {
-        if ($laskurow["poistumistoimipaikka_koodi"] == $vrow["selite"]) {
-          $poistumistoimipaikka = "$vrow[selitetark]##$vrow[selite]";
+        while ($vrow = mysql_fetch_assoc($vresult)) {
+          if ($laskurow["poistumistoimipaikka_koodi"] == $vrow["selite"]) {
+            $poistumistoimipaikka = "$vrow[selitetark]##$vrow[selite]";
+          }
         }
+
+        if ($laskurow["lisattava_era"] == 0) {
+          $laskurow["lisattava_era"] = $yhtiorow["tulli_lisattava_era"];
+        }
+        if ($laskurow["vahennettava_era"] == 0) {
+          $laskurow["vahennettava_era"] = $yhtiorow["tulli_vahennettava_era"];
+        }
+
+        $vahennettava_era = $laskurow["vahennettava_era"];
+        $lisattava_era = $laskurow["lisattava_era"];
       }
 
-      if ($laskurow["lisattava_era"] == 0) {
-        $laskurow["lisattava_era"] = $yhtiorow["tulli_lisattava_era"];
-      }
-      if ($laskurow["vahennettava_era"] == 0) {
-        $laskurow["vahennettava_era"] = $yhtiorow["tulli_vahennettava_era"];
-      }
+      $bruttopaino = $laskurow["bruttopaino"];
+      $lomake_lisatiedot = $laskurow["comments"];
+      $aiotut_rajatoimipaikat = $laskurow["aiotut_rajatoimipaikat"];
+      $maaratoimipaikka = $laskurow["maaratoimipaikka"];
 
-      $vahennettava_era = $laskurow["vahennettava_era"];
-      $lisattava_era = $laskurow["lisattava_era"];
+      # P‰ivitet‰‰n viennin lis‰tiedot
+      require "tilauskasittely/vientitilauksen_lisatiedot.php";
+
+      $query = "SELECT alatila
+                FROM lasku
+                WHERE tunnus = $otunnus
+                and tila = 'L'
+                AND vienti  in ('K','E')
+                and yhtio = '$kukarow[yhtio]'";
+      $result = pupe_query($query);
+      $alatila = mysql_fetch_assoc($result);
     }
-
-    $bruttopaino = $laskurow["bruttopaino"];
-    $lomake_lisatiedot = $laskurow["comments"];
-    $aiotut_rajatoimipaikat = $laskurow["aiotut_rajatoimipaikat"];
-    $maaratoimipaikka = $laskurow["maaratoimipaikka"];
-
-    # P‰ivitet‰‰n viennin lis‰tiedot
-    require "tilauskasittely/vientitilauksen_lisatiedot.php";
-
-    $query = "SELECT alatila
-              FROM lasku
-              WHERE tunnus = $otunnus
-              and tila = 'L'
-              AND vienti  in ('K','E')
-              and yhtio = '$kukarow[yhtio]'";
-    $result = pupe_query($query);
-    $alatila = mysql_fetch_assoc($result);
 
     return $alatila['alatila'];
   }
@@ -34987,7 +35161,7 @@ if (!function_exists("tilauksen_seurantalinkit")) {
 
           $seurantakoodit[] = array(
             "id" => $nro,
-            "link" => "http://mhhkiweb1.matkahuolto.fi/scripts/loginetyleinen.wsc/002tapahtuma_new?spacketnum={$nro}"
+            "link" => "https://www.matkahuolto.fi/seuranta/tilanne/?package_code={$nro}"
           );
         }
       }
@@ -35131,6 +35305,198 @@ if (!function_exists('viidakko_tracking_code')) {
     while ($viidrow = mysql_fetch_assoc($viidres)) {
       $viidakko_orders->update_viidakko_tracking_code($viidrow['kohde'], $tracking_code);
     }
+}
+
+if (!function_exists('finvoice_myyntilaskuksi_valitse_maksuehto')) {
+  function finvoice_myyntilaskuksi_valitse_maksuehto($laskun_maksuehtoteksti, $laskun_erapaiva, $laskun_lapvm) {
+    global $kukarow, $yhtiorow;
+
+    $maksuaika_sek = strtotime($laskun_lapvm) - strtotime($laskun_erapaiva);
+
+    if (!empty($maksuaika_sek)) {
+      $maksuaika = round($maksuaika_sek/86400);
+
+      $query = "SELECT *
+                FROM maksuehto
+                WHERE yhtio = '{$yhtiorow['yhtio']}'
+                AND rel_pvm = '$maksuaika'
+                AND kassa_relpvm = '0'";
+      $maksuehtores = pupe_query($query);
+
+      if (mysql_num_rows($maksuehtores) == 0) {
+        $query = "SELECT *
+                  FROM maksuehto
+                  WHERE yhtio = '{$yhtiorow['yhtio']}'
+                  AND rel_pvm = '0'
+                  AND kassa_relpvm = '0'";
+        $maksuehtores = pupe_query($query);
+      }
+
+      if (mysql_num_rows($maksuehtores) == 1) {
+        return mysql_fetch_assoc($maksuehtores);
+      }
+      return False;
+    }
+    else {
+      // Haetaan maksuehdon nimell‰
+      $query = "SELECT *
+                FROM maksuehto
+                WHERE yhtio = '{$yhtiorow['yhtio']}'
+                AND teksti = '$laskun_maksuehtoteksti'";
+      $maksuehtores = pupe_query($query);
+
+      if (mysql_num_rows($maksuehtores) == 1) {
+        return mysql_fetch_assoc($maksuehtores);
+      }
+    }
+  }
+}
+
+if (!function_exists('finvoice_myyntilaskuksi_valitse_asiakas')) {
+  function finvoice_myyntilaskuksi_valitse_asiakas($toim_asiakkaantiedot, $ostaja_asiakkaantiedot, $laskun_asiakaspupetunnus) {
+    global $kukarow, $yhtiorow;
+
+    if (!empty($laskun_asiakaspupetunnus)) {
+      $query = "SELECT *
+                FROM asiakas
+                WHERE yhtio = '{$yhtiorow['yhtio']}'
+                AND tunnus = '{$laskun_asiakaspupetunnus}'";
+      $result = pupe_query($query);
+      #echo "$query\n\n";
+    }
+    else {
+      $ytunnus = str_replace("-", "", $ostaja_asiakkaantiedot['ytunnus']);
+
+      $query = "SELECT *
+                FROM asiakas
+                WHERE yhtio = '{$yhtiorow['yhtio']}'
+                AND REPLACE(ytunnus, '-', '') = '{$ytunnus}'
+                AND concat_ws(' ', nimi, nimitark) = '{$ostaja_asiakkaantiedot['nimi']}'
+                AND osoite = '{$ostaja_asiakkaantiedot["osoite"]}'
+                AND postino = '{$ostaja_asiakkaantiedot["postino"]}'
+                AND postitp = '{$ostaja_asiakkaantiedot["postitp"]}'
+                AND concat_ws(' ', toim_nimi, toim_nimitark) = '{$toim_asiakkaantiedot['nimi']}'
+                AND toim_osoite = '{$toim_asiakkaantiedot["osoite"]}'
+                AND toim_postino = '{$toim_asiakkaantiedot["postino"]}'
+                AND toim_postitp = '{$toim_asiakkaantiedot["postitp"]}'
+                AND laji != 'P'";
+      $result = pupe_query($query);
+      #echo "$query\n\n";
+    }
+
+    if (mysql_num_rows($result) != 1) {
+      $ytunnus = str_replace("-", "", $ostaja_asiakkaantiedot['ytunnus']);
+
+      $query = "SELECT *
+                FROM asiakas
+                WHERE yhtio = '{$yhtiorow['yhtio']}'
+                AND REPLACE(ytunnus, '-', '') = '{$ytunnus}'
+                AND concat_ws(' ', nimi, nimitark) = '{$ostaja_asiakkaantiedot['nimi']}'
+                AND osoite = '{$ostaja_asiakkaantiedot["osoite"]}'
+                AND postino = '{$ostaja_asiakkaantiedot["postino"]}'
+                AND postitp = '{$ostaja_asiakkaantiedot["postitp"]}'
+                AND laji != 'P'";
+      $result = pupe_query($query);
+      #echo "$query\n\n";
+    }
+
+    if (mysql_num_rows($result) != 1) {
+      $ytunnus = str_replace("-", "", $ostaja_asiakkaantiedot['ytunnus']);
+
+      $query = "SELECT *
+                FROM asiakas
+                WHERE yhtio = '{$yhtiorow['yhtio']}'
+                AND REPLACE(ytunnus, '-', '') = '{$ytunnus}'
+                AND concat_ws(' ', nimi, nimitark) = '{$ostaja_asiakkaantiedot['nimi']}'
+                AND osoite = '{$ostaja_asiakkaantiedot["osoite"]}'
+                AND postino = '{$ostaja_asiakkaantiedot["postino"]}'
+                AND postitp = '{$ostaja_asiakkaantiedot["postitp"]}'
+                AND toim_nimi = ''
+                AND toim_osoite = ''
+                AND toim_postino = ''
+                AND toim_postitp = ''
+                AND laji != 'P'";
+      $result = pupe_query($query);
+      #echo "$query\n\n";
+    }
+
+    if (mysql_num_rows($result) != 1) {
+      # Haiskahtaako laskutusosoitteelta?
+      $ytunnus = str_replace("-", "", $ostaja_asiakkaantiedot['ytunnus']);
+
+      # Odoossa on t‰ss‰ tapauksessa ostajan nimen‰: "ostajan nimi, laskutusoositteen nimi", eli j‰tet‰‰n se pois ehdoista
+      # ja toimitusositteessa joko toimitusosite tai ostajan osoite jos toimitusositetta ei ole
+
+      $query = "SELECT *
+                FROM asiakas
+                WHERE yhtio = '{$yhtiorow['yhtio']}'
+                AND REPLACE(ytunnus, '-', '') = '{$ytunnus}'
+                AND laskutus_osoite = '{$ostaja_asiakkaantiedot["osoite"]}'
+                AND laskutus_postino = '{$ostaja_asiakkaantiedot["postino"]}'
+                AND laskutus_postitp = '{$ostaja_asiakkaantiedot["postitp"]}'
+                AND concat_ws(' ', toim_nimi, toim_nimitark) = '{$toim_asiakkaantiedot['nimi']}'
+                AND toim_osoite = '{$toim_asiakkaantiedot["osoite"]}'
+                AND toim_postino = '{$toim_asiakkaantiedot["postino"]}'
+                AND toim_postitp = '{$toim_asiakkaantiedot["postitp"]}'
+                AND laji != 'P'";
+      $result = pupe_query($query);
+      #echo "$query\n\n";
+
+      if (mysql_num_rows($result) != 1) {
+        $query = "SELECT *
+                  FROM asiakas
+                  WHERE yhtio = '{$yhtiorow['yhtio']}'
+                  AND REPLACE(ytunnus, '-', '') = '{$ytunnus}'
+                  AND laskutus_osoite = '{$ostaja_asiakkaantiedot["osoite"]}'
+                  AND laskutus_postino = '{$ostaja_asiakkaantiedot["postino"]}'
+                  AND laskutus_postitp = '{$ostaja_asiakkaantiedot["postitp"]}'
+                  AND concat_ws(' ', nimi, nimitark) = '{$toim_asiakkaantiedot['nimi']}'
+                  AND osoite = '{$toim_asiakkaantiedot["osoite"]}'
+                  AND postino = '{$toim_asiakkaantiedot["postino"]}'
+                  AND postitp = '{$toim_asiakkaantiedot["postitp"]}'
+                  AND toim_nimi = ''
+                  AND toim_osoite = ''
+                  AND toim_postino = ''
+                  AND toim_postitp = ''
+                  AND laji != 'P'";
+        $result = pupe_query($query);
+        #echo "$query\n\n";
+      }
+
+      if (mysql_num_rows($result) != 1) {
+        $query = "SELECT *
+                  FROM asiakas
+                  WHERE yhtio = '{$yhtiorow['yhtio']}'
+                  AND REPLACE(ytunnus, '-', '') = '{$ytunnus}'
+                  AND laskutus_osoite = '{$ostaja_asiakkaantiedot["osoite"]}'
+                  AND laskutus_postino = '{$ostaja_asiakkaantiedot["postino"]}'
+                  AND laskutus_postitp = '{$ostaja_asiakkaantiedot["postitp"]}'
+                  AND concat_ws(' ', nimi, nimitark) = '{$toim_asiakkaantiedot['nimi']}'
+                  AND osoite = '{$toim_asiakkaantiedot["osoite"]}'
+                  AND postino = '{$toim_asiakkaantiedot["postino"]}'
+                  AND postitp = '{$toim_asiakkaantiedot["postitp"]}'
+                  AND laji != 'P'";
+        $result = pupe_query($query);
+        #echo "$query\n\n";
+      }
+    }
+
+    if (mysql_num_rows($result) != 1 and !empty($ostaja_asiakkaantiedot['ytunnus'])) {
+      $ytunnus = str_replace("-", "", $ostaja_asiakkaantiedot['ytunnus']);
+
+      $query = "SELECT *
+                FROM asiakas
+                WHERE yhtio = '{$yhtiorow['yhtio']}'
+                AND REPLACE(ytunnus, '-', '') = '{$ytunnus}'
+                AND laji != 'P'";
+      $result = pupe_query($query);
+      #echo "$query\n\n";
+    }
+
+    if (mysql_num_rows($result) == 1) {
+      return mysql_fetch_assoc($result);
+    }
+    return False;
   }
 }
 

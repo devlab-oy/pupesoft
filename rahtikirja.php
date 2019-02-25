@@ -892,6 +892,12 @@ if ($tee == 'add') {
 
     } // end if löytykö toimitustapa
 
+    // Automaattinen vientitietojen kuittaus kun koontirahtikirjaa ei tulosteta
+    if ($yhtiorow["vientitietojen_autosyotto"] == "K" and $laskurow['alatila'] != 'X' and ($laskurow['vienti'] == 'E' or $laskurow['vienti'] == 'K')) {
+      viennin_lisatiedot($laskurow['tunnus']);
+
+    }
+
     if ($yhtiorow['karayksesta_rahtikirjasyottoon'] != '' and $mista == 'keraa.php') {
       $keraaseen = 'mennaan';
     }
@@ -1489,9 +1495,15 @@ if (($toim == 'lisaa' or $toim == 'lisaa_siirto') and $id == 0 and (string) $id 
     $lisawhere = " and (rahtikirjat.otsikkonro is null or rahtikirjat.poikkeava = -9) ";
   }
 
+  $groupaika = ",laadittux, toimaika ";
+
   if ($yhtiorow["splittauskielto"] == "" and $yhtiorow['pakkaamolokerot'] != '') {
     $grouplisa = ", lasku.vanhatunnus, lasku.varasto, lasku.pakkaamo ";
     $selecttoimitustapaehto = " toimitustapa.tunnus kimppakyyti, ";
+  }
+  elseif ($kukarow['yhtio'] == 'mast') {
+    $selecttoimitustapaehto = " if (toimitustapa.tulostustapa='K', toimitustapa.tunnus, if (lasku.kerayslista > 0, lasku.kerayslista, lasku.tunnus)) kimppakyyti, ";
+    $groupaika = ', if (lasku.kerayslista > 0,"", concat(date_format(lasku.luontiaika, "%Y-%m-%d"), date_format(lasku.toimaika, "%Y-%m-%d")))';
   }
   else {
     $selecttoimitustapaehto = " if (toimitustapa.tulostustapa='K', toimitustapa.tunnus, lasku.tunnus) kimppakyyti, ";
@@ -1561,7 +1573,7 @@ if (($toim == 'lisaa' or $toim == 'lisaa_siirto') and $id == 0 and (string) $id 
             $lisawhere
             {$saldotonwherelisa}
             and ((toimitustapa.nouto is null or toimitustapa.nouto = '') or lasku.vienti != '')
-            GROUP BY lasku.yhtio, lasku.yhtio_nimi, lasku.toimitustapa, toimitustapa.nouto, $groupmaksuehto kimppakyyti, lasku.vienti, laadittux, toimaika $grouplisa
+            GROUP BY lasku.yhtio, lasku.yhtio_nimi, lasku.toimitustapa, toimitustapa.nouto, $groupmaksuehto kimppakyyti, lasku.vienti $groupaika $grouplisa
             $jarjx";
   $tilre = pupe_query($query);
 
@@ -3363,7 +3375,7 @@ if ($yhtiorow['karayksesta_rahtikirjasyottoon'] != '' and $mista == 'keraa.php' 
 
 }
 elseif ($yhtiorow['karayksesta_rahtikirjasyottoon'] != '' and $mista == 'keraa.php' and $keraaseen == 'mennaan') {
-  echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=tilauskasittely/keraa.php'>";
+  echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=tilauskasittely/keraa.php?indexvas=1'>";
   exit;
 }
 

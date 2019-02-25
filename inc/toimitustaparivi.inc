@@ -133,20 +133,15 @@ if (mysql_field_name($result, $i) == "virallinen_selite") {
   $ulos .= "<optgroup label='Unifaun / DANX'>";
   $ulos .= "<option value='DANXSTD' {$sel["DANXSTD"]}>DANX</option>";
   $ulos .= "</optgroup>";
-
-  $ulos .= "<optgroup label='Unifaun / DB SCHENKER kotimaankuljetukset'>";
-  $ulos .= "<option value='KLGRP' {$sel["KLGRP"]}>DB SCHENKER kotimaankuljetukset</option>";
-  $ulos .= "</optgroup>";
-
+  
   $ulos .= "<optgroup label='Unifaun / DB SCHENKER Parcel - kotimaan pakettikuljetukset'>";
   $ulos .= "<option value='SBTLFIEXP' {$sel["SBTLFIEXP"]}>DB SCHENKERparcel (Suomi)</option>";
   $ulos .= "</optgroup>";
 
-  $ulos .= "<optgroup label='Unifaun / DB SCHENKER Vientikuljetukset'>";
-  $ulos .= "<option value='SBTLFISY' {$sel["SBTLFISY"]}>DB SCHENKER Vientikuljetukset</option>";
-  $ulos .= "</optgroup>";
-
   $ulos .= "<optgroup label='Unifaun / DB Schenker'>";
+  $ulos .= "<option value='KLGRP' {$sel["SBTLFIRREX"]}>DB SCHENKER Noutopistepaketti</option>";
+  $ulos .= "<option value='KLGRP' {$sel["KLGRP"]}>DB SCHENKER kotimaankuljetukset</option>";
+  $ulos .= "<option value='SBTLFISY' {$sel["SBTLFISY"]}>DB SCHENKER Vientikuljetukset</option>";
   $ulos .= "<option value='BBU' {$sel["BBU"]}>DB SCHENKERbudget</option>";
   $ulos .= "<option value='BCSI' {$sel["BCSI"]}>DB SCHENKERcoldsped - Europa</option>";
   $ulos .= "<option value='BCS' {$sel["BCS"]}>DB SCHENKERcoldsped - Sverige</option>";
@@ -269,8 +264,11 @@ if (mysql_field_name($result, $i) == "virallinen_selite") {
   $ulos .= "<optgroup label='Unifaun / PostNord'>";
   $ulos .= "<option value='DOMROAD' {$sel["DOMROAD"]}>PostNord Domestic Road</option>";
   $ulos .= "<option value='H48' {$sel["H48"]}>PostNord Logistics InNight</option>";
+  $ulos .= "<option value='P17FI' {$sel["P17FI"]}>PostNord MyPack Home FI</option>";
   $ulos .= "<option value='P19FI' {$sel["P19FI"]}>PostNord Logistics MyPack (Suomi)</option>";
   $ulos .= "<option value='P19FIDPD' {$sel["P19FIDPD"]}>PostNord MyPack Collect FI Pohjoismaiden ulkopuolella</option>";
+  $ulos .= "<option value='P18FI' {$sel["P18FI"]}>PostNord FI Parcel (Pohjoismaat)</option>";
+  $ulos .= "<option value='P18FIDPD' {$sel["P18FIDPD"]}>PostNord FI Parcel (muut maat)</option>";
   $ulos .= "<option value='DPDFI' {$sel["DPDFI"]}>PostNord DPD Classic (Suomi)</option>";
   $ulos .= "<option value='DLMAILEXP' {$sel["DLMAILEXP"]}>Direct Link Merchandise Mail Plus Express</option>";
   $ulos .= "<option value='P24FI' {$sel["P24FI"]}>PostNord Logistics MyPack return (Suomi)</option>";

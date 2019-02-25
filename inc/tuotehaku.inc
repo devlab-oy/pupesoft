@@ -314,6 +314,7 @@ if (!$enarimatch) {
                   ON (asiakaskommentti.yhtio = tuote.yhtio
                   AND asiakaskommentti.tuoteno = tuote.tuoteno
                   AND asiakaskommentti.ytunnus = '{$asiakasrow["ytunnus"]}')
+                  AND asiakaskommentti.tyyppi  = ''
                 WHERE tuote.yhtio              = '{$kukarow["yhtio"]}'
                 AND asiakaskommentti.kommentti = '{$tuoteno}'
                 {$poistetulisa}

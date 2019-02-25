@@ -131,6 +131,90 @@ if ($rivimaara == '') {
   $rivimaara = $laaja_inventointilista ? '16' : '17';
 }
 
+
+if ($tee == "LUELISTA") {
+  if (is_uploaded_file($_FILES['listafile']['tmp_name']) === TRUE) {
+    $path_parts = pathinfo($_FILES['listafile']['name']);
+    $name  = strtoupper($path_parts['filename']);
+    $ext  = strtoupper($path_parts['extension']);
+
+    if ($_FILES['listafile']['size'] == 0) {
+      die ("<font class='error'><br>".t("Tiedosto on tyhj‰")."!</font>");
+    }
+
+    $retval = tarkasta_liite("listafile", array("XLSX", "XLS", "ODS", "SLK", "XML", "GNUMERIC", "CSV", "TXT", "DATAIMPORT"));
+
+    if ($retval !== TRUE) {
+      die ("<font class='error'><br>".t("V‰‰r‰ tiedostomuoto")."!</font>");
+    }
+
+    $excelrivit = pupeFileReader($_FILES['listafile']['tmp_name'], $ext);
+
+    $maarasarake = 0;
+    $paivitetyt_rivit = 0;
+
+    // Otsikot
+    for ($excei = 0; $excei < count($excelrivit); $excei++) {
+      if ($excelrivit[$excei][1] == "paikka" and $excelrivit[$excei][2] == "tuoteno" and $maarasarake == 0) {
+        for ($sara = 2; $sara < count($excelrivit[$excei]); $sara++) {
+          if ($excelrivit[$excei][$sara] == "m‰‰r‰") {
+            $maarasarake = $sara;
+            break;
+          }
+        }
+        continue;
+      }
+      if (empty($maarasarake)) {
+        continue;
+      }
+
+      if (!empty($maarasarake) and trim($excelrivit[$excei][$maarasarake]) == "") {
+        continue;
+      }
+
+      // luetaan rivi tiedostosta..
+      $tuo    = mysql_real_escape_string(trim($excelrivit[$excei][2]));
+      $hyl    = mysql_real_escape_string(trim($excelrivit[$excei][1]));
+      $maa    = str_replace(",", ".", trim($excelrivit[$excei][$maarasarake]));
+      list($alue, $nro, $vali, $taso)  = explode("-", $hyl);
+
+      $query = "UPDATE inventointilistarivi SET
+                laskettu = '$maa'
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND tila = 'A'
+                AND otunnus = '{$lista}'
+                AND tuoteno = '{$tuo}'
+                AND hyllyalue = '{$alue}'
+                AND hyllynro = '{$nro}'
+                AND hyllyvali = '{$vali}'
+                AND hyllytaso = '{$taso}'";
+      pupe_query($query);
+      $paivitetyt_rivit++;
+    }
+
+    echo "<br>".t("P‰ivitettiin %s rivi‰", "", $paivitetyt_rivit)."<br>";
+    $tee = "";
+  }
+  else {
+    echo "<form action='inventoi.php' method='post' enctype='multipart/form-data'>
+          <input type='hidden' name='toim' value='$toim'>
+          <input type='hidden' name='lopetus' value='$lopetus'>
+          <input type='hidden' name='tee' value='LUELISTA'>
+          <input type='hidden' name='lista' value='$lista'>
+          <input type='hidden' name='lista_aika' value='$lista_aika'>
+          <input type='hidden' name='inventointipvm_pp' value='$inventointipvm_pp'>
+          <input type='hidden' name='inventointipvm_kk' value='$inventointipvm_kk'>
+          <input type='hidden' name='inventointipvm_vv' value='$inventointipvm_vv'>";
+
+    echo "<table><tr>";
+    echo "<th>".t("Valitse tiedosto").":</th>";
+    echo "<td><input name='listafile' type='file'></td>";
+    echo "</tr></table>";
+    echo "<br><input type='submit' value='".t("K‰sittele m‰‰r‰t")."'>
+        </form>";
+  }
+}
+
 //katotaan onko tiedosto ladattu
 if ($tee == "FILE") {
   if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
@@ -2605,7 +2689,7 @@ if ($tee == '') {
       echo "<th>", t("Vapaa teksti"), "</th>";
     }
 
-    echo "<th colspan='2'></th>";
+    echo "<th colspan='3'></th>";
     echo "</tr>";
 
     while ($lrow = mysql_fetch_assoc($result)) {
@@ -2637,8 +2721,25 @@ if ($tee == '') {
             <input type='hidden' name='inventointipvm_vv' value='$inventointipvm_vv'>
             <input type='submit' value='".t("Inventoi")."'>
             </form>
-          </td>
-          <td>
+          </td>";
+
+      if ($yhtiorow['laaja_inventointilista'] != '') {
+        echo "<td>
+              <form action='inventoi.php' method='post'>
+              <input type='hidden' name='toim' value='$toim'>
+              <input type='hidden' name='lopetus' value='$lopetus'>
+              <input type='hidden' name='tee' value='LUELISTA'>
+              <input type='hidden' name='lista' value='$lrow[inventointilista]'>
+              <input type='hidden' name='lista_aika' value='$lrow[inventointilista_aika]'>
+              <input type='hidden' name='inventointipvm_pp' value='$inventointipvm_pp'>
+              <input type='hidden' name='inventointipvm_kk' value='$inventointipvm_kk'>
+              <input type='hidden' name='inventointipvm_vv' value='$inventointipvm_vv'>
+              <input type='submit' value='".t("Lue m‰‰r‰t Excelist‰")."'>
+              </form>
+            </td>";
+      }
+
+      echo "<td>
             <form action='inventoi.php' method='post'>
             <input type='hidden' name='toim' value='$toim'>
             <input type='hidden' name='lopetus' value='$lopetus'>

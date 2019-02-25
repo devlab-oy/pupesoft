@@ -14,6 +14,13 @@ if (!isset($argv[1]) or $argv[1] == '') {
 
 $yhtio = $argv[1];
 
+if (isset($argv[2]) and $argv[2] != '') {
+  $customer_laajennus = true;
+}
+else {
+  $customer_laajennus = false;
+}
+
 ini_set("memory_limit", "1G");
 
 // otetaan includepath aina rootista
@@ -64,7 +71,7 @@ echo "Logisticar siirto: $yhtio\n";
 
 //testausta varten limit
 $limit = "";
-//$limit = "limit 200";
+//$limit = "limit 300";
 
 // Ajetaan kaikki operaatiot
 nimike($limit);
@@ -253,24 +260,43 @@ function nimike($limit = '') {
 }
 
 function asiakas($limit = '') {
-  global $path_asiakas, $yhtio, $logisticar;
+  global $path_asiakas, $yhtio, $logisticar, $customer_laajennus;
 
   $where_logisticar = $logisticar[$yhtio]["where"];
 
   echo "Asiakkaat...";
 
-  $query = "SELECT
-            asiakas.tunnus    asiakastunnus,
-            concat_ws(' ', asiakas.nimi, asiakas.nimitark)  asiakkaannimi,
-            asiakas.ryhma    asiakasryhma,
-            kuka.kuka       myyjatunnus,
-            asiakas.postino  postinumero,
-            asiakas.toim_postitp toimituspostitp,
-            asiakas.toim_maa toimitusmaa
-            FROM asiakas
-            LEFT JOIN kuka ON kuka.myyja=asiakas.myyjanro and kuka.yhtio=asiakas.yhtio and kuka.myyja > 0
-            where asiakas.yhtio='$yhtio'
-            $limit";
+  if ($customer_laajennus){
+
+    $query = "SELECT
+              asiakas.tunnus    asiakastunnus,
+              concat_ws(' ', asiakas.nimi, asiakas.nimitark)  asiakkaannimi,
+              asiakas.ryhma    asiakasryhma,
+              kuka.kuka       myyjatunnus,
+              if(asiakas.toim_postino !='', asiakas.toim_postino, asiakas.postino) postinumero,
+              if(asiakas.toim_postitp !='', asiakas.toim_postitp, asiakas.postitp) toimituspostitp,
+              if(asiakas.toim_maa !='', asiakas.toim_maa, asiakas.maa) toimitusmaa,
+              if(asiakas.toim_nimitark !='', asiakas.toim_nimitark, asiakas.nimitark) nimitarkenne
+              FROM asiakas
+              LEFT JOIN kuka ON kuka.myyja=asiakas.myyjanro and kuka.yhtio=asiakas.yhtio and kuka.myyja > 0
+              where asiakas.yhtio='$yhtio'
+              $limit";
+
+  }
+  else {
+    $query = "SELECT
+              asiakas.tunnus    asiakastunnus,
+              concat_ws(' ', asiakas.nimi, asiakas.nimitark)  asiakkaannimi,
+              asiakas.ryhma    asiakasryhma,
+              kuka.kuka       myyjatunnus,
+              asiakas.postino  postinumero,
+              asiakas.toim_postitp toimituspostitp,
+              asiakas.toim_maa toimitusmaa
+              FROM asiakas
+              LEFT JOIN kuka ON kuka.myyja=asiakas.myyjanro and kuka.yhtio=asiakas.yhtio and kuka.myyja > 0
+              where asiakas.yhtio='$yhtio'
+              $limit";
+  }
   $rest = pupe_query($query);
 
   $rows = mysql_num_rows($rest);
@@ -283,15 +309,29 @@ function asiakas($limit = '') {
 
   $fp = fopen($path_asiakas, 'w+');
 
-  $headers = array(
-    'asiakastunnus'  => null,
-    'asiakkaannimi'  => null,
-    'asiakasryhma'   => null,
-    'myyjatunnus'    => null,
-    'postinumero'    => null,
-    'toimituspostitp' => null,
-    'toimitusmaa'    => null
-  );
+  if ($customer_laajennus) {
+    $headers = array(
+      'asiakastunnus'  => null,
+      'asiakkaannimi'  => null,
+      'asiakasryhma'   => null,
+      'myyjatunnus'    => null,
+      'postinumero'    => null,
+      'toimituspostitp' => null,
+      'toimitusmaa'    => null,
+      'nimitarkenne'   => null
+    );
+  }
+  else {
+    $headers = array(
+      'asiakastunnus'  => null,
+      'asiakkaannimi'  => null,
+      'asiakasryhma'   => null,
+      'myyjatunnus'    => null,
+      'postinumero'    => null,
+      'toimituspostitp' => null,
+      'toimitusmaa'    => null
+    );
+  }
 
   create_headers($fp, array_keys($headers));
 
@@ -482,12 +522,12 @@ function varastotapahtumat($limit = '') {
             (tapahtuma.kplhinta * tapahtuma.kpl * -1) myyntiarvo,
             (tapahtuma.kplhinta * tapahtuma.kpl * -1) ostoarvo,
             (tapahtuma.kpl * (tapahtuma.kplhinta - tapahtuma.hinta) * -1) kate,
-            tapahtuma.kpl         tapahtumamaara,
+            tapahtuma.kpl               tapahtumamaara,
             lasku.laskunro              laskunumero,
-            kuka.kuka                  myyjatunnus,
-            lasku.yhtio_toimipaikka    toimipaikka,
+            kuka.kuka                   myyjatunnus,
+            lasku.yhtio_toimipaikka     toimipaikka,
             varastopaikat.tunnus        varastotunnus,
-            tapahtuma.laji        tapahtumatyyppi
+            tapahtuma.laji              tapahtumatyyppi
             FROM tapahtuma
             LEFT JOIN tilausrivi USE INDEX (PRIMARY) ON (tilausrivi.yhtio = tapahtuma.yhtio and tilausrivi.tunnus = tapahtuma.rivitunnus)
             LEFT JOIN lasku USE INDEX (PRIMARY) ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus)
@@ -500,6 +540,7 @@ function varastotapahtumat($limit = '') {
             LEFT JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
               AND varastopaikat.tunnus                          = tuotepaikat.varasto)
             LEFT JOIN kuka ON kuka.tunnus=lasku.myyja and kuka.yhtio=lasku.yhtio
+
             WHERE tapahtuma.laji                                in ('tulo', 'laskutus', 'siirto', 'valmistus', 'kulutus')
             and tapahtuma.yhtio                                 = '$yhtio'
             $pvmlisa
@@ -525,7 +566,7 @@ function varastotapahtumat($limit = '') {
     'tapahtumamaara'  => null,
     'laskunumero'     => null,
     'myyjatunnus'     => null,
-    'toimipaikka'    => null,
+    'toimipaikka'     => null,
     'varastotunnus'   => null,
     'tapahtumatyyppi' => null
   );
@@ -594,6 +635,18 @@ function varastotapahtumat($limit = '') {
 
     }
 
+    $asquery = "SELECT asiakas.myyjanro, kuka.kuka from asiakas
+              LEFT JOIN kuka ON (kuka.yhtio = asiakas.yhtio and kuka.myyja = asiakas.myyjanro)
+              WHERE asiakas.yhtio = '$yhtio'
+                and asiakas.myyjanro != 0
+                and asiakas.tunnus = '{$trow[asiakastunnus]}'";
+    $asres = pupe_query($asquery);
+
+    $asrow = mysql_fetch_assoc($asres);
+
+    #Laitetaan myyjatunnus tyhj‰n‰ jos ei asiakasmyyj‰‰ ole asetettu
+    $trow['myyjatunnus'] = $asrow['kuka'];
+
     unset($trow['kate']);
 
     // Siivotaan kent‰t:
@@ -642,7 +695,8 @@ function myynti($limit = '') {
             kuka.kuka myyjatunnus,
             lasku.yhtio_toimipaikka  toimipaikka,
             varastopaikat.tunnus varastotunnus,
-            tilausrivi.toimitettu
+            tilausrivi.toimitettu,
+            date_format(lasku.luontiaika, '%Y-%m-%d') luontipaiva
             FROM tilausrivi
             JOIN lasku USE INDEX (PRIMARY) ON lasku.tunnus=tilausrivi.otunnus and lasku.yhtio=tilausrivi.yhtio
             JOIN tuote ON tuote.tuoteno = tilausrivi.tuoteno and tuote.yhtio = tilausrivi.yhtio
@@ -676,8 +730,9 @@ function myynti($limit = '') {
     'tapahtumamaara'  => null,
     'tilausnro'       => null,
     'myyjatunnus'     => null,
-    'toimipaikka'    => null,
-    'varastotunnus'   => null
+    'toimipaikka'     => null,
+    'varastotunnus'   => null,
+    'luontipaiva'     => null
   );
 
   // tehd‰‰n otsikot

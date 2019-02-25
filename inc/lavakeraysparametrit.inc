@@ -2,14 +2,14 @@
 
 define("lavakerayskapasiteetti", 1488);
 
-$lavakeraysparam = "if ((tuote.mallitarkenne = '400' and tuote.myynti_era='1'), 8,
+$lavakeraysparam = "if ((tuote.mallitarkenne = '400' and tuote.myynti_era='1'), concat('8', lasku.liitostunnus),
                       if (tuote.mallitarkenne = '200', 7,
                         if (tuote.mallitarkenne = '12', 6,
                           if (tuote.mallitarkenne = '1000', 5,
                             if (tuote.mallitarkenne = '150', 4,
                               if (tuote.mallitarkenne = '585', 3,
                                 if (tuote.mallitarkenne = '500', 2,
-                                  if (tuote.mallitarkenne = '400', 1, 9)
+                                  if (tuote.mallitarkenne = '400', 1, 9999999)
                                 )
                               )
                             )

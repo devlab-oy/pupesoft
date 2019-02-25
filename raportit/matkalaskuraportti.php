@@ -265,7 +265,7 @@ function ajotapa_where($request_params) {
     $where .= "AND (lasku.tila = 'H' AND lasku.alatila = '') OR (lasku.tila = 'Y' AND lasku.alatila = '')";
     break;
   case 'kaikki':
-    $where .= "AND lasku.tila IN ('H','Y') AND lasku.alatila IN ('M', '')";
+    $where .= "AND lasku.tila IN ('H','Y','M','P','Q') AND lasku.alatila IN ('M', '')";
   }
 
   return $where;

@@ -82,8 +82,8 @@ class ViidakkoStoreTilaukset {
       "tracking_code"  => $tracking_code,
     ));
 
-    echo "\n---------INSERTÖIDÄÄN---------\n";
-    echo "<pre>",var_dump($product);
+    #echo "\n---------INSERTÖIDÄÄN---------\n";
+    #echo "<pre>",var_dump($product);
 
     $ch = curl_init($url);
     curl_setopt($ch, CURLOPT_HTTPHEADER, array('Accept: application/json', 'Content-Type: application/json', 'X-Auth-Token: '.$this->token));
@@ -97,8 +97,8 @@ class ViidakkoStoreTilaukset {
 
     $response_array = json_decode($response);
 
-    echo "\n update_viidakko_tracking_code\n";
-    echo "\n",var_dump($response);
+    #echo "\n update_viidakko_tracking_code\n";
+    #echo "\n",var_dump($response);
 
     if (isset($response_array->items[0]->id) and !empty($response_array->items[0]->id)) {
       $this->logger->log("--> Verkkokaupan tilaus {$response_array->items[0]->id} päivitettiin tracking_code $tracking_code");
@@ -118,8 +118,8 @@ class ViidakkoStoreTilaukset {
       "status"  => "13",
       "comment" => "Jou",
     ));
-    echo "\n---------UPDATETAAN---------\n";
-    echo "<pre>",var_dump($product);
+    #echo "\n---------UPDATETAAN---------\n";
+    #echo "<pre>",var_dump($product);
 
     $ch = curl_init($url);
     curl_setopt($ch, CURLOPT_HTTPHEADER, array('Accept: application/json', 'Content-Type: application/json', 'X-Auth-Token: '.$this->token));
@@ -133,8 +133,8 @@ class ViidakkoStoreTilaukset {
 
     $response_array = json_decode($response);
 
-    echo "\n update_viidakko_order_status\n";
-    echo "\n",var_dump($response);
+    #echo "\n update_viidakko_order_status\n";
+    #echo "\n",var_dump($response);
 
     if (isset($response_array->items[0]->id) and !empty($response_array->items[0]->id)) {
       $this->logger->log("--> Verkkokaupan tilaus {$response_array->items[0]->id} päivitetty");
@@ -177,7 +177,7 @@ class ViidakkoStoreTilaukset {
 
     $tilaus = array();
 
-    echo "<pre>",var_dump($response_array);
+    #echo "<pre>",var_dump($response_array);
     #die;
 
     if (count($response_array->items) > 0 ) {

@@ -94,8 +94,8 @@ class ViidakkoStoreKuvat {
 
     $response_array = json_decode($response);
 
-    echo "\n delete\n";
-    echo "\ndelete image product response_array:<pre>",var_dump($response_array);
+    #echo "\n delete\n";
+    #echo "\ndelete image product response_array:<pre>",var_dump($response_array);
 
     // response ok/fail vielä tähän
     $this->logger->log("--> tuotteen {$product['code']} kuva-id {$product['image_id']} poistettu");

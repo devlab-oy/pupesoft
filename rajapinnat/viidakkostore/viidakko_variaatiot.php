@@ -118,10 +118,10 @@ class ViidakkoStoreVariaatiot {
     unset($data['variation_id']);
     unset($data['variation_group_array']);
 
-    echo "<pre>",var_dump($data);
+    #echo "<pre>",var_dump($data);
 
     $data_json = json_encode($data);
-    echo "\n---------INSERTÖIDÄÄN---------\n";
+    #echo "\n---------INSERTÖIDÄÄN---------\n";
     $ch = curl_init($url);
     curl_setopt($ch, CURLOPT_HTTPHEADER, array('Accept: application/json', 'Content-Type: application/json', 'X-Auth-Token: '.$this->token));
     curl_setopt($ch, CURLOPT_HEADER, FALSE);
@@ -132,20 +132,21 @@ class ViidakkoStoreVariaatiot {
     $response = curl_exec($ch);
     curl_close($ch);
 
-    echo "\n insert\n";
+    #echo "\n insert\n";
+
     $response_array = json_decode($response);
 
-    echo "\n\nvar_dump insert variations:<pre>",var_dump($response_array);
+    #echo "\n\nvar_dump insert variations:<pre>",var_dump($response_array);
 
     if (isset($response_array->items[0]->id) and !empty($response_array->items[0]->id)) {
       $this->logger->log("--> variaatio {$data["erp_id"]} lisätty");
       $this->update_id("", $response_array->items[0]);
-      echo "\nIIDEE LISÄTTY!!!\n";
+      #echo "\nIIDEE LISÄTTY!!!\n";
     }
     else {
       $this->logger->log("--> variaatio {$data["erp_id"]} lisääminen epäonnistui!");
       $this->logger->log("syy: {$response_array->message}");
-      echo "\nvariaation {$data["erp_id"]} lisääminen epäonnistui. syy: {$response_array->message}\n";
+      #echo "\nvariaation {$data["erp_id"]} lisääminen epäonnistui. syy: {$response_array->message}\n";
     }
   }
 

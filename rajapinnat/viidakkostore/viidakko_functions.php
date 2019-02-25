@@ -211,7 +211,7 @@ function viidakko_hae_tuotteet($tyyppi = "viidakko_tuotteet") {
           $liite_tk_url = "{$viidakko_kuvaurl}/view.php?id={$liite_row['tunnus']}";
 
           // for testing..
-          if ($liite_row['tunnus'] != '24875') $liite_tk_url = "https://www.sprintit.fi/website/image/ir.attachment/5509_4ac6bcc/datas";
+          #if ($liite_row['tunnus'] != '24875') $liite_tk_url = "https://www.sprintit.fi/website/image/ir.attachment/5509_4ac6bcc/datas";
 
           // X = delete all pics and then install
           // Y = just install, pics have been deleted already
@@ -298,6 +298,9 @@ function viidakko_hae_tuotteet($tyyppi = "viidakko_tuotteet") {
       $try_row = mysql_fetch_assoc($try_res);
       $try = trim($try_row['selitetark_3']);
 
+      // fallback jos ryhmittely‰ ei ole m‰‰ritelty
+      if (empty($try)) $try = 2;
+
       // tyhj‰ = verolliset, x = verottomat
       // viidakkoon siirret‰‰n verollisena
       if ($yhtiorow['alv_kasittely'] != '') {
@@ -374,7 +377,7 @@ function viidakko_tuoterajaus() {
                    AND tuote.tuotetyyppi NOT in ('A','B')
                    AND tuote.status != 'P'
                    AND tuote.nimitys != ''
-                   AND (tuote.tuoteno in ('TAIGA99','TAIGA06') or tuote.tuoteno like 'kokk01_%')
+                   AND (tuote.tuoteno in ('TAIGA99','TAIGA06') or tuote.tuoteno like 'kokk0%')
                    #AND tuote.hinnastoon in ('W')
                    ";
 
@@ -424,7 +427,7 @@ function product_row($tuoteno) {
   return mysql_fetch_assoc($res2);
 }
 
-function viidakko_hae_variaatiot() {
+function viidakko_hae_variaatiot($tyyppi) {
   global $kukarow, $yhtiorow, $viidakko_varastot, $ajetaanko_kaikki, $viidakko_kuvaurl;
 
   viidakko_echo("Haetaan kaikki variaatiotuotteet");
@@ -579,7 +582,7 @@ function viidakko_hae_variaatiot() {
     list(, , $myytavissa) = saldo_myytavissa($tuoteno, '', $viidakko_varastot);
 
     // for testing
-    $myytavissa = 10;
+    //$myytavissa = 10;
 
     // lapsituotteita ei ole erikseen perustettu, ei ole tuote-id:t‰
     if ($isatuote) {
@@ -650,13 +653,13 @@ function viidakko_hae_variaatiot() {
         $liite_tk_url = "{$viidakko_kuvaurl}/view.php?id={$liite_row['tunnus']}";
 
         // for testing..
-        if ($liite_row['tunnus'] != '24875') $liite_tk_url = "https://www.sprintit.fi/website/image/ir.attachment/5509_4ac6bcc/datas";
+        # if ($liite_row['tunnus'] != '24875') $liite_tk_url = "https://www.sprintit.fi/website/image/ir.attachment/5509_4ac6bcc/datas";
 
       }
     }
 
     // for testing
-    $liite_tk_url = "https://www.sprintit.fi/website/image/ir.attachment/5509_4ac6bcc/datas";
+    #$liite_tk_url = "https://www.sprintit.fi/website/image/ir.attachment/5509_4ac6bcc/datas";
 
     //  haetaan kielik‰‰nnˆkset avainsanoista
     $query = "  SELECT *

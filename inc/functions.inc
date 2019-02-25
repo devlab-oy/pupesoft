@@ -35305,6 +35305,7 @@ if (!function_exists('viidakko_tracking_code')) {
     while ($viidrow = mysql_fetch_assoc($viidres)) {
       $viidakko_orders->update_viidakko_tracking_code($viidrow['kohde'], $tracking_code);
     }
+  }
 }
 
 if (!function_exists('finvoice_myyntilaskuksi_valitse_maksuehto')) {

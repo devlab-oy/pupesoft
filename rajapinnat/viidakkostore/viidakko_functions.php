@@ -377,8 +377,8 @@ function viidakko_tuoterajaus() {
                    AND tuote.tuotetyyppi NOT in ('A','B')
                    AND tuote.status != 'P'
                    AND tuote.nimitys != ''
-                   AND (tuote.tuoteno in ('TAIGA99','TAIGA06') or tuote.tuoteno like 'kokk0%')
-                   #AND tuote.hinnastoon in ('W')
+                   #AND (tuote.tuoteno in ('TAIGA99','TAIGA06') or tuote.tuoteno like 'kokk0%')
+                   AND tuote.hinnastoon in ('W')
                    ";
 
   return $tuoterajaus;

@@ -299,7 +299,7 @@ function viidakko_hae_tuotteet($tyyppi = "viidakko_tuotteet") {
       $try = trim($try_row['selitetark_3']);
 
       // fallback jos ryhmittely‰ ei ole m‰‰ritelty
-      if (empty($try)) $try = 2;
+      if (empty($try)) $try = 1;
 
       // tyhj‰ = verolliset, x = verottomat
       // viidakkoon siirret‰‰n verollisena

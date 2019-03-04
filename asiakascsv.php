@@ -25,11 +25,13 @@ else {
 
   echo "<font class='head'>".t("Varastosaldot ja hinnasto asiakashinnoin")."</font><hr>";
 
-  $ytunnus = trim($ytunnus);
-   require "inc/asiakashaku.inc";
-
-  $asiakas = $asiakasrow["tunnus"];
-  $ytunnus = $asiakasrow["ytunnus"];
+  if ($ytunnus != '') {
+    $ytunnus = trim($ytunnus);
+    require_once "inc/asiakashaku.inc";
+    
+    $asiakas = $asiakasrow["tunnus"];
+    $ytunnus = $asiakasrow["ytunnus"];
+  }
 
   //Käyttöliittymä
   echo "<br>";
@@ -64,16 +66,50 @@ else {
   }
 
   echo "</select></td></tr>";
+  
   if (!isset($hinkieli)) {
     $hinkieli = $yhtiorow['kieli'];
   }
   
+  // Monivalintalaatikot (osasto, try tuotemerkki...)
+  // Määritellään mitkä latikot halutaan mukaan
+  $monivalintalaatikot = array("TRY", "TUOTEMERKKI");
+
+  echo "<tr><th>".t("tuoteryhmät joita ei huomioida").":</th><td nowrap>";
+
+  require_once "tilauskasittely/monivalintalaatikot.inc";
+  echo "</td></tr>";
+  
+  $query  = "SELECT tunnus, nimitys
+             FROM varastopaikat
+             WHERE yhtio = '$kukarow[yhtio]'
+             AND tyyppi  = ''
+             ORDER BY tyyppi, nimitys";
+  $vares = pupe_query($query);
+
+  echo "<tr>
+      <th valign=top>".t('Varastorajaus').":</th>
+      <td>";
+
+  $varastot = (isset($_POST['varastot']) && is_array($_POST['varastot'])) ? $_POST['varastot'] : array();
+
+  while ($varow = mysql_fetch_assoc($vares)) {
+    $sel = '';
+    if (in_array($varow['tunnus'], $varastot)) {
+      $sel = 'checked';
+    }
+
+    echo "<input type='checkbox' name='varastot[]' class='shift' value='{$varow['tunnus']}' $sel/>{$varow['nimitys']}<br />\n";
+  }
+  #echo "</table><br>";
+  $valitut_varastot = implode(",", $varastot);
+
   $ale_kaikki_array = array();
 
   for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
     $ale_kaikki_array['ale'.$alepostfix] = ${'ale'.$alepostfix};
   }
-  echo "<table";
+  #echo "<table>";
   echo "<tr>";
   echo "<th>".t("Valitse tuotteet").":</th>";
   echo "<td><select name='nayta'>";
@@ -82,11 +118,15 @@ else {
   echo "</select></td>";
   echo "</tr>";
 
-  echo "</td></tr>";
+  echo "<tr><th>".t("Käytettävä kateprosentti").":</th><td><input type='text' name='katepros' size='15' value='$katepros'></td></tr>";
+  
   echo "</table><br>";
   echo "<input type='submit' name='ajatiedosto' value='".t("Aja Tiedosto")."'>";
   echo "</form>";
-
+  
+  //Pilkut pisteiksi
+  $katepros = str_replace(',', '.', $katepros);
+  
   if ( $asiakas > 0) {
     echo "<form method='post'>";
     echo "<input type='submit' value='Valitse uusi asiakas'>";
@@ -95,35 +135,17 @@ else {
 
   if ($tee != '' and $asiakas > 0 and isset($ajatiedosto)) {
 
-      $aquery = "SELECT avainsana.selitetark selitetark
-               FROM avainsana
-               WHERE avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji='ASCSV_EIMERKKI'
-               and avainsana.kieli = '$yhtiorow[kieli]'
-               LIMIT 1";
-      $aresult = pupe_query($aquery);
-      
-      if (mysql_num_rows($aresult) != 1) {
-        $ohitettavat_brandit = '';
-      }
-      else {
-        $arow = mysql_fetch_assoc($aresult);
-        $ohita_brandit = explode(",", $arow["selitetark"]);
-        $ohitettavat_brandit = " and tuote.tuotemerkki not in ('".implode("','", $ohita_brandit)."')";
-      }
-
-    $ohitettavat_brandit = " and tuote.tuotemerkki not in ('NF Parts','OE','OEM')";
-    $ohitettavat_tryt = " and (tuote.try not in ('0','999','999999','1000002','1000003','400001','400002')
-    and tuote.try < '200101' and tuote.try < '201112')";
-    $zeniorparts_lisa = ($nayta == "normaalit") ? "" : " JOIN tuotteen_avainsanat ON (tuote.yhtio = tuotteen_avainsanat.yhtio AND tuotteen_avainsanat.kieli = '{$yhtiorow['kieli']}' AND tuote.tuoteno = tuotteen_avainsanat.tuoteno AND tuotteen_avainsanat.laji = 'zeniorparts')";
+    $zeniorparts_lisa = ($nayta == "normaalit") ? "" : " JOIN tuotteen_avainsanat ON (tuote.yhtio = tuotteen_avainsanat.yhtio AND tuotteen_avainsanat.kieli = '{$yhtiorow['kieli']}' AND tuotteen_avainsanat.laji = 'zeniorparts' AND tuote.tuoteno = tuotteen_avainsanat.tuoteno)";
+    $lisa = str_replace(' in ', ' not in ', $lisa);
 
     $query = "SELECT *
               FROM tuote
               {$zeniorparts_lisa}
               WHERE tuote.yhtio      = '{$kukarow['yhtio']}'
-              and tuote.status       NOT IN ('P','X')
+              and tuote.status       NOT IN ('E','P', 'T', 'X')
               and tuote.tuotetyyppi  NOT IN ('A', 'B')
-              {$ohitettavat_brandit}
-              {$ohitettavat_tryt}";
+              and tuote.ei_saldoa    = ''
+              {$lisa}";
     $rresult = pupe_query($query);
 
     if (mysql_num_rows($rresult) == 0) {
@@ -134,15 +156,13 @@ else {
       echo "<br><br><font class='message'>".t("Asiakashinnastoa luodaan...")."</font><br>";
       flush();
 
-      if (@require_once "inc/ProgressBar.class.php");
-      elseif (@require_once "ProgressBar.class.php");
+      require_once "inc/ProgressBar.class.php";
 
       $bar = new ProgressBar();
       $elements = mysql_num_rows($rresult); // total number of elements to process
       $bar->initialize($elements); // print the empty bar
 
-      if (@include "inc/pupeExcel.inc");
-      elseif (@include "pupeExcel.inc");
+      require_once "inc/pupeExcel.inc";
 
       $worksheet    = new pupeExcel();
       $format_bold = array("bold" => TRUE);
@@ -173,15 +193,16 @@ else {
 
       $rivit = array();
 
-      while ($rrow = mysql_fetch_assoc($rresult)) {
+      while ($row = mysql_fetch_assoc($rresult)) {
+        $bar->increase();
+        list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($row['tuoteno'],'' ,$varastot);
 
-        list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($rrow['tuoteno']);
-
-        $kopiorivi = $rrow;
+        $kopiorivi = $row;
         $kopiorivi['saldo'] = ($myytavissa > 4) ? 4 : $myytavissa;
 
-        $rivit[] = $kopiorivi;
-
+        if ($myytavissa > 0) {
+          $rivit[] = $kopiorivi;
+        }
       }
   
       foreach ($rivit as $rrow) {
@@ -190,7 +211,8 @@ else {
 
         if ($nayta == "normaalit") {
           if ($rrow["kehahin"] > 0) {
-            $hinta = round($rrow["kehahin"] * 1.17, 2);
+            $hinta = round($rrow["kehahin"] * ((100 + $katepros) / 100), 2);
+            
           }
         }
         else {
@@ -264,7 +286,7 @@ else {
       $excelnimi = $worksheet->close();
 
       echo "<br><br><table>";
-      echo "<tr><th>".t("Tallenna hinnasto").":</th>";
+      echo "<tr><th>".t("Tallenna tiedosto").":</th>";
       echo "<form method='post' class='multisubmit'>";
       echo "<input type='hidden' name='tee_lataa' value='lataa_tiedosto'>";
       echo "<input type='hidden' name='kaunisnimi' value='".t("Asiakashinnasto").".xlsx'>";

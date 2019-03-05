@@ -19,6 +19,7 @@ if (!checkdate($kka, $ppa, $vva)) {
 }
 else {
   $alku_pvm = date("Y-m-d", mktime(0, 0, 0, $kka, $ppa, $vva));
+  $alku_pvm_tsek = date("Ymd", mktime(0, 0, 0, $kka, $ppa, $vva));
 }
 
 if (!checkdate($kkl, $ppl, $vvl)) {
@@ -103,51 +104,58 @@ if ($tee == "raportoi") {
 
   // T‰h‰n arrayseen ker‰t‰‰n raportti
   $tulosseuranta = array();
+  $include_20 = " and taso.taso != '20' ";
+  $include_3600 = " and tili.tilino != '3600' ";
 
   echo "<br><br>";
 
-  // Katostaan halutaanko hakea myynti/varastonmuutos myynnin puolelta
-  $query = "SELECT *
-            FROM taso
-            WHERE yhtio         = '{$kukarow["yhtio"]}'
-            AND tyyppi          = 'B'
-            AND summattava_taso LIKE '%nettokate%'";
-  $result = pupe_query($query);
-
-  if (mysql_num_rows($result) != 0) {
-
-    // Haetaan myynti/kate tilausriveilt‰
-    $query = "SELECT tuote.yhtio, sum(if(tilausrivi.laskutettuaika >= '$alku_pvm'
-              AND tilausrivi.laskutettuaika  <= '$loppu_pvm', tilausrivi.rivihinta, 0)) myyntinyt, sum(if(tilausrivi.laskutettuaika >= '$alku_pvm'
-              AND tilausrivi.laskutettuaika  <= '$loppu_pvm', tilausrivi.kate - (tilausrivi.rivihinta * IFNULL(asiakas.kuluprosentti, 0)/100) - (tilausrivi.rivihinta * IFNULL(toimitustapa.kuluprosentti, 0)/100) - (tilausrivi.rivihinta * IFNULL(tuote.kuluprosentti, 0)/100) - (tilausrivi.rivihinta * IFNULL(yhtio.kuluprosentti, 0)/100), 0)) nettokatenyt
-              FROM lasku use index (yhtio_tila_tapvm)
-              JOIN yhtio ON (yhtio.yhtio = lasku.yhtio)
-              JOIN tilausrivi use index (uusiotunnus_index) ON (tilausrivi.yhtio=lasku.yhtio
-              AND tilausrivi.uusiotunnus=lasku.tunnus
-              AND tilausrivi.tyyppi='L')
-              JOIN tuote use index (tuoteno_index) ON (tuote.yhtio=tilausrivi.yhtio
-              and tuote.tuoteno=tilausrivi.tuoteno)
-              JOIN asiakas use index (PRIMARY) ON (asiakas.yhtio = lasku.yhtio
-              AND asiakas.tunnus             = lasku.liitostunnus
-              AND asiakas.myynninseuranta    = '' )
-              LEFT JOIN toimitustapa ON (lasku.yhtio=toimitustapa.yhtio
-              and lasku.toimitustapa=toimitustapa.selite)
-              WHERE lasku.yhtio              = '{$kukarow["yhtio"]}'
-              AND lasku.tila                 = 'U'
-              AND lasku.alatila              = 'X'
-              AND lasku.tapvm                >= '$alku_pvm'
-              AND lasku.tapvm                <= '$loppu_pvm'
-              AND tuote.myynninseuranta      = ''
-              AND tilausrivi.tuoteno        != 'MAKSUERƒ'
-              $lisa_haku_kustp";
-
+  if ($alku_pvm_tsek < 20190101) {
+    // Katsotaan halutaanko hakea myynti/varastonmuutos myynnin puolelta
+    $query = "SELECT *
+              FROM taso
+              WHERE yhtio         = '{$kukarow["yhtio"]}'
+              AND tyyppi          = 'B'
+              AND summattava_taso LIKE '%nettokate%'";
     $result = pupe_query($query);
-    $row = mysql_fetch_assoc($result);
 
-    $tulosseuranta["myynti"]["summa"] = $row["myyntinyt"];
-    $tulosseuranta["myynti"]["nimi"]  = "Myynti";
-    $tulosseuranta["nettokate"]["summa"] = $row["nettokatenyt"];
-    $tulosseuranta["nettokate"]["nimi"]  = "Nettokate";
+    if (mysql_num_rows($result) != 0) {
+
+      // Haetaan myynti/kate tilausriveilt‰
+      $query = "SELECT tuote.yhtio, sum(if(tilausrivi.laskutettuaika >= '$alku_pvm'
+                AND tilausrivi.laskutettuaika  <= '$loppu_pvm', tilausrivi.rivihinta, 0)) myyntinyt, sum(if(tilausrivi.laskutettuaika >= '$alku_pvm'
+                AND tilausrivi.laskutettuaika  <= '$loppu_pvm', tilausrivi.kate - (tilausrivi.rivihinta * IFNULL(asiakas.kuluprosentti, 0)/100) - (tilausrivi.rivihinta * IFNULL(toimitustapa.kuluprosentti, 0)/100) - (tilausrivi.rivihinta * IFNULL(tuote.kuluprosentti, 0)/100) - (tilausrivi.rivihinta * IFNULL(yhtio.kuluprosentti, 0)/100), 0)) nettokatenyt
+                FROM lasku use index (yhtio_tila_tapvm)
+                JOIN yhtio ON (yhtio.yhtio = lasku.yhtio)
+                JOIN tilausrivi use index (uusiotunnus_index) ON (tilausrivi.yhtio=lasku.yhtio
+                AND tilausrivi.uusiotunnus=lasku.tunnus
+                AND tilausrivi.tyyppi='L')
+                JOIN tuote use index (tuoteno_index) ON (tuote.yhtio=tilausrivi.yhtio
+                and tuote.tuoteno=tilausrivi.tuoteno)
+                JOIN asiakas use index (PRIMARY) ON (asiakas.yhtio = lasku.yhtio
+                AND asiakas.tunnus             = lasku.liitostunnus
+                AND asiakas.myynninseuranta    = '' )
+                LEFT JOIN toimitustapa ON (lasku.yhtio=toimitustapa.yhtio
+                and lasku.toimitustapa=toimitustapa.selite)
+                WHERE lasku.yhtio              = '{$kukarow["yhtio"]}'
+                AND lasku.tila                 = 'U'
+                AND lasku.alatila              = 'X'
+                AND lasku.tapvm                >= '$alku_pvm'
+                AND lasku.tapvm                <= '$loppu_pvm'
+                AND tuote.myynninseuranta      = ''
+                AND tilausrivi.tuoteno        != 'MAKSUERƒ'
+                $lisa_haku_kustp";
+      $result = pupe_query($query);
+      $row = mysql_fetch_assoc($result);
+
+      $tulosseuranta["myynti"]["summa"] = $row["myyntinyt"];
+      $tulosseuranta["myynti"]["nimi"]  = "Myynti";
+      $tulosseuranta["nettokate"]["summa"] = $row["nettokatenyt"];
+      $tulosseuranta["nettokate"]["nimi"]  = "Nettokate";
+    }
+  }
+  else {
+    $include_20 = "";
+    $include_3600 = "";
   }
 
   // Haetaan kaikki tulosseurannan tasot sek‰ katsotaan lˆytyykˆ niille kirjauksia
@@ -161,7 +169,8 @@ if ($tee == "raportoi") {
             group_concat(distinct concat('\'', tili.tilino, '\'')) tilit
             FROM taso
             LEFT JOIN tili ON (tili.yhtio = taso.yhtio
-              AND tili.tulosseuranta_taso = taso.taso)
+              AND tili.tulosseuranta_taso = taso.taso
+              {$include_3600})
             LEFT JOIN tiliointi ON (tiliointi.yhtio = tili.yhtio
               AND tiliointi.tilino        = tili.tilino
               AND tiliointi.tapvm         >= '$alku_pvm'
@@ -170,6 +179,7 @@ if ($tee == "raportoi") {
               $lisa)
             WHERE taso.yhtio              = '{$kukarow['yhtio']}'
             AND taso.tyyppi               = 'B'
+            {$include_20}
             GROUP BY taso.taso, taso.nimi, taso.summattava_taso, taso.kerroin, taso.jakaja, taso.kumulatiivinen
             ORDER BY taso.taso+1";
   $result = pupe_query($query);
@@ -212,7 +222,9 @@ if ($tee == "raportoi") {
       $summa = $row["summa"];
 
       // Piilotetaan nettokate-solu
-      if (strtolower($row["nimi"]) == strtolower("nettokate")) continue;
+      if ($include_3600 != "" and strtolower($row["nimi"]) == strtolower("nettokate")) {
+        continue;
+      }
 
       // Jos tasoon halutaan summata mukaan muita tasoja
       foreach (explode(",", $row["summattava_taso"]) as $summattava_taso) {

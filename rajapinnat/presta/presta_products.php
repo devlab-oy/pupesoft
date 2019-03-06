@@ -38,6 +38,9 @@ class PrestaProducts extends PrestaClient {
     unset($xml->product->manufacturer_name);
     unset($xml->product->quantity);
     unset($xml->product->position_in_category);
+    if ($xml->product->associations->product_bundle->children() == 0) {
+      unset($xml->product->associations->product_bundle);
+    }
 
     return $xml;
   }

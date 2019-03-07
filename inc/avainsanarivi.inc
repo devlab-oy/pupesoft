@@ -324,6 +324,7 @@ if (mysql_field_name($result, $i) == "laji") {
   if ($lukitse_laji== "" or $lukitse_laji == "KORVAMERKKI")   $ulos .= "<option value='KORVAMERKKI' {$avain_sel['KORVAMERKKI']}>".t("Tilausrivin korvamerkinnän vaihtoehdot")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "HUOLTOP_EMAIL") $ulos .= "<option value='HUOLTOP_EMAIL' {$avain_sel['HUOLTOP_EMAIL']}>".t("RMA portaalin huoltopyyntöemail")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "POSTEN_TKOODI")   $ulos .= "<option value='POSTEN_TKOODI' {$avain_sel['POSTEN_TKOODI']}>".t("Logmaster OutboundDelivery ja MaterialMaster sanomien kentät")."</option>";
+  if ($lukitse_laji== "" or $lukitse_laji == "MYYNTITILASTO") $ulos .= "<option value='MYYNTITILASTO' {$avain_sel['MYYNTITILASTO']}>".t("Myyntimittarin raja-arvot")."</option>";
   if ($lukitse_laji== "") $ulos .= "</optgroup>";
 
   if ($lukitse_laji== "") $ulos .= "<optgroup label='".t("Verkkokaupan avainsanat")."'>";

@@ -345,6 +345,7 @@ if (mysql_field_name($result, $i) == "laji") {
   if ($lukitse_laji== "" or $lukitse_laji == "VASTUUMYYJA") $ulos .= "<option value='VASTUUMYYJA' {$avain_sel['VASTUUMYYJA']}>".t("Asiakkaan vastuumyyjä")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "MAKSUKP") $ulos .= "<option value='MAKSUKP' {$avain_sel['MAKSUKP']}>".t("Maksatuksessa kustannuspaikka")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "MAKSUMS") $ulos .= "<option value='MAKSUMS' {$avain_sel['MAKSUMS']}>".t("Maksuteksti näkyviin avoimissa myyntilaskuissa")."</option>";
+  if ($lukitse_laji== "" or $lukitse_laji == "MYYNTITILASTO") $ulos .= "<option value='MYYNTITILASTO' {$avain_sel['MYYNTITILASTO']}>".t("Myyntimittarin raja-arvot")."</option>";
 
   if ($lukitse_laji== "") $ulos .= "</optgroup>";
 

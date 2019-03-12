@@ -194,15 +194,11 @@ function kasittele_xml_tiedosto(SimpleXMLElement $xml, $tiedosto_polku) {
       }
     }
 
-    // Vienti-tieto ohjataan Pupen asiakastiedoila, ei Odoon laskun sisällöllä
-    $vienti = $asiakas['vienti'];
-
-    /*
     $vienti = "";
-    if (!empty($ostaja_asiakkaantiedot["maa"])) {
+    if (!empty($toim_asiakkaantiedot["maa"])) {
       $query = "SELECT distinct koodi, eu
                 FROM maat
-                WHERE koodi = '$ostaja_asiakkaantiedot[maa]'";
+                WHERE koodi = '$toim_asiakkaantiedot[maa]'";
       $maaresult = pupe_query($query);
 
       if (mysql_num_rows($maaresult)) {
@@ -219,7 +215,6 @@ function kasittele_xml_tiedosto(SimpleXMLElement $xml, $tiedosto_polku) {
         }
       }
     }
-    */
 
     $laskunnro = preg_replace("/[^0-9]/", "", $laskun_numero);
 

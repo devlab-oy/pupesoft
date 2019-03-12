@@ -12,8 +12,6 @@ if (!isset($naytetaan_tulos)) $naytetaan_tulos = '';
 
 if ($toim != "") {
 
-  if (!isset($naytetaan_luvut)) $naytetaan_luvut = 'eurolleen';
-
   $query = "SELECT selitetark, selitetark_2, selitetark_3
             FROM avainsana
             WHERE yhtio = '$kukarow[yhtio]'

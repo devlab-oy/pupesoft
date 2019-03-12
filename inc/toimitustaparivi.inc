@@ -267,6 +267,8 @@ if (mysql_field_name($result, $i) == "virallinen_selite") {
   $ulos .= "<option value='P17FI' {$sel["P17FI"]}>PostNord MyPack Home FI</option>";
   $ulos .= "<option value='P19FI' {$sel["P19FI"]}>PostNord Logistics MyPack (Suomi)</option>";
   $ulos .= "<option value='P19FIDPD' {$sel["P19FIDPD"]}>PostNord MyPack Collect FI Pohjoismaiden ulkopuolella</option>";
+  $ulos .= "<option value='P18FI' {$sel["P18FI"]}>PostNord FI Parcel (Pohjoismaat)</option>";
+  $ulos .= "<option value='P18FIDPD' {$sel["P18FIDPD"]}>PostNord FI Parcel (muut maat)</option>";
   $ulos .= "<option value='DPDFI' {$sel["DPDFI"]}>PostNord DPD Classic (Suomi)</option>";
   $ulos .= "<option value='DLMAILEXP' {$sel["DLMAILEXP"]}>Direct Link Merchandise Mail Plus Express</option>";
   $ulos .= "<option value='P24FI' {$sel["P24FI"]}>PostNord Logistics MyPack return (Suomi)</option>";

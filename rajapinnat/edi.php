@@ -20,6 +20,7 @@ class Edi {
     $rahtikulu_tuoteno             = $options['rahtikulu_tuoteno'];
     $rahtikulu_nimitys             = $options['rahtikulu_nimitys'];
     $verkkokauppa_erikoiskasittely = $options['erikoiskasittely'];
+    $verkkokauppa_verollisen_hinnan_kentta = $options['verkkokauppa_verollisen_hinnan_kentta'];
 
     if (empty($magento_api_ht_edi) or empty($ovt_tunnus) or empty($pupesoft_tilaustyyppi)) {
       die("Parametrejä puuttuu\n");
@@ -240,8 +241,18 @@ class Edi {
           $_item = $item;
         }
 
-        // Verollinen yksikköhinta
-        $verollinen_hinta = $_item['original_price'];
+        $_hintacheck = (isset($verkkokauppa_verollisen_hinnan_kentta) and !empty($verkkokauppa_verollisen_hinnan_kentta));
+
+        // Verollinen yksikköhinta (tarkistetaan halutaanko ottaa eri kentästä, custom syistä johtuen)
+        if ($_hintacheck and $_item['product_type'] == 'configurable') {
+          $verollinen_hinta = $_item[$verkkokauppa_verollisen_hinnan_kentta];
+
+          // varmuuden vuoksi check
+          if (empty($verollinen_hinta)) $verollinen_hinta = $_item['original_price'];
+        }
+        else {
+          $verollinen_hinta = $_item['original_price'];
+        }
 
         // Veroton yksikköhinta
         $veroton_hinta = $_item['price'];

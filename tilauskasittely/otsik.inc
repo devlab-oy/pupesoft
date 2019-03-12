@@ -2125,13 +2125,13 @@ if ($tila == "" and !isset($jatka)) {
         $myyjanro = $row['myyja'];
         $sel = 'selected';
       }
-      elseif ($srow['myyja'] == '' or $srow['myyja'] == 0) {
+      elseif (!$asiakasmyyja and ($srow['myyja'] == '' or $srow['myyja'] == 0)) {
         if ($row['nimi'] == $kukarow['nimi']) {
           $sel = 'selected';
         }
       }
       else {
-        if ($row['tunnus'] == $srow['myyja']) {
+        if (!$asiakasmyyja and $row['tunnus'] == $srow['myyja']) {
           $sel = 'selected';
         }
       }

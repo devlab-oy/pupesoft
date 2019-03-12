@@ -1109,9 +1109,52 @@ if (!function_exists("talenom_queue")) {
 }
 
 if (!function_exists("fitek_queue")) {
-  function fitek_queue($invoice_number, $xmlstring, $kieli) {
+  function fitek_queue($fitek_invoice, $fitek_invoicenum, $kieli) {
     global $kukarow, $yhtiorow, $pupe_root_polku;
 
+    $fitek_ulos = "";
+
+    // Filenimi
+    $fitekzipfile = "laskutus-".$yhtiorow['yhtio']."-invoices-".$fitek_invoicenum."-".md5(uniqid(rand(), true)).".zip";
+
+    // Luodaan temppidirikka jonne tyˆnnet‰‰n t‰n kiekan kaikki fitek-filet
+    list($usec, $sec) = explode(' ', microtime());
+    mt_srand((float) $sec + ((float) $usec * 100000));
+    $fitek_tmpdirnimi = "/tmp/fitek-".md5(uniqid(mt_rand(), true));
+
+    if (mkdir($fitek_tmpdirnimi)) {
+
+      // Kirjoitetaan finvoiceaineisto dirikkaan
+      if (!file_put_contents($fitek_tmpdirnimi."/MERCANT.INVOICE.".date("Ymd").".$fitek_invoicenum.xml", $fitek_invoice)) {
+        $fitek_ulos .= "Fitek finvoicewrite feilasi!";
+      }
+
+      // Luodaan laskupdf:‰
+      $fitektmpfile = tulosta_lasku("LASKU:".$fitek_invoicenum, "fi", "VERKKOLASKU_FITEK", "", "", "", "", "");
+
+      // Siirret‰‰n faili fitektemppiin
+      if (!rename($fitektmpfile, $fitek_tmpdirnimi."/MERCANT.INVOICE.".date("Ymd").".$fitek_invoicenum.pdf")) {
+        $fitek_ulos .= "FITEK tmpmove MERCANT.INVOICE_$fitek_invoicenum.pdf feilas!";
+      }
+
+      // Tehd‰‰n fitekzippi
+      exec("cd $fitek_tmpdirnimi; zip $fitekzipfile *;");
+
+      // Aineisto l‰hetysjonoon
+      exec("cp $fitek_tmpdirnimi/$fitekzipfile {$pupe_root_polku}/dataout/fitek_error/");
+
+      // Poistetaan apix-tmpdir
+      #exec("rm -rf $fitek_tmpdirnimi");
+
+      $fitek_ulos .= "Lasku $fitek_invoicenum siirretty l‰hetysjonoon<br>\n";
+    }
+    else {
+      $fitek_ulos .= "FITEK tmpdirrin teko feilas!<br>\n";
+    }
+
+    return $fitek_ulos;
+
+      // Kirjoitetaan finvoiceaineisto dirikkaan
     // Siirret‰‰n l‰hetysjonoon
     file_put_contents("{$pupe_root_polku}/dataout/fitek_error/laskutus-$kukarow[yhtio]-".date("Ymd")."-$invoice_number.xml", $xmlstring);
     return "Lasku siirretty l‰hetysjonoon";
@@ -10544,7 +10587,9 @@ if (!function_exists("livesearch_asiakashaku")) {
         $haku_query .= " or asiakas.laskutus_nimi like ('%$haku%') or asiakas.laskutus_nimitark like ('%$haku%') or asiakas.laskutus_postitp like ('%$haku%')) ";
       }
 
-      $query = "SELECT *, if (toim_nimi != nimi and toim_nimi != '', concat(nimi, ' ', nimitark, ' / ', toim_nimi, ' ', toim_nimitark), concat(nimi, ' ', nimitark)) asiakkaan_tieto,
+      $query = "SELECT *,
+                if (toim_nimi != '' and concat(nimi, nimitark) != concat(toim_nimi, toim_nimitark), concat(nimi, ' ', nimitark, ' / ', toim_nimi, ' ', toim_nimitark), concat_ws(' ', nimi, nimitark)) asiakkaan_tieto,
+                if (toim_nimi != '', toim_postitp, '') toim_postitp,
                 if (asiakas.ytunnus = '$haku', 1, if(left(asiakas.ytunnus, length('$haku')) = '$haku', 2, 3)) jarjestys,
                 if (asiakas.asiakasnro = '$haku', 1, if(left(asiakas.asiakasnro, length('$haku')) = '$haku', 2, 3)) jarjestys2,
                 if (asiakas.nimi = '$haku', 1, if(left(asiakas.nimi, length('$haku')) = '$haku', 2, 3)) jarjestys3,
@@ -10580,7 +10625,13 @@ if (!function_exists("livesearch_asiakashaku")) {
           echo "\"
                 style='padding:2px;'>
                 <span class='livesearch_rivispan_{$hakuid}'>
-                <font style='font-weight:bold'>$row[ytunnus] &raquo; $row[asiakkaan_tieto]</font>
+                <font style='font-weight:bold'>$row[ytunnus] &raquo; $row[asiakkaan_tieto]";
+
+          if (!empty($row['toim_postitp'])) {
+            echo " ({$row['toim_postitp']})";
+          }
+
+          echo "</font>
                 </span>
               </div><div name='selectValues$hakuid' id='$row[tunnus]'></div>";
           $limit++;
@@ -11608,6 +11659,11 @@ if (!function_exists("hae_rahtimaksu")) {
     if (mysql_num_rows($rares) == 1) {
       $hirow = mysql_fetch_assoc($rares);
       $ale_kaikki_array = array();
+
+      // Rahtimaksut ovat yhtion valuutassa, se pit‰‰ muuttaa laskun valuuttaan, koska alehinta funktio k‰sittelee hintoja kuin ne olisi syˆtetty laskun valuutassa
+      if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
+        $hirow['rahtihinta'] = round(laskuval($hirow['rahtihinta'], $laskurow["vienti_kurssi"]), 2);
+      }
 
       if ($rahtituoteno_toimitustavalta) {
         // Etsit‰‰n spessuhintaa/alennuksia jos toimitustavan takana oli oma rahti_tuotenumero

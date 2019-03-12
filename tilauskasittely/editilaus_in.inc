@@ -205,6 +205,7 @@ $editilaus_alatila            = "";
 $editilaus_eilahetetta        = "";
 $editilaus_hyvaksyttava       = "";
 $editilaus_hyvaksyttavaksi    = "";
+$editilaus_laatija            = "";
 $editilaus_kassalipas         = "";
 $editilaus_liitetiedosto      = "";
 $editilaus_loppuhinta         = "";
@@ -401,7 +402,10 @@ while ($tietue = fgets($fd)) {
   if ($edi_tyyppi == "futursoft" or $edi_tyyppi == "magento") {
 
     if (substr($tietue, 0, 1) != '*') {
-      list($tunnus, $tieto)  = explode(':', $tietue);
+      $tietue_array  = explode(':', $tietue);
+      $tunnus = $tietue_array[0];
+      unset($tietue_array[0]);
+      $tieto = implode(":", $tietue_array);
     }
     else {
       $tunnus = $tietue;
@@ -673,9 +677,13 @@ while ($tietue = fgets($fd)) {
     $edi_kommentti .= $tieto." \n";
     break;
 
+  case 'OSTOTIL.OT_SISAINEN_VIESTI'  :
   case 'ORFFCR_NU'  :
     //Kommentteja
     $merkkitieto = $tieto;
+
+    $merkkitieto = str_replace("!!!###!!!", "\n", $merkkitieto);
+
     break;
 
   case 'OSTOTIL.OT_MAKSUEHTO' :
@@ -994,6 +1002,10 @@ while ($tietue = fgets($fd)) {
 
   case 'OSTOTIL.OT_HYVAKSYTTAVA':
     $editilaus_hyvaksyttava = trim($tieto);
+    break;
+
+  case 'OSTOTIL.OT_CUSTOM_LAATIJA':
+    $editilaus_laatija = trim($tieto);
     break;
 
   case 'ONADPL_PC' :
@@ -1723,8 +1735,9 @@ while ($tietue = fgets($fd)) {
         $editilaus_alatila = 'F';
       }
 
-      if ($editilaus_hyvaksyttava != "") {
+      if (($editilaus_hyvaksyttava != "") or (isset($editilaus_hyvaksyttavaksi_aina) and $editilaus_hyvaksyttavaksi_aina = "JOO" and $edi_tyyppi == 'futursoft')) {
         $editilaus_alatila = 'F';
+        $editilaus_hyvaksyttava = "JOO";
       }
 
       // Jos asiakas on syöttänyt verkkokaupassa oman tilausnumeron tai viitteen yliajetaan viesti
@@ -1778,6 +1791,9 @@ while ($tietue = fgets($fd)) {
         $kukarow['toimipaikka'] = $editilaus_toimipaikka;
         $yhtiorow = hae_yhtion_parametrit($yhtiorow["yhtio"]);
       }
+
+      // jos annettu custom laatija
+      if (isset($editilaus_laatija) and trim($editilaus_laatija) != "") $edi_laatija = $editilaus_laatija;
 
       // Lisätään otsikko
       $query = "INSERT into lasku SET
@@ -2884,6 +2900,7 @@ while ($tietue = fgets($fd)) {
     $editilaus_eilahetetta        = "";
     $editilaus_hyvaksyttava       = "";
     $editilaus_hyvaksyttavaksi    = "";
+    $editilaus_laatija            = "";
     $editilaus_kassalipas         = "";
     $editilaus_liitetiedosto      = "";
     $editilaus_loppuhinta         = "";

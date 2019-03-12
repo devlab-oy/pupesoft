@@ -56,7 +56,7 @@ if ($tila == 'poistasuoritus' or $tila == 'siirrasuoritus' or $tila == "siirrasu
   }
 
   if ($tila == 'poistasuoritus') {
-    $suorilisa = " ";
+    $suorilisa = " and viite = '' ";
   }
   else {
     $suorilisa = " ";
@@ -767,31 +767,36 @@ if ($tila == '') {
       // tehd‰‰n nappi suorituksen poistamiseen
       echo "<td valign='top' class='back'>";
 
-      if (isset($siirrasuoritustilille[$kukarow["yhtio"]]) and count($siirrasuoritustilille[$kukarow["yhtio"]]) > 0) {
-      
-        $suoritustunnukset_kaikki[] = $maksurow["tunnus"];
-      
-        foreach ($siirrasuoritustilille[$kukarow["yhtio"]] as $siirtotili) {
-          echo "<form method='post' action = '?$ulisa'>";
-          echo "<input type='hidden' name='tila' value='siirrasuoritus_tilille'>";
-          echo "<input type='hidden' name='siirtotili' value='$siirtotili'>";
-          echo "<input type='hidden' name='suoritustunnukset' value='$maksurow[tunnus]'>";
-          echo "<input type='submit' value='Siirr‰ $siirtotili-tilille' onClick='return verify3($siirtotili);'>";
-          echo "</form>";
+      if (trim($maksurow["viite"]) != "") {
+
+        if (isset($siirrasuoritustilille[$kukarow["yhtio"]]) and count($siirrasuoritustilille[$kukarow["yhtio"]]) > 0) {
+
+          $suoritustunnukset_kaikki[] = $maksurow["tunnus"];
+
+          foreach ($siirrasuoritustilille[$kukarow["yhtio"]] as $siirtotili) {
+            echo "<form method='post' action = '?$ulisa'>";
+            echo "<input type='hidden' name='tila' value='siirrasuoritus_tilille'>";
+            echo "<input type='hidden' name='siirtotili' value='$siirtotili'>";
+            echo "<input type='hidden' name='suoritustunnukset' value='$maksurow[tunnus]'>";
+            echo "<input type='submit' value='Siirr‰ $siirtotili-tilille' onClick='return verify3($siirtotili);'>";
+            echo "</form>";
+          }
         }
+
+        echo "<form method='post' action = '?$ulisa'>";
+        echo "<input type='hidden' name='tila' value='siirrasuoritus'>";
+        echo "<input type='hidden' name='suoritustunnukset' value='$maksurow[tunnus]'>";
+        echo "<input type='submit' value='".t("Siirr‰ selvittelytilille")."' onClick='return verify1();'>";
+        echo "</form>";
       }
-      
-      echo "<form method='post' action = '?$ulisa'>";
-      echo "<input type='hidden' name='tila' value='siirrasuoritus'>";
-      echo "<input type='hidden' name='suoritustunnukset' value='$maksurow[tunnus]'>";
-      echo "<input type='submit' value='".t("Siirr‰ selvittelytilille")."' onClick='return verify1();'>";
-      echo "</form>";
-      
-      echo "<form method='post' action = '?$ulisa'>";
-      echo "<input type='hidden' name='tila' value='poistasuoritus'>";
-      echo "<input type='hidden' name='suoritustunnukset' value='$maksurow[tunnus]'>";
-      echo "<input type='submit' value='".t("Poista suoritus")."' onClick='return verify2();'>";
-      echo "</form>";
+      else {
+        echo "<form method='post' action = '?$ulisa'>";
+        echo "<input type='hidden' name='tila' value='poistasuoritus'>";
+        echo "<input type='hidden' name='suoritustunnukset' value='$maksurow[tunnus]'>";
+        echo "<input type='submit' value='".t("Poista suoritus")."' onClick='return verify2();'>";
+        echo "</form>";
+      }
+
       echo "</td>";
     }
 

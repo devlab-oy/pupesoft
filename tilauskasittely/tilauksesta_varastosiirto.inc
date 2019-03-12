@@ -45,27 +45,7 @@ if (!function_exists('kirjanpidollinen_varastosiirto')) {
     //Kirjanpidollisessa varastosiirrossa yhdellä myyntitilauksella voi olla vain 1 lähde-kohdevarasto kombinaatio.
     //Kombinaatio muodostuu Lähde: lasku.varasto kohde: lasku.yhtio_toimipaikka.varasto.first
 
-    // Tarkistetaan tarviiko varasto hakea eri tavalla ennakoissa
-    if (!empty($yhtiorow['asiakasvarasto']) and $myyntitilaus['jaksotettu'] > 0) {
-
-      // Tarkistetaan että on 100% ennakko
-      $query = "SELECT tunnus
-                FROM maksupositio
-                WHERE otunnus = '{$myyntitilaus['tunnus']}'
-                AND osuus = 100
-                and yhtio   = '{$kukarow['yhtio']}'";
-      $result = pupe_query($query);
-
-      if (mysql_num_rows($result) == 1) {
-        $toimipaikan_varastot[0]['tunnus'] = $yhtiorow['asiakasvarasto'];
-      }
-      else {
-        $toimipaikan_varastot = hae_yhtion_toimipaikan_varastot($myyntitilaus['yhtio_toimipaikka']);
-      }
-    }
-    else {
-      $toimipaikan_varastot = hae_yhtion_toimipaikan_varastot($myyntitilaus['yhtio_toimipaikka']);
-    }
+    $toimipaikan_varastot = hae_yhtion_toimipaikan_varastot($myyntitilaus['yhtio_toimipaikka']);
 
     $lahde_ja_kohde_varasto_yhdistelma = array(
       'lahdevarasto_tunnus'   => $myyntitilaus['varasto'],
@@ -366,10 +346,8 @@ if (!function_exists('luo_varastosiirto')) {
       $chn = 'GEN';
     }
 
-    if ($yhtiorow["asiakasvarasto"] == '') {
-      $lahdevarasto = hae_varasto($lahdevarasto_tunnus);
-      $yhtio_toimipaikka = $lahdevarasto['toimipaikka'];
-    }
+    $lahdevarasto = hae_varasto($lahdevarasto_tunnus);
+    $yhtio_toimipaikka = $lahdevarasto['toimipaikka'];
 
     require "otsik_siirtolista.inc";
 

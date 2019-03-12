@@ -260,6 +260,20 @@ function kasittele_xml_tiedosto(SimpleXMLElement $xml, $tiedosto_polku) {
       return;
     }
 
+    $query = "SELECT tunnus
+              FROM lasku
+              WHERE yhtio = '{$yhtiorow['yhtio']}'
+              AND tila = 'U'
+              AND alatila = 'X'
+              AND viesti = '{$laskun_numero}'";
+    $tseklasku_res = pupe_query($query);
+
+    if (mysql_num_rows($tseklasku_res)) {
+      siirra_tiedosto_kansioon($tiedosto_polku, $finvoice_myyntilasku_kansio_error);
+      echo "VIRHE: Lasku löytyy jo Pupesta: $laskun_numero\n";
+      return;
+    }
+
     $query = "INSERT INTO lasku
               SET yhtio          = '{$yhtiorow['yhtio']}',
               yhtio_nimi         = '{$yhtiorow['nimi']}',

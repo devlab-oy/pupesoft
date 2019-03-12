@@ -1245,6 +1245,8 @@ if ($tee == 'P') {
               if (mysql_num_rows($monistares2) > 0) {
                 $monistarow2 = mysql_fetch_assoc($monistares2);
 
+                $alunperin_puute = $rvar == 'P' ? '1' : '0';
+
                 $querys = "INSERT INTO tilausrivin_lisatiedot
                            SET yhtio        = '$kukarow[yhtio]',
                            positio                = '$monistarow2[positio]',
@@ -1252,6 +1254,7 @@ if ($tee == 'P') {
                            toimittajan_tunnus     = '$monistarow2[toimittajan_tunnus]',
                            ei_nayteta             = '$monistarow2[ei_nayteta]',
                            tilausrivitunnus       = '$lisatty_tun',
+                           alunperin_puute        = '{$alunperin_puute}',
                            erikoistoimitus_myynti = '$monistarow2[erikoistoimitus_myynti]',
                            vanha_otunnus          = '$monistarow2[vanha_otunnus]',
                            jarjestys              = '$monistarow2[jarjestys]',

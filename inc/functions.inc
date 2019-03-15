@@ -27178,53 +27178,8 @@ if (!function_exists('hyllysiirto')) {
       $result = pupe_query($query);
     }
 
-    $asiakasvarasto_case = false;
-
-    // Jos tiliöidään ennakkolaskun varastosiirto eri tilille
-    // Katsotaan ensiksi että parametrit mahdollistaa tämän
-    if (!empty($yhtiorow["ennakkolaskun_asiakasvarasto"]) and !empty($yhtiorow["asiakasvarasto"]) and !empty($tun)) {
-
-      // Tarkistetaan vielä et siirtorivi on linkattu
-      // myyntitilausriviin ja kyseisellä myyntitilauksella
-      // on maksupositioita (100%) = ennakkolaskun kautta
-      // muodostunut varastosiirto (100% ennakkolasku)
-
-      $query = "SELECT tilausrivilinkki
-                FROM tilausrivin_lisatiedot
-                WHERE tilausrivitunnus = '$tun'
-                and yhtio   = '$kukarow[yhtio]'";
-      $result = pupe_query($query);
-
-      if (mysql_num_rows($result) == 1) {
-        $siirtolisatieto_row = mysql_fetch_assoc($result);
-
-        $query = "SELECT otunnus
-                  FROM tilausrivi
-                  WHERE tunnus = '{$siirtolisatieto_row['tilausrivilinkki']}'
-                  and yhtio   = '{$kukarow['yhtio']}'";
-        $result = pupe_query($query);
-
-        if (mysql_num_rows($result) == 1) {
-
-          $mytil_row = mysql_fetch_assoc($result);
-
-          $query = "SELECT tunnus
-                      FROM maksupositio
-                      WHERE yhtio = '{$kukarow['yhtio']}'
-                      AND otunnus = '{$mytil_row['otunnus']}'
-                      AND osuus = '100.00'";
-
-          $result = pupe_query($query);
-
-          if (mysql_num_rows($result) == 1) {
-            $asiakasvarasto_case = true;
-          }
-        }
-      }
-    }
-
     // Tehdään kirjanpito
-    if ($yhtiorow["tarkenteiden_prioriteetti"] == "T" or $asiakasvarasto_case) {
+    if ($yhtiorow["tarkenteiden_prioriteetti"] == "T") {
       // Lähettävä varasto
       $mistavarasto = kuuluukovarastoon($mistarow['hyllyalue'], $mistarow['hyllynro']);
       $minnevarasto = kuuluukovarastoon($minnerow['hyllyalue'], $minnerow['hyllynro']);
@@ -27273,7 +27228,7 @@ if (!function_exists('hyllysiirto')) {
         if ($mista_projekti == 0) $mista_projekti = $toimirow['projekti'];
       }
 
-      if ($mista_kustp > 0 or $mista_kohde > 0 or $mista_projekti > 0 or $asiakasvarasto_case) {
+      if ($mista_kustp > 0 or $mista_kohde > 0 or $mista_projekti > 0) {
         $minne_kustp    = 0;
         $minne_kohde    = 0;
         $minne_projekti = 0;
@@ -27315,7 +27270,7 @@ if (!function_exists('hyllysiirto')) {
         $varastonmuutos = round($kappaleet * $keskihankintahinta, 2);
         $varastonmuutos_neg = round(-1 * $kappaleet * $keskihankintahinta, 2);
 
-        if (($varastonmuutos != 0 and $mennaanko) or $asiakasvarasto_case) {
+        if ($varastonmuutos != 0 and $mennaanko) {
 
           $laskuid = 0;
 
@@ -27446,10 +27401,6 @@ if (!function_exists('hyllysiirto')) {
                       laatija         = '$kukarow[kuka]',
                       laadittu        = now()";
             $result = pupe_query($query);
-          }
-
-          if ($asiakasvarasto_case) {
-            $varastotili = $yhtiorow["ennakkolaskun_asiakasvarasto"];
           }
 
           // Minne varasto

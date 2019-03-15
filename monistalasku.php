@@ -1382,9 +1382,15 @@ if ($tee == 'MONISTA') {
           }
           break;
         case 'ketjutus':
+        // Virolle oletuksena sallitaan hyvitysten ketjutus
           if ($kumpi == 'HYVITA' or $kumpi == 'REKLAMA') {
-            echo t("Hyvitystä/ALV-korjausta ei ketjuteta")."<br>";
-            $values .= ", 'x'";
+            echo t("Ketjutus asiakkaan takaa")."<br>";
+            if ($asiakrow["ketjutus"] == '') {
+              $values .= ", ''";
+            }
+            else {
+              $values .= ", 'o'";
+            }
           }
           else {
             $values .= ", '".$monistarow[$fieldname]."'";

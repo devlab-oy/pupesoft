@@ -229,7 +229,7 @@ if (!function_exists("korjaalaskut")) {
                   FROM tiliointi
                    WHERE yhtio = '$kukarow[yhtio]'
                   and ltunnus  = '$tilausrivi[ltunnus]'
-                  and tilino   = '{$varastotili}',
+                  and tilino   = '{$varastotili}'
                   and kustp    = '$xrivi[kustp]'
                   and kohde    = '$xrivi[kohde]'
                   and projekti = '$xrivi[projekti]'
@@ -244,7 +244,7 @@ if (!function_exists("korjaalaskut")) {
                     FROM tiliointi
                      WHERE yhtio = '$kukarow[yhtio]'
                     and ltunnus  = '$tilausrivi[ltunnus]'
-                    and tilino   = '{$varastotili}',
+                    and tilino   = '{$varastotili}'
                     and korjattu = ''
                     ORDER BY tapvm DESC, tunnus DESC
                     LIMIT 1";

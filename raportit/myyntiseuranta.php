@@ -1777,11 +1777,38 @@ if ((isset($aja_raportti) or isset($valitse_asiakas)) and count($_REQUEST) > 0) 
       $tuotelista2_rajaus = "";
       $_i = 1;
 
+      if ($ajotapa == 'tilausjaaukiluonti' or $ajotapa == 'ennakot') {
+        $pvm_vertailu = "lasku.luontiaika >= '{$vva}-{$kka}-{$ppa} 00:00:00' and lasku.luontiaika <= '{$vvl}-{$kkl}-{$ppl} 23:59:59'";
+        $kpl_kentta = "if(tilausrivi.uusiotunnus = 0, tilausrivi.varattu+tilausrivi.jt, tilausrivi.kpl)";
+      }
+      elseif ($ajotapa == 'tilausjaauki') {
+        $pvm_vertailu1 = "lasku.luontiaika >= '{$vva}-{$kka}-{$ppa} 00:00:00' and lasku.luontiaika <= '{$vvl}-{$kkl}-{$ppl} 23:59:59' and tilausrivi.uusiotunnus = 0";
+        $kpl_kentta1 = "tilausrivi.varattu+tilausrivi.jt";
+        $pvm_vertailu2 = "tilausrivi.laskutettuaika >= '{$vva}-{$kka}-{$ppa}' and tilausrivi.laskutettuaika <= '{$vvl}-{$kkl}-{$ppl}'";
+        $kpl_kentta2 = "tilausrivi.kpl";
+      }
+      elseif ($ajotapa == 'tilausauki') {
+        $pvm_vertailu = "lasku.luontiaika >= '{$vva}-{$kka}-{$ppa} 00:00:00' and lasku.luontiaika <= '{$vvl}-{$kkl}-{$ppl} 23:59:59' and tilausrivi.uusiotunnus = 0";
+        $kpl_kentta = "tilausrivi.varattu+tilausrivi.jt";
+      }
+      else {
+        $pvm_vertailu = "tilausrivi.laskutettuaika >= '{$vva}-{$kka}-{$ppa}' and tilausrivi.laskutettuaika <= '{$vvl}-{$kkl}-{$ppl}'";
+        $kpl_kentta = "tilausrivi.kpl";
+      }
+
       foreach ($tuotteet as $tuote) {
         if (trim($tuote) != '') {
           $tuote = trim($tuote);
-          $tuotelista2_select .= ", sum(if(tilausrivi.tuoteno = '{$tuote}',1,0)) check_{$_i}";
-          $tuotelista2_having .= "check_{$_i} > 0 and ";
+          
+          if ($ajotapa == 'tilausjaauki') {
+            $tuotelista2_select .= ", sum(if(tilausrivi.tuoteno = '{$tuote}' and {$pvm_vertailu1}, {$kpl_kentta1}, 0)) +
+            sum(if(tilausrivi.tuoteno = '{$tuote}' and {$pvm_vertailu2}, {$kpl_kentta2}, 0)) '{$tuote}'";
+          }
+          else {
+            $tuotelista2_select .= ", sum(if(tilausrivi.tuoteno = '{$tuote}' and {$pvm_vertailu}, {$kpl_kentta}, 0)) '{$tuote}'";
+          }
+
+          $tuotelista2_having .= "'{$tuote}' > 0 and ";
           $_i++;
         }
       }

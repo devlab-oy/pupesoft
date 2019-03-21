@@ -2494,6 +2494,7 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
 
       // Aloitellaan keräyslistan teko
       $params_kerayslista = alku_kerayslista($params_kerayslista);
+      $params_kerayslista["yhteensasumma"] = 0;
 
       while ($row = mysql_fetch_assoc($riresult)) {
         $params_kerayslista["row"] = $row;

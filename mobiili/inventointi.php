@@ -63,7 +63,7 @@ function hae($viivakoodi='', $tuoteno='', $tuotepaikka='') {
     }
 
     $query = "SELECT
-              tuote.tuoteno, 
+              tuote.tuoteno,
               tuotepaikat.saldo,
               tuotepaikat.inventointiaika,
               inventointilistarivi.otunnus as inventointilista,
@@ -331,6 +331,8 @@ if ($tee == 'laske' or $tee == 'inventoi') {
               tuotepaikat.tyyppi,
               tuotepaikat.hyllyalue,
               tuotepaikat.hyllynro,
+              tuotepaikat.hyllyvali,
+              tuotepaikat.hyllytaso,
               tuotepaikat.inventointiaika,
               concat_ws('-',tuotepaikat.hyllyalue, tuotepaikat.hyllynro,
                     tuotepaikat.hyllyvali, tuotepaikat.hyllytaso) as tuotepaikka

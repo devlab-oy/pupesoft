@@ -48,7 +48,7 @@
     <?php if ($kukarow['yhtio'] = 'mergr') ?>
       <tr>
       <th>Saldo</th>
-      <td><?php echo $tuote['saldo'] ?></td>
+      <td><?php echo ($tuote['saldo'] - $hylrow['keratty']) ?></td>
     </tr>
     <tr>
       <th>Inventointi selite</th>

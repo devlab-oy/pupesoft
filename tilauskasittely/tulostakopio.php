@@ -1789,11 +1789,38 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
 
       require_once "tulosta_tarjous.inc";
 
-      tulosta_tarjous($otunnus, $komento["Tarjous"], $kieli, $tee, $hinnat,
-        $verolliset_verottomat_hinnat, $naytetaanko_rivihinta, $naytetaanko_tuoteno,
-        $liita_tuotetiedot, $naytetaanko_yhteissummarivi);
+      if ($kaikkilomakepohjat) {
 
-      $tee = '';
+        $tarjoukset = array();
+
+        foreach (pupesoft_tarjoustyypit() as $seltarjoustyyppi => $seltarjoustyyppiteksti) {
+          $tarjoukset[] = array($seltarjoustyyppi, "$seltarjoustyyppiteksti ($seltarjoustyyppi)");
+        }
+
+        $_tmp_yhtiorow_tarjoustyyppi = $yhtiorow['tarjoustyyppi'];
+
+        foreach ($tarjoukset as $tarjous) {
+          $seltarjoustyyppi = $tarjous[0]."##".$tarjous[1];
+
+          $yhtiorow['tarjoustyyppi'] = $tarjous[0];
+
+          tulosta_tarjous($otunnus, $komento["Tarjous"], $kieli, $tee, $hinnat,
+          $verolliset_verottomat_hinnat, $naytetaanko_rivihinta, $naytetaanko_tuoteno,
+          $liita_tuotetiedot, $naytetaanko_yhteissummarivi, $seltarjoustyyppi);
+
+          $tee = '';
+        }
+
+        $yhtiorow['tarjoustyyppi'] = $_tmp_yhtiorow_tarjoustyyppi;
+      }
+      else {
+
+        tulosta_tarjous($otunnus, $komento["Tarjous"], $kieli, $tee, $hinnat,
+          $verolliset_verottomat_hinnat, $naytetaanko_rivihinta, $naytetaanko_tuoteno,
+          $liita_tuotetiedot, $naytetaanko_yhteissummarivi);
+
+        $tee = '';
+      }
     }
 
     if ($toim == "MYYNTISOPIMUS" or $toim == "MYYNTISOPIMUS!!!VL" or $toim == "MYYNTISOPIMUS!!!BR") {

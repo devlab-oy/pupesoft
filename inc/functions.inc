@@ -21042,6 +21042,19 @@ if (!function_exists("pupesoft_tilausvahvistustyypit")) {
   }
 }
 
+if (!function_exists("pupesoft_tarjoustyypit")) {
+  function pupesoft_tarjoustyypit() {
+    return array(
+      "0" => "Normaali tarjouspohja",
+      "2" => "Normaali tarjouspohja ei ALV",
+      "1" => "Pelkistetty tarjouspohja",
+      "3" => "Lyhyt tarjouspohja",
+      "4" => "Tarjouspohja, jossa ainoastaan nettohinnat",
+      "5" => "Kuvallinen tarjouspohja",
+    );
+  }
+}
+
 if (!function_exists("pupesoft_lahetetyyppi")) {
   function pupesoft_lahetetyyppi($laskutunnus, $asiakastunnus = 0) {
     global $kukarow;

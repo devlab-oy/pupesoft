@@ -1843,10 +1843,6 @@ if (!function_exists('loppu_tarjous')) {
           $kuha = 168;
         }
 
-        if ($kuha-165 <= 140) {
-          list($page_tarjous[$sivu], $kuha) = uusi_sivu_tarjous($laskurow, $asiakasrow, $kieli, $pdf_tarjous);
-        }
-
         if ($vikanrivin_sivu != $sivu and $naytetaanko_rivihinta != 'kokonaan_ilman_hintoja' and
           $naytetaanko_yhteissummarivi != "E"
         ) {
@@ -1862,6 +1858,10 @@ if (!function_exists('loppu_tarjous')) {
 
           $oikpos = $pdf_tarjous->strlen(sprintf("%.2f", $total_tarjous)." ".$laskurow["valkoodi"], $boldi);
           $pdf_tarjous->draw_text(575-$oikpos, $kuha, sprintf("%.2f", $total_tarjous)." ".$laskurow["valkoodi"], $page_tarjous[$sivu], $boldi);
+        }
+
+        if ($kuha-165 <= 80) {
+          list($page_tarjous[$sivu], $kuha) = uusi_sivu_tarjous($laskurow, $asiakasrow, $kieli, $pdf_tarjous);
         }
 
         $result = t_avainsana('TARJOUS_VAKIOTE', $kieli);

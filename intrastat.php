@@ -141,7 +141,7 @@ if ($tee == "tulosta") {
     $query = "(SELECT
                tuote.tullinimike1,
                if (lasku.maa_lahetys='', toimi.maa, lasku.maa_lahetys) maalahetys,
-               ifnull((SELECT alkuperamaa FROM tuotteen_toimittajat WHERE tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.alkuperamaa not in ('$yhtiorow[maa]','') LIMIT 1), if (lasku.maa_lahetys='', toimi.maa, lasku.maa_lahetys)) alkuperamaa,
+               ifnull((SELECT alkuperamaa FROM tuotteen_toimittajat WHERE tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.liitostunnus=toimi.tunnus and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.alkuperamaa not in ('$yhtiorow[maa]','') LIMIT 1), if (lasku.maa_lahetys='', toimi.maa, lasku.maa_lahetys)) alkuperamaa,
                if (lasku.maa_maara='', if (lasku.toim_maa='', if(varastopaikat.maa is null or varastopaikat.maa='', '$yhtiorow[maa]', varastopaikat.maa), lasku.toim_maa), lasku.maa_maara) maamaara,
                lasku.kuljetusmuoto,
                lasku.kauppatapahtuman_luonne,

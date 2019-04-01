@@ -612,13 +612,13 @@ if (!empty($etsinappi)) {
         echo "<td align='right'>{$row['myohassa_pva']}</td>";
 
         $i=0;
-        $worksheet->write($excelrivi, $i++, $row['tilauksia']);
-        $worksheet->write($excelrivi, $i++, $row['myohassa_tilauksia']);
-        $worksheet->write($excelrivi, $i++, $pros_myohassa_til);
-        $worksheet->write($excelrivi, $i++, $row['riveja']);
-        $worksheet->write($excelrivi, $i++, $row['myohassa_riveja']);
-        $worksheet->write($excelrivi, $i++, $pros_myohassa_riv);
-        $worksheet->write($excelrivi, $i++, $row['myohassa_pva']);
+        $worksheet->writeNumber($excelrivi, $i++, $row['tilauksia']);
+        $worksheet->writeNumber($excelrivi, $i++, $row['myohassa_tilauksia']);
+        $worksheet->writeNumber($excelrivi, $i++, $pros_myohassa_til);
+        $worksheet->writeNumber($excelrivi, $i++, $row['riveja']);
+        $worksheet->writeNumber($excelrivi, $i++, $row['myohassa_riveja']);
+        $worksheet->writeNumber($excelrivi, $i++, $pros_myohassa_riv);
+        $worksheet->writeNumber($excelrivi, $i++, $row['myohassa_pva']);
         $excelrivi++;
       }
       elseif ($raptaso == "partneri") {
@@ -642,14 +642,14 @@ if (!empty($etsinappi)) {
         echo "<td align='right'>{$row['myohassa_pva']}</td>";
 
         $i=0;
-        $worksheet->write($excelrivi, $i++, $row['nimi']);
-        $worksheet->write($excelrivi, $i++, $row['tilauksia']);
-        $worksheet->write($excelrivi, $i++, $row['myohassa_tilauksia']);
-        $worksheet->write($excelrivi, $i++, $pros_myohassa_til);
-        $worksheet->write($excelrivi, $i++, $row['riveja']);
-        $worksheet->write($excelrivi, $i++, $row['myohassa_riveja']);
-        $worksheet->write($excelrivi, $i++, $pros_myohassa_riv);
-        $worksheet->write($excelrivi, $i++, $row['myohassa_pva']);
+        $worksheet->writeString($excelrivi, $i++, $row['nimi']);
+        $worksheet->writeNumber($excelrivi, $i++, $row['tilauksia']);
+        $worksheet->writeNumber($excelrivi, $i++, $row['myohassa_tilauksia']);
+        $worksheet->writeNumber($excelrivi, $i++, $pros_myohassa_til);
+        $worksheet->writeNumber($excelrivi, $i++, $row['riveja']);
+        $worksheet->writeNumber($excelrivi, $i++, $row['myohassa_riveja']);
+        $worksheet->writeNumber($excelrivi, $i++, $pros_myohassa_riv);
+        $worksheet->writeNumber($excelrivi, $i++, $row['myohassa_pva']);
         $excelrivi++;
       }
       elseif ($raptaso == "rivi") {
@@ -665,16 +665,16 @@ if (!empty($etsinappi)) {
         echo "<td align='right'>".pupe_DataTablesEchoSort($row['toimaika']).tv1dateconv($row["toimaika"])."</td>";
 
         $i=0;
-        $worksheet->write($excelrivi, $i++, $row['nimi']);
-        $worksheet->write($excelrivi, $i++, $row['tilaus']);
-        $worksheet->write($excelrivi, $i++, $row['viesti']);
-        $worksheet->write($excelrivi, $i++, $row['tuoteno']);
-        $worksheet->write($excelrivi, $i++, $row['nimitys']);
-        $worksheet->write($excelrivi, $i++, $row['varattu']);
-        $worksheet->write($excelrivi, $i++, $row['yksikko']);
-        $worksheet->write($excelrivi, $i++, $row['hinta']);
-        $worksheet->write($excelrivi, $i++, $row['rivihinta']);
-        $worksheet->write($excelrivi, $i++, $row['toimaika']);
+        $worksheet->writeString($excelrivi, $i++, $row['nimi']);
+        $worksheet->writeString($excelrivi, $i++, $row['tilaus']);
+        $worksheet->writeString($excelrivi, $i++, $row['viesti']);
+        $worksheet->writeString($excelrivi, $i++, $row['tuoteno']);
+        $worksheet->writeString($excelrivi, $i++, $row['nimitys']);
+        $worksheet->writeNumber($excelrivi, $i++, $row['varattu']);
+        $worksheet->writeString($excelrivi, $i++, $row['yksikko']);
+        $worksheet->writeNumber($excelrivi, $i++, $row['hinta']);
+        $worksheet->writeNumber($excelrivi, $i++, $row['rivihinta']);
+        $worksheet->writeDate($excelrivi, $i++, $row['toimaika']);
         $excelrivi++;
       }
       else {

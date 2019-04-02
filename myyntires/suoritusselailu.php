@@ -56,7 +56,12 @@ if ($tila == 'poistasuoritus' or $tila == 'siirrasuoritus' or $tila == "siirrasu
   }
 
   if ($tila == 'poistasuoritus') {
-    $suorilisa = " and viite = '' ";
+    if ($kukarow["yhtio"] != 'macea') {
+      $suorilisa = " and viite = '' ";
+    }
+    else {
+      $suorilisa = " ";
+    }
   }
   else {
     $suorilisa = " ";
@@ -767,7 +772,7 @@ if ($tila == '') {
       // tehd‰‰n nappi suorituksen poistamiseen
       echo "<td valign='top' class='back'>";
 
-      if (trim($maksurow["viite"]) != "") {
+      if (trim($maksurow["viite"]) != "" and $kukarow["yhtio"] != 'macea') {
 
         if (isset($siirrasuoritustilille[$kukarow["yhtio"]]) and count($siirrasuoritustilille[$kukarow["yhtio"]]) > 0) {
 

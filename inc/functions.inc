@@ -17369,6 +17369,7 @@ if (!function_exists("tuotteen_lisatiedot")) {
               FROM tuotteen_avainsanat
               JOIN avainsana ON (avainsana.yhtio = tuotteen_avainsanat.yhtio
                 AND avainsana.laji             = 'LISATIETO'
+                AND avainsana.kieli            = '$kukarow[kieli]'
                 AND avainsana.selite           = SUBSTR(tuotteen_avainsanat.laji, 11))
               WHERE tuotteen_avainsanat.yhtio  = '$kukarow[yhtio]'
               AND tuotteen_avainsanat.kieli    = '$kukarow[kieli]'

@@ -1427,6 +1427,9 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
   elseif ($toim == "VAKADR") {
     $tulostimet[0] = 'VAK_ADR';
   }
+  elseif ($toim == "PULLOPANTTITARRAT") {
+    $tulostimet[0] = 'Pullopanttitarrat';
+  }
 
   if ($kukarow['kuka'] == "admin" and $kappaleet === "POHJAT") {
     $kaikkilomakepohjat = TRUE;
@@ -1552,6 +1555,12 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
       require 'tulosta_tilaustuotetarrat.inc';
       tulosta_tilaustuotetarrat($otunnus, 0, $komento["Tilauksen tuotetarrat"], $tee);
       $tee = '';
+    }
+
+    if ($toim == "PULLOPANTTITARRAT") {
+      require_once "inc/tulosta_pullopanttitarra_pdf.inc";
+      $pdf_zebra_tarra = tulosta_pullopanttitarra_pdf($laskurow);
+      $tee = "";
     }
 
     if ($toim == "TARIFFI") {

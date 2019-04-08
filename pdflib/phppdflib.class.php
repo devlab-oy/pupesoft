@@ -295,6 +295,12 @@ class pdffile {
       $this->objects[$o]["width"] = 418;
       break;
 
+    case "zebra_tarra" :
+      $o = $this->_addnewoid();
+      $this->objects[$o]["height"] = 600;#304;
+      $this->objects[$o]["width"] = 1240;#629;
+      break;
+
     default :
       if (preg_match("/in/", $size)) {
         $o = $this->_addnewoid();
@@ -860,6 +866,7 @@ class pdffile {
       case "\xce":
       case "\xcf":
         $precision = $this->_int_val(substr($data, $pos + 4, 1));
+        error_log(print_r($precision, true));
         $height = $this->_int_val(substr($data, $pos + 5, 2));
         $width = $this->_int_val(substr($data, $pos + 7, 2));
         $numcomp = $this->_int_val(substr($data, $pos + 9, 1));

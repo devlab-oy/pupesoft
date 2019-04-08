@@ -4417,6 +4417,34 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
 
       echo "</form>";
 
+      $query = "SELECT tuote.tuoteno,
+	                tuote.pullopanttitarratulostus_kerayksessa
+                FROM tilausrivi
+	                JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
+                WHERE tilausrivi.yhtio = '{$yhtiorow['yhtio']}'
+                AND tilausrivi.otunnus = '{$otsik_row['tunnus']}'";
+      $pullopantti_check_res = pupe_query($query);
+      $pullopantti_check = FALSE;
+
+      while ($pullopantti_check_row = mysql_fetch_assoc($pullopantti_check_res)) {
+        if ($pullopantti_check_row['pullopanttitarratulostus_kerayksessa'] == 'T') {
+          $pullopantti_check = TRUE;
+          break;
+        }
+      }
+
+      if ($pullopantti_check) {
+        echo "<br>";
+        
+        js_openFormInNewWindow();
+
+        echo "<br><form id='tulostakopioform_{$otsik_row['tunnus']}' name='tulostakopioform_{$otsik_row['tunnus']}' method='post' action='{$palvelin2}tilauskasittely/tulostakopio.php' autocomplete='off'>
+              <input type='hidden' name='otunnus' value='{$otsik_row['tunnus']}'>
+              <input type='hidden' name='toim' value='PULLOPANTTITARRAT'>
+              <input type='hidden' name='tee' value='NAYTATILAUS'>
+              <input type='submit' value='".t("Pullopanttitarrat").": {$otsik_row['tunnus']}' onClick=\"js_openFormInNewWindow('tulostakopioform_{$otsik_row['tunnus']}', ''); return false;\"></form><br>";
+      }
+
       if ($otsik_row["tulostustapa"] != "X" and $otsik_row['nouto'] == '' and $yhtiorow['karayksesta_rahtikirjasyottoon'] == 'Y') {
         echo "<br><br><font class='message'>".t("Siirryt automaattisesti rahtikirjan syöttöön")."!</font>";
       }

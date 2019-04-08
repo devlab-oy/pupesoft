@@ -349,6 +349,24 @@ if (mysql_field_name($result, $i) == "automaattinen_sarjanumerointi") {
   $jatko = 0;
 }
 
+if (mysql_field_name($result, $i) == "pullopanttitarratulostus_kerayksessa") {
+  $sela = $selb = "";
+  
+  if ($trow[$i] == 'T') {
+    $selb = "SELECTED";
+  }
+  else {
+    $sela = "SELECTED";
+  }
+
+  $ulos  = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
+  $ulos .= "<option value = '' $sela>".t("Ei pullopanttitarrojen tulostusta")."</option>";
+  $ulos .= "<option value = 'T' $selb>".t("Pullopanttitarrat voi tulostaa keräyksessä")."</option>";
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
 if (mysql_field_name($result, $i) == "aleryhma") {
 
   $query = "SELECT ryhma, if (ryhma!=selite, concat_ws(' - ', ryhma, selite), ryhma) selitetark

@@ -83,7 +83,7 @@ if ($tila == "Muuta" or $tila == "vaihdaasiakas") {
                  '' toimaika,
                  '' tilausyhteyshenkilo,
                  '' viesti,
-                 '' sisviesti1,
+                 vapaa_teksti sisviesti1,
                  '' comments,
                  '' erikoisale
                  FROM toimi

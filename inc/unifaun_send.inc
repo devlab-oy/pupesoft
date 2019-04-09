@@ -617,8 +617,21 @@ class Unifaun {
     $uni_rcv_val = $uni_receiver->addChild('val', utf8_encode($this->rakir_row["toim_postino"])); // Zipcode
     $uni_rcv_val->addAttribute('n', "zipcode");
 
+    if ($toim_maa == "FI") {
+      list($_postinomaa, $_postino) = explode("-", $this->rakir_row["toim_postino"]);
+    }
+    else {
+      $_postinomaa = '';
+    }
+
+    if ($_postinomaa == "AX") { 
+      $toim_maa = "AX";
+    }
+    else {
+      // jos asiakkaan toim_maa on tyhjä niin oletetaan, että se on sama ku yhtiön maa
+      $toim_maa = ($this->rakir_row['toim_maa'] != "") ? $this->rakir_row['toim_maa'] : $this->postirow["yhtio_maa"];
+    }
     // jos asiakkaan toim_maa on tyhjä niin oletetaan, että se on sama ku yhtiön maa
-    $toim_maa = ($this->rakir_row['toim_maa'] != "") ? $this->rakir_row['toim_maa'] : $this->postirow["yhtio_maa"];
 
     if ($toim_maa == "US") {
 

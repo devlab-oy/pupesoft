@@ -1817,7 +1817,7 @@ if (!function_exists('rivi_lahete')) {
     if (substr($lahetetyyppi, 0, 6) != "perhe_" or $piilotarivi == "") {
       if ($base_lahetetyyppi == "tulosta_lahete.inc" or $base_lahetetyyppi == 'tulosta_lahete_viivakoodi_ykshinta_normaali.inc') {
         // tulosta_lahete.inc
-        if ((($row["var"] != 'J' or ($row['var'] == 'J' and $base_lahetetyyppi == 'tulosta_lahete_viivakoodi_ykshinta_normaali.inc')) or ($tyyppi == "TILAUSVAHVISTUS" and strpos($laskurow['tilausvahvistus'], 'JT') !== FALSE)) and $row["var"] != 'P') {
+        if ((($row["var"] != 'J' or ($row['var'] == 'J' and ($base_lahetetyyppi == 'tulosta_lahete_viivakoodi_ykshinta_normaali.inc' or $lahetetyyppi == 'tulosta_lahete_jt_mukaan_loppusummaan.inc'))) or ($tyyppi == "TILAUSVAHVISTUS" and strpos($laskurow['tilausvahvistus'], 'JT') !== FALSE)) and $row["var"] != 'P') {
 
           // Myyntihinnat sisältävät arvonlisäveron
           if ($yhtiorow['alv_kasittely'] == '') {
@@ -4426,6 +4426,7 @@ if (!function_exists('hae_base_lahetetyyppi')) {
     $base_lahetetyyppi = str_replace('hinnat_isalla_', '', $base_lahetetyyppi);
     $base_lahetetyyppi = str_replace('_verollinen', '', $base_lahetetyyppi);
     $base_lahetetyyppi = str_replace('_eipuute', '', $base_lahetetyyppi);
+    $base_lahetetyyppi = str_replace('_jt_mukaan_loppusummaan', '', $base_lahetetyyppi);
 
     return $base_lahetetyyppi;
   }

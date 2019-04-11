@@ -11925,6 +11925,12 @@ if (!function_exists("laheta_tilausvahvistus")) {
     if ($kukarow['extranet'] != "" and $kukarow['hyvaksyja'] != '') {
       $naytatvale = 2; // jos mell‰ on tilausvahvistuksessa kakkonen, ei haluta n‰h‰ aleja
     }
+    elseif (strpos($laskurow['tilausvahvistus'], '14') !== FALSE) {
+      $naytatvale = 14; // jos meill‰ on tilausvahvistuksessa 14, halutaan n‰h‰ alet ja jt-rivit mukaan yhteens‰summaan
+      if (strpos($laskurow['tilausvahvistus'], 'Y') !== FALSE) {
+        $tuoteperheetyhdessa = TRUE;
+      }
+    }
     elseif (strpos($laskurow['tilausvahvistus'], '11') !== FALSE) {
       $naytatvale = 11; // jos meill‰ on tilausvahvistuksessa seiska, niin tehd‰‰n N‰ytet‰‰n asiakkaan hinta, viivakoodi ja jt-rivit normaaleina. Ei alennuksia
       if (strpos($laskurow['tilausvahvistus'], 'Y') !== FALSE) {
@@ -21038,6 +21044,7 @@ if (!function_exists("pupesoft_tilausvahvistustyypit")) {
       "10" => "N‰ytet‰‰n asiakkaan hinta, alennus, viivakoodi ja jt-rivit normaaleina",
       "11" => "N‰ytet‰‰n asiakkaan hinta ja alennus. Tuotteen EAN viivakoodina. JT-rivit normaaleina",
       "12" => "N‰ytet‰‰n asiakkaan hinta, vain Ale1 ja erikoisalennus. Tuotteen EAN viivakoodina",
+      "14" => "N‰ytet‰‰n asiakkaan hinta ja alennus (JT-rivit lasketaan mukaan yhteens‰summaan)",
     );
   }
 }

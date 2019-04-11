@@ -164,6 +164,12 @@ if ($toim == "TILAUSVAHVISTUS"
   if ($kukarow['extranet'] != "" and $kukarow['hyvaksyja'] != '') {
     $naytatvale = 2; // jos mell‰ on tilausvahvistuksessa kakkonen, ei haluta n‰h‰ aleja
   }
+  elseif (strpos($row2['tilausvahvistus'], '14') !== FALSE) {
+    $naytatvale = 14; // jos meill‰ on tilausvahvistuksessa 14, halutaan n‰h‰ alet ja jt-rivit mukaan yhteens‰summaan
+    if (strpos($row2['tilausvahvistus'], 'Y') !== FALSE) {
+      $tuoteperheetyhdessa = TRUE;
+    }
+  }
   elseif (strpos($row2['tilausvahvistus'], '12') !== FALSE) {
     $naytatvale = 12; // jos meill‰ on tilausvahvistuksessa 12, niin n‰ytet‰‰n hinta, viivakoodi, ale1, ja erikoisale
     if (strpos($row2['tilausvahvistus'], 'Y') !== FALSE) {

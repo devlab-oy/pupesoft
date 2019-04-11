@@ -45,6 +45,9 @@ elseif ($naytatvale == 11) {
 elseif ($naytatvale == 12) {
   $lahetetyyppi .= "tulosta_lahete_viivakoodi_ale1.inc";
 }
+elseif ($naytatvale == 14) {
+  $lahetetyyppi .= "tulosta_lahete_jt_mukaan_loppusummaan.inc";
+}
 else {
   $lahetetyyppi .= "tulosta_lahete.inc";
 }

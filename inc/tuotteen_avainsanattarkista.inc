@@ -137,6 +137,12 @@ if (!function_exists("tuotteen_avainsanattarkista")) {
       }
     }
 
+    if (mysql_field_name($result, $i) == "selitetark") {
+
+      $tem_selitetark = trim($t[$i]);
+    }
+
+
     if (mysql_field_name($result, $i) == 'tunnus') {
 
       $query = "SELECT tunnus
@@ -154,6 +160,22 @@ if (!function_exists("tuotteen_avainsanattarkista")) {
 
       if (mysql_num_rows($results) > 0) {
         $virhe[$tem_tuoteno_i] = $virhe[$i] = t("Avainsana annetuilla tiedoilla löytyy kannasta. Duplikaatit ovat kiellettyjä!");
+      }
+      else {
+
+        $query = "SELECT tunnus
+                  FROM tuotteen_avainsanat
+                  WHERE yhtio     = '$kukarow[yhtio]'
+                  AND tuoteno     = '$tem_tuoteno'
+                  AND kieli       = '$tem_kieli'
+                  AND laji        = '$tem_laji'
+                  AND selite      = '$tem_selite'
+                  AND selitetark  = '$tem_selitetark'";
+        $results = pupe_query($query);
+
+        if (mysql_num_rows($results) > 0) {
+          $virhe[$tem_tuoteno_i] = $virhe[$i] = t("Avainsana annetuilla tiedoilla löytyy kannasta. Duplikaatit ovat kiellettyjä!");
+        }
       }
     }
   }

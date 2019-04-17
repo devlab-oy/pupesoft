@@ -13182,6 +13182,77 @@ if (!function_exists("viivakoodi")) {
   }
 }
 
+if (!function_exists("pdf_viivakoodi")) {
+  function pdf_viivakoodi($viivakoodi, $encoding = "ean", $leveys = 180, $korkeus = 40, $teksti = "") {
+
+    if (trim($viivakoodi) == '') return FALSE;
+
+    $leveys = (int) $leveys;
+    $korkeus = (int) $korkeus;
+
+    if ($leveys <= 0 or $korkeus <= 0) {
+      return FALSE;
+    }
+
+    $encoding = trim(strtolower($encoding));
+
+    switch ($encoding) {
+    case "ean":
+    case "ean13":
+    case "ean-13":
+    case "ean8":
+    case "ean-8":
+    case "upc":
+    case "upc-a":
+    case "upc-e":
+    case "isbn":
+    case "39":
+    case "code39":
+    case "128c":
+    case "code128c":
+    case "128b":
+    case "code128b":
+    case "128":
+    case "code128":
+    case "128raw":
+    case "i25":
+    case "interleaved 2 of 5":
+    case "cbr":
+    case "codabar":
+    case "msi":
+    case "pls":
+    case "plessey":
+    case "code93":
+    case "93":
+      break;
+    default:
+      return FALSE;
+    }
+
+    $lisa = $teksti != "" ? "" : "-n";
+
+    // Tehdään tempfilet viivakoodille ja kuvalle
+    $postscript = tempnam("/tmp", "barcode-");
+    $image = tempnam("/tmp", "image-");
+
+    // Tehdään viivakoodi PostScript
+    shell_exec("barcode -b \"$viivakoodi\" -e \"$encoding\" -u mm -g \"{$leveys}x{$korkeus}\" -E $lisa -o \"$postscript\" -c");
+
+    // Ghostscript konversioon yksikkö kuntoon
+    $leveys = round($leveys * 3.03);
+    $korkeus = round($korkeus * 4.8);
+
+    // Käännetään PostScript PDF:ksi
+    shell_exec("gs -dSAFER -dBATCH -dNOPAUSE -r72x72 -g629x304 -sDEVICE=pdfwrite -sOutputFile=\"$image\".pdf \"$postscript\"");
+
+    // Dellataan temp-filet
+    unlink($postscript);
+    unlink($image);
+
+    return $image.".pdf";
+  }
+}
+
 if (!function_exists("tarkista_ean13")) {
   function tarkista_ean13($eankoodi) {
     // Ensiksi eankoodi muutetaan Stringiksi

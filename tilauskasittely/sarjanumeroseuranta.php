@@ -1636,7 +1636,7 @@ if ($rivirow["tyyppi"] != 'V') {
 
       echo "<tr><th>".t("Lis‰tieto")."</th><td><textarea rows='4' cols='27' name='lisatieto'>$lisatieto</textarea></td></tr>";
     }
-    elseif ($rivirow["sarjanumeroseuranta"] == "T") {
+    elseif ($rivirow["sarjanumeroseuranta"] == "T" and $rivirow["automaattinen_sarjanumerointi"] == 0) {
       echo "<br><table>";
       echo "<tr><th colspan='2'>".t("Lis‰‰ uusi sarjanumero")."</th></tr>";
       echo "<tr><th>".t("Sarjanumero")."</th><td><input type='text' size='30' name='sarjanumero' value='$sarjanumero'></td></tr>";

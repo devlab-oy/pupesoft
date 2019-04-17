@@ -1427,6 +1427,9 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
   elseif ($toim == "VAKADR") {
     $tulostimet[0] = 'VAK_ADR';
   }
+  elseif ($toim == "PULLOPANTTITARRAT") {
+    $tulostimet[0] = 'Pullopanttitarrat';
+  }
 
   if ($kukarow['kuka'] == "admin" and $kappaleet === "POHJAT") {
     $kaikkilomakepohjat = TRUE;
@@ -1552,6 +1555,12 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
       require 'tulosta_tilaustuotetarrat.inc';
       tulosta_tilaustuotetarrat($otunnus, 0, $komento["Tilauksen tuotetarrat"], $tee);
       $tee = '';
+    }
+
+    if ($toim == "PULLOPANTTITARRAT") {
+      require_once "inc/tulosta_pullopanttitarra_pdf.inc";
+      $pdf_zebra_tarra = tulosta_pullopanttitarra_pdf($laskurow);
+      $tee = "";
     }
 
     if ($toim == "TARIFFI") {
@@ -1789,11 +1798,38 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
 
       require_once "tulosta_tarjous.inc";
 
-      tulosta_tarjous($otunnus, $komento["Tarjous"], $kieli, $tee, $hinnat,
-        $verolliset_verottomat_hinnat, $naytetaanko_rivihinta, $naytetaanko_tuoteno,
-        $liita_tuotetiedot, $naytetaanko_yhteissummarivi);
+      if ($kaikkilomakepohjat) {
 
-      $tee = '';
+        $tarjoukset = array();
+
+        foreach (pupesoft_tarjoustyypit() as $seltarjoustyyppi => $seltarjoustyyppiteksti) {
+          $tarjoukset[] = array($seltarjoustyyppi, "$seltarjoustyyppiteksti ($seltarjoustyyppi)");
+        }
+
+        $_tmp_yhtiorow_tarjoustyyppi = $yhtiorow['tarjoustyyppi'];
+
+        foreach ($tarjoukset as $tarjous) {
+          $seltarjoustyyppi = $tarjous[0]."##".$tarjous[1];
+
+          $yhtiorow['tarjoustyyppi'] = $tarjous[0];
+
+          tulosta_tarjous($otunnus, $komento["Tarjous"], $kieli, $tee, $hinnat,
+          $verolliset_verottomat_hinnat, $naytetaanko_rivihinta, $naytetaanko_tuoteno,
+          $liita_tuotetiedot, $naytetaanko_yhteissummarivi, $seltarjoustyyppi);
+
+          $tee = '';
+        }
+
+        $yhtiorow['tarjoustyyppi'] = $_tmp_yhtiorow_tarjoustyyppi;
+      }
+      else {
+
+        tulosta_tarjous($otunnus, $komento["Tarjous"], $kieli, $tee, $hinnat,
+          $verolliset_verottomat_hinnat, $naytetaanko_rivihinta, $naytetaanko_tuoteno,
+          $liita_tuotetiedot, $naytetaanko_yhteissummarivi);
+
+        $tee = '';
+      }
     }
 
     if ($toim == "MYYNTISOPIMUS" or $toim == "MYYNTISOPIMUS!!!VL" or $toim == "MYYNTISOPIMUS!!!BR") {
@@ -2494,6 +2530,7 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
 
       // Aloitellaan keräyslistan teko
       $params_kerayslista = alku_kerayslista($params_kerayslista);
+      $params_kerayslista["yhteensasumma"] = 0;
 
       while ($row = mysql_fetch_assoc($riresult)) {
         $params_kerayslista["row"] = $row;

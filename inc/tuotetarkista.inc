@@ -6,7 +6,7 @@ if (!function_exists("tuotetarkista")) {
 
     static $tem_tuoteno, $tem_tullinimike1, $tem_eisaldoa, $tem_kehahin, $tem_kehahin_ind;
     static $tem_tuotetyyppi, $tem_status, $tem_status_vanha, $tem_try, $tem_try_vanha;
-    static $tem_eankoodi, $tem_yksikko, $tem_nimitys, $tem_tuotemassa;
+    static $tem_eankoodi, $tem_yksikko, $tem_nimitys, $tem_tuotemassa, $tem_halyraja;
 
     $fieldname = mysql_field_name($result, $i);
 
@@ -204,6 +204,10 @@ if (!function_exists("tuotetarkista")) {
 
     if ($fieldname == "tuotemassa") {
       $tem_tuotemassa = $t[$i];
+    }
+    
+    if ($fieldname == "halytysraja") {
+      $tem_halytysraja = $t[$i];
     }
 
     if ($fieldname == "tuotetyyppi") {
@@ -476,6 +480,7 @@ if (!function_exists("tuotetarkista")) {
           $tem_yksikko    != $trow['yksikko']    or
           $tem_nimitys    != $trow['nimitys']    or
           $tem_tuotemassa != $trow['tuotemassa'] or
+          $tem_halytysraja   != $trow['halytysraja'] or
           $tem_try        != $tem_try_vanha)) {
 
         $query = "UPDATE tuotteen_avainsanat SET

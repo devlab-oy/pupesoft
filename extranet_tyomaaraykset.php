@@ -555,6 +555,7 @@ function tallenna_tyomaarays($request) {
              postino             = '{$asiakastiedot['postino']}',
              postitp             = '{$asiakastiedot['postitp']}',
              maa                 = '{$asiakastiedot['maa']}',
+             maksuehto           = '{$asiakastiedot['maksuehto']}',
              toim_nimi           = '{$request['osoite_parametrit']['toim_nimi']}',
              toim_nimitark       = '{$request['osoite_parametrit']['toim_nimitark']}',
              toim_osoite         = '{$request['osoite_parametrit']['toim_osoite']}',

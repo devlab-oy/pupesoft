@@ -154,7 +154,12 @@ if (mysql_num_rows($res) > 0) {
         $line->addChild('Brand',               xml_cleanstring($row['tuotemerkki'], 30));
         $line->addChild('ProviderNum',         xml_cleanstring($row['toim_tuoteno'], 30));
       }
-      $line->addChild('AlarmLimit',            '');
+      if ($uj_nimi == "PostNord") {
+        $line->addChild('AlarmLimit',            $row['halytysraja']);
+      } 
+      else {
+        $line->addChild('AlarmLimit',          '');
+      }
       $line->addChild('QualPeriod1',           '');
       $line->addChild('QualPeriod2',           '');
       $line->addChild('QualPeriod3',           '');

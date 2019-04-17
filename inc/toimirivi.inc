@@ -401,6 +401,11 @@ if (mysql_field_name($result, $i) == "fakta") {
   $jatko = 0;
 }
 
+if (mysql_field_name($result, $i) == "vapaa_teksti") {
+  $ulos = "<td><textarea cols='55' rows='7' name='$nimi'>$trow[$i]</textarea></td>";
+  $jatko = 0;
+}
+
 if (mysql_field_name($result, $i) == "ohjeitapankille") {
   $ulos = "<td><textarea cols='35' rows='7' name='$nimi'>$trow[$i]</textarea></td>";
   $jatko = 0;

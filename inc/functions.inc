@@ -11925,6 +11925,12 @@ if (!function_exists("laheta_tilausvahvistus")) {
     if ($kukarow['extranet'] != "" and $kukarow['hyvaksyja'] != '') {
       $naytatvale = 2; // jos mell‰ on tilausvahvistuksessa kakkonen, ei haluta n‰h‰ aleja
     }
+    elseif (strpos($laskurow['tilausvahvistus'], '14') !== FALSE) {
+      $naytatvale = 14; // jos meill‰ on tilausvahvistuksessa 14, halutaan n‰h‰ alet ja jt-rivit mukaan yhteens‰summaan
+      if (strpos($laskurow['tilausvahvistus'], 'Y') !== FALSE) {
+        $tuoteperheetyhdessa = TRUE;
+      }
+    }
     elseif (strpos($laskurow['tilausvahvistus'], '11') !== FALSE) {
       $naytatvale = 11; // jos meill‰ on tilausvahvistuksessa seiska, niin tehd‰‰n N‰ytet‰‰n asiakkaan hinta, viivakoodi ja jt-rivit normaaleina. Ei alennuksia
       if (strpos($laskurow['tilausvahvistus'], 'Y') !== FALSE) {
@@ -13173,6 +13179,77 @@ if (!function_exists("viivakoodi")) {
     unlink($image);
 
     return $data;
+  }
+}
+
+if (!function_exists("pdf_viivakoodi")) {
+  function pdf_viivakoodi($viivakoodi, $encoding = "ean", $leveys = 180, $korkeus = 40, $teksti = "") {
+
+    if (trim($viivakoodi) == '') return FALSE;
+
+    $leveys = (int) $leveys;
+    $korkeus = (int) $korkeus;
+
+    if ($leveys <= 0 or $korkeus <= 0) {
+      return FALSE;
+    }
+
+    $encoding = trim(strtolower($encoding));
+
+    switch ($encoding) {
+    case "ean":
+    case "ean13":
+    case "ean-13":
+    case "ean8":
+    case "ean-8":
+    case "upc":
+    case "upc-a":
+    case "upc-e":
+    case "isbn":
+    case "39":
+    case "code39":
+    case "128c":
+    case "code128c":
+    case "128b":
+    case "code128b":
+    case "128":
+    case "code128":
+    case "128raw":
+    case "i25":
+    case "interleaved 2 of 5":
+    case "cbr":
+    case "codabar":
+    case "msi":
+    case "pls":
+    case "plessey":
+    case "code93":
+    case "93":
+      break;
+    default:
+      return FALSE;
+    }
+
+    $lisa = $teksti != "" ? "" : "-n";
+
+    // Tehd‰‰n tempfilet viivakoodille ja kuvalle
+    $postscript = tempnam("/tmp", "barcode-");
+    $image = tempnam("/tmp", "image-");
+
+    // Tehd‰‰n viivakoodi PostScript
+    shell_exec("barcode -b \"$viivakoodi\" -e \"$encoding\" -u mm -g \"{$leveys}x{$korkeus}\" -E $lisa -o \"$postscript\" -c");
+
+    // Ghostscript konversioon yksikkˆ kuntoon
+    $leveys = round($leveys * 3.03);
+    $korkeus = round($korkeus * 4.8);
+
+    // K‰‰nnet‰‰n PostScript PDF:ksi
+    shell_exec("gs -dSAFER -dBATCH -dNOPAUSE -r72x72 -g629x304 -sDEVICE=pdfwrite -sOutputFile=\"$image\".pdf \"$postscript\"");
+
+    // Dellataan temp-filet
+    unlink($postscript);
+    unlink($image);
+
+    return $image.".pdf";
   }
 }
 
@@ -21038,6 +21115,20 @@ if (!function_exists("pupesoft_tilausvahvistustyypit")) {
       "10" => "N‰ytet‰‰n asiakkaan hinta, alennus, viivakoodi ja jt-rivit normaaleina",
       "11" => "N‰ytet‰‰n asiakkaan hinta ja alennus. Tuotteen EAN viivakoodina. JT-rivit normaaleina",
       "12" => "N‰ytet‰‰n asiakkaan hinta, vain Ale1 ja erikoisalennus. Tuotteen EAN viivakoodina",
+      "14" => "N‰ytet‰‰n asiakkaan hinta ja alennus (JT-rivit lasketaan mukaan yhteens‰summaan)",
+    );
+  }
+}
+
+if (!function_exists("pupesoft_tarjoustyypit")) {
+  function pupesoft_tarjoustyypit() {
+    return array(
+      "0" => "Normaali tarjouspohja",
+      "2" => "Normaali tarjouspohja ei ALV",
+      "1" => "Pelkistetty tarjouspohja",
+      "3" => "Lyhyt tarjouspohja",
+      "4" => "Tarjouspohja, jossa ainoastaan nettohinnat",
+      "5" => "Kuvallinen tarjouspohja",
     );
   }
 }

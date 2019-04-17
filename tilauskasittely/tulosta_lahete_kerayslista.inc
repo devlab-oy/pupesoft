@@ -316,8 +316,6 @@ if (!function_exists('alku_kerayslista')) {
       $pdf->draw_text(310, 666, t("Maksuehto", $kieli),     $thispage, $pieni);
       $pdf->draw_text(310, 656, $maksuehto,           $thispage, $norm);
 
-      $pdf->draw_rectangle(653, 300, 632, 580, $thispage, $rectparam);
-
       if ($myyrow['kuka'] != $laskurow['laatija']) {
         //etsitään laatijan nimi
         $query  = "SELECT nimi
@@ -326,12 +324,9 @@ if (!function_exists('alku_kerayslista')) {
         $laaresult = pupe_query($query);
         $laarow = mysql_fetch_assoc($laaresult);
 
+        $pdf->draw_rectangle(653, 300, 632, 580, $thispage, $rectparam);
         $pdf->draw_text(310, 645, t("Laatija", $kieli), $thispage, $pieni);
         $pdf->draw_text(310, 635, $laarow["nimi"], $thispage, $norm);
-      }
-      else {
-        $pdf->draw_text(310, 645, "", $thispage, $pieni);
-        $pdf->draw_text(310, 635, "", $thispage, $norm);
       }
 
       if ($laskurow['pakkaamo'] > 0 and $yhtiorow['pakkaamolokerot'] != '') {
@@ -372,6 +367,10 @@ if (!function_exists('alku_kerayslista')) {
 
       if (trim($laskurow['tilausyhteyshenkilo']) != '') {
         $komm .= "\n".t("Tilaaja", $kieli).":###".$laskurow['tilausyhteyshenkilo'];
+      }
+
+      if (trim($laskurow['toim_puh']) != '') {
+        $komm .= "\n".t("Puhelin toimitukseen", $kieli).":###".$laskurow['toim_puh'];
       }
 
       if (trim($laskurow['asiakkaan_tilausnumero']) != '') {
@@ -739,6 +738,7 @@ if (!function_exists('rivi_kerayslista')) {
         if ($row["var"] == "" or  $row["var"] == "H") {
           $thispage->writeString($kala, 5, (float) round($row['kplhinta'], 2));
           $thispage->writeString($kala, 6, (float) round($row['rivihinta'], 2));
+          $yhteensasumma = $yhteensasumma + $row['rivihinta'];
         }
       }
 
@@ -1267,8 +1267,12 @@ if (!function_exists('loppu_kerayslista')) {
     // Luodaan muuttujat
     extract($params);
 
-    if ($kerayslistatyyppi == 'EXCEL1' or $kerayslistatyyppi == 'EXCEL2' or $kerayslistatyyppi == 'EXCEL3') {
+    if ($kerayslistatyyppi == 'EXCEL1' or $kerayslistatyyppi == 'EXCEL2') {
       // Tässä pärjätään ilman footteria....
+    }
+    elseif ($kerayslistatyyppi == 'EXCEL3') {
+      $thispage->writeString($kala, 5, "Total:", $boldi);
+      $thispage->writeString($kala, 6, (float) round($yhteensasumma, 2));
     }
     else {
       // yhtiötiedot

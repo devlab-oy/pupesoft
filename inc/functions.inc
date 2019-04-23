@@ -1107,7 +1107,7 @@ if (!function_exists("fitek_queue")) {
       }
 
       // Luodaan laskupdf:‰
-      $fitektmpfile = tulosta_lasku("LASKU:".$fitek_invoicenum, "fi", "VERKKOLASKU_FITEK", "", "", "", "", "");
+      $fitektmpfile = tulosta_lasku("LASKU:".$fitek_invoicenum, $kieli, "VERKKOLASKU_FITEK", "", "", "", "", "");
       
 
       // Siirret‰‰n faili fitektemppiin

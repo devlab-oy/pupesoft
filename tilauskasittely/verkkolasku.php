@@ -2971,7 +2971,7 @@ else {
 
             $fitek_invoice = "<?xml version=".$fitek_laskuarray[$a];
             
-            $tulos_ulos = fitek_queue($fitek_invoice, $invoice_number[1], $kieli);
+            $tulos_ulos = fitek_queue($fitek_invoice, $invoice_number[1], $laskun_kieli);
           }
         }
       }

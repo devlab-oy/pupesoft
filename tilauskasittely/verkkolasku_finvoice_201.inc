@@ -418,6 +418,16 @@ if (!function_exists('finvoice_otsik')) {
 
       xml_add("BuyerContactPersonName", $asiakkaan_yhteyshenkilo, $tootfinvoice, 35);
 
+      if ($yhtiorow["verkkolasku_lah"] == "fitek") {
+        if ($asiakasrow["lasku_email"] != '') {
+          fputs($tootfinvoice, "<BuyerCommunicationDetails>\r\n");
+          xml_add("BuyerEmailaddressIdentifier", $asiakasrow["lasku_email"], $tootfinvoice, 70);
+        }
+        elseif ($asiakasrow["email"] != '') {
+          fputs($tootfinvoice, "<BuyerCommunicationDetails>\r\n");
+          xml_add("BuyerEmailaddressIdentifier", $asiakasrow["email"], $tootfinvoice, 70);
+        } 
+      }
       fputs($tootfinvoice, "<DeliveryPartyDetails>\r\n");
       xml_add("DeliveryPartyIdentifier", tulosta_ytunnus($lasrow['ytunnus'], $lasrow['maa'], "", true), $tootfinvoice, 35);
       xml_add("DeliveryOrganisationName", trim($lasrow['toim_nimi']." ".$lasrow['toim_nimitark']), $tootfinvoice, 35, 2);

@@ -1293,7 +1293,7 @@ if ($tee == 'S') {
   if ($kpmaksatuksessa == true) {
     $kplisa = ", (select kustannuspaikka.nimi from tiliointi 
 left join kustannuspaikka on tiliointi.yhtio = kustannuspaikka.yhtio and kustannuspaikka.tyyppi = 'K' and kustannuspaikka.tunnus = tiliointi.kustp
-where lasku.yhtio=tiliointi.yhtio and lasku.tunnus = tiliointi.ltunnus and tiliointi.kustp != 0 limit 1) kustnimi ";
+where lasku.yhtio=tiliointi.yhtio and lasku.tunnus = tiliointi.ltunnus and tiliointi.kustp != 0 and tiliointi.korjattu = '' limit 1) kustnimi ";
   }  
 
   $query = "SELECT lasku.nimi, lasku.kapvm, lasku.erpcm, lasku.valkoodi,

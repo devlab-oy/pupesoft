@@ -6513,9 +6513,9 @@ if ($tee == '') {
       $poisrajatut_tuotteet = lisaa_vaihtoehtoinen_rahti_merkkijonoon($poisrajatut_tuotteet);
 
       $query = "SELECT SUM(
-                (tuote.myyntihinta / if ('{$yhtiorow['alv_kasittely']}' = '', (1+tilausrivi.alv/100), 1) * {$query_ale_lisa} * (tilausrivi.kpl+tilausrivi.varattu+tilausrivi.jt))
+                (tuote.myyntihinta / if ('{$yhtiorow['alv_kasittely']}' = 'o', (1+tilausrivi.alv/100), 1) * {$query_ale_lisa} * (tilausrivi.kpl+tilausrivi.varattu+tilausrivi.jt))
                 +
-                (tuote.myyntihinta / if ('{$yhtiorow['alv_kasittely']}' = '', (1+tilausrivi.alv/100), 1) * {$query_ale_lisa} * (tilausrivi.kpl+tilausrivi.varattu+tilausrivi.jt) * (tilausrivi.alv/100))
+                (tuote.myyntihinta / if ('{$yhtiorow['alv_kasittely']}' = 'o', (1+tilausrivi.alv/100), 1) * {$query_ale_lisa} * (tilausrivi.kpl+tilausrivi.varattu+tilausrivi.jt) * (tilausrivi.alv/100))
                 ) rivihinta
                 FROM tilausrivi
                 JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
@@ -9741,7 +9741,11 @@ if ($tee == '') {
           $rahtivapaa_alarajasumma = (float) $yhtiorow["rahtivapaa_alarajasumma"];
         }
 
-        if (isset($summa) and (float) $summa != 0) {
+        // rahtivapaa_alarajasumma on verollisia jos myyntihinnat ovat verollisia, tai verottomia vice versa, joten verrataan sitä oikeaan summaan
+        if ($yhtiorow["alv_kasittely"] == "o" and isset($summa_alviton) and (float) $summa_alviton != 0) {
+          $kaikkiyhteensa = yhtioval($summa_alviton, $laskurow["vienti_kurssi"]); // käännetään yhteensäsumma yhtiövaluuttaan
+        }
+        elseif ($yhtiorow["alv_kasittely"] == "" and isset($summa) and (float) $summa != 0) {
           $kaikkiyhteensa = yhtioval($summa, $laskurow["vienti_kurssi"]); // käännetään yhteensäsumma yhtiövaluuttaan
         }
         else {

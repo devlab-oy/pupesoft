@@ -9748,7 +9748,18 @@ if ($tee == '') {
           $kaikkiyhteensa = 0;
         }
 
-        if ((($kaikkiyhteensa > $rahtivapaa_alarajasumma or $etayhtio_totaalisumma > $rahtivapaa_alarajasumma) and $rahtivapaa_alarajasumma != 0) or $laskurow["rahtivapaa"] != "") {
+        // Rahtivapaa_alarajasumma on verollisia jos myyntihinnat ovat verollisia, tai verottomia vice versa, joten verrataan sitä oikeaan summaan
+        if ($yhtiorow["alv_kasittely"] == "o" and isset($summa_alviton) and (float) $summa_alviton != 0) {
+          $rahtivapaa_vertailu = yhtioval($summa_alviton, $laskurow["vienti_kurssi"]);
+        }
+        elseif (isset($summa) and (float) $summa != 0) {
+          $rahtivapaa_vertailu = yhtioval($summa, $laskurow["vienti_kurssi"]);
+        }
+        else {
+          $rahtivapaa_vertailu = 0;
+        }
+
+        if ((($rahtivapaa_vertailu > $rahtivapaa_alarajasumma or $etayhtio_totaalisumma > $rahtivapaa_alarajasumma) and $rahtivapaa_alarajasumma != 0) or $laskurow["rahtivapaa"] != "") {
           echo "<tr>$jarjlisa<td class='back' colspan='".($sarakkeet_alku-5)."'>&nbsp;</td><th colspan='5' align='right'>".t("Rahtikulu").":</th><td class='spec' align='right'>0.00</td>";
           if ($kukarow['extranet'] == '' and $naytetaanko_kate) {
             echo "<td class='spec' align='right'>&nbsp;</td>";

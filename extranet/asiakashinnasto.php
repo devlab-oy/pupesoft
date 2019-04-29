@@ -30,12 +30,13 @@ else {
   if ($tee != '' and $ytunnus != '' and $kukarow["extranet"] == '') {
 
     if (isset($muutparametrit)) {
-      $muutparametrit = unserialize(urldecode($muutparametrit));
-      $mul_osasto   = $muutparametrit[0];
-      $mul_try     = $muutparametrit[1];
+      $muutparametrit  = unserialize(urldecode($muutparametrit));
+      $mul_osasto      = $muutparametrit[0];
+      $mul_try         = $muutparametrit[1];
+      $mul_tuotemerkki = $muutparametrit[2];
     }
 
-    $muutparametrit = array($mul_osasto, $mul_try);
+    $muutparametrit = array($mul_osasto, $mul_try, $mul_tuotemerkki);
     $muutparametrit = urlencode(serialize($muutparametrit));
 
     require "inc/asiakashaku.inc";
@@ -155,7 +156,7 @@ else {
 
   // Monivalintalaatikot (osasto, try tuotemerkki...)
   // M‰‰ritell‰‰n mitk‰ latikot halutaan mukaan
-  $monivalintalaatikot = array("OSASTO", "TRY");
+  $monivalintalaatikot = array("OSASTO", "TRY", "TUOTEMERKKI");
 
   echo "<tr><th>".t("Osasto")." / ".t("tuoteryhm‰").":</th><td nowrap>";
 
@@ -222,8 +223,8 @@ else {
       echo "<br><br><font class='message'>".t("Asiakashinnastoa luodaan...")."</font><br>";
       flush();
 
-      if (@require_once "inc/ProgressBar.class.php");
-      elseif (@require_once "ProgressBar.class.php");
+      if (@include_once "inc/ProgressBar.class.php");
+      elseif (@include_once "ProgressBar.class.php");
 
       $bar = new ProgressBar();
       $elements = mysql_num_rows($rresult); // total number of elements to process
@@ -254,6 +255,8 @@ else {
           $worksheet->writeString($excelrivi, $excelsarake, t("Osasto", $hinkieli), $format_bold);
           $excelsarake++;
           $worksheet->writeString($excelrivi, $excelsarake, t("Tuoteryhm‰", $hinkieli), $format_bold);
+          $excelsarake++;
+          $worksheet->writeString($excelrivi, $excelsarake, t("Tuotemerkki", $hinkieli), $format_bold);
           $excelsarake++;
         }
 
@@ -519,6 +522,18 @@ else {
           $asiakashinta_verollinen = round(($asiakashinta*(1+$lis_alv/100)), 2);
         }
 
+        // Katsotaan, mist‰ lˆytyy enari
+        if ($rrow["eankoodi"] == '') {
+          $query = "SELECT *
+                    FROM tuotteen_toimittajat
+                    WHERE yhtio = '$kukarow[yhtio]'
+                    AND tuoteno = '$rrow[tuoteno]'
+                    ORDER BY if (jarjestys = 0, 9999, jarjestys) limit 1";
+          $tuotetoim_res = pupe_query($query);
+          $tuotetoimrow = mysql_fetch_assoc($tuotetoim_res);
+          $rrow["eankoodi"] = $tuotetoimrow["viivakoodi"];
+        }
+
         if (isset($worksheet)) {
 
           $excelsarake = 0;
@@ -538,6 +553,8 @@ else {
             $worksheet->writeString($excelrivi, $excelsarake, $rrow["osasto"]);
             $excelsarake++;
             $worksheet->writeString($excelrivi, $excelsarake, $rrow["try"]);
+            $excelsarake++;
+            $worksheet->writeString($excelrivi, $excelsarake, $rrow["tuotemerkki"]);
             $excelsarake++;
           }
 

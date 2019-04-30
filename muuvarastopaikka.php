@@ -587,10 +587,11 @@ if ($tee == 'N') {
         $myytavissa += $kappaleet[$iii];
       }
 
-      if ($kappaleet[$iii] == $hyllyssa and $myytavissa < $kappaleet[$iii] and strpos($_SERVER['SCRIPT_NAME'], "muuvarastopaikka.php") !== false) {
+      # Kaikki saldot tilauksilla ja kannassa ovat kahden desimaalin tarkkuudella, joten tehd‰‰n vertailut n‰ill‰ tarkkuuksilla myˆs
+      if (round($kappaleet[$iii], 2) == round($hyllyssa, 2) and round($myytavissa, 2) < round($kappaleet[$iii], 2) and strpos($_SERVER['SCRIPT_NAME'], "muuvarastopaikka.php") !== false) {
         $siirretaan_varattua = true;
       }
-      elseif ($kappaleet[$iii] > $myytavissa and !in_array($kutsuja, array('varastopaikka_aineistolla.php', 'vastaanota.php'))) {
+      elseif (round($kappaleet[$iii], 2) > round($myytavissa, 2) and !in_array($kutsuja, array('varastopaikka_aineistolla.php', 'vastaanota.php'))) {
         echo "Tuotetta ei voida siirt‰‰. Saldo ei riitt‰nyt. $tuotteet[$iii] $kappaleet[$iii] ($mistarow[hyllyalue] $mistarow[hyllynro] $mistarow[hyllyvali] $mistarow[hyllytaso])<br>";
         $saldook++;
       }
@@ -601,7 +602,7 @@ if ($tee == 'N') {
     }
   }
 
-  if ($saldook > 0 and ($kappaleet[$iii] < $myytavissa or $kappaleet[$iii] < $hyllyssa)) {
+  if ($saldook > 0 and (round($kappaleet[$iii], 2) < round($myytavissa, 2) or round($kappaleet[$iii], 2) < round($hyllyssa, 2))) {
     echo "<font class='error'>".t("Voit siirt‰‰ vain myyt‰viss‰ olevaa m‰‰r‰‰ tai koko hyllyss‰ olevan m‰‰r‰n")."</font><br><br>";
     $tee = $uusitee;
   }

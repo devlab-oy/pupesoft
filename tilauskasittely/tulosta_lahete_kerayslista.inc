@@ -1148,9 +1148,11 @@ if (!function_exists('rivi_kerayslista')) {
           }
 
           $row['kommentti'] .= t("Tilausnumero", $kieli).": {$row['otunnus']}";
+          $row['kommentti'] .= "\n".t("Asiakasnimi", $kieli).": {$laskurow['nimi']}";
+          $row['kommentti'] .= "\n".t("Toimitustapa", $kieli).": {$laskurow['toimitustapa']}";
 
           //etsit‰‰n myyj‰n nimi
-          $query  = "SELECT kuka.nimi
+          $query  = "SELECT kuka.nimi myyja, lasku.nimi, lasku.toimitustapa
                      FROM lasku
                      JOIN kuka ON (kuka.yhtio = lasku.yhtio AND kuka.tunnus = lasku.myyja AND kuka.yhtio = lasku.yhtio)
                      WHERE lasku.yhtio = '{$kukarow['yhtio']}'
@@ -1158,7 +1160,10 @@ if (!function_exists('rivi_kerayslista')) {
           $myyresult = pupe_query($query);
           $myyrow = mysql_fetch_assoc($myyresult);
 
-          $row['kommentti'] .= "\n".t("Myyj‰", $kieli).": {$myyrow['nimi']}";
+          $row['kommentti'] .= "\n".t("Myyj‰", $kieli).": {$myyrow['myyja']}";
+          $row['kommentti'] .= "\n".t("Asiakasnimi", $kieli).": {$myyrow['nimi']}";
+          $row['kommentti'] .= "\n".t("Toimitustapa", $kieli).": {$myyrow['toimitustapa']}";
+          
         }
 
         // Trimmataan ja otetaan "yhteens‰kommentti" pois

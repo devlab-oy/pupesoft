@@ -701,6 +701,19 @@ if ($tee == 'N') {
 
     if (strpos($_SERVER['SCRIPT_NAME'], "muuvarastopaikka.php")  !== FALSE) {
       echo "<br><font class='message'>".t("Tuotesiirto onnistui. Paikalle %s siirrettiin %s tuotetta", "", "$minnerow[hyllyalue]-$minnerow[hyllynro]-$minnerow[hyllyvali]-$minnerow[hyllytaso]", $kappaleet[$iii])."!</font><br><br>";
+
+      if ($toim == "VAINSIIRTO") {        
+        js_openFormInNewWindow();
+
+        $params = implode(",", $params);
+
+        echo "<br><form id='tulostakopioform_{$tuotteet[$iii]}' name='tulostakopioform_{$tuotteet[$iii]}' method='post' action='{$palvelin2}tilauskasittely/tulostakopio.php' autocomplete='off'>
+              <input type='hidden' name='params' value='{$params}'>
+              <input type='hidden' name='toim' value='SIIRTORAPORTTI'>
+              <input type='hidden' name='tee' value='NAYTATILAUS'>
+              <input type='submit' value='".t("Tulosta siirtoraportti")."' onClick=\"js_openFormInNewWindow('tulostakopioform_{$tuotteet[$iii]}', ''); return false;\"></form><br>";
+        echo "<br><br>";
+      }
     }
   }
 
@@ -1183,8 +1196,14 @@ if ($tee == 'M') {
   echo "<th>".t("Selite")."</th>";
   echo "<td colspan='$sncspan' ><input type='text' name='selite' size='50' /></td>";
 
-  echo "<td class='back'><input type = 'submit' value = '".t("Siirrä")."'></td>
-      </tr></table></form><br>";
+  if ($toim == "VAINSIIRTO") {
+    echo "<td class='back'><input type = 'submit' value = '".t("Siirrä ja tulosta")."'></td>
+    </tr></table></form><br>";
+  }
+  else {
+    echo "<td class='back'><input type = 'submit' value = '".t("Siirrä")."'></td>
+    </tr></table></form><br>";
+  }
 
   if ($toim != "VAINSIIRTO") {
     // Tehdään käyttöliittymä paikkojen muutoksille (otetus tai pois)

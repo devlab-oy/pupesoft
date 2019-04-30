@@ -219,7 +219,7 @@ if (isset($muutparametrit) and $muutparametrit != '') {
   $kka     = $muut[1];
   $ppa     = $muut[2];
   $vvl     = $muut[3];
-  $kkl    = $muut[4];
+  $kkl     = $muut[4];
   $ppl     = $muut[5];
 }
 
@@ -1323,6 +1323,15 @@ if ($tee == "ETSILASKU") {
   else {
     echo "<font class='error'>".t("Ei tilauksia")."...</font><br><br>";
   }
+}
+
+if ($toim == "SIIRTORAPORTTI") {
+  $tulostimet[0] = 'Siirtoraportti';
+
+  require_once "inc/tulosta_siirtoraportti_pdf.inc";
+  $pdf_zebra_tarra = tulosta_siirtoraportti_pdf($params);
+  
+  $tee = "";
 }
 
 if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {

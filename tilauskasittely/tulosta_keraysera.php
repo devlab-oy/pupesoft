@@ -582,6 +582,46 @@ if ($tee != '') {
             $keraysvyohyke    = $erat['keraysvyohyketiedot']['keraysvyohyke'];
             $laskuja          = count($erat['tilaukset']);
 
+            $query  = "SELECT komento,
+                        mediatyyppi
+                       FROM kirjoittimet
+                       WHERE yhtio = '{$kukarow['yhtio']}'
+                        AND tunnus  = 118";
+            $kirres = pupe_query($query);
+            $kirrow = mysql_fetch_assoc($kirres);
+
+            $oslapp = $kirrow['komento'];
+            $oslapp_mediatyyppi = $kirrow['mediatyyppi'];
+
+            $query = "SELECT kerayserat.otunnus, pakkaus.pakkaus, kerayserat.pakkausnro
+                      FROM kerayserat
+                        LEFT JOIN pakkaus ON (pakkaus.yhtio = kerayserat.yhtio AND pakkaus.tunnus = kerayserat.pakkaus)
+                      WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
+                        AND kerayserat.otunnus IN ({$tilausnumeroita})
+                      GROUP BY kerayserat.pakkausnro
+                      ORDER BY kerayserat.otunnus, kerayserat.pakkausnro";
+            $pak_chk_res = pupe_query($query);
+
+            $pak_num = mysql_num_rows($pak_chk_res);
+
+            while ($pak_chk_row = mysql_fetch_assoc($pak_chk_res)) {
+              $params = array(
+                'tilriv' => $pak_chk_row['otunnus'],
+                'komento' => $oslapp,
+                'mediatyyppi' => $oslapp_mediatyyppi,
+                'pakkauskoodi' => $pak_chk_row['pakkaus'],
+                'montako_laatikkoa_yht' => $pak_num,
+                'toim_nimi' => $laskurow['toim_nimi'],
+                'toim_nimitark' => $laskurow['toim_nimitark'],
+                'toim_osoite' => $laskurow['toim_osoite'],
+                'toim_postino' => $laskurow['toim_postino'],
+                'toim_postitp' => $laskurow['toim_postitp'],
+                'pakkausnro' => $pak_chk_row['pakkausnro'],
+              );
+
+              tulosta_oslap_mg($params);
+            }
+
             require "tilauskasittely/tilaus-valmis-tulostus.inc";
 
             // Jos tulostus feilasi, niin dellataan keräyserä

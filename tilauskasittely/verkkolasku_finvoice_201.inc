@@ -422,12 +422,15 @@ if (!function_exists('finvoice_otsik')) {
         if ($asiakasrow["lasku_email"] != '') {
           fputs($tootfinvoice, "<BuyerCommunicationDetails>\r\n");
           xml_add("BuyerEmailaddressIdentifier", $asiakasrow["lasku_email"], $tootfinvoice, 70);
+          fputs($tootfinvoice, "</BuyerCommunicationDetails>\r\n");
         }
         elseif ($asiakasrow["email"] != '') {
           fputs($tootfinvoice, "<BuyerCommunicationDetails>\r\n");
           xml_add("BuyerEmailaddressIdentifier", $asiakasrow["email"], $tootfinvoice, 70);
+          fputs($tootfinvoice, "</BuyerCommunicationDetails>\r\n");
         } 
       }
+      
       fputs($tootfinvoice, "<DeliveryPartyDetails>\r\n");
       xml_add("DeliveryPartyIdentifier", tulosta_ytunnus($lasrow['ytunnus'], $lasrow['maa'], "", true), $tootfinvoice, 35);
       xml_add("DeliveryOrganisationName", trim($lasrow['toim_nimi']." ".$lasrow['toim_nimitark']), $tootfinvoice, 35, 2);

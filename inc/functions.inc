@@ -16769,6 +16769,10 @@ if (!function_exists('tulosta_oslap_mg')) {
 
     if (trim($komento) != '' and $komento != 'email') {
 
+      if (isset($pakkausnro) and !empty($pakkausnro)) {
+        $pakkaus_kirjain = chr((64+$pakkausnro));
+      }
+
       $toimosoite_nimi = trim($toim_nimi.' '.$toim_nimitark);
 
       $ot_tilaus = t("Tilaus", $yhtiorow['kieli']);
@@ -16806,6 +16810,13 @@ if (!function_exists('tulosta_oslap_mg')) {
                  {PC004;0070,0430,1,1,I,00,B|}
                 {RC004;{$montako_laatikkoa_yht} {$pakkauskoodi}|}
                 ";
+
+          if (isset($pakkaus_kirjain) and !empty($pakkaus_kirjain)) {
+            $sivu .= "
+                 {PC005;1120,0600,1,1,I,00,B|}
+                {RC005;{$pakkaus_kirjain}|}
+                ";
+          }
         }
         else {
           $sivu = "  *** ETIKETIN KOKO ***
@@ -16830,6 +16841,16 @@ if (!function_exists('tulosta_oslap_mg')) {
                  {PC004;0030,0280,1,1,I,00,B|}
                 {RC004;{$montako_laatikkoa_yht} {$pakkauskoodi}|}
                 ";
+
+          if (isset($pakkaus_kirjain) and !empty($pakkaus_kirjain)) {
+            $sivu .= "
+                 {PC005;0445,0350,1,1,I,00,B|}
+                {RC005;{$pakkaus_kirjain}|}
+                    ";
+          }
+
+          $tempfile = tempnam("/tmp", "oslap-");
+          file_put_contents($tempfile, $sivu);
         }
 
         $sivu .= "  *** TULOSTUS  ***

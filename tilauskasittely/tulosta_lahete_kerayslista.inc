@@ -1148,8 +1148,6 @@ if (!function_exists('rivi_kerayslista')) {
           }
 
           $row['kommentti'] .= t("Tilausnumero", $kieli).": {$row['otunnus']}";
-          $row['kommentti'] .= "\n".t("Asiakasnimi", $kieli).": {$laskurow['nimi']}";
-          $row['kommentti'] .= "\n".t("Toimitustapa", $kieli).": {$laskurow['toimitustapa']}";
 
           //etsit‰‰n myyj‰n nimi
           $query  = "SELECT kuka.nimi myyja, lasku.nimi, lasku.toimitustapa

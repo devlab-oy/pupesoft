@@ -75,6 +75,10 @@ class MyCashflowTilaukset {
     $this->mycf_erikoiskasittely = $value;
   }
 
+  public function set_mycf_kaupat($value) {
+    $this->mycf_kaupat = $value;
+  }
+
   public function fetch_orders() {
     $this->logger->log('---------Aloitetaan tilausten haku---------');
 
@@ -87,14 +91,15 @@ class MyCashflowTilaukset {
 
     // EDI-tilauksen luontiin tarvittavat parametrit
     $options = array(
-      'edi_polku'          => $this->edi_polku,
-      'ovt_tunnus'         => $this->ovt_tunnus,
-      'rahtikulu_nimitys'  => $this->rahtikulu_nimitys,
-      'rahtikulu_tuoteno'  => $this->rahtikulu_tuoteno,
-      'tilaustyyppi'       => $this->pupesoft_tilaustyyppi,
-      'asiakasnro'         => $this->verkkokauppa_asiakasnro,
-      'maksuehto_ohjaus'   => $this->mycf_maksuehto_ohjaus,
-      'erikoiskasittely'   => $this->mycf_erikoiskasittely,
+      'edi_polku'         => $this->edi_polku,
+      'ovt_tunnus'        => $this->ovt_tunnus,
+      'rahtikulu_nimitys' => $this->rahtikulu_nimitys,
+      'rahtikulu_tuoteno' => $this->rahtikulu_tuoteno,
+      'tilaustyyppi'      => $this->pupesoft_tilaustyyppi,
+      'asiakasnro'        => $this->verkkokauppa_asiakasnro,
+      'maksuehto_ohjaus'  => $this->mycf_maksuehto_ohjaus,
+      'erikoiskasittely'  => $this->mycf_erikoiskasittely,
+      'verkkokauppa_verollisen_hinnan_kentta' => '',
     );
 
     $url = "{$this->apiurl}/webhooks/changes?ts={$datetime_checkpoint}&key={$this->whkey}";
@@ -115,6 +120,16 @@ class MyCashflowTilaukset {
     $tilaus = array();
 
     foreach ($xml->Order as $order) {
+
+      // Kaupan tiedot
+      $kauppaversio = (int) $order->OrderVersionID;
+
+      if (!empty($this->mycf_kaupat[$kauppaversio])) {
+        $options['asiakasnro'] = $this->mycf_kaupat[$kauppaversio];
+      }
+      else {
+        $options['asiakasnro'] = $this->verkkokauppa_asiakasnro;
+      }
 
       // Ostajan tiedot
       $tilaus['billing_address']['city'] = $order->CustomerInformation->City;

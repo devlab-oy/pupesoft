@@ -1736,7 +1736,7 @@ if ($tee == 'P') {
         pupesoft_sahkoposti($parametri);
       }
 
-      $varquery = "SELECT poik_email
+      $varquery = "SELECT Kerayspoikkeus_email
                 FROM varastopaikat
                 WHERE yhtio = '{$kukarow['yhtio']}'
                 AND tunnus = '{$laskurow['varasto']}'";
@@ -1746,8 +1746,8 @@ if ($tee == 'P') {
       
       $poikkeama_email = '';
 
-      if ($varrow['poik_email'] != '') {
-        $poikkeama_email = $varrow['poik_email'];
+      if ($varrow['Kerayspoikkeus_email'] != '') {
+        $poikkeama_email = $varrow['Kerayspoikkeus_email'];
       }
       else if ($laskurow['kuka_ext_nimi'] != '' and $yhtiorow['extranet_kerayspoikkeama_email'] != '') {
         $poikkeama_email = $yhtiorow['extranet_kerayspoikkeama_email'];

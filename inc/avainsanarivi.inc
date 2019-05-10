@@ -295,6 +295,7 @@ if (mysql_field_name($result, $i) == "laji") {
   if ($lukitse_laji== "" or $lukitse_laji == "JAKELULISTA") $ulos .= "<option value='JAKELULISTA' $avain_sel[JAKELULISTA]>".t("Email jakelulista")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "LUETTELO") $ulos .= "<option value='LUETTELO' $avain_sel[LUETTELO]>".t("Luettelotyyppi")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "TRIVITYYPPI") $ulos .= "<option value='TRIVITYYPPI' $avain_sel[TRIVITYYPPI]>".t("Tilausrivin tyyppi")."</option>";
+  if ($lukitse_laji== "" or $lukitse_laji == "TILRIVI_VIILAUS") $ulos .= "<option value='TILRIVI_VIILAUS' $avain_sel[TILRIVI_VIILAUS]>".t("Tilausrivin ulkoasun muutos")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "LASKUTUS_SAATE") $ulos .= "<option value='LASKUTUS_SAATE' $avain_sel[LASKUTUS_SAATE]>".t("Laskun sähköpostisaatekirje asiakkaalle")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "PALAUTUS_SAATE") $ulos .= "<option value='PALAUTUS_SAATE' $avain_sel[PALAUTUS_SAATE]>".t("Palautuksen sähköpostisaatekirje asiakkaalle")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "TV_LISATIETO") $ulos .= "<option value='TV_LISATIETO' $avain_sel[TV_LISATIETO]>".t("Tilausvahvistuksen lisätiedot")."</option>";

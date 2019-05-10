@@ -8028,9 +8028,20 @@ if ($tee == '') {
           }
         }
         elseif ((($toim != "TARJOUS" and $toim != "EXTTARJOUS") or $yhtiorow['tarjouksen_tuotepaikat'] == "") and $muokkauslukko_rivi == "" and ($kukarow['extranet'] == '' or ($kukarow['extranet'] != '' and $yhtiorow['tuoteperhe_suoratoimitus'] == 'E')) and $trow["ei_saldoa"] == "") {
-          if ($paikat != '') {
+          
+          $avainsana_result = t_avainsana("TILRIVI_VIILAUS");
+          $avainsana_tulos = mysql_fetch_assoc($avainsana_result);
 
-            echo "  <td $class align='left' nowrap>";
+          if ($avainsana_tulos and $selpaikkamyytavissa < 0) {
+            $tyyli = "style='color:white' bgcolor='red'";
+          }
+          else {
+            $tyyli = "";
+          }
+          
+          if ($paikat != '') {
+            
+            echo "  <td $class $tyyli align='left' nowrap>";
 
             //valitaan näytetävä lippu varaston tai yhtiön maanperusteella
             if ($selpaikkamaa != '' and $yhtiorow['varastopaikan_lippu'] != '') {
@@ -8070,7 +8081,7 @@ if ($tee == '') {
                 if ($row['var'] == 'U' or $row['var'] == 'T') echo t("Suoratoimitus");
               }
               else {
-                echo "<td $class align='left' nowrap> $row[hyllyalue] $row[hyllynro] $row[hyllyvali] $row[hyllytaso] ($selpaikkamyytavissa) ";
+                echo "<td $class align='left' $tyyli nowrap> $row[hyllyalue] $row[hyllynro] $row[hyllyvali] $row[hyllytaso] ($selpaikkamyytavissa) ";
               }
             }
 

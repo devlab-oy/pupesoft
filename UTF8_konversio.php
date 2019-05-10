@@ -38,7 +38,7 @@ echo "Konvertoidaan Pupesoft UTF8 merkistöön";
 
 foreach ($files as $file) {
 
-  if (strpos($file, "UTF8_konversio.php") !== FALSE) {
+  if (strpos($file, "UTF8_konversio.php") !== FALSE or strpos($file, "import.class.php") !== FALSE) {
     continue;
   }
 

@@ -569,20 +569,20 @@ if ($ytunnus != '' or $tuoteno != '' or (int) $asiakasid > 0 or (int) $toimittaj
     }
 
     if ($toim == "OSTO") {
-      $csp = 4;
+      $csp = 5;
     }
     else {
       if ($asiakaslisa != "") {
-        $csp = 6;
+        $csp = 8;
       }
       else {
-        $csp = 3;
+        $csp = 4;
       }
     }
 
     $csp2 = 2;
 
-    $loopattava_maara = $toim == 'OSTO' ? 1 : $yhtiorow['myynnin_alekentat'];
+    $loopattava_maara = $toim == 'OSTO' ? 2 : $yhtiorow['myynnin_alekentat'];
 
     for ($alepostfix = 1; $alepostfix <= $loopattava_maara; $alepostfix++) {
       if ($alepostfix > 1) {
@@ -619,7 +619,7 @@ if ($ytunnus != '' or $tuoteno != '' or (int) $asiakasid > 0 or (int) $toimittaj
       $worksheet->writeFormula($excelrivi, 5, "SUM(F2:F$excelrivi)");
       $worksheet->write($excelrivi, 6, "");
       $worksheet->writeFormula($excelrivi, 7, "SUM(H2:H$excelrivi)");
-      $worksheet->writeFormula($excelrivi, 8, "SUM(I2:I$excelrivi)");
+      $worksheet->writeFormula($excelrivi, 10, "SUM(K2:K$excelrivi)");
     }
     else {
 
@@ -634,11 +634,11 @@ if ($ytunnus != '' or $tuoteno != '' or (int) $asiakasid > 0 or (int) $toimittaj
       }
       else {
         $worksheet->writeFormula($excelrivi, 4, "SUM(E2:E$excelrivi)");
-        $worksheet->writeFormula($excelrivi, 7, "SUM(H2:H$excelrivi)");
+        $worksheet->writeFormula($excelrivi, 9, "SUM(J2:J$excelrivi)");
 
         if ($kukarow['extranet'] == '' and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y"))) {
-          $worksheet->write($excelrivi, 8+$sarakeplus, $kate_yht);
-          $worksheet->write($excelrivi, 9+$sarakeplus, $ykate);
+          $worksheet->write($excelrivi, 9+$sarakeplus, $kate_yht);
+          $worksheet->write($excelrivi, 10+$sarakeplus, $ykate);
         }
       }
     }

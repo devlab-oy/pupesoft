@@ -148,8 +148,6 @@ if (!function_exists("asiakastarkista")) {
         }
 
         $query   = "SELECT tunnus from asiakas where yhtio in ($tarkyhtio) and asiakasnro='$asiakasnro_select' and tunnus != '$tunnus'";
-        echo "8 <pre> {$asiakasnro_select}    {$tunnus}</pre> <br> <br>";
-        echo "<pre>asiakastarkista 151 tänne tullaan kun seuraava vapaa painiketta painetaan {$query}</pre> <br> <br>";
         $sresult = pupe_query($query);
 
         if (mysql_num_rows($sresult) > 0) {

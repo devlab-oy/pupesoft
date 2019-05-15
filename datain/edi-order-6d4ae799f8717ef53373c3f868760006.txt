@@ -1,0 +1,2680 @@
+﻿#
+# 
+#
+ICHGSTART:31252         
+ICHG_TYPE:POS
+ICHG_SNDR:003719284269                       @30
+ICHG_RCPT:003706806400                       @30
+ICHG_DATA:EIH-1.4.0
+OMSGSTART:1             
+OHDRSTART:
+OBGMITYPE:220@   
+OBGMINUMB:1632029                            
+OBGMMFUNC:9  
+ODTM4__DT:20190315                           @102
+ODTM2__DT:20190322                           @102
+ONADIV_PC:003719284269     @100
+ONADIV_NA:Tokmanni Oy                        
+ONADIV_SA:only by e-mail to address:         
+ONADIV_SA:tokmanni@bscs.basware.com          
+ONADIV_CI:MANTSALA                           
+ONADIV_PO:04600    
+ONADBY_RF:ZZ @joni.rutqvist@tokmanni.fi          
+ONADBY_CC:PD @Joni Rutqvist                      
+ONADBY_TE:PD @Joni Rutqvist            
+ONADSE_PC:003706806400     @100
+ONADSE_NA:MASTON OY                          
+ONADSE_SA:TEOLLISUUSTIE 10                   
+ONADSE_CI:VEIKKOLA                           
+ONADSE_PO:02880    
+ONADSE_DO:220@E  
+ONADSE_CC:SR @Jaana Stenbackpuh. 0207188580      
+ONADSE_TE:SR @09-8634630               
+ONADSE_FX:SR @0207784405               
+ONADBY_PC:600
+ONADBY_NA:Tokmanni Oy                        
+ONADBY_NX:VIITASAARI                         
+ONADBY_SA:Isolammintie 1                     
+ONADBY_CI:MANTSALA                           
+ONADBY_PO:04600    
+ONADBY_LO:11     @Tokmanni Oy              
+ONADCN_PC:402
+ONADCN_NA:Tokmanni Oy                        
+ONADCN_NX:VIITASAARI                         
+ONADCN_SA:Isolammintie 1                     
+ONADCN_CI:MANTSALA                           
+ONADCN_PO:04600    
+ONADIV_PC:003719284269     @100
+ONADIV_NA:Tokmanni Oy                        
+ONADIV_SA:only by e-mail to address:         
+ONADIV_SA:tokmanni@bscs.basware.com          
+ONADIV_CI:MANTSALA                           
+ONADIV_PO:04600    
+OCUX5__CR:EUR
+OPAT1__DT:
+OPAT1__TP:45 PV NETTO                        @20                                 
+OPAT1__PT:-                
+OTDT20_TT:                 @2  @TOIMITETTUNA TONN
+OTOD___TT:   @TOP@106@   @TOIMITETTUNA PERILLE                                                  @1                                                                     
+OHDR__END:
+OLINSTART:       1
+OLINEN_NU:6412490023898                      
+OLINSA_PI:MA120005                           @5 
+OLIN8__IF:-      @   @   @   @Automaali 12ml Touch               @-up 120005 Primer Gr
+OLIN21_QT:            3.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:           2.9500@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:       1
+OLINSTART:       2
+OLINEN_NU:6412490023904                      
+OLINSA_PI:MA120009                           @5 
+OLIN8__IF:-      @   @   @   @Automaali 12ml Touch               @-up 120009 Clearcoat
+OLIN21_QT:            3.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:           2.9500@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:       2
+OLINSTART:       3
+OLINEN_NU:6412490023911                      
+OLINSA_PI:MA120010                           @5 
+OLIN8__IF:-      @   @   @   @Automaali 12ml Touch               @-up 120010 Clearcoat
+OLIN21_QT:            3.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:           2.9500@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:       3
+OLINSTART:       4
+OLINEN_NU:6412490023928                      
+OLINSA_PI:MA121005                           @5 
+OLIN8__IF:-      @   @   @   @Automaali 12ml Touch               @-up 121005 White
+OLIN21_QT:            3.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:           2.9500@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:       4
+OLINSTART:       5
+OLINEN_NU:6412490023935                      
+OLINSA_PI:MA121010                           @5 
+OLIN8__IF:-      @   @   @   @Automaali 12ml Touch               @-up 121010 White
+OLIN21_QT:            3.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:           2.9500@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:       5
+OLINSTART:       6
+OLINEN_NU:6412490023942                      
+OLINSA_PI:MA121015                           @5 
+OLIN8__IF:-      @   @   @   @Automaali 12ml Touch               @-up 121015 White
+OLIN21_QT:            3.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:           2.9500@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:       6
+OLINSTART:       7
+OLINEN_NU:6412490023959                      
+OLINSA_PI:MA121020                           @5 
+OLIN8__IF:-      @   @   @   @Automaali 12ml Touch               @-up 121020 White
+OLIN21_QT:            3.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:           2.9500@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:       7
+OLINSTART:       8
+OLINEN_NU:6412490023966                      
+OLINSA_PI:MA121025                           @5 
+OLIN8__IF:-      @   @   @   @Automaali 12ml Touch               @-up 121025 White
+OLIN21_QT:            3.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:           2.9500@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:       8
+OLINSTART:       9
+OLINEN_NU:6412490023973                      
+OLINSA_PI:MA121030                           @5 
+OLIN8__IF:-      @   @   @   @Automaali 12ml Touch               @-up 121030 White
+OLIN21_QT:            3.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:           2.9500@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:       9
+OLINSTART:      10
+OLINEN_NU:6412490023980                      
+OLINSA_PI:MA121035                           @5 
+OLIN8__IF:-      @   @   @   @Automaali 12ml Touch               @-up 121035 White
+OLIN21_QT:            3.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:           2.9500@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:      10
+OLINSTART:      11
+OLINEN_NU:6412490023997                      
+OLINSA_PI:MA121040                           @5 
+OLIN8__IF:-      @   @   @   @Automaali 12ml Touch               @-up 121040 White
+OLIN21_QT:            3.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:           2.9500@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:      11
+OLINSTART:      12
+OLINEN_NU:6412490024000                      
+OLINSA_PI:MA122005                           @5 
+OLIN8__IF:-      @   @   @   @Automaali 12ml Touch               @-up 122005 Yellow
+OLIN21_QT:            3.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:           2.9500@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:      12
+OLINSTART:      13
+OLINEN_NU:6412490024017                      
+OLINSA_PI:MA124005                           @5 
+OLIN8__IF:-      @   @   @   @Automaali 12ml Touch               @-up 124005 Red
+OLIN21_QT:            3.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:           2.9500@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:      13
+OLINSTART:      14
+OLINEN_NU:6412490024024                      
+OLINSA_PI:MA124010                           @5 
+OLIN8__IF:-      @   @   @   @Automaali 12ml Touch               @-up 124010 Red
+OLIN21_QT:            3.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:           2.9500@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:      14
+OLINSTART:      15
+OLINEN_NU:6412490024031                      
+OLINSA_PI:MA124015                           @5 
+OLIN8__IF:-      @   @   @   @Automaali 12ml Touch               @-up 124015 Red
+OLIN21_QT:            3.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:           2.9500@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:      15
+OLINSTART:      16
+OLINEN_NU:6412490024048                      
+OLINSA_PI:MA124020                           @5 
+OLIN8__IF:-      @   @   @   @Automaali 12ml Touch               @-up 124020 Red
+OLIN21_QT:            3.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:           2.9500@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:      16
+OLINSTART:      17
+OLINEN_NU:6412490024055                      
+OLINSA_PI:MA124025                           @5 
+OLIN8__IF:-      @   @   @   @Automaali 12ml Touch               @-up 124025 Red
+OLIN21_QT:            3.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:           2.9500@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:      17
+OLINSTART:      18
+OLINEN_NU:6412490024062                      
+OLINSA_PI:MA124030                           @5 
+OLIN8__IF:-      @   @   @   @Automaali 12ml Touch               @-up 124030 Red
+OLIN21_QT:            3.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:           2.9500@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:      18
+OLINSTART:      19
+OLINEN_NU:6412490024079                      
+OLINSA_PI:MA124035                           @5 
+OLIN8__IF:-      @   @   @   @Automaali 12ml Touch               @-up 124035 Red
+OLIN21_QT:            3.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:           2.9500@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:      19
+OLINSTART:      20
+OLINEN_NU:6412490024086                      
+OLINSA_PI:MA125005                           @5 
+OLIN8__IF:-      @   @   @   @Automaali 12ml Touch               @-up 125005 Blue
+OLIN21_QT:            3.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:           2.9500@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:      20
+OLINSTART:      21
+OLINEN_NU:6412490024093                      
+OLINSA_PI:MA125010                           @5 
+OLIN8__IF:-      @   @   @   @Automaali 12ml Touch               @-up 125010 Blue meta
+OLIN21_QT:            3.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:           2.9500@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:      21
+OLINSTART:      22
+OLINEN_NU:6412490024109                      
+OLINSA_PI:MA125015                           @5 
+OLIN8__IF:-      @   @   @   @Automaali 12ml Touch               @-up 125015 Blue
+OLIN21_QT:            3.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:           2.9500@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:      22
+OLINSTART:      23
+OLINEN_NU:6412490024116                      
+OLINSA_PI:MA125020                           @5 
+OLIN8__IF:-      @   @   @   @Automaali 12ml Touch               @-up 125020 Blue
+OLIN21_QT:            3.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:           2.9500@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:      23
+OLINSTART:      24
+OLINEN_NU:6412490024123                      
+OLINSA_PI:MA125025                           @5 
+OLIN8__IF:-      @   @   @   @Automaali 12ml Touch               @-up 125025 Blue
+OLIN21_QT:            3.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:           2.9500@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:      24
+OLINSTART:      25
+OLINEN_NU:6412490024130                      
+OLINSA_PI:MA126005                           @5 
+OLIN8__IF:-      @   @   @   @Automaali 12ml Touch               @-up 126005 Green
+OLIN21_QT:            3.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:           2.9500@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:      25
+OLINSTART:      26
+OLINEN_NU:6412490024147                      
+OLINSA_PI:MA126010                           @5 
+OLIN8__IF:-      @   @   @   @Automaali 12ml Touch               @-up 126010 Green
+OLIN21_QT:            3.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:           2.9500@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:      26
+OLINSTART:      27
+OLINEN_NU:6412490024154                      
+OLINSA_PI:MA126015                           @5 
+OLIN8__IF:-      @   @   @   @Automaali 12ml Touch               @-up 126015 Green met
+OLIN21_QT:            3.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:           2.9500@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:      27
+OLINSTART:      28
+OLINEN_NU:6412490024161                      
+OLINSA_PI:MA127005                           @5 
+OLIN8__IF:-      @   @   @   @Automaali 12ml Touch               @-up 127005 Silver me
+OLIN21_QT:            3.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:           2.9500@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:      28
+OLINSTART:      29
+OLINEN_NU:6412490024178                      
+OLINSA_PI:MA127010                           @5 
+OLIN8__IF:-      @   @   @   @Automaali 12ml Touch               @-up 127010 Silver me
+OLIN21_QT:            3.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:           2.9500@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:      29
+OLINSTART:      30
+OLINEN_NU:6412490024185                      
+OLINSA_PI:MA127015                           @5 
+OLIN8__IF:-      @   @   @   @Automaali 12ml Touch               @-up 127015 Silver me
+OLIN21_QT:            3.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:           2.9500@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:      30
+OLINSTART:      31
+OLINEN_NU:6412490024192                      
+OLINSA_PI:MA127020                           @5 
+OLIN8__IF:-      @   @   @   @Automaali 12ml Touch               @-up 127020 Silver me
+OLIN21_QT:            3.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:           2.9500@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:      31
+OLINSTART:      32
+OLINEN_NU:6412490024208                      
+OLINSA_PI:MA127025                           @5 
+OLIN8__IF:-      @   @   @   @Automaali 12ml Touch               @-up 127025 Silver me
+OLIN21_QT:            3.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:           2.9500@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:      32
+OLINSTART:      33
+OLINEN_NU:6412490024215                      
+OLINSA_PI:MA127030                           @5 
+OLIN8__IF:-      @   @   @   @Automaali 12ml Touch               @-up 127030 Silver me
+OLIN21_QT:            3.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:           2.9500@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:      33
+OLINSTART:      34
+OLINEN_NU:6412490024222                      
+OLINSA_PI:MA127035                           @5 
+OLIN8__IF:-      @   @   @   @Automaali 12ml Touch               @-up 127035 Silver me
+OLIN21_QT:            3.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:           2.9500@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:      34
+OLINSTART:      35
+OLINEN_NU:6412490024239                      
+OLINSA_PI:MA127040                           @5 
+OLIN8__IF:-      @   @   @   @Automaali 12ml Touch               @-up 127040 Silver me
+OLIN21_QT:            3.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:           2.9500@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:      35
+OLINSTART:      36
+OLINEN_NU:6412490024246                      
+OLINSA_PI:MA127045                           @5 
+OLIN8__IF:-      @   @   @   @Automaali 12ml Touch               @-up 127045 Silver me
+OLIN21_QT:            3.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:           2.9500@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:      36
+OLINSTART:      37
+OLINEN_NU:6412490024253                      
+OLINSA_PI:MA127050                           @5 
+OLIN8__IF:-      @   @   @   @Automaali 12ml Touch               @-up 127050 Silver me
+OLIN21_QT:            3.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:           2.9500@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:      37
+OLINSTART:      38
+OLINEN_NU:6412490024260                      
+OLINSA_PI:MA128010                           @5 
+OLIN8__IF:-      @   @   @   @Automaali 12ml Touch               @-up 128010 Black me
+OLIN21_QT:            3.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:           2.9500@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:      38
+OLINSTART:      39
+OLINEN_NU:6412490024277                      
+OLINSA_PI:MA128050                           @5 
+OLIN8__IF:-      @   @   @   @Automaali 12ml Touch               @-up 128050 Black
+OLIN21_QT:            3.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:           2.9500@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:      39
+OLINSTART:      40
+OLINEN_NU:6412490024284                      
+OLINSA_PI:MA128055                           @5 
+OLIN8__IF:-      @   @   @   @Automaali 12ml Touch               @-up 128055 Black mat
+OLIN21_QT:            3.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:           2.9500@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:      40
+OLINSTART:      41
+OLINEN_NU:6412490023072                      
+OLINSA_PI:1107024S                           @5 
+OLIN8__IF:-      @   @   @   @Spraymaali 400ml One               @harmaa
+OLIN21_QT:            6.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:           3.0400@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:      41
+OLINSTART:      42
+OLINEN_NU:6412490022990                      
+OLINSA_PI:1101028S                           @5 
+OLIN8__IF:-      @   @   @   @Spraymaali 400ml One               @keltainen
+OLIN21_QT:            6.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:           3.0400@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:      42
+OLINSTART:      43
+OLINEN_NU:6412490023096                      
+OLINSA_PI:1109001S                           @5 
+OLIN8__IF:-      @   @   @   @Spraymaali 400ml One               @kermanvalkea
+OLIN21_QT:            6.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:           3.0400@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:      43
+OLINSTART:      44
+OLINEN_NU:6412490023157                      
+OLINSA_PI:1100332                            @5 
+OLIN8__IF:-      @   @   @   @Lakka 400ml One kiil               @tava
+OLIN21_QT:            6.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:           3.0400@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:      44
+OLINSTART:      45
+OLINEN_NU:6412490023119                      
+OLINSA_PI:1109005M                           @5 
+OLIN8__IF:-      @   @   @   @Spraymaali 400ml One               @mattamusta
+OLIN21_QT:            6.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:           3.0400@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:      45
+OLINSTART:      46
+OLINEN_NU:6412490023133                      
+OLINSA_PI:1109010M                           @5 
+OLIN8__IF:-      @   @   @   @Spraymaali 400ml One               @mattavalkoin
+OLIN21_QT:            6.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:           3.0400@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:      46
+OLINSTART:      47
+OLINEN_NU:6412490023102                      
+OLINSA_PI:1109005S                           @5 
+OLIN8__IF:-      @   @   @   @Spraymaali 400ml One               @musta
+OLIN21_QT:            6.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:           3.0400@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:      47
+OLINSTART:      48
+OLINEN_NU:6412490023140                      
+OLINSA_PI:1100518                            @5 
+OLIN8__IF:-      @   @   @   @Pohjamaali 400ml One               @harmaa
+OLIN21_QT:            6.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:           3.0400@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:      48
+OLINSTART:      49
+OLINEN_NU:6412490023010                      
+OLINSA_PI:1103020S                           @5 
+OLIN8__IF:-      @   @   @   @Spraymaali 400ml One               @punainen
+OLIN21_QT:            6.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:           3.0400@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:      49
+OLINSTART:      50
+OLINEN_NU:6412490023089                      
+OLINSA_PI:1108008S                           @5 
+OLIN8__IF:-      @   @   @   @Spraymaali 400ml One               @ruskea
+OLIN21_QT:            6.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:           3.0400@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:      50
+OLINSTART:      51
+OLINEN_NU:6412490023027                      
+OLINSA_PI:10005015                           @5 
+OLIN8__IF:-      @   @   @   @Spraymaali 400ml ONE               @sininen
+OLIN21_QT:            6.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:           3.0400@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:      51
+OLINSTART:      52
+OLINEN_NU:6412490023126                      
+OLINSA_PI:1109010S                           @5 
+OLIN8__IF:-      @   @   @   @Spraymaali 400ml One               @valkoinen
+OLIN21_QT:            6.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:           3.0400@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:      52
+OLINSTART:      53
+OLINEN_NU:6412490023058                      
+OLINSA_PI:1106018S                           @5 
+OLIN8__IF:-      @   @   @   @Spraymaali 400ml One               @vihrea
+OLIN21_QT:            6.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:           3.0400@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:      53
+OLINSTART:      54
+OLINEN_NU:6412490000790                      
+OLINSA_PI:MA111800                           @5 
+OLIN8__IF:-      @   @   @   @Automaali 400ml Car                @Color MA111800
+OLIN21_QT:            2.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:2                                                                     
+OLINNTPIV:           4.7100@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:      54
+OLINSTART:      55
+OLINEN_NU:6412490000844                      
+OLINSA_PI:MA114150                           @5 
+OLIN8__IF:-      @   @   @   @Automaali 400ml Car                @Color MA114150
+OLIN21_QT:            2.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:2                                                                     
+OLINNTPIV:           4.7100@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:      55
+OLINSTART:      56
+OLINEN_NU:6412490000967                      
+OLINSA_PI:MA104050                           @5 
+OLIN8__IF:-      @   @   @   @Automaali 400ml Car                @Color MA104050
+OLIN21_QT:            7.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:7                                                                     
+OLINNTPIV:           4.7100@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:      56
+OLINSTART:      57
+OLINEN_NU:6412490000998                      
+OLINSA_PI:MA115600                           @5 
+OLIN8__IF:-      @   @   @   @Automaali 400ml Car                @Color MA115600
+OLIN21_QT:            2.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:2                                                                     
+OLINNTPIV:           4.7100@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:      57
+OLINSTART:      58
+OLINEN_NU:6412490001025                      
+OLINSA_PI:MA103750                           @5 
+OLIN8__IF:-      @   @   @   @Automaali 400ml Car                @Color MA103750
+OLIN21_QT:            2.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:2                                                                     
+OLINNTPIV:           4.7100@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:      58
+OLINSTART:      59
+OLINEN_NU:6412490001056                      
+OLINSA_PI:MA103300                           @5 
+OLIN8__IF:-      @   @   @   @Automaali 400ml Car                @Color MA103300
+OLIN21_QT:            2.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:2                                                                     
+OLINNTPIV:           4.7100@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:      59
+OLINSTART:      60
+OLINEN_NU:6412490001063                      
+OLINSA_PI:MA102700                           @5 
+OLIN8__IF:-      @   @   @   @Automaali 400ml Car                @Color MA102700
+OLIN21_QT:            2.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:2                                                                     
+OLINNTPIV:           4.7100@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:      60
+OLINSTART:      61
+OLINEN_NU:6412490001070                      
+OLINSA_PI:MA102550                           @5 
+OLIN8__IF:-      @   @   @   @Automaali 400ml Car                @Color MA102550
+OLIN21_QT:            2.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:2                                                                     
+OLINNTPIV:           4.7100@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:      61
+OLINSTART:      62
+OLINEN_NU:6412490001117                      
+OLINSA_PI:MA101550                           @5 
+OLIN8__IF:-      @   @   @   @Automaali 400ml Car                @Color MA101550
+OLIN21_QT:            2.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:2                                                                     
+OLINNTPIV:           4.7100@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:      62
+OLINSTART:      63
+OLINEN_NU:6412490001261                      
+OLINSA_PI:MA100500                           @5 
+OLIN8__IF:-      @   @   @   @Automaali 400ml Car                @Color MA100500
+OLIN21_QT:            2.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:2                                                                     
+OLINNTPIV:           4.7100@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:      63
+OLINSTART:      64
+OLINEN_NU:6412490001315                      
+OLINSA_PI:MA105220                           @5 
+OLIN8__IF:-      @   @   @   @Automaali 400ml Car                @Color MA105220
+OLIN21_QT:            2.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:2                                                                     
+OLINNTPIV:           4.7100@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:      64
+OLINSTART:      65
+OLINEN_NU:6412490001339                      
+OLINSA_PI:MA105900                           @5 
+OLIN8__IF:-      @   @   @   @Automaali 400ml Car                @Color MA105900
+OLIN21_QT:            2.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:2                                                                     
+OLINNTPIV:           4.7100@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:      65
+OLINSTART:      66
+OLINEN_NU:6412490001377                      
+OLINSA_PI:MA106725                           @5 
+OLIN8__IF:-      @   @   @   @Automaali 400ml Car                @Color MA106725
+OLIN21_QT:            2.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:2                                                                     
+OLINNTPIV:           4.7100@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:      66
+OLINSTART:      67
+OLINEN_NU:6412490001384                      
+OLINSA_PI:MA106750                           @5 
+OLIN8__IF:-      @   @   @   @Automaali 400ml Car                @Color MA106750
+OLIN21_QT:            2.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:2                                                                     
+OLINNTPIV:           4.7100@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:      67
+OLINSTART:      68
+OLINEN_NU:6412490001391                      
+OLINSA_PI:MA105550                           @5 
+OLIN8__IF:-      @   @   @   @Automaali 400ml Car                @Color MA105550
+OLIN21_QT:            2.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:2                                                                     
+OLINNTPIV:           4.7100@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:      68
+OLINSTART:      69
+OLINEN_NU:6412490001582                      
+OLINSA_PI:MA108450                           @5 
+OLIN8__IF:-      @   @   @   @Automaali 400ml Car                @Color MA108450
+OLIN21_QT:            2.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:2                                                                     
+OLINNTPIV:           4.7100@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:      69
+OLINSTART:      70
+OLINEN_NU:6412490001605                      
+OLINSA_PI:MA108100                           @5 
+OLIN8__IF:-      @   @   @   @Automaali 400ml Car                @Color MA108100
+OLIN21_QT:            2.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:2                                                                     
+OLINNTPIV:           4.7100@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:      70
+OLINSTART:      71
+OLINEN_NU:6412490001858                      
+OLINSA_PI:MA213400                           @5 
+OLIN8__IF:-      @   @   @   @Automaali 400ml Car                @Color MA213400
+OLIN21_QT:            3.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:3                                                                     
+OLINNTPIV:           4.7100@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:      71
+OLINSTART:      72
+OLINEN_NU:6412490001865                      
+OLINSA_PI:MA213975                           @5 
+OLIN8__IF:-      @   @   @   @Automaali 400ml Car                @Color MA213975
+OLIN21_QT:            2.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:2                                                                     
+OLINNTPIV:           4.7100@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:      72
+OLINSTART:      73
+OLINEN_NU:6412490001872                      
+OLINSA_PI:MA212750                           @5 
+OLIN8__IF:-      @   @   @   @Automaali 400ml Car                @Color MA212750
+OLIN21_QT:            2.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:2                                                                     
+OLINNTPIV:           4.7100@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:      73
+OLINSTART:      74
+OLINEN_NU:6412490002268                      
+OLINSA_PI:MA204650                           @5 
+OLIN8__IF:-      @   @   @   @Automaali 400ml Car                @Color MA204650
+OLIN21_QT:            2.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:2                                                                     
+OLINNTPIV:           4.7100@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:      74
+OLINSTART:      75
+OLINEN_NU:6412490002343                      
+OLINSA_PI:MA222103                           @5 
+OLIN8__IF:-      @   @   @   @Automaali 400ml Car                @Color MA222103
+OLIN21_QT:            2.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:2                                                                     
+OLINNTPIV:           4.7100@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:      75
+OLINSTART:      76
+OLINEN_NU:6412490002503                      
+OLINSA_PI:4780100                            @5 
+OLIN8__IF:-      @   @   @   @Automaali 400ml Car                @Color ruiskukitti
+OLIN21_QT:            2.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:2                                                                     
+OLINNTPIV:           4.7100@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:      76
+OLINSTART:      77
+OLINEN_NU:6412490032623                      
+OLINSA_PI:1801020                            @5 
+OLIN8__IF:-      @   @   @   @Maton liukueste spra               @y 400ml variton
+OLIN21_QT:            6.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:           4.5000@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:      77
+OLINSTART:      78
+OLINEN_NU:6412490000141                      
+OLINSA_PI:4150150                            @5 
+OLIN8__IF:-      @   @   @   @Alustasuoja 1kg Auto               @mix UBC15
+OLIN21_QT:           18.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:3                                                                     
+OLINNTPIV:           2.5300@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:      78
+OLINSTART:      79
+OLINEN_NU:6412490000134                      
+OLINSA_PI:4150110                            @5 
+OLIN8__IF:-      @   @   @   @Alustasuoja 1l Autom               @ix UBC11
+OLIN21_QT:           12.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:           3.9000@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:      79
+OLINSTART:      80
+OLINEN_NU:6412490000158                      
+OLINSA_PI:4150300                            @5 
+OLIN8__IF:-      @   @   @   @Kotelosuoja 500ml Au               @tomix HOC30
+OLIN21_QT:           12.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:2                                                                     
+OLINNTPIV:           2.1100@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:      80
+OLINSTART:      81
+OLINEN_NU:6412490000165                      
+OLINSA_PI:4150310                            @5 
+OLIN8__IF:-      @   @   @   @Kotelosuoja 1l Autom               @ix HOC31
+OLIN21_QT:           12.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:           3.9000@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:      81
+OLINSTART:      82
+OLINEN_NU:6412490000172                      
+OLINSA_PI:4150501                            @5 
+OLIN8__IF:-      @   @   @   @Kiveniskusuoja 500ml               @Automix musta
+OLIN21_QT:           12.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:2                                                                     
+OLINNTPIV:           2.1100@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:      82
+OLINSTART:      83
+OLINEN_NU:6412490000189                      
+OLINSA_PI:4150502                            @5 
+OLIN8__IF:-      @   @   @   @Kiveniskusuoja 500ml               @Automix harmaa
+OLIN21_QT:           12.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:2                                                                     
+OLINNTPIV:           2.1100@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:      83
+OLINSTART:      84
+OLINEN_NU:6412490000196                      
+OLINSA_PI:4150511                            @5 
+OLIN8__IF:-      @   @   @   @Kiveniskusuoja 1l Au               @tomix STH51 musta
+OLIN21_QT:           12.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:           4.3500@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:      84
+OLINSTART:      85
+OLINEN_NU:6412490021573                      
+OLINSA_PI:MA104650                           @5 
+OLIN8__IF:-      @   @   @   @Automaali 400ml Car                @Color 104650
+OLIN21_QT:            2.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:2                                                                     
+OLINNTPIV:           4.7100@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:      85
+OLINSTART:      86
+OLINEN_NU:6412490021597                      
+OLINSA_PI:MA109550                           @5 
+OLIN8__IF:-      @   @   @   @Automaali 400ml Car                @Color 109550
+OLIN21_QT:            2.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:2                                                                     
+OLINNTPIV:           4.7100@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:      86
+OLINSTART:      87
+OLINEN_NU:6412490021634                      
+OLINSA_PI:MA112470                           @5 
+OLIN8__IF:-      @   @   @   @Automaali 400ml Car                @Color 112470
+OLIN21_QT:            2.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:2                                                                     
+OLINNTPIV:           4.7100@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:      87
+OLINSTART:      88
+OLINEN_NU:6412490021719                      
+OLINSA_PI:MA116360                           @5 
+OLIN8__IF:-      @   @   @   @Automaali 400ml Car                @Color 116360
+OLIN21_QT:            2.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:2                                                                     
+OLINNTPIV:           4.7100@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:      88
+OLINSTART:      89
+OLINEN_NU:6412490021825                      
+OLINSA_PI:MA201820                           @5 
+OLIN8__IF:-      @   @   @   @Automaali 400ml Car                @Color 201820
+OLIN21_QT:            2.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:2                                                                     
+OLINNTPIV:           4.7100@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:      89
+OLINSTART:      90
+OLINEN_NU:6412490021948                      
+OLINSA_PI:MA212410                           @5 
+OLIN8__IF:-      @   @   @   @Automaali 400ml Car                @Color 212410
+OLIN21_QT:            2.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:2                                                                     
+OLINNTPIV:           4.7100@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:      90
+OLINSTART:      91
+OLINEN_NU:6412490021955                      
+OLINSA_PI:MA213140                           @5 
+OLIN8__IF:-      @   @   @   @Automaali 400ml Car                @Color 213140
+OLIN21_QT:            2.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:2                                                                     
+OLINNTPIV:           4.7100@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:      91
+OLINSTART:      92
+OLINEN_NU:6412490021962                      
+OLINSA_PI:MA213600                           @5 
+OLIN8__IF:-      @   @   @   @Automaali 400ml Car                @Color 213600
+OLIN21_QT:            2.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:2                                                                     
+OLINNTPIV:           4.7100@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:      92
+OLINSTART:      93
+OLINEN_NU:6412490022020                      
+OLINSA_PI:MA216820                           @5 
+OLIN8__IF:-      @   @   @   @Automaali 400ml Car                @Color 216820
+OLIN21_QT:            2.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:2                                                                     
+OLINNTPIV:           4.7100@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:      93
+OLINSTART:      94
+OLINEN_NU:6412490022051                      
+OLINSA_PI:MA217750                           @5 
+OLIN8__IF:-      @   @   @   @Automaali 400ml Car                @Color 217750
+OLIN21_QT:            2.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:2                                                                     
+OLINNTPIV:           4.7100@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:      94
+OLINSTART:      95
+OLINEN_NU:6412490022112                      
+OLINSA_PI:MA220250                           @5 
+OLIN8__IF:-      @   @   @   @Automaali 400ml Car                @Color 220250
+OLIN21_QT:            2.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:2                                                                     
+OLINNTPIV:           4.7100@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:      95
+OLINSTART:      96
+OLINEN_NU:6412490022150                      
+OLINSA_PI:MA220500                           @5 
+OLIN8__IF:-      @   @   @   @Automaali 400ml Car                @Color 220500
+OLIN21_QT:            2.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:2                                                                     
+OLINNTPIV:           4.7100@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:      96
+OLINSTART:      97
+OLINEN_NU:6412490022167                      
+OLINSA_PI:MA220550                           @5 
+OLIN8__IF:-      @   @   @   @Automaali 400ml Car                @Color 220550
+OLIN21_QT:            2.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:2                                                                     
+OLINNTPIV:           4.7100@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:      97
+OLINSTART:      98
+OLINEN_NU:6412490022204                      
+OLINSA_PI:MA221250                           @5 
+OLIN8__IF:-      @   @   @   @Automaali 400ml Car                @Color 221250
+OLIN21_QT:            2.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:2                                                                     
+OLINNTPIV:           4.7100@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:      98
+OLINSTART:      99
+OLINEN_NU:6412494005005                      
+OLINSA_PI:400500                             @5 
+OLIN8__IF:-      @   @   @   @Spraypohjamaali                    @
+OLIN21_QT:            6.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:           3.2000@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:      99
+OLINSTART:     100
+OLINEN_NU:6412494008051                      
+OLINSA_PI:400805                             @5 
+OLIN8__IF:-      @   @   @   @Kuumankestomaali 400               @ml 250C punainen
+OLIN21_QT:           12.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:2                                                                     
+OLINNTPIV:           2.8000@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:     100
+OLINSTART:     101
+OLINEN_NU:6412494009966                      
+OLINSA_PI:400996                             @5 
+OLIN8__IF:-      @   @   @   @Kuumankestomaali 400               @ml 600C hopea
+OLIN21_QT:            6.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:           2.8000@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:     101
+OLINSTART:     102
+OLINEN_NU:6412497102213                      
+OLINSA_PI:710221                             @5 
+OLIN8__IF:-      @   @   @   @Kuumankestomaali 400               @ml 600C musta
+OLIN21_QT:           12.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:2                                                                     
+OLINNTPIV:           3.8100@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:     102
+OLINSTART:     103
+OLINEN_NU:6412497102220                      
+OLINSA_PI:710222                             @5 
+OLIN8__IF:-      @   @   @   @Kuumankestomaali 400               @ml 600C valkoinen
+OLIN21_QT:            6.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:           3.9400@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:     103
+OLINSTART:     104
+OLINEN_NU:6412490023782                      
+OLINSA_PI:210818                             @5 
+OLIN8__IF:-      @   @   @   @Spraymaali 400ml Met               @allic hopea
+OLIN21_QT:            6.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:           3.3600@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:     104
+OLINSTART:     105
+OLINEN_NU:6412492108166                      
+OLINSA_PI:210816                             @5 
+OLIN8__IF:-      @   @   @   @Spraymaali 400ml Met               @allic violetti
+OLIN21_QT:            6.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:           3.3600@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:     105
+OLINSTART:     106
+OLINEN_NU:6412492108173                      
+OLINSA_PI:210817                             @5 
+OLIN8__IF:-      @   @   @   @Spraymaali 400ml Met               @allic vihrea
+OLIN21_QT:            6.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:           3.3600@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:     106
+OLINSTART:     107
+OLINEN_NU:6412492108227                      
+OLINSA_PI:210822                             @5 
+OLIN8__IF:-      @   @   @   @Lakka Metallic                     @
+OLIN21_QT:            6.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:           3.3600@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:     107
+OLINSTART:     108
+OLINEN_NU:6412490028732                      
+OLINSA_PI:100520                             @5 
+OLIN8__IF:-      @   @   @   @Spraypohjamaali 400m               @l musta
+OLIN21_QT:           12.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:2                                                                     
+OLINNTPIV:           1.7900@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:     108
+OLINSTART:     109
+OLINEN_NU:6412494004008                      
+OLINSA_PI:400400                             @5 
+OLIN8__IF:-      @   @   @   @Spraymaali RAL9005 m               @usta silkinhohto
+OLIN21_QT:            6.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:           3.8200@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:     109
+OLINSTART:     110
+OLINEN_NU:6412490027353                      
+OLINSA_PI:191215                             @5 
+OLIN8__IF:-      @   @   @   @Kumipinnoite Rubberc               @omp musta puolikiilt
+OLIN21_QT:           12.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:2                                                                     
+OLINNTPIV:           5.2000@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:     110
+OLINSTART:     111
+OLINEN_NU:6412490027360                      
+OLINSA_PI:192220                             @5 
+OLIN8__IF:-      @   @   @   @Kumipinnoite Rubberc               @omp valkoinen
+OLIN21_QT:            6.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:           5.3700@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:     111
+OLINSTART:     112
+OLINEN_NU:6412490027391                      
+OLINSA_PI:196170                             @5 
+OLIN8__IF:-      @   @   @   @Kumipinnoite Rubberc               @omp neonoranssi
+OLIN21_QT:            6.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:           5.3700@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:     112
+OLINSTART:     113
+OLINEN_NU:6412490027407                      
+OLINSA_PI:196200                             @5 
+OLIN8__IF:-      @   @   @   @Kumipinnoite Rubberc               @omp neonvihrea
+OLIN21_QT:            6.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:           5.3700@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:     113
+OLINSTART:     114
+OLINEN_NU:6412490027452                      
+OLINSA_PI:199980                             @5 
+OLIN8__IF:-      @   @   @   @Kumipinnoite Rubberc               @omp vannehopea
+OLIN21_QT:            6.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:           5.3700@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:     114
+OLINSTART:     115
+OLINEN_NU:6412490027469                      
+OLINSA_PI:1901210                            @5 
+OLIN8__IF:-      @   @   @   @Kumipinnoite 250ml R               @ubbercomp mattamusta
+OLIN21_QT:           10.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:2                                                                     
+OLINNTPIV:           5.2900@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:     115
+OLINSTART:     116
+OLINEN_NU:6412490027476                      
+OLINSA_PI:1901215                            @5 
+OLIN8__IF:-      @   @   @   @Kumipinnoite 250ml R               @ubbercomp mus puolik
+OLIN21_QT:           10.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:2                                                                     
+OLINNTPIV:           5.2900@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:     116
+OLINSTART:     117
+OLINEN_NU:6412490027483                      
+OLINSA_PI:1902220                            @5 
+OLIN8__IF:-      @   @   @   @Kumipinnoite 250ml R               @ubbercomp valkoinen
+OLIN21_QT:           10.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:2                                                                     
+OLINNTPIV:           5.2900@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:     117
+OLINSTART:     118
+OLINEN_NU:6412490027490                      
+OLINSA_PI:1903320                            @5 
+OLIN8__IF:-      @   @   @   @Kumipinnoite 250ml R               @ubbercomp varit kiil
+OLIN21_QT:           10.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:2                                                                     
+OLINNTPIV:           5.2900@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:     118
+OLINSTART:     119
+OLINEN_NU:6412494001717                      
+OLINSA_PI:400171                             @5 
+OLIN8__IF:-      @   @   @   @Spraymaali 400ml sin               @kki
+OLIN21_QT:            6.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:           4.7800@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:     119
+OLINSTART:     120
+OLINEN_NU:6412494001724                      
+OLINSA_PI:400172                             @5 
+OLIN8__IF:-      @   @   @   @Spraymaali 400ml sin               @kki vaalea
+OLIN21_QT:            6.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:           4.7800@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:     120
+OLINSTART:     121
+OLINEN_NU:6412491008054                      
+OLINSA_PI:100805                             @5 
+OLIN8__IF:-      @   @   @   @Spraymaali 400ml pun               @ainen
+OLIN21_QT:           12.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:2                                                                     
+OLINNTPIV:           1.7300@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:     121
+OLINSTART:     122
+OLINEN_NU:6412490005665                      
+OLINSA_PI:830432                             @5 
+OLIN8__IF:-      @   @   @   @Spraymaali 400ml kup               @ari
+OLIN21_QT:            6.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:           5.1500@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:     122
+OLINSTART:     123
+OLINEN_NU:6412498304319                      
+OLINSA_PI:830431                             @5 
+OLIN8__IF:-      @   @   @   @Spraymaali 400ml Gol               @d
+OLIN21_QT:            6.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:           5.1500@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:     123
+OLINSTART:     124
+OLINEN_NU:6412491008009                      
+OLINSA_PI:100800                             @5 
+OLIN8__IF:-      @   @   @   @Spraymaali 400ml har               @maa
+OLIN21_QT:           12.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:2                                                                     
+OLINNTPIV:           1.7900@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:     124
+OLINSTART:     125
+OLINEN_NU:6412491009969                      
+OLINSA_PI:100996                             @5 
+OLIN8__IF:-      @   @   @   @Spraymaali 400ml hop               @ea
+OLIN21_QT:           12.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:2                                                                     
+OLINNTPIV:           1.7900@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:     125
+OLINSTART:     126
+OLINEN_NU:6412491008016                      
+OLINSA_PI:100801                             @5 
+OLIN8__IF:-      @   @   @   @Spraymaali 400ml kel               @tainen
+OLIN21_QT:           12.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:2                                                                     
+OLINNTPIV:           1.7900@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:     126
+OLINSTART:     127
+OLINEN_NU:6412491009945                      
+OLINSA_PI:100994                             @5 
+OLIN8__IF:-      @   @   @   @Spraymaali 400ml kup               @ari
+OLIN21_QT:           12.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:2                                                                     
+OLINNTPIV:           1.7900@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:     127
+OLINSTART:     128
+OLINEN_NU:6412491009952                      
+OLINSA_PI:100995                             @5 
+OLIN8__IF:-      @   @   @   @Spraymaali 400ml kul               @ta
+OLIN21_QT:           12.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:2                                                                     
+OLINNTPIV:           1.7900@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:     128
+OLINSTART:     129
+OLINEN_NU:6412490005689                      
+OLINSA_PI:100811                             @5 
+OLIN8__IF:-      @   @   @   @Spraymaali 400ml lil               @a
+OLIN21_QT:           12.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:2                                                                     
+OLINNTPIV:           1.7900@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:     129
+OLINSTART:     130
+OLINEN_NU:6412491008047                      
+OLINSA_PI:100804                             @5 
+OLIN8__IF:-      @   @   @   @Spraymaali 400ml ora               @nssi
+OLIN21_QT:           12.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:2                                                                     
+OLINNTPIV:           1.7900@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:     130
+OLINSTART:     131
+OLINEN_NU:6412490005672                      
+OLINSA_PI:100808                             @5 
+OLIN8__IF:-      @   @   @   @Spraymaali 400ml pin               @kki
+OLIN21_QT:           12.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:2                                                                     
+OLINNTPIV:           1.7900@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:     131
+OLINSTART:     132
+OLINEN_NU:6412491005183                      
+OLINSA_PI:100518                             @5 
+OLIN8__IF:-      @   @   @   @Spraypohjamaali 400m               @l harmaa
+OLIN21_QT:           18.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:3                                                                     
+OLINNTPIV:           1.7300@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:     132
+OLINSTART:     133
+OLINEN_NU:6412491005190                      
+OLINSA_PI:100519                             @5 
+OLIN8__IF:-      @   @   @   @Spraypohjamaali 400m               @l punaruskea
+OLIN21_QT:           12.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:2                                                                     
+OLINNTPIV:           1.7900@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:     133
+OLINSTART:     134
+OLINEN_NU:6412491008061                      
+OLINSA_PI:100806                             @5 
+OLIN8__IF:-      @   @   @   @Spraymaali 400ml rus               @kea
+OLIN21_QT:           12.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:2                                                                     
+OLINNTPIV:           1.7900@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:     134
+OLINSTART:     135
+OLINEN_NU:6412491008030                      
+OLINSA_PI:100803                             @5 
+OLIN8__IF:-      @   @   @   @Spraymaali 400ml sin               @inen
+OLIN21_QT:           12.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:2                                                                     
+OLINNTPIV:           1.7900@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:     135
+OLINSTART:     136
+OLINEN_NU:6412491008023                      
+OLINSA_PI:100802                             @5 
+OLIN8__IF:-      @   @   @   @Spraymaali 400ml vih               @rea
+OLIN21_QT:           12.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:2                                                                     
+OLINNTPIV:           1.7900@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:     136
+OLINSTART:     137
+OLINEN_NU:6412491002236                      
+OLINSA_PI:100223                             @5 
+OLIN8__IF:-      @   @   @   @Spraymaali 400ml maa               @larinvalkea
+OLIN21_QT:           12.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:2                                                                     
+OLINNTPIV:           1.7900@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:     137
+OLINSTART:     138
+OLINEN_NU:6412491003318                      
+OLINSA_PI:100331                             @5 
+OLIN8__IF:-      @   @   @   @Spraymaali 400ml him               @mea lakka
+OLIN21_QT:           12.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:2                                                                     
+OLINNTPIV:           1.7900@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:     138
+OLINSTART:     139
+OLINEN_NU:6412490039202                      
+OLINSA_PI:400524                             @5 
+OLIN8__IF:-      @   @   @   @Pohjamaali 400ml spr               @ay alumiini&galvanoi
+OLIN21_QT:            6.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:           4.1000@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:     139
+OLINSTART:     140
+OLINEN_NU:6412490028916                      
+OLINSA_PI:4406121                            @5 
+OLIN8__IF:-      @   @   @   @Ryppymaali 400ml Spr               @ay musta
+OLIN21_QT:            6.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:           5.3500@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:     140
+OLINSTART:     141
+OLINEN_NU:6412490038052                      
+OLINSA_PI:702011                             @5 
+OLIN8__IF:-      @   @   @   @Spraykahva                         @
+OLIN21_QT:            6.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:           2.2000@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:     141
+OLINSTART:     142
+OLINEN_NU:6412490024765                      
+OLINSA_PI:830332                             @5 
+OLIN8__IF:-      @   @   @   @Spraylakka 400ml Dec               @oeffect
+OLIN21_QT:            6.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:           5.0000@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:     142
+OLINSTART:     143
+OLINEN_NU:6412490032555                      
+OLINSA_PI:1801008                            @5 
+OLIN8__IF:-      @   @   @   @Spraymaali 400ml Mai               @tolasi efekti
+OLIN21_QT:            6.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:           4.1000@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:     143
+OLINSTART:     144
+OLINEN_NU:6412490036959                      
+OLINSA_PI:831002                             @5 
+OLIN8__IF:-      @   @   @   @Spraymaali 400ml Rus               @t effect
+OLIN21_QT:            6.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:           5.0000@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:     144
+OLINSTART:     145
+OLINEN_NU:6412490037833                      
+OLINSA_PI:831007                             @5 
+OLIN8__IF:-      @   @   @   @Spraymaali 400ml Con               @crete effect
+OLIN21_QT:            6.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:           5.0000@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:     145
+OLINSTART:     146
+OLINEN_NU:6412490039844                      
+OLINSA_PI:707622                             @5 
+OLIN8__IF:-      @   @   @   @Spraymaali 400ml neo               @n pinkki
+OLIN21_QT:            6.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:           4.0000@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:     146
+OLINSTART:     147
+OLINEN_NU:6412490040338                      
+OLINSA_PI:210832                             @5 
+OLIN8__IF:-      @   @   @   @Spraymaali 400ml Met               @allic antiikki kulta
+OLIN21_QT:            6.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:           3.1500@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:     147
+OLINSTART:     148
+OLINEN_NU:6412490040345                      
+OLINSA_PI:210837                             @5 
+OLIN8__IF:-      @   @   @   @Spraymaali 400ml Met               @allic metallinharmaa
+OLIN21_QT:            6.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:           3.1500@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:     148
+OLINSTART:     149
+OLINEN_NU:6412494330015                      
+OLINSA_PI:707617                             @5 
+OLIN8__IF:-      @   @   @   @Spraymaali 400ml neo               @n oranssi
+OLIN21_QT:            6.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:           4.0000@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:     149
+OLINSTART:     150
+OLINEN_NU:6412494330022                      
+OLINSA_PI:707619                             @5 
+OLIN8__IF:-      @   @   @   @Spraymaali 400ml Neo               @n keltainen
+OLIN21_QT:            6.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:           4.1600@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:     150
+OLINSTART:     151
+OLINEN_NU:6412490024932                      
+OLINSA_PI:4301210                            @5 
+OLIN8__IF:-      @   @   @   @Spraymaali 500ml Aut               @oacryl matta musta
+OLIN21_QT:           12.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:2                                                                     
+OLINNTPIV:           2.4000@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:     151
+OLINSTART:     152
+OLINEN_NU:6412490024949                      
+OLINSA_PI:4301215                            @5 
+OLIN8__IF:-      @   @   @   @Spraymaali 500ml Aut               @oacryl puolikiiltava
+OLIN21_QT:           12.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:2                                                                     
+OLINNTPIV:           2.4000@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:     152
+OLINSTART:     153
+OLINEN_NU:6412490024956                      
+OLINSA_PI:4301220                            @5 
+OLIN8__IF:-      @   @   @   @Spraymaali 500ml Aut               @oacryl kiiltava mus
+OLIN21_QT:           12.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:2                                                                     
+OLINNTPIV:           2.4000@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:     153
+OLINSTART:     154
+OLINEN_NU:6412490024963                      
+OLINSA_PI:4302220                            @5 
+OLIN8__IF:-      @   @   @   @Spraymaali 500ml Aut               @oacryl Valkoinen
+OLIN21_QT:           12.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:2                                                                     
+OLINNTPIV:           2.4000@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:     154
+OLINSTART:     155
+OLINEN_NU:6412490024987                      
+OLINSA_PI:4305180                            @5 
+OLIN8__IF:-      @   @   @   @Spraymaali 500ml Aut               @oacryl pohjamaali ha
+OLIN21_QT:           12.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:2                                                                     
+OLINNTPIV:           2.4000@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:     155
+OLINSTART:     156
+OLINEN_NU:6412490024994                      
+OLINSA_PI:4305190                            @5 
+OLIN8__IF:-      @   @   @   @Spraymaali 500ml Aut               @oacryl pohjamaali ru
+OLIN21_QT:           12.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:2                                                                     
+OLINNTPIV:           2.4000@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:     156
+OLINSTART:     157
+OLINEN_NU:6412490025069                      
+OLINSA_PI:4308050                            @5 
+OLIN8__IF:-      @   @   @   @Spraymaali 500ml Aut               @oacryl Punainen
+OLIN21_QT:            6.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:           2.4000@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:     157
+OLINSTART:     158
+OLINEN_NU:6412490025076                      
+OLINSA_PI:4309950                            @5 
+OLIN8__IF:-      @   @   @   @Spraymaali 500ml Aut               @oacryl Vannekulta
+OLIN21_QT:           12.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:2                                                                     
+OLINNTPIV:           2.4000@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:     158
+OLINSTART:     159
+OLINEN_NU:6412490025083                      
+OLINSA_PI:4309960                            @5 
+OLIN8__IF:-      @   @   @   @Spraymaali 500ml Aut               @oacryl Vannehopea
+OLIN21_QT:           12.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:2                                                                     
+OLINNTPIV:           2.4000@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:     159
+OLINSTART:     160
+OLINEN_NU:6412490037420                      
+OLINSA_PI:4302210                            @5 
+OLIN8__IF:-      @   @   @   @Spraymaali 500ml Aut               @oacryl matta val
+OLIN21_QT:           12.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:2                                                                     
+OLINNTPIV:           2.4000@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:     160
+OLINSTART:     161
+OLINEN_NU:6412490039196                      
+OLINSA_PI:400523                             @5 
+OLIN8__IF:-      @   @   @   @Styroksipohjamaali 4               @00ml spray
+OLIN21_QT:            6.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:           4.1000@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:     161
+OLINSTART:     162
+OLINEN_NU:6412490032715                      
+OLINSA_PI:1970121                            @5 
+OLIN8__IF:-      @   @   @   @Tiivistepinnoite 500               @ml Spray Seal mus
+OLIN21_QT:            6.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:           6.2100@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:     162
+OLINSTART:     163
+OLINEN_NU:6412490032722                      
+OLINSA_PI:1970221                            @5 
+OLIN8__IF:-      @   @   @   @Tiivistepinnoite 500               @ml Spray Seal val
+OLIN21_QT:            6.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:           6.2100@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:     163
+OLINSTART:     164
+OLINEN_NU:6412490032746                      
+OLINSA_PI:1970800                            @5 
+OLIN8__IF:-      @   @   @   @Tiivistepinnoite 500               @ml Spray Seal thar
+OLIN21_QT:            6.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:           6.2100@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:     164
+OLINSTART:     165
+OLINEN_NU:6412490004767                      
+OLINSA_PI:2311001                            @5 
+OLIN8__IF:-      @   @   @   @MP-Ketjuoljy 400ml S               @pray
+OLIN21_QT:            6.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:           2.8900@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:     165
+OLINSTART:     166
+OLINEN_NU:6412490000400                      
+OLINSA_PI:3110020                            @5 
+OLIN8__IF:-      @   @   @   @Electro clean 400ml                @Spray
+OLIN21_QT:            6.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:           2.5700@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:     166
+OLINSTART:     167
+OLINEN_NU:6412494006026                      
+OLINSA_PI:400602                             @5 
+OLIN8__IF:-      @   @   @   @Tervaspray 400ml                   @
+OLIN21_QT:            6.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:           3.4700@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:     167
+OLINSTART:     168
+OLINEN_NU:6412490028060                      
+OLINSA_PI:2320021                            @5 
+OLIN8__IF:-      @   @   @   @Puhdistusvaahto 400m               @l Spray Thunder
+OLIN21_QT:            6.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:           3.1000@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:     168
+OLINSTART:     169
+OLINEN_NU:6412497367360                      
+OLINSA_PI:736736                             @5 
+OLIN8__IF:-      @   @   @   @Sprayliima                         @
+OLIN21_QT:            6.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:           4.5400@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:     169
+OLINSTART:     170
+OLINEN_NU:6412490005702                      
+OLINSA_PI:5141001                            @5 
+OLIN8__IF:-      @   @   @   @Puhdistusaine 500ml                @PU-Cleaner Pro 2in1
+OLIN21_QT:            6.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:           2.9400@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:     170
+OLINSTART:     171
+OLINEN_NU:6412490038427                      
+OLINSA_PI:706410                             @5 
+OLIN8__IF:-      @   @   @   @Quikset Paisuva beto               @ni 300g
+OLIN21_QT:           20.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:           8.0200@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:     171
+OLINSTART:     172
+OLINEN_NU:6412490038434                      
+OLINSA_PI:706411                             @5 
+OLIN8__IF:-      @   @   @   @Quikset Paisuva beto               @ni 700g
+OLIN21_QT:           12.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:          11.4400@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:     172
+OLINSTART:     173
+OLINEN_NU:6412490004132                      
+OLINSA_PI:6031003                            @5 
+OLIN8__IF:-      @   @   @   @Puukitti 50g Woodmix               @Manty 3
+OLIN21_QT:            8.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:2                                                                     
+OLINNTPIV:           2.2000@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:     173
+OLINSTART:     174
+OLINEN_NU:6412490004163                      
+OLINSA_PI:6031008                            @5 
+OLIN8__IF:-      @   @   @   @Puukitti 50g Woodmix               @Tammi 8
+OLIN21_QT:            8.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:2                                                                     
+OLINNTPIV:           2.2000@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:     174
+OLINSTART:     175
+OLINEN_NU:6412490004200                      
+OLINSA_PI:6031013                            @5 
+OLIN8__IF:-      @   @   @   @Puukitti 50g Woodmix               @Tumma pahkinapuu 13
+OLIN21_QT:            8.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:2                                                                     
+OLINNTPIV:           2.2000@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:     175
+OLINSTART:     176
+OLINEN_NU:6412490004224                      
+OLINSA_PI:6031016                            @5 
+OLIN8__IF:-      @   @   @   @Puukitti 50g Woodmix               @Valkoinen 16
+OLIN21_QT:            8.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:2                                                                     
+OLINNTPIV:           2.2000@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:     176
+OLINSTART:     177
+OLINEN_NU:4000970021667                      
+OLINSA_PI:661007                             @5 
+OLIN8__IF:-      @   @   @   @Ruosteenestomaali 37               @5ml AutoRust harmaa
+OLIN21_QT:           12.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:2                                                                     
+OLINNTPIV:           5.2800@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:     177
+OLINSTART:     178
+OLINEN_NU:4000970021780                      
+OLINSA_PI:661002                             @5 
+OLIN8__IF:-      @   @   @   @Ruosteenestomaali 37               @5ml AutoRust pun
+OLIN21_QT:            6.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:           5.2800@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:     178
+OLINSTART:     179
+OLINEN_NU:4000970021889                      
+OLINSA_PI:661012                             @5 
+OLIN8__IF:-      @   @   @   @Ruosteenestomaali 37               @5ml AutoRust musta
+OLIN21_QT:            6.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:           6.6400@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:     179
+OLINSTART:     180
+OLINEN_NU:4000970021988                      
+OLINSA_PI:661017                             @5 
+OLIN8__IF:-      @   @   @   @Ruosteenestomaali 37               @5ml AutoRust valk
+OLIN21_QT:            6.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:           6.6400@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:     180
+OLINSTART:     181
+OLINEN_NU:6412490012076                      
+OLINSA_PI:8861001                            @5 
+OLIN8__IF:-      @   @   @   @Metallimaali 750ml m               @usta silea
+OLIN21_QT:            8.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:4                                                                     
+OLINNTPIV:           6.4400@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:     181
+OLINSTART:     182
+OLINEN_NU:6412490012090                      
+OLINSA_PI:8861003                            @5 
+OLIN8__IF:-      @   @   @   @Metallimaali 750ml h               @opea silea
+OLIN21_QT:            8.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:4                                                                     
+OLINNTPIV:           6.4400@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:     182
+OLINSTART:     183
+OLINEN_NU:6412490017576                      
+OLINSA_PI:8861006                            @5 
+OLIN8__IF:-      @   @   @   @Metallimaali 750ml p               @unainen silea
+OLIN21_QT:            6.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:3                                                                     
+OLINNTPIV:           6.4400@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:     183
+OLINSTART:     184
+OLINEN_NU:6412498860020                      
+OLINSA_PI:886002                             @5 
+OLIN8__IF:-      @   @   @   @Metallimaali 250ml v               @alkoinen silea
+OLIN21_QT:           10.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:2                                                                     
+OLINNTPIV:           2.8400@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:     184
+OLINSTART:     185
+OLINEN_NU:6412498860068                      
+OLINSA_PI:886006                             @5 
+OLIN8__IF:-      @   @   @   @Metallimaali 250ml p               @unainen silea
+OLIN21_QT:           10.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:2                                                                     
+OLINNTPIV:           2.8400@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:     185
+OLINSTART:     186
+OLINEN_NU:6412490012120                      
+OLINSA_PI:8871001                            @5 
+OLIN8__IF:-      @   @   @   @Vasaralakka 750ml mu               @sta
+OLIN21_QT:            8.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:4                                                                     
+OLINNTPIV:           6.4400@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:     186
+OLINSTART:     187
+OLINEN_NU:6412490012496                      
+OLINSA_PI:8871003                            @5 
+OLIN8__IF:-      @   @   @   @Vasaralakka 750ml ho               @pea
+OLIN21_QT:            4.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:2                                                                     
+OLINNTPIV:           6.4400@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:     187
+OLINSTART:     188
+OLINEN_NU:6412498870036                      
+OLINSA_PI:887003                             @5 
+OLIN8__IF:-      @   @   @   @Vasaralakka 250ml ho               @pea
+OLIN21_QT:           10.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:2                                                                     
+OLINNTPIV:           2.8400@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:     188
+OLINSTART:     189
+OLINEN_NU:6412490038328                      
+OLINSA_PI:1840001                            @5 
+OLIN8__IF:-      @   @   @   @Kaakelimaali 250ml m               @usta
+OLIN21_QT:            5.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:          10.6100@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:     189
+OLINSTART:     190
+OLINEN_NU:6412490038335                      
+OLINSA_PI:1840002                            @5 
+OLIN8__IF:-      @   @   @   @Kaakelimaali 250ml v               @alkoinen
+OLIN21_QT:            5.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:          10.6100@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:     190
+OLINSTART:     191
+OLINEN_NU:6412490038342                      
+OLINSA_PI:1840006                            @5 
+OLIN8__IF:-      @   @   @   @Kaakelimaali 250ml p               @unainen
+OLIN21_QT:            5.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:          10.6100@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:     191
+OLINSTART:     192
+OLINEN_NU:6412490038359                      
+OLINSA_PI:1840004                            @5 
+OLIN8__IF:-      @   @   @   @Kaakelimaali 250ml b               @etoninharmaa
+OLIN21_QT:            5.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:          10.6100@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:     192
+OLINSTART:     193
+OLINEN_NU:6412490038366                      
+OLINSA_PI:1840003                            @5 
+OLIN8__IF:-      @   @   @   @Kaakelimaali 250ml m               @aalarinvalkoinen
+OLIN21_QT:            5.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:          10.6100@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:     193
+OLINSTART:     194
+OLINEN_NU:6412490026929                      
+OLINSA_PI:400606                             @5 
+OLIN8__IF:-      @   @   @   @Kuparirasva 400ml Sp               @ray
+OLIN21_QT:            6.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:           3.0400@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:     194
+OLINSTART:     195
+OLINEN_NU:6412496025285                      
+OLINSA_PI:602528                             @5 
+OLIN8__IF:-      @   @   @   @Laudesuojaspray 150m               @l Tixo
+OLIN21_QT:           12.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:           1.8900@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:     195
+OLINSTART:     196
+OLINEN_NU:6412490005771                      
+OLINSA_PI:1711021                            @5 
+OLIN8__IF:-      @   @   @   @Maali 250ml H2O Colo               @rmix rypsinkeltainen
+OLIN21_QT:            5.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:           4.0200@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:     196
+OLINSTART:     197
+OLINEN_NU:6412490005788                      
+OLINSA_PI:1712002                            @5 
+OLIN8__IF:-      @   @   @   @Maali 250ml H2O Colo               @rmix verenpunainen
+OLIN21_QT:            5.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:           4.0200@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:     197
+OLINSTART:     198
+OLINEN_NU:6412490005795                      
+OLINSA_PI:1713000                            @5 
+OLIN8__IF:-      @   @   @   @Maali 250ml H2O Colo               @rmix tulenpunainen
+OLIN21_QT:            5.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:           4.0200@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:     198
+OLINSTART:     199
+OLINEN_NU:6412490005818                      
+OLINSA_PI:1715010                            @5 
+OLIN8__IF:-      @   @   @   @Maali 250ml H2O Colo               @rmix gentiansininen
+OLIN21_QT:            5.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:           4.0200@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:     199
+OLINSTART:     200
+OLINEN_NU:6412490005825                      
+OLINSA_PI:1716002                            @5 
+OLIN8__IF:-      @   @   @   @Maali 250ml H2O Colo               @rmix lehdenvihrea
+OLIN21_QT:            5.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:           4.0200@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:     200
+OLINSTART:     201
+OLINEN_NU:6412490005832                      
+OLINSA_PI:1717001                            @5 
+OLIN8__IF:-      @   @   @   @Maali 250ml H2O Colo               @rmix hopeanharmaa
+OLIN21_QT:            5.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:           4.0200@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:     201
+OLINSTART:     202
+OLINEN_NU:6412490005849                      
+OLINSA_PI:1718017                            @5 
+OLIN8__IF:-      @   @   @   @Maali 250ml H2O Colo               @rmix suklaanruskea
+OLIN21_QT:            5.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:           4.0200@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:     202
+OLINSTART:     203
+OLINEN_NU:6412490005856                      
+OLINSA_PI:1719001                            @5 
+OLIN8__IF:-      @   @   @   @Maali 250ml H2O Colo               @rmix kermanvalkoinen
+OLIN21_QT:            5.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:           4.0200@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:     203
+OLINSTART:     204
+OLINEN_NU:6412490005863                      
+OLINSA_PI:1719005                            @5 
+OLIN8__IF:-      @   @   @   @Maali 250ml H2O Colo               @rmix syvanmusta
+OLIN21_QT:            5.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:           4.0200@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:     204
+OLINSTART:     205
+OLINEN_NU:6412490005870                      
+OLINSA_PI:1719010                            @5 
+OLIN8__IF:-      @   @   @   @Maali 250ml H2O Colo               @rmix valkoinen
+OLIN21_QT:            5.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:           4.0200@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:     205
+OLINSTART:     206
+OLINEN_NU:6412490005887                      
+OLINSA_PI:1729005                            @5 
+OLIN8__IF:-      @   @   @   @Maali 250ml H2O Colo               @rmix matta musta
+OLIN21_QT:            5.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:           4.0200@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:     206
+OLINSTART:     207
+OLINEN_NU:6412490005894                      
+OLINSA_PI:1730518                            @5 
+OLIN8__IF:-      @   @   @   @Pohjamaali 250ml H2O               @Colormix harmaa
+OLIN21_QT:            5.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:           4.0200@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:     207
+OLINSTART:     208
+OLINEN_NU:6412490028749                      
+OLINSA_PI:100521                             @5 
+OLIN8__IF:-      @   @   @   @Pohjamaali 400ml val               @koinen
+OLIN21_QT:           12.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:2                                                                     
+OLINNTPIV:           1.7900@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:     208
+OLINSTART:     209
+OLINEN_NU:6412496054506                      
+OLINSA_PI:605450                             @5 
+OLIN8__IF:-      @   @   @   @Tiikkioljy 450ml Tea               @koil
+OLIN21_QT:            6.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:           4.6300@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:     209
+OLINSTART:     210
+OLINEN_NU:6412490003555                      
+OLINSA_PI:6021006                            @5 
+OLIN8__IF:-      @   @   @   @Petsilakka 250ml Woo               @dmix 6 mahonki
+OLIN21_QT:            5.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:           3.6700@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:     210
+OLINSTART:     211
+OLINEN_NU:6412490003579                      
+OLINSA_PI:6021008                            @5 
+OLIN8__IF:-      @   @   @   @Petsilakka 250ml Woo               @dmix 8 vaalea manty
+OLIN21_QT:            5.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:           3.6700@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:     211
+OLINSTART:     212
+OLINEN_NU:6412490003586                      
+OLINSA_PI:6021009                            @5 
+OLIN8__IF:-      @   @   @   @Petsilakka 250ml Woo               @dmix 9 tammi
+OLIN21_QT:            5.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:           3.6700@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:     212
+OLINSTART:     213
+OLINEN_NU:6412490003593                      
+OLINSA_PI:6021010                            @5 
+OLIN8__IF:-      @   @   @   @Petsilakka 250ml Woo               @dmix 10 ruskea mahon
+OLIN21_QT:            5.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:           3.6700@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:     213
+OLINSTART:     214
+OLINEN_NU:6412490003647                      
+OLINSA_PI:6021018                            @5 
+OLIN8__IF:-      @   @   @   @Petsilakka 250ml Woo               @dmix 18 pyokki
+OLIN21_QT:            5.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:           3.6700@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:     214
+OLINSTART:     215
+OLINEN_NU:6412490017798                      
+OLINSA_PI:1801001                            @5 
+OLIN8__IF:-      @   @   @   @Spraymaali 400ml roi               @skekaton korjausmaal
+OLIN21_QT:            6.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:           5.3100@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:     215
+OLINSTART:     216
+OLINEN_NU:6412490017842                      
+OLINSA_PI:1801006                            @5 
+OLIN8__IF:-      @   @   @   @Spraymaali 400ml Ovi               @- lista- ja ikkunali
+OLIN21_QT:            6.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:           4.7700@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:     216
+OLINSTART:     217
+OLINEN_NU:6412490032609                      
+OLINSA_PI:1801010                            @5 
+OLIN8__IF:-      @   @   @   @Spraymaali 400ml lii               @tutaulu musta
+OLIN21_QT:            6.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:           4.1300@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:     217
+OLINSTART:     218
+OLINEN_NU:6412490005641                      
+OLINSA_PI:605451                             @5 
+OLIN8__IF:-      @   @   @   @Tiikki oljy 450ml ru               @skea
+OLIN21_QT:            6.000@KPL
+OLIN2__DT:20190322                           @102
+OLINME_FC:1                                                                     
+OLINNTPIV:           4.6300@   @   @   @           @KPL
+OLINVATTX:24.0000          @S  
+OLIN___AL:                                   @   @   @   
+OLIN___PA:12 @    0.0000
+OLIN__END:     218
+OMOA116MA:            4871.560
+OMSG__END:1             
+ICHGTOTAL:1
+ICHG__END:31252         
+

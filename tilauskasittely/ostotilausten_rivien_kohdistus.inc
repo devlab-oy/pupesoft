@@ -1393,7 +1393,6 @@ if ($tila == '') {
   }
 
   $result = pupe_query($query);
-
   echo "<table><tr><td class='back'>";
 
   // aloitellaan laskun otsikko taulu

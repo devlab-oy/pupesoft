@@ -762,9 +762,9 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
 
           $ostoehdotus     = $row["halytysraja"] - $vapaasaldo;
           $vku_laskenta    = !empty($ei_vuosikulutusta) ? 0 : $vku;
-echo "765 <pre> vuosikulutuslaskenta: {$vku_laskenta}  abc luokka: {$row["abcluokka"]}   tavoite: {$kiertonopeus_tavoite[$row["abcluokka"]]} </pre> <br> <br>";
+
           $ostoehdotus_lisa = (2 * (($vku_laskenta / $kiertonopeus_tavoite[$row["abcluokka"]]) - $row["varmuus_varasto"]));
-echo "767 <pre> ostoehdotuslisa: {$ostoehdotus_lisa}  </pre> <br> <br>";
+
           if ($ostoehdotus_lisa > 0) {
             $ostoehdotus += $ostoehdotus_lisa;
           }

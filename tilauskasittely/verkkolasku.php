@@ -580,7 +580,7 @@ else {
                     AND tuoteno = '$lasku_chk_row[tuoteno]'";
           $saldo_chk_res = pupe_query($query);
           $saldo_chk_row = mysql_fetch_assoc($saldo_chk_res);
-echo "583 Saldo:($saldo_chk_row[saldo], $lasku_chk_row[varattu] <br><br>";
+
           if ($saldo_chk_row["saldo"] - $lasku_chk_row["varattu"] < 0) {
             $lasklisa .= " and lasku.tunnus not in ($lasku_chk_row[tunnukset]) ";
             $tulos_ulos .= "<br>\n".t("Saldovirheet").":<br>\n".t("Tilausta")." $lasku_chk_row[tunnukset] ".t("ei voida laskuttaa, koska tuotteen")." $lasku_chk_row[tuoteno] ".t("saldo ei riitä")."!<br>\n";
@@ -676,7 +676,6 @@ echo "583 Saldo:($saldo_chk_row[saldo], $lasku_chk_row[varattu] <br><br>";
                         WHERE tuotepaikat.yhtio = '$kukarow[yhtio]'
                         AND tuotepaikat.tuoteno = '$tuoteno_varattu_chk_row[tuoteno]'
                         AND tuotepaikat.varasto = '$laskurow[varasto]'";
-                        query_dump($query);
             }
             else {
               // haetaan saldo tuotepaikoilta kaikista varastoista
@@ -684,7 +683,6 @@ echo "583 Saldo:($saldo_chk_row[saldo], $lasku_chk_row[varattu] <br><br>";
                         FROM tuotepaikat
                         WHERE tuotepaikat.yhtio = '$kukarow[yhtio]'
                         AND tuotepaikat.tuoteno = '$tuoteno_varattu_chk_row[tuoteno]'";
-                      
             }
             $saldo_chk_res = pupe_query($query);
             $saldo_chk_row = mysql_fetch_assoc($saldo_chk_res);
@@ -696,7 +694,7 @@ echo "583 Saldo:($saldo_chk_row[saldo], $lasku_chk_row[varattu] <br><br>";
 
             $lasklisa .= " and lasku.tunnus != '$laskurow[tunnus]' ";
             $tulos_ulos .= "<br>\n".t("Saldovirheet").":<br>\n".t("Tilausta")." $laskurow[tunnus] ".t("ei voida laskuttaa, koska tuotteen")." $tuoteno_varattu_chk_row[tuoteno] ".t("saldo ei riitä")."!<br>\n";
-  echo "697: {$laskutus_esto_saldot[$tuoteno_varattu_chk_row['tuoteno']]}, {$tuoteno_varattu_chk_row['varattu']} <br><br>";
+
             // skipataan seuraavaan laskuun
             continue 2;
           }

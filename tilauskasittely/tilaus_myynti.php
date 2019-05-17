@@ -7413,12 +7413,10 @@ if ($tee == '') {
 
           $summa_alviton     = $summa / (1+$alvkapu/100);
           $kotisumma_alviton   = $kotisumma / (1+$alvkapu/100);
-          $summa_alviton_rahtivapaa_vertailuun += $summa / (1+$alvkapu/100); 
         }
         else {
           $summa_alviton     = $summa;
           $kotisumma_alviton   = $kotisumma;
-          $summa_alviton_rahtivapaa_vertailuun += $summa;
         }
 
         if ($row["hinta"] == 0.00)   $row["hinta"] = '';
@@ -9762,8 +9760,8 @@ if ($tee == '') {
         }
 
         // Rahtivapaa_alarajasumma on verollisia jos myyntihinnat ovat verollisia, tai verottomia vice versa, joten verrataan sitä oikeaan summaan
-        if ($yhtiorow["alv_kasittely"] == "o" and isset($summa_alviton_rahtivapaa_vertailuun) and (float) $summa_alviton_rahtivapaa_vertailuun != 0) {
-          $rahtivapaa_vertailu = yhtioval($summa_alviton_rahtivapaa_vertailuun, $laskurow["vienti_kurssi"]);
+        if ($yhtiorow["alv_kasittely"] == "o" and isset($arvo) and (float) $arvo != 0) {
+          $rahtivapaa_vertailu = yhtioval($arvo, $laskurow["vienti_kurssi"]);
         }
         elseif (isset($summa) and (float) $summa != 0) {
           $rahtivapaa_vertailu = yhtioval($summa, $laskurow["vienti_kurssi"]);

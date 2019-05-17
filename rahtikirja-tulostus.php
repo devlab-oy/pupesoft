@@ -527,7 +527,7 @@ if ($tee == 'tulosta') {
   $query = "SELECT DISTINCT lasku.ytunnus, lasku.toim_maa, lasku.toim_nimi, lasku.toim_nimitark,
             lasku.toim_osoite, lasku.toim_ovttunnus, lasku.toim_postino, lasku.toim_postitp,
             lasku.toim_puh,
-            lasku.maa, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.ovttunnus, lasku.postino, lasku.postitp,
+            lasku.maa, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.ovttunnus, lasku.postino, lasku.postitp, lasku.toimitusehto,
             rahtikirjat.merahti, rahtikirjat.rahtisopimus, if(maksuehto.jv is null,'',maksuehto.jv) jv, lasku.alv, lasku.vienti, rahtisopimukset.muumaksaja,
             asiakas.toimitusvahvistus, asiakas.kieli,
             IF(lasku.toim_email != '', lasku.toim_email,
@@ -958,7 +958,7 @@ if ($tee == 'tulosta') {
       $rahinta   = "";
 
       // jos kyseessä on jälkivaatimus
-      if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE and $rakir_row['jv'] != '') {
+      if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE and ($rakir_row['jv'] != '' or $rakir_row['toimitusehto'] == '21- Arvega')) {
         $tee       = "TARKISTA";
         $laskutakaikki   = "KYLLA";
         $silent       = "KYLLA";
@@ -967,6 +967,10 @@ if ($tee == 'tulosta') {
         if ($rakirsyotto_laskutulostin != '') {
           $valittu_tulostin = $rakirsyotto_laskutulostin;
           $chnlisa = ", chn = '667' ";
+        }
+        elseif ($rakir_row['toimitusehto'] == '21- Arvega') {
+          $valittu_tulostin = $rakirsyotto_laskutulostin;
+          $chnlisa = ", chn = '666' ";
         }
         else {
           $valittu_tulostin = "";
@@ -994,13 +998,15 @@ if ($tee == 'tulosta') {
         // $laskurow jossa on laskutetun laskun tiedot
         // $viite jossa on viitenumero
 
-        $yhteensa = $laskurow['summa'];
-        $summa    = $laskurow['summa'] - $jvhinta - $rahinta;
-
-        $jvtext  = "<li>".t("Jälkivaatimuskulu").": $jvhinta $yhtiorow[valkoodi]";
-        $jvtext .= "<li>".t("Loppusumma yhteensä").": $yhteensa $yhtiorow[valkoodi]";
-
-        $aputeksti = t("JÄLKIVAATIMUS");
+        if ($rakir_row['jv']) {
+          $yhteensa = $laskurow['summa'];
+          $summa    = $laskurow['summa'] - $jvhinta - $rahinta;
+          
+          $jvtext  = "<li>".t("Jälkivaatimuskulu").": $jvhinta $yhtiorow[valkoodi]";
+          $jvtext .= "<li>".t("Loppusumma yhteensä").": $yhteensa $yhtiorow[valkoodi]";
+          
+          $aputeksti = t("JÄLKIVAATIMUS");
+        }  
       }
       elseif (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") !== FALSE and $rakir_row['jv'] != '') {
 

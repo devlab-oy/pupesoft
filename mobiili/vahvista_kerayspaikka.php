@@ -8,10 +8,12 @@ $mobile = true;
 if (@include_once "../inc/parametrit.inc");
 elseif (@include_once "inc/parametrit.inc");
 
-// Nämä on pakollisia
+// Nï¿½mï¿½ on pakollisia
 if (!isset($alusta_tunnus, $liitostunnus, $tilausrivi)) exit;
 
 if (!isset($saapumisnro_haku)) $saapumisnro_haku = '';
+if (!isset($kerayspaikka)) $kerayspaikka = '';
+if (!isset($clearing)) $clearing = '';
 
 $alusta_tunnus = (int) $alusta_tunnus;
 $liitostunnus = (int) $liitostunnus;
@@ -27,14 +29,37 @@ $data = array(
 $url = http_build_query($data);
 
 // Haetaan suuntalavan tuotteet
-if (!empty($alusta_tunnus)) {
+if (!empty($alusta_tunnus) and !isset($siirtolista)) {
   $res = suuntalavan_tuotteet(array($alusta_tunnus), $liitostunnus, "", "", "", $tilausrivi);
   $row = mysql_fetch_assoc($res);
 }
 
-// Jos suuntalavan_tuotteet() ei löytynyt mitään
+// Jos suuntalavan_tuotteet() ei lï¿½ytynyt mitï¿½ï¿½n
 if (!isset($row)) {
-  $query = "SELECT
+  if (isset($siirtolista)) {
+    $query = "SELECT
+            tilausrivi.*,
+            tilausrivin_lisatiedot.kohde_hyllyalue AS tuotepaikat_hyllyalue,
+            tilausrivin_lisatiedot.kohde_hyllynro AS tuotepaikat_hyllynro,
+            tilausrivin_lisatiedot.kohde_hyllyvali AS tuotepaikat_hyllyvali,
+            tilausrivin_lisatiedot.kohde_hyllytaso AS tuotepaikat_hyllytaso,
+            tuotepaikat.varasto AS tuotepaikat_varasto,
+            tuotteen_toimittajat.toim_tuoteno
+            FROM tilausrivi
+            LEFT JOIN tilausrivin_lisatiedot
+            ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
+              AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus)
+            LEFT JOIN tuotteen_toimittajat
+              ON (tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno
+                AND tuotteen_toimittajat.yhtio=tilausrivi.yhtio)
+            JOIN tuotepaikat
+              ON (tuotepaikat.yhtio = tilausrivi.yhtio
+                AND tuotepaikat.tuoteno = tilausrivi.tuoteno
+                AND tuotepaikat.oletus  = 'X')
+            WHERE tilausrivi.tunnus='{$tilausrivi}'
+            AND tilausrivi.yhtio='{$kukarow['yhtio']}'";
+  } else {
+    $query = "SELECT
             tilausrivi.*,
             tuotepaikat.hyllyalue AS tuotepaikat_hyllyalue,
             tuotepaikat.hyllynro AS tuotepaikat_hyllynro,
@@ -52,19 +77,24 @@ if (!isset($row)) {
                 AND tuotepaikat.oletus  = 'X')
             WHERE tilausrivi.tunnus='{$tilausrivi}'
             AND tilausrivi.yhtio='{$kukarow['yhtio']}'";
+  }
+
   $row = mysql_fetch_assoc(pupe_query($query));
 }
+// Jos parametrina hylly, eli ollaan muutettu tuotteen kerï¿½yspaikkaa
+if (isset($hylly) and ($hylly != "")) {
+  $hyllypaikat = explode(",", $hylly);
+  if (count($hyllypaikat) != 4) {
+    $hyllypaikat = explode("-", $hylly);
+  }
 
-// Jos parametrina hylly, eli ollaan muutettu tuotteen keräyspaikkaa
-if (isset($hylly)) {
-  $hylly = explode(",", $hylly);
-  $row['hyllyalue'] = $hylly[0];
-  $row['hyllynro'] = $hylly[1];
-  $row['hyllyvali'] = $hylly[2];
-  $row['hyllytaso'] = $hylly[3];
+  $row['hyllyalue'] = $hyllypaikat[0];
+  $row['hyllynro'] = $hyllypaikat[1];
+  $row['hyllyvali'] = $hyllypaikat[2];
+  $row['hyllytaso'] = $hyllypaikat[3];
 }
-elseif ($row['varasto'] == $row['tuotepaikat_varasto']) {
-  // käytetään oletuspaikan varastossa aina oletuspaikkaa
+elseif ($row['varasto'] == $row['tuotepaikat_varasto'] or isset($siirtolista)) {
+  // kï¿½ytetï¿½ï¿½n oletuspaikan varastossa aina oletuspaikkaa
   $row['hyllyalue'] = $row['tuotepaikat_hyllyalue'];
   $row['hyllynro']  = $row['tuotepaikat_hyllynro'];
   $row['hyllyvali'] = $row['tuotepaikat_hyllyvali'];
@@ -74,12 +104,12 @@ elseif ($row['varasto'] == $row['tuotepaikat_varasto']) {
 $_varasto = kuuluukovarastoon($row['hyllyalue'], $row['hyllynro']);
 $onko_varaston_hyllypaikat_kaytossa = onko_varaston_hyllypaikat_kaytossa($_varasto);
 
-// Alkuperäinen saapuminen talteen
+// Alkuperï¿½inen saapuminen talteen
 $alkuperainen_saapuminen = $saapuminen;
 
 // Tullaan nappulasta
 if (isset($submit_button) and trim($submit_button) != '') {
-  // Vaan yks varastoonvienti kerrallaan voi olla käynnissä per firma
+  // Vaan yks varastoonvienti kerrallaan voi olla kï¿½ynnissï¿½ per firma
   $lock_params = array(
   "locktime"    => 600,
   "lockfile"    => "$kukarow[yhtio]-keikka.lock",
@@ -97,11 +127,17 @@ if (isset($submit_button) and trim($submit_button) != '') {
     echo "<META HTTP-EQUIV='Refresh' CONTENT='0; URL=uusi_kerayspaikka.php?{$url}'>";
     exit;
     break;
-  case 'submit':
 
-    // Tarkistetaan määrä
-    if (!is_numeric($maara) or $maara < 1) {
-      $errors[] = t("Virheellinen määrä");
+  case 'submit':
+    // Tarkistetaan mï¿½ï¿½rï¿½
+    if (isset($siirtolista)) {
+      if (!is_numeric($maara) or $maara < 0) {
+        $errors[] = t("Virheellinen mï¿½ï¿½rï¿½");
+      }
+    } else {
+      if (!is_numeric($maara) or $maara < 1) {
+        $errors[] = t("Virheellinen mï¿½ï¿½rï¿½");
+      }
     }
 
     if ($onko_varaston_hyllypaikat_kaytossa) {
@@ -112,7 +148,7 @@ if (isset($submit_button) and trim($submit_button) != '') {
         $errors[] = t("Virheellinen varmistuskoodi");
       }
 
-      // Setataan viimeinen muuttuja jos lavalla vain yksi rivi jäjellä
+      // Setataan viimeinen muuttuja jos lavalla vain yksi rivi jï¿½jellï¿½
       if (!empty($alusta_tunnus)) {
         $query = "SELECT * FROM tilausrivi WHERE suuntalava = '{$alusta_tunnus}' AND yhtio='{$kukarow['yhtio']}'";
         $rivit_result = pupe_query($query);
@@ -122,8 +158,53 @@ if (isset($submit_button) and trim($submit_button) != '') {
 
     $viimeinen = (isset($rivit) and $rivit == 1) ? true : false;
 
-    // Jos ei virheitä
+    // Jos ei virheitï¿½
     if (count($errors) == 0) {
+      if (isset($siirtolista)) {
+        $lasku_tunnus = $row['otunnus'];
+        $echotaanko = false;
+        $tee = "paikat";
+        $id = $row['otunnus'];
+        $tunnus[0] = $tilausrivi;
+        $toimittamatta = -1;
+        $t1[$tilausrivi] = $row['hyllyalue'];
+        $t2[$tilausrivi] = $row['hyllynro'];
+        $t3[$tilausrivi] = $row['hyllyvali'];
+        $t4[$tilausrivi] = $row['hyllytaso'];
+
+        if (isset($kerailypaikka) and $kerailypaikka != "") {
+          $paikat = explode("-", $kerailypaikka);
+
+          if (count($paikat) == 4) {
+            $t1[$tilausrivi] = $paikat[0];
+            $t2[$tilausrivi] = $paikat[1];
+            $t3[$tilausrivi] = $paikat[2];
+            $t4[$tilausrivi] = $paikat[3];
+          } else {
+            $errors[] = t("Virheellinen kerÃ¤ilypaikka");
+          }
+        }
+
+        if (count($errors) == 0) {
+          require "../tilauskasittely/vastaanota.php";
+
+          $query = "UPDATE kuka SET kesken = 0 WHERE yhtio = '{$kukarow['yhtio']}' AND kuka = '{$kukarow['kuka']}'";
+          $result = pupe_query($query);
+
+          if (count($errors) == 0) {
+            if ($toimittamatta == 0) {
+              $jatko_url = "siirtolista.php?uusi";
+            } else {
+              $jatko_url = "siirtolistalla_useita_tuotteita.php?siirtolista={$lasku_tunnus}";
+            }
+
+            echo "<META HTTP-EQUIV='Refresh' CONTENT='0;URL={$jatko_url}'>";
+          }
+        }
+
+        break;
+      }
+
       $tilausrivit = array();
 
       // Jos rivi on jo kohdistettu eri saapumiselle
@@ -131,7 +212,7 @@ if (isset($submit_button) and trim($submit_button) != '') {
         $saapuminen = $row['uusiotunnus'];
       }
       elseif ($yhtiorow['suuntalavat'] == "" and $saapuminen != 0) {
-        // Jos yhtiö ei käytä suuntalavaa ja rivi ei ole saapumisella
+        // Jos yhtiï¿½ ei kï¿½ytï¿½ suuntalavaa ja rivi ei ole saapumisella
         $query = "UPDATE tilausrivi SET
                   uusiotunnus = '{$saapuminen}'
                   WHERE yhtio = '{$kukarow['yhtio']}'
@@ -139,7 +220,7 @@ if (isset($submit_button) and trim($submit_button) != '') {
         pupe_query($query);
       }
 
-      //tarkistetaan vielä ettei riviä ole jo viety varastoon
+      //tarkistetaan vielï¿½ ettei riviï¿½ ole jo viety varastoon
       $viety_query = "SELECT uusiotunnus
                       FROM tilausrivi
                       WHERE yhtio         = '{$kukarow['yhtio']}'
@@ -148,13 +229,13 @@ if (isset($submit_button) and trim($submit_button) != '') {
       $viety = pupe_query($viety_query);
 
       if (mysql_num_rows($viety) == 0) {
-        // Tarkastetaan syötetyt määrät, eli tarviiko tilausrivia splittailla tai kopioida
+        // Tarkastetaan syï¿½tetyt mï¿½ï¿½rï¿½t, eli tarviiko tilausrivia splittailla tai kopioida
         if ($maara < $row['varattu']) {
-          // Syötetty määrä on pienempi kuin tilausrivilla oleva määrä.
-          // Splitataan rivi ja siirretään ylijääneet uudellele tilausriville.
+          // Syï¿½tetty mï¿½ï¿½rï¿½ on pienempi kuin tilausrivilla oleva mï¿½ï¿½rï¿½.
+          // Splitataan rivi ja siirretï¿½ï¿½n ylijï¿½ï¿½neet uudellele tilausriville.
           splittaa_tilausrivi($tilausrivi, ($row['varattu'] - $maara), TRUE, FALSE);
 
-          // Alkuperäinen viedään varastoon, splitattu jää jâljelle
+          // Alkuperï¿½inen viedï¿½ï¿½n varastoon, splitattu jï¿½ï¿½ jï¿½ljelle
           $ok = paivita_tilausrivin_kpl($tilausrivi, $maara);
           $tilausrivit[] = $tilausrivi;
 
@@ -165,27 +246,27 @@ if (isset($submit_button) and trim($submit_button) != '') {
           $tilausrivit[] = $tilausrivi;
         }
         else {
-          // Tehdään insertti erotukselle
+          // Tehdï¿½ï¿½n insertti erotukselle
           $kopioitu_tilausrivi = kopioi_tilausrivi($tilausrivi);
 
-          // Päivitä kopioidun kpl (maara - varattu)
+          // Pï¿½ivitï¿½ kopioidun kpl (maara - varattu)
           paivita_tilausrivin_kpl($kopioitu_tilausrivi, ($maara - $row['varattu']));
 
           $tilausrivit = array($tilausrivi, $kopioitu_tilausrivi);
         }
       }
       else {
-        echo t("Tuote oli jo viety varastoon! Ei viedä tuotetta uudestaan varastoon!");
+        echo t("Tuote oli jo viety varastoon! Ei viedï¿½ tuotetta uudestaan varastoon!");
       }
 
 
       $temppi_lava = false;
 
-      // Viedään varastoon temppi lavalla
+      // Viedï¿½ï¿½n varastoon temppi lavalla
       if ($yhtiorow['suuntalavat'] != "" and (($alusta_tunnus == 0 && $saapuminen != 0) || ($alusta_tunnus != 0 && $row['uusiotunnus'] == 0))) {
         $temppi_lava = true;
-        // Tarkottaa että on tultu ostotilauksen tuloutuksesta ilman että kyseisellä
-        // tilauksella on suuntalavaa. Ratkaisuna tehdään väliaikainen lava.
+        // Tarkottaa ettï¿½ on tultu ostotilauksen tuloutuksesta ilman ettï¿½ kyseisellï¿½
+        // tilauksella on suuntalavaa. Ratkaisuna tehdï¿½ï¿½n vï¿½liaikainen lava.
         $tee = "eihalutamitankayttoliittymaapliis";
         $suuntalavat_ei_kayttoliittymaa = "KYLLA";
         $otunnus = $saapuminen;
@@ -236,7 +317,7 @@ if (isset($submit_button) and trim($submit_button) != '') {
         require "../tilauskasittely/suuntalavat.inc";
       }
 
-      // Kun splittaukset ja alustat on selvitelty, voidaan kamat viedään varastoon.
+      // Kun splittaukset ja alustat on selvitelty, voidaan kamat viedï¿½ï¿½n varastoon.
       // Hylly array
       $hylly = array(
         "hyllyalue" => $row['hyllyalue'],
@@ -252,7 +333,7 @@ if (isset($submit_button) and trim($submit_button) != '') {
         $saapumiset = array($saapuminen);
       }
 
-      // Viimeisellä rivillä viedään koko suuntalava, jolloin lava merkataan puretuksi
+      // Viimeisellï¿½ rivillï¿½ viedï¿½ï¿½n koko suuntalava, jolloin lava merkataan puretuksi
       if ($viimeinen) {
         vie_varastoon($saapumiset[0], $alusta_tunnus, $hylly);
       }
@@ -285,6 +366,15 @@ if (isset($submit_button) and trim($submit_button) != '') {
           echo "<META HTTP-EQUIV='Refresh' CONTENT='3; URL=tuotteella_useita_tilauksia.php?ostotilaus={$ostotilaus_urliin}{$url}'>";
         }
       }
+      if (isset($siirtolista)) {
+        if ($tilausten_lukumaara < 1) {
+          echo "<META HTTP-EQUIV='Refresh' CONTENT='3; URL=siirtolista.php?siirtolista={$ostotilaus_urliin}'>";
+        }
+        else {
+          $url = "&riveja={$tilausten_lukumaara}&viivakoodi={$viivakoodi}";
+          echo "<META HTTP-EQUIV='Refresh' CONTENT='3; URL=siirtolistalla_useita_tuotteita.php?siirtolista={$ostotilaus_urliin}{$url}'>";
+        }
+      }
       else {
         echo "<META HTTP-EQUIV='Refresh' CONTENT='3; URL=suuntalavan_tuotteet.php?{$url}'>";
       }
@@ -306,10 +396,10 @@ elseif ($row['tilausrivi_tyyppi'] == '') {
   $row['tilausrivi_tyyppi'] = 'JT';
 }
 
-// Asetetaan määrä varattu kentän arvoksi jos sitä ei ole setattu
+// Asetetaan mï¿½ï¿½rï¿½ varattu kentï¿½n arvoksi jos sitï¿½ ei ole setattu
 $maara = (empty($maara)) ? $row['varattu'] : $maara;
 
-// Jos ollaan tultu ostotilausten tuloutuksesta, on näkymä hieman erilainen kuin asn-tuloutuksessa
+// Jos ollaan tultu ostotilausten tuloutuksesta, on nï¿½kymï¿½ hieman erilainen kuin asn-tuloutuksessa
 if (isset($ostotilaus)) {
   $disabled = "readonly";
   $hidden = "hidden";
@@ -325,7 +415,7 @@ echo "
       var maara = document.getElementById('maara').value;
       var row_varattu = parseInt(document.getElementById('row_varattu').innerHTML);
       if(maara > row_varattu) {
-        return confirm('Olet tulouttamassa enemmän kuin rivillä alunperin oli. Oletko varma?');
+        return confirm('Olet tulouttamassa enemmï¿½n kuin rivillï¿½ alunperin oli. Oletko varma?');
       }
       else return true;
     }
@@ -344,7 +434,7 @@ echo "
 
     $(document).ready(function() {
       $('#koodi').on('keyup', function() {
-        // Autosubmit vain jos on syötetty tarpeeksi pitkä viivakoodi
+        // Autosubmit vain jos on syï¿½tetty tarpeeksi pitkï¿½ viivakoodi
         if ($('#koodi').val().length > 1) {
           document.getElementById('vahvista').click();
         }
@@ -354,7 +444,6 @@ echo "
   </script>
 ";
 
-// Asn-tuloutus -> suuntalava
 $paluu_url = "suuntalavan_tuotteet.php?$url";
 // Ostotilaus -> hyllytykseen
 if (isset($hyllytys)) {
@@ -362,9 +451,18 @@ if (isset($hyllytys)) {
   $paluu_url = "hyllytys.php?ostotilaus={$row['otunnus']}&tilausrivi={$tilausrivi}&saapuminen={$saapuminen}{$urlilisa}";
 }
 
+if (isset($siirtolista)) {
+  #if ($tilausten_lukumaara == 1) {
+  #  $paluu_url = "siirtolista.php?movingback&siirtolista={$row['otunnus']}";
+  #} else {
+  #  $paluu_url = "siirtolistalla_useita_tuotteita.php?siirtolista={$row['otunnus']}";
+  #}
+  $paluu_url = "siirtolistan_hyllytys.php?siirtolista={$row['otunnus']}&tilausrivi={$tilausrivi}&riveja={$tilausten_lukumaara}";
+}
+
 echo "<div class='header'>";
 echo "<button onclick='window.location.href=\"$paluu_url\"' class='button left'><img src='back2.png'></button>";
-echo "<h1>", t("VAHVISTA KERÄYSPAIKKA"), "</h1></div>";
+echo "<h1>", t("VAHVISTA KERï¿½YSPAIKKA"), "</h1></div>";
 
 // Virheet
 if (isset($errors)) {
@@ -388,14 +486,22 @@ echo "<div class='main'>
     <td colspan='2'>{$row['toim_tuoteno']}</td>
   </tr>
   <tr>
-    <th>", t("Määrä"), "</th>
-    <td><input type='text' id='maara' name='maara' value='{$maara}' size='7' $disabled/> {$row['tilausrivi_tyyppi']}</td>
-    <td><span id='row_varattu' $hidden>{$row['varattu']}</span><span id='yksikko'>{$row['yksikko']}</span></td>
+    <th>", t("Mï¿½ï¿½rï¿½"), "</th>";
+
+if (isset($siirtolista)) {
+  echo "<td>{$maara}</td>";
+} else {
+  echo "<td><input type='text' id='maara' name='maara' value='{$maara}' size='7' $disabled/> {$row['tilausrivi_tyyppi']}</td>";
+}
+
+echo "<td><span id='row_varattu' $hidden>{$row['varattu']}</span><span id='yksikko'>{$row['yksikko']}</span></td>
   </tr>
+  
   <tr>
-    <th>", t("Keräyspaikka"), "</th>
-    <td colspan='2'>{$row['hyllyalue']} {$row['hyllynro']} {$row['hyllyvali']} {$row['hyllytaso']}</td>
-  </tr>";
+    <th>", t("Kerï¿½yspaikka"), "</th>
+    <td colspan='2'>{$row['hyllyalue']}-{$row['hyllynro']}-{$row['hyllyvali']}-{$row['hyllytaso']}</td>
+  </tr>
+  ";
 
 if ($onko_varaston_hyllypaikat_kaytossa) {
   echo "<tr>
@@ -413,9 +519,9 @@ echo "<tr>
 echo "<div class='controls'>
   <button name='submit_button' class='button' value='submit' id='vahvista' onclick='return vahvista_formin_submittaus();'>", t("Vahvista"), "</button>";
 
-// Jos hyllytyksestä niin tämä piiloon
-if (!isset($hyllytys)) {
-  echo "<button class='button right' name='submit_button' value='new'>", t("Uusi keräyspaikka"), "</button>";
+// Jos hyllytyksestï¿½ niin tï¿½mï¿½ piiloon
+if (!isset($hyllytys) and !isset($siirtolista)) {
+  echo "<button class='button right' name='submit_button' value='new'>", t("Uusi kerï¿½yspaikka"), "</button>";
 
   $saapuminen = !isset($saapuminen) ? $row['uusiotunnus'] : $saapuminen;
 
@@ -435,6 +541,9 @@ echo "
   <input type='hidden' name='manuaalisesti_syotetty_ostotilausnro' value='{$manuaalisesti_syotetty_ostotilausnro}' />
   <input type='hidden' name='viivakoodi' value='{$viivakoodi}' />
   <input type='hidden' name='tuotenumero' value='{$tuotenumero}' />
+  <input type='hidden' name='varasto' value='{$clearing}' />
+  <input type='hidden' name='kerayspaikka' value='{$kerayspaikka}' />
+  <input type='hidden' name='maara' value='{$maara}' />
 </form>
 ";
 

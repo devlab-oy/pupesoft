@@ -964,12 +964,12 @@ if ($tee == 'tulosta') {
         $silent       = "KYLLA";
         $laskutettavat   = $otunnukset;
 
-        if ($rakirsyotto_laskutulostin != '') {
+        if ($rakirsyotto_laskutulostin != '' and $rakir_row['toimitusehto'] != '21- Arvega') {
           $valittu_tulostin = $rakirsyotto_laskutulostin;
           $chnlisa = ", chn = '667' ";
         }
         elseif ($rakir_row['toimitusehto'] == '21- Arvega') {
-          $valittu_tulostin = $rakirsyotto_laskutulostin;
+          $valittu_tulostin = '';
           $chnlisa = ", chn = '666' ";
         }
         else {

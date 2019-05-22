@@ -2413,7 +2413,7 @@ if ($tila == "" and !isset($jatka)) {
       $sel = "";
       if ($toimehtosel == $row["tunnus"]) $sel = "SELECTED";
 
-      $vasen_sarake[$vasen] .= "<option value='$row[selite]' id='toimitusehto_$row[tunnus]' $sel>$row[selite] - $row[selitetark] $row[selitetark_2]</option>";
+      $vasen_sarake[$vasen] .= "<option value='$row[selite]' id='toimitusehto_$row[tunnus]' $sel>$row[selite] $row[selitetark]</option>";
     }
 
     $vasen_sarake[$vasen] .= "</select>";
@@ -2476,7 +2476,7 @@ if ($tila == "" and !isset($jatka)) {
         $sel = "";
         if ($toimehtosel == $row["tunnus"]) $sel = "SELECTED";
 
-        $vasen_sarake[$vasen] .= "<option value='$row[selite]' $sel>$row[selite] - $row[selitetark] $row[selitetark_2]</option>";
+        $vasen_sarake[$vasen] .= "<option value='$row[selite]' $sel>$row[selite] $row[selitetark]]</option>";
       }
 
       $vasen_sarake[$vasen] .= "</select>";

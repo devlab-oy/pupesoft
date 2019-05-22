@@ -17,10 +17,81 @@ else {
 
 if (strpos($_SERVER['SCRIPT_NAME'], "yllapito.php")  !== FALSE) {
   require "inc/parametrit.inc";
+}
+
+if ($toim == "tuote") {
+  if (!empty($_POST['ajax_toiminto']) and $_POST['ajax_toiminto'] == "hae_tuote_ryhmat") {
+    if (!isset($osasto)) $osasto = '';
+
+    $query = "SELECT selite, selitetark
+              FROM avainsana
+              WHERE laji = 'TRY'
+                AND (selitetark_2 IS NULL OR selitetark_2 = '' OR selitetark_2 = '$osasto')
+              ORDER BY selite";
+    $result = pupe_query($query);
+    $results = array();
+
+    while ($row = mysql_fetch_assoc($result)) {
+      $row['selitetark'] = utf8_encode($row['selitetark']);
+      $results[] = $row;
+    }
+
+    $out = array_values($results);
+    echo json_encode($out);
+
+    exit;
+  }
+
+  ?>
+  <script>
+
+  $(function() {
+    $('#osasto').on('change', function(e) {
+      var osasto = $('#osasto :selected').val()
+
+      $.ajax({
+        async: false,
+        type: 'POST',
+        url: "yllapito.php",
+        data: {
+          no_head: 'yes',
+          ohje: 'off',
+          toim: "tuote",
+          osasto: osasto,
+          ajax_toiminto: 'hae_tuote_ryhmat'
+        }
+      }).done(function(json) {
+        var ryhma = $('#try')
+        var valinta = ryhma.val();
+
+        ryhma.empty()
+        ryhma.append('<option value=\'\'><?php echo t("Ei valintaa<"); ?>/option>');
+
+        var data = jQuery.parseJSON(json);
+
+        $.each(data, function (index, item) {
+          var isselected = '';
+          if (item.selite == valinta) {
+            isselected = ' selected';
+          }
+
+          ryhma.append('<option value=' + item.selite + isselected + '>' + item.selite + ' ' + item.selitetark + '</option>');
+        });
+
+        ryhma.value = valinta;
+      });
+    });
+  });
+
+  </script>
+  <?php
+}
+
+if (strpos($_SERVER['SCRIPT_NAME'], "yllapito.php")  !== FALSE) {
   echo "<script src='yllapito.js'></script>";
 }
 
-// Rails infraan siirretyt ylläpitonäkymät, eli $pupenext_yllapitonakymat, määritellään parametrit.inc:tiedostossa.
+// Rails infraan siirretyt yllï¿½pitonï¿½kymï¿½t, eli $pupenext_yllapitonakymat, mï¿½ï¿½ritellï¿½ï¿½n parametrit.inc:tiedostossa.
 if (array_key_exists($toim, $pupenext_yllapitonakymat)) {
 
   $psx_url = $pupenext_yllapitonakymat[$toim];
@@ -30,7 +101,7 @@ if (array_key_exists($toim, $pupenext_yllapitonakymat)) {
   echo "<br />";
 
   echo "<a href='{$psx_url}'>";
-  echo t("%s ylläpito on siirtynyt uuteen ympäristöön", '', $toim);
+  echo t("%s yllï¿½pito on siirtynyt uuteen ympï¿½ristï¿½ï¿½n", '', $toim);
   echo " &raquo;</a>";
 
   echo "<br />";
@@ -53,7 +124,7 @@ if (isset($livesearch_tee) and $livesearch_tee == "TUOTERYHMAHAKU") {
   exit;
 }
 
-//Jotta määritelty rajattu näkymä olisi myös käyttöoikeudellisesti tiukka
+//Jotta mï¿½ï¿½ritelty rajattu nï¿½kymï¿½ olisi myï¿½s kï¿½yttï¿½oikeudellisesti tiukka
 $aputoim = $toim;
 $toimi_array = explode('!!!', $toim);
 $a_lisa = "";
@@ -66,7 +137,7 @@ if ($toim == "toimi" or $toim == "asiakas" or $toim == "tuote" or $toim == "avai
   enable_ajax();
 }
 
-// Tuotteita voidaan rajata status -kentällä
+// Tuotteita voidaan rajata status -kentï¿½llï¿½
 $tuote_status_rajaus_lisa = "";
 $tuote_status_lisa = "";
 
@@ -106,7 +177,7 @@ if (!isset($lukossa))             $lukossa = "";
 if (!isset($lukitse_laji))        $lukitse_laji = "";
 if (!isset($mista))               $mista = "";
 
-// Tutkitaan vähän alias_settejä ja rajattua näkymää
+// Tutkitaan vï¿½hï¿½n alias_settejï¿½ ja rajattua nï¿½kymï¿½ï¿½
 $al_lisa = " and selitetark_2 = 'Default' and nakyvyys != '' ";
 $al_lisa_defaultit = " and selitetark_2 = 'Default'";
 
@@ -123,7 +194,7 @@ if ($alias_set != '') {
 
 $al_lisa_defaultit .= $tunnus == '' ? " and (nakyvyys != '' or selitetark_4 != '') " : " and nakyvyys != '' ";
 
-// pikkuhäkki, ettei rikota css kenttää
+// pikkuhï¿½kki, ettei rikota css kenttï¿½ï¿½
 if (isset($_POST["toim"]) and $_POST["toim"] == "yhtion_parametrit") {
   if (isset($apucss)) {
     $t[$cssi] = mysql_real_escape_string($apucss);
@@ -157,7 +228,7 @@ if ($otsikko_lisatiedot != "") {
   echo $otsikko_lisatiedot;
 }
 
-// Kun tehdään päivityksiä omasta ikkunasta
+// Kun tehdï¿½ï¿½n pï¿½ivityksiï¿½ omasta ikkunasta
 js_open_yllapito();
 
 if ($from == "yllapito") {
@@ -205,18 +276,18 @@ if ($from == "yllapito") {
 // Saako paivittaa
 if ($oikeurow['paivitys'] != '1') {
   if ($uusi == 1) {
-    echo "<b>".t("Sinulla ei ole oikeutta lisätä tätä tietoa")."</b><br>";
+    echo "<b>".t("Sinulla ei ole oikeutta lisï¿½tï¿½ tï¿½tï¿½ tietoa")."</b><br>";
     $uusi = '';
     exit;
   }
   if ($del == 1 or $del == 2) {
-    echo "<b>".t("Sinulla ei ole oikeutta poistaa tätä tietoa")."</b><br>";
+    echo "<b>".t("Sinulla ei ole oikeutta poistaa tï¿½tï¿½ tietoa")."</b><br>";
     $del = '';
     $tunnus = 0;
     exit;
   }
   if ($upd == 1) {
-    echo "<b>".t("Sinulla ei ole oikeutta muuttaa tätä tietoa")."</b><br>";
+    echo "<b>".t("Sinulla ei ole oikeutta muuttaa tï¿½tï¿½ tietoa")."</b><br>";
     $upd = '';
     $uusi = 0;
     $tunnus = 0;
@@ -237,7 +308,7 @@ if ($del == 1) {
             WHERE tunnus='$tunnus'";
   $result = pupe_query($query);
 
-  // Jos poistamme ifamesta tietoja niin päivitetään varsinaisen tietueen muutospvm, jotta verkkokauppasiirto huomaa, että tietoja on muutettu
+  // Jos poistamme ifamesta tietoja niin pï¿½ivitetï¿½ï¿½n varsinaisen tietueen muutospvm, jotta verkkokauppasiirto huomaa, ettï¿½ tietoja on muutettu
   if ($lukitse_avaimeen != "") {
     if ($toim == "tuotteen_avainsanat" or $toim == "tuotteen_toimittajat") {
       $query = "UPDATE tuote
@@ -282,7 +353,7 @@ if ($del == 2) {
   }
 }
 
-// Jotain päivitetään tietokontaan
+// Jotain pï¿½ivitetï¿½ï¿½n tietokontaan
 if ($upd == 1) {
 
   // Luodaan puskuri, jotta saadaan taulukot kuntoon
@@ -292,7 +363,7 @@ if ($upd == 1) {
   $result = pupe_query($query);
   $trow = mysql_fetch_array($result);
 
-  //  Tehdään muuttujista linkit jolla luomme otsikolliset avaimet!
+  //  Tehdï¿½ï¿½n muuttujista linkit jolla luomme otsikolliset avaimet!
   for ($i=1; $i < mysql_num_fields($result)-1; $i++) {
     if (isset($t["{$i}_uusi"]) and $t["{$i}_uusi"] != "") {
       $t[$i] = $t["{$i}_uusi"];
@@ -306,19 +377,19 @@ if ($upd == 1) {
 
   for ($i=1; $i < mysql_num_fields($result); $i++) {
 
-    //Päivämäärä spesiaali
+    //Pï¿½ivï¿½mï¿½ï¿½rï¿½ spesiaali
     if (isset($tpp[$i])) {
       if ($tvv[$i] < 1000 and $tvv[$i] > 0) $tvv[$i] += 2000;
 
       $t[$i] = sprintf('%04d', $tvv[$i])."-".sprintf('%02d', $tkk[$i])."-".sprintf('%02d', $tpp[$i]);
 
       if (!@checkdate($tkk[$i], $tpp[$i], $tvv[$i]) and ($tkk[$i]!= 0 or $tpp[$i] != 0)) {
-        $virhe[$i] = t("Virheellinen päivämäärä");
+        $virhe[$i] = t("Virheellinen pï¿½ivï¿½mï¿½ï¿½rï¿½");
         $errori = 1;
       }
     }
 
-    // Tarkistetaan saako käyttäjä päivittää tätä kenttää
+    // Tarkistetaan saako kï¿½yttï¿½jï¿½ pï¿½ivittï¿½ï¿½ tï¿½tï¿½ kenttï¿½ï¿½
     $al_nimi = mysql_field_name($result, $i);
 
     $query = "SELECT *
@@ -331,7 +402,7 @@ if ($upd == 1) {
     $pakollisuuden_tarkistus_rivi = mysql_fetch_assoc($al_res);
 
     if (mysql_num_rows($al_res) == 0 and $rajattu_nakyma != '' and isset($t[$i])) {
-      $virhe[$i] = t("Sinulla ei ole oikeutta päivittää tätä kenttää");
+      $virhe[$i] = t("Sinulla ei ole oikeutta pï¿½ivittï¿½ï¿½ tï¿½tï¿½ kenttï¿½ï¿½");
       $errori = 1;
     }
 
@@ -380,7 +451,7 @@ if ($upd == 1) {
     $errori = "";
   }
   elseif ($errori != '' and isset($yllapitonappi)) {
-    echo "<font class='error'>".t("Jossain oli jokin virhe! Ei voitu paivittää!")."</font>";
+    echo "<font class='error'>".t("Jossain oli jokin virhe! Ei voitu paivittï¿½ï¿½!")."</font>";
   }
 
   // Luodaan tietue
@@ -390,14 +461,14 @@ if ($upd == 1) {
 
     if ($onko_tama_insert) {
 
-      // Taulun ensimmäinen kenttä on aina yhtiö
+      // Taulun ensimmï¿½inen kenttï¿½ on aina yhtiï¿½
       $query = "INSERT into $toim SET yhtio='$kukarow[yhtio]', laatija='$kukarow[kuka]', luontiaika=now(), muuttaja='$kukarow[kuka]', muutospvm=now() ";
 
       if ($toim == 'tuotteen_toimittajat' and isset($paivita_tehdas_saldo_paivitetty) and is_array($paivita_tehdas_saldo_paivitetty) and count($paivita_tehdas_saldo_paivitetty) == 2) $query .= ", tehdas_saldo_paivitetty = now() ";
 
       for ($i=1; $i < mysql_num_fields($result); $i++) {
 
-        // Tuleeko tämä columni käyttöliittymästä
+        // Tuleeko tï¿½mï¿½ columni kï¿½yttï¿½liittymï¿½stï¿½
         if (isset($t[$i])) {
 
           if ($toim == 'tuotteen_toimittajat' and mysql_field_name($result, $i) == 'tehdas_saldo_paivitetty') continue;
@@ -422,7 +493,7 @@ if ($upd == 1) {
           }
         }
         else {
-          // columni ei tullut käyttöliittymästä, katsotaan onko meillä sille silti joku oletusarvo aliaksissa
+          // columni ei tullut kï¿½yttï¿½liittymï¿½stï¿½, katsotaan onko meillï¿½ sille silti joku oletusarvo aliaksissa
           $al_nimi = mysql_field_name($result, $i);
 
           $oletus_tarkistus_query = "SELECT *
@@ -442,7 +513,7 @@ if ($upd == 1) {
         }
       }
     }
-    // Päivitetään
+    // Pï¿½ivitetï¿½ï¿½n
     else {
 
       //  Jos poistettiin jokin liite, poistetaan se nyt
@@ -458,7 +529,7 @@ if ($upd == 1) {
         }
       }
 
-      // Taulun ensimmäinen kenttä on aina yhtiö
+      // Taulun ensimmï¿½inen kenttï¿½ on aina yhtiï¿½
       $query = "UPDATE $toim SET muuttaja='$kukarow[kuka]', muutospvm=now() ";
 
       if ($toim == 'tuotteen_toimittajat' and isset($paivita_tehdas_saldo_paivitetty) and is_array($paivita_tehdas_saldo_paivitetty) and count($paivita_tehdas_saldo_paivitetty) == 2) $query .= ", tehdas_saldo_paivitetty = now() ";
@@ -626,19 +697,19 @@ if ($upd == 1) {
 
           $paivita_sisviesti1 = "";
 
-          // Päivitetäänkö sisviesti1?
+          // Pï¿½ivitetï¿½ï¿½nkï¿½ sisviesti1?
           if ($trow["sisviesti1"] != "" and $otsikrow["sisviesti1"] != $trow["sisviesti1"] and strpos($laskuorow["sisviesti1"], $trow["sisviesti1"]) !== FALSE) {
             $paivita_sisviesti1 = ", sisviesti1 = replace(sisviesti1, '{$trow["sisviesti1"]}', '{$otsikrow["sisviesti1"]}') ";
 
           }
-          // Lisätään uusi sisviesti1, jos sitä ei vielä ole laskulla
+          // Lisï¿½tï¿½ï¿½n uusi sisviesti1, jos sitï¿½ ei vielï¿½ ole laskulla
           elseif (strpos($laskuorow["sisviesti1"], $otsikrow["sisviesti1"]) === FALSE) {
             $paivita_sisviesti1 = ", sisviesti1 = trim(concat(sisviesti1,' ', '{$otsikrow["sisviesti1"]}')) ";
           }
 
           $paivita_myos_lisa = "";
 
-          // Ei päivitetää toimitettujen ja rahtikirjasyötettyjen myyntitilausten toimitustapoja
+          // Ei pï¿½ivitetï¿½ï¿½ toimitettujen ja rahtikirjasyï¿½tettyjen myyntitilausten toimitustapoja
           if ($paivita_myos_toimitustapa != "" and $laskuorow["tila"] != 'L' or ($laskuorow["tila"] == 'L' and ($laskuorow["alatila"] == 'A' or $laskuorow["alatila"] == 'C'))) {
             $paivita_myos_lisa .= ", toimitustapa = '$otsikrow[toimitustapa]' ";
           }
@@ -740,11 +811,11 @@ if ($upd == 1) {
           $upda_yhtioalv_tilino  = $otsikrow["alv"];
 
           if ($laskuorow["maa"] != "" and $laskuorow["maa"] != $otsikrow["maa"]) {
-            // tutkitaan ollaanko siellä alv-rekisteröity
+            // tutkitaan ollaanko siellï¿½ alv-rekisterï¿½ity
             $alhqur = "SELECT vat_numero from yhtion_toimipaikat where yhtio='$kukarow[yhtio]' and maa='$laskuorow[maa]' and vat_numero != ''";
             $alhire = pupe_query($alhqur);
 
-            // ollaan alv-rekisteröity, aina kotimaa myynti ja alvillista
+            // ollaan alv-rekisterï¿½ity, aina kotimaa myynti ja alvillista
             if (mysql_num_rows($alhire) == 1) {
               $alhiro = mysql_fetch_assoc($alhire);
 
@@ -839,7 +910,7 @@ if ($upd == 1) {
 
           $komm = "";
 
-          // Jos lasku on hyväksytty ja muutetaan hyvöksyntään liittyviä tietoja
+          // Jos lasku on hyvï¿½ksytty ja muutetaan hyvï¿½ksyntï¿½ï¿½n liittyviï¿½ tietoja
           if ($laskuorow["hyvak1"] != "" and $laskuorow["hyvak1"] != "verkkolas" and $laskuorow["h1time"] != "0000-00-00 00:00:00" and (
               ($oletus_erapvm > 0 and $laskuorow["erpcm"] != $oletus_erapvm) or
               ($oletus_erapvm > 0 and $laskuorow["kapvm"] != $oletus_kapvm) or
@@ -857,7 +928,7 @@ if ($upd == 1) {
               ($laskuorow["sisviesti1"] != $otsikrow["ohjeitapankille"]))) {
 
             //echo "<br><table>";
-            //echo "<tr><td>Lasku palautetaan hyväksyntään</td><td>$laskuorow[summa]</td></tr>";
+            //echo "<tr><td>Lasku palautetaan hyvï¿½ksyntï¿½ï¿½n</td><td>$laskuorow[summa]</td></tr>";
             //echo "<tr><td>".$laskuorow["erpcm"]."</td><td>".$oletus_erapvm."</td></tr>";
             //echo "<tr><td>".$laskuorow["kapvm"]."</td><td>".$oletus_kapvm."</td></tr>";
             //echo "<tr><td>".$laskuorow["kasumma"]."</td><td>".$otsikrow["oletus_kasumma"]."</td></tr>";
@@ -890,7 +961,7 @@ if ($upd == 1) {
 
             $laskuorow["hyvaksyja_nyt"] = $otsikrow["oletus_hyvak1"];
 
-            $komm = "(" . $kukarow['nimi'] . "@" . date('Y-m-d') .") ".t("Lasku palautettiin hyväksyntään koska toimittajan tietojen päivitys muutti laskun tietoja.")."<br>";
+            $komm = "(" . $kukarow['nimi'] . "@" . date('Y-m-d') .") ".t("Lasku palautettiin hyvï¿½ksyntï¿½ï¿½n koska toimittajan tietojen pï¿½ivitys muutti laskun tietoja.")."<br>";
           }
 
           // Matkalasku
@@ -954,7 +1025,7 @@ if ($upd == 1) {
       }
     }
 
-    // Jos päivitämme ifamesta tietoja niin päivitetään varsinaisen tietueen muutospvm, jotta verkkokauppasiirto huomaa, että tietoja on muutettu
+    // Jos pï¿½ivitï¿½mme ifamesta tietoja niin pï¿½ivitetï¿½ï¿½n varsinaisen tietueen muutospvm, jotta verkkokauppasiirto huomaa, ettï¿½ tietoja on muutettu
     if (isset($lukitse_avaimeen) and $lukitse_avaimeen != "") {
       if ($toim == "tuotteen_avainsanat" or $toim == "tuotteen_toimittajat") {
         $query = "UPDATE tuote
@@ -972,11 +1043,11 @@ if ($upd == 1) {
       }
     }
 
-    //  Tämä funktio tekee myös oikeustarkistukset!
+    //  Tï¿½mï¿½ funktio tekee myï¿½s oikeustarkistukset!
     synkronoi($kukarow["yhtio"], $toim, $tunnus, $trow, "");
 
     if ($lopetus != '' and (isset($yllapitonappi) or isset($paivita_myos_avoimet_tilaukset))) {
-      //unohdetaan tämä jos loopatan takaisin yllapito.php:seen, eli silloin metasta ei ole mitään hyötyä
+      //unohdetaan tï¿½mï¿½ jos loopatan takaisin yllapito.php:seen, eli silloin metasta ei ole mitï¿½ï¿½n hyï¿½tyï¿½
       if (strpos($lopetus, "yllapito.php") === FALSE) {
         $lopetus .= "//yllapidossa=$toim//yllapidontunnus=$tunnus";
         lopetus($lopetus, "META");
@@ -993,7 +1064,7 @@ if ($upd == 1) {
 }
 
 if ($errori != '' and $_POST["toim"] == "yhtion_parametrit") {
-  // jos tuli virhe, niin laitetaan takaisin css:t ilman mysql_real_escape_stringiä
+  // jos tuli virhe, niin laitetaan takaisin css:t ilman mysql_real_escape_stringiï¿½
   if (isset($apucss)) {
     $t[$cssi] = $apucss;
   }
@@ -1332,12 +1403,12 @@ for ($i=0; $i<=$count; $i++) {
   }
 }
 
-//  Säilytetään ohjeen tila
+//  Sï¿½ilytetï¿½ï¿½n ohjeen tila
 if ($from != "") {
   $ulisa .= "&ohje=off&from=$from&lukitse_avaimeen=".urlencode($lukitse_avaimeen)."&lukitse_laji=$lukitse_laji";
 }
 
-//  Pidetään oletukset tallessa!
+//  Pidetï¿½ï¿½n oletukset tallessa!
 if (is_array($oletus)) {
   foreach ($oletus as $o => $a) {
     $ulisa.="&oletus[$o]=$a";
@@ -1406,7 +1477,7 @@ if ($tunnus == 0 and $uusi == 0 and $errori == '') {
     $edosuu = 'desc';
   }
 
-  // Ei näytetä seuraavia avainsanoja avainsana-ylläpitolistauksessa
+  // Ei nï¿½ytetï¿½ seuraavia avainsanoja avainsana-yllï¿½pitolistauksessa
   $avainsana_query_lisa = $toim == "avainsana" ? " AND laji NOT IN ('MYSQLALIAS', 'HALYRAP', 'SQLDBQUERY', 'KKOSTOT') " : "";
 
   $query = "SELECT {$kentat}
@@ -1452,7 +1523,7 @@ if ($tunnus == 0 and $uusi == 0 and $errori == '') {
         <input type = 'hidden' name = 'nayta_poistetut' value = '$nayta_poistetut'>
         <input type = 'hidden' name = 'nayta_eraantyneet' value = '$nayta_eraantyneet'>
         <input type = 'hidden' name = 'laji' value = '$laji'>
-        <input type = 'submit' value = '".t("Näytä kaikki")."'>";
+        <input type = 'submit' value = '".t("Nï¿½ytï¿½ kaikki")."'>";
 
     if ($toim == "asiakas" and $yhtiorow['toimipaikkakasittely'] == 'L') {
       for ($i = 1; $i < mysql_num_fields($result); $i++) {
@@ -1475,7 +1546,7 @@ if ($tunnus == 0 and $uusi == 0 and $errori == '') {
         <input type = 'hidden' name = 'nayta_poistetut' value = 'YES'>
         <input type = 'hidden' name = 'nayta_eraantyneet' value = '$nayta_eraantyneet'>
         <input type = 'hidden' name = 'laji' value = '$laji'>
-        <input type = 'submit' value = '".t("Näytä poistetut")."'></form>";
+        <input type = 'submit' value = '".t("Nï¿½ytï¿½ poistetut")."'></form>";
   }
 
   if ($toim == "asiakasalennus" or $toim == "asiakashinta" or $toim == "hinnasto") {
@@ -1486,7 +1557,7 @@ if ($tunnus == 0 and $uusi == 0 and $errori == '') {
         <input type = 'hidden' name = 'limit' value = 'NO'>
         <input type = 'hidden' name = 'nayta_eraantyneet' value = 'YES'>
         <input type = 'hidden' name = 'laji' value = '$laji'>
-        <input type = 'submit' value = '".t("Näytä erääntyneet")."'></form>";
+        <input type = 'submit' value = '".t("Nï¿½ytï¿½ erï¿½ï¿½ntyneet")."'></form>";
   }
 
   if (!in_array($yhtiorow['livetuotehaku_hakutapa'], array('F', 'G')) and $toim == "tuote" and $uusi != 1 and $errori == '' and isset($tmp_tuote_tunnus) and $tmp_tuote_tunnus > 0) {
@@ -1594,7 +1665,7 @@ if ($tunnus == 0 and $uusi == 0 and $errori == '') {
 
             echo "<option value=''></option>";
             echo "<option value='@E'{$sel['@E']}>", t("Ei"), "</option>";
-            echo "<option value='@K'{$sel['@K']}>", t("Kyllä"), "</option>";
+            echo "<option value='@K'{$sel['@K']}>", t("Kyllï¿½"), "</option>";
           }
 
           echo "</select>";
@@ -1686,7 +1757,7 @@ if ($tunnus == 0 and $uusi == 0 and $errori == '') {
           }
         }
         elseif (strpos(strtoupper($array[$i]), "SELECT") === FALSE or ($toim == 'puun_alkio' and strpos(strtoupper($array[$i]), "SELECT") == TRUE)) {
-          // jos meidän kenttä ei ole subselect niin tehdään hakukenttä
+          // jos meidï¿½n kenttï¿½ ei ole subselect niin tehdï¿½ï¿½n hakukenttï¿½
           if (!isset($haku[$i])) $haku[$i] = "";
 
           echo "<br><input type='text' name='haku[$i]' value='$haku[$i]' size='$size' maxlength='" . mysql_field_len($result, $i) ."'>";
@@ -1738,13 +1809,13 @@ if ($tunnus == 0 and $uusi == 0 and $errori == '') {
     for ($i=1; $i < mysql_num_fields($result); $i++) {
       if (strpos(strtoupper(mysql_field_name($result, $i)), "HIDDEN") === FALSE) {
 
-        // Ei näytetä henkilötunnuksen loppuosaa selausnäkymässä
+        // Ei nï¿½ytetï¿½ henkilï¿½tunnuksen loppuosaa selausnï¿½kymï¿½ssï¿½
         if (stripos(mysql_field_name($result, $i), "ytunnus") !== FALSE) {
           $trow[$i] = tarkistahetu($trow[$i]);
         }
 
         if ($i == 1) {
-          if (trim($trow[1]) == '' or (is_float($trow[1]) and $trow[1] == 0)) $trow[1] = t("*tyhjä*");
+          if (trim($trow[1]) == '' or (is_float($trow[1]) and $trow[1] == 0)) $trow[1] = t("*tyhjï¿½*");
 
           echo "<td><a name='$trow[0]' href='yllapito.php?mista=$mista&ojarj=$ojarj$ulisa&toim=$aputoim&tunnus=$trow[0]&limit=$limit&nayta_poistetut=$nayta_poistetut&nayta_eraantyneet=$nayta_eraantyneet&laji=$laji{$tuote_status_lisa}";
 
@@ -1763,7 +1834,7 @@ if ($tunnus == 0 and $uusi == 0 and $errori == '') {
           if (mysql_field_name($result, $i) == 'liitedata') {
 
             if ($lukitse_laji == "tuote" and $lukitse_avaimeen > 0 and in_array($trow[1], array("image/jpeg", "image/jpg", "image/gif", "image/png", "image/bmp"))) {
-              echo "<img src='".$palvelin2."view.php?id=$trow[0]' height='80px'><br>".t("Muokkaa liitettä");
+              echo "<img src='".$palvelin2."view.php?id=$trow[0]' height='80px'><br>".t("Muokkaa liitettï¿½");
             }
             else {
               list($liitedata1, $liitedata2) = explode("/", $trow[1]);
@@ -1772,13 +1843,13 @@ if ($tunnus == 0 and $uusi == 0 and $errori == '') {
               $ext = $path_parts['extension'];
 
               if (file_exists("pics/tiedostotyyppiikonit/".strtoupper($liitedata2).".ico")) {
-                echo "<img src='".$palvelin2."pics/tiedostotyyppiikonit/".strtoupper($liitedata2).".ico' height='80px'><br>".t("Muokkaa liitettä");
+                echo "<img src='".$palvelin2."pics/tiedostotyyppiikonit/".strtoupper($liitedata2).".ico' height='80px'><br>".t("Muokkaa liitettï¿½");
               }
               elseif (file_exists("pics/tiedostotyyppiikonit/".strtoupper($ext).".ico")) {
-                echo "<img src='".$palvelin2."pics/tiedostotyyppiikonit/".strtoupper($ext).".ico' height='80px'><br>".t("Muokkaa liitettä");
+                echo "<img src='".$palvelin2."pics/tiedostotyyppiikonit/".strtoupper($ext).".ico' height='80px'><br>".t("Muokkaa liitettï¿½");
               }
               else {
-                echo $trow[1]."<br>".t("Muokkaa liitettä");
+                echo $trow[1]."<br>".t("Muokkaa liitettï¿½");
               }
             }
           }
@@ -1842,10 +1913,10 @@ if ($tunnus == 0 and $uusi == 0 and $errori == '') {
   echo "</table>";
 }
 
-// Nyt näytetään vanha tai tehdään uusi(=tyhjä)
+// Nyt nï¿½ytetï¿½ï¿½n vanha tai tehdï¿½ï¿½n uusi(=tyhjï¿½)
 if ($tunnus > 0 or $uusi != 0 or $errori != '') {
   if ($oikeurow['paivitys'] != 1) {
-    echo "<b>".t("Sinulla ei ole oikeuksia päivittää tätä tietoa")."</b><br>";
+    echo "<b>".t("Sinulla ei ole oikeuksia pï¿½ivittï¿½ï¿½ tï¿½tï¿½ tietoa")."</b><br>";
   }
 
   if ($from == "") {
@@ -1858,7 +1929,7 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
   if ($toim == "lasku" or $toim == "laskun_lisatiedot") {
     echo "<SCRIPT LANGUAGE=JAVASCRIPT>
           function verify(){
-            msg = '".t("Oletko varma, että haluat muuttaa kirjanpitoaineiston tietoja jälkikäteen")."?';
+            msg = '".t("Oletko varma, ettï¿½ haluat muuttaa kirjanpitoaineiston tietoja jï¿½lkikï¿½teen")."?';
 
             if (confirm(msg)) {
               return true;
@@ -1892,7 +1963,7 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
     echo "<input type = 'hidden' name = 'status' value = '$status'>";
   }
 
-  // Kokeillaan geneeristä
+  // Kokeillaan geneeristï¿½
   $query = "SELECT *
             FROM $toim
             WHERE tunnus = '$tunnus'";
@@ -1950,7 +2021,7 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
 
   for ($i=0; $i < mysql_num_fields($result) - 1; $i++) {
 
-    // Intrastat_kurssi kenttä näytetään vain jos yrityksen maa on EE
+    // Intrastat_kurssi kenttï¿½ nï¿½ytetï¿½ï¿½n vain jos yrityksen maa on EE
     if ($yhtiorow['maa'] != 'EE' and mysql_field_name($result, $i) == 'intrastat_kurssi') {
       continue;
     }
@@ -1980,7 +2051,7 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
       $size = '10';
     }
 
-    $maxsize = mysql_field_len($result, $i); // Jotta tätä voidaan muuttaa
+    $maxsize = mysql_field_len($result, $i); // Jotta tï¿½tï¿½ voidaan muuttaa
 
     //Haetaan tietokantasarakkeen nimialias
     $al_nimi   = mysql_field_name($result, $i);
@@ -2004,7 +2075,7 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
         $otsikko = t(mysql_field_name($result, $i));
       }
 
-      // jos ollaan tekemässä uutta tietuetta ja meillä on mysql-aliaksista oletusarvo
+      // jos ollaan tekemï¿½ssï¿½ uutta tietuetta ja meillï¿½ on mysql-aliaksista oletusarvo
       if ($tunnus == "" and $trow[$i] == "" and $al_row["selitetark_4"] != "") {
         $trow[$i] = $al_row["selitetark_4"];
       }
@@ -2012,10 +2083,10 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
     else {
       switch (mysql_field_name($result, $i)) {
       case "printteri0":
-        $otsikko = t("Keräyslista");
+        $otsikko = t("Kerï¿½yslista");
         break;
       case "printteri1":
-        $otsikko = t("Lähete");
+        $otsikko = t("Lï¿½hete");
         break;
       case "printteri2":
         $otsikko = t("Tuotetarrat");
@@ -2042,10 +2113,10 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
         $otsikko = t("Reklamaatioiden ja siirtolistojen vastaanoton purkulista");
         break;
       case "printteri10":
-        $otsikko = t("Lämpösiirto");
+        $otsikko = t("Lï¿½mpï¿½siirto");
         break;
       case "isa_varasto":
-        $otsikko = t("Isävarasto");
+        $otsikko = t("Isï¿½varasto");
         break;
       default:
         if (isset($mysqlaliasarraysetti) and isset($mysqlaliasarray[$mysqlaliasarraysetti][mysql_field_name($result, $i)])) {
@@ -2064,7 +2135,7 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
       $tyyppi = 0;
     }
 
-    // Näitä kenttiä ei ikinä saa päivittää käyttöliittymästä
+    // Nï¿½itï¿½ kenttiï¿½ ei ikinï¿½ saa pï¿½ivittï¿½ï¿½ kï¿½yttï¿½liittymï¿½stï¿½
     if (mysql_field_name($result, $i) == "laatija" or
       mysql_field_name($result, $i) == "muutospvm" or
       mysql_field_name($result, $i) == "muuttaja" or
@@ -2072,12 +2143,12 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
       $tyyppi = 2;
     }
 
-    // $tyyppi --> 0 riviä ei näytetä ollenkaan
-    // $tyyppi --> 1 rivi näytetään normaalisti
-    // $tyyppi --> 1.5 rivi näytetään normaalisti ja se on päivämääräkenttä
-    // $tyyppi --> 2 rivi näytetään, mutta sitä ei voida muokata, eikä sen arvoa pävitetä (riviä ei näytetä kun tehdään uusi)
-    // $tyyppi --> 3 rivi näytetään, mutta sitä ei voida muokata, mutta sen arvo päivitetään (riviä ei näytetä kun tehdään uusi)
-    // $tyyppi --> 4 riviä ei näytetä ollenkaan, mutta sen arvo päivitetään
+    // $tyyppi --> 0 riviï¿½ ei nï¿½ytetï¿½ ollenkaan
+    // $tyyppi --> 1 rivi nï¿½ytetï¿½ï¿½n normaalisti
+    // $tyyppi --> 1.5 rivi nï¿½ytetï¿½ï¿½n normaalisti ja se on pï¿½ivï¿½mï¿½ï¿½rï¿½kenttï¿½
+    // $tyyppi --> 2 rivi nï¿½ytetï¿½ï¿½n, mutta sitï¿½ ei voida muokata, eikï¿½ sen arvoa pï¿½vitetï¿½ (riviï¿½ ei nï¿½ytetï¿½ kun tehdï¿½ï¿½n uusi)
+    // $tyyppi --> 3 rivi nï¿½ytetï¿½ï¿½n, mutta sitï¿½ ei voida muokata, mutta sen arvo pï¿½ivitetï¿½ï¿½n (riviï¿½ ei nï¿½ytetï¿½ kun tehdï¿½ï¿½n uusi)
+    // $tyyppi --> 4 riviï¿½ ei nï¿½ytetï¿½ ollenkaan, mutta sen arvo pï¿½ivitetï¿½ï¿½n
     // $tyyppi --> 5 liitetiedosto
 
     if ($tyyppi == 1 or
@@ -2089,12 +2160,12 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
 
       $infolinkki = "";
 
-      // Jos riviltä löytyy selitetark_5 niin piirretään otsikon perään tooltip-kysymysmerkki
+      // Jos riviltï¿½ lï¿½ytyy selitetark_5 niin piirretï¿½ï¿½n otsikon perï¿½ï¿½n tooltip-kysymysmerkki
       if (!empty($al_row) and $al_row['selitetark_5'] != '') {
         $siistiselite = str_replace('.', '_', $al_row['selite']);
         $infolinkki = "<div style='float: right;'><a class='tooltip' id='{$al_row['tunnus']}_{$siistiselite}'><img src='{$palvelin2}pics/lullacons/info.png'></a></div>";
 
-        // Tehdään helppi-popup
+        // Tehdï¿½ï¿½n helppi-popup
         echo "<div id='div_{$al_row['tunnus']}_{$siistiselite}' class='popup'>{$al_row['selitetark']}<br><br>{$al_row['selitetark_5']}</div>";
       }
       echo "<th align='left'>$otsikko $infolinkki</th>";
@@ -2129,7 +2200,7 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
       echo "<td>";
 
       if ($trow[$i] > 0) {
-        echo "<a href='view.php?id=".$trow[$i]."' target='Attachment'>".t("Näytä liitetiedosto")."</a><input type = 'hidden' name = '$nimi' value = '$trow[$i]'> ".("Poista").": <input type = 'checkbox' name = 'poista_liite[$i]' value = '$trow[$i]'>";
+        echo "<a href='view.php?id=".$trow[$i]."' target='Attachment'>".t("Nï¿½ytï¿½ liitetiedosto")."</a><input type = 'hidden' name = '$nimi' value = '$trow[$i]'> ".("Poista").": <input type = 'checkbox' name = 'poista_liite[$i]' value = '$trow[$i]'>";
       }
       else {
         echo "<input type = 'text' name = '$nimi' value = '$trow[$i]'>";
@@ -2156,22 +2227,22 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
     $nimi = t("Perusta $otsikko_nappi");
   }
   else {
-    $nimi = t("Päivitä $otsikko_nappi");
+    $nimi = t("Pï¿½ivitï¿½ $otsikko_nappi");
   }
 
   echo "<br><input type = 'submit' name='yllapitonappi' value = '$nimi'>";
 
   if (($toim == "asiakas" or $toim == "yhtio") and $uusi != 1) {
-    echo "<br><br><input type = 'submit' name='paivita_myos_avoimet_tilaukset' value = '$nimi ".t("ja päivitä tiedot myös avoimille tilauksille")."'>";
+    echo "<br><br><input type = 'submit' name='paivita_myos_avoimet_tilaukset' value = '$nimi ".t("ja pï¿½ivitï¿½ tiedot myï¿½s avoimille tilauksille")."'>";
 
     if ($toim == "asiakas") {
-      echo "<br><input type = 'checkbox' name='paivita_myos_toimitustapa' value = 'OK'> ".t("Päivitä myös toimitustapa avoimille tilauksille");
-      echo "<br><input type = 'checkbox' name='paivita_myos_maksuehto' value = 'OK'> ".t("Päivitä myös maksuehto avoimille tilauksille");
-      echo "<br><input type = 'checkbox' name='paivita_myos_kanavointitieto' value = 'OK'> ".t("Päivitä vain verkkolaskutunnus ja kanavointitieto avoimille tilauksille");
+      echo "<br><input type = 'checkbox' name='paivita_myos_toimitustapa' value = 'OK'> ".t("Pï¿½ivitï¿½ myï¿½s toimitustapa avoimille tilauksille");
+      echo "<br><input type = 'checkbox' name='paivita_myos_maksuehto' value = 'OK'> ".t("Pï¿½ivitï¿½ myï¿½s maksuehto avoimille tilauksille");
+      echo "<br><input type = 'checkbox' name='paivita_myos_kanavointitieto' value = 'OK'> ".t("Pï¿½ivitï¿½ vain verkkolaskutunnus ja kanavointitieto avoimille tilauksille");
     }
   }
   if ($toim == "toimi" and $uusi != 1) {
-    echo "<br><input type = 'submit' name='paivita_myos_avoimet_tilaukset' value = '$nimi ".t("ja päivitä tiedot myös avoimille laskuille")."'>";
+    echo "<br><input type = 'submit' name='paivita_myos_avoimet_tilaukset' value = '$nimi ".t("ja pï¿½ivitï¿½ tiedot myï¿½s avoimille laskuille")."'>";
   }
 
   if ($lukossa == "ON") {
@@ -2186,7 +2257,7 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
     @include "inc/arviokortti.inc";
   }
 
-  // Ylläpito.php:n formi kiinni vasta tässä
+  // Yllï¿½pito.php:n formi kiinni vasta tï¿½ssï¿½
   echo "</form>";
 
   $lopetus_muut  = $palvelin2;
@@ -2360,9 +2431,9 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
 
     if (mysql_num_rows($extkukares) > 0) {
 
-      echo "<br><font class='head'>".t("Extranet-käyttäjät")."</font><hr>";
+      echo "<br><font class='head'>".t("Extranet-kï¿½yttï¿½jï¿½t")."</font><hr>";
       echo "<table>";
-      echo "<tr><th>".t("Käyttäjätunnus")."</th><th>".t("Nimi")."</th></tr>";
+      echo "<tr><th>".t("Kï¿½yttï¿½jï¿½tunnus")."</th><th>".t("Nimi")."</th></tr>";
 
       while ($extkukarow = mysql_fetch_assoc($extkukares)) {
         echo "<tr><td>{$extkukarow["kuka"]}</td><td>{$extkukarow["nimi"]}</td></tr>";
@@ -2374,7 +2445,7 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
 
   echo "</td></tr>";
 
-  // Määritellään mitä tietueita saa poistaa
+  // Mï¿½ï¿½ritellï¿½ï¿½n mitï¿½ tietueita saa poistaa
   if ($toim == "auto_vari" or
     $toim == "auto_vari_tuote" or
     $toim == "auto_vari_korvaavat" or
@@ -2419,11 +2490,11 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
     ($toim == "tuote" and $poistolukko == "") or
     ($toim == "toimi" and $kukarow["taso"] == "3")) {
 
-    // Tehdään "poista tietue"-nappi
+    // Tehdï¿½ï¿½n "poista tietue"-nappi
     if ($uusi != 1 and $toim != "yhtio" and $toim != "yhtion_parametrit") {
       echo "<SCRIPT LANGUAGE=JAVASCRIPT>
             function verify(){
-              msg = '".t("Haluatko todella poistaa tämän tietueen?")."';
+              msg = '".t("Haluatko todella poistaa tï¿½mï¿½n tietueen?")."';
 
               if (confirm(msg)) {
                 return true;

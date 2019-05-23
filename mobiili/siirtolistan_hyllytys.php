@@ -65,7 +65,7 @@ if (isset($submit)) {
   switch ($submit) {
     case 'ok':
       // Vahvista keräyspaikka
-      echo "<META HTTP-EQUIV='Refresh'CONTENT='1;URL=vahvista_kerayspaikka.php?siirtolista&".http_build_query($url_array)."{$url}&saapuminen={$saapuminen}&alusta_tunnus={$row['suuntalava']}&liitostunnus={$row['liitostunnus']}'>";
+      echo "<META HTTP-EQUIV='Refresh'CONTENT='1;URL=vahvista_kerayspaikka.php?siirtolista&{$url}&maara={$maara}&saapuminen={$saapuminen}&alusta_tunnus={$row['suuntalava']}&liitostunnus={$row['liitostunnus']}'>";
       exit();
       break;
 
@@ -81,7 +81,7 @@ if (isset($submit)) {
 }
 
 $url_prelisa = $riveja < 2 ? "siirtolista.php" : "siirtolistalla_useita_tuotteita.php";
-$url_lisa = $siirtolista ? "siirtolista={$siirtolista}" : "";
+$url_lisa = $siirtolista ? "siirtolista={$siirtolista}&movingback" : "";
 $url_lisa .= ($viivakoodi != "" and $riveja > 1) ? "&viivakoodi={$viivakoodi}" : "";
 
 // vastaanottavan varaston tiedot
@@ -105,13 +105,13 @@ echo "<div class='main'>
 <input type='hidden' name='siirtolista' value='{$siirtolista}' />
 <table>
     <tr>
-        <th>", t("Varattu määrä"), "</th>
+        <th width=\"40%\">", t("Varattu määrä"), "</th>
         <td>{$row['varattu']}</td>
         <td>({$row['ulkkpl']})</td>
     </tr>
     <tr>
         <th>", t("Hyllytetty määrä"), "</th>
-        <td><input id='numero' class='numero' type='text' id='maara' name='maara' value='{$row['varattu']}' onchange='update_label()'></td>
+        <td><input class='numero' type='text' id='maara' name='maara' value='{$row['varattu']}' onchange='update_label()'></td>
         <td> </td>
     </tr>
     <tr>
@@ -149,7 +149,13 @@ if (array_sum($counts) > 1) {
         echo "<th>&nbsp;</th>";
       }
 
-      echo "<td>" . $tp['hyllyalue'], '-', $tp['hyllynro'], '-', $tp['hyllyvali'], '-', $tp['hyllytaso'] . "</td>";
+      $paikka = $tp['hyllyalue'] . '-' . $tp['hyllynro'] . '-' . $tp['hyllyvali'] . '-' . $tp['hyllytaso'];
+      if ($row['kerayspaikka'] == $paikka) {
+        echo "<td>{$paikka}</td>";
+      } else {
+        echo "<td>({$paikka})</td>";
+      }
+
       echo "<td>&nbsp;</td>";
       echo "</tr>";
     }
@@ -166,7 +172,13 @@ if (array_sum($counts) > 1) {
         echo "<td>&nbsp;</td>";
       }
 
-      echo "<td>" . $tp['hyllyalue'], '-', $tp['hyllynro'], '-', $tp['hyllyvali'], '-', $tp['hyllytaso'] . "</td>";
+      $paikka = $tp['hyllyalue'] . '-' . $tp['hyllynro'] . '-' . $tp['hyllyvali'] . '-' . $tp['hyllytaso'];
+      if ($row['kerayspaikka'] == $paikka) {
+        echo "<td>{$paikka}</td>";
+      } else {
+        echo "<td>({$paikka})</td>";
+      }
+
       echo "<td>&nbsp;</td>";
       echo "</tr>";
     }
@@ -211,7 +223,7 @@ $url = "siirtolista&varasto={$clearing}&viivakoodi={$viivakoodi}&alusta_tunnus=&
 // Napit
 echo "<div class='controls'>";
 echo "<button type='submit' class='button left' onclick=\"f1.action='vahvista_kerayspaikka.php?{$url}'\">", t("OK"), "</button>";
-echo "<button name='submit' class='button right' id='submit' value='kerayspaikka' onclick='submit();' disabled>", t("UUSI KERÄYSPAIKKA"), "</button>";
+echo "<button name='submit' class='button right' id='submit' value='kerayspaikka' onclick='submit();'>", t("UUSI KERÄYSPAIKKA"), "</button>";
 
 echo "</div>";
 echo "</form>";

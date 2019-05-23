@@ -12,7 +12,6 @@ elseif (@include_once "inc/parametrit.inc");
 if (!isset($alusta_tunnus, $liitostunnus, $tilausrivi)) exit;
 
 if (!isset($saapumisnro_haku)) $saapumisnro_haku = '';
-if (!isset($kerayspaikka)) $kerayspaikka = '';
 if (!isset($clearing)) $clearing = '';
 
 $alusta_tunnus = (int) $alusta_tunnus;
@@ -83,6 +82,7 @@ if (!isset($row)) {
 }
 // Jos parametrina hylly, eli ollaan muutettu tuotteen keräyspaikkaa
 if (isset($hylly) and ($hylly != "")) {
+  error_log(" HYLLY = " . $hylly . "<br>");
   $hyllypaikat = explode(",", $hylly);
   if (count($hyllypaikat) != 4) {
     $hyllypaikat = explode("-", $hylly);
@@ -171,6 +171,7 @@ if (isset($submit_button) and trim($submit_button) != '') {
         $t2[$tilausrivi] = $row['hyllynro'];
         $t3[$tilausrivi] = $row['hyllyvali'];
         $t4[$tilausrivi] = $row['hyllytaso'];
+        $vastaanotettu_maara[$tilausrivi] = $maara;
 
         if (isset($kerailypaikka) and $kerailypaikka != "") {
           $paikat = explode("-", $kerailypaikka);
@@ -542,7 +543,7 @@ echo "
   <input type='hidden' name='viivakoodi' value='{$viivakoodi}' />
   <input type='hidden' name='tuotenumero' value='{$tuotenumero}' />
   <input type='hidden' name='varasto' value='{$clearing}' />
-  <input type='hidden' name='kerayspaikka' value='{$kerayspaikka}' />
+  <input type='hidden' name='hylly' value='{$hylly}' />
   <input type='hidden' name='maara' value='{$maara}' />
 </form>
 ";

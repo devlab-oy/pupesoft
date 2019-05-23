@@ -418,13 +418,11 @@ if (isset($submit) and trim($submit) != '') {
       }
 
       // Palataan edelliselle sivulle
-      if (isset($hyllytys)) {
-        echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=hyllytys.php?{$url}'>"; exit();
-      }
-      elseif (isset($siirtolista)) {
+      if (isset($siirtolista)) {
         echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=siirtolistan_hyllytys.php?siirtolista={$ostotilaus}&tilausrivi={$tilausrivi}'>"; exit();
-      }
-      elseif (isset($tullaan) and $tullaan == 'tuotteen_hyllypaikan_muutos') {
+      } elseif (isset($hyllytys)) {
+        echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=hyllytys.php?{$url}'>"; exit();
+      } elseif (isset($tullaan) and $tullaan == 'tuotteen_hyllypaikan_muutos') {
         $minne_hyllypaikka = trim("{$hyllyalue} {$hyllynro} {$hyllyvali} {$hyllytaso}");
         echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=tuotteen_hyllypaikan_muutos.php?minne_hyllypaikka={$minne_hyllypaikka}&{$url}'>"; exit();
       }

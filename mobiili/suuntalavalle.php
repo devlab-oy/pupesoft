@@ -31,7 +31,7 @@ $tilausrivi = mysql_fetch_assoc($result);
 
 $alkuperainen_saapuminen = $saapuminen;
 
-// Kï¿½sitellï¿½ï¿½n eri saapumista
+// Käsitellään eri saapumista
 if (!empty($tilausrivi['uusiotunnus'])) {
   $saapuminen = $tilausrivi['uusiotunnus'];
 }
@@ -40,7 +40,7 @@ if (empty($tullaan)) $tullaan = '';
 
 $sscchaku = !empty($sscc) ? "and suuntalavat.sscc = '".mysql_escape_string($sscc)."'" : "";
 
-// Etsitï¿½ï¿½n sopivat suuntalavat
+// Etsitään sopivat suuntalavat
 $query = "(SELECT DISTINCT suuntalavat.tunnus, suuntalavat.sscc, suuntalavat.tila, suuntalavat.kaytettavyys, suuntalavat.keraysvyohyke, suuntalavat.tyyppi
            FROM suuntalavat
            JOIN suuntalavat_saapuminen ON (suuntalavat_saapuminen.yhtio = suuntalavat.yhtio AND suuntalavat_saapuminen.suuntalava = suuntalavat.tunnus AND suuntalavat_saapuminen.saapuminen = '{$saapuminen}')
@@ -87,11 +87,11 @@ if (isset($submit) and $tullaan != 'pre_vahvista_kerayspaikka') {
     $result   = pupe_query($query);
     $laskurow = mysql_fetch_array($result);
 
-    require "../inc/keikan_toiminnot.inc"; // Tï¿½ï¿½ koittaa heti hakea uudelleen $laskurown ja nollaa siis edellisen haun??!?
+    require "../inc/keikan_toiminnot.inc"; // Tää koittaa heti hakea uudelleen $laskurown ja nollaa siis edellisen haun??!?
 
-    // Tarkistetaan mï¿½ï¿½rï¿½ ja splittaillaan jos tarvetta
+    // Tarkistetaan määrä ja splittaillaan jos tarvetta
     if ($hyllytetty < $tilausrivi['varattu']) {
-      // Pï¿½ivitetï¿½ï¿½n alkuperï¿½isen rivin kpl
+      // Päivitetään alkuperäisen rivin kpl
       $ok = paivita_tilausrivin_kpl($tilausrivi['tunnus'], ($tilausrivi['varattu'] - $hyllytetty));
       $uusi_tilausrivi = splittaa_tilausrivi($tilausrivi['tunnus'], $hyllytetty, TRUE, FALSE);
 
@@ -113,9 +113,9 @@ if (isset($submit) and $tullaan != 'pre_vahvista_kerayspaikka') {
     if ($submit == 'siirtovalmis' or $submit == 'suoraan_hyllyyn') {
       echo "Suuntalava $suuntalava siirtovalmiiksi<br>";
 
-      // Suuntalavan kï¿½sittelytapa (Suoraan (H)yllyyn)
+      // Suuntalavan käsittelytapa (Suoraan (H)yllyyn)
       if ($submit == 'suoraan_hyllyyn') {
-        echo "Kï¿½sittelytapa suoraan hyllyyn";
+        echo "Käsittelytapa suoraan hyllyyn";
         $query = "UPDATE suuntalavat SET kasittelytapa='H' WHERE tunnus='{$suuntalava}'";
         $result = pupe_query($query);
       }
@@ -196,8 +196,8 @@ echo "<div class='main'>
     <tr>
         <th></th>
         <th>", t("SSCC"), "</th>
-        <th>", t("Ker.vyï¿½hyk."), "</th>
-        <th>", t("Rivejï¿½"), "</th>
+        <th>", t("Ker.vyöhyk."), "</th>
+        <th>", t("Rivejä"), "</th>
         <th>", t("Tyyppi"), "</th>
     </tr>";
 
@@ -234,7 +234,7 @@ while ($row = mysql_fetch_assoc($suuntalavat_res)) {
     </tr>";
 }
 
-if (!$loytyiko) $errors[] = t("Suuntalavaa ei lï¿½ytynyt");
+if (!$loytyiko) $errors[] = t("Suuntalavaa ei löytynyt");
 
 echo "</table></div>";
 echo "<div class='controls'>
@@ -256,7 +256,7 @@ echo "<script type='text/javascript'>
 
   $(document).ready(function() {
     $('#sscc').on('keyup', function() {
-      // Autosubmit vain jos on syï¿½tetty tarpeeksi pitkï¿½ viivakoodi
+      // Autosubmit vain jos on syötetty tarpeeksi pitkä viivakoodi
       if ($('#sscc').val().length > 6) {
         document.getElementById('hakunappi').click();
       }

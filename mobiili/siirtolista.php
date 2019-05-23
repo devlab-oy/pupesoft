@@ -16,7 +16,7 @@ if (isset($uusi) and !isset($virhe)) {
   $nollaus_query = "UPDATE kuka SET kesken = 0 WHERE yhtio = '{$kukarow['yhtio']}' AND kuka = '{$kukarow['kuka']}'";
   $result = pupe_query($nollaus_query);
 }
-// Katsotaan onko kï¿½yttï¿½jï¿½lle keskenerï¿½istï¿½ siirtolistaa
+// Katsotaan onko käyttäjälle keskeneräistä siirtolistaa
 elseif (!isset($virhe) and !isset($movingback)) {
   $query = "SELECT kesken
             FROM kuka
@@ -27,9 +27,9 @@ elseif (!isset($virhe) and !isset($movingback)) {
   $kesken_row = mysql_fetch_assoc($result);
   $kesken = 0;
 
-  // Jos kï¿½yttï¿½jï¿½llï¿½ ei ole keskenerï¿½istï¿½ siirtolistaa, haetaan kï¿½yttï¿½jï¿½n viimeisimmï¿½ksi luotu siirtolista ja jatketaan sitï¿½
+  // Jos käyttäjällä ei ole keskeneräistä siirtolistaa, haetaan käyttäjän viimeisimmäksi luotu siirtolista ja jatketaan sitä
   if ($kesken_row['kesken'] == 0) {
-    // Haetaan kï¿½yttï¿½jï¿½n uusin siirtolistan tunnus ja setataan se kesken kolumniin
+    // Haetaan käyttäjän uusin siirtolistan tunnus ja setataan se kesken kolumniin
     $query = "SELECT *
               FROM lasku
               WHERE yhtio = '{$kukarow['yhtio']}'
@@ -58,9 +58,9 @@ elseif (!isset($virhe) and !isset($movingback)) {
   }
 }
 
-// Jos haulla ei lï¿½ytyny mitï¿½ï¿½n, ollaan palattu tï¿½lle sivulle virheparametrilla.
+// Jos haulla ei löytyny mitään, ollaan palattu tälle sivulle virheparametrilla.
 if (isset($virhe)) {
-  $errors[] = t("Ei lï¿½ytynyt. Hae uudestaan.");
+  $errors[] = t("Ei löytynyt. Hae uudestaan.");
 }
 
 if (isset($submit)) {
@@ -69,13 +69,13 @@ if (isset($submit)) {
       $_empty_data = empty($data['viivakoodi']);
       $_empty_data = ($_empty_data and empty($data['siirtolista']));
 
-      // Haettu vï¿½hintï¿½ï¿½n yhdellï¿½ kentï¿½llï¿½
+      // Haettu vähintään yhdellä kentällä
       if ($_empty_data) {
-        $errors[] = t("Vï¿½hintï¿½ï¿½n yksi kenttï¿½ on syï¿½tettï¿½vï¿½");
+        $errors[] = t("Vähintään yksi kenttä on syötettävä");
         break;
       }
 
-      // Rakennetaan parametrit kentistï¿½
+      // Rakennetaan parametrit kentistä
       $url = http_build_query($data);
 
       echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=siirtolistalla_useita_tuotteita.php?{$url}'>"; exit();
@@ -86,7 +86,7 @@ if (isset($submit)) {
       break;
 
     default:
-      $errors[] = t("Yllï¿½ttï¿½vï¿½ virhe");
+      $errors[] = t("Yllättävä virhe");
       break;
   }
 }
@@ -135,7 +135,7 @@ echo "<script type='text/javascript'>
 
   $(document).ready(function() {
     $('#viivakoodi').on('keyup', function() {
-      // Autosubmit vain jos on syï¿½tetty tarpeeksi pitkï¿½ viivakoodi
+      // Autosubmit vain jos on syötetty tarpeeksi pitkä viivakoodi
       if (is_mobile && $('#viivakoodi').val().length > 8) {
         document.getElementById('haku_nappi').click();
       }

@@ -49,12 +49,12 @@ $result = pupe_query($query);
 $row = mysql_fetch_assoc($result);
 
 if (!$row) {
-  exit("Virhe, riviï¿½ ei lï¿½ydy");
+  exit("Virhe, riviä ei löydy");
 }
 
 $clearing = $row['clearing'];
 
-// Pï¿½ivitetï¿½ï¿½n kuka.kesken
+// Päivitetään kuka.kesken
 $update_kuka = "UPDATE kuka SET kesken = {$siirtolista} WHERE yhtio = '{$kukarow['yhtio']}' AND kuka = '{$kukarow['kuka']}'";
 $updated = pupe_query($update_kuka);
 
@@ -64,7 +64,7 @@ if (isset($submit)) {
 
   switch ($submit) {
     case 'ok':
-      // Vahvista kerï¿½yspaikka
+      // Vahvista keräyspaikka
       echo "<META HTTP-EQUIV='Refresh'CONTENT='1;URL=vahvista_kerayspaikka.php?siirtolista&".http_build_query($url_array)."{$url}&saapuminen={$saapuminen}&alusta_tunnus={$row['suuntalava']}&liitostunnus={$row['liitostunnus']}'>";
       exit();
       break;
@@ -105,12 +105,12 @@ echo "<div class='main'>
 <input type='hidden' name='siirtolista' value='{$siirtolista}' />
 <table>
     <tr>
-        <th>", t("Varattu mï¿½ï¿½rï¿½"), "</th>
+        <th>", t("Varattu määrä"), "</th>
         <td>{$row['varattu']}</td>
         <td>({$row['ulkkpl']})</td>
     </tr>
     <tr>
-        <th>", t("Hyllytetty mï¿½ï¿½rï¿½"), "</th>
+        <th>", t("Hyllytetty määrä"), "</th>
         <td><input id='numero' class='numero' type='text' id='maara' name='maara' value='{$row['varattu']}' onchange='update_label()'></td>
         <td> </td>
     </tr>
@@ -191,7 +191,7 @@ if (array_sum($counts) > 1) {
 } else {
   echo "
     <tr>
-    <th>", t("Kerï¿½yspaikka"), "</th>
+    <th>", t("Keräyspaikka"), "</th>
     <td>{$row['kerayspaikka']}</td>
     <td>&nbsp;</td>
     </tr>";
@@ -199,7 +199,7 @@ if (array_sum($counts) > 1) {
 
 echo "
     <tr>
-      <th>".t("Vaihda Kerï¿½yspaikka")."</th>
+      <th>".t("Vaihda Keräyspaikka")."</th>
       <td colspan='2'><input type='text' id='hylly' name='hylly' value='' size='11' /></td>
     </tr> 
 
@@ -211,7 +211,7 @@ $url = "siirtolista&varasto={$clearing}&viivakoodi={$viivakoodi}&alusta_tunnus=&
 // Napit
 echo "<div class='controls'>";
 echo "<button type='submit' class='button left' onclick=\"f1.action='vahvista_kerayspaikka.php?{$url}'\">", t("OK"), "</button>";
-echo "<button name='submit' class='button right' id='submit' value='kerayspaikka' onclick='submit();' disabled>", t("UUSI KERï¿½YSPAIKKA"), "</button>";
+echo "<button name='submit' class='button right' id='submit' value='kerayspaikka' onclick='submit();' disabled>", t("UUSI KERÄYSPAIKKA"), "</button>";
 
 echo "</div>";
 echo "</form>";

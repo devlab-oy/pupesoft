@@ -21,13 +21,13 @@ $params = array();
 
 // Joku parametri tarvii olla setattu.
 if ($siirtolista == '' and $viivakoodi == '') {
-  // Tï¿½nne ei pitï¿½is pï¿½ï¿½tyï¿½, tarkistetaan jo siirtolista.php:ssï¿½
+  // Tänne ei pitäis päätyä, tarkistetaan jo siirtolista.php:ssä
   echo t("Parametrivirhe");
   echo "<META HTTP-EQUIV='Refresh'CONTENT='2;URL=siirtolista.php'>";
   exit();
 }
 
-// Tarkistetaan onko kï¿½yttï¿½jï¿½llï¿½ kesken saapumista
+// Tarkistetaan onko käyttäjällä kesken saapumista
 $keskeneraiset_query = "SELECT kuka.kesken FROM lasku
                         JOIN kuka ON (lasku.tunnus = kuka.kesken AND lasku.yhtio = kuka.yhtio)
                         WHERE kuka = '{$kukarow['kuka']}'
@@ -35,7 +35,7 @@ $keskeneraiset_query = "SELECT kuka.kesken FROM lasku
                           AND lasku.tila = 'Q'";
 $keskeneraiset = mysql_fetch_assoc(pupe_query($keskeneraiset_query));
 
-// Jos kuka.kesken on saapuminen, kï¿½ytetï¿½ï¿½n sitï¿½
+// Jos kuka.kesken on saapuminen, käytetään sitä
 if ($keskeneraiset['kesken'] != 0) {
   $saapuminen = $keskeneraiset['kesken'];
 }
@@ -145,7 +145,7 @@ if ($riveja == 0 and $tuoteviivakoodi == "") {
   exit();
 }
 
-// Jos vain yksi osuma, mennï¿½ï¿½n suoraan hyllytykseen;
+// Jos vain yksi osuma, mennään suoraan hyllytykseen;
 if ($riveja == 1) {
   mysql_data_seek($result, 0);
   $row = mysql_fetch_assoc($result);
@@ -176,7 +176,7 @@ if ($riveja == 1) {
 }
 
 if (isset($virhe)) {
-  $errors[] = t("Siirtolistaa ei lÃ¶ytynyt").".<br>";
+  $errors[] = t("Siirtolistaa ei löytynyt").".<br>";
 }
 
 // Result alkuun
@@ -250,7 +250,7 @@ while ($row = mysql_fetch_assoc($result)) {
 }
 
 echo "</table></div>";
-echo "RivejÃ¤: " . mysql_num_rows($result);
+echo "Rivejä: " . mysql_num_rows($result);
 
 echo "<div class='controls'>
 <button type='submit' name='submit' value='ok' onsubmit='false'>", t("OK"), "</button>
@@ -272,7 +272,7 @@ echo "<script type='text/javascript'>
 
   $(document).ready(function() {
     $('#viivakoodi').on('keyup', function() {
-      // Autosubmit vain jos on syï¿½tetty tarpeeksi pitkï¿½ viivakoodi
+      // Autosubmit vain jos on syötetty tarpeeksi pitkä viivakoodi
       if (is_mobile && $('#viivakoodi').val().length > 8) {
         document.getElementById('valitse_nappi').click();
       }

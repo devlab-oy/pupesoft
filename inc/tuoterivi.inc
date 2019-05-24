@@ -194,7 +194,12 @@ if ($laji != "V" and
     or mysql_field_name($result, $i) == "mallitarkenne"
     or mysql_field_name($result, $i) == "valmistuslinja")) {
 
-  $sresult = t_avainsana(mysql_field_name($result, $i));
+  if (mysql_field_name($result, $i) == "try" && $trow['osasto'] != 0) {
+    $sresult = t_avainsana(mysql_field_name($result, $i), "", " AND (selite = '{$trow['osasto']}' OR selitetark_2 IS NULL OR selitetark_2 = '' OR selitetark_2 = '{$trow['osasto']}')");
+  } else {
+    $sresult = t_avainsana(mysql_field_name($result, $i));
+  }
+
   $sarnimi = mysql_field_name($result, $i);
 
   // jos avainsanoja on perustettu tehd‰‰n dropdown

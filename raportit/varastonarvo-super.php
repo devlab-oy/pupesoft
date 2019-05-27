@@ -104,6 +104,7 @@ if (!isset($kiertoviilasku))         $kiertoviilasku = "";
 if (!isset($huomioi_varastosiirrot)) $huomioi_varastosiirrot = "";
 if (!isset($saldo_myytavissa))       $saldo_myytavissa = '';
 if (!isset($nayta_ostohinta))        $nayta_ostohinta = '';
+if (!isset($nayta_muut))             $nayta_muut = '';
 if (!isset($status))                 $status = '';
 
 // setataan
@@ -350,6 +351,14 @@ if (!$php_cli) {
   echo "<input type='checkbox' name='nayta_ostohinta' {$chk}/>";
   echo "</td></tr>";
 
+  echo "<tr><th>", t("N‰yt‰ tuotemerkki, aleryhm‰, tuotep‰‰ll., myyntihinta ja toim.tuoteno"), ":</th>";
+  echo "<td>";
+
+  $chk = !empty($nayta_muut) ? 'checked' : '';
+
+  echo "<input type='checkbox' name='nayta_muut' {$chk}/>";
+  echo "</td></tr>";
+
 
   $chk = !empty($huomioi_varastosiirrot) ? "checked" : "";
 
@@ -590,6 +599,13 @@ if (isset($supertee) and $supertee == "RAPORTOI") {
     $varastolisa1 = " 'varastot' varastonnimi, 0 varastotunnus, ";
   }
 
+  if ($nayta_muut) {
+    $tuote_lisa2 = "tuote.aleryhma, tuote.tuotepaallikko, tuote.myyntihinta, ";
+  }
+  else {
+    $tuote_lisa2 = "";
+  }
+  
   if (!$php_cli) {
     force_echo("Haetaan k‰sitelt‰vien tuotteiden varastopaikat historiasta.");
   }
@@ -601,6 +617,7 @@ if (isset($supertee) and $supertee == "RAPORTOI") {
     // haetaan kaikki distinct tapahtumat
     $query = "(SELECT DISTINCT
                $varastolisa1
+               $tuote_lisa2
                tapahtuma.tuoteno,
                tapahtuma.yhtio,
                tuote.try,
@@ -641,6 +658,7 @@ if (isset($supertee) and $supertee == "RAPORTOI") {
   // haetaan kaikki distinct tuotepaikat
   $query .= "  (SELECT DISTINCT
         $varastolisa1
+        $tuote_lisa2
         tuotepaikat.tuoteno,
         tuotepaikat.yhtio,
         tuote.try,
@@ -789,14 +807,24 @@ if (isset($supertee) and $supertee == "RAPORTOI") {
   }
 
   if ($tallennusmuoto_check) {
-    $worksheet->writeString($excelrivi, $excelsarake, t("Osasto"),         $format_bold);
+    $worksheet->writeString($excelrivi, $excelsarake, t("Osasto"),        $format_bold);
     $excelsarake++;
-    $worksheet->writeString($excelrivi, $excelsarake, t("Tuoteryhm‰"),       $format_bold);
+    $worksheet->writeString($excelrivi, $excelsarake, t("Tuoteryhm‰"),    $format_bold);
     $excelsarake++;
     $worksheet->writeString($excelrivi, $excelsarake, t("Tuoteno"),       $format_bold);
     $excelsarake++;
     $worksheet->writeString($excelrivi, $excelsarake, t("Nimitys"),       $format_bold);
     $excelsarake++;
+    if ($nayta_muut) {
+      $worksheet->writeString($excelrivi, $excelsarake, t("Tuotemerkki"),   $format_bold);
+      $excelsarake++;
+      $worksheet->writeString($excelrivi, $excelsarake, t("Aleryhm‰"),   $format_bold);
+      $excelsarake++;
+      $worksheet->writeString($excelrivi, $excelsarake, t("Tuotep‰‰llikkˆ"),   $format_bold);
+      $excelsarake++;
+      $worksheet->writeString($excelrivi, $excelsarake, t("Toim.tuoteno"),   $format_bold);
+      $excelsarake++;
+    }
     $worksheet->writeString($excelrivi, $excelsarake, t("Yksikko"),       $format_bold);
     $excelsarake++;
   }
@@ -805,6 +833,12 @@ if (isset($supertee) and $supertee == "RAPORTOI") {
     fwrite($fh, pupesoft_csvstring(t("Tuoteryhm‰"))."\t");
     fwrite($fh, pupesoft_csvstring(t("Tuoteno"))."\t");
     fwrite($fh, pupesoft_csvstring(t("Nimitys"))."\t");
+    if ($nayta_muut) {
+      fwrite($fh, pupesoft_csvstring(t("Tuotemerkki"))."\t");
+      fwrite($fh, pupesoft_csvstring(t("Aleryhm‰"))."\t");
+      fwrite($fh, pupesoft_csvstring(t("Tuotep‰‰llikkˆ"))."\t");
+      fwrite($fh, pupesoft_csvstring(t("Toim.tuoteno"))."\t");
+    }
     fwrite($fh, pupesoft_csvstring(t("Yksikko"))."\t");
   }
 
@@ -857,6 +891,11 @@ if (isset($supertee) and $supertee == "RAPORTOI") {
       $excelsarake++;
     }
 
+    if ($nayta_muut) {
+      $worksheet->writeString($excelrivi, $excelsarake, t("Myyntihinta"), $format_bold);
+      $excelsarake++;
+    }
+    
     $worksheet->writeString($excelrivi, $excelsarake, t("Varastonarvo"), $format_bold);
     $excelsarake++;
   }
@@ -867,6 +906,10 @@ if (isset($supertee) and $supertee == "RAPORTOI") {
       fwrite($fh, pupesoft_csvstring(t("Ostohinta"))."\t");
     }
 
+    if ($nayta_muut) {
+      fwrite($fh, pupesoft_csvstring(t("Myyntihinta"))."\t");
+    }
+    
     fwrite($fh, pupesoft_csvstring(t("Varastonarvo"))."\t");
   }
 
@@ -1400,16 +1443,6 @@ if (isset($supertee) and $supertee == "RAPORTOI") {
         }
       }
 
-      if (isset($sel_tuotemerkki) and $sel_tuotemerkki != '') {
-        if ($tallennusmuoto_check) {
-          $worksheet->writeString($excelrivi, $excelsarake, $row["tuotemerkki"]);
-          $excelsarake++;
-        }
-        else {
-          fwrite($fh, pupesoft_csvstring($row["tuotemerkki"])."\t");
-        }
-      }
-
       if ($tallennusmuoto_check) {
         $worksheet->writeString($excelrivi, $excelsarake, $row["osasto"]);
         $excelsarake++;
@@ -1442,17 +1475,52 @@ if (isset($supertee) and $supertee == "RAPORTOI") {
         }
       }
 
+      if ($nayta_ostohinta or $nayta_muut) {
+        $query = "SELECT ostohinta, toim_tuoteno, IF(jarjestys = 0, 9999, jarjestys) sorttaus
+                  FROM tuotteen_toimittajat
+                  WHERE yhtio = '{$kukarow['yhtio']}'
+                  AND tuoteno = '{$row['tuoteno']}'
+                  ORDER BY sorttaus";
+        $ttres = pupe_query($query);
+        $ttrow = mysql_fetch_assoc($ttres);
+      }
+      
+      if ($nayta_muut) {
+        $query = "SELECT nimi
+                  FROM kuka
+                  WHERE yhtio = '{$kukarow['yhtio']}'
+                  AND myyja = '{$row['tuotepaallikko']}'";
+        $kkres = pupe_query($query);
+        $kkrow = mysql_fetch_assoc($kkres);
+      }
+
       $tuotesarake = $excelsarake;
 
       if ($tallennusmuoto_check) {
         $excelsarake++;
         $worksheet->writeString($excelrivi, $excelsarake, t_tuotteen_avainsanat($row, 'nimitys'));
         $excelsarake++;
+        if ($nayta_muut) {
+          $worksheet->writeString($excelrivi, $excelsarake, $row["tuotemerkki"]);
+          $excelsarake++;
+          $worksheet->writeString($excelrivi, $excelsarake, $row["aleryhma"]);
+          $excelsarake++;
+          $worksheet->writeString($excelrivi, $excelsarake, $kkrow["nimi"]);
+          $excelsarake++;
+          $worksheet->writeString($excelrivi, $excelsarake, $ttrow["toim_tuoteno"]);
+          $excelsarake++;
+        }
         $worksheet->writeString($excelrivi, $excelsarake, $row["yksikko"]);
         $excelsarake++;
       }
       else {
         fwrite($fh, pupesoft_csvstring(t_tuotteen_avainsanat($row, 'nimitys'))."\t");
+        if ($nayta_muut) {
+          fwrite($fh, pupesoft_csvstring($row["tuotemerkki"])."\t");
+          fwrite($fh, pupesoft_csvstring($row["aleryhma"])."\t");
+          fwrite($fh, pupesoft_csvstring($kkrow["nimi"])."\t");
+          fwrite($fh, pupesoft_csvstring($ttrow["toim_tuoteno"])."\t");
+        }
         fwrite($fh, pupesoft_csvstring($row["yksikko"])."\t");
       }
 
@@ -1514,16 +1582,6 @@ if (isset($supertee) and $supertee == "RAPORTOI") {
         }
       }
 
-      if ($nayta_ostohinta) {
-        $query = "SELECT ostohinta, IF(jarjestys = 0, 9999, jarjestys) sorttaus
-                  FROM tuotteen_toimittajat
-                  WHERE yhtio = '{$kukarow['yhtio']}'
-                  AND tuoteno = '{$row['tuoteno']}'
-                  ORDER BY sorttaus";
-        $ttres = pupe_query($query);
-        $ttrow = mysql_fetch_assoc($ttres);
-      }
-
       if ($tallennusmuoto_check) {
         $worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.06f", $kehasilloin));
         $excelsarake++;
@@ -1533,6 +1591,11 @@ if (isset($supertee) and $supertee == "RAPORTOI") {
           $excelsarake++;
         }
 
+        if ($nayta_muut) {
+          $worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.06f", $row['myyntihinta']));
+          $excelsarake++;
+        }
+        
         $worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.06f", $muutoshinta));
         $excelsarake++;
       }
@@ -1543,6 +1606,10 @@ if (isset($supertee) and $supertee == "RAPORTOI") {
           fwrite($fh, pupesoft_csvstring(sprintf("%.06f", $ttrow['ostohinta']))."\t");
         }
 
+        if ($nayta_muut) {
+          fwrite($fh, pupesoft_csvstring(sprintf("%.06f", $ttrow['myyntihinta']))."\t");
+        }
+        
         fwrite($fh, pupesoft_csvstring(sprintf("%.06f", $muutoshinta))."\t");
       }
 

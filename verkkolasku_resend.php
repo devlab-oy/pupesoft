@@ -405,7 +405,12 @@ if ($handle = opendir($kansio)) {
     // Logitetaan ajo
     cron_log("{$pupe_root_polku}/dataout/$lasku");
 
-    $ftphost = "213.214.148.38";
+    if (isset($visma_ppg_host)) {
+      $ftphost = $visma_ppg_host;
+    }
+    else {
+      $ftphost = "213.214.148.38";
+    }
     $ftpuser = $yhtiorow['verkkotunnus_lah'];
     $ftppass = $yhtiorow['verkkosala_lah'];
     //$ftppath = "test/invoice/finvoice/";

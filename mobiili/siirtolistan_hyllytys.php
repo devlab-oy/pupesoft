@@ -12,7 +12,7 @@ if (!isset($errors)) $errors = array();
 if (!isset($siirtolista)) $siirtolista = '';
 if (!isset($tilausrivi)) $tilausrivi = '';
 if (!isset($tilausrivi)) $tilausrivi = '';
-if (!isset($kerayspaikka)) $kerayspaikka = '';
+if (!isset($hylly)) $hylly = '';
 
 if (empty($siirtolista)) {
   exit("Virheelliset parametrit");
@@ -38,10 +38,6 @@ $query = "SELECT
           LEFT JOIN tilausrivin_lisatiedot
             ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
               AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus)
-          JOIN tuotepaikat
-            ON (tuotepaikat.yhtio = lasku.yhtio
-              AND tuotepaikat.tuoteno                     = tilausrivi.tuoteno
-              AND tuotepaikat.oletus                      = 'X')
           WHERE tilausrivi.tunnus                         = '{$tilausrivi}'
           AND tilausrivi.yhtio                            = '{$kukarow['yhtio']}'
           AND lasku.tunnus                                = '{$siirtolista}'";
@@ -53,6 +49,8 @@ if (!$row) {
 }
 
 $clearing = $row['clearing'];
+if (!isset($maara)) $maara = $row['varattu'];
+if (!isset($hylly) or $hylly == "") $hylly = $row['kerayspaikka'];
 
 // P‰ivitet‰‰n kuka.kesken
 $update_kuka = "UPDATE kuka SET kesken = {$siirtolista} WHERE yhtio = '{$kukarow['yhtio']}' AND kuka = '{$kukarow['kuka']}'";
@@ -60,18 +58,18 @@ $updated = pupe_query($update_kuka);
 
 // Kontrolleri
 if (isset($submit)) {
-  $url = "&kerayspaikka={$kerayspaikka}&varasto={$clearing}&viivakoodi={$viivakoodi}&tilausten_lukumaara={$riveja}&saapumisnro_haku={$saapumisnro_haku}&manuaalisesti_syotetty_ostotilausnro={$manuaalisesti_syotetty_ostotilausnro}&ennaltakohdistettu={$ennaltakohdistettu}&tuotenumero=".urlencode($tuotenumero);
+  $url = "&kerayspaikka={$hylly}&varasto={$clearing}&viivakoodi={$viivakoodi}&tilausten_lukumaara={$riveja}&saapumisnro_haku={$saapumisnro_haku}&manuaalisesti_syotetty_ostotilausnro={$manuaalisesti_syotetty_ostotilausnro}&ennaltakohdistettu={$ennaltakohdistettu}&tuotenumero=".urlencode($tuotenumero);
 
   switch ($submit) {
     case 'ok':
       // Vahvista ker‰yspaikka
-      echo "<META HTTP-EQUIV='Refresh'CONTENT='1;URL=vahvista_kerayspaikka.php?siirtolista&{$url}&maara={$maara}&saapuminen={$saapuminen}&alusta_tunnus={$row['suuntalava']}&liitostunnus={$row['liitostunnus']}'>";
+      echo "<META HTTP-EQUIV='Refresh'CONTENT='1;URL=vahvista_kerayspaikka.php?siirtolista{$url}&maara={$maara}&saapuminen={$saapuminen}&alusta_tunnus={$row['suuntalava']}&liitostunnus={$row['liitostunnus']}'>";
       exit();
       break;
 
     case 'kerayspaikka':
       // Parametrit $alusta_tunnus, $liitostunnus, $tilausrivi
-      echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=uusi_kerayspaikka.php?siirtolista&ostotilaus={$siirtolista}{$url}&tilausrivi={$tilausrivi}'>"; exit();
+      echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=uusi_kerayspaikka.php?siirtolista&ostotilaus={$siirtolista}{$url}&tilausrivi={$tilausrivi}&clearing={$clearing}&maara={$maara}'>"; exit();
       break;
 
     default:
@@ -83,14 +81,6 @@ if (isset($submit)) {
 $url_prelisa = $riveja < 2 ? "siirtolista.php" : "siirtolistalla_useita_tuotteita.php";
 $url_lisa = $siirtolista ? "siirtolista={$siirtolista}&movingback" : "";
 $url_lisa .= ($viivakoodi != "" and $riveja > 1) ? "&viivakoodi={$viivakoodi}" : "";
-
-// vastaanottavan varaston tiedot
-$query  = "SELECT *
-           FROM varastopaikat
-           WHERE yhtio = '$kukarow[yhtio]'
-             AND tunnus  = '{$clearing}'";
-$vares = pupe_query($query);
-$varow2 = mysql_fetch_assoc($vares);
 
 //####### UI ##########
 // Otsikko
@@ -111,114 +101,27 @@ echo "<div class='main'>
     </tr>
     <tr>
         <th>", t("Hyllytetty m‰‰r‰"), "</th>
-        <td><input class='numero' type='text' id='maara' name='maara' value='{$row['varattu']}' onchange='update_label()'></td>
+        <td><input class='numero' type='text' id='maara' name='maara' value='{$maara}' onchange='update_label()'></td>
         <td> </td>
     </tr>
     <tr>
         <th>", t("Tuote"), "</th>
         <td>{$row['tuoteno']}</td>
         <td>&nbsp;</td>
-    </tr>";
-
-$vares = varaston_lapsivarastot($varow2['tunnus'], $row['tuoteno']);
-
-$s1_options = array();
-$s2_options = array();
-$s3_options = array();
-
-while ($varow = mysql_fetch_assoc($vares)) {
-  $status = $varow['status'];
-  ${$status."_options"}[] = $varow;
-}
-
-$counts = array(
-  's1' => count($s1_options),
-  's2' => count($s2_options),
-  's3' => count($s3_options)
-);
-
-if (array_sum($counts) > 1) {
-  if ($counts['s1'] > 0) {
-    $tulosta_otsikko = true;
-    foreach ($s1_options as $tp) {
-      echo "<tr>";
-      if ($tulosta_otsikko) {
-        $tulosta_otsikko = false;
-        echo "<th>" . t("Kohdevaraston-paikat") . "</th>";
-      } else {
-        echo "<th>&nbsp;</th>";
-      }
-
-      $paikka = $tp['hyllyalue'] . '-' . $tp['hyllynro'] . '-' . $tp['hyllyvali'] . '-' . $tp['hyllytaso'];
-      if ($row['kerayspaikka'] == $paikka) {
-        echo "<td>{$paikka}</td>";
-      } else {
-        echo "<td>({$paikka})</td>";
-      }
-
-      echo "<td>&nbsp;</td>";
-      echo "</tr>";
-    }
-  }
-
-  if ($counts['s2'] > 0) {
-    $tulosta_otsikko = true;
-    foreach ($s2_options as $tp) {
-      echo "<tr>";
-      if ($tulosta_otsikko) {
-        $tulosta_otsikko = false;
-        echo "<th>" . t("Lapsivarastojen-paikat") . "</th>";
-      } else {
-        echo "<td>&nbsp;</td>";
-      }
-
-      $paikka = $tp['hyllyalue'] . '-' . $tp['hyllynro'] . '-' . $tp['hyllyvali'] . '-' . $tp['hyllytaso'];
-      if ($row['kerayspaikka'] == $paikka) {
-        echo "<td>{$paikka}</td>";
-      } else {
-        echo "<td>({$paikka})</td>";
-      }
-
-      echo "<td>&nbsp;</td>";
-      echo "</tr>";
-    }
-  }
-
-  if ($counts['s3'] > 0) {
-    $tulosta_otsikko = true;
-    foreach ($s3_options as $va) {
-      echo "<tr>";
-      if ($tulosta_otsikko) {
-        $tulosta_otsikko = false;
-        echo "<th>" . t("Paikattomat-lapsivarastot") . "</th>";
-      } else {
-        echo "<td>&nbsp;</td>";
-      }
-
-      echo "<td>" . $va['nimitys'] . "</td>";
-      echo "<td>&nbsp;</td>";
-      echo "</tr>";
-    }
-  }
-} else {
-  echo "
+    </tr>
     <tr>
-    <th>", t("Ker‰yspaikka"), "</th>
-    <td>{$row['kerayspaikka']}</td>
-    <td>&nbsp;</td>
-    </tr>";
-}
-
-echo "
+        <th>", t("Ker‰yspaikka"), "</th>
+        <td colspan='2'>{$hylly}{$muutpaikat}</td>
+    </tr>
     <tr>
-      <th>".t("Vaihda Ker‰yspaikka")."</th>
-      <td colspan='2'><input type='text' id='hylly' name='hylly' value='' size='11' /></td>
-    </tr> 
-
+        <th>", t("Siirtolista"), "</th>
+        <td>{$siirtolista}</td>
+        <td>&nbsp;</td>
+    </tr>
 </table>
 </div>";
 
-$url = "siirtolista&varasto={$clearing}&viivakoodi={$viivakoodi}&alusta_tunnus=&liitostunnus=&saapumisnro_haku=&tilausrivi={$tilausrivi}&ostotilaus={$siirtolista}&tilausten_lukumaara={$riveja}&tuotenumero=".urlencode($tuotenumero);
+$url = "siirtolista&varasto={$clearing}&hylly={$hylly}&viivakoodi={$viivakoodi}&alusta_tunnus=&liitostunnus=&saapumisnro_haku=&tilausrivi={$tilausrivi}&ostotilaus={$siirtolista}&tilausten_lukumaara={$riveja}&tuotenumero=".urlencode($tuotenumero);
 
 // Napit
 echo "<div class='controls'>";

@@ -458,7 +458,7 @@ if (isset($siirtolista)) {
   #} else {
   #  $paluu_url = "siirtolistalla_useita_tuotteita.php?siirtolista={$row['otunnus']}";
   #}
-  $paluu_url = "siirtolistan_hyllytys.php?siirtolista={$row['otunnus']}&tilausrivi={$tilausrivi}&riveja={$tilausten_lukumaara}";
+  $paluu_url = "siirtolistan_hyllytys.php?siirtolista={$row['otunnus']}&tilausrivi={$tilausrivi}&riveja={$tilausten_lukumaara}&maara={$maara}&hylly={$hylly}";
 }
 
 echo "<div class='header'>";

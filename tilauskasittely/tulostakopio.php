@@ -1728,6 +1728,7 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
 
     $pos  = strpos($komento_tilausvahvistus, "excel_lahete_geodis_wilson");
     $pos2 = strpos($komento_tilausvahvistus, "excel_lahete_hinnoilla");
+    $pos3 = strpos($komento_tilausvahvistus, "excel_lahete_hinta_muillatiedoilla");
 
     if ($pos !== FALSE and $toim == "TILAUSVAHVISTUS") {
       $toim = "KERAYSLISTA";
@@ -1745,6 +1746,12 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
       }
     }
 
+    if ($pos3 !== FALSE and $toim == "TILAUSVAHVISTUS") {
+      $toim = "KERAYSLISTA";
+      $excel_lahete_hinta_muillatiedoilla = 'JOO';
+      $excel_tarjous = "JOO";
+    }
+    
     if ($toim == "TILAUSVAHVISTUS" or $toim == "YLLAPITOSOPIMUS") {
 
       if (isset($seltvtyyppi) and $seltvtyyppi != "") {
@@ -2368,6 +2375,10 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
       $pjat_sortlisa = "";
       $kerayslistatyyppi = "";
 
+      if ($excel_lahete_hinta_muillatiedoilla != '') {
+        $kerayslistatyyppi = "EXCEL4";
+      }
+      else
       if ($excel_lahete_hinnoilla != '') {
         $kerayslistatyyppi = "EXCEL3";
       }
@@ -2438,6 +2449,14 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
                   kerayserat.tunnus as ker_tunnus,
                   kerayserat.pakkaus,
                   kerayserat.pakkausnro,
+                  tuote.myyntihinta,
+                  tuote.myymalahinta,
+                  tuote.lyhytkuvaus,
+                  tuote.kuvaus,
+                  tuote.tuotemassa,
+                  tuote.tullinimike1,
+                  tuote.tullinimike2,
+                  tuote.tahtituote,
                   {$sorttauskentta}
                   FROM kerayserat
                   JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio AND tilausrivi.tunnus = kerayserat.tilausrivi AND tilausrivi.tyyppi != 'D')
@@ -2458,6 +2477,15 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
                   if (tuote.myyntihinta_maara=0, 1, tuote.myyntihinta_maara) myyntihinta_maara,
                   tuote.sarjanumeroseuranta,
                   tuote.eankoodi,
+                  tuote.myyntihinta,
+                  tuote.myymalahinta,
+                  tuote.lyhytkuvaus,
+                  tuote.kuvaus,
+                  tuote.tuotemassa,
+                  tuote.tullinimike1,
+                  tuote.tullinimike2,
+                  tuote.tahtituote,
+                  lasku.maa,
                   abs(tilausrivin_lisatiedot.asiakkaan_positio) asiakkaan_positio
                   FROM tilausrivi
                   JOIN lasku ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus
@@ -2560,6 +2588,9 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
         $params_kerayslista['uusiotsikko'] = "Lähete";
       }
       elseif ($excel_lahete_hinnoilla != '') {
+        $params_kerayslista['uusiotsikko'] = "Tilausvahvistus";
+      }
+      elseif ($excel_lahete_hinta_muillatiedoilla != '') {
         $params_kerayslista['uusiotsikko'] = "Tilausvahvistus";
       }
       elseif ($excel_tarjous != '') {

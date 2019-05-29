@@ -355,8 +355,17 @@ if (isset($submit_button) and trim($submit_button) != '') {
 
       echo t("Odota hetki...");
 
-      // Redirectit ostotilaukseen tai suuntalavan_tuotteet?
-      if (isset($hyllytys)) {
+      // Redirectit siirtolistaan, ostotilaukseen tai suuntalavan_tuotteet?
+      if (isset($siirtolista)) {
+        if ($tilausten_lukumaara < 1) {
+          echo "<META HTTP-EQUIV='Refresh' CONTENT='3; URL=siirtolista.php?siirtolista={$ostotilaus_urliin}'>";
+        }
+        else {
+          $url = "&riveja={$tilausten_lukumaara}&viivakoodi={$viivakoodi}";
+          echo "<META HTTP-EQUIV='Refresh' CONTENT='3; URL=siirtolistalla_useita_tuotteita.php?siirtolista={$ostotilaus_urliin}{$url}'>";
+        }
+      }
+      elseif (isset($hyllytys)) {
         $ostotilaus_urliin = $manuaalisesti_syotetty_ostotilausnro ? $row['otunnus'] : "";
         $tilausten_lukumaara--;
         if ($tilausten_lukumaara < 1) {
@@ -365,15 +374,6 @@ if (isset($submit_button) and trim($submit_button) != '') {
         else {
           $url = "&tilausten_lukumaara={$tilausten_lukumaara}&saapumisnro_haku={$saapumisnro_haku}&manuaalisesti_syotetty_ostotilausnro={$manuaalisesti_syotetty_ostotilausnro}&viivakoodi={$viivakoodi}&tuotenumero=".urlencode($tuotenumero);
           echo "<META HTTP-EQUIV='Refresh' CONTENT='3; URL=tuotteella_useita_tilauksia.php?ostotilaus={$ostotilaus_urliin}{$url}'>";
-        }
-      }
-      if (isset($siirtolista)) {
-        if ($tilausten_lukumaara < 1) {
-          echo "<META HTTP-EQUIV='Refresh' CONTENT='3; URL=siirtolista.php?siirtolista={$ostotilaus_urliin}'>";
-        }
-        else {
-          $url = "&riveja={$tilausten_lukumaara}&viivakoodi={$viivakoodi}";
-          echo "<META HTTP-EQUIV='Refresh' CONTENT='3; URL=siirtolistalla_useita_tuotteita.php?siirtolista={$ostotilaus_urliin}{$url}'>";
         }
       }
       else {

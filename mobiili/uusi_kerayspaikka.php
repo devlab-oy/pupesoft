@@ -224,7 +224,10 @@ if (isset($submit) and trim($submit) != '' and count($errors) == 0) {
       // Jos syötettyä paikkaa ei ole tämän tuotteen, lisätään uusi tuotepaikka
       if (mysql_num_rows($oma_paikka) == 0) {
 
-        if (isset($tullaan) and $tullaan == 'tuotteen_hyllypaikan_muutos') {
+        if (isset($siirtolista)) {
+          $_viesti = 'Varastosiirrossa';
+        }
+        else if (isset($tullaan) and $tullaan == 'tuotteen_hyllypaikan_muutos') {
           $_viesti = 'Hyllysiirroissa';
         }
         else {
@@ -470,7 +473,11 @@ if (isset($submit) and trim($submit) != '' and count($errors) == 0) {
 
 $oletuspaikka_chk = "";
 
-if (!isset($oletuspaikka) or count($oletuspaikka) == 2) $oletuspaikka_chk = "checked";
+if (isset($siirtolista)) {
+  if (isset($oletuspaikka) and count($oletuspaikka) == 2) $oletuspaikka_chk = "checked";
+} else {
+  if (!isset($oletuspaikka) or count($oletuspaikka) == 2) $oletuspaikka_chk = "checked";
+}
 
 if (!isset($tullaan) or $tullaan != 'tuotteen_hyllypaikan_muutos') {
 

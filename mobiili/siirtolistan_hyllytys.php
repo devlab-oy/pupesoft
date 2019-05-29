@@ -29,7 +29,8 @@ $query = "SELECT
             tilausrivi.suuntalava,
             tilausrivi.uusiotunnus,
             lasku.liitostunnus,
-            lasku.clearing
+            lasku.clearing,
+            tilausrivi.toimitettu
           FROM lasku
           JOIN tilausrivi
             ON (tilausrivi.yhtio = lasku.yhtio
@@ -46,6 +47,10 @@ $row = mysql_fetch_assoc($result);
 
 if (!$row) {
   exit("Virhe, riviä ei löydy");
+}
+
+if ($row['toimitettu'] != '' or $row['varattu'] == 0) {
+  exit(t("VIRHE: Riviä ei löydy tai se on jo siirretty uudelle paikalle"));
 }
 
 $clearing = $row['clearing'];

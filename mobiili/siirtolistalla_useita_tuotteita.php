@@ -91,6 +91,7 @@ if (isset($siirtolista) && is_numeric($siirtolista)) {
             AND lasku.yhtio = '{$kukarow['yhtio']}'
             AND (lasku.tila = 'G' AND lasku.alatila IN ('C', 'B', 'D'))
             AND tilausrivi.toimitettu = ''
+            AND tilausrivi.varattu > 0
             {$viivakoodirajaus}
           ORDER BY {$orderby} {$ascdesc}";
 

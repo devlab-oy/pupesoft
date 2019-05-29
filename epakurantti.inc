@@ -47,7 +47,10 @@ if ($tuoteno != "") {
               0),
             6) kehahin_nyt,
             tuote.sarjanumeroseuranta,
-            sum(tuotepaikat.saldo) saldo
+            sum(tuotepaikat.saldo) saldo,
+            tuote.try,
+            tuote.aleryhma,
+            tuote.osasto
             FROM tuote
             LEFT JOIN tuotepaikat ON (tuote.yhtio = tuotepaikat.yhtio AND tuote.tuoteno = tuotepaikat.tuoteno)
             WHERE tuote.yhtio = '{$kukarow["yhtio"]}'
@@ -535,9 +538,73 @@ if ($tee == "paalle" or $tee == "25paalle" or $tee == "puolipaalle" or $tee == "
   if ($pvm75  != $updatepvm) { $pvm75  = "'{$pvm75}'" ; }
   if ($pvm100 != $updatepvm) { $pvm100 = "'{$pvm100}'"; }
 
+  if (($yhtiorow['epakurantti_automaattimuutokset'] == 'Z') and ($on_jo_epakurantti == 0)) {
+    $query = "INSERT INTO tuotteen_avainsanat  SET
+                    yhtio      = '{$kukarow["yhtio"]}',
+                    kieli      = '{$yhtiorow["kieli"]}',
+                    tuoteno    = '{$tuoterow["tuoteno"]}',
+                    laji       = 'zeniorparts',
+                    selite     = 'ALKUP_TRY',
+                    selitetark = '{$tuoterow["try"]}',
+                    laatija    = '{$kukarow["kuka"]}',
+                    luontiaika = now()";
+    $a_result = pupe_query($query);
+
+    $query = "INSERT INTO tuotteen_avainsanat  SET
+                    yhtio      = '{$kukarow["yhtio"]}',
+                    kieli      = '{$yhtiorow["kieli"]}',
+                    tuoteno    = '{$tuoterow["tuoteno"]}',
+                    laji       = 'zeniorparts',
+                    selite     = 'ALKUP_ALERYHMA',
+                    selitetark = '{$tuoterow["aleryhma"]}',
+                    laatija    = '{$kukarow["kuka"]}',
+                    luontiaika = now()";
+    $a_result = pupe_query($query);
+
+    $query = "INSERT INTO tuotteen_avainsanat  SET
+                    yhtio      = '{$kukarow["yhtio"]}',
+                    kieli      = '{$yhtiorow["kieli"]}',
+                    tuoteno    = '{$tuoterow["tuoteno"]}',
+                    laji       = 'zeniorparts',
+                    selite     = 'ALKUP_OSASTO',
+                    selitetark = '{$tuoterow["osasto"]}',
+                    laatija    = '{$kukarow["kuka"]}',
+                    luontiaika = now()";
+    $a_result = pupe_query($query);
+
+    $query = "INSERT INTO puun_alkio
+              SET yhtio       = '$kukarow[yhtio]',
+                  liitos      = '{$tuoterow["tuoteno"]}',
+                  laji        = 'tuote',
+                  kutsuja     = '',
+                  puun_tunnus = '23990',
+                  kieli       = '$kieli',
+                  laatija     = '$kukarow[kuka]',
+                  luontiaika  = now()";
+    $a_result = pupe_query($query);
+
+    $query = "INSERT INTO puun_alkio
+              SET yhtio       = '$kukarow[yhtio]',
+                  liitos      = '{$tuoterow["tuoteno"]}',
+                  laji        = 'tuote',
+                  kutsuja     = '',
+                  puun_tunnus = '23985',
+                  kieli       = '$kieli',
+                  laatija     = '$kukarow[kuka]',
+                  luontiaika  = now()";
+    $a_result = pupe_query($query);
+
+    $set_lisakentat = "try      = (SELECT selite FROM avainsana    WHERE yhtio = '{$kukarow["yhtio"]}' AND selitetark = 'Zenior parts' AND laji = 'TRY'),
+                       aleryhma = (SELECT ryhma  FROM perusalennus WHERE yhtio = '{$kukarow["yhtio"]}' AND selite = 'Zenior parts'),
+                       osasto   = (SELECT selite FROM avainsana    WHERE yhtio = '{$kukarow["yhtio"]}' AND selitetark = 'Zenior parts' AND laji = 'OSASTO'),";
+  } else {
+    $set_lisakentat = "";
+  }
+
   $query = "UPDATE tuote SET
             $set_zenior
             $set_kehahin
+            $set_lisakentat
             epakurantti25pvm  =  {$pvm25},
             epakurantti50pvm  =  {$pvm50},
             epakurantti75pvm  =  {$pvm75},

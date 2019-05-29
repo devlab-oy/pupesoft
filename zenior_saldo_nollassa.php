@@ -38,7 +38,7 @@ $query  = "SELECT t.tuoteno,
            MAX(t.myyntihinta)  as varahinta,
            SUM(p.saldo)        as saldosumma
            FROM tuote t
-                 JOIN tuotteen_avainsanat a ON (t.yhtio = a.yhtio AND a.kieli = '{$yhtiorow['kieli']}' AND t.tuoteno = a.tuoteno AND a.laji = 'zeniorparts')
+                 JOIN tuotteen_avainsanat a ON (t.yhtio = a.yhtio AND a.kieli = '{$yhtiorow['kieli']}' AND t.tuoteno = a.tuoteno AND a.laji = 'zeniorparts' and a.selite = 'K')
            JOIN tuotepaikat p ON (a.yhtio = p.yhtio AND a.tuoteno = p.tuoteno)
            WHERE t.yhtio           = '{$kukarow["yhtio"]}'
            and t.epakurantti25pvm != '0000-00-00'
@@ -48,12 +48,26 @@ $result = pupe_query($query);
 
 while ($row = mysql_fetch_assoc($result)) {
 
+  if ($yhtiorow['epakurantti_automaattimuutokset'] == 'Z') {
+    $query = "DELETE FROM puun_alkio WHERE yhtio = '{$kukarow["yhtio"]}' AND liitos = '{$row["tuoteno"]}' AND puun_tunnus IN (23990, 23985)";
+    pupe_query($query);
+
+    $set_lisakentat = "try      = (SELECT selitetark FROM tuotteen_avainsanat WHERE yhtio = '{$kukarow["yhtio"]}' AND kieli = '{$yhtiorow["kieli"]}' AND tuoteno = '{$row["tuoteno"]}' AND laji = 'zeniorparts' AND selite = 'ALKUP_TRY'),
+                       aleryhma = (SELECT selitetark FROM tuotteen_avainsanat WHERE yhtio = '{$kukarow["yhtio"]}' AND kieli = '{$yhtiorow["kieli"]}' AND tuoteno = '{$row["tuoteno"]}' AND laji = 'zeniorparts' AND selite = 'ALKUP_ALERYHMA'),
+                       osasto   = (SELECT selitetark FROM tuotteen_avainsanat WHERE yhtio = '{$kukarow["yhtio"]}' AND kieli = '{$yhtiorow["kieli"]}' AND tuoteno = '{$row["tuoteno"]}' AND laji = 'zeniorparts' AND selite = 'ALKUP_OSASTO'),
+                       hinnastoon  = 'E',
+                       ostoehdotus = 'E',";
+  } else {
+    $set_lisakentat = "";
+  }
+
   // jos talteenotettu hinta ei ole nollaa isompi, otetaan viimeisin myyntihinta
   $hinta = (floatval($row["orig_myyntihinta"]) > 0) ? floatval($row["orig_myyntihinta"]) : $row["varahinta"];
   $selite = t("Ep‰kuranttimuutos") . ": ".t("Tuote")." {$row["tuoteno"]} ".t("p‰ivitet‰‰n kurantiksi");
 
   $t_query = "UPDATE tuote
               SET status        = 'T',
+              {$set_lisakentat}
               epakurantti25pvm  = '0000-00-00',
               epakurantti50pvm  = '0000-00-00',
               epakurantti75pvm  = '0000-00-00',

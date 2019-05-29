@@ -2790,7 +2790,7 @@ if ($fieldname == "vahvistusviesti_asiakkaalle") {
     t("Ei lähetetä asiakkaalle vahvistusviestiä");
   $ulos .= "<option value = 'Y' $sel>" .
     t("Lähetetään asiakkaalle tekstiviesti ja sähköposti, kun jälkitoimitustuotteet ovat " .
-    "valmiina noudettaviksi, tai kun työmääräys on valmis");
+      "valmiina noudettaviksi, tai kun työmääräys on valmis");
   $ulos .= "</select></td>";
 
   $jatko = 0;
@@ -3269,8 +3269,8 @@ if ($fieldname == "jt_rivien_saapumisajan_nayttaminen") {
 
   $ulos .= "<option value=''>" . t("Ei näytetä jt-rivien saapumisaikoja") . "</option>";
   $ulos .= "<option value='K' {$sel["K"]}>" . t("Näytetään jt-rivien saapumisaika " .
-    "tilausvahvistuksessa ja lähetteessä, jos se on " .
-    "tiedossa") . "</option>";
+      "tilausvahvistuksessa ja lähetteessä, jos se on " .
+      "tiedossa") . "</option>";
   $ulos .= "</select></td>";
 
   $jatko = 0;
@@ -3404,10 +3404,10 @@ if ($fieldname == "raaka_aine_tiliointi") {
 
   $ulos .= "<option value = ''>" .
     t("Tiliöidään raaka-aineiden varasto ja varastonmuutokset varasto ja " .
-    "varastonmuutostileille");
+      "varastonmuutostileille");
   $ulos .= "<option value = 'Y' $sel>" .
     t("Tiliöidään varasto ja varastonmuutos raaka-ainetileille, jos tuotetyyppi on " .
-    "raaka-aine");
+      "raaka-aine");
   $ulos .= "</select></td>";
 
   $jatko = 0;
@@ -3420,7 +3420,7 @@ if ($fieldname == "nayta_variaatiot") {
 
   $ulos .= "<option value = ''>" . t("Ei näytetä tuotteiden variaatioita tuotelistauksessa");
   $ulos .= "<option value = 'Y' $sel>" . t("Tuotteiden listauksessa Hae ja selaa-ohjelmassa " .
-    "mahdollisuus nähdä tuotteen variaatiot (Esim. eri koot ja värit)");
+      "mahdollisuus nähdä tuotteen variaatiot (Esim. eri koot ja värit)");
   $ulos .= "</select></td>";
 
   $jatko = 0;
@@ -3995,7 +3995,7 @@ if ($fieldname == "myynti_asiakhin_tallenna") {
         <option value = ''>".t("Myyntitilauksella ei voi tallentaa asiakashintoja")."</option>
         <option value = 'K' {$sel["K"]}>".t("Myyntitilauksen hinnat voi tallentaa asiakkaalle asiakashinnoiksi")."</option>
         <option value='V' {$sel["V"]}>" . t("Myyntitilauksen hinnat voi tallentaa asiakkaalle " .
-    "asiakashinnoiksi valitulla tavalla") . "</option>
+      "asiakashinnoiksi valitulla tavalla") . "</option>
       </select></td>";
 
   $jatko = 0;
@@ -4485,6 +4485,19 @@ if ($fieldname == 'epakurantoinnin_myyntihintaleikkuri') {
 
   $ulos .= "<option value = ''>".t("Hintaa ei leikata")."</option>";
   $ulos .= "<option value = 'Z' {$sel["Z"]}>".t("Myyntihintaa leikataan 25% per taso")."</option>";
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
+if ($fieldname == 'epakurantti_automaattimuutokset') {
+  $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+  $sel = array();
+  $sel['Z'] = $trow[$i] == 'Z' ? 'selected' : '';
+
+  $ulos .= "<option value = ''>".t("Epäkurantoitaessa ei muuteta tuotetietoja")."</option>";
+  $ulos .= "<option value = 'Z' {$sel["Z"]}>".t("Epäkurantoitaessa tuote, muutetaan sen osasto, tuoteryhmä, alennusryhmä ja puunoksa")."</option>";
   $ulos .= "</select></td>";
 
   $jatko = 0;

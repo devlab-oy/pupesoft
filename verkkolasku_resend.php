@@ -411,10 +411,16 @@ if ($handle = opendir($kansio)) {
     else {
       $ftphost = "213.214.148.38";
     }
+    
+    if (isset($visma_ftppath)) {
+      $ftppath = $visma_ftppath;
+    }
+    else {
+      $ftppath = "/";
+    }
+    
     $ftpuser = $yhtiorow['verkkotunnus_lah'];
     $ftppass = $yhtiorow['verkkosala_lah'];
-    //$ftppath = "test/invoice/finvoice/";
-    $ftppath = "/";
     $ftpfile = $kansio.$lasku;
     $ftpsucc = "{$pupe_root_polku}/dataout/";
 

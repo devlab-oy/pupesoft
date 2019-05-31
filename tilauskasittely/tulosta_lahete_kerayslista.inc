@@ -655,8 +655,8 @@ if (!function_exists('rivi_otsikot_kerayslista')) {
         if ($kerayslistatyyppi == 'EXCEL4') {
           $thispage->writeString($kala, 7, "Gross price", $boldi);
           $thispage->writeString($kala, 8, "RRP", $boldi);
-          $thispage->writeString($kala, 9, "Lyhyt kuvaus", $boldi);
-          $thispage->writeString($kala, 10, "Kuvaus", $boldi);
+          $thispage->writeString($kala, 9, "Composition", $boldi);
+          $thispage->writeString($kala, 10, "Description", $boldi);
           $thispage->writeString($kala, 11, "Tariff heading", $boldi);
           $thispage->writeString($kala, 12, "Origin", $boldi);
           $thispage->writeString($kala, 13, "Weight", $boldi);

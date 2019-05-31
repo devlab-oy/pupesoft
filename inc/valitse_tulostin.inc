@@ -435,6 +435,7 @@ foreach ($tulostimet as $tulostin) {
   if ($toim == 'TILAUSVAHVISTUS') {
     echo "<option value='excel_lahete_geodis_wilson'>".t("Excel-tilausvahvistus")."</option>";
     echo "<option value='excel_lahete_hinnoilla'>".t("Excel-tilausvahvistus hintatiedoilla")."</option>";
+    echo "<option value='excel_lahete_hinta_muillatiedoilla'>".t("Excel-tilausvahvistus hinta- ja kuvaustiedoilla")."</option>";
   }
 
   if ($toim == 'TARJOUS') {

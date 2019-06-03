@@ -1805,7 +1805,7 @@ while ($tietue = fgets($fd)) {
       // jos annettu custom laatija
       if (isset($editilaus_laatija) and trim($editilaus_laatija) != "") $edi_laatija = $editilaus_laatija;
 
-      if ($edi_laatija ="Harbour") {
+      if ($edi_laatija =="Harbour") {
           $editilaus_alatila = 'A';
           $tilaustyyppilisa = 'E';
       }

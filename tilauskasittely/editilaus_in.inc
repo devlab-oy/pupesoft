@@ -50,6 +50,11 @@ if ($php_cli) {
     $edi_tyyppi = 'woo';
   }
 
+  // tunnistetaan woo commerce -tyyppinen k‰sittely tiedostonimest‰
+  if ($edi_tyyppi == 'futursoft' and preg_match("/^harbour\-order/", $verkkokauppa_filename) === 1) {
+    $edi_tyyppi = 'harbour';
+  }
+
   // tunnistetaan apix-edi -tyyppinen k‰sittely tiedostonimest‰
   if ($edi_tyyppi == 'futursoft' and preg_match("/^apix_/", $verkkokauppa_filename) === 1) {
     $edi_tyyppi = 'apix_edi';
@@ -342,6 +347,11 @@ elseif ($edi_tyyppi == "presta") {
 elseif ($edi_tyyppi == "woo") {
   $edi_subj = "Sis‰‰ntuleva Verkkokauppa-tilaus";
   $edi_laatija = "WooCommerce";
+  $edi_tyyppi = "magento"; // woocommerce toimii t‰‰ll‰ samaan tapaan kuin magento
+}
+elseif ($edi_tyyppi == "harbour") {
+  $edi_subj = "Sis‰‰ntuleva Verkkokauppa-tilaus";
+  $edi_laatija = "Harbour";
   $edi_tyyppi = "magento"; // woocommerce toimii t‰‰ll‰ samaan tapaan kuin magento
 }
 elseif ($edi_tyyppi == "edifact911") {
@@ -1794,6 +1804,11 @@ while ($tietue = fgets($fd)) {
 
       // jos annettu custom laatija
       if (isset($editilaus_laatija) and trim($editilaus_laatija) != "") $edi_laatija = $editilaus_laatija;
+
+      if ($edi_laatija ="Harbour") {
+          $editilaus_alatila = 'A';
+          $tilaustyyppilisa = 'E';
+      }
 
       // Lis‰t‰‰n otsikko
       $query = "INSERT into lasku SET

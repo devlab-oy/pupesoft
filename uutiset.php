@@ -536,7 +536,7 @@ if ($tee == '') {
           $kuva = "<img src='{$palvelin2}pics/facelift/pupe.gif' width='130'>";
         }
         else {
-          $kuva = "<img src='{$pupesoft_scheme}api.devlab.fi/pupesoft.gif' width='130'>";
+          $kuva = "<img src='{$pupesoft_scheme}pupeapi.sprintit.fi/pupesoft.gif' width='130'>";
         }
       }
 

@@ -573,24 +573,24 @@ if ($tee == "paalle" or $tee == "25paalle" or $tee == "puolipaalle" or $tee == "
     $a_result = pupe_query($query);
 
     $query = "INSERT INTO puun_alkio
-              SET yhtio       = '$kukarow[yhtio]',
+              SET yhtio       = '{$kukarow["yhtio"]}',
                   liitos      = '{$tuoterow["tuoteno"]}',
                   laji        = 'tuote',
                   kutsuja     = '',
                   puun_tunnus = '23990',
-                  kieli       = '$kieli',
-                  laatija     = '$kukarow[kuka]',
+                  kieli       = '{$yhtiorow["kieli"]}',
+                  laatija     = '{$kukarow["kuka"]}',
                   luontiaika  = now()";
     $a_result = pupe_query($query);
 
     $query = "INSERT INTO puun_alkio
-              SET yhtio       = '$kukarow[yhtio]',
+              SET yhtio       = '{$kukarow["yhtio"]}',
                   liitos      = '{$tuoterow["tuoteno"]}',
                   laji        = 'tuote',
                   kutsuja     = '',
                   puun_tunnus = '23985',
-                  kieli       = '$kieli',
-                  laatija     = '$kukarow[kuka]',
+                  kieli       = '{$yhtiorow["kieli"]}',
+                  laatija     = '{$kukarow["kuka"]}',
                   luontiaika  = now()";
     $a_result = pupe_query($query);
 

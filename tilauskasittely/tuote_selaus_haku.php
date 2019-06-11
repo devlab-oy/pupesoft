@@ -1826,7 +1826,7 @@ function piirra_extranet_saldo($row, $oleasrow) {
         list($noutosaldo, $noutohyllyssa, $noutomyytavissa) = saldo_myytavissa($row["tuoteno"], "", $noutovarrow["tunnus"], "", "", "", "", "", $laskurow["toim_maa"], $saldoaikalisa);
 
         if ($noutomyytavissa > 0) {
-          if ($yhtiorow["extranet_nayta_saldo"] == "Y") {
+          if ($yhtiorow["extranet_nayta_saldo"] != "") {
             $naytettava_saldo = sprintf("%.2f", $noutomyytavissa) . " {$rivin_yksikko}";
           }
           else {
@@ -1853,7 +1853,7 @@ function piirra_extranet_saldo($row, $oleasrow) {
     if ($verkkokauppa != "" and $verkkokauppa_saldoluku) {
       $naytettava_saldo = $myytavissa;
     }
-    elseif ($yhtiorow["extranet_nayta_saldo"] == "Y") {
+    elseif ($yhtiorow["extranet_nayta_saldo"] != "") {
       $naytettava_saldo = sprintf("%.2f", $myytavissa) . " {$rivin_yksikko}";
     }
     else {
@@ -1870,7 +1870,7 @@ function piirra_extranet_saldo($row, $oleasrow) {
     echo "</font>";
   }
   elseif ($row['status'] != 'T') {
-    if ($yhtiorow["extranet_nayta_saldo"] == "Y") {
+    if ($yhtiorow["extranet_nayta_saldo"] != "") {
       $naytettava_saldo = sprintf("%.2f", 0) . " {$rivin_yksikko}";
     }
     else {
@@ -2224,7 +2224,7 @@ function hae_ja_piirra_saldo($row, $yhtiot, $oleasrow) {
           $kokonaismyytavissa += $myytavissa;
         }
 
-        if ($yhtiorow["extranet_nayta_saldo"] == "Y") {
+        if ($yhtiorow["extranet_nayta_saldo"] != "") {
           $naytettava_saldo = sprintf("%.2f", $kokonaismyytavissa) . " {$rivin_yksikko}";
           $_vari = "";
         }

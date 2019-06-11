@@ -3446,7 +3446,8 @@ if ($fieldname == "extranet_nayta_saldo") {
   $sel = $trow[$i] == 'Y' ? ' selected' : '';
 
   $ulos .= "<option value = ''>" . t("Ei n‰ytet‰ saldoa extranetiss‰");
-  $ulos .= "<option value = 'Y' $sel>" . t("N‰ytet‰‰n saldo extranetiss‰");
+  $ulos .= "<option value = 'Y' $sel>" . t("N‰ytet‰‰n saldo extranetin tuotehaussa");
+  $ulos .= "<option value = 'X' $sel>" . t("N‰ytet‰‰n saldo extranetiss‰");
   $ulos .= "</select></td>";
 
   $jatko = 0;

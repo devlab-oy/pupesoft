@@ -38,6 +38,7 @@ function mycf_toimita_tilaus($params) {
     // Päivitetään toimitetuksi
     $data = array("action" => "deliver",
                   "order" => $order_number,
+                  "tracking_code" => $tracking_code,
                   "send_email" => 1,
                   "key" => $mycf_webhooks_key);
 

@@ -110,7 +110,7 @@ while (false !== ($file = readdir($handle))) {
     $seurantakoodi = implode(' ', $koodit);
 
     $query = "UPDATE rahtikirjat SET
-              rahtikirjanro  = trim(concat(rahtikirjanro, ' ', '{$seurantakoodi}')),
+              rahtikirjanro  = trim(concat(ifnull(rahtikirjanro, ''), ' ', '{$seurantakoodi}')),
               tulostettu     = now()
               WHERE yhtio    = '{$kukarow['yhtio']}'
               AND tulostettu = '0000-00-00 00:00:00'

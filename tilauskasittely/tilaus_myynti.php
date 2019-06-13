@@ -6853,7 +6853,6 @@ if ($tee == '') {
     $headerit .= "<th>".t("Tuotenumero")."</th><th>".t("M‰‰r‰")."</th><th>".t("Tila")."</th>";
     $sarakkeet += 3;
 
-    $yhtiorow["extranet_nayta_saldo"] = "X";
     if ($yhtiorow["extranet_nayta_saldo"] == 'X' and $kukarow['extranet'] != '') {
       $nayta_extranet_saldo = true;
       $headerit .= "<th>".t("Varastossa")."</th>";

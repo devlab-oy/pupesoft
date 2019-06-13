@@ -3443,11 +3443,12 @@ if ($fieldname == "extranet_tilaus_varaa_saldoa") {
 if ($fieldname == "extranet_nayta_saldo") {
   $ulos = "<td><select name='$nimi' " . js_alasvetoMaxWidth($nimi, 400) . ">";
 
-  $sel = $trow[$i] == 'Y' ? ' selected' : '';
+  $selY = $trow[$i] == 'Y' ? ' selected' : '';
+  $selX = $trow[$i] == 'X' ? ' selected' : '';
 
   $ulos .= "<option value = ''>" . t("Ei n‰ytet‰ saldoa extranetiss‰");
-  $ulos .= "<option value = 'Y' $sel>" . t("N‰ytet‰‰n saldo extranetin tuotehaussa");
-  $ulos .= "<option value = 'X' $sel>" . t("N‰ytet‰‰n saldo extranetiss‰");
+  $ulos .= "<option value = 'Y' $selY>" . t("N‰ytet‰‰n saldo extranetin tuotehaussa");
+  $ulos .= "<option value = 'X' $selX>" . t("N‰ytet‰‰n saldo extranetiss‰");
   $ulos .= "</select></td>";
 
   $jatko = 0;

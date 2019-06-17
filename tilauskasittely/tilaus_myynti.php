@@ -6853,6 +6853,15 @@ if ($tee == '') {
     $headerit .= "<th>".t("Tuotenumero")."</th><th>".t("M‰‰r‰")."</th><th>".t("Tila")."</th>";
     $sarakkeet += 3;
 
+    if ($yhtiorow["extranet_nayta_saldo"] == 'X' and $kukarow['extranet'] != '') {
+      $nayta_extranet_saldo = true;
+      $headerit .= "<th>".t("Varastossa")."</th>";
+      $sarakkeet++;
+
+      $avainsana_result = t_avainsana("TILRIVI_VIILAUS");
+      $extranet_saldo_varjays = mysql_fetch_assoc($avainsana_result);
+    }
+
     if ($_onko_valmistus and $yhtiorow["varastonarvon_jako_usealle_valmisteelle"] == "K") {
       $headerit .= "<th>".t("Arvo")."</th><th>".t("Lukitse arvo")."</th>";
       $sarakkeet += 2;
@@ -8525,6 +8534,18 @@ if ($tee == '') {
             echo '<input type="checkbox" class="valmiste_lukko" data-tunnus="'.$row['tunnus'].'" data-perheid="'.$row['perheid'].'" />';
           }
           echo '</td>';
+        }
+
+        if (isset($nayta_extranet_saldo) and $nayta_extranet_saldo) {
+          list($extranet_saldo, $extranet_hyllyssa, $extranet_myytavissa) = saldo_myytavissa($row["tuoteno"], "", 0, "", "", "", "", "", $laskurow["toim_maa"], $saldoaikalisa);
+
+          if ($extranet_saldo_varjays and $extranet_myytavissa < 0) {
+            $bgcolor = " style='color:white' bgcolor='red'";
+          } else {
+            $bgcolor = "";
+          }
+
+          echo "<td {$class} align='right' nowrap{$bgcolor}>{$extranet_myytavissa}</td>";
         }
 
         if ($toim != "VALMISTAVARASTOON" and $toim != "SIIRTOLISTA") {

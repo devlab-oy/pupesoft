@@ -8537,13 +8537,15 @@ if ($tee == '') {
         }
 
         if (isset($nayta_extranet_saldo) and $nayta_extranet_saldo) {
-          if ($extranet_saldo_varjays and $selpaikkamyytavissa < 0) {
+          list($extranet_saldo, $extranet_hyllyssa, $extranet_myytavissa) = saldo_myytavissa($row["tuoteno"], "", 0, "", "", "", "", "", $laskurow["toim_maa"], $saldoaikalisa);
+
+          if ($extranet_saldo_varjays and $extranet_myytavissa < 0) {
             $bgcolor = " style='color:white' bgcolor='red'";
           } else {
             $bgcolor = "";
           }
 
-          echo "<td {$class} align='right' nowrap{$bgcolor}>{$selpaikkamyytavissa}</td>";
+          echo "<td {$class} align='right' nowrap{$bgcolor}>{$extranet_myytavissa}</td>";
         }
 
         if ($toim != "VALMISTAVARASTOON" and $toim != "SIIRTOLISTA") {

@@ -572,27 +572,23 @@ if ($tee == "paalle" or $tee == "25paalle" or $tee == "puolipaalle" or $tee == "
                     luontiaika = now()";
     $a_result = pupe_query($query);
 
-    $query = "INSERT INTO puun_alkio
-              SET yhtio       = '{$kukarow["yhtio"]}',
-                  liitos      = '{$tuoterow["tuoteno"]}',
-                  laji        = 'tuote',
-                  kutsuja     = '',
-                  puun_tunnus = '23990',
-                  kieli       = '{$yhtiorow["kieli"]}',
-                  laatija     = '{$kukarow["kuka"]}',
-                  luontiaika  = now()";
+    $query = "SELECT selite FROM avainsana WHERE yhtio = '$kukarow[yhtio]' AND laji = 'ZEPA_OS_PUUNALK' AND selitetark = '{$tuoterow['osasto']}'";
     $a_result = pupe_query($query);
+    if (mysql_num_rows($a_result) > 0) {
+      $a_row = mysql_fetch_assoc($a_result);
+      $puun_tunnus = $a_row['selite'];
 
-    $query = "INSERT INTO puun_alkio
-              SET yhtio       = '{$kukarow["yhtio"]}',
-                  liitos      = '{$tuoterow["tuoteno"]}',
-                  laji        = 'tuote',
-                  kutsuja     = '',
-                  puun_tunnus = '23985',
-                  kieli       = '{$yhtiorow["kieli"]}',
-                  laatija     = '{$kukarow["kuka"]}',
-                  luontiaika  = now()";
-    $a_result = pupe_query($query);
+      $query = "INSERT INTO puun_alkio
+                SET yhtio       = '{$kukarow["yhtio"]}',
+                    liitos      = '{$tuoterow["tuoteno"]}',
+                    laji        = 'tuote',
+                    kutsuja     = '',
+                    puun_tunnus = '{$puun_tunnus}',
+                    kieli       = '{$yhtiorow["kieli"]}',
+                    laatija     = '{$kukarow["kuka"]}',
+                    luontiaika  = now()";
+      $a_result = pupe_query($query);
+    }
 
     $set_lisakentat = "try      = (SELECT selite FROM avainsana    WHERE yhtio = '{$kukarow["yhtio"]}' AND selitetark = 'Zenior parts' AND laji = 'TRY'),
                        aleryhma = (SELECT ryhma  FROM perusalennus WHERE yhtio = '{$kukarow["yhtio"]}' AND selite = 'Zenior parts'),

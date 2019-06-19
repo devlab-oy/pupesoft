@@ -572,13 +572,14 @@ if ($tee == "paalle" or $tee == "25paalle" or $tee == "puolipaalle" or $tee == "
                     luontiaika = now()";
     $a_result = pupe_query($query);
 
-    $query = "SELECT selite FROM avainsana WHERE yhtio = '$kukarow[yhtio]' AND laji = 'ZEPA_OS_PUUNALK' AND selitetark = '{$tuoterow['osasto']}'";
-    $a_result = pupe_query($query);
-    if (mysql_num_rows($a_result) > 0) {
+    $puun_tunnus = t_avainsana("ZEPA_OS_PUUNALK", "", "AND selitetark = {$tuoterow['osasto']}", "", "", "selite");
+    if ($puun_tunnus != "") {
+      $query = "SELECT COUNT(*) AS maara FROM puun_alkio WHERE yhtio = '{$kukarow['yhtio']}' AND liitos = '{$tuoterow['tuoteno']}' AND puun_tunnus = '{$puun_tunnus}'";
+      $a_result = pupe_query($query);
       $a_row = mysql_fetch_assoc($a_result);
-      $puun_tunnus = $a_row['selite'];
 
-      $query = "INSERT INTO puun_alkio
+      if ($a_row['maara'] == 0) {
+        $query = "INSERT INTO puun_alkio
                 SET yhtio       = '{$kukarow["yhtio"]}',
                     liitos      = '{$tuoterow["tuoteno"]}',
                     laji        = 'tuote',
@@ -587,7 +588,8 @@ if ($tee == "paalle" or $tee == "25paalle" or $tee == "puolipaalle" or $tee == "
                     kieli       = '{$yhtiorow["kieli"]}',
                     laatija     = '{$kukarow["kuka"]}',
                     luontiaika  = now()";
-      $a_result = pupe_query($query);
+        $a_result = pupe_query($query);
+      }
     }
 
     $set_lisakentat = "try      = (SELECT selite FROM avainsana    WHERE yhtio = '{$kukarow["yhtio"]}' AND selitetark = 'Zenior parts' AND laji = 'TRY'),

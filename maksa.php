@@ -76,7 +76,7 @@ if ($tee == 'O') {
 }
 
 // Etsit‰‰n aluksi yrityksen oletustili
-$query = "SELECT kuka.oletustili
+$query = "SELECT kuka.oletustili, yriti.bic
           FROM kuka
           JOIN yriti ON (yriti.yhtio = kuka.yhtio and yriti.tunnus = kuka.oletustili and yriti.kaytossa = '')
           WHERE kuka.yhtio = '$kukarow[yhtio]' and
@@ -190,9 +190,7 @@ if ($tee == 'H' or $tee == 'G') {
 
     // Huomaa samat kyselyt (wheret) tee == G haarassa...
     if (strtoupper($trow['maa']) == 'FI') {
-      $query = "SELECT sum(if(alatila = 'K' and summa > 0, summa - kasumma, summa)) summa
-                FROM lasku
-                WHERE yhtio    = '$kukarow[yhtio]'
+      $where = "WHERE yhtio    = '$kukarow[yhtio]'
                 and tila       = 'P'
                 and olmapvm    = '$trow[olmapvm]'
                 and maksaja    = '$kukarow[kuka]'
@@ -200,11 +198,8 @@ if ($tee == 'H' or $tee == 'G') {
                 and maa        = 'FI'
                 and ultilno    = '$trow[ultilno]'
                 and swift      = '$trow[swift]'";
-    }
-    else {
-      $query = "SELECT sum(if(alatila='K' and summa > 0, summa - kasumma, summa)) summa
-                FROM lasku
-                WHERE yhtio     = '$kukarow[yhtio]'
+    } else {
+      $where = "WHERE yhtio     = '$kukarow[yhtio]'
                 and tila        = 'P'
                 and olmapvm     = '$trow[olmapvm]'
                 and maksaja     = '$kukarow[kuka]'
@@ -220,21 +215,41 @@ if ($tee == 'H' or $tee == 'G') {
                 and sisviesti1  = '$trow[sisviesti1]'";
     }
 
+    $query = "SELECT sum(if(alatila='K' and summa > 0, summa - kasumma, summa)) summa
+              FROM lasku
+              {$where}";
+
     $result = pupe_query($query);
 
     if (mysql_num_rows($result) != 1) {
-      echo "<b>".t("Hyvityshaulla ei lˆytynyt mit‰‰n")."</b>$query";
+      echo "<b>" . t("Hyvityshaulla ei lˆytynyt mit‰‰n") . "</b>$query";
       require "inc/footer.inc";
       exit;
     }
 
     $veloitusrow = mysql_fetch_assoc($result);
 
-    if (abs($veloitusrow['summa'] + $trow['summa_valuutassa']) < 0.01) {
+    $query = "SELECT COUNT(*) AS hyvityslaskuja
+              FROM lasku
+              {$where} and summa < 0";
+
+    $result = pupe_query($query);
+    if (mysql_num_rows($result) > 0) {
+      $maararow = mysql_fetch_assoc($result);
+      $hyvityslaskuja = $maararow['hyvityslaskuja'];
+    } else {
+      $hyvityslaskuja = 0;
+    }
+
+    if ($hyvityslaskuja >= 9 and $oltilrow['bic'] == 'NDEAFIHH') {
+      echo "<font class='error'>".t("Poimittu aineisto voi sis‰lt‰‰ vain 9 hyvityslaskua yhdelle asiakkaalle")."</font><br><br>";
+      $tee = 'S';
+
+    } elseif (abs($veloitusrow['summa'] + $trow['summa_valuutassa']) < 0.01) {
 
       // Ei ole valittu mit‰ tehd‰‰n
       if (!isset($valinta) or $valinta == '') {
-        echo "<font class='message'>".t("Hyvityslasku ja veloituslasku(t) n‰ytt‰v‰t menev‰n p‰itt‰in")."<br>".t("Haluatko, ett‰ ne suoritetaan heti ja j‰tet‰‰n l‰hett‰m‰tt‰ pankkiin")."?</font><br><br>";
+        echo "<font class='message'>" . t("Hyvityslasku ja veloituslasku(t) n‰ytt‰v‰t menev‰n p‰itt‰in") . "<br>" . t("Haluatko, ett‰ ne suoritetaan heti ja j‰tet‰‰n l‰hett‰m‰tt‰ pankkiin") . "?</font><br><br>";
         echo "<form action = 'maksa.php' method='post'>
         <input type='hidden' name = 'tee' value='G'>
         <input type='hidden' name = 'valuu' value='$valuu'>
@@ -244,21 +259,20 @@ if ($tee == 'H' or $tee == 'G') {
         <input type='hidden' name = 'tunnus' value='$tunnus'>
         <input type='hidden' name = 'kaale' value='$kaale'>
         <input type='hidden' name = 'poikkeus' value='$poikkeus'>
-        <input type='radio'  name = 'valinta' value='K' checked> ".t("Kyll‰")."
-        <input type='radio'  name = 'valinta' value='E'> ".t("Ei")."
-        <input type='submit' name = 'valitse' value='".t("Valitse")."'>";
+        <input type='radio'  name = 'valinta' value='K' checked> " . t("Kyll‰") . "
+        <input type='radio'  name = 'valinta' value='E'> " . t("Ei") . "
+        <input type='submit' name = 'valitse' value='" . t("Valitse") . "'>";
 
         require "inc/footer.inc";
         exit;
       }
 
       if (isset($valinta) and $valinta == 'E') {
-        echo "<font class='error'>".t("Valitut veloitukset ja hyvitykset menev‰t tasan p‰itt‰in (summa 0,-). Pankkiin ei kuitenkaan voi l‰hett‰‰ nolla-summaisia maksuja. Jos haluat l‰hett‰‰ n‰m‰ p‰itt‰in menev‰t veloitukset ja hyvitykset pankkiin, pit‰‰ sinun valita lis‰‰ veloituksia. Yhteissumman pit‰‰ olla suurempi kuin 0.")."</font><br><br>";
+        echo "<font class='error'>" . t("Valitut veloitukset ja hyvitykset menev‰t tasan p‰itt‰in (summa 0,-). Pankkiin ei kuitenkaan voi l‰hett‰‰ nolla-summaisia maksuja. Jos haluat l‰hett‰‰ n‰m‰ p‰itt‰in menev‰t veloitukset ja hyvitykset pankkiin, pit‰‰ sinun valita lis‰‰ veloituksia. Yhteissumman pit‰‰ olla suurempi kuin 0.") . "</font><br><br>";
         $tee = 'S';
       }
-    }
-    elseif ($veloitusrow['summa'] + $trow['summa'] < 0.01) {
-      echo "<font class='error'>".t("Hyvityslaskua vastaavaa m‰‰r‰‰ veloituksia ei ole valittuna.")."<br>".t("Valitse samalle asiakkaalle lis‰‰ veloituksia, jos haluat valita t‰m‰n hyvityslaskun maksatukseen")."</font><br><br>";
+    } elseif ($veloitusrow['summa'] + $trow['summa'] < 0.01) {
+      echo "<font class='error'>" . t("Hyvityslaskua vastaavaa m‰‰r‰‰ veloituksia ei ole valittuna.") . "<br>" . t("Valitse samalle asiakkaalle lis‰‰ veloituksia, jos haluat valita t‰m‰n hyvityslaskun maksatukseen") . "</font><br><br>";
       $tee = 'S';
     }
   }

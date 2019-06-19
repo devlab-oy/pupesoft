@@ -900,21 +900,21 @@ if (isset($supertee) and $supertee == "RAPORTOI") {
     }
   }
 
-  if ($myynnit) {
-    $worksheet->writeString($excelrivi, $excelsarake, t("Edellinen 3kk"), $format_bold);
-    $excelsarake++;
-
-    $worksheet->writeString($excelrivi, $excelsarake, t("Edellinen 12kk"), $format_bold);
-    $excelsarake++;
-
-    $worksheet->writeString($excelrivi, $excelsarake, t("Myynti 3kk"), $format_bold);
-    $excelsarake++;
-
-    $worksheet->writeString($excelrivi, $excelsarake, t("Myynti 12kk"), $format_bold);
-    $excelsarake++;
-  }
-
   if ($tallennusmuoto_check) {
+    if ($myynnit) {
+      $worksheet->writeString($excelrivi, $excelsarake, t("Myynti 3kk"), $format_bold);
+      $excelsarake++;
+
+      $worksheet->writeString($excelrivi, $excelsarake, t("Edellinen 3kk"), $format_bold);
+      $excelsarake++;
+
+      $worksheet->writeString($excelrivi, $excelsarake, t("Myynti 12kk"), $format_bold);
+      $excelsarake++;
+
+      $worksheet->writeString($excelrivi, $excelsarake, t("Edellinen 12kk"), $format_bold);
+      $excelsarake++;
+    }
+
     $worksheet->writeString($excelrivi, $excelsarake, t("Kehahin"), $format_bold);
     $excelsarake++;
 
@@ -927,6 +927,13 @@ if (isset($supertee) and $supertee == "RAPORTOI") {
     $excelsarake++;
   }
   else {
+    if ($myynnit) {
+      fwrite($fh, pupesoft_csvstring(t("Myynti 3kk"))."\t");
+      fwrite($fh, pupesoft_csvstring(t("Edellinen 3kk"))."\t");
+      fwrite($fh, pupesoft_csvstring(t("Myynti 12kk"))."\t");
+      fwrite($fh, pupesoft_csvstring(t("Edellinen 12kk"))."\t");
+    }
+
     fwrite($fh, pupesoft_csvstring(t("Kehahin"))."\t");
 
     if ($nayta_ostohinta) {
@@ -1652,25 +1659,31 @@ if (isset($supertee) and $supertee == "RAPORTOI") {
                     AND tuoteno        = '{$row["tuoteno"]}'
                     AND tyyppi         = 'L'
                     and laskutettuaika >= date_sub('{$vv}-{$kk}-{$pp}', interval 24 month)
-                    AND kpl            != 0
-                    AND varasto in ({$varastontunnukset})";
+                    AND kpl            != 0";
+
+        if ($varastontunnukset != "") {
+          $query .= " AND varasto in ({$varastontunnukset})";
+        }
+
         $myyntiresult = pupe_query($query);
         $myyntirivi = mysql_fetch_assoc($myyntiresult);
-
-        $worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f", $myyntirivi['edelliset3kk']));
-        $excelsarake++;
-
-        $worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f", $myyntirivi['edelliset12kk']));
-        $excelsarake++;
-
-        $worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f", $myyntirivi['myynti3kk']));
-        $excelsarake++;
-
-        $worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f", $myyntirivi['myynti12kk']));
-        $excelsarake++;
       }
 
       if ($tallennusmuoto_check) {
+        if ($myynnit) {
+          $worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f", $myyntirivi['myynti3kk']));
+          $excelsarake++;
+
+          $worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f", $myyntirivi['edelliset3kk']));
+          $excelsarake++;
+
+          $worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f", $myyntirivi['myynti12kk']));
+          $excelsarake++;
+
+          $worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f", $myyntirivi['edelliset12kk']));
+          $excelsarake++;
+        }
+
         $worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.06f", $kehasilloin));
         $excelsarake++;
 
@@ -1688,6 +1701,13 @@ if (isset($supertee) and $supertee == "RAPORTOI") {
         $excelsarake++;
       }
       else {
+        if ($myynnit) {
+          fwrite($fh, pupesoft_csvstring(sprintf("%.06f", $myyntirivi['myynti3kk']))."\t");
+          fwrite($fh, pupesoft_csvstring(sprintf("%.06f", $myyntirivi['edelliset3kk']))."\t");
+          fwrite($fh, pupesoft_csvstring(sprintf("%.06f", $myyntirivi['myynti12kk']))."\t");
+          fwrite($fh, pupesoft_csvstring(sprintf("%.06f", $myyntirivi['edelliset12kk']))."\t");
+        }
+
         fwrite($fh, pupesoft_csvstring(sprintf("%.06f", $kehasilloin))."\t");
 
         if ($nayta_ostohinta) {

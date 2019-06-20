@@ -1668,9 +1668,7 @@ if (isset($supertee) and $supertee == "RAPORTOI") {
 
         $myyntiresult = pupe_query($query);
         $myyntirivi = mysql_fetch_assoc($myyntiresult);
-      }
 
-      if ($myynnit) {
         if ($tallennusmuoto_check) {
           $worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f", $myyntirivi['myynti3kk']));
           $excelsarake++;

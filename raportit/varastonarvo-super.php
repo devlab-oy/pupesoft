@@ -900,8 +900,8 @@ if (isset($supertee) and $supertee == "RAPORTOI") {
     }
   }
 
-  if ($tallennusmuoto_check) {
-    if ($myynnit) {
+  if ($myynnit) {
+    if ($tallennusmuoto_check) {
       $worksheet->writeString($excelrivi, $excelsarake, t("Myynti 3kk"), $format_bold);
       $excelsarake++;
 
@@ -913,8 +913,16 @@ if (isset($supertee) and $supertee == "RAPORTOI") {
 
       $worksheet->writeString($excelrivi, $excelsarake, t("Edellinen 12kk"), $format_bold);
       $excelsarake++;
-    }
 
+    } else {
+      fwrite($fh, pupesoft_csvstring(t("Myynti 3kk"))."\t");
+      fwrite($fh, pupesoft_csvstring(t("Edellinen 3kk"))."\t");
+      fwrite($fh, pupesoft_csvstring(t("Myynti 12kk"))."\t");
+      fwrite($fh, pupesoft_csvstring(t("Edellinen 12kk"))."\t");
+    }
+  }
+
+  if ($tallennusmuoto_check) {
     $worksheet->writeString($excelrivi, $excelsarake, t("Kehahin"), $format_bold);
     $excelsarake++;
 
@@ -927,13 +935,6 @@ if (isset($supertee) and $supertee == "RAPORTOI") {
     $excelsarake++;
   }
   else {
-    if ($myynnit) {
-      fwrite($fh, pupesoft_csvstring(t("Myynti 3kk"))."\t");
-      fwrite($fh, pupesoft_csvstring(t("Edellinen 3kk"))."\t");
-      fwrite($fh, pupesoft_csvstring(t("Myynti 12kk"))."\t");
-      fwrite($fh, pupesoft_csvstring(t("Edellinen 12kk"))."\t");
-    }
-
     fwrite($fh, pupesoft_csvstring(t("Kehahin"))."\t");
 
     if ($nayta_ostohinta) {
@@ -1669,8 +1670,8 @@ if (isset($supertee) and $supertee == "RAPORTOI") {
         $myyntirivi = mysql_fetch_assoc($myyntiresult);
       }
 
-      if ($tallennusmuoto_check) {
-        if ($myynnit) {
+      if ($myynnit) {
+        if ($tallennusmuoto_check) {
           $worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f", $myyntirivi['myynti3kk']));
           $excelsarake++;
 
@@ -1682,8 +1683,16 @@ if (isset($supertee) and $supertee == "RAPORTOI") {
 
           $worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f", $myyntirivi['edelliset12kk']));
           $excelsarake++;
-        }
 
+        } else {
+          fwrite($fh, pupesoft_csvstring(sprintf("%.06f", $myyntirivi['myynti3kk']))."\t");
+          fwrite($fh, pupesoft_csvstring(sprintf("%.06f", $myyntirivi['edelliset3kk']))."\t");
+          fwrite($fh, pupesoft_csvstring(sprintf("%.06f", $myyntirivi['myynti12kk']))."\t");
+          fwrite($fh, pupesoft_csvstring(sprintf("%.06f", $myyntirivi['edelliset12kk']))."\t");
+        }
+      }
+
+      if ($tallennusmuoto_check) {
         $worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.06f", $kehasilloin));
         $excelsarake++;
 
@@ -1701,13 +1710,6 @@ if (isset($supertee) and $supertee == "RAPORTOI") {
         $excelsarake++;
       }
       else {
-        if ($myynnit) {
-          fwrite($fh, pupesoft_csvstring(sprintf("%.06f", $myyntirivi['myynti3kk']))."\t");
-          fwrite($fh, pupesoft_csvstring(sprintf("%.06f", $myyntirivi['edelliset3kk']))."\t");
-          fwrite($fh, pupesoft_csvstring(sprintf("%.06f", $myyntirivi['myynti12kk']))."\t");
-          fwrite($fh, pupesoft_csvstring(sprintf("%.06f", $myyntirivi['edelliset12kk']))."\t");
-        }
-
         fwrite($fh, pupesoft_csvstring(sprintf("%.06f", $kehasilloin))."\t");
 
         if ($nayta_ostohinta) {

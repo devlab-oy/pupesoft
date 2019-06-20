@@ -471,7 +471,12 @@ if ($tee == "paalle" or $tee == "25paalle" or $tee == "puolipaalle" or $tee == "
       $set_zenior = "myyntihinta = myyntihinta * " . ($zenior_jaettava / $zenior_jakaja) . ", ";
     }
 
-    $z_query = "SELECT laji, selitetark
+    $z_orig_hinta = null;
+    $z_orig_try = null;
+    $z_orig_osasto = null;
+    $z_orig_aleryhma = null;
+
+    $z_query = "SELECT laji, selite, selitetark
                 FROM tuotteen_avainsanat
                 WHERE yhtio = '{$kukarow["yhtio"]}'
                 AND kieli   = '{$yhtiorow["kieli"]}'
@@ -480,13 +485,19 @@ if ($tee == "paalle" or $tee == "25paalle" or $tee == "puolipaalle" or $tee == "
     $z_result = pupe_query($z_query);
 
     if (mysql_num_rows($z_result) == 0) {
-      $z_row_found = 0;
       $on_jo_epakurantti = 0;  // Tämä on epäkurantoitu ennen zeniorparts-toiminnon käyttöönottoa. Poistetaan hinnastot mutta talteen otettava tuote.myyntihinta saattaa olla käsin muutettu
     }
     else {
-      $z_row_found = 1;
-      $z_row = mysql_fetch_assoc($z_result);
-      $z_orig_hinta = (floatval($z_row["selitetark"]) > 0) ? floatval($z_row["selitetark"]) : $tuoterow["myyntihinta"];
+      while ($z_row = mysql_fetch_assoc($z_result)) {
+        if ($z_row['selite'] == "K")
+          $z_orig_hinta = (floatval($z_row["selitetark"]) > 0) ? floatval($z_row["selitetark"]) : $tuoterow["myyntihinta"];
+        elseif ($z_row['selite'] == "ALKUP_TRY")
+          $z_orig_try = $z_row['selitetark'];
+        elseif ($z_row['selite'] == "ALKUP_OSASTO")
+          $z_orig_osasto = $z_row['selitetark'];
+        elseif ($z_row['selite'] == "ALKUP_ALERYHMA")
+          $z_orig_aleryhma = $z_row['selitetark'];
+      }
     }
 
     if ($on_jo_epakurantti == 0) {
@@ -507,7 +518,7 @@ if ($tee == "paalle" or $tee == "25paalle" or $tee == "puolipaalle" or $tee == "
                   AND tuoteno = '{$tuoterow["tuoteno"]}'";
       $z_result = pupe_query($z_query);
 
-      if ($z_row_found == 0) {
+      if ($z_orig_hinta == null) {
         $z_query = "INSERT INTO tuotteen_avainsanat  SET
                     yhtio      = '{$kukarow["yhtio"]}',
                     kieli      = '{$yhtiorow["kieli"]}',
@@ -519,9 +530,68 @@ if ($tee == "paalle" or $tee == "25paalle" or $tee == "puolipaalle" or $tee == "
                     luontiaika = now()";
         $z_result = pupe_query($z_query);
       }
+
+      if ($yhtiorow['epakurantti_automaattimuutokset'] == 'Z') {
+        if ($z_orig_try == null) {
+          $query = "INSERT INTO tuotteen_avainsanat  SET
+                    yhtio      = '{$kukarow["yhtio"]}',
+                    kieli      = '{$yhtiorow["kieli"]}',
+                    tuoteno    = '{$tuoterow["tuoteno"]}',
+                    laji       = 'zeniorparts',
+                    selite     = 'ALKUP_TRY',
+                    selitetark = '{$tuoterow["try"]}',
+                    laatija    = '{$kukarow["kuka"]}',
+                    luontiaika = now()";
+          $a_result = pupe_query($query);
+        }
+
+        if ($z_orig_aleryhma == null) {
+          $query = "INSERT INTO tuotteen_avainsanat  SET
+                    yhtio      = '{$kukarow["yhtio"]}',
+                    kieli      = '{$yhtiorow["kieli"]}',
+                    tuoteno    = '{$tuoterow["tuoteno"]}',
+                    laji       = 'zeniorparts',
+                    selite     = 'ALKUP_ALERYHMA',
+                    selitetark = '{$tuoterow["aleryhma"]}',
+                    laatija    = '{$kukarow["kuka"]}',
+                    luontiaika = now()";
+          $a_result = pupe_query($query);
+        }
+
+        if ($z_orig_osasto == null) {
+          $query = "INSERT INTO tuotteen_avainsanat  SET
+                    yhtio      = '{$kukarow["yhtio"]}',
+                    kieli      = '{$yhtiorow["kieli"]}',
+                    tuoteno    = '{$tuoterow["tuoteno"]}',
+                    laji       = 'zeniorparts',
+                    selite     = 'ALKUP_OSASTO',
+                    selitetark = '{$tuoterow["osasto"]}',
+                    laatija    = '{$kukarow["kuka"]}',
+                    luontiaika = now()";
+          $a_result = pupe_query($query);
+        }
+      }
     }
-    elseif (($tee == 'pois' or $tee == 'peru') and $z_row_found != 0) {
-      $set_zenior = "myyntihinta = {$z_orig_hinta}, ";
+    elseif (($tee == 'pois' or $tee == 'peru')) {
+      $set_zenior = "";
+
+      if ($z_orig_hinta != null)
+        $set_zenior .= "myyntihinta = {$z_orig_hinta}, ";
+
+      if ($yhtiorow['epakurantti_automaattimuutokset'] == 'Z') {
+        $puun_tunnus = t_avainsana("ZEPA_OS_PUUNALK", "", "AND selitetark = {$z_orig_osasto}", "", "", "selite");
+        if ($puun_tunnus != "") {
+          $query = "DELETE FROM puun_alkio WHERE yhtio = '{$kukarow["yhtio"]}' AND liitos = '{$tuoterow["tuoteno"]}' AND puun_tunnus = {$puun_tunnus}";
+          pupe_query($query);
+        }
+
+        if ($z_orig_try != null)
+          $set_zenior .= "try = '{$z_orig_try}', ";
+        if ($z_orig_aleryhma != null)
+          $set_zenior .= "aleryhma = '{$z_orig_aleryhma}', ";
+        if ($z_orig_osasto != null)
+          $set_zenior .= "osasto = '{$z_orig_osasto}', ";
+      }
 
       $t_query = "DELETE FROM tuotteen_avainsanat
                   WHERE yhtio = '{$kukarow["yhtio"]}'
@@ -539,39 +609,6 @@ if ($tee == "paalle" or $tee == "25paalle" or $tee == "puolipaalle" or $tee == "
   if ($pvm100 != $updatepvm) { $pvm100 = "'{$pvm100}'"; }
 
   if (($yhtiorow['epakurantti_automaattimuutokset'] == 'Z') and ($on_jo_epakurantti == 0)) {
-    $query = "INSERT INTO tuotteen_avainsanat  SET
-                    yhtio      = '{$kukarow["yhtio"]}',
-                    kieli      = '{$yhtiorow["kieli"]}',
-                    tuoteno    = '{$tuoterow["tuoteno"]}',
-                    laji       = 'zeniorparts',
-                    selite     = 'ALKUP_TRY',
-                    selitetark = '{$tuoterow["try"]}',
-                    laatija    = '{$kukarow["kuka"]}',
-                    luontiaika = now()";
-    $a_result = pupe_query($query);
-
-    $query = "INSERT INTO tuotteen_avainsanat  SET
-                    yhtio      = '{$kukarow["yhtio"]}',
-                    kieli      = '{$yhtiorow["kieli"]}',
-                    tuoteno    = '{$tuoterow["tuoteno"]}',
-                    laji       = 'zeniorparts',
-                    selite     = 'ALKUP_ALERYHMA',
-                    selitetark = '{$tuoterow["aleryhma"]}',
-                    laatija    = '{$kukarow["kuka"]}',
-                    luontiaika = now()";
-    $a_result = pupe_query($query);
-
-    $query = "INSERT INTO tuotteen_avainsanat  SET
-                    yhtio      = '{$kukarow["yhtio"]}',
-                    kieli      = '{$yhtiorow["kieli"]}',
-                    tuoteno    = '{$tuoterow["tuoteno"]}',
-                    laji       = 'zeniorparts',
-                    selite     = 'ALKUP_OSASTO',
-                    selitetark = '{$tuoterow["osasto"]}',
-                    laatija    = '{$kukarow["kuka"]}',
-                    luontiaika = now()";
-    $a_result = pupe_query($query);
-
     $puun_tunnus = t_avainsana("ZEPA_OS_PUUNALK", "", "AND selitetark = {$tuoterow['osasto']}", "", "", "selite");
     if ($puun_tunnus != "") {
       $query = "SELECT COUNT(*) AS maara FROM puun_alkio WHERE yhtio = '{$kukarow['yhtio']}' AND liitos = '{$tuoterow['tuoteno']}' AND puun_tunnus = '{$puun_tunnus}'";

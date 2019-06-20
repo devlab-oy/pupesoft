@@ -50,8 +50,11 @@ $result = pupe_query($query);
 while ($row = mysql_fetch_assoc($result)) {
 
   if ($yhtiorow['epakurantti_automaattimuutokset'] == 'Z') {
-    $query = "DELETE FROM puun_alkio WHERE yhtio = '{$kukarow["yhtio"]}' AND liitos = '{$row["tuoteno"]}' AND puun_tunnus IN (SELECT selite FROM avainsana WHERE yhtio = '{$kukarow['yhtio']}' AND selitetark = '{$row['osasto']}')";
-    pupe_query($query);
+    $puun_tunnus = t_avainsana("ZEPA_OS_PUUNALK", "", "AND selitetark = (SELECT selitetark FROM tuotteen_avainsanat WHERE yhtio = '{$kukarow["yhtio"]}' AND kieli = '{$yhtiorow["kieli"]}' AND tuoteno = '{$row["tuoteno"]}' AND laji = 'zeniorparts' AND selite = 'ALKUP_OSASTO' LIMIT 1)", "", "", "selite");
+    if ($puun_tunnus != "") {
+      $query = "DELETE FROM puun_alkio WHERE yhtio = '{$kukarow["yhtio"]}' AND liitos = '{$row["tuoteno"]}' AND puun_tunnus = {$puun_tunnus}";
+      pupe_query($query);
+    }
 
     $set_lisakentat = "try      = (SELECT selitetark FROM tuotteen_avainsanat WHERE yhtio = '{$kukarow["yhtio"]}' AND kieli = '{$yhtiorow["kieli"]}' AND tuoteno = '{$row["tuoteno"]}' AND laji = 'zeniorparts' AND selite = 'ALKUP_TRY' LIMIT 1),
                        aleryhma = (SELECT selitetark FROM tuotteen_avainsanat WHERE yhtio = '{$kukarow["yhtio"]}' AND kieli = '{$yhtiorow["kieli"]}' AND tuoteno = '{$row["tuoteno"]}' AND laji = 'zeniorparts' AND selite = 'ALKUP_ALERYHMA' LIMIT 1),

@@ -794,7 +794,7 @@ if ($tee == "KIRJOITA" or $tee == "KIRJOITAKOPIO") {
 
       echo "<tr>";
       echo "<th>".t("Virhe")."</th>";
-      echo "<td><font class='error'>" . t("Poimittu aineisto voi sis‰lt‰‰ vain 9 hyvityslaskua yhdelle asiakkaalle") . ".</font></td>";
+      echo "<td><font class='error'>" . t("Poimittu aineisto voi sis‰lt‰‰ vain 9 hyvityslaskua yhdelle toimittajalle") . ".</font></td>";
       echo "</tr>";
       echo "</table>";
 

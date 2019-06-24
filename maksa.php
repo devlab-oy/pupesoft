@@ -190,7 +190,9 @@ if ($tee == 'H' or $tee == 'G') {
 
     // Huomaa samat kyselyt (wheret) tee == G haarassa...
     if (strtoupper($trow['maa']) == 'FI') {
-      $where = "WHERE yhtio    = '$kukarow[yhtio]'
+      $query = "SELECT sum(if(summa < 0, 1, 0)) maara, sum(if(alatila = 'K' and summa > 0, summa - kasumma, summa)) summa
+                FROM lasku
+                WHERE yhtio    = '$kukarow[yhtio]'
                 and tila       = 'P'
                 and olmapvm    = '$trow[olmapvm]'
                 and maksaja    = '$kukarow[kuka]'
@@ -198,8 +200,11 @@ if ($tee == 'H' or $tee == 'G') {
                 and maa        = 'FI'
                 and ultilno    = '$trow[ultilno]'
                 and swift      = '$trow[swift]'";
-    } else {
-      $where = "WHERE yhtio     = '$kukarow[yhtio]'
+    }
+    else {
+      $query = "SELECT sum(if(summa < 0, 1, 0)) maara, sum(if(alatila='K' and summa > 0, summa - kasumma, summa)) summa
+                FROM lasku
+                WHERE yhtio     = '$kukarow[yhtio]'
                 and tila        = 'P'
                 and olmapvm     = '$trow[olmapvm]'
                 and maksaja     = '$kukarow[kuka]'
@@ -215,10 +220,6 @@ if ($tee == 'H' or $tee == 'G') {
                 and sisviesti1  = '$trow[sisviesti1]'";
     }
 
-    $query = "SELECT sum(if(alatila='K' and summa > 0, summa - kasumma, summa)) summa
-              FROM lasku
-              {$where}";
-
     $result = pupe_query($query);
 
     if (mysql_num_rows($result) != 1) {
@@ -228,24 +229,13 @@ if ($tee == 'H' or $tee == 'G') {
     }
 
     $veloitusrow = mysql_fetch_assoc($result);
+    $hyvityslaskuja = $veloitusrow['maara'];
 
-    $query = "SELECT COUNT(*) AS hyvityslaskuja
-              FROM lasku
-              {$where} and summa < 0";
-
-    $result = pupe_query($query);
-    if (mysql_num_rows($result) > 0) {
-      $maararow = mysql_fetch_assoc($result);
-      $hyvityslaskuja = $maararow['hyvityslaskuja'];
-    } else {
-      $hyvityslaskuja = 0;
-    }
-
-    if ($hyvityslaskuja >= 9 and $oltilrow['bic'] == 'NDEAFIHH') {
-      echo "<font class='error'>".t("Poimittu aineisto voi sis‰lt‰‰ vain 9 hyvityslaskua yhdelle asiakkaalle")."</font><br><br>";
+    if ($hyvityslaskuja >= 1 and $oltilrow['bic'] == 'NDEAFIHH') {
+      echo "<font class='error'>".t("Poimittu aineisto voi sis‰lt‰‰ vain 9 hyvityslaskua yhdelle toimittajalle")."</font><br><br>";
       $tee = 'S';
-
-    } elseif (abs($veloitusrow['summa'] + $trow['summa_valuutassa']) < 0.01) {
+    }
+    elseif (abs($veloitusrow['summa'] + $trow['summa_valuutassa']) < 0.01) {
 
       // Ei ole valittu mit‰ tehd‰‰n
       if (!isset($valinta) or $valinta == '') {
@@ -271,7 +261,8 @@ if ($tee == 'H' or $tee == 'G') {
         echo "<font class='error'>" . t("Valitut veloitukset ja hyvitykset menev‰t tasan p‰itt‰in (summa 0,-). Pankkiin ei kuitenkaan voi l‰hett‰‰ nolla-summaisia maksuja. Jos haluat l‰hett‰‰ n‰m‰ p‰itt‰in menev‰t veloitukset ja hyvitykset pankkiin, pit‰‰ sinun valita lis‰‰ veloituksia. Yhteissumman pit‰‰ olla suurempi kuin 0.") . "</font><br><br>";
         $tee = 'S';
       }
-    } elseif ($veloitusrow['summa'] + $trow['summa'] < 0.01) {
+    }
+    elseif ($veloitusrow['summa'] + $trow['summa'] < 0.01) {
       echo "<font class='error'>" . t("Hyvityslaskua vastaavaa m‰‰r‰‰ veloituksia ei ole valittuna.") . "<br>" . t("Valitse samalle asiakkaalle lis‰‰ veloituksia, jos haluat valita t‰m‰n hyvityslaskun maksatukseen") . "</font><br><br>";
       $tee = 'S';
     }

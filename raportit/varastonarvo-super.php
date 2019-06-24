@@ -914,7 +914,8 @@ if (isset($supertee) and $supertee == "RAPORTOI") {
       $worksheet->writeString($excelrivi, $excelsarake, t("Edellinen 12kk"), $format_bold);
       $excelsarake++;
 
-    } else {
+    }
+    else {
       fwrite($fh, pupesoft_csvstring(t("Myynti 3kk"))."\t");
       fwrite($fh, pupesoft_csvstring(t("Edellinen 3kk"))."\t");
       fwrite($fh, pupesoft_csvstring(t("Myynti 12kk"))."\t");
@@ -1651,10 +1652,10 @@ if (isset($supertee) and $supertee == "RAPORTOI") {
 
       if ($myynnit) {
         $query = "SELECT
-                    round(sum(if(laskutettuaika >= date_sub('{$vv}-{$kk}-{$pp}', interval 24 month) AND laskutettuaika < date_sub('{$vv}-{$kk}-{$pp}', interval 12 month), kpl, 0))) edelliset12kk,
-                    round(sum(if(laskutettuaika >= date_sub('{$vv}-{$kk}-{$pp}', interval 6 month) AND laskutettuaika < date_sub('{$vv}-{$kk}-{$pp}', interval 3 month), kpl, 0))) edelliset3kk,
+                    round(sum(if(laskutettuaika >= date_sub('{$vv}-{$kk}-{$pp}', interval 3 month), kpl, 0))) myynti3kk,
+                    round(sum(if(laskutettuaika >= date_sub('{$vv}-{$kk}-{$pp}', interval 15 month) AND laskutettuaika < date_sub('{$vv}-{$kk}-{$pp}', interval 12 month), kpl, 0))) edelliset3kk,
                     round(sum(if(laskutettuaika >= date_sub('{$vv}-{$kk}-{$pp}', interval 12 month), kpl, 0))) myynti12kk,
-                    round(sum(if(laskutettuaika >= date_sub('{$vv}-{$kk}-{$pp}', interval 3 month), kpl, 0))) myynti3kk
+                    round(sum(if(laskutettuaika >= date_sub('{$vv}-{$kk}-{$pp}', interval 24 month) AND laskutettuaika < date_sub('{$vv}-{$kk}-{$pp}', interval 12 month), kpl, 0))) edelliset12kk
                   FROM tilausrivi
                   WHERE yhtio          = '{$kukarow["yhtio"]}'
                     AND tuoteno        = '{$row["tuoteno"]}'
@@ -1682,7 +1683,8 @@ if (isset($supertee) and $supertee == "RAPORTOI") {
           $worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f", $myyntirivi['edelliset12kk']));
           $excelsarake++;
 
-        } else {
+        }
+        else {
           fwrite($fh, pupesoft_csvstring(sprintf("%.06f", $myyntirivi['myynti3kk']))."\t");
           fwrite($fh, pupesoft_csvstring(sprintf("%.06f", $myyntirivi['edelliset3kk']))."\t");
           fwrite($fh, pupesoft_csvstring(sprintf("%.06f", $myyntirivi['myynti12kk']))."\t");

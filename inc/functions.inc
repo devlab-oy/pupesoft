@@ -12407,6 +12407,22 @@ if (!function_exists('t_tuotteen_avainsanat')) {
   }
 }
 
+// Tämä funktio kääntää tuotteen avainsanan tai palautta avainsanan yhtiön oletuskielellä mikäli käännöstä ei löydy.
+if (!function_exists('t_tuotteen_avainsana')) {
+  function t_tuotteen_avainsana($tuoterow, $laji, $kieli = '')
+  {
+    global $yhtiorow;
+
+    $result = t_tuotteen_avainsanat($tuoterow, $laji, $kieli);
+
+    if ($result == $laji) {
+        $result = t_tuotteen_avainsanat($tuoterow, $laji, $yhtiorow['kieli']);
+    }
+
+    return $result;
+  }
+}
+
 // funktio palauttaa maan nimen tekstimuodossa halutulla kielellä, tai jos ei löydy niin suomeksi
 if (!function_exists("t_maanimi")) {
   function t_maanimi($maa, $kieli = 'fi') {

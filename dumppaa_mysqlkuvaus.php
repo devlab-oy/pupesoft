@@ -68,7 +68,7 @@ $curlfile = "/tmp/".$tmpfilenimi;
 
 // Löytyykö alttereita?
 $ch = curl_init();
-curl_setopt($ch, CURLOPT_URL, "http://api.devlab.fi/sqlupdate.php");
+curl_setopt($ch, CURLOPT_URL, "http://pupeapi.sprintit.fi/sqlupdate.php");
 curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
 curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, FALSE);
 curl_setopt($ch, CURLOPT_HEADER, 1);
@@ -91,7 +91,7 @@ $alterit = trim($result);
 
 // Löytyykö custom updateja?
 $ch = curl_init();
-curl_setopt($ch, CURLOPT_URL, "http://api.devlab.fi/sqlupdate.sql");
+curl_setopt($ch, CURLOPT_URL, "http://pupeapi.sprintit.fi/sqlupdate.sql");
 curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
 curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, FALSE);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);

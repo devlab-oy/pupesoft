@@ -17,6 +17,77 @@ else {
 
 if (strpos($_SERVER['SCRIPT_NAME'], "yllapito.php")  !== FALSE) {
   require "inc/parametrit.inc";
+}
+
+if ($toim == "tuote") {
+  if (!empty($_POST['ajax_toiminto']) and $_POST['ajax_toiminto'] == "hae_tuote_ryhmat") {
+    if (!isset($osasto)) $osasto = '';
+
+    $query = "SELECT selite, selitetark
+              FROM avainsana
+              WHERE laji = 'TRY'
+                AND (selitetark_2 IS NULL OR selitetark_2 = '' OR selitetark_2 = '$osasto')
+              ORDER BY selite";
+    $result = pupe_query($query);
+    $results = array();
+
+    while ($row = mysql_fetch_assoc($result)) {
+      $row['selitetark'] = utf8_encode($row['selitetark']);
+      $results[] = $row;
+    }
+
+    $out = array_values($results);
+    echo json_encode($out);
+
+    exit;
+  }
+
+  ?>
+  <script>
+
+  $(function() {
+    $('#osasto').on('change', function(e) {
+      var osasto = $('#osasto :selected').val()
+
+      $.ajax({
+        async: false,
+        type: 'POST',
+        url: "yllapito.php",
+        data: {
+          no_head: 'yes',
+          ohje: 'off',
+          toim: "tuote",
+          osasto: osasto,
+          ajax_toiminto: 'hae_tuote_ryhmat'
+        }
+      }).done(function(json) {
+        var ryhma = $('#try')
+        var valinta = ryhma.val();
+
+        ryhma.empty()
+        ryhma.append('<option value=\'\'><?php echo t("Ei valintaa<"); ?>/option>');
+
+        var data = jQuery.parseJSON(json);
+
+        $.each(data, function (index, item) {
+          var isselected = '';
+          if (item.selite == valinta) {
+            isselected = ' selected';
+          }
+
+          ryhma.append('<option value=' + item.selite + isselected + '>' + item.selite + ' ' + item.selitetark + '</option>');
+        });
+
+        ryhma.value = valinta;
+      });
+    });
+  });
+
+  </script>
+  <?php
+}
+
+if (strpos($_SERVER['SCRIPT_NAME'], "yllapito.php")  !== FALSE) {
   echo "<script src='yllapito.js'></script>";
 }
 

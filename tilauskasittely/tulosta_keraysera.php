@@ -581,56 +581,61 @@ if ($tee != '') {
             $valittu_tulostin = $kerayslistatulostin;
             $keraysvyohyke    = $erat['keraysvyohyketiedot']['keraysvyohyke'];
             $laskuja          = count($erat['tilaukset']);
+            
+            # Mikäli useampia asiakkaita yhdistellää keräyseriin niin tulostetaan lappuja tässä
+            if (strpos($erat["keraysvyohyketiedot"]["yhdistelysaanto"], "S") !== false) {
+              # Haetaan varaston osoitelapputulostin eli printteri3
+              $query  = "SELECT kirjoittimet.komento,
+                          kirjoittimet.mediatyyppi
+                        FROM kirjoittimet
+                          JOIN varastopaikat ON (varastopaikat.yhtio = kirjoittimet.yhtio AND varastopaikat.printteri3 = kirjoittimet.tunnus)
+                        WHERE kirjoittimet.yhtio = '{$kukarow['yhtio']}'
+                          AND varastopaikat.tunnus  = {$select_varasto}";
+              $kirres = pupe_query($query);
+              $kirrow = mysql_fetch_assoc($kirres);
 
-            $query  = "SELECT komento,
-                        mediatyyppi
-                       FROM kirjoittimet
-                       WHERE yhtio = '{$kukarow['yhtio']}'
-                        AND tunnus  = 118";
-            $kirres = pupe_query($query);
-            $kirrow = mysql_fetch_assoc($kirres);
+              $oslapp = $kirrow['komento'];
+              $oslapp_mediatyyppi = $kirrow['mediatyyppi'];
 
-            $oslapp = $kirrow['komento'];
-            $oslapp_mediatyyppi = $kirrow['mediatyyppi'];
+              $query = "SELECT kerayserat.otunnus, 
+                          pakkaus.pakkaus, 
+                          GROUP_CONCAT(DISTINCT kerayserat.pakkausnro) AS pakkausnro,
+                          lasku.toim_nimi,
+                          lasku.toim_nimitark,
+                          lasku.toim_osoite,
+                          lasku.toim_postino,
+                          lasku.toim_postitp
+                        FROM kerayserat
+                          LEFT JOIN pakkaus ON (pakkaus.yhtio = kerayserat.yhtio AND pakkaus.tunnus = kerayserat.pakkaus)
+                          JOIN lasku ON (lasku.yhtio = kerayserat.yhtio AND lasku.tunnus = kerayserat.otunnus)
+                        WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
+                          AND kerayserat.otunnus IN ({$tilausnumeroita})
+                        GROUP BY lasku.liitostunnus
+                        ORDER BY kerayserat.otunnus, kerayserat.pakkausnro";
+              $pak_chk_res = pupe_query($query);
 
-            $query = "SELECT kerayserat.otunnus, 
-                        pakkaus.pakkaus, 
-                        GROUP_CONCAT(DISTINCT kerayserat.pakkausnro) AS pakkausnro,
-                        lasku.toim_nimi,
-                        lasku.toim_nimitark,
-                        lasku.toim_osoite,
-                        lasku.toim_postino,
-                        lasku.toim_postitp
-                      FROM kerayserat
-                        LEFT JOIN pakkaus ON (pakkaus.yhtio = kerayserat.yhtio AND pakkaus.tunnus = kerayserat.pakkaus)
-                        JOIN lasku ON (lasku.yhtio = kerayserat.yhtio AND lasku.tunnus = kerayserat.otunnus)
-                      WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
-                        AND kerayserat.otunnus IN ({$tilausnumeroita})
-                      GROUP BY lasku.liitostunnus
-                      ORDER BY kerayserat.otunnus, kerayserat.pakkausnro";
-            $pak_chk_res = pupe_query($query);
+              while ($pak_chk_row = mysql_fetch_assoc($pak_chk_res)) {
+                $paks = explode(",", $pak_chk_row['pakkausnro']);
 
-            while ($pak_chk_row = mysql_fetch_assoc($pak_chk_res)) {
-              $paks = explode(",", $pak_chk_row['pakkausnro']);
+                $pak_num = count($paks);
 
-              $pak_num = count($paks);
-
-              foreach ($paks as $pak) {
-                $params = array(
-                  'tilriv' => $pak_chk_row['otunnus'],
-                  'komento' => $oslapp,
-                  'mediatyyppi' => $oslapp_mediatyyppi,
-                  'pakkauskoodi' => $pak_chk_row['pakkaus'],
-                  'montako_laatikkoa_yht' => $pak_num,
-                  'toim_nimi' => $pak_chk_row['toim_nimi'],
-                  'toim_nimitark' => $pak_chk_row['toim_nimitark'],
-                  'toim_osoite' => $pak_chk_row['toim_osoite'],
-                  'toim_postino' => $pak_chk_row['toim_postino'],
-                  'toim_postitp' => $pak_chk_row['toim_postitp'],
-                  'pakkausnro' => $pak,
-                );
-  
-                tulosta_oslap_mg($params);
+                foreach ($paks as $pak) {
+                  $params = array(
+                    'tilriv' => $pak_chk_row['otunnus'],
+                    'komento' => $oslapp,
+                    'mediatyyppi' => $oslapp_mediatyyppi,
+                    'pakkauskoodi' => $pak_chk_row['pakkaus'],
+                    'montako_laatikkoa_yht' => $pak_num,
+                    'toim_nimi' => $pak_chk_row['toim_nimi'],
+                    'toim_nimitark' => $pak_chk_row['toim_nimitark'],
+                    'toim_osoite' => $pak_chk_row['toim_osoite'],
+                    'toim_postino' => $pak_chk_row['toim_postino'],
+                    'toim_postitp' => $pak_chk_row['toim_postitp'],
+                    'pakkausnro' => $pak,
+                  );
+    
+                  tulosta_oslap_mg($params);
+                }
               }
             }
 

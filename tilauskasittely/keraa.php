@@ -1736,13 +1736,30 @@ if ($tee == 'P') {
         pupesoft_sahkoposti($parametri);
       }
 
-      if ($laskurow['kuka_ext_nimi'] != '' and $yhtiorow['extranet_kerayspoikkeama_email'] != '') {
+      $varquery = "SELECT Kerayspoikkeus_email
+                FROM varastopaikat
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND tunnus = '{$laskurow['varasto']}'";
+      $result = pupe_query($varquery);
+
+      $varrow = mysql_fetch_assoc($result);
+      
+      $poikkeama_email = '';
+
+      if ($varrow['Kerayspoikkeus_email'] != '') {
+        $poikkeama_email = $varrow['Kerayspoikkeus_email'];
+      }
+      else if ($laskurow['kuka_ext_nimi'] != '' and $yhtiorow['extranet_kerayspoikkeama_email'] != '') {
+        $poikkeama_email = $yhtiorow['extranet_kerayspoikkeama_email'];
+      } 
+      
+      if ($poikkeama_email != '') {
         $uloslisa .= t("Tilauksen keräsi").": $keraaja[nimi]<br><br>";
         $ulos = str_replace("</font><hr><br><br><table>", "</font><hr><br><br>$uloslisa<table>", $ulos);
 
         // Sähköpostin lähetykseen parametrit
         $parametri = array(
-          "to"           => $yhtiorow["extranet_kerayspoikkeama_email"],
+          "to"           => $poikkeama_email,
           "cc"           => "",
           "subject"      => "{$yhtiorow['nimi']} - ".t("Keräyspoikkeamat", $kieli),
           "ctype"        => $_ctype,

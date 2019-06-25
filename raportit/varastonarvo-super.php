@@ -1653,14 +1653,14 @@ if (isset($supertee) and $supertee == "RAPORTOI") {
       if ($myynnit) {
         $query = "SELECT
                     round(sum(if(laskutettuaika >= date_sub('{$vv}-{$kk}-{$pp}', interval 3 month), kpl, 0))) myynti3kk,
-                    round(sum(if(laskutettuaika >= date_sub('{$vv}-{$kk}-{$pp}', interval 15 month) AND laskutettuaika < date_sub('{$vv}-{$kk}-{$pp}', interval 12 month), kpl, 0))) edelliset3kk,
+                    round(sum(if(laskutettuaika >= date_sub('{$vv}-{$kk}-{$pp}', interval 15 month) AND laskutettuaika <= date_sub('{$vv}-{$kk}-{$pp}', interval 12 month), kpl, 0))) edelliset3kk,
                     round(sum(if(laskutettuaika >= date_sub('{$vv}-{$kk}-{$pp}', interval 12 month), kpl, 0))) myynti12kk,
-                    round(sum(if(laskutettuaika >= date_sub('{$vv}-{$kk}-{$pp}', interval 24 month) AND laskutettuaika < date_sub('{$vv}-{$kk}-{$pp}', interval 12 month), kpl, 0))) edelliset12kk
+                    round(sum(if(laskutettuaika >= date_sub('{$vv}-{$kk}-{$pp}', interval 24 month) AND laskutettuaika <= date_sub('{$vv}-{$kk}-{$pp}', interval 12 month), kpl, 0))) edelliset12kk
                   FROM tilausrivi
                   WHERE yhtio          = '{$kukarow["yhtio"]}'
                     AND tuoteno        = '{$row["tuoteno"]}'
                     AND tyyppi         = 'L'
-                    and laskutettuaika >= date_sub('{$vv}-{$kk}-{$pp}', interval 24 month)
+                    AND laskutettuaika >= date_sub('{$vv}-{$kk}-{$pp}', interval 24 month)
                     AND kpl            != 0";
 
         if ($varastontunnukset != "") {

@@ -231,7 +231,7 @@ if ($tee == 'H' or $tee == 'G') {
     $veloitusrow = mysql_fetch_assoc($result);
     $hyvityslaskuja = $veloitusrow['maara'];
 
-    if ($hyvityslaskuja >= 1 and $oltilrow['bic'] == 'NDEAFIHH') {
+    if ($hyvityslaskuja >= 9 and $oltilrow['bic'] == 'NDEAFIHH') {
       echo "<font class='error'>".t("Poimittu aineisto voi sis‰lt‰‰ vain 9 hyvityslaskua yhdelle toimittajalle")."</font><br><br>";
       $tee = 'S';
     }

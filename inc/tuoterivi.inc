@@ -70,7 +70,12 @@ if (mysql_field_name($result, $i) == "tuoteno") {
       }
     }
 
-    $ulos = "<td><input type = 'hidden' name = 'uusi' value = '$uusi'><input type = 'text' name = '$nimi' value = '$trow[$i]' size='$size' maxlength='$maxsize'>{$virheviesti}</td>";
+    $ulos = "<td>
+               <input type = 'hidden' name = 'uusi' value = '$uusi'>
+               <input type = 'text' name = '$nimi' id = 'input_tuoteno' value = '$trow[$i]' size='$size' maxlength='$maxsize'>
+               <input type = 'button' name = 'etsi_vapaa_tuoteno' id = 'etsi_vapaa_tuoteno' value = '" . t("Etsi seuraava vapaa") . "'>
+               <div id = 'tuoteno_virhe'>{$virheviesti}</div>
+             </td>";
     $jatko=0;
 
     // Jos on uusi tuote niin kaikki lukot on auki

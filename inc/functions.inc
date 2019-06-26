@@ -12416,7 +12416,11 @@ if (!function_exists('t_tuotteen_avainsana')) {
     $result = t_tuotteen_avainsanat($tuoterow, $laji, $kieli);
 
     if ($result == $laji) {
-        $result = t_tuotteen_avainsanat($tuoterow, $laji, $yhtiorow['kieli']);
+      $result = t_tuotteen_avainsanat($tuoterow, $laji, $yhtiorow['kieli']);
+
+      if ($result == $laji) {
+        $result = "";
+      }
     }
 
     return $result;

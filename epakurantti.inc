@@ -489,14 +489,18 @@ if ($tee == "paalle" or $tee == "25paalle" or $tee == "puolipaalle" or $tee == "
     }
     else {
       while ($z_row = mysql_fetch_assoc($z_result)) {
-        if ($z_row['selite'] == "K")
+        if ($z_row['selite'] == "K") {
           $z_orig_hinta = (floatval($z_row["selitetark"]) > 0) ? floatval($z_row["selitetark"]) : $tuoterow["myyntihinta"];
-        elseif ($z_row['selite'] == "ALKUP_TRY")
+        }
+        elseif ($z_row['selite'] == "ALKUP_TRY") {
           $z_orig_try = $z_row['selitetark'];
-        elseif ($z_row['selite'] == "ALKUP_OSASTO")
+        }
+        elseif ($z_row['selite'] == "ALKUP_OSASTO") {
           $z_orig_osasto = $z_row['selitetark'];
-        elseif ($z_row['selite'] == "ALKUP_ALERYHMA")
+        }
+        elseif ($z_row['selite'] == "ALKUP_ALERYHMA") {
           $z_orig_aleryhma = $z_row['selitetark'];
+        }
       }
     }
 
@@ -585,12 +589,15 @@ if ($tee == "paalle" or $tee == "25paalle" or $tee == "puolipaalle" or $tee == "
           pupe_query($query);
         }
 
-        if ($z_orig_try != null)
+        if ($z_orig_try != null) {
           $set_zenior .= "try = '{$z_orig_try}', ";
-        if ($z_orig_aleryhma != null)
+        }
+        if ($z_orig_aleryhma != null) {
           $set_zenior .= "aleryhma = '{$z_orig_aleryhma}', ";
-        if ($z_orig_osasto != null)
+        }
+        if ($z_orig_osasto != null) {
           $set_zenior .= "osasto = '{$z_orig_osasto}', ";
+        }
       }
 
       $t_query = "DELETE FROM tuotteen_avainsanat
@@ -632,7 +639,8 @@ if ($tee == "paalle" or $tee == "25paalle" or $tee == "puolipaalle" or $tee == "
     $set_lisakentat = "try      = (SELECT selite FROM avainsana    WHERE yhtio = '{$kukarow["yhtio"]}' AND selitetark = 'Zenior parts' AND laji = 'TRY'),
                        aleryhma = (SELECT ryhma  FROM perusalennus WHERE yhtio = '{$kukarow["yhtio"]}' AND selite = 'Zenior parts'),
                        osasto   = (SELECT selite FROM avainsana    WHERE yhtio = '{$kukarow["yhtio"]}' AND selitetark = 'Zenior parts' AND laji = 'OSASTO'),";
-  } else {
+  }
+  else {
     $set_lisakentat = "";
   }
 

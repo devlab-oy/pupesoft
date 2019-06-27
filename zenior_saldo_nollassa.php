@@ -61,7 +61,8 @@ while ($row = mysql_fetch_assoc($result)) {
                        osasto   = (SELECT selitetark FROM tuotteen_avainsanat WHERE yhtio = '{$kukarow["yhtio"]}' AND kieli = '{$yhtiorow["kieli"]}' AND tuoteno = '{$row["tuoteno"]}' AND laji = 'zeniorparts' AND selite = 'ALKUP_OSASTO' LIMIT 1),
                        hinnastoon  = 'E',
                        ostoehdotus = 'E',";
-  } else {
+  }
+  else {
     $set_lisakentat = "";
   }
 

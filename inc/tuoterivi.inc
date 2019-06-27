@@ -68,12 +68,17 @@ if (mysql_field_name($result, $i) == "tuoteno") {
       else {
         $trow[$i] = $autom_tuoteno_row['seuraava_tuoteno'];
       }
+
+      $tuotenohaku = "<input type = 'button' name = 'etsi_vapaa_tuoteno' id = 'etsi_vapaa_tuoteno' value = '" . t("Etsi seuraava vapaa") . "'>";
+    }
+    else {
+      $tuotenohaku = "";
     }
 
     $ulos = "<td>
                <input type = 'hidden' name = 'uusi' value = '$uusi'>
                <input type = 'text' name = '$nimi' id = 'input_tuoteno' value = '$trow[$i]' size='$size' maxlength='$maxsize'>
-               <input type = 'button' name = 'etsi_vapaa_tuoteno' id = 'etsi_vapaa_tuoteno' value = '" . t("Etsi seuraava vapaa") . "'>
+               {$tuotenohaku}
                <div id = 'tuoteno_virhe'>{$virheviesti}</div>
              </td>";
     $jatko=0;

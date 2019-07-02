@@ -43,7 +43,9 @@ if (mysql_field_name($result, $i) == "tuoteno") {
   else {
 
     // Jos automaattinen tuotenumeron ehdotus on p‰‰ll‰...
-    if ($trow[$i] == '' and ($yhtiorow['seuraava_tuotenumero'] == 'K' or ($yhtiorow['seuraava_tuotenumero'] == 'O' and isset($tee_myos_tuotteen_toimittaja_liitos)))) {
+    $automaattinen_tuotenumerointi = ($yhtiorow['seuraava_tuotenumero'] == 'K' or ($yhtiorow['seuraava_tuotenumero'] == 'O' and isset($tee_myos_tuotteen_toimittaja_liitos)));
+
+    if ($trow[$i] == '' and $automaattinen_tuotenumerointi) {
       $virheviesti = '';
       $autom_wherelisa = '';
       $autom_selectlisa = 'MAX(CAST(tuote.tuoteno AS UNSIGNED))';
@@ -68,7 +70,9 @@ if (mysql_field_name($result, $i) == "tuoteno") {
       else {
         $trow[$i] = $autom_tuoteno_row['seuraava_tuoteno'];
       }
+    }
 
+    if ($automaattinen_tuotenumerointi) {
       $tuotenohaku = "<input type = 'button' name = 'etsi_vapaa_tuoteno' id = 'etsi_vapaa_tuoteno' value = '" . t("Etsi seuraava vapaa") . "'>";
     }
     else {

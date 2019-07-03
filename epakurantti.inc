@@ -543,6 +543,7 @@ if ($tee == "paalle" or $tee == "25paalle" or $tee == "puolipaalle" or $tee == "
                     tuoteno    = '{$tuoterow["tuoteno"]}',
                     laji       = 'zeniorparts',
                     selite     = 'ALKUP_TRY',
+                    nakyvyys   = 'P',
                     selitetark = '{$tuoterow["try"]}',
                     laatija    = '{$kukarow["kuka"]}',
                     luontiaika = now()";
@@ -556,6 +557,7 @@ if ($tee == "paalle" or $tee == "25paalle" or $tee == "puolipaalle" or $tee == "
                     tuoteno    = '{$tuoterow["tuoteno"]}',
                     laji       = 'zeniorparts',
                     selite     = 'ALKUP_ALERYHMA',
+                    nakyvyys   = 'P',
                     selitetark = '{$tuoterow["aleryhma"]}',
                     laatija    = '{$kukarow["kuka"]}',
                     luontiaika = now()";
@@ -569,6 +571,7 @@ if ($tee == "paalle" or $tee == "25paalle" or $tee == "puolipaalle" or $tee == "
                     tuoteno    = '{$tuoterow["tuoteno"]}',
                     laji       = 'zeniorparts',
                     selite     = 'ALKUP_OSASTO',
+                    nakyvyys   = 'P',
                     selitetark = '{$tuoterow["osasto"]}',
                     laatija    = '{$kukarow["kuka"]}',
                     luontiaika = now()";

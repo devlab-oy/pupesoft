@@ -108,7 +108,7 @@ if (isset($synkronoi) and count($syncyhtiot) > 1) {
 if ($kukarow['kuka'] == 'admin' and (isset($synkronoireferenssi) or isset($synkronoireferenssialapaivita)) and count($syncyhtiot) > 0) {
 
   $ch  = curl_init();
-  curl_setopt($ch, CURLOPT_URL, "http://api.devlab.fi/referenssivalikot.sql");
+  curl_setopt($ch, CURLOPT_URL, "http://pupeapi.sprintit.fi/referenssivalikot.sql");
   curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
   curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, FALSE);
   curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
@@ -651,7 +651,7 @@ if ($tee == "") {
 
       if ($yhtio == "REFERENSSI") {
         $ch  = curl_init();
-        curl_setopt($ch, CURLOPT_URL, "http://api.devlab.fi/referenssivalikot.sql");
+        curl_setopt($ch, CURLOPT_URL, "http://pupeapi.sprintit.fi/referenssivalikot.sql");
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
         curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, FALSE);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);

@@ -43,7 +43,9 @@ if (mysql_field_name($result, $i) == "tuoteno") {
   else {
 
     // Jos automaattinen tuotenumeron ehdotus on p‰‰ll‰...
-    if ($trow[$i] == '' and ($yhtiorow['seuraava_tuotenumero'] == 'K' or ($yhtiorow['seuraava_tuotenumero'] == 'O' and isset($tee_myos_tuotteen_toimittaja_liitos)))) {
+    $automaattinen_tuotenumerointi = ($yhtiorow['seuraava_tuotenumero'] == 'K' or ($yhtiorow['seuraava_tuotenumero'] == 'O' and isset($tee_myos_tuotteen_toimittaja_liitos)));
+
+    if ($trow[$i] == '' and $automaattinen_tuotenumerointi) {
       $virheviesti = '';
       $autom_wherelisa = '';
       $autom_selectlisa = 'MAX(CAST(tuote.tuoteno AS UNSIGNED))';
@@ -70,7 +72,19 @@ if (mysql_field_name($result, $i) == "tuoteno") {
       }
     }
 
-    $ulos = "<td><input type = 'hidden' name = 'uusi' value = '$uusi'><input type = 'text' name = '$nimi' value = '$trow[$i]' size='$size' maxlength='$maxsize'>{$virheviesti}</td>";
+    if ($automaattinen_tuotenumerointi) {
+      $tuotenohaku = "<input type = 'button' name = 'etsi_vapaa_tuoteno' id = 'etsi_vapaa_tuoteno' value = '" . t("Etsi seuraava vapaa") . "'>";
+    }
+    else {
+      $tuotenohaku = "";
+    }
+
+    $ulos = "<td>
+               <input type = 'hidden' name = 'uusi' value = '$uusi'>
+               <input type = 'text' name = '$nimi' id = 'input_tuoteno' value = '$trow[$i]' size='$size' maxlength='$maxsize'>
+               {$tuotenohaku}
+               <div id = 'tuoteno_virhe'>{$virheviesti}</div>
+             </td>";
     $jatko=0;
 
     // Jos on uusi tuote niin kaikki lukot on auki

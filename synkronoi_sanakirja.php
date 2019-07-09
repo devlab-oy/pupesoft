@@ -38,7 +38,7 @@ if ($tee == "TEE" or $tee == "UPDATE") {
   }
 
   $ch  = curl_init();
-  curl_setopt($ch, CURLOPT_URL, "http://api.devlab.fi/referenssisanakirja.sql");
+  curl_setopt($ch, CURLOPT_URL, "http://pupeapi.sprintit.fi/referenssisanakirja.sql");
   curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
   curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, FALSE);
   curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);

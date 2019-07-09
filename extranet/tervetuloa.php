@@ -273,7 +273,7 @@ if ($tee == '') {
           $kuva = "<img src='{$palvelin2}pics/facelift/pupe.gif' width='180'>";
         }
         else {
-          $kuva = "<img src='{$pupesoft_scheme}api.devlab.fi/pupesoft.gif' width='180'>";
+          $kuva = "<img src='{$pupesoft_scheme}pupeapi.sprintit.fi/pupesoft.gif' width='180'>";
         }
       }
 

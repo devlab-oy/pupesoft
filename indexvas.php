@@ -50,7 +50,7 @@ if (($yhtiorow["kayttoliittyma"] == "" and $kukarow["kayttoliittyma"] == "") or 
     $yhtio_nimi = "";
   }
   else {
-    $logo = "{$pupesoft_scheme}api.devlab.fi/pupesoft.png";
+    $logo = "{$pupesoft_scheme}pupeapi.sprintit.fi/pupesoft.png";
     $koko = "width='150'";
     $yhtio_nimi = "<font class='info'>$yhtiorow[nimi]</font><br>";
   }

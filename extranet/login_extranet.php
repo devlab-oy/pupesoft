@@ -173,7 +173,7 @@ else {
     echo "<a target='_top' href='/'><img src='{$palvelin2}pics/facelift/pupe.gif' border='0'>";
   }
   else {
-    echo "<a target='_top' href='/'><img src='{$pupesoft_scheme}api.devlab.fi/pupesoft_large.png'><br><img src='{$palvelin2}pics/facelift/extranet_logo.png'>";
+    echo "<a target='_top' href='/'><img src='{$pupesoft_scheme}pupeapi.sprintit.fi/pupesoft_large.png'><br><img src='{$palvelin2}pics/facelift/extranet_logo.png'>";
   }
 }
 

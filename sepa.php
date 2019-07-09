@@ -725,12 +725,13 @@ if ($tee == "KIRJOITA" or $tee == "KIRJOITAKOPIO") {
 
     // Etsit‰‰n samalle p‰iv‰lle tarpeeksi veloituksia, haetaan ensin kaikki miinukset, sitten summan mukaan desc
     $query = "SELECT lasku.tunnus laskutunnus,
-              if(lasku.alatila = 'K', summa - kasumma, summa) maksettavasumma
+              if(lasku.alatila = 'K', summa - kasumma, summa) maksettavasumma, yriti.bic
               FROM lasku
-              WHERE yhtio    = '$kukarow[yhtio]'
+              INNER JOIN yriti ON yriti.tunnus = lasku.maksu_tili AND yriti.yhtio = lasku.yhtio
+              WHERE lasku.yhtio    = '$kukarow[yhtio]'
               {$lisa}
               AND ultilno    = '$laskurow[ultilno]'
-              AND valkoodi   = '$laskurow[valkoodi]'
+              AND lasku.valkoodi   = '$laskurow[valkoodi]'
               AND maksu_tili = '$laskurow[maksu_tili]'
               AND olmapvm    = '$laskurow[olmapvm]'
               ORDER BY if(summa < 0, 1, 2), summa DESC";
@@ -739,19 +740,26 @@ if ($tee == "KIRJOITA" or $tee == "KIRJOITAKOPIO") {
     // T‰ll‰ lasketaan monta laskua tarvitaan mukaan
     $nettosumma_yhteensa = 0;
     $nettolaskuja_yhteensa = 0;
+    $nordea_hyvityslaskuja_yhteensa = 0;
 
     // T‰nne tallennetaan laskujen tunnukset
     $nettolaskujen_tunnukset = "";
+    $summa_plussalla = false;
 
     // Loopataan laskuja l‰pi, kunnes p‰‰st‰‰n plussalle
     while ($nettolaskurow = mysql_fetch_assoc($nettolaskures)) {
+      if (!$summa_plussalla) {
+        $nettosumma_yhteensa += $nettolaskurow["maksettavasumma"];
+        $nettolaskujen_tunnukset .= "$nettolaskurow[laskutunnus],";
+        $nettolaskuja_yhteensa++;
+      }
 
-      $nettosumma_yhteensa += $nettolaskurow["maksettavasumma"];
-      $nettolaskujen_tunnukset .= "$nettolaskurow[laskutunnus],";
-      $nettolaskuja_yhteensa++;
+      if ($nettolaskurow["maksettavasumma"] < 0 and $nettolaskurow['bic'] == 'NDEAFIHH') {
+        $nordea_hyvityslaskuja_yhteensa++;
+      }
 
       if ($nettosumma_yhteensa > 0) {
-        break;
+        $summa_plussalla = true;
       }
     }
 
@@ -775,6 +783,18 @@ if ($tee == "KIRJOITA" or $tee == "KIRJOITAKOPIO") {
       echo "<tr>";
       echo "<th>".t("Virhe")."</th>";
       echo "<td><font class='error'>Hyvityslaskujen netotus koostuu yli 999 tapahtumasta! SEPA aineisto ei tue n‰in isoja netotuksia! $laskurow[valkoodi] $laskurow[ultilno], $laskurow[olmapvm]</font></td>";
+      echo "</tr>";
+      echo "</table>";
+
+      require "inc/footer.inc";
+      exit;
+    }
+
+    if ($nordea_hyvityslaskuja_yhteensa > 9) {
+
+      echo "<tr>";
+      echo "<th>".t("Virhe")."</th>";
+      echo "<td><font class='error'>" . t("Poimittu aineisto voi sis‰lt‰‰ vain 9 hyvityslaskua yhdelle toimittajalle") . ".</font></td>";
       echo "</tr>";
       echo "</table>";
 

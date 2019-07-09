@@ -11,7 +11,7 @@ if (strpos($_SERVER['SCRIPT_NAME'], "synkronoi_mysqlaliakset.php") !== FALSE) {
 if ($tee == "TEE" or strpos($_SERVER['SCRIPT_NAME'], "iltasiivo.php") !== FALSE) {
 
   $ch  = curl_init();
-  curl_setopt($ch, CURLOPT_URL, "http://api.devlab.fi/referenssialiakset.sql");
+  curl_setopt($ch, CURLOPT_URL, "http://pupeapi.sprintit.fi/referenssialiakset.sql");
   curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
   curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, FALSE);
   curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);

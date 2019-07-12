@@ -350,6 +350,18 @@ if (!function_exists('alku_kerayslista')) {
         $pdf->draw_text(310, 614, $keraaja_teksti,   $thispage, $keraaja_font);
       }
 
+      if ($yhtiorow["siirtolistatyyppi"] == "B" and $asrow["asiakasnro"] == "SIIRTO") {
+        // Haetaan siirtolistan rivien ostohinta yhteensä
+        $query = "SELECT ROUND(SUM(tuotteen_toimittajat.ostohinta * (tilausrivi.varattu + tilausrivi.kpl)), 2) AS ostohinta_summa
+                  FROM tilausrivi
+                    JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = tilausrivi.yhtio AND tuotteen_toimittajat.tuoteno = tilausrivi.tuoteno)
+                  WHERE tilausrivi.yhtio = '{$kukarow["yhtio"]}'
+                    AND tilausrivi.otunnus IN ($tilausnumeroita)";
+        $ostohinta_sum = mysql_fetch_assoc(pupe_query($query));
+
+        $pdf->draw_text(300, 604, t("Ostohinnat yhteensä:", $kieli),   $thispage, $norm);
+        $pdf->draw_text(390, 604, $ostohinta_sum["ostohinta_summa"],   $thispage, $norm);
+      }
 
       $komm = "";
 

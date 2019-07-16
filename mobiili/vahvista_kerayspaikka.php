@@ -186,6 +186,15 @@ if (isset($submit_button) and trim($submit_button) != '') {
           }
         }
 
+        if ($maara < $row['varattu']) {
+          // Syötetty määrä on pienempi kuin tilausrivilla oleva määrä.
+          // Splitataan rivi ja siirretään ylijääneet uudellele tilausriville.
+          splittaa_tilausrivi($tilausrivi, ($row['varattu'] - $maara), TRUE, FALSE);
+
+          // Alkuperäinen viedään varastoon, splitattu jää jäljelle
+          $ok = paivita_tilausrivin_kpl($tilausrivi, $maara);
+        }
+
         if (count($errors) == 0) {
           require "../tilauskasittely/vastaanota.php";
 

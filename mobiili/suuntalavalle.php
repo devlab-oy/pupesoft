@@ -127,7 +127,7 @@ if (isset($submit) and $tullaan != 'pre_vahvista_kerayspaikka') {
       require "../tilauskasittely/suuntalavat.inc";
     }
 
-    if ($riveja > 0) {
+    if ($tilausten_lukumaara > 0) {
       $url = "tuotteella_useita_tilauksia.php";
     }
     elseif ($tullaan == 'vahvista_kerayspaikka') {
@@ -147,7 +147,7 @@ $url = array (
   'ostotilaus' => $tilausrivi['otunnus'],
   'tilausrivi' => $tilausrivi['tunnus'],
   'saapuminen' => $alkuperainen_saapuminen,
-  'tilausten_lukumaara' => $riveja,
+  'tilausten_lukumaara' => $tilausten_lukumaara,
   'manuaalisesti_syotetty_ostotilausnro' => $manuaalisesti_syotetty_ostotilausnro,
   'tuotenumero' => $tuotenumero,
   'alusta_tunnus' => $alusta_tunnus,
@@ -173,7 +173,7 @@ echo "<div class='main'>
 
 <input type='hidden' name='hyllytetty' value='{$hyllytetty}' />
 <input type='hidden' name='saapuminen' value='{$alkuperainen_saapuminen}' />
-<input type='hidden' name='tilausten_lukumaara' value='{$riveja}' />
+<input type='hidden' name='tilausten_lukumaara' value='{$tilausten_lukumaara}' />
 <input type='hidden' name='tilausrivi' value='{$tilausrivi['tunnus']}' />
 <input type='hidden' name='tullaan' value='{$tullaan}' />
 <input type='hidden' name='alusta_tunnus' value='{$alusta_tunnus}' />

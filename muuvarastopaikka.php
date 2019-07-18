@@ -682,7 +682,7 @@ if ($tee == 'N') {
   if (!isset($kohdepaikasta_oletuspaikka)) $kohdepaikasta_oletuspaikka = "";
 
   for ($iii=0; $iii< count($tuotteet); $iii++) {
-    if ($kappaleet[$iii] <> $tilattumaara) {
+    if (isset($kappaleet[$iii]) and isset($tilattumaara) and $kappaleet[$iii] <> $tilattumaara) {
       // splittaa_tilausrivi($tun, $tilattumaara - $asaldo);
 
       $query = "UPDATE tilausrivi SET varattu = {$asaldo} WHERE tunnus = {$tun} AND yhtio = '$kukarow[yhtio]'";

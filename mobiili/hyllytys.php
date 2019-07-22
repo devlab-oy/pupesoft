@@ -112,7 +112,7 @@ else {
 // Kontrolleri
 if (isset($submit)) {
 
-  $url = "&viivakoodi={$viivakoodi}&tilausten_lukumaara={$riveja}&saapumisnro_haku={$saapumisnro_haku}&manuaalisesti_syotetty_ostotilausnro={$manuaalisesti_syotetty_ostotilausnro}&ennaltakohdistettu={$ennaltakohdistettu}&tuotenumero=".urlencode($tuotenumero);
+  $url = "&viivakoodi={$viivakoodi}&tilausten_lukumaara={$tilausten_lukumaara}&saapumisnro_haku={$saapumisnro_haku}&manuaalisesti_syotetty_ostotilausnro={$manuaalisesti_syotetty_ostotilausnro}&ennaltakohdistettu={$ennaltakohdistettu}&tuotenumero=".urlencode($tuotenumero);
 
   switch ($submit) {
   case 'ok':
@@ -150,9 +150,9 @@ elseif ($row['tilausrivi_tyyppi'] == '') {
   $row['tilausrivi_tyyppi'] = 'JT';
 }
 
-$url_prelisa = $riveja < 2 ? "ostotilaus.php" : "tuotteella_useita_tilauksia.php";
+$url_prelisa = $tilausten_lukumaara < 2 ? "ostotilaus.php" : "tuotteella_useita_tilauksia.php";
 $url_lisa = $manuaalisesti_syotetty_ostotilausnro ? "ostotilaus={$ostotilaus}" : "";
-$url_lisa .= ($viivakoodi != "" and $riveja > 1) ? "&viivakoodi={$viivakoodi}" : "";
+$url_lisa .= ($viivakoodi != "" and $tilausten_lukumaara > 1) ? "&viivakoodi={$viivakoodi}" : "";
 $url_lisa .= "&tuotenumero=".urlencode($tuotenumero);
 $url_lisa .= "&manuaalisesti_syotetty_ostotilausnro={$manuaalisesti_syotetty_ostotilausnro}";
 $url_lisa .= "&ennaltakohdistettu={$ennaltakohdistettu}";
@@ -168,7 +168,7 @@ echo "</div>";
 // Main
 echo "<div class='main'>
 <form name='f1' method='post' action=''>
-<input type='hidden' name='tilausten_lukumaara' value='{$riveja}' />
+<input type='hidden' name='tilausten_lukumaara' value='{$tilausten_lukumaara}' />
 <input type='hidden' name='manuaalisesti_syotetty_ostotilausnro' value='{$manuaalisesti_syotetty_ostotilausnro}' />
 <input type='hidden' name='tuotenumero' value='{$tuotenumero}' />
 <input type='hidden' name='saapumisnro_haku' value='{$saapumisnro_haku}' />
@@ -233,7 +233,7 @@ echo "<td><input type='hidden' name='saapuminen' value='$saapuminen'></td>
 </table>
 </div>";
 
-$url = "&viivakoodi={$viivakoodi}&saapumisnro_haku={$saapumisnro_haku}&tilausten_lukumaara={$riveja}&manuaalisesti_syotetty_ostotilausnro={$manuaalisesti_syotetty_ostotilausnro}&tuotenumero=".urlencode($tuotenumero);
+$url = "&viivakoodi={$viivakoodi}&saapumisnro_haku={$saapumisnro_haku}&tilausten_lukumaara={$tilausten_lukumaara}&manuaalisesti_syotetty_ostotilausnro={$manuaalisesti_syotetty_ostotilausnro}&tuotenumero=".urlencode($tuotenumero);
 
 // Napit
 echo "<div class='controls'>";

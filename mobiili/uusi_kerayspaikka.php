@@ -38,7 +38,7 @@ else {
     'tilausrivi' => $tilausrivi,
     'ostotilaus' => $ostotilaus,
     'saapuminen' => $saapuminen,
-    'tilausten_lukumaara' => $riveja,
+    'tilausten_lukumaara' => $tilausten_lukumaara,
     'manuaalisesti_syotetty_ostotilausnro' => $manuaalisesti_syotetty_ostotilausnro,
     'tuotenumero' => $tuotenumero,
     'ennaltakohdistettu' => $ennaltakohdistettu,

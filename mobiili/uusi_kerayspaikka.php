@@ -32,13 +32,20 @@ else {
   $liitostunnus = (int) $liitostunnus;
   $tilausrivi = (int) $tilausrivi;
 
+  if (isset($tilausten_lukumaara)) {
+    $_maara = $tilausten_lukumaara;
+  }
+  else {
+    $_maara = $riveja;
+  }
+
   $data = array(
     'alusta_tunnus' => $alusta_tunnus,
     'liitostunnus' => $liitostunnus,
     'tilausrivi' => $tilausrivi,
     'ostotilaus' => $ostotilaus,
     'saapuminen' => $saapuminen,
-    'tilausten_lukumaara' => $tilausten_lukumaara,
+    'tilausten_lukumaara' => $_maara,
     'manuaalisesti_syotetty_ostotilausnro' => $manuaalisesti_syotetty_ostotilausnro,
     'tuotenumero' => $tuotenumero,
     'ennaltakohdistettu' => $ennaltakohdistettu,

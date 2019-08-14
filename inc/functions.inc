@@ -1093,7 +1093,7 @@ if (!function_exists("fitek_queue")) {
 
     // Filenimi
     $fitekzipfile = "laskutus-".$yhtiorow['yhtio']."-invoices-".$fitek_invoicenum."-".md5(uniqid(rand(), true)).".zip";
-
+    
     // Luodaan temppidirikka jonne työnnetään tän kiekan kaikki fitek-filet
     list($usec, $sec) = explode(' ', microtime());
     mt_srand((float) $sec + ((float) $usec * 100000));
@@ -1108,7 +1108,7 @@ if (!function_exists("fitek_queue")) {
 
       // Luodaan laskupdf:ä
       $fitektmpfile = tulosta_lasku("LASKU:".$fitek_invoicenum, $kieli, "VERKKOLASKU_FITEK", "", "", "", "", "");
-
+      
 
       // Siirretään faili fitektemppiin
       if (!rename($fitektmpfile, $fitek_tmpdirnimi."/MERCANT.INVOICE.".date("Ymd").".$fitek_invoicenum.pdf")) {
@@ -22515,23 +22515,6 @@ if (!function_exists('onko_suoratoimitus')) {
   }
 }
 
-if (!function_exists('lisaa_virhe')) {
-  function lisaa_virhe($opening_tags, $virhe, $closing_tags)
-  {
-    global $errors;
-
-    if (!isset($errors)) {
-      $errors = array();
-    }
-
-    $errors[] = $virhe;
-
-    if ((!isset($echotaanko)) or (isset($echotaanko) and $echotaanko)) {
-      echo "{$opening_tags}{$virhe}{$closing_tags}";
-    }
-  }
-}
-
 if (!function_exists('splittaa_tilausrivi')) {
   function splittaa_tilausrivi($tunnus, $uuden_rivin_kpl, $varastoon = TRUE, $pois_suuntalavalta = FALSE, $perheid = FALSE, $vanhan_rivin_kpl = '') {
     global $kukarow, $yhtiorow;
@@ -22548,8 +22531,6 @@ if (!function_exists('splittaa_tilausrivi')) {
     $rivi = mysql_fetch_array($result);
 
     $vanhan_rivin_kpl = $vanhan_rivin_kpl != '' ? $vanhan_rivin_kpl : $rivi['varattu'];
-    $tee_lisatietorivi = $rivi['tyyppi'] == "G";
-    $laskun_tunnus = $rivi['otunnus'];
 
     mysql_data_seek($result, 0);
 
@@ -22676,40 +22657,6 @@ if (!function_exists('splittaa_tilausrivi')) {
                   WHERE yhtio = '{$kukarow['yhtio']}'
                   AND tunnus  = '{$lapsi_chk_row['tunnus']}'";
         $upd_res = pupe_query($query);
-      }
-    }
-
-    if ($tee_lisatietorivi) {
-      $query = "SELECT MAX(tunnus) AS uusi_tunnus FROM tilausrivi WHERE yhtio = '{$kukarow['yhtio']}' AND otunnus = '{$laskun_tunnus}'";
-      $result = pupe_query($query);
-      $rivi = mysql_fetch_assoc($result);
-      $uusi_tunnus = $rivi['uusi_tunnus'];
-
-      $query = "SELECT tilausrivin_lisatiedot.*
-                FROM tilausrivin_lisatiedot
-                INNER JOIN tilausrivi ON tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
-                WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-                  AND tilausrivin_lisatiedot.tilausrivitunnus  = '{$tunnus}'";
-      $result = pupe_query($query);
-
-      if (mysql_num_rows($result) != 0) {
-        $rivi = mysql_fetch_array($result);
-        $query = "INSERT INTO tilausrivin_lisatiedot SET ";
-
-        for ($i = 0; $i < mysql_num_fields($result) - 1; $i++) {
-          switch (mysql_field_name($result, $i)) {
-            case 'tilausrivitunnus':
-              $query .= " tilausrivitunnus = {$uusi_tunnus},";
-              break;
-            case 'tunnus':
-              break;
-            default:
-              $query .= mysql_field_name($result, $i)." = '".$rivi[mysql_field_name($result, $i)]."',";
-          }
-        }
-
-        $query = substr($query, 0, -1);
-        $result = pupe_query($query);
       }
     }
 
@@ -26377,7 +26324,7 @@ if (!function_exists("hae_viivakoodilla")) {
                  LIMIT 200";
       $chk_res = pupe_query($query);
     }
-
+         
     while ($row = mysql_fetch_assoc($chk_res)) {
       $viivakoodit[$row['tuoteno']][] = $row['liitostunnus'];
     }

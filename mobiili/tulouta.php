@@ -27,12 +27,6 @@ echo "<a href='ostotilaus.php' class='button'><font color='chucknorris'>(".t("Ja
 
 echo "</li>";
 
-echo "<li><a href='siirtolista.php?uusi' class='button'>", t("Siirtolista"), "</a>";
-
-echo "<a href='siirtolista.php' class='button'><font color='chucknorris'>(".t("Jatka edellistä").")</font></a>";
-
-echo "</li>";
-
 if ($yhtiorow['suuntalavat'] != "") {
   echo "<br>";
   echo "<li><a href='suuntalavat.php' class='button'>", t("Suuntalavat"), "</a></li>";

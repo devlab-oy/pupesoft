@@ -27,10 +27,98 @@ $rivinkorkeus          = 15;
 //muutamat funktiot...
 if (!function_exists('tulosta_pullopanttitarra_pdf')) {
   function tulosta_pullopanttitarra_pdf ($laskurow) {
-    global $yhtiorow, $keski, $iso;
+    global $kukarow, $yhtiorow, $keski, $iso;
 
     $sivu = 0;
     $tarrat = "";
+
+    $query = "SELECT r.tuoteno, r.nimitys, r.tunnus, r.varattu - IFNULL(sarjanumeroita.kpl, 0) puuttuu
+              FROM tilausrivi r
+              INNER JOIN tuote t
+                ON (t.yhtio = r.yhtio AND t.tuoteno = r.tuoteno)
+              LEFT JOIN
+              (
+                SELECT sns.yhtio, sns.myyntirivitunnus, COUNT(*) kpl
+                FROM sarjanumeroseuranta sns
+                WHERE sns.yhtio = '$kukarow[yhtio]'
+                GROUP BY sns.yhtio, sns.myyntirivitunnus
+              ) sarjanumeroita
+                ON (sarjanumeroita.yhtio = r.yhtio AND sarjanumeroita.myyntirivitunnus = r.tunnus)
+              WHERE t.pullopanttitarratulostus_kerayksessa = 'T'
+                AND r.yhtio = '$kukarow[yhtio]'
+                AND r.otunnus = '$laskurow[tunnus]'
+              HAVING puuttuu > 0";
+    $sarjanumerot = pupe_query($query);
+
+    while ($tilausrivi = mysql_fetch_assoc($sarjanumerot)) {
+      for ($tarralaskuri = 1; $tarralaskuri <= $tilausrivi['puuttuu']; $tarralaskuri++) {
+        $query = "SELECT tilausrivi.*,
+                     tuote.sarjanumeroseuranta,
+                     tuote.automaattinen_sarjanumerointi,
+                     tuote.yksikko,
+                     tilausrivin_lisatiedot.osto_vai_hyvitys,
+                     tuote.kehahin
+                   FROM tilausrivi use index (PRIMARY)
+                   JOIN tuote
+                     ON tilausrivi.yhtio = tuote.yhtio AND tilausrivi.tuoteno = tuote.tuoteno
+                   LEFT JOIN tilausrivin_lisatiedot
+                     ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus)
+                   WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+                     AND tilausrivi.tunnus = '$tilausrivi[tunnus]'";
+        $rivires = pupe_query($query);
+        $rivirow = mysql_fetch_assoc($rivires);
+
+        if ($rivirow["hyllyalue"] == "") {
+          $query = "SELECT *
+                  FROM tuotepaikat
+                  WHERE yhtio    = '$kukarow[yhtio]'
+                    AND tuoteno  = '$rivirow[tuoteno]'
+                    AND oletus  != ''";
+          $result = pupe_query($query);
+          $saldorow = mysql_fetch_assoc($result);
+
+          $rivirow["hyllyalue"] = $saldorow["hyllyalue"];
+          $rivirow["hyllynro"] = $saldorow["hyllynro"];
+          $rivirow["hyllyvali"] = $saldorow["hyllyvali"];
+          $rivirow["hyllytaso"] = $saldorow["hyllytaso"];
+        }
+
+        $query = "INSERT INTO sarjanumeroseuranta (
+                  yhtio, tuoteno, sarjanumero, lisatieto,
+                  ostorivitunnus, myyntirivitunnus, kaytetty, era_kpl,
+                  laatija, luontiaika, muutospvm, muuttaja,
+                  hyllyalue, hyllynro, hyllyvali, hyllytaso
+                )
+                VALUES
+                (
+                  '$yhtiorow[yhtio]', '$rivirow[tuoteno]', '" .generoi_sarjanumero($rivirow, 'myyntirivitunnus') . "', '',
+                  0, {$tilausrivi[tunnus]}, '', 0,
+                  '$kukarow[kuka]', now(), '$kukarow[kuka]', now(),
+                  '$rivirow[hyllyalue]', '$rivirow[hyllynro]', '$rivirow[hyllyvali]', '$rivirow[hyllytaso]'
+                )";
+        pupe_query($query);
+
+        $query = "UPDATE laite
+                SET paikka     = '{$tilausrivi['tunnus']}',
+                    muutospvm  = now(),
+                    muuttaja   = '{$kukarow['kuka']}'
+                WHERE yhtio    = '{$kukarow['yhtio']}'
+                  AND sarjanro = '{$tilausrivi['sarjanumero']}'
+                  AND tuoteno  = '{$tilausrivi['tuoteno']}'";
+        pupe_query($query);
+
+        if (mysql_affected_rows() == 0) {
+          $query = "INSERT INTO laite
+                  SET yhtio      = '{$kukarow['yhtio']}',
+                      luontiaika = now(),
+                      sarjanro   = '{$tilausrivi['sarjanumero']}',
+                      paikka     = '{$tilausrivi['tunnus']}',
+                      tuoteno    = '{$tilausrivi['tuoteno']}',
+                      laatija    = '{$kukarow['kuka']}'";
+          pupe_query($query);
+        }
+      }
+    }
 
     $query = "SELECT tilausrivi.tuoteno,
                 tilausrivi.nimitys,
@@ -39,7 +127,8 @@ if (!function_exists('tulosta_pullopanttitarra_pdf')) {
               FROM tilausrivi
                 JOIN sarjanumeroseuranta ON (sarjanumeroseuranta.yhtio = tilausrivi.yhtio AND sarjanumeroseuranta.myyntirivitunnus = tilausrivi.tunnus)
               WHERE tilausrivi.yhtio = '{$yhtiorow['yhtio']}'
-              AND tilausrivi.otunnus = '{$laskurow['tunnus']}';";
+                AND tilausrivi.otunnus = '{$laskurow['tunnus']}'
+              ORDER BY sarjanumeroseuranta.sarjanumero";
     $tuotetiedot_res = (pupe_query($query));
 
     while ($tilausrivi = mysql_fetch_assoc($tuotetiedot_res)){

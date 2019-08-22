@@ -214,6 +214,19 @@ if (!function_exists("pupe_query")) {
   }
 }
 
+if (!function_exists('executescalar')) {
+  function executescalar($sql)
+  {
+    $result = pupe_query($sql);
+    if (mysql_num_rows($result) > 0) {
+      $row = mysql_fetch_array($result);
+      return $row[0];
+    }
+
+    return null;
+  }
+}
+
 // Käytetään slavea jos sellainen on
 if (!function_exists("pupeslave_start")) {
   function pupeslave_start() {
@@ -35588,5 +35601,57 @@ if (!function_exists('toimita_kaikki_tarkistus')) {
     }
 
     return $toimita_kaikki;
+  }
+}
+
+if (!function_exists('generoi_sarjanumero')) {
+  function generoi_sarjanumero($tuote, $tunnuskentta = "")
+  {
+    global $kukarow;
+
+    switch ($tuote["automaattinen_sarjanumerointi"]) {
+      case 1:
+        if (empty($tunnuskentta)) break;
+
+        $query = "SELECT max(substring(sarjanumero, position('-' IN sarjanumero) + 1) + 0) + 1 sarjanumero
+              FROM sarjanumeroseuranta
+              WHERE yhtio = '{$kukarow["yhtio"]}'
+              AND tuoteno = '{$tuote["tuoteno"]}'
+              AND {$tunnuskentta} = '{$tuote["tunnus"]}'";
+
+        $result = pupe_query($query);
+        $row = mysql_fetch_assoc($result);
+
+        $sarjanumero = $tuote["nimitys"];
+
+        if ($row["sarjanumero"] > 0) {
+          $sarjanumero = $sarjanumero . "-" . $row["sarjanumero"];
+        } else {
+          $sarjanumero = $sarjanumero . "-1";
+        }
+
+        break;
+      case 2:
+        $query = "SELECT max(substring(sarjanumero, 6)) AS kuluvan_vuoden_suurin_numero
+              FROM sarjanumeroseuranta
+              WHERE yhtio = '{$kukarow["yhtio"]}'
+              AND substring(sarjanumero, 1, 4) = year(now())";
+
+        $result = pupe_query($query);
+        $row = mysql_fetch_assoc($result);
+
+        if ($row["kuluvan_vuoden_suurin_numero"]) {
+          $sarjanumero = date("Y") . "-" . ($row["kuluvan_vuoden_suurin_numero"] + 1);
+        } else {
+          $sarjanumero = date("Y") . "-1000";
+        }
+
+        break;
+
+      default:
+        $sarjanumero = "";
+    }
+
+    return $sarjanumero;
   }
 }

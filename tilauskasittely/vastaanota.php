@@ -797,13 +797,25 @@ if ($tee == 'valmis') {
     echo "<br><br>";
   }
 
-  $query  = "SELECT COUNT(*) AS toimittamatta
-             FROM tilausrivi
-             WHERE yhtio = '$kukarow[yhtio]'
-             AND otunnus IN ($id)
-             AND toimitettu = ''";
-  $result = pupe_query($query);
-  $toimittamatta = mysql_fetch_assoc($result)['toimittamatta'];
+  if ($id != "") {
+    $query  = "SELECT COUNT(*) AS toimittamatta
+              FROM tilausrivi
+              WHERE yhtio = '$kukarow[yhtio]'
+              AND otunnus IN ($id)
+              AND toimitettu = ''";
+    $result = pupe_query($query);
+
+    if (mysql_num_rows($result) > 0) {
+      $toimittamatta_array = mysql_fetch_assoc($result);
+      $toimittamatta = $toimittamatta_array['toimittamatta'];  
+    }
+    else {
+      $toimittamatta = 0;
+    }
+  }
+  else {
+    $toimittamatta = 0;
+  }
 
   if ($virheita == 0 and $toimittamatta == 0) {
 

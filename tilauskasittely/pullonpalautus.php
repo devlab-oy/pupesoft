@@ -94,7 +94,7 @@ if ($tee == "HYVITA") {
             $query = "UPDATE sarjanumeroseuranta SET ostorivitunnus = {$rivit[1][0]} WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = {$row['tunnus']}";
             pupe_query($query);
 
-            if ($row['panttirivitunnus'] != null and $lisatiedot['paivia'] <= 2) { // TERO_TODO: <= 545
+            if ($row['panttirivitunnus'] != null and $lisatiedot['paivia'] <= 545) {
               # Hyvitetään pantti, jos se on laskutettu eikä palautuksesta ole yli 1,5 vuotta
 
               $query = "SELECT * FROM tuote WHERE yhtio = '{$kukarow['yhtio']}' AND tuoteno = '{$laskutustuoteno}'";

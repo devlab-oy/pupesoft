@@ -6,7 +6,7 @@
 */
 
 //* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
-$useslave = 1;
+$useslave = 2;
 
 // Kutsutaanko CLI:st‰
 if (php_sapi_name() != 'cli') {

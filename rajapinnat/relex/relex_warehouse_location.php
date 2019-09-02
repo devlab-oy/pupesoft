@@ -1,11 +1,11 @@
 <?php
 
-//* TÃ¤mÃ¤ skripti kÃ¤yttÃ¤Ã¤ slave-tietokantapalvelinta *//
-$useslave = 1;
+//* Tämä skripti käyttää slave-tietokantapalvelinta *//
+$useslave = 2;
 
-// Kutsutaanko CLI:stÃ¤
+// Kutsutaanko CLI:stä
 if (php_sapi_name() != 'cli') {
-  die ("TÃ¤tÃ¤ scriptiÃ¤ voi ajaa vain komentoriviltÃ¤!");
+  die ("Tätä scriptiä voi ajaa vain komentoriviltä!");
 }
 
 if (!isset($argv[1]) or $argv[1] == '') {
@@ -50,7 +50,7 @@ $kukarow  = hae_kukarow('admin', $yhtiorow['yhtio']);
 $filepath = "/tmp/product_locations_update_{$yhtio}_$ajopaiva.csv";
 
 if (!$fp = fopen($filepath, 'w+')) {
-  die("Tiedoston avaus epÃ¤onnistui: $filepath\n");
+  die("Tiedoston avaus epäonnistui: $filepath\n");
 }
 
 $header = "product;location;varastopaikka;poistuva\n";
@@ -58,7 +58,7 @@ fwrite($fp, $header);
 
 $tuoterajaus = rakenna_relex_tuote_parametrit();
 
-// Otetaan mukaan vain viimeisen vuorokauden jÃ¤lkeen muuttuneet
+// Otetaan mukaan vain viimeisen vuorokauden jälkeen muuttuneet
 $query = "SELECT tuote.tuoteno, yhtio.maa
           FROM tuote
           JOIN yhtio ON (tuote.yhtio = yhtio.yhtio)
@@ -66,10 +66,10 @@ $query = "SELECT tuote.tuoteno, yhtio.maa
           {$tuoterajaus}";
 $res = pupe_query($query);
 
-// Kerrotaan montako riviÃ¤ kÃ¤sitellÃ¤Ã¤n
+// Kerrotaan montako riviä käsitellään
 $rows = mysql_num_rows($res);
 
-echo date("d.m.Y @ G:i:s") . ": Relex tuoterivejÃ¤ {$rows} kappaletta.\n";
+echo date("d.m.Y @ G:i:s") . ": Relex tuoterivejä {$rows} kappaletta.\n";
 
 while ($row = mysql_fetch_assoc($res)) {
 
@@ -108,7 +108,7 @@ while ($row = mysql_fetch_assoc($res)) {
 
 fclose($fp);
 
-// TehdÃ¤Ã¤n FTP-siirto
+// Tehdään FTP-siirto
 if (!empty($relex_ftphost)) {
   $ftphost = $relex_ftphost;
   $ftpuser = $relex_ftpuser;

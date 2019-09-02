@@ -6,7 +6,7 @@
 */
 
 //* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
-$useslave = 1;
+$useslave = 2;
 
 // Kutsutaanko CLI:st‰
 if (php_sapi_name() != 'cli') {
@@ -99,10 +99,10 @@ $tilausnumero = "'' tilausnumero, ";
 $rivinumero = "'' rivinumero, ";
 
 if ($extra_laskutiedot) {
- 
+
   $query_ale_lisa_myynti = generoi_alekentta('M');
   $query_ale_lisa_osto = generoi_alekentta('O');
-  
+
   $ostolisa = ", round(tilausrivi.hinta / if ('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * {$query_ale_lisa_osto}, 2) kplhinta";
   $myyntilisa = ", if (tilausrivi.tyyppi='V', tuote.kehahin, round(tilausrivi.hinta / if ('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * {$query_ale_lisa_myynti}, 2)) kplhinta";
   $siirtolisa = ", tuote.kehahin kplhinta";

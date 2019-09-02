@@ -58,7 +58,7 @@ $query = "SELECT sns.tunnus, sns.sarjanumero, sns.myyntirivitunnus,
             AND sns.ostorivitunnus = 0
             AND r.hinta = 0
             AND t.pullopanttitarratulostus_kerayksessa = 'T'
-          HAVING paivia >= 1"; /* TERO_TODO: >= 151 */
+          HAVING paivia >= 151";
 $result = pupe_query($query);
 while ($row = mysql_fetch_assoc($result)) {
   $asiakasid = $row['asiakasid'];

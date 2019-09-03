@@ -441,6 +441,10 @@ foreach ($tulostimet as $tulostin) {
     echo "<option value='excel_lahete_hinta_muillatiedoilla'>".t("Excel-tilausvahvistus hinta- ja kuvaustiedoilla")."</option>";
   }
 
+  if ($toim == 'SIIRTOLISTA') {
+    echo "<option value='excel_siirtolista'>".t("Excel-siirtolista")."</option>";
+  }
+
   if ($toim == 'TARJOUS') {
     echo "<option value='excel_lahete_hinnoilla'>".t("Excel-tarjous hintatiedoilla")."</option>";
   }

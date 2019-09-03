@@ -527,6 +527,7 @@ if ($tee == 'tulosta') {
   $query = "SELECT DISTINCT lasku.ytunnus, lasku.toim_maa, lasku.toim_nimi, lasku.toim_nimitark,
             lasku.toim_osoite, lasku.toim_ovttunnus, lasku.toim_postino, lasku.toim_postitp,
             lasku.toim_puh,
+            lasku.chn,
             lasku.maa, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.ovttunnus, lasku.postino, lasku.postitp, lasku.toimitusehto,
             rahtikirjat.merahti, rahtikirjat.rahtisopimus, if(maksuehto.jv is null,'',maksuehto.jv) jv, lasku.alv, lasku.vienti, rahtisopimukset.muumaksaja,
             asiakas.toimitusvahvistus, asiakas.kieli,
@@ -968,7 +969,7 @@ if ($tee == 'tulosta') {
           $valittu_tulostin = $rakirsyotto_laskutulostin;
           $chnlisa = ", chn = '667' ";
         }
-        elseif ($rakir_row['toimitusehto'] == '21- Arvega') {
+        elseif ($rakir_row['chn'] != '999' and $rakir_row['toimitusehto'] == '21- Arvega') {
           $valittu_tulostin = '';
           $chnlisa = ", chn = '666' ";
         }

@@ -66,6 +66,8 @@ if (!$fp = fopen($filepath, 'w+')) {
 $header = "location;product;clean_product;quantity;type\n";
 fwrite($fp, $header);
 
+echo date("d.m.Y @ G:i:s") . ": Relex saldot.\n";
+
 // Haetaan tuotteiden saldot per varasto
 $query = "SELECT
           yhtio.maa,
@@ -77,6 +79,7 @@ $query = "SELECT
           JOIN varastopaikat ON (varastopaikat.tunnus = tuotepaikat.varasto and varastopaikat.yhtio = tuotepaikat.yhtio)
           JOIN yhtio ON (tuote.yhtio = yhtio.yhtio)
           WHERE tuote.yhtio = '$yhtio'
+          AND tuotepaikat.saldo > 0
           {$tuoterajaus}
           GROUP BY 1,2,3
           ORDER BY tuotepaikat.varasto, tuotepaikat.tuoteno";
@@ -88,6 +91,7 @@ $rows = mysql_num_rows($res);
 echo date("d.m.Y @ G:i:s") . ": Relex saldorivej‰ {$rows} kappaletta.\n";
 
 $k_rivi = 0;
+$rivi = "";
 
 while ($row = mysql_fetch_assoc($res)) {
   // Haetaan hyllyss‰m‰‰r‰
@@ -108,18 +112,23 @@ while ($row = mysql_fetch_assoc($res)) {
     $row['saldo'] -= $kerrow["keratty"];
   }
 
-  $rivi  = "{$row['maa']}-{$row['varasto']};";
+  $rivi .= "{$row['maa']}-{$row['varasto']};";
   $rivi .= "{$row['maa']}-".pupesoft_csvstring($row['tuoteno']).";";
   $rivi .= pupesoft_csvstring($row['tuoteno']).";";
   $rivi .= "{$row['saldo']};";
   $rivi .= "BALANCE";
   $rivi .= "\n";
 
-  fwrite($fp, $rivi);
+  # Kirjoitetaan tuhat rivi‰ kerralla
+  if ($k_rivi % 1000 == 0) {
+    fwrite($fp, $rivi);
+    $rivi = "";
+  }
 
   $k_rivi++;
 }
 
+fwrite($fp, $rivi);
 fclose($fp);
 
 // Tehd‰‰n FTP-siirto

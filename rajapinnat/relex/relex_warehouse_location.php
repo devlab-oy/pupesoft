@@ -58,6 +58,8 @@ fwrite($fp, $header);
 
 $tuoterajaus = rakenna_relex_tuote_parametrit();
 
+echo date("d.m.Y @ G:i:s") . ": Relex varastopaikat.\n";
+
 // Otetaan mukaan vain viimeisen vuorokauden j‰lkeen muuttuneet
 $query = "SELECT tuote.tuoteno, yhtio.maa
           FROM tuote
@@ -70,6 +72,9 @@ $res = pupe_query($query);
 $rows = mysql_num_rows($res);
 
 echo date("d.m.Y @ G:i:s") . ": Relex tuoterivej‰ {$rows} kappaletta.\n";
+
+$k_rivi = 0;
+$rivi = "";
 
 while ($row = mysql_fetch_assoc($res)) {
 
@@ -96,16 +101,23 @@ while ($row = mysql_fetch_assoc($res)) {
   }
 
   foreach ($tuotepaikat as $_varasto => $_arr) {
-    $rivi  = "{$row['maa']}-".pupesoft_csvstring($row['tuoteno']).";";
+    $rivi .= "{$row['maa']}-".pupesoft_csvstring($row['tuoteno']).";";
     $rivi .= "{$row['maa']}-{$_arr['varasto']};";
     $rivi .= pupesoft_csvstring($_arr['hyllypaikka']).";";
     $rivi .= $_arr['poistettava'] == "D" ? "TRUE" : "FALSE";
     $rivi .= "\n";
 
-    fwrite($fp, $rivi);
+    # Kirjoitetaan tuhat rivi‰ kerralla
+    if ($k_rivi % 1000 == 0) {
+      fwrite($fp, $rivi);
+      $rivi = "";
+    }
+
+    $k_rivi++;
   }
 }
 
+fwrite($fp, $rivi);
 fclose($fp);
 
 // Tehd‰‰n FTP-siirto

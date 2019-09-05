@@ -1735,6 +1735,13 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
       $tilausvahvistus_onkin_kerayslista = "JOO";
     }
 
+    $komento_siirtolista = empty($komento['Siirtolista']) ? '' : $komento['Siirtolista'];
+    $pos  = strpos($komento_siirtolista, "excel_siirtolista");
+    if ($pos !== FALSE and $toim == "SIIRTOLISTA") {
+      $toim = "KERAYSLISTA";
+      $siirtolista_excel = "JOO";
+    }
+
     if ($pos2 !== FALSE and in_array($toim, array("TILAUSVAHVISTUS", "TARJOUS"))) {
       $toim = "KERAYSLISTA";
 
@@ -2382,7 +2389,7 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
       if ($excel_lahete_hinnoilla != '') {
         $kerayslistatyyppi = "EXCEL3";
       }
-      elseif ($varastorow["ulkoinen_jarjestelma"] == "G" or $tilausvahvistus_onkin_kerayslista != "") {
+      elseif ($varastorow["ulkoinen_jarjestelma"] == "G" or $tilausvahvistus_onkin_kerayslista != "" or $siirtolista_excel) {
         $kerayslistatyyppi = "EXCEL2";
       }
       elseif ($varastorow["ulkoinen_jarjestelma"] == "C") {
@@ -2586,6 +2593,9 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
 
       if ($tilausvahvistus_onkin_kerayslista != '') {
         $params_kerayslista['uusiotsikko'] = "Lähete";
+      }
+      elseif ($siirtolista_excel != '') {
+        $params_kerayslista['uusiotsikko'] = "Siirtolista";
       }
       elseif ($excel_lahete_hinnoilla != '') {
         $params_kerayslista['uusiotsikko'] = "Tilausvahvistus";

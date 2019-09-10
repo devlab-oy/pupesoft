@@ -42,10 +42,89 @@ if (isset($muutparametrit) and $muutparametrit != '') {
 }
 
 if ($tee == 'NAYTATILAUS') {
+  echo "<font class='head'>", t("Tilausnro"), ": {$tunnus}</font><hr>";
   require "naytatilaus.inc";
+  require "inc/footer.inc";
+  exit;
+}
 
-  echo "<br><br>";
-  $tee = "TULOSTA";
+$tilaustunnus = isset($tilaustunnus) ? $tilaustunnus : "";
+
+if (!isset($tilaus_lopetus)) {
+  $tilaus_lopetus = isset($lopetus) ? $lopetus : "";
+}
+
+if ($tee == "LISAATILAUKSEEN" and isset($lisaa_tuote) and isset($lisaa_maara) and isset($lisaa_hinta) and isset($asiakasid)) {
+  $lisaa_maara = isset($lisaa_maara) ? $lisaa_maara : 1;
+  $uusilasku = false;
+
+  if ($tilaustunnus == "") {
+    $kesken = executescalar("SELECT kesken FROM kuka WHERE yhtio = '{$kukarow['yhtio']}' AND kuka = '{$kukarow['kuka']}'");
+    if ($kesken == '' or $kesken == 0) {
+      $uusilasku = true;
+    }
+    else {
+      $asiakas = executescalar("SELECT liitostunnus FROM lasku WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = {$kesken}");
+      if ($asiakas != $asiakasid) {
+        $uusilasku = true;
+      }
+      else {
+        $tilaustunnus = $kesken;
+      }
+    }
+  }
+  else {
+    $query = "SELECT liitostunnus, tila, alatila FROM lasku WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = {$tilaustunnus}";
+    $result = pupe_query($query);
+    if (mysql_num_rows($result) == 1) {
+      $row = mysql_fetch_assoc($result);
+      $tilaus_kesken = ($row['tila'] == 'N') or (($row['tila'] == 'D') and ($row['alatila'] == 'N'));
+      if (!$tilaus_kesken or ($asiakasid != $row['liitostunnus'])) {
+        $uusilasku = true;
+      }
+    }
+    else {
+      $uusilasku = true;
+    }
+  }
+
+  if ($uusilasku) {
+    require "tilauskasittely/luo_myyntitilausotsikko.inc";
+    $tilaustunnus = luo_myyntitilausotsikko("RIVISYOTTO", $asiakasid, '', '', '', '', '', 'N');
+
+    echo t("Luodaan uusi tilaus") . " {$tilaustunnus}<br>";
+  }
+  else {
+    echo t("K‰ytet‰‰n olemassa olevaa tilausta") . " {$tilaustunnus}<br>";
+  }
+
+  $query = "SELECT * FROM lasku WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$tilaustunnus}'";
+  $result = pupe_query($query);
+  $laskurow = mysql_fetch_assoc($result);
+
+  foreach ($lisaa_tuote as $key => $tn) {
+    if ($lisaa_maara[$key] != "" and $lisaa_maara[$key] != 0) {
+      $query = "SELECT * FROM tuote WHERE yhtio = '{$kukarow['yhtio']}' AND tuoteno = '{$tn}'";
+      $result = pupe_query($query);
+      if (mysql_num_rows($result) == 1) {
+        echo t("Lis‰t‰‰n tuote") . " {$tn} (" . $lisaa_maara[$key] . " " . t("kpl") . "), " . t("hinta") . ": " . sprintf('%.2f', $lisaa_hinta[$key]) . "<br>";
+
+        $trow = mysql_fetch_assoc($result);
+
+        $parametrit = array(
+          'kpl' => $lisaa_maara[$key],
+          'hinta' => $lisaa_hinta[$key],
+          'laskurow' => $laskurow,
+          'trow' => $trow,
+          'tuoteno' => $trow['tuoteno'],
+        );
+
+        $rivit = lisaa_rivi($parametrit);
+      }
+    }
+  }
+
+  echo "<br>";
 }
 
 if ($ytunnus != '' or (int) $asiakasid > 0 or (int) $toimittajaid > 0) {
@@ -75,6 +154,8 @@ function vaihdaClick() {
 //Etsi-kentt‰
 echo "<br><table><form method='post' id='etsiform' name='etsiform'>
     <input type='hidden' name='toim' value='$toim'>
+    <input type='hidden' name='lopetus' value='$tilaus_lopetus'>
+    <input type='hidden' name='tilaustunnus' value='$tilaustunnus'>
     <input type='hidden' name='tee' value='ETSI'>";
 
 if ($kka == '')
@@ -299,7 +380,21 @@ if ($ytunnus != '' or $tuoteno != '' or (int) $asiakasid > 0 or (int) $toimittaj
 
   if (mysql_num_rows($result) > 0) {
 
-    echo "<br><table>";
+    echo "<br>
+          <form method='post'>
+          <input type='hidden' name='lopetus' value='{$tilaus_lopetus}'>
+          <input type='hidden' name='tee' value='LISAATILAUKSEEN'>
+          <input type='hidden' name='toim' value='$toim'>
+          <input type='hidden' name='tilaustunnus' value='$tilaustunnus'>
+          <input type='hidden' name='ytunnus' value='$ytunnus'>
+          <input type='hidden' name='asiakasid' value='$asiakasid'>
+          <input type='hidden' name='ppa' value='$ppa'>
+          <input type='hidden' name='kka' value='$kka'>
+          <input type='hidden' name='vva' value='$vva'>
+          <input type='hidden' name='ppl' value='$ppl'>
+          <input type='hidden' name='kkl' value='$kkl'>
+          <input type='hidden' name='vvl' value='$vvl'>
+          <table>";
     echo "<tr>";
 
     if ($toim == 'OSTO' and $pvmtapa == 'toimaika') {
@@ -372,7 +467,28 @@ if ($ytunnus != '' or $tuoteno != '' or (int) $asiakasid > 0 or (int) $toimittaj
 
       for ($i=1; $i<mysql_num_fields($result)-$miinus; $i++) {
 
-        if (mysql_field_name($result, $i) == 'kerattyaika' or mysql_field_name($result, $i) == 'toimaika' or mysql_field_name($result, $i) == 'tuloutettu' or mysql_field_name($result, $i) == 'K‰sittelyyn') {
+        if (mysql_field_name($result, $i) == "tilaus") {
+          $params = http_build_query(
+            array(
+              'tee' => 'NAYTATILAUS',
+              'toim' => $toim,
+              'tunnus' => $row['tilaus']
+            )
+          );
+
+          echo "<td valign='top' $class>" . js_openUrlNewWindow("?$params", t($row[$i])) . "</td>";
+        } elseif (mysql_field_name($result, $i) == "tuoteno") {
+          $params = http_build_query(
+            array(
+              'tee' => 'NAYTATILAUS',
+              'toim' => $toim,
+              'tunnus' => $row['tilaus']
+            )
+          );
+
+          echo "<td valign='top' $class>" . js_openUrlNewWindow("{$palvelin2}tuote.php?tee=Z&tuoteno=".urlencode($row[$i]), $row[$i], "", 1000, 1000) . "</td>";
+
+        } elseif (mysql_field_name($result, $i) == 'kerattyaika' or mysql_field_name($result, $i) == 'toimaika' or mysql_field_name($result, $i) == 'tuloutettu' or mysql_field_name($result, $i) == 'K‰sittelyyn') {
           echo "<$ero valign='top' $class>".tv1dateconv($row[$i], "pitka")."</$ero>";
         }
         elseif (substr(mysql_field_name($result, $i), 0, 3) == 'ale' or mysql_field_name($result, $i) == 'm‰‰r‰') {
@@ -548,20 +664,13 @@ if ($ytunnus != '' or $tuoteno != '' or (int) $asiakasid > 0 or (int) $toimittaj
         $worksheet->write($excelrivi, $i, t("$laskutyyppi")." ".t("$alatila"));
       }
 
-      echo "<form method='post'><td class='back' valign='top'>
-          <input type='hidden' name='tee' value='NAYTATILAUS'>
-          <input type='hidden' name='toim' value='$toim'>
-          <input type='hidden' name='tunnus' value='$row[tilaus]'>
-          <input type='hidden' name='ytunnus' value='$ytunnus'>
-          <input type='hidden' name='asiakasid' value='$asiakasid'>
-          <input type='hidden' name='tuoteno' value='$tuoteno'>
-          <input type='hidden' name='ppa' value='$ppa'>
-          <input type='hidden' name='kka' value='$kka'>
-          <input type='hidden' name='vva' value='$vva'>
-          <input type='hidden' name='ppl' value='$ppl'>
-          <input type='hidden' name='kkl' value='$kkl'>
-          <input type='hidden' name='vvl' value='$vvl'>
-          <input type='submit' value='".t("N‰yt‰ tilaus")."'></td></form>";
+      if ($toim == "MYYNTI" and $asiakasid != '') {
+        echo "<td class='back' valign='top'>
+          <input type='hidden' name='lisaa_tuote[]' value='{$row['tuoteno']}'>
+          <input type='hidden' name='lisaa_hinta[]' value='{$row['hinta']}'>
+          <input type='text' name='lisaa_maara[]' value='' size='5'>
+          <input type='submit' value='" . t("Lis‰‰ tilaukseen") . "'></td></form>";
+      }
 
       echo "</tr>";
 
@@ -611,7 +720,7 @@ if ($ytunnus != '' or $tuoteno != '' or (int) $asiakasid > 0 or (int) $toimittaj
 
 
     echo "</tr>";
-    echo "</table>";
+    echo "</form></table>";
 
     $sarakeplus = $yhtiorow["myynnin_alekentat"]-1;
 

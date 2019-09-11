@@ -3933,146 +3933,147 @@ if ($tee == '') {
 
     echo "<tr>$jarjlisa";
 
-    echo "<tr>";
-    echo "<th>" . t("Maksuehto") . ":</th><td>";
+    if ($toim == "MYYNTI") {
+      echo "<tr>";
+      echo "<th>" . t("Maksuehto") . ":</th><td>";
 
-    $query = "SELECT *
+      $query = "SELECT *
               FROM maksupositio
               WHERE yhtio ='$kukarow[yhtio]'
               and otunnus ='$srow[jaksotettu]'";
-    $maposres = pupe_query($query);
-    if (mysql_num_rows($maposres) > 0) {
-      echo t("Maksusopimus");
-      echo "<input type='hidden' name='maksuehto' value = '$laskurow[maksuehto]'>";
-    }
-    else {
-      echo "<select name='maksuehto' onchange='submit();'>";
+      $maposres = pupe_query($query);
+      if (mysql_num_rows($maposres) > 0) {
+        echo t("Maksusopimus");
+        echo "<input type='hidden' name='maksuehto' value = '$laskurow[maksuehto]'>";
+      }
+      else {
+        echo "<select name='maksuehto' onchange='submit();'>";
 
-      $query = "SELECT *
+        $query = "SELECT *
                 FROM maksuehto
                 WHERE yhtio  = '$kukarow[yhtio]'
                 and kaytossa = ''
                 and (sallitut_maat = '' or sallitut_maat like '%$srow[maa]%')
                 order by jarjestys, teksti, tunnus";
-      $mresult = pupe_query($query);
+        $mresult = pupe_query($query);
 
-      $maksuehto_valinta = $srow["maksuehto"];
+        $maksuehto_valinta = $srow["maksuehto"];
 
-      while ($row = mysql_fetch_assoc($mresult)) {
-        echo "<option value='$row[tunnus]'" . ($row["tunnus"] == $laskurow['maksuehto'] ? " SELECTED" : "") . ">".t_tunnus_avainsanat($row, "teksti", "MAKSUEHTOKV")."</option>";
+        while ($row = mysql_fetch_assoc($mresult)) {
+          echo "<option value='$row[tunnus]'" . ($row["tunnus"] == $laskurow['maksuehto'] ? " SELECTED" : "") . ">".t_tunnus_avainsanat($row, "teksti", "MAKSUEHTOKV")."</option>";
+        }
+
+      }
+      echo "</select>";
+
+      echo "</td>";
+      echo "<th>" . t("Myy varastosta") . ":</th>";
+
+      $args = array(
+        'asiakas_tunnus' => $laskurow['liitostunnus'],
+        'toimipaikka_tunnus' => $yhtiotoimipaikka,
+        'toim' => $toim,
+        'tilaustyyppi' => $laskurow['tilaustyyppi'],
+        'varasto' => $laskurow['varasto'],
+        'toimitus_maa' => $laskurow['maa'],
+      );
+
+      list($oletusvarasto, $varastot) = palauta_varasto($args);
+
+      $varastot_lisa_query = "";
+
+      if (count($varastot) > 0) {
+        $varastot_lisa_query = " AND tunnus IN (".implode(',', $varastot).")";
       }
 
-    }
-    echo "</select>";
+      if ($toim == "REKLAMAATIO" and ($tilaustyyppi == 'U') and $yhtiorow['takuuvarasto'] != 0) {
+        $oletusvarasto = (int) $yhtiorow['takuuvarasto'];
+        $varastot_lisa_query = " and tunnus = {$oletusvarasto}";
+      }
 
-    echo "</td>";
-    echo "<th>" . t("Myy varastosta") . ":</th>";
+      $disabled = '';
 
-    $args = array(
-      'asiakas_tunnus' => $laskurow['liitostunnus'],
-      'toimipaikka_tunnus' => $yhtiotoimipaikka,
-      'toim' => $toim,
-      'tilaustyyppi' => $laskurow['tilaustyyppi'],
-      'varasto' => $laskurow['varasto'],
-      'toimitus_maa' => $laskurow['maa'],
-    );
-
-    list($oletusvarasto, $varastot) = palauta_varasto($args);
-
-    $varastot_lisa_query = "";
-
-    if (count($varastot) > 0) {
-      $varastot_lisa_query = " AND tunnus IN (".implode(',', $varastot).")";
-    }
-
-    if ($toim == "REKLAMAATIO" and ($tilaustyyppi == 'U') and $yhtiorow['takuuvarasto'] != 0) {
-      $oletusvarasto = (int) $yhtiorow['takuuvarasto'];
-      $varastot_lisa_query = " and tunnus = {$oletusvarasto}";
-    }
-
-    $disabled = '';
-
-    if ($yhtiorow['pakollinen_varasto'] == 'K' and !empty($srow['tunnus'])) {
-      $query = "SELECT COUNT(*) AS tilausrivi_kpl
+      if ($yhtiorow['pakollinen_varasto'] == 'K' and !empty($srow['tunnus'])) {
+        $query = "SELECT COUNT(*) AS tilausrivi_kpl
                 FROM tilausrivi
                 WHERE yhtio  = '{$kukarow['yhtio']}'
                 AND otunnus  = {$srow['tunnus']}
                 AND var     != 'P'
                 AND tyyppi  != 'D'";
-      $tilausrivi_result = pupe_query($query);
-      $tilausrivit = mysql_fetch_assoc($tilausrivi_result);
-    }
-    else {
-      $tilausrivit['tilausrivi_kpl'] = 0;
-    }
+        $tilausrivi_result = pupe_query($query);
+        $tilausrivit = mysql_fetch_assoc($tilausrivi_result);
+      }
+      else {
+        $tilausrivit['tilausrivi_kpl'] = 0;
+      }
 
-    if ($yhtiorow['pakollinen_varasto'] == 'K' and $tilausrivit['tilausrivi_kpl'] > 0) {
-      $disabled = 'DISABLED';
-    }
+      if ($yhtiorow['pakollinen_varasto'] == 'K' and $tilausrivit['tilausrivi_kpl'] > 0) {
+        $disabled = 'DISABLED';
+      }
 
-    $query = "SELECT *
+      $query = "SELECT *
               FROM varastopaikat
               WHERE yhtio  = '$kukarow[yhtio]'
               $varastot_lisa_query
               AND tyyppi  != 'P'
               order by tyyppi, nimitys";
-    $vares = pupe_query($query);
+      $vares = pupe_query($query);
 
-    echo "<td><select name='myy_varastosta' onchange='this.form.submit()' {$disabled}><option value='0'>".t("Kaikista")."</option>";
+      echo "<td><select name='myy_varastosta' onchange='this.form.submit()' {$disabled}><option value='0'>".t("Kaikista")."</option>";
 
-    while ($varow = mysql_fetch_assoc($vares)) {
-      echo "<option value='$varow[tunnus]'" . ($laskurow['varasto'] == $varow['tunnus'] ? " SELECTED" : "") . ">$varow[nimitys]</option>";
-    }
+      while ($varow = mysql_fetch_assoc($vares)) {
+        echo "<option value='$varow[tunnus]'" . ($laskurow['varasto'] == $varow['tunnus'] ? " SELECTED" : "") . ">$varow[nimitys]</option>";
+      }
 
-    echo "</select></td>";
-    echo "</tr>";
+      echo "</select></td>";
+      echo "</tr>";
 
-    echo "<tr>";
-    echo "<th>" . t("Laskutuskieltoon") . "</th>";
-    if (!empty($yhtiorow['laskutuskielto']) and $toim != "MYYNTITILI") {
-      echo "<td><input type='checkbox' name='laskutuskielto' value='999' onchange='submit();'" . ($laskurow['chn'] == '999' ? " CHECKED" : "") . "></td>";
-    }
-    elseif ($toim != "MYYNTITILI" and $laskurow['chn'] == '999') {
-      echo "<input type='hidden' name='laskutuskielto' value='o'>";
-    }
+      echo "<tr>";
+      echo "<th>" . t("Laskutuskieltoon") . "</th>";
+      if (!empty($yhtiorow['laskutuskielto']) and $toim != "MYYNTITILI") {
+        echo "<td><input type='checkbox' name='laskutuskielto' value='999' onchange='submit();'" . ($laskurow['chn'] == '999' ? " CHECKED" : "") . "></td>";
+      }
+      elseif ($toim != "MYYNTITILI" and $laskurow['chn'] == '999') {
+        echo "<input type='hidden' name='laskutuskielto' value='o'>";
+      }
 
-    // Lukitaan rahtikirjaan vaikuttavat tiedot jos/kun rahtikirja on tulostettu
-    if ($kukarow["kesken"] != 0) {
-      $query = "SELECT *
+      // Lukitaan rahtikirjaan vaikuttavat tiedot jos/kun rahtikirja on tulostettu
+      if ($kukarow["kesken"] != 0) {
+        $query = "SELECT *
             FROM rahtikirjat
             WHERE yhtio     = '$kukarow[yhtio]'
             AND otsikkonro  = '$kukarow[kesken]'
             AND tulostettu != '0000-00-00 00:00:00'
             LIMIT 1";
-      $rakre_chkres = pupe_query($query);
-    }
+        $rakre_chkres = pupe_query($query);
+      }
 
-    echo "<th>" . t("Rahtivapaa") . "</th>";
-    echo "<td><input type='checkbox' id='rahtivapaa' name='rahtivapaa' value='o' onchange='submit();'" . ($laskurow['rahtivapaa'] != '' ? " CHECKED" : "") . (is_resource($rakre_chkres) and mysql_num_rows($rakre_chkres) > 0 ? " DISABLED" : "") . ">";
-    // HUOM: jos varsinainen on disabloitu niin siirret‰‰n tieto hidddeniss‰
-    if ($state_chk == 'disabled') {
-      echo "<input type='hidden' name='rahtivapaa' value='$laskurow[rahtivapaa]'>";
-    }
-    echo "</td>";
-    echo "</tr>";
+      echo "<th>" . t("Rahtivapaa") . "</th>";
+      echo "<td><input type='checkbox' id='rahtivapaa' name='rahtivapaa' value='o' onchange='submit();'" . ($laskurow['rahtivapaa'] != '' ? " CHECKED" : "") . (is_resource($rakre_chkres) and mysql_num_rows($rakre_chkres) > 0 ? " DISABLED" : "") . ">";
+      // HUOM: jos varsinainen on disabloitu niin siirret‰‰n tieto hidddeniss‰
+      if ($state_chk == 'disabled') {
+        echo "<input type='hidden' name='rahtivapaa' value='$laskurow[rahtivapaa]'>";
+      }
+      echo "</td>";
+      echo "</tr>";
 
-    $query = "SELECT a.myyjanro, k.nimi FROM asiakas a INNER JOIN kuka k ON k.myyja = a.myyjanro WHERE a.tunnus = {$laskurow['liitostunnus']}";
-    $myyja_result = pupe_query($query);
-    $myyja_row = mysql_fetch_assoc($myyja_result);
+      $query = "SELECT a.myyjanro, k.nimi FROM asiakas a INNER JOIN kuka k ON k.myyja = a.myyjanro WHERE a.tunnus = {$laskurow['liitostunnus']}";
+      $myyja_result = pupe_query($query);
+      $myyja_row = mysql_fetch_assoc($myyja_result);
 
-    if ($kukarow["extranet"] != "" and $kukarow["yhtio"] == 'orum') {
-      echo "<th>&nbsp;</th>";
+      if ($kukarow["extranet"] != "" and $kukarow["yhtio"] == 'orum') {
+        echo "<th>&nbsp;</th>";
+      }
+      elseif ($toim != "SIIRTOTYOMAARAYS"  and $toim != "SIIRTOLISTA" and $toim != "VALMISTAVARASTOON") {
+        echo "<th>".t("Asiakasmyyj‰").":</th><td>{$myyja_row['myyjanro']} - {$myyja_row['nimi']}</td>";
+      }
+      elseif (($toim == "SIIRTOTYOMAARAYS" or $toim == "SIIRTOLISTA") and $yhtiorow["varastosiirto_tilausvahvistus"] == "K") {
+        echo "<th>".t("Asiakasmyyj‰").":</th><td>{$myyja_row['myyjanro']} - {$myyja_row['nimi']}</td>";
+      }
+      else {
+        echo "<th>&nbsp;</th>";
+      }
     }
-    elseif ($toim != "SIIRTOTYOMAARAYS"  and $toim != "SIIRTOLISTA" and $toim != "VALMISTAVARASTOON") {
-      echo "<th>".t("Asiakasmyyj‰").":</th><td>{$myyja_row['myyjanro']} - {$myyja_row['nimi']}</td>";
-    }
-    elseif (($toim == "SIIRTOTYOMAARAYS" or $toim == "SIIRTOLISTA") and $yhtiorow["varastosiirto_tilausvahvistus"] == "K") {
-      echo "<th>".t("Asiakasmyyj‰").":</th><td>{$myyja_row['myyjanro']} - {$myyja_row['nimi']}</td>";
-    }
-    else {
-      echo "<th>&nbsp;</th>";
-    }
-
 
     if ($kukarow["extranet"] == "") {
       if ($toim != "VALMISTAVARASTOON") {

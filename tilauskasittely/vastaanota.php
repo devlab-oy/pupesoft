@@ -483,6 +483,8 @@ if ($tee == 'valmis') {
     exit();
   }
 
+  $poikkeava_maara_email = "";
+
   //käydään kaikki riviti läpi ja siirretään saldoja
   foreach ($tunnus as $tun) {
     if (isset($vastaanotetaan) and $vastaanotetaan[$tun] == "")
@@ -496,7 +498,7 @@ if ($tee == 'valmis') {
 
     $t1[$tun]=strtoupper($t1[$tun]);
 
-    $query = "SELECT tilausrivi.tuoteno, tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso, tilausrivi.varattu, tuote.ei_saldoa, tuote.sarjanumeroseuranta
+    $query = "SELECT tilausrivi.tunnus, tilausrivi.tuoteno, tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso, tilausrivi.varattu, tuote.ei_saldoa, tuote.sarjanumeroseuranta
               FROM tilausrivi
               JOIN tuote on tilausrivi.yhtio=tuote.yhtio and tilausrivi.tuoteno=tuote.tuoteno
               WHERE tilausrivi.tunnus   = '$tun'
@@ -514,6 +516,19 @@ if ($tee == 'valmis') {
       $tuoteno = $tilausrivirow["tuoteno"];
       $asaldo  = $tilausrivirow["varattu"];
       $tee    = "";
+
+      if (isset($vastaanotettu_maara[$tun]) and ($vastaanotettu_maara[$tun] != "")) {
+        $asaldo = $vastaanotettu_maara[$tun];
+        $alkup_varattu = $tilausrivirow["varattu"];
+        $tilausrivirow["varattu"] = $asaldo;
+
+        paivita_tilausrivin_kpl($tilausrivirow['tunnus'], $asaldo);
+
+        if ($poikkeava_maara_email == "") {
+          $poikkeava_maara_email = t("tuotetta vastaanotettiin eri määrä kuin merkattiin kerätyksi") . "\n\n";
+        }
+        $poikkeava_maara_email .= $tilausrivirow['tuoteno'] . ": " . $tilausrivirow["varattu"] . " / " . $alkup_varattu . "\n";
+      }
 
       if ($asaldo != 0 and $tilausrivirow["ei_saldoa"] == "") {
 
@@ -618,9 +633,6 @@ if ($tee == 'valmis') {
         $tee = "N";
         $kutsuja = "vastaanota.php";
         $tilattumaara = $asaldo;
-        if (isset($vastaanotettu_maara[$tun])) {
-          $asaldo = $vastaanotettu_maara[$tun];
-        }
 
         require "muuvarastopaikka.php";
 
@@ -709,6 +721,23 @@ if ($tee == 'valmis') {
         // Summataan virhecountteria
         $virheita++;
       }
+    }
+  }
+
+  if ($poikkeava_maara_email != "") {
+    $query = "SELECT kerayspoikkeus_email FROM varastopaikat WHERE tunnus = (SELECT varasto FROM tilausrivi WHERE tunnus = {$tun} AND yhtio = '$kukarow[yhtio]') and yhtio = '$kukarow[yhtio]'";
+    $paikka_result = pupe_query($query);
+    $paikka_row = mysql_fetch_assoc($paikka_result);
+    $email = $paikka_row['kerayspoikkeus_email'];
+
+    if ($email != "") {
+      $parametrit = array(
+        "to"      => $email,
+        "subject" => t("Varastosiirtojen vastaanotossa poikkeava määrä"),
+        "body"    => $poikkeava_maara_email,
+      );
+
+      pupesoft_sahkoposti($parametrit);
     }
   }
 

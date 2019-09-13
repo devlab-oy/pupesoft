@@ -165,13 +165,14 @@ if (isset($submit_button) and trim($submit_button) != '') {
         $echotaanko = false;
         $tee = "paikat";
         $id = $row['otunnus'];
-        $tunnus[0] = $tilausrivi;
+        $tunnus[$tilausrivi] = $tilausrivi;
+        $vastaanotettu_maara[$tilausrivi] = $maara;
+        $asaldo = $maara;
         $toimittamatta = -1;
         $t1[$tilausrivi] = $row['hyllyalue'];
         $t2[$tilausrivi] = $row['hyllynro'];
         $t3[$tilausrivi] = $row['hyllyvali'];
         $t4[$tilausrivi] = $row['hyllytaso'];
-        $vastaanotettu_maara[$tilausrivi] = $maara;
 
         if (isset($kerailypaikka) and $kerailypaikka != "") {
           $paikat = explode("-", $kerailypaikka);
@@ -184,15 +185,6 @@ if (isset($submit_button) and trim($submit_button) != '') {
           } else {
             $errors[] = t("Virheellinen keräilypaikka");
           }
-        }
-
-        if ($maara < $row['varattu']) {
-          // Syötetty määrä on pienempi kuin tilausrivilla oleva määrä.
-          // Splitataan rivi ja siirretään ylijääneet uudellele tilausriville.
-          splittaa_tilausrivi($tilausrivi, ($row['varattu'] - $maara), TRUE, FALSE);
-
-          // Alkuperäinen viedään varastoon, splitattu jää jäljelle
-          $ok = paivita_tilausrivin_kpl($tilausrivi, $maara);
         }
 
         if (count($errors) == 0) {

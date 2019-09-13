@@ -682,30 +682,8 @@ if ($tee == 'N') {
   if (!isset($kohdepaikasta_oletuspaikka)) $kohdepaikasta_oletuspaikka = "";
 
   for ($iii=0; $iii< count($tuotteet); $iii++) {
-    if (isset($kappaleet[$iii]) and isset($tilattumaara) and $kappaleet[$iii] <> $tilattumaara) {
-      // splittaa_tilausrivi($tun, $tilattumaara - $asaldo);
-
-      $query = "UPDATE tilausrivi SET varattu = {$asaldo} WHERE tunnus = {$tun} AND yhtio = '$kukarow[yhtio]'";
-      $result = pupe_query($query);
-
-      $query = "SELECT kerayspoikkeus_email FROM varastopaikat WHERE tunnus = (SELECT varasto FROM tilausrivi WHERE tunnus = {$tun} AND yhtio = '$kukarow[yhtio]') and yhtio = '$kukarow[yhtio]'";
-      $result = pupe_query($query);
-      $paikka_row = mysql_fetch_assoc($result);
-      $email = $paikka_row['kerayspoikkeus_email'];
-
-      if ($email != "") {
-        $parametrit = array(
-          "to"      => $email,
-          "subject" => t("Varastosiirtojen vastaanotossa poikkeava määrä"),
-          "body"    => $id . " " . $tuotteet[$iii] . " " . t("tuotetta vastaanotettiin eri määrä kuin merkattiin kerätyksi") . ": " . $kappaleet[$iii] . " / " . $tilattumaara,
-        );
-
-        pupesoft_sahkoposti($parametrit);
-      }
-    }
-
     $params = array(
-      'kappaleet' => $kappaleet[$iii],
+      'kappaleet' => $asaldo,
       'lisavaruste' => $lisavaruste[$iii],
       'tuoteno' => $tuotteet[$iii],
       'tuotepaikat_tunnus_otetaan' => $otetaan[$iii],

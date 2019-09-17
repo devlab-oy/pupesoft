@@ -3933,7 +3933,7 @@ if ($tee == '') {
 
     echo "<tr>$jarjlisa";
 
-    if ($toim == "MYYNTI") {
+    if ($toim == "RIVISYOTTO") {
       echo "<tr>";
       echo "<th>" . t("Maksuehto") . ":</th><td>";
 
@@ -4072,6 +4072,54 @@ if ($tee == '') {
       }
       else {
         echo "<th>&nbsp;</th>";
+      }
+    }
+    else {
+      if ($kukarow["extranet"] != "" and $kukarow["yhtio"] == 'orum') {
+        echo "<th>&nbsp;</th>";
+      }
+      elseif ($toim != "SIIRTOTYOMAARAYS"  and $toim != "SIIRTOLISTA" and $toim != "VALMISTAVARASTOON") {
+        echo "<th>".t("Tilausvahvistus").":</th>";
+      }
+      elseif (($toim == "SIIRTOTYOMAARAYS" or $toim == "SIIRTOLISTA") and $yhtiorow["varastosiirto_tilausvahvistus"] == "K") {
+        echo "<th>".t("Siirtovahvistus").":</th>";
+      }
+      else {
+        echo "<th>&nbsp;</th>";
+      }
+
+      if ($kukarow["extranet"] != "" and $kukarow["yhtio"] == 'orum') {
+        echo "<td><input type='hidden' name='tilausvahvistus' value='$laskurow[tilausvahvistus]'>&nbsp;</td>";
+      }
+      elseif ($toim != "SIIRTOTYOMAARAYS"  and $toim != "SIIRTOLISTA" and $toim != "VALMISTAVARASTOON") {
+        $extralisa = "";
+
+        if ($kukarow["extranet"] != "") {
+          $extralisa .= " and (avainsana.selite like '%S%' or avainsana.selite like '%O%') ";
+
+          if ($kukarow['hinnat'] == 1) {
+            $extralisa .= " and avainsana.selite not like '1%' ";
+          }
+        }
+
+        $tresult = t_avainsana("TV", "", $extralisa);
+
+        echo "<td><select name='tilausvahvistus' onchange='submit();' ".js_alasvetoMaxWidth("tilausvahvistus", 250)." $state>";
+        echo "<option value=' '>".t("Ei Vahvistusta")."</option>";
+
+        while ($row = mysql_fetch_assoc($tresult)) {
+          $sel = "";
+          if ($row["selite"]== $laskurow["tilausvahvistus"]) $sel = 'selected';
+          echo "<option value='$row[selite]' $sel>$row[selitetark]</option>";
+        }
+        echo "</select></td>";
+
+      }
+      elseif (($toim == "SIIRTOTYOMAARAYS" or $toim == "SIIRTOLISTA") and $yhtiorow["varastosiirto_tilausvahvistus"] == "K") {
+        echo "<td>".t("Kyllä")."</td>";
+      }
+      else {
+        echo "<td>&nbsp;</td>";
       }
     }
 

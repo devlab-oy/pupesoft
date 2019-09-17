@@ -765,6 +765,7 @@ if ($toim == "VAIHDAKEHAHIN" and $tee == "vaihda_kehahin") {
 if ($toim == "VAIHDAKEHAHIN" and $tee == "vaihda_kehahin") {
 
   $query = "LOCK TABLES
+            sanakirja READ,
             tuotepaikat WRITE,
             tapahtuma WRITE,
             tuote WRITE,

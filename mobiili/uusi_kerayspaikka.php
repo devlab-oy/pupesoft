@@ -302,6 +302,7 @@ if (isset($submit) and trim($submit) != '' and count($errors) == 0) {
 
           // Lukitaan taulut saldojen siirtoa varten
           $query = "LOCK TABLE
+                    sanakirja READ,
                     tuotepaikat WRITE,
                     tapahtuma WRITE,
                     tuote READ,

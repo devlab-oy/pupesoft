@@ -2299,7 +2299,7 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
                                      FROM rahtikirjat
                                      WHERE yhtio    = '{$kukarow["yhtio"]}'
                                      AND otsikkonro = '{$laskurow["tunnus"]}'
-                                     GROUP BY otsikkonro)";
+                                     GROUP BY rahtikirjanro)";
       $rahti_result = pupe_query($query);
 
       $tunnukset = mysql_fetch_assoc($rahti_result);

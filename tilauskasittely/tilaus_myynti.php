@@ -424,8 +424,10 @@ if (!isset($var_array)) $var_array = "";
 if (!isset($yksi_suoratoimittaja)) $yksi_suoratoimittaja = "";
 if (!isset($ylatila)) $ylatila = "";
 if (!isset($luottorajavirhe_ylivito_valmis)) $luottorajavirhe_ylivito_valmis = true;
-if (!isset($laskutuskielto)) $laskutuskielto = "";
+if (!isset($laskutuskielto_ruksi)) $laskutuskielto_ruksi = "";
 if (!isset($rahtivapaa)) $rahtivapaa = "";
+if (!isset($osatoimitus)) $osatoimitus = "";
+if (!isset($muokataan_otsikoita)) $muokataan_otsikoita = "";
 
 if (empty($_POST["tilausrivi_alvillisuus"]) and isset($_COOKIE["tilausrivi_alvillisuus"])) {
   $tilausrivi_alvillisuus = $_COOKIE["tilausrivi_alvillisuus"];
@@ -2864,8 +2866,8 @@ if ($tee == '') {
       (isset($maksuehto) and $maksuehto != $laskurow["maksuehto"]) or
       (isset($myy_varastosta) and $myy_varastosta != $laskurow["varasto"]) or
       (isset($hyvaksynnanmuutos) and $hyvaksynnanmuutos != $laskurow["hyvaksynnanmuutos"]) or
-      ($laskutuskielto != $laskurow["chn"]) or
-      ($rahtivapaa != $laskurow["rahtivapaa"]) or
+      (isset($laskutuskielto_ruksi) and $muokataan_otsikoita != "") or
+      (isset($rahtivapaa) and $rahtivapaa != $laskurow["rahtivapaa"]) or
       (isset($tilausvahvistus) and $tilausvahvistus != $laskurow["tilausvahvistus"]) or
       (isset($myyjanro) and $myyjanro > 0 and $myyjanro != $v_myyjanro) or
       (isset($myyja) and $myyja > 0 and $myyja != $laskurow["myyja"]) or
@@ -2904,10 +2906,27 @@ if ($tee == '') {
       $laskurow["maksuehto"] = $maksutapa;
     }
 
-    $myy_varastosta_lisa = ($myy_varastosta != $laskurow['varasto'] ? "varasto = '{$myy_varastosta}'," : "");
-    $hyvaksynnanmuutos_lisa = ($hyvaksynnanmuutos != $laskurow['hyvaksynnanmuutos'] ? "hyvaksynnanmuutos = '{$hyvaksynnanmuutos}'," : "");
-    $rahtivapaa_lisa = ($rahtivapaa != $laskurow['rahtivapaa'] ? "rahtivapaa = '{$rahtivapaa}'," : "");
-    $laskutuskielto_lisa = ($laskutuskielto != $laskurow['chn'] ? "chn = '{$laskutuskielto}'," : "");
+    $myy_varastosta_lisa = ($muokataan_otsikoita != "" and isset($myy_varastosta) and $myy_varastosta != $laskurow['varasto']) ? "varasto = '{$myy_varastosta}'," : "";
+    $hyvaksynnanmuutos_lisa = ($muokataan_otsikoita != "" and isset($hyvaksynnanmuutos) and $hyvaksynnanmuutos != $laskurow['hyvaksynnanmuutos']) ? "hyvaksynnanmuutos = '{$hyvaksynnanmuutos}'," : "";
+    $rahtivapaa_lisa = ($muokataan_otsikoita != "" and isset($rahtivapaa) and $rahtivapaa != $laskurow['rahtivapaa']) ? "rahtivapaa = '{$rahtivapaa}'," : "";
+    $osatoimitus_lisa = ($muokataan_otsikoita != "" and isset($osatoimitus) and $osatoimitus != $laskurow['osatoimitus']) ? "osatoimitus = 'o'," : "";
+
+    if ($muokataan_otsikoita != "" and isset($laskutuskielto_ruksi)) {
+      $chn = '';
+
+      if ($laskutuskielto_ruksi != '') {
+        $chn = '999';
+      }
+      else {
+        $chn = $asiakasrow['chn'];
+
+        if ($chn == '') {
+          $chn = '100';
+        }
+      }
+
+      $laskutuskielto_lisa = ($chn != $laskurow['chn']) ? "chn = '{$chn}'," : "";
+    }
 
     // haetaan maksuehdoen tiedot tarkastuksia varten
     $apuqu = "SELECT *
@@ -3010,6 +3029,7 @@ if ($tee == '') {
                $hyvaksynnanmuutos_lisa
                $rahtivapaa_lisa
                $laskutuskielto_lisa
+               $osatoimitus_lisa
                kassalipas      = '$kassalipas',
                maksuehto       = '$laskurow[maksuehto]'
                WHERE yhtio     = '$kukarow[yhtio]'
@@ -3808,17 +3828,19 @@ if ($tee == '') {
         }
       }
 
-      $tresult = t_avainsana("ASIAKASLUOKKA");
+      if ($toim == "RIVISYOTTO") {
+        $tresult = t_avainsana("ASIAKASLUOKKA");
 
-      echo "<select name='hyvaksynnanmuutos' onchange='submit();'><option value=''>".t("Tyhjä")."</option>";
+        echo "<select name='hyvaksynnanmuutos' onchange='submit();'><option value=''>" . t("Tyhjä") . "</option>";
 
-      while ($row = mysql_fetch_assoc($tresult)) {
-        echo "<option value='$row[selite]'" . ($row["selite"] == $laskurow["hyvaksynnanmuutos"] ? " SELECTED" : "") . ">" . $row['selite'];
-        if ($row["selitetark"] != "") echo " - $row[selitetark]";
-        echo "</option>";
+        while ($row = mysql_fetch_assoc($tresult)) {
+          echo "<option value='$row[selite]'" . ($row["selite"] == $laskurow["hyvaksynnanmuutos"] ? " SELECTED" : "") . ">" . $row['selite'];
+          if ($row["selitetark"] != "") echo " - $row[selitetark]";
+          echo "</option>";
+        }
+
+        echo "</select>";
       }
-
-      echo "</select>";
 
       echo "</td>";
     }
@@ -3931,9 +3953,8 @@ if ($tee == '') {
     echo "<th>".t("Tilausviite").":</th><td>";
     echo "<input type='text' size='30' name='viesti' value='$laskurow[viesti]' $state><input type='submit' class='tallenna_btn' value='".t("Tallenna")."' $state></td></tr>\n";
 
-    echo "<tr>$jarjlisa";
-
     if ($toim == "RIVISYOTTO") {
+      echo "<input type='hidden' name='muokataan_otsikoita' value='joo'>";
       echo "<tr>";
       echo "<th>" . t("Maksuehto") . ":</th><td>";
 
@@ -4031,7 +4052,7 @@ if ($tee == '') {
       echo "<tr>";
       echo "<th>" . t("Laskutuskieltoon") . "</th>";
       if (!empty($yhtiorow['laskutuskielto']) and $toim != "MYYNTITILI") {
-        echo "<td><input type='checkbox' name='laskutuskielto' value='999' onchange='submit();'" . ($laskurow['chn'] == '999' ? " CHECKED" : "") . "></td>";
+        echo "<td><input type='checkbox' name='laskutuskielto_ruksi' value='999' onchange='submit();'" . ($laskurow['chn'] == '999' ? " CHECKED" : "") . "></td>";
       }
       elseif ($toim != "MYYNTITILI" and $laskurow['chn'] == '999') {
         echo "<input type='hidden' name='laskutuskielto' value='o'>";
@@ -4057,24 +4078,30 @@ if ($tee == '') {
       echo "</td>";
       echo "</tr>";
 
+      $osath = '';
+      $args = array(
+        'srow'   => $laskurow,
+        'oletus' => $oletus,
+        'huomioidaanko_kukarow_kesen' => true
+      );
+      $osatoimitusko = osatoimitus($args);
+      if ($osatoimitusko) {
+        $osath = 'CHECKED';
+      }
+
+      echo "<tr>";
+      echo "<th>" . t("Tilausta ei osatoimiteta") . ":</th><td><input type='checkbox' name='osatoimitus' onchange='submit();' $osath></td><th>&nbsp;</th><td>&nbsp;</td>";
+      echo "</tr>";
+
       $query = "SELECT a.myyjanro, k.nimi FROM asiakas a INNER JOIN kuka k ON k.myyja = a.myyjanro WHERE a.tunnus = {$laskurow['liitostunnus']}";
       $myyja_result = pupe_query($query);
       $myyja_row = mysql_fetch_assoc($myyja_result);
 
-      if ($kukarow["extranet"] != "" and $kukarow["yhtio"] == 'orum') {
-        echo "<th>&nbsp;</th>";
-      }
-      elseif ($toim != "SIIRTOTYOMAARAYS"  and $toim != "SIIRTOLISTA" and $toim != "VALMISTAVARASTOON") {
-        echo "<th>".t("Asiakasmyyjä").":</th><td>{$myyja_row['myyjanro']} - {$myyja_row['nimi']}</td>";
-      }
-      elseif (($toim == "SIIRTOTYOMAARAYS" or $toim == "SIIRTOLISTA") and $yhtiorow["varastosiirto_tilausvahvistus"] == "K") {
-        echo "<th>".t("Asiakasmyyjä").":</th><td>{$myyja_row['myyjanro']} - {$myyja_row['nimi']}</td>";
-      }
-      else {
-        echo "<th>&nbsp;</th>";
-      }
+      echo "<tr><th>".t("Asiakasmyyjä").":</th><td>{$myyja_row['myyjanro']} - {$myyja_row['nimi']}</td>";
     }
     else {
+      echo "<tr>$jarjlisa";
+
       if ($kukarow["extranet"] != "" and $kukarow["yhtio"] == 'orum') {
         echo "<th>&nbsp;</th>";
       }

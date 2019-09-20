@@ -2909,7 +2909,7 @@ if ($tee == '') {
     $myy_varastosta_lisa = ($muokataan_otsikoita != "" and isset($myy_varastosta) and $myy_varastosta != $laskurow['varasto']) ? "varasto = '{$myy_varastosta}'," : "";
     $hyvaksynnanmuutos_lisa = ($muokataan_otsikoita != "" and isset($hyvaksynnanmuutos) and $hyvaksynnanmuutos != $laskurow['hyvaksynnanmuutos']) ? "hyvaksynnanmuutos = '{$hyvaksynnanmuutos}'," : "";
     $rahtivapaa_lisa = ($muokataan_otsikoita != "" and isset($rahtivapaa) and $rahtivapaa != $laskurow['rahtivapaa']) ? "rahtivapaa = '{$rahtivapaa}'," : "";
-    $osatoimitus_lisa = ($muokataan_otsikoita != "" and isset($osatoimitus) and $osatoimitus != $laskurow['osatoimitus']) ? "osatoimitus = 'o'," : "";
+    $osatoimitus_lisa = ($muokataan_otsikoita != "" and isset($osatoimitus) and $osatoimitus != $laskurow['osatoimitus']) ? "osatoimitus = '{$osatoimitus}'," : "";
 
     if ($muokataan_otsikoita != "" and isset($laskutuskielto_ruksi)) {
       $chn = '';
@@ -4213,7 +4213,7 @@ if ($tee == '') {
 
       if ($toim == "RIVISYOTTO") {
         echo "<tr>";
-        echo "<th>" . t("Tilausta ei osatoimiteta") . ":</th><td><input type='checkbox' name='osatoimitus' onchange='submit();' $osath></td><th>&nbsp;</th><td>&nbsp;</td>";
+        echo "<th>" . t("Tilausta ei osatoimiteta") . ":</th><td><input type='checkbox' name='osatoimitus' value = 'o' onchange='submit();' $osath></td><th>&nbsp;</th><td>&nbsp;</td>";
         echo "</tr>";
       }
 

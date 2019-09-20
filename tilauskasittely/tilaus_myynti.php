@@ -2928,6 +2928,15 @@ if ($tee == '') {
       $laskutuskielto_lisa = ($chn != $laskurow['chn']) ? "chn = '{$chn}'," : "";
     }
 
+    if ($hyvaksynnanmuutos_lisa != "") {
+      $prioriteettinro = t_avainsana("ASIAKASLUOKKA", "", " and avainsana.selite='{$hyvaksynnanmuutos}'", "", "", "selitetark_3");
+
+      // Default 9 myös kannassa, niin laitetaan tännekki 9 jos avainsanoista ei löydy prioa
+      if (!is_numeric($prioriteettinro)) $prioriteettinro = 9;
+
+      $hyvaksynnanmuutos_lisa .= "prioriteettinro = {$prioriteettinro},";
+    }
+
     // haetaan maksuehdoen tiedot tarkastuksia varten
     $apuqu = "SELECT *
               FROM maksuehto
@@ -4089,10 +4098,6 @@ if ($tee == '') {
         $osath = 'CHECKED';
       }
 
-      echo "<tr>";
-      echo "<th>" . t("Tilausta ei osatoimiteta") . ":</th><td><input type='checkbox' name='osatoimitus' onchange='submit();' $osath></td><th>&nbsp;</th><td>&nbsp;</td>";
-      echo "</tr>";
-
       $query = "SELECT a.myyjanro, k.nimi FROM asiakas a INNER JOIN kuka k ON k.myyja = a.myyjanro WHERE a.tunnus = {$laskurow['liitostunnus']}";
       $myyja_result = pupe_query($query);
       $myyja_row = mysql_fetch_assoc($myyja_result);
@@ -4205,6 +4210,12 @@ if ($tee == '') {
       echo "<select id='myyja_id' name='myyja' {$state}>";
       echo $options;
       echo "</select></td></tr>";
+
+      if ($toim == "RIVISYOTTO") {
+        echo "<tr>";
+        echo "<th>" . t("Tilausta ei osatoimiteta") . ":</th><td><input type='checkbox' name='osatoimitus' onchange='submit();' $osath></td><th>&nbsp;</th><td>&nbsp;</td>";
+        echo "</tr>";
+      }
 
       if (trim($asiakasrow["fakta"]) != "" and $toim != "SIIRTOTYOMAARAYS"  and $toim != "SIIRTOLISTA" and $toim != "VALMISTAVARASTOON") {
         echo "<tr>$jarjlisa<th>".t("Asiakasfakta").":</th><td colspan='3'>";

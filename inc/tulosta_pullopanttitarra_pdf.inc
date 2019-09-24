@@ -127,8 +127,8 @@ if (!function_exists('tulosta_pullopanttitarra_pdf')) {
                 tuote.lyhytkuvaus AS kylma_aine
               FROM tilausrivi
                 JOIN sarjanumeroseuranta ON (sarjanumeroseuranta.yhtio = tilausrivi.yhtio AND sarjanumeroseuranta.myyntirivitunnus = tilausrivi.tunnus)
-                JOIN tilausrivi aine ON (aine.yhtio = tilausrivi.yhtio AND aine.tunnus = tilausrivi.perheid)
-                JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = aine.tuoteno)
+                LEFT JOIN tilausrivi aine ON (aine.yhtio = tilausrivi.yhtio AND aine.tunnus = tilausrivi.perheid)
+                LEFT JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = aine.tuoteno)
               WHERE tilausrivi.yhtio = '{$yhtiorow['yhtio']}'
                 AND tilausrivi.otunnus = '{$laskurow['tunnus']}'
               ORDER BY sarjanumeroseuranta.sarjanumero";

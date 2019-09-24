@@ -2863,11 +2863,11 @@ if ($tee == '') {
       (isset($rahtisopimus) and $rahtisopimus != '' and $rahtisopimus != $laskurow["rahtisopimus"]) or
       (isset($viesti) and $viesti != $laskurow["viesti"]) or
       (isset($asiakkaan_tilausnumero) and $asiakkaan_tilausnumero != $laskurow["asiakkaan_tilausnumero"]) or
-      (isset($maksuehto) and $maksuehto != $laskurow["maksuehto"]) or
-      (isset($myy_varastosta) and $myy_varastosta != $laskurow["varasto"]) or
-      (isset($hyvaksynnanmuutos) and $hyvaksynnanmuutos != $laskurow["hyvaksynnanmuutos"]) or
+      (isset($maksuehto) and $maksuehto != $laskurow["maksuehto"] and $muokataan_otsikoita != "") or
+      (isset($myy_varastosta) and $myy_varastosta != $laskurow["varasto"] and $muokataan_otsikoita != "") or
+      (isset($hyvaksynnanmuutos) and $hyvaksynnanmuutos != $laskurow["hyvaksynnanmuutos"] and $muokataan_otsikoita != "") or
       (isset($laskutuskielto_ruksi) and $muokataan_otsikoita != "") or
-      (isset($rahtivapaa) and $rahtivapaa != $laskurow["rahtivapaa"]) or
+      (isset($rahtivapaa) and $rahtivapaa != $laskurow["rahtivapaa"] and $muokataan_otsikoita != "") or
       (isset($tilausvahvistus) and $tilausvahvistus != $laskurow["tilausvahvistus"]) or
       (isset($myyjanro) and $myyjanro > 0 and $myyjanro != $v_myyjanro) or
       (isset($myyja) and $myyja > 0 and $myyja != $laskurow["myyja"]) or

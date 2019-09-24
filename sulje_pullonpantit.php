@@ -44,11 +44,27 @@ $query = "SELECT *
             AND tilaustyyppi = 'P'
             AND tila = 'N'";
 $hyvitystilaukset = pupe_query($query);
+$laskutettavat = array();
+
 while ($laskurow = mysql_fetch_assoc($hyvitystilaukset)) {
   echo "K‰sitell‰‰n lasku " . $laskurow['tunnus'] . "\n";
 
   $kukarow["kesken"] = $laskurow['tunnus'];
   require "tilauskasittely/tilaus-valmis.inc";
+
+  $laskutettavat[] = $laskurow['tunnus'];
+}
+
+if (!empty($laskutettavat)) {
+  $laskutettavat = implode(",", $laskutettavat);
+
+  echo "Verkkolaskutetaan: " . $laskutettavat . "\n";
+
+  $tee           = "TARKISTA";
+  $laskutakaikki = "KYLLA";
+  $silent        = "VIENTI";
+
+  require "./tilauskasittely/verkkolasku.php";
 }
 
 $kukarow['kesken'] = "0";

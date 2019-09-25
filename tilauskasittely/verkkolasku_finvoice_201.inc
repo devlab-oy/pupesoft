@@ -551,7 +551,10 @@ if (!function_exists('finvoice_otsik')) {
       xml_add("InvoiceDate Format=\"CCYYMMDD\"", vlas_dateconv($lasrow['tapvm']), $tootfinvoice);
       xml_add("SellerReferenceIdentifier", substr($lasrow['tilausnumerot'], 0, 35), $tootfinvoice, 35);
 
-      if ($yhtiorow["verkkolasku_lah"] == "talenom" or $yhtiorow["verkkolasku_lah"] == "arvato") {
+      $sellersbuyeridentifier_avainsana_where = "AND selite = '{$yhtiorow["verkkolasku_lah"]}' AND selitetark = 'SellersBuyerIdentifier'";
+      $sellersbuyeridentifier_avainsana_kentta = t_avainsana("VERKLASKKENTSIS", "", $sellersbuyeridentifier_avainsana_where, "", "", "selitetark_2");
+
+      if ($yhtiorow["verkkolasku_lah"] == "talenom" or $yhtiorow["verkkolasku_lah"] == "arvato" or $sellersbuyeridentifier_avainsana_kentta == "asiakasnro") {
         xml_add("SellersBuyerIdentifier", substr($asiakasrow["asiakasnro"], 0, 35), $tootfinvoice, 35);
       }
       elseif (trim($lasrow['asiakkaan_tilausnumero']) != "") {
@@ -561,7 +564,13 @@ if (!function_exists('finvoice_otsik')) {
         xml_add("SellersBuyerIdentifier", substr($lasrow['viesti'], 0, 35), $tootfinvoice, 35);
       }
 
-      if (trim($lasrow['asiakkaan_tilausnumero']) != "") {
+      $orderidentifier_avainsana_where = "AND selite = '{$yhtiorow["verkkolasku_lah"]}' AND selitetark = 'OrderIdentifier'";
+      $orderidentifier_avainsana_kentta = t_avainsana("VERKLASKKENTSIS", "", $orderidentifier_avainsana_where, "", "", "selitetark_2");
+
+      if ($orderidentifier_avainsana_kentta == "tyhja") {
+        xml_add("OrderIdentifier", "", $tootfinvoice, 35);
+      }
+      elseif (trim($lasrow['asiakkaan_tilausnumero']) != "") {
         xml_add("OrderIdentifier", substr($lasrow['asiakkaan_tilausnumero'], 0, 35), $tootfinvoice, 35);
       }
       else {

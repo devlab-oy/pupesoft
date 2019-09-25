@@ -518,16 +518,22 @@ if ($tee == 'valmis') {
       $tee    = "";
 
       if (isset($vastaanotettu_maara[$tun]) and ($vastaanotettu_maara[$tun] != "")) {
-        $asaldo = $vastaanotettu_maara[$tun];
-        $alkup_varattu = $tilausrivirow["varattu"];
-        $tilausrivirow["varattu"] = $asaldo;
+        if ($vastaanotettu_maara[$tun] != $tilausrivirow["varattu"]) {
+          $asaldo = $vastaanotettu_maara[$tun];
+          $alkup_varattu = $tilausrivirow["varattu"];
+          $tilausrivirow["varattu"] = $asaldo;
 
-        paivita_tilausrivin_kpl($tilausrivirow['tunnus'], $asaldo);
+          if ($asaldo < $tilausrivirow["varattu"]) {
+            splittaa_tilausrivi($tilausrivirow['tunnus'], $alkup_varattu - $asaldo);
+          }
 
-        if ($poikkeava_maara_email == "") {
-          $poikkeava_maara_email = t("tuotetta vastaanotettiin eri määrä kuin merkattiin kerätyksi") . "\n\n";
+          paivita_tilausrivin_kpl($tilausrivirow['tunnus'], $asaldo);
+
+          if ($poikkeava_maara_email == "") {
+            $poikkeava_maara_email = t("tuotetta vastaanotettiin eri määrä kuin merkattiin kerätyksi") . "\n\n";
+          }
+          $poikkeava_maara_email .= $tilausrivirow['tuoteno'] . ": " . $tilausrivirow["varattu"] . " / " . $alkup_varattu . "\n";
         }
-        $poikkeava_maara_email .= $tilausrivirow['tuoteno'] . ": " . $tilausrivirow["varattu"] . " / " . $alkup_varattu . "\n";
       }
 
       if ($asaldo != 0 and $tilausrivirow["ei_saldoa"] == "") {

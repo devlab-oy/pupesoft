@@ -32,7 +32,10 @@ if (!function_exists('tulosta_pullopanttitarra_pdf')) {
     $sivu = 0;
     $tarrat = "";
 
-    $query = "SELECT r.tuoteno, r.nimitys, r.tunnus, r.varattu - IFNULL(sarjanumeroita.kpl, 0) puuttuu
+    $sorttaus = generoi_sorttauskentta($yhtiorow["tilauksen_jarjestys"]);
+    $sorttaus = str_replace("tilausrivi.", "r.", $sorttaus);
+
+    $query = "SELECT r.tuoteno, r.nimitys, r.tunnus, r.varattu - IFNULL(sarjanumeroita.kpl, 0) puuttuu, {$sorttaus}
               FROM tilausrivi r
               INNER JOIN tuote t
                 ON (t.yhtio = r.yhtio AND t.tuoteno = r.tuoteno)
@@ -48,7 +51,8 @@ if (!function_exists('tulosta_pullopanttitarra_pdf')) {
                 AND r.var NOT IN ('P','J','O','S')
                 AND r.yhtio = '$kukarow[yhtio]'
                 AND r.otunnus = '$laskurow[tunnus]'
-              HAVING puuttuu > 0";
+              HAVING puuttuu > 0
+              ORDER BY sorttauskentta";
     $sarjanumerot = pupe_query($query);
 
     while ($tilausrivi = mysql_fetch_assoc($sarjanumerot)) {
@@ -121,18 +125,20 @@ if (!function_exists('tulosta_pullopanttitarra_pdf')) {
       }
     }
 
+    $sorttaus = generoi_sorttauskentta($yhtiorow["tilauksen_jarjestys"]);
     $query = "SELECT tilausrivi.tuoteno,
                 tilausrivi.nimitys,
                 tilausrivi.tunnus,
                 sarjanumeroseuranta.sarjanumero,
-                tuote.lyhytkuvaus AS kylma_aine
+                tuote.lyhytkuvaus AS kylma_aine,
+                {$sorttaus}
               FROM tilausrivi
                 JOIN sarjanumeroseuranta ON (sarjanumeroseuranta.yhtio = tilausrivi.yhtio AND sarjanumeroseuranta.myyntirivitunnus = tilausrivi.tunnus)
                 LEFT JOIN tilausrivi aine ON (aine.yhtio = tilausrivi.yhtio AND aine.tunnus = tilausrivi.perheid)
                 LEFT JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = aine.tuoteno)
               WHERE tilausrivi.yhtio = '{$yhtiorow['yhtio']}'
                 AND tilausrivi.otunnus = '{$laskurow['tunnus']}'
-              ORDER BY sarjanumeroseuranta.sarjanumero";
+              ORDER BY sorttauskentta";
     $tuotetiedot_res = (pupe_query($query));
 
     while ($tilausrivi = mysql_fetch_assoc($tuotetiedot_res)){

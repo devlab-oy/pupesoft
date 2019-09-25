@@ -45,6 +45,7 @@ if (!function_exists('tulosta_pullopanttitarra_pdf')) {
               ) sarjanumeroita
                 ON (sarjanumeroita.yhtio = r.yhtio AND sarjanumeroita.myyntirivitunnus = r.tunnus)
               WHERE t.pullopanttitarratulostus_kerayksessa = 'T'
+                AND r.var NOT IN ('P','J','O','S')
                 AND r.yhtio = '$kukarow[yhtio]'
                 AND r.otunnus = '$laskurow[tunnus]'
               HAVING puuttuu > 0";

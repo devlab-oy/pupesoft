@@ -3398,11 +3398,12 @@ if ($tee == '') {
     }
 
     if ($kukarow["extranet"] == "" and tarkista_oikeus("yllapito.php", "asiakashinta", "x") and (($toim == "TARJOUS" or $toim == "EXTTARJOUS") or $laskurow["tilaustyyppi"] == "T" or in_array($yhtiorow["myynti_asiakhin_tallenna"], array('K', 'V'))) and in_array($toim, array("TARJOUS", "EXTTARJOUS", "PIKATILAUS", "RIVISYOTTO", "VALMISTAASIAKKAALLE", "TYOMAARAYS", "PROJEKTI"))) {
+      $l = "{$palvelin2}{$tilauskaslisa}tilaus_myynti.php////toim=$toim//projektilla=$projektilla//tilausnumero={$laskurow['tunnus']}//ruutulimit=$ruutulimit//tilausrivi_alvillisuus=$tilausrivi_alvillisuus//mista=$mista";
       echo "<form method='post' action='{$palvelin2}raportit/asiakkaan_tilaukset_tuotteittain.php'>
           <input type='hidden' name='asiakasid' value='{$laskurow['liitostunnus']}'>
           <input type='hidden' name='tilaustunnus' value='{$laskurow['tunnus']}'>
           <input type='hidden' name='toim' value='MYYNTI'>
-          <input type='hidden' name='lopetus' value='$tilmyy_lopetus'>";
+          <input type='hidden' name='lopetus' value='$l'>";
       echo "<input type='submit' value='".t("Asiakkaan tuoteostot")."'>";
       echo "</form>";
     }

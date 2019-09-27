@@ -328,17 +328,20 @@ if (!function_exists('logmaster_outbounddelivery')) {
     elseif ($looprow['tilaustyyppi'] == 'U') {
       $tilaustyyppi = 7;
     }
+    elseif ($JOKU_UUSI_EHTO === TRUE) {
+      $tilaustyyppi = 'K';
+    }
     else {
       $tilaustyyppi = '';
     }
-    
+
     $CustOrderNumber = $looprow['asiakkaan_tilausnumero'];
 
     // Katsotaan onko CustOrderNumber kenttään erillistä määritystä
     $query = "SELECT *
               FROM toimitustavan_avainsanat
               WHERE yhtio = '{$kukarow['yhtio']}'
-              AND liitostunnus   = '{$toimitustapa_chk_row['tunnus']}'
+              AND liitostunnus = '{$toimitustapa_chk_row['tunnus']}'
               AND laji = 'ulk_var_param'
               AND selite = 'CustOrderNumber'";
     $toimitustavan_avainsanat_res = pupe_query($query);

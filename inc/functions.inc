@@ -24068,7 +24068,7 @@ if (!function_exists('tee_keraysera_painon_perusteella')) {
             $pakkausnro++;
             $pakkauksen_kaytetty_paino = ($kerayseran_rivit[$i]['data']['tuotemassa'] * $jaljella);
 
-            $sscc          = uusi_sscc_nro();
+            $sscc = uusi_sscc_nro();
 
             if (!empty($yhtiorow['ean'])) {
               $_selitetark = t_avainsana("GS1_SSCC", "", "and avainsana.selite = '{$laskurow['toimitustapa']}'", "", "", "selitetark");
@@ -33718,7 +33718,9 @@ if (!function_exists('pupesoft_toimitusvahvistus')) {
               asiakas.postitp asiakaspostitp,
               asiakas.postino asiakaspostino,
               asiakas.maa asiakasmaa,
+              asiakas.toim_ovttunnus asiakastoim_ovttunnus,
               asiakas.ovttunnus asiakasovttunnus,
+              asiakas.konserni asiakastoimittajanro,
               rahtikirjat.merahti,
               rahtikirjat.rahtisopimus,
               if(maksuehto.jv is null,'',maksuehto.jv) jv,
@@ -33761,6 +33763,10 @@ if (!function_exists('pupesoft_toimitusvahvistus')) {
     }
     elseif ($laskurow["toimitusvahvistus"] == "toimitusvahvistus_desadv_fi0089.inc") {
       $desadv_version = "fi0089";
+      $laskurow["toimitusvahvistus"] = "toimitusvahvistus_desadv.inc";
+    }
+    elseif ($laskurow["toimitusvahvistus"] == "toimitusvahvistus_desadv_ean005.inc") {
+      $desadv_version = "ean005";
       $laskurow["toimitusvahvistus"] = "toimitusvahvistus_desadv.inc";
     }
     else {

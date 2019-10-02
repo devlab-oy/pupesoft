@@ -506,6 +506,8 @@ if ($kukarow["extranet"] == "" and in_array($toim, array("PIKATILAUS", "RIVISYOT
   require_once 'tilauskasittely/ostoskorin_haku.inc';
 }
 
+$laajennettu_pikaotsikko = ($kukarow["extranet"] == "" and in_array($toim, array("PIKATILAUS", "RIVISYOTTO")));
+
 // Vaihdetaan tietyn projektin toiseen toimitukseen
 //  HUOM: tämä käyttää aktivointia joten tämä on oltava aika alussa!! (valinta on onchage submit rivisyötössä joten noita muita paremetreja ei oikein voi passata eteenpäin..)
 if ((int) $valitsetoimitus > 0 and $valitsetoimitus != $tilausnumero) {
@@ -3963,7 +3965,7 @@ if ($tee == '') {
     echo "<th>".t("Tilausviite").":</th><td>";
     echo "<input type='text' size='30' name='viesti' value='$laskurow[viesti]' $state><input type='submit' class='tallenna_btn' value='".t("Tallenna")."' $state></td></tr>\n";
 
-    if ($toim == "RIVISYOTTO") {
+    if ($laajennettu_pikaotsikko) {
       echo "<input type='hidden' name='muokataan_otsikoita' value='joo'>";
       echo "<tr>";
       echo "<th>" . t("Maksuehto") . ":</th><td>";
@@ -4212,7 +4214,7 @@ if ($tee == '') {
       echo $options;
       echo "</select></td></tr>";
 
-      if ($toim == "RIVISYOTTO") {
+      if ($laajennettu_pikaotsikko) {
         echo "<tr>";
         echo "<th>" . t("Tilausta ei osatoimiteta") . ":</th><td><input type='checkbox' name='osatoimitus' value = 'o' onchange='submit();' $osath></td><th>&nbsp;</th><td>&nbsp;</td>";
         echo "</tr>";

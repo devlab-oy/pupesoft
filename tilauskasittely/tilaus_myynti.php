@@ -3840,7 +3840,7 @@ if ($tee == '') {
         }
       }
 
-      if ($toim == "RIVISYOTTO") {
+      if ($laajennettu_pikaotsikko) {
         $tresult = t_avainsana("ASIAKASLUOKKA");
 
         echo "<select name='hyvaksynnanmuutos' onchange='submit();'><option value=''>" . t("Tyhjä") . "</option>";

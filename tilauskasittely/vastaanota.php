@@ -523,7 +523,7 @@ if ($tee == 'valmis') {
           $alkup_varattu = $tilausrivirow["varattu"];
           $tilausrivirow["varattu"] = $asaldo;
 
-          if ($asaldo < $tilausrivirow["varattu"]) {
+          if ($asaldo < $alkup_varattu) {
             splittaa_tilausrivi($tilausrivirow['tunnus'], $alkup_varattu - $asaldo);
           }
 

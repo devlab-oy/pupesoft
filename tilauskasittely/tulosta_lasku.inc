@@ -2364,7 +2364,7 @@ if (!function_exists('loppu')) {
     if (file_exists("../pics/footer_logo.jpg")) {
       $data = file_get_contents("../pics/footer_logo.jpg", true);
       $image = $pdf_lasku->jfif_embed($data);
-      $pdf_lasku->image_place($image, 15, 25, $thispage, array("scale" => 0.175));
+      $pdf_lasku->image_place($image, 25, 25, $thispage, array("scale" => 0.175));
       $x = 80;
     }
     else {

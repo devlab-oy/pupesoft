@@ -23995,14 +23995,28 @@ if (!function_exists('tee_keraysera_painon_perusteella')) {
     global $kukarow, $yhtiorow;
 
     $_pakkaus = (int) $_pakkaus;
-
     $pakkaukset = array();
+
+    $tuoterajaus = "AND tuote.tuotemassa != 0";
+
+    $query = "SELECT *
+              FROM asiakkaan_avainsanat
+              WHERE yhtio       = '{$kukarow['yhtio']}'
+              AND liitostunnus  = '{$laskurow[liitostunnus]}'
+              AND laji          = 'KICK_EDI'
+              AND avainsana    != ''";
+    $edi_chk_res = pupe_query($query);
+
+    // Special EDI case
+    if (mysql_num_rows($edi_chk_res)) {
+      $tuoterajaus = "";
+    }
 
     if ($_pakkaus == 0) {
       // valitaan sopiva pakkaus painon perusteella
       $query = "SELECT SUM(tuote.tuotemassa * tilausrivi.varattu) AS paino
                 FROM tilausrivi
-                JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.tuotemassa != 0)
+                JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno {$tuoterajaus})
                 WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
                 AND tilausrivi.var     not in ('P','J','O','S')
                 AND tilausrivi.otunnus IN ($tilausnumeroita)";
@@ -24034,7 +24048,7 @@ if (!function_exists('tee_keraysera_painon_perusteella')) {
     // katsotaan tarvitaanko jakaa tilausrivej‰ myyntier‰ll‰
     $query = "SELECT tilausrivi.tunnus, tilausrivi.tuoteno, tilausrivi.otunnus, tilausrivi.varattu, tuote.tuotemassa, tuote.tuotemassa * tilausrivi.varattu AS paino, IF(tuote.myynti_era = 0, 1, myynti_era) myynti_era, {$sorttauskentta}
               FROM tilausrivi
-              JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.tuotemassa != 0)
+              JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno {$tuoterajaus})
               WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
               AND tilausrivi.var     not in ('P','J','O','S')
               AND tilausrivi.otunnus IN ($tilausnumeroita)
@@ -34118,6 +34132,9 @@ if (!function_exists('sort_array_of_arrays')) {
 
 if (!function_exists('pupesoft_log')) {
   function pupesoft_log($log_file, $log_message) {
+    echo $log_message;
+    return;
+
     // tehd‰‰n full path tiedostoon
     $log_path  = is_dir('/home/devlab/logs') ? '/home/devlab/logs/' : '/tmp/';
     $full_path = $log_path . basename($log_file, '.log') . '.log';

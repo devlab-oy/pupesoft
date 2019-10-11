@@ -25,7 +25,7 @@ if (!function_exists('desadv_header')) {
     $lahtunniste = $valpvm.$valaika.$rajaus;
 
     if ($desadv_version == "una") {
-      $kuljetustunnus = "PS".sprintf("%012.12s", $desadv_laskurow["laskutunnus"]); // tämä voi olla yhteensä max 14 merkkiäpitkä stringjono
+      $kuljetustunnus = "PS".sprintf("%012.12s", $desadv_laskurow["laskutunnus"]); // tämä voi olla yhteensä max 14 merkkiä pitkä stringjono
 
       // ED2 ja UNA kehykset.
       // NRQ:0 = Ei CON kuittauspyyntöä, NRQ:1 = CON kuittauspyyntö
@@ -327,49 +327,66 @@ if (!function_exists('desadv_row')) {
           $sscc = $keraysera_row['sscc'];
         }
 
-        // CPS - consignment packing sequence
-        $desadv_message .= "CPS+{$sscc}++1'";
-        $x++;
+        if ($desadv_version == "ean005") {
+          // CPS - consignment packing sequence
+          $desadv_message .= "CPS+1'";
+          $x++;
 
-        // PAC - number and type of packages
-        $desadv_message .= "PAC+1++PK'";
-        $x++;
+          // PAC - number and type of packages
+          $desadv_message .= "PAC+1++CT'";
+          $x++;
 
-        $query = "SELECT *
-                  FROM pakkaus
-                  WHERE yhtio = '{$kukarow['yhtio']}'
-                  AND tunnus  = '{$keraysera_row['pakkaus']}'";
-        $pakkaus_res = pupe_query($query);
-        $pakkaus_row = mysql_fetch_assoc($pakkaus_res);
+          $desadv_message .= "PCI+33E'";
+          $x++;
 
-        if ($desadv_version != "fi0089" and ($pakkaus_row['korkeus'] == 0 or $pakkaus_row['leveys'] == 0 or $pakkaus_row['syvyys'] == 0)) {
-          $error .= t("Pakkauksella %s %s on puutteelliset mittatiedot", '', $pakkaus_row['pakkaus'], $pakkaus_row['pakkauskuvaus'])."<br>";
+          $desadv_message .= "GIN+BJ+{$sscc}'";
+          $x++;
         }
-
-        if ($desadv_version == "fi0089") {
-          // Haetaan pakkauksen tiedot
-          $query = "SELECT SUM(tuote.tuotemassa * kerayserat.kpl_keratty) kilot, SUM(tuote.tuotekorkeus * tuote.tuoteleveys * tuote.tuotesyvyys * kerayserat.kpl_keratty) tilavuus
-                    FROM tilausrivi
-                    JOIN kerayserat ON (kerayserat.yhtio = tilausrivi.yhtio AND kerayserat.tilausrivi = tilausrivi.tunnus)
-                    JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.ei_saldoa = '')
-                    WHERE tilausrivi.yhtio  = '{$kukarow['yhtio']}'
-                    AND tilausrivi.tunnus   IN ({$keraysera_row['tilausrivit']})
-                    AND tilausrivi.tyyppi  != 'D'";
-          $paino_res = pupe_query($query);
-          $paino_row = mysql_fetch_assoc($paino_res);
-
-          $paino_row['kilot'] += $pakkaus_row['oma_paino'];
-          $paino_row['kilot'] = round($paino_row['kilot']);
-
-          // Pakkauksen bruttopaino
-          $desadv_message .= "MEA+AAE+AAA+KGM:{$paino_row['kilot']}'";
+        else {
+          // CPS - consignment packing sequence
+          $desadv_message .= "CPS+{$sscc}++1'";
           $x++;
 
-          // Pakkauksen tilavuus
-          // m3 => litrat
-          $pakkauksen_tilavuus_litroina = round($paino_row['tilavuus'] * 1000);
-          $desadv_message .= "MEA+AAE+ABJ+LTR:{$pakkauksen_tilavuus_litroina}'";
+          // PAC - number and type of packages
+          $desadv_message .= "PAC+1++PK'";
           $x++;
+
+          $query = "SELECT *
+                    FROM pakkaus
+                    WHERE yhtio = '{$kukarow['yhtio']}'
+                    AND tunnus  = '{$keraysera_row['pakkaus']}'";
+          $pakkaus_res = pupe_query($query);
+          $pakkaus_row = mysql_fetch_assoc($pakkaus_res);
+
+          if ($desadv_version != "fi0089" and ($pakkaus_row['korkeus'] == 0 or $pakkaus_row['leveys'] == 0 or $pakkaus_row['syvyys'] == 0)) {
+            $error .= t("Pakkauksella %s %s on puutteelliset mittatiedot", '', $pakkaus_row['pakkaus'], $pakkaus_row['pakkauskuvaus'])."<br>";
+          }
+
+          if ($desadv_version == "fi0089") {
+            // Haetaan pakkauksen tiedot
+            $query = "SELECT SUM(tuote.tuotemassa * kerayserat.kpl_keratty) kilot, SUM(tuote.tuotekorkeus * tuote.tuoteleveys * tuote.tuotesyvyys * kerayserat.kpl_keratty) tilavuus
+                      FROM tilausrivi
+                      JOIN kerayserat ON (kerayserat.yhtio = tilausrivi.yhtio AND kerayserat.tilausrivi = tilausrivi.tunnus)
+                      JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.ei_saldoa = '')
+                      WHERE tilausrivi.yhtio  = '{$kukarow['yhtio']}'
+                      AND tilausrivi.tunnus   IN ({$keraysera_row['tilausrivit']})
+                      AND tilausrivi.tyyppi  != 'D'";
+            $paino_res = pupe_query($query);
+            $paino_row = mysql_fetch_assoc($paino_res);
+
+            $paino_row['kilot'] += $pakkaus_row['oma_paino'];
+            $paino_row['kilot'] = round($paino_row['kilot']);
+
+            // Pakkauksen bruttopaino
+            $desadv_message .= "MEA+AAE+AAA+KGM:{$paino_row['kilot']}'";
+            $x++;
+
+            // Pakkauksen tilavuus
+            // m3 => litrat
+            $pakkauksen_tilavuus_litroina = round($paino_row['tilavuus'] * 1000);
+            $desadv_message .= "MEA+AAE+ABJ+LTR:{$pakkauksen_tilavuus_litroina}'";
+            $x++;
+          }
         }
 
         $query = "SELECT tuote.eankoodi,
@@ -410,10 +427,12 @@ if (!function_exists('desadv_row')) {
           $desadv_message .= "PIA+$piacode+".substr($tuotenumero, 0, 35).":SA'";
           $x++;
 
-          // IMD - additional information of the article
-          $tuotteen_nimitys = preg_replace("/[^a-zA-ZåäöÅÄÖ0-9]/", " ", $tuotteet_row['nimitys']);
-          $desadv_message .= "IMD+F+8+:::".substr($tuotteen_nimitys, 0, 256)."'";
-          $x++;
+          if ($desadv_version != "ean005") {
+            // IMD - additional information of the article
+            $tuotteen_nimitys = preg_replace("/[^a-zA-ZåäöÅÄÖ0-9]/", " ", $tuotteet_row['nimitys']);
+            $desadv_message .= "IMD+F+8+:::".substr($tuotteen_nimitys, 0, 256)."'";
+            $x++;
+          }
 
           // QTY - quantity
           // PCE = piece

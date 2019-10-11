@@ -1998,7 +1998,7 @@ if (!function_exists('rivi_perhe')) {
 
 if (!function_exists('loppu')) {
   function loppu($laskurow, $asiakasrow, $kieli, $pdf_lasku, $toim, $thispage, $masrow, $sivu, $summa, $arvo, $page, $vientikala, $laskutyyppi, $vikasivu = "") {
-    global $yhtiorow, $kukarow;
+    global $yhtiorow, $kukarow, $pupe_root_polku;
 
     // Fonttimuuttujat
     extract(lasku_fontit($laskutyyppi));
@@ -2359,10 +2359,9 @@ if (!function_exists('loppu')) {
       }
     }
 
-    //Alimmat kolme laatikkoa, yhtiötietoja
-
-    if (file_exists("../pics/footer_logo.jpg")) {
-      $data = file_get_contents("../pics/footer_logo.jpg", true);
+    // Alimmat kolme laatikkoa, yhtiötietoja
+    if (file_exists("{$pupe_root_polku}/pics/footer_logo.jpg")) {
+      $data = file_get_contents("{$pupe_root_polku}/pics/footer_logo.jpg", true);
       $image = $pdf_lasku->jfif_embed($data);
       $pdf_lasku->image_place($image, 25 + $tileja + $barcode_korkeus, 25, $thispage, array("scale" => 0.175));
       $x = 80;

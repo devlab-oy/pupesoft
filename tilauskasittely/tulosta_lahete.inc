@@ -3519,7 +3519,7 @@ if (!function_exists('rivi_viivakoodi_lahete_ean13')) {
 
 if (!function_exists('loppu_lahete')) {
   function loppu_lahete($params) {
-    global $kukarow, $yhtiorow, $lahete_piilota_ytunnus_toimipaikka;
+    global $kukarow, $yhtiorow, $lahete_piilota_ytunnus_toimipaikka, $pupe_root_polku;
 
     if (skippa_lahete_pdf($params)) {
       // Luodaan palautettavat
@@ -3662,8 +3662,8 @@ if (!function_exists('loppu_lahete')) {
     else {
       //Alimmat kolme laatikkoa, yhtiötietoja
 
-      if (file_exists("../pics/footer_logo.jpg")) {
-        $data = file_get_contents("../pics/footer_logo.jpg", true);
+      if (file_exists("{$pupe_root_polku}/pics/footer_logo.jpg")) {
+        $data = file_get_contents("{$pupe_root_polku}/pics/footer_logo.jpg", true);
         $image = $pdf->jfif_embed($data);
         $pdf->image_place($image, 25, 25, $thispage, array("scale" => 0.175));
         $x = 80;

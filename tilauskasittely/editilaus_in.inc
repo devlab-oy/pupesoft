@@ -1092,6 +1092,7 @@ while ($tietue = fgets($fd)) {
 
   case 'OSTOTIL.OT_TOIMITUS_ASIAKASNRO' :
     // toimitusasiakkaan asiakasnumero
+    $toimitetaan_tanne = $tieto;
     $toimovttunnus = $tieto;
     break;
 

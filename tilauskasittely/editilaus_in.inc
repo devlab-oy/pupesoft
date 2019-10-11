@@ -1106,14 +1106,6 @@ while ($tietue = fgets($fd)) {
   case 'OSTOTIL.OT_TOIMITUS_YRITYS' :
     // toimitusasiakkaan nimitark
     $tnimitark = $tieto;
-
-    $matches = array();
-    preg_match('/^[A-Z]* ([0-9]{3,4}) /i', $tieto, $matches);
-
-    if (!empty($matches)) {
-      $viite = $matches[1];
-    }
-
     break;
 
   case 'ONADDP_SA' :
@@ -1823,6 +1815,25 @@ while ($tietue = fgets($fd)) {
       if ($edi_tyyppi == 'magento' and $editilaus_toimipaikka) {
         $kukarow['toimipaikka'] = $editilaus_toimipaikka;
         $yhtiorow = hae_yhtion_parametrit($yhtiorow["yhtio"]);
+      }
+
+      $query = "SELECT *
+                FROM asiakkaan_avainsanat
+                WHERE yhtio       = '{$kukarow['yhtio']}'
+                AND liitostunnus  = '{$arow[tunnus]}'
+                AND laji          = 'KICK_EDI'
+                AND avainsana    != ''";
+      $edi_chk_res = pupe_query($query);
+
+      // Special EDI case
+      if (mysql_num_rows($edi_chk_res)) {
+        $matches = array();
+        preg_match('/^[A-Z]* ([0-9]{3,4}) /i', $arow['toim_nimi'], $matches);
+
+        $viite = "";
+        if (!empty($matches)) {
+          $viite = $matches[1];
+        }
       }
 
       // jos annettu custom laatija
@@ -2909,7 +2920,6 @@ while ($tietue = fgets($fd)) {
                   AND tunnus  = '$id'";
         pupe_query($query);
       }
-
     }
     elseif ($editilaus_otsikko_ok == "HYVAKJONOON") {
       $edi_ulos .= "\n".t("Merkittiin tilaus hyväksyttäväksi").": {$laskurow['tunnus']}.\n\n";

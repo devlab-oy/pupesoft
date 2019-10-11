@@ -245,6 +245,7 @@ if (!function_exists('logmaster_outbounddelivery')) {
               asiakas.email,
               lasku.toim_email,
               asiakas.asiakasnro,
+              asiakas.tunnus asiakastunnus,
               tuote.eankoodi,
               tuote.ei_saldoa,
               tuote.tullinimike1,
@@ -272,13 +273,26 @@ if (!function_exists('logmaster_outbounddelivery')) {
 
     if (mysql_num_rows($loopres) == 0) {
       pupesoft_log('logmaster_outbound_delivery', "Yht√§√§n rivi√§ ei l√∂ytynyt tilaukselle {$otunnus}. Sanoman luonti ep√§onnistui.");
-
       return false;
     }
 
     $looprow = mysql_fetch_assoc($loopres);
 
     $varastorow = hae_varasto($looprow['otsikon_varasto']);
+
+    $query = "SELECT *
+              FROM asiakkaan_avainsanat
+              WHERE yhtio       = '{$kukarow['yhtio']}'
+              AND liitostunnus  = '{$looprow['asiakastunnus']}'
+              AND laji          = 'KICK_EDI'
+              AND avainsana    != ''";
+    $edi_chk_res = pupe_query($query);
+
+    // Special EDI case
+    $edi_pack_process = FALSE;
+    if (mysql_num_rows($edi_chk_res)) {
+      $edi_pack_process = TRUE;
+    }
 
     switch ($varastorow['ulkoinen_jarjestelma']) {
     case 'L':
@@ -293,7 +307,7 @@ if (!function_exists('logmaster_outbounddelivery')) {
       return false;
     }
 
-    # S√§√§detaan muuttujia kuntoon
+    # S‰‰det‰‰n muuttujia kuntoon
     $query = "SELECT tunnus
               FROM toimitustapa
               WHERE yhtio = '{$kukarow['yhtio']}'
@@ -328,7 +342,7 @@ if (!function_exists('logmaster_outbounddelivery')) {
     elseif ($looprow['tilaustyyppi'] == 'U') {
       $tilaustyyppi = 7;
     }
-    elseif ($JOKU_UUSI_EHTO === TRUE) {
+    elseif ($edi_pack_process) {
       $tilaustyyppi = 'K';
     }
     else {

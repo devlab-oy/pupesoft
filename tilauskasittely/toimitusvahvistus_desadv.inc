@@ -90,7 +90,7 @@ if (!function_exists('desadv_header')) {
       list($hour, $minute, $second) = explode(":", $time);
 
       if ($desadv_version == 'ean005') {
-        $dtmdate = $year.$month.$day.$hour.$minute;
+        $dtmdate = $year.$month.$day;
         $desadv_message .= "DTM+137:{$dtmdate}:102'";
       }
       else {

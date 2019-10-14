@@ -214,6 +214,19 @@ if (!function_exists("pupe_query")) {
   }
 }
 
+if (!function_exists('executescalar')) {
+  function executescalar($sql)
+  {
+    $result = pupe_query($sql);
+    if (mysql_num_rows($result) > 0) {
+      $row = mysql_fetch_array($result);
+      return $row[0];
+    }
+
+    return null;
+  }
+}
+
 // K‰ytet‰‰n slavea jos sellainen on
 if (!function_exists("pupeslave_start")) {
   function pupeslave_start() {

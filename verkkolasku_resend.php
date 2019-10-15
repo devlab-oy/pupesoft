@@ -253,6 +253,13 @@ if ($handle = opendir($kansio)) {
         $maventaerrorreport = t("Maventa-laskun %s lähetys epäonnistui", "", $laskunro)."!\n\n";
         $maventaerrorreport .= t("Lähetetyn tiedoston nimi").": $lasku \n\n";
 
+        $maventaerrorreport .= "\n\n__________________________________________________\n";
+        $maventaerrorreport .= "Teknisempää tietoa virheestä:\n";
+        $maventaerrorreport .= "Status: $status\n\n";
+
+        // Printataan virhe myös Pupen omaan errorlogiin
+        error_log(print_r("Virhe laskun {$laskunro} lähetyksessä Maventaan, status: {$status}", true));
+
         // Laitetaan sähköposti admin osoitteeseen siinä tapauksessa,
         // jos talhal tai alert email osoitteita ei ole kumpaakaan setattu
         $error_email = $yhtiorow["admin_email"];

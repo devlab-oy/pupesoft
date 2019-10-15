@@ -9886,7 +9886,7 @@ if ($tee == '') {
                 if (strlen($lahtoaika) == 8 and substr($lahtoaika, 5, 3) == ":00") {
                   $lahtoaika = substr($lahtoaika, 0, 5);
                 }
-                $lahto = $lahdot_row['pvm'].' '.$tilausaika." / ".$lahtoaika;
+                $lahto = tv1dateconv($lahdot_row['pvm']).' / '.$tilausaika." / ".$lahtoaika;
 
                 $sel = (count($toimitustavan_lahto_chk) > 0 and in_array($lahdot_row['tunnus'], $toimitustavan_lahto_chk)) ? " selected" : ($laskurow['toimitustavan_lahto'] == $lahdot_row['tunnus'] ? " selected" : "");
 

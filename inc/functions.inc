@@ -18258,7 +18258,7 @@ if (!function_exists('hae_tuotteet_ja_pisin_mitta')) {
 
 if (!function_exists("tee_keraysera")) {
   function tee_keraysera($keraysvyohyke, $varasto) {
-    global $kukarow, $yhtiorow, $tee_keraysera_debugdir;
+    global $kukarow, $yhtiorow, $tee_keraysera_debugdir, $kasitellaan_noutoja;
 
     $lock_params = array(
       "locktime" => 0,
@@ -18696,7 +18696,6 @@ if (!function_exists("tee_keraysera")) {
     $ed_prioriteetti = '';
     $ed_asiakas      = '';
     $ed_lahto        = '';
-    $kasitellaan_noutoja = '';
 
     $i = 1;
 

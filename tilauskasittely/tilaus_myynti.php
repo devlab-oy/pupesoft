@@ -2865,11 +2865,11 @@ if ($tee == '') {
       (isset($rahtisopimus) and $rahtisopimus != '' and $rahtisopimus != $laskurow["rahtisopimus"]) or
       (isset($viesti) and $viesti != $laskurow["viesti"]) or
       (isset($asiakkaan_tilausnumero) and $asiakkaan_tilausnumero != $laskurow["asiakkaan_tilausnumero"]) or
-      (isset($maksuehto) and $maksuehto != $laskurow["maksuehto"] and $muokataan_otsikoita != "") or
-      (isset($myy_varastosta) and $myy_varastosta != $laskurow["varasto"] and $muokataan_otsikoita != "") or
-      (isset($hyvaksynnanmuutos) and $hyvaksynnanmuutos != $laskurow["hyvaksynnanmuutos"] and $muokataan_otsikoita != "") or
-      (isset($laskutuskielto_ruksi) and $muokataan_otsikoita != "") or
-      (isset($rahtivapaa) and $rahtivapaa != $laskurow["rahtivapaa"] and $muokataan_otsikoita != "") or
+      ($laajennettu_pikaotsikko and isset($maksuehto) and $maksuehto != $laskurow["maksuehto"] and $muokataan_otsikoita != "") or
+      ($laajennettu_pikaotsikko and isset($myy_varastosta) and $myy_varastosta != $laskurow["varasto"] and $muokataan_otsikoita != "") or
+      ($laajennettu_pikaotsikko and isset($hyvaksynnanmuutos) and $hyvaksynnanmuutos != $laskurow["hyvaksynnanmuutos"] and $muokataan_otsikoita != "") or
+      ($laajennettu_pikaotsikko and isset($laskutuskielto_ruksi) and $muokataan_otsikoita != "") or
+      ($laajennettu_pikaotsikko and isset($rahtivapaa) and $rahtivapaa != $laskurow["rahtivapaa"] and $muokataan_otsikoita != "") or
       (isset($tilausvahvistus) and $tilausvahvistus != $laskurow["tilausvahvistus"]) or
       (isset($myyjanro) and $myyjanro > 0 and $myyjanro != $v_myyjanro) or
       (isset($myyja) and $myyja > 0 and $myyja != $laskurow["myyja"]) or
@@ -2908,35 +2908,42 @@ if ($tee == '') {
       $laskurow["maksuehto"] = $maksutapa;
     }
 
-    $myy_varastosta_lisa = ($muokataan_otsikoita != "" and isset($myy_varastosta) and $myy_varastosta != $laskurow['varasto']) ? "varasto = '{$myy_varastosta}'," : "";
-    $hyvaksynnanmuutos_lisa = ($muokataan_otsikoita != "" and isset($hyvaksynnanmuutos) and $hyvaksynnanmuutos != $laskurow['hyvaksynnanmuutos']) ? "hyvaksynnanmuutos = '{$hyvaksynnanmuutos}'," : "";
-    $rahtivapaa_lisa = ($muokataan_otsikoita != "" and isset($rahtivapaa) and $rahtivapaa != $laskurow['rahtivapaa']) ? "rahtivapaa = '{$rahtivapaa}'," : "";
-    $osatoimitus_lisa = ($muokataan_otsikoita != "" and isset($osatoimitus) and $osatoimitus != $laskurow['osatoimitus']) ? "osatoimitus = '{$osatoimitus}'," : "";
+    if ($laajennettu_pikaotsikko) {
+      $myy_varastosta_lisa = ($muokataan_otsikoita != "" and isset($myy_varastosta) and $myy_varastosta != $laskurow['varasto']) ? "varasto = '{$myy_varastosta}'," : "";
+      $hyvaksynnanmuutos_lisa = ($muokataan_otsikoita != "" and isset($hyvaksynnanmuutos) and $hyvaksynnanmuutos != $laskurow['hyvaksynnanmuutos']) ? "hyvaksynnanmuutos = '{$hyvaksynnanmuutos}'," : "";
+      $rahtivapaa_lisa = ($muokataan_otsikoita != "" and isset($rahtivapaa) and $rahtivapaa != $laskurow['rahtivapaa']) ? "rahtivapaa = '{$rahtivapaa}'," : "";
+      $osatoimitus_lisa = ($muokataan_otsikoita != "" and isset($osatoimitus) and $osatoimitus != $laskurow['osatoimitus']) ? "osatoimitus = '{$osatoimitus}'," : "";
 
-    if ($muokataan_otsikoita != "" and isset($laskutuskielto_ruksi)) {
-      $chn = '';
+      if ($muokataan_otsikoita != "" and isset($laskutuskielto_ruksi)) {
+        $chn = '';
 
-      if ($laskutuskielto_ruksi != '') {
-        $chn = '999';
-      }
-      else {
-        $chn = $asiakasrow['chn'];
+        if ($laskutuskielto_ruksi != '') {
+          $chn = '999';
+        } else {
+          $chn = $asiakasrow['chn'];
 
-        if ($chn == '') {
-          $chn = '100';
+          if ($chn == '') {
+            $chn = '100';
+          }
         }
+
+        $laskutuskielto_lisa = ($chn != $laskurow['chn']) ? "chn = '{$chn}'," : "";
       }
 
-      $laskutuskielto_lisa = ($chn != $laskurow['chn']) ? "chn = '{$chn}'," : "";
+      if ($hyvaksynnanmuutos_lisa != "") {
+        $prioriteettinro = t_avainsana("ASIAKASLUOKKA", "", " and avainsana.selite='{$hyvaksynnanmuutos}'", "", "", "selitetark_3");
+
+        // Default 9 myös kannassa, niin laitetaan tännekki 9 jos avainsanoista ei löydy prioa
+        if (!is_numeric($prioriteettinro)) $prioriteettinro = 9;
+
+        $hyvaksynnanmuutos_lisa .= "prioriteettinro = {$prioriteettinro},";
+      }
     }
-
-    if ($hyvaksynnanmuutos_lisa != "") {
-      $prioriteettinro = t_avainsana("ASIAKASLUOKKA", "", " and avainsana.selite='{$hyvaksynnanmuutos}'", "", "", "selitetark_3");
-
-      // Default 9 myös kannassa, niin laitetaan tännekki 9 jos avainsanoista ei löydy prioa
-      if (!is_numeric($prioriteettinro)) $prioriteettinro = 9;
-
-      $hyvaksynnanmuutos_lisa .= "prioriteettinro = {$prioriteettinro},";
+    else {
+      $myy_varastosta_lisa = "";
+      $hyvaksynnanmuutos_lisa = "";
+      $rahtivapaa_lisa = "";
+      $osatoimitus_lisa = "";
     }
 
     // haetaan maksuehdoen tiedot tarkastuksia varten

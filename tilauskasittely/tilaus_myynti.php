@@ -2870,7 +2870,7 @@ if ($tee == '') {
       ($laajennettu_pikaotsikko and isset($hyvaksynnanmuutos) and $hyvaksynnanmuutos != $laskurow["hyvaksynnanmuutos"] and $muokataan_otsikoita != "") or
       ($laajennettu_pikaotsikko and isset($laskutuskielto_ruksi) and $muokataan_otsikoita != "") or
       ($laajennettu_pikaotsikko and isset($rahtivapaa) and $rahtivapaa != $laskurow["rahtivapaa"] and $muokataan_otsikoita != "") or
-      (isset($tilausvahvistus) and $tilausvahvistus != $laskurow["tilausvahvistus"]) or
+      (!$laajennettu_pikaotsikko and isset($tilausvahvistus) and $tilausvahvistus != $laskurow["tilausvahvistus"]) or
       (isset($myyjanro) and $myyjanro > 0 and $myyjanro != $v_myyjanro) or
       (isset($myyja) and $myyja > 0 and $myyja != $laskurow["myyja"]) or
       (isset($maksutapa) and $maksutapa != ''))) {
@@ -2901,7 +2901,7 @@ if ($tee == '') {
 
     if ($toimitustapa != $laskurow['toimitustapa']) $toimitustavan_lahto = array();
 
-    if ($maksuehto != $laskurow['maksuehto']) {
+    if ($laajennettu_pikaotsikko and $maksuehto != $laskurow['maksuehto']) {
       $laskurow["maksuehto"] = $maksuehto;
     }
     elseif ($maksutapa != '') {
@@ -3034,11 +3034,18 @@ if ($tee == '') {
       $asiakkaan_tilaunumero_lisa = "asiakkaan_tilausnumero = '$asiakkaan_tilausnumero',";
     }
 
+    if (!$laajennettu_pikaotsikko) {
+      $tilausvahvistus_lisa = "tilausvahvistus = '{$tilausvahvistus}',";
+    }
+    else {
+      $tilausvahvistus_lisa = "";
+    }
+
     $query  = "UPDATE lasku SET
                toimitustapa    = '$toimitustapa',
                rahtisopimus    = '$rahtisopimus',
                viesti          = '$viesti',
-               tilausvahvistus = '$tilausvahvistus',
+               $tilausvahvistus_lisa
                $asiakkaan_tilaunumero_lisa
                $pika_paiv_merahti
                $pika_paiv_myyja

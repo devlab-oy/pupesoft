@@ -39,6 +39,7 @@ class LumoClient {
         $this->log("{$errno} {$errstr}");
       }
       else {
+        stream_set_timeout($this->_socket, 180);
         $this->log("Maksupääteyhteys avattu");
       }
     }

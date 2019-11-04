@@ -10390,6 +10390,13 @@ if ($tee == '') {
       $kateista_annettu = isset($kateista_annettu) ? $kateista_annettu : 0;
       $korttimaksutapahtuman_status =
         isset($korttimaksutapahtuman_status) ? $korttimaksutapahtuman_status : "";
+
+      if (!isset($maksettavaa_jaljella)) {
+        list($loytyy_maksutapahtumia, $maksettavaa_jaljella, $kateismaksu["luottokortti"],
+          $kateismaksu["pankkikortti"]) =
+          jaljella_oleva_maksupaatesumma($laskurow["tunnus"], $kaikkiyhteensa);
+      }
+
       piirra_maksupaate_formi($laskurow, $kaikkiyhteensa, $kateinen, $maksettavaa_jaljella,
         $loytyy_maksutapahtumia, $kateismaksu, $kateista_annettu,
         $korttimaksutapahtuman_status);

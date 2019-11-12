@@ -18258,7 +18258,7 @@ if (!function_exists('hae_tuotteet_ja_pisin_mitta')) {
 
 if (!function_exists("tee_keraysera")) {
   function tee_keraysera($keraysvyohyke, $varasto) {
-    global $kukarow, $yhtiorow, $tee_keraysera_debugdir, $kasitellaan_noutoja;
+    global $kukarow, $yhtiorow, $tee_keraysera_debugdir;
 
     $lock_params = array(
       "locktime" => 0,
@@ -18323,7 +18323,7 @@ if (!function_exists("tee_keraysera")) {
     // Kun käyttäjän takana on keräysvyöhykkeiden monivalinta, joudutaan tilauksen order by ja group by tekemään niin, että pienimmän prioriteetin ja kellonajan mukaan järjestetään
     // tilaukset tulemaan keräysvyöhykkeittäin. Jos prio ja aika on sama, otetaan randomisti jonkun keräysvyöhykkeen tilauksia (kumpi nyt sattuu tulemaan ensiksi),
     // muuten prio ja aika määrää minkä keräysvyöhykkeen tilaukset tulevat ensiksi.
-    $query = "(SELECT SQL_NO_CACHE
+    $query = "(SELECT 
                lasku.prioriteettinro as prioriteetti,
                (TIME_TO_SEC(TIMEDIFF(lahdot.lahdon_kellonaika, CURTIME())) / 60) as erotus,
                lasku.ohjausmerkki,
@@ -18375,7 +18375,7 @@ if (!function_exists("tee_keraysera")) {
 
                UNION
 
-               (SELECT SQL_NO_CACHE
+               (SELECT 
                lasku.prioriteettinro as prioriteetti,
                0 as erotus,
                lasku.ohjausmerkki,
@@ -18568,7 +18568,7 @@ if (!function_exists("tee_keraysera")) {
     pupe_query($query);
 
     if ($aikarajaus != 999999999999 and $keraysvyohyketiedot['lahtojen_valinen_enimmaisaika'] > 0) {
-      $query = "SELECT SQL_NO_CACHE
+      $query = "SELECT 
                 {$prioriteettilisa}
                 (TIME_TO_SEC(TIMEDIFF(lahdot.lahdon_kellonaika, CURTIME())) / 60) as erotus,
                 lasku.ohjausmerkki,
@@ -18625,7 +18625,7 @@ if (!function_exists("tee_keraysera")) {
     }
     else {
 
-      $query = "SELECT SQL_NO_CACHE
+      $query = "SELECT 
                 {$prioriteettilisa}
                 0 as erotus,
                 lasku.ohjausmerkki,
@@ -18692,6 +18692,7 @@ if (!function_exists("tee_keraysera")) {
     $kerailyniput        = array();
     $kerailyniput_key    = array();
     $kerailyniput_tiedot = array();
+    $kasitellaan_noutoja = '';
 
     $ed_prioriteetti = '';
     $ed_asiakas      = '';
@@ -18722,6 +18723,11 @@ if (!function_exists("tee_keraysera")) {
         }
 
         if ($row['nouto'] != 'o') {
+          continue;
+        }
+      }
+      else {
+        if ($row['nouto'] == 'o') {
           continue;
         }
       }

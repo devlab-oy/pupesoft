@@ -501,7 +501,7 @@ if (!function_exists('finvoice_otsik')) {
       else {
         $BuyerEmailaddressIdentifier_avainsana_where = "and selitetark = 'BuyerEmailaddressIdentifier' and selitetark_2 !='' ";
         $BuyerEmailaddressIdentifier_avainsana_kentta = t_avainsana("VERKLASKKENTSIS", "", $BuyerEmailaddressIdentifier_avainsana_where, "", "", "selitetark_2");
-        if ($BuyerEmailaddressIdentifier_avainsana_kentta != "" and issset($asiakasrow[$BuyerEmailaddressIdentifier_avainsana_kentta])){
+        if ($BuyerEmailaddressIdentifier_avainsana_kentta != "" and isset($asiakasrow[$BuyerEmailaddressIdentifier_avainsana_kentta])){
           xml_add("BuyerEmailaddressIdentifier", $asiakasrow[$BuyerEmailaddressIdentifier_avainsana_kentta], $tootfinvoice, 35);
         } 
       } 

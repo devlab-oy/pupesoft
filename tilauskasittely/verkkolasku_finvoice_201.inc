@@ -502,7 +502,9 @@ if (!function_exists('finvoice_otsik')) {
         $BuyerEmailaddressIdentifier_avainsana_where = "and selitetark = 'BuyerEmailaddressIdentifier' and selitetark_2 !='' ";
         $BuyerEmailaddressIdentifier_avainsana_kentta = t_avainsana("VERKLASKKENTSIS", "", $BuyerEmailaddressIdentifier_avainsana_where, "", "", "selitetark_2");
         if ($BuyerEmailaddressIdentifier_avainsana_kentta != "" and isset($asiakasrow[$BuyerEmailaddressIdentifier_avainsana_kentta])){
+          fputs($tootfinvoice, "<BuyerCommunicationDetails>\r\n");
           xml_add("BuyerEmailaddressIdentifier", $asiakasrow[$BuyerEmailaddressIdentifier_avainsana_kentta], $tootfinvoice, 35);
+          fputs($tootfinvoice, "</BuyerCommunicationDetails>\r\n");
         } 
       } 
 

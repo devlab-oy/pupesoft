@@ -34130,9 +34130,6 @@ if (!function_exists('sort_array_of_arrays')) {
 
 if (!function_exists('pupesoft_log')) {
   function pupesoft_log($log_file, $log_message) {
-    echo $log_message;
-    return;
-
     // tehd‰‰n full path tiedostoon
     $log_path  = is_dir('/home/devlab/logs') ? '/home/devlab/logs/' : '/tmp/';
     $full_path = $log_path . basename($log_file, '.log') . '.log';

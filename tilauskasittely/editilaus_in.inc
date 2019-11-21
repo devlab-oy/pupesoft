@@ -2758,6 +2758,19 @@ while ($tietue = fgets($fd)) {
       $editilaus_otsikko_ok = "HYVAKSYTTAVAKSI";
     }
 
+    $query = "SELECT *
+              FROM asiakkaan_avainsanat
+              WHERE yhtio       = '{$kukarow['yhtio']}'
+              AND liitostunnus  = '{$arow[tunnus]}'
+              AND laji          = 'EDI_HYVAKSYNTAJONOON'
+              AND avainsana    != ''";
+    $edi_chk_res = pupe_query($query);
+
+    if (mysql_num_rows($edi_chk_res)) {
+      $editilaus_otsikko_ok = "HYVAKSYTTAVAKSI";
+      $editilaus_hyvaksyttavaksi = "JOO";
+    }
+
     if ($editilaus_hyvaksyttava != "") {
       $editilaus_otsikko_ok = "HYVAKSYTTAVAKSI";
     }

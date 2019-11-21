@@ -1332,29 +1332,19 @@ if (!function_exists('loppu_kerayslista')) {
       }
 
       if ($isoasiakasfooter) {
-        $yhtiofont["height"]    = 8;
-        $yhtiofont["font"]      = "Times-Roman";
-        $color['green'] = $color['blue'] = $color['red'] = 0.5;
-        $yhtiofont["fillcolor"] = $color;
-
-        $asiakasfont["height"]    = 30;
+        $asiakasfont["height"]    = 50;
         $asiakasfont["font"]      = "Times-Bold";
 
         $pdf->draw_rectangle(70, 20, 20, 580, $thispage, $rectparam);
-        $pdf->draw_rectangle(35, 20, 20, 580, $thispage, $rectparam);
 
+        $y_pos = 0;
         $s = strtoupper($laskurow['nimi']);
         while($pdf->strlen($s, $asiakasfont) > 545 and $asiakasfont["height"] > 1) {
-          $asiakasfont["height"] -= 1;
+          $asiakasfont["height"] -= 2;
+          $y_pos++;
         }
 
-        $pdf->draw_text(30, 41, $s, $thispage, $asiakasfont);
-
-        $s = "{$y_nimi} | {$y_osoite}, {$y_kotipaikka}, {$y_postino} | {$y_puhelin} | {$y_email} | {$y_www} | mgnet.mercantile.ee";
-        while($pdf->strlen($s, $yhtiofont) > 545 and $yhtiofont["height"] > 1) {
-          $yhtiofont["height"] -= 1;
-        }
-        $pdf->draw_text(30, 25, $s, $thispage, $yhtiofont);
+        $pdf->draw_text(30, 30 + $y_pos, $s, $thispage, $asiakasfont);
       }
       else {
         //Alimmat kolme laatikkoa, yhtiötietoja

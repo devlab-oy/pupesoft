@@ -805,7 +805,7 @@ if ($desadv_host != '' and $desadv_user != '' and $desadv_pass != '' and $desadv
         $apixfilename  = "{$pupe_root_polku}/dataout/apix_error/";
         $apixfilename .= "out_desadv_apix_{$desadv_laskurow['tunnus']}.dat";
 
-        rename(realpath($filenimi), $apixfilename);
+        rename($filenimi, $apixfilename);
 
         $status = apix_edi_put_file($filename, $desadv_laskurow["tunnus"], $desadv_path);
 

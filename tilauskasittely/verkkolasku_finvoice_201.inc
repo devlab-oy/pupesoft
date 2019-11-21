@@ -709,6 +709,11 @@ if (!function_exists('finvoice_rivi')) {
       fputs($tootfinvoice, "<InvoiceRow>\r\n");
       xml_add("ArticleIdentifier", $tilrow['tuoteno'], $tootfinvoice, 35);
       xml_add("ArticleName", $tilrow['nimitys'], $tootfinvoice, 100);
+
+      if ($laskutyyppi == 7 and $tilrow["eankoodi"] != "") {
+        xml_add("EanCode", $tilrow['eankoodi'], $tootfinvoice, 35);
+      }
+
       xml_add("DeliveredQuantity QuantityUnitCode=\"$tilrow[yksikko]\"", pp($tilrow['kpl'], 2), $tootfinvoice);
       xml_add("OrderedQuantity QuantityUnitCode=\"$tilrow[yksikko]\"", pp($tilrow['tilkpl'], 2), $tootfinvoice);
       xml_add("UnitPriceAmount AmountCurrencyIdentifier=\"$lasrow[valkoodi]\"", pp($tilrow['hinta'], $yhtiorow["hintapyoristys"], 5, 2), $tootfinvoice);

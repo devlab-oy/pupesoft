@@ -259,6 +259,13 @@ $toimpvm                      = date("Y-m-d");
 $tosoite                      = "";
 $tpostino                     = "";
 $tpostitp                     = "";
+$vovttunnus                   = "";
+$vnimi                        = "";
+$vnimitark                    = "";
+$vosoite                      = "";
+$vpostino                     = "";
+$vpostitp                     = "";
+$vmaa                         = "";
 $vastaustapa                  = "";
 $verkkokauppa                 = "";
 $verkkokauppavarasto          = "";
@@ -498,7 +505,6 @@ while ($tietue = fgets($fd)) {
     $tieto = trim($type[0]);
 
     $edi_ulos .= t("Tilaus yritykselle")." '$tieto' ";
-
     hae_yhtiotiedot($tieto);
     break;
 
@@ -687,7 +693,7 @@ while ($tietue = fgets($fd)) {
     break;
 
   case 'OSTOTIL.OT_MAKSUEHTO' :
-    //Magento keississä maksuehdon koko nimi verkkokaupassa
+    // Magento keississä maksuehdon koko nimi verkkokaupassa
     if ($edi_tyyppi == "magento" and $tieto != '') {
 
       if ($editilaus_maksuehto == "") {
@@ -861,23 +867,6 @@ while ($tietue = fgets($fd)) {
 
     // Otetaan talteen
     $OT_ASIAKASNRO = $tieto;
-
-    // Örum häkki
-    if (!isset($yhtiorow) and strpos($palvelin, "orum.devlab.fi") !== FALSE) {
-      $yhtiorow = hae_yhtion_parametrit("artr");
-
-      // Copy pastettu ylhäältä koko setti. :(
-      $kukarow['yhtio'] = $yhtiorow['yhtio']; // Tämä on vaarallista, mutta tätä ilman ei mikän toimi!
-      $kukarow['kuka']  = $edi_laatija;
-
-      // nollataan argv ja laitetaan ensimmäiseksi paratemetriksi yhtio, niin verkkolaskutus toimii!
-      $argv       = array();
-      $argv[0]    = "";
-      $argv[1]    = $kukarow["yhtio"];
-      $editil_cli = TRUE;
-
-      $edi_ulos .= "VASTAANOTTTAVAN YHTION TIETO PUUTTUU! -> $yhtiorow[nimi] ($kukarow[yhtio])\n";
-    }
 
     if (!is_array($arow)) {
       $edi_ulos .= t("Tilaava asiakas")." $tieto -> ";
@@ -1101,6 +1090,12 @@ while ($tietue = fgets($fd)) {
     }
     break;
 
+  case 'OSTOTIL.OT_TOIMITUS_ASIAKASNRO' :
+    // toimitusasiakkaan asiakasnumero
+    $toimitetaan_tanne = $tieto;
+    $toimovttunnus = $tieto;
+    break;
+
   case 'ONADDP_NA' :
   case 'OSTOTIL.OT_TOIMITUS_NIMI' :
     // toimitusasiakkaan nimi
@@ -1154,6 +1149,36 @@ while ($tietue = fgets($fd)) {
   case 'OSTOTIL.OT_TOIMITUS_NOUTOPISTE_TUNNUS' :
     // noutopisteen tunnus unifaunia varten
     $noutopisteen_tunnus = trim($tieto);
+    break;
+
+  case 'OSTOTIL.OT_VASTAANOTTAJA_ASIAKASNR' :
+    // vastaanottajan/terminaalin numero
+    $vovttunnus = $tieto;
+    break;
+
+  case 'OSTOTIL.OT_VASTAANOTTAJA_YRITYS' :
+    // vastaanottajan/terminaalin nimitark
+    $vnimi = $tieto;
+    break;
+
+  case 'OSTOTIL.OT_VASTAANOTTAJA_KATUOSOITE' :
+    // vastaanottajan/terminaalin osoite
+    $vosoite = $tieto;
+    break;
+
+  case 'OSTOTIL.OT_VASTAANOTTAJA_POSTITOIMIPAIKKA' :
+    // vastaanottajan/terminaalin postinro
+    $vpostino = $tieto;
+    break;
+
+  case 'OSTOTIL.OT_VASTAANOTTAJA_POSTINRO' :
+    // vastaanottajan/terminaalin postitoimipaikka
+    $vpostitp = $tieto;
+    break;
+
+  case 'OSTOTIL.OT_VASTAANOTTAJA_MAAKOODI' :
+    // vastaanottajan/terminaalin maakoodi
+    $vmaa = substr(trim($tieto), 0, 2);
     break;
 
   case 'OSTOTIL.OT_MAKSETTU' :
@@ -1411,7 +1436,7 @@ while ($tietue = fgets($fd)) {
         $arow['toim_maa']       = $arow['maa'];
       }
 
-      // jos tilauksessa on tullut poikkeava nimi, postino ja postitp otetaan kaikki tiedot tilaukselta (PAITSI JO KYSESSÄ ON KOONTIKULJETUSKEISSI)
+      // jos tilauksessa on tullut poikkeava nimi, postino ja postitp otetaan kaikki tiedot tilaukselta (PAITSI JOS KYSESSÄ ON KOONTIKULJETUSKEISSI)
       if (isset($crossdock911) or ($tnimi != "" or ($tnimi == "" and $tnimitark != "")) and $tpostino != "" and $tpostitp != "" and $apuro["tulostustapa"] != "K" and $apuro["tulostustapa"] != "L") {
         if ($tnimi == "" and $tnimitark != "") {
           $tnimi = $tnimitark;
@@ -1792,6 +1817,25 @@ while ($tietue = fgets($fd)) {
         $yhtiorow = hae_yhtion_parametrit($yhtiorow["yhtio"]);
       }
 
+      $query = "SELECT *
+                FROM asiakkaan_avainsanat
+                WHERE yhtio       = '{$kukarow['yhtio']}'
+                AND liitostunnus  = '{$arow[tunnus]}'
+                AND laji          = 'KICK_EDI'
+                AND avainsana    != ''";
+      $edi_chk_res = pupe_query($query);
+
+      // Special EDI case
+      if (mysql_num_rows($edi_chk_res)) {
+        $matches = array();
+        preg_match('/^[A-Z]* ([0-9]{3,4}) /i', $arow['toim_nimi'], $matches);
+
+        $viite = "";
+        if (!empty($matches)) {
+          $viite = $matches[1];
+        }
+      }
+
       // jos annettu custom laatija
       if (isset($editilaus_laatija) and trim($editilaus_laatija) != "") $edi_laatija = $editilaus_laatija;
 
@@ -1896,6 +1940,13 @@ while ($tietue = fgets($fd)) {
                 laskutus_postitp    = '$arow[laskutus_postitp]',
                 laskutus_postino    = '$arow[laskutus_postino]',
                 laskutus_maa        = '$arow[laskutus_maa]',
+                kolm_ovttunnus      = '$vovttunnus',
+                kolm_nimi           = '$vnimi',
+                kolm_nimitark       = '$vnimitark',
+                kolm_osoite         = '$vosoite',
+                kolm_postitp        = '$vpostitp',
+                kolm_postino        = '$vpostino',
+                kolm_maa            = '$vmaa',
                 noutopisteen_tunnus = '{$noutopisteen_tunnus}',
                 kasinsyotetty_viite = '{$laskuviite}',
                 laatija             = '$edi_laatija',
@@ -2707,6 +2758,19 @@ while ($tietue = fgets($fd)) {
       $editilaus_otsikko_ok = "HYVAKSYTTAVAKSI";
     }
 
+    $query = "SELECT *
+              FROM asiakkaan_avainsanat
+              WHERE yhtio       = '{$kukarow['yhtio']}'
+              AND liitostunnus  = '{$arow[tunnus]}'
+              AND laji          = 'EDI_HYVAKSYNTAJONOON'
+              AND avainsana    != ''";
+    $edi_chk_res = pupe_query($query);
+
+    if (mysql_num_rows($edi_chk_res)) {
+      $editilaus_otsikko_ok = "HYVAKSYTTAVAKSI";
+      $editilaus_hyvaksyttavaksi = "JOO";
+    }
+
     if ($editilaus_hyvaksyttava != "") {
       $editilaus_otsikko_ok = "HYVAKSYTTAVAKSI";
     }
@@ -2869,7 +2933,6 @@ while ($tietue = fgets($fd)) {
                   AND tunnus  = '$id'";
         pupe_query($query);
       }
-
     }
     elseif ($editilaus_otsikko_ok == "HYVAKJONOON") {
       $edi_ulos .= "\n".t("Merkittiin tilaus hyväksyttäväksi").": {$laskurow['tunnus']}.\n\n";
@@ -2953,6 +3016,13 @@ while ($tietue = fgets($fd)) {
     $tosoite                      = "";
     $tpostino                     = "";
     $tpostitp                     = "";
+    $vovttunnus                   = "";
+    $vnimi                        = "";
+    $vnimitark                    = "";
+    $vosoite                      = "";
+    $vpostino                     = "";
+    $vpostitp                     = "";
+    $vmaa                         = "";
     $vastaustapa                  = "";
     $verkkokauppa                 = "";
     $verkkokauppavarasto          = "";

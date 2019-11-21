@@ -1333,7 +1333,7 @@ if (!function_exists("apix_invoice_put_file")) {
 }
 
 if (!function_exists("apix_edi_put_file")) {
-  function apix_edi_put_file($apixzipfile, $apix_ordernum) {
+  function apix_edi_put_file($apixzipfile, $apix_ordernum, $soft = "PupesoftEDI") {
     global $kukarow, $yhtiorow, $pupe_root_polku;
 
     // siirret‰‰n laskutiedosto operaattorille
@@ -1341,7 +1341,7 @@ if (!function_exists("apix_edi_put_file")) {
     $url             = "https://api.apix.fi/invoices";
     $transferkey     = $yhtiorow['apix_edi_avain'];
     $transferid      = $yhtiorow['apix_edi_tunnus'];
-    $software        = "PupesoftEDI";
+    $software        = $soft;
     $version         = "1.0";
 
     $timestamp       = gmdate("YmdHis");
@@ -23995,14 +23995,28 @@ if (!function_exists('tee_keraysera_painon_perusteella')) {
     global $kukarow, $yhtiorow;
 
     $_pakkaus = (int) $_pakkaus;
-
     $pakkaukset = array();
+
+    $tuoterajaus = "AND tuote.tuotemassa != 0";
+
+    $query = "SELECT *
+              FROM asiakkaan_avainsanat
+              WHERE yhtio       = '{$kukarow['yhtio']}'
+              AND liitostunnus  = '{$laskurow[liitostunnus]}'
+              AND laji          = 'KICK_EDI'
+              AND avainsana    != ''";
+    $edi_chk_res = pupe_query($query);
+
+    // Special EDI case
+    if (mysql_num_rows($edi_chk_res)) {
+      $tuoterajaus = "";
+    }
 
     if ($_pakkaus == 0) {
       // valitaan sopiva pakkaus painon perusteella
       $query = "SELECT SUM(tuote.tuotemassa * tilausrivi.varattu) AS paino
                 FROM tilausrivi
-                JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.tuotemassa != 0)
+                JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno {$tuoterajaus})
                 WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
                 AND tilausrivi.var     not in ('P','J','O','S')
                 AND tilausrivi.otunnus IN ($tilausnumeroita)";
@@ -24034,7 +24048,7 @@ if (!function_exists('tee_keraysera_painon_perusteella')) {
     // katsotaan tarvitaanko jakaa tilausrivej‰ myyntier‰ll‰
     $query = "SELECT tilausrivi.tunnus, tilausrivi.tuoteno, tilausrivi.otunnus, tilausrivi.varattu, tuote.tuotemassa, tuote.tuotemassa * tilausrivi.varattu AS paino, IF(tuote.myynti_era = 0, 1, myynti_era) myynti_era, {$sorttauskentta}
               FROM tilausrivi
-              JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.tuotemassa != 0)
+              JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno {$tuoterajaus})
               WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
               AND tilausrivi.var     not in ('P','J','O','S')
               AND tilausrivi.otunnus IN ($tilausnumeroita)
@@ -24068,7 +24082,7 @@ if (!function_exists('tee_keraysera_painon_perusteella')) {
             $pakkausnro++;
             $pakkauksen_kaytetty_paino = ($kerayseran_rivit[$i]['data']['tuotemassa'] * $jaljella);
 
-            $sscc          = uusi_sscc_nro();
+            $sscc = uusi_sscc_nro();
 
             if (!empty($yhtiorow['ean'])) {
               $_selitetark = t_avainsana("GS1_SSCC", "", "and avainsana.selite = '{$laskurow['toimitustapa']}'", "", "", "selitetark");
@@ -33761,6 +33775,10 @@ if (!function_exists('pupesoft_toimitusvahvistus')) {
     }
     elseif ($laskurow["toimitusvahvistus"] == "toimitusvahvistus_desadv_fi0089.inc") {
       $desadv_version = "fi0089";
+      $laskurow["toimitusvahvistus"] = "toimitusvahvistus_desadv.inc";
+    }
+    elseif ($laskurow["toimitusvahvistus"] == "toimitusvahvistus_desadv_ean005.inc") {
+      $desadv_version = "ean005";
       $laskurow["toimitusvahvistus"] = "toimitusvahvistus_desadv.inc";
     }
     else {

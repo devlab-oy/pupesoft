@@ -142,7 +142,16 @@ if (!function_exists('desadv_header')) {
       }
 
       if ($desadv_version == 'ean005') {
-        $desadv_message .= "RFF+CR:".substr($desadv_laskurow["asiakastoimittajanro"], 0, 35)."'";
+        $query = "SELECT avainsana
+                  FROM asiakkaan_avainsanat
+                  WHERE yhtio       = '{$kukarow['yhtio']}'
+                  AND liitostunnus  = '{$laskurow[liitostunnus]}'
+                  AND laji          = 'KICK_EDI'
+                  AND avainsana    != ''";
+        $edi_chk_res = pupe_query($query);
+        $edi_chk_row = mysql_fetch_assoc($edi_chk_res);
+
+        $desadv_message .= "RFF+CR:".substr($edi_chk_row["avainsana"], 0, 35)."'";
         $x++;
       }
 

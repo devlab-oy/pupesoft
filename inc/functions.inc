@@ -1333,7 +1333,7 @@ if (!function_exists("apix_invoice_put_file")) {
 }
 
 if (!function_exists("apix_edi_put_file")) {
-  function apix_edi_put_file($apixzipfile, $apix_ordernum) {
+  function apix_edi_put_file($apixzipfile, $apix_ordernum, $soft = "PupesoftEDI") {
     global $kukarow, $yhtiorow, $pupe_root_polku;
 
     // siirret‰‰n laskutiedosto operaattorille
@@ -1341,7 +1341,7 @@ if (!function_exists("apix_edi_put_file")) {
     $url             = "https://api.apix.fi/invoices";
     $transferkey     = $yhtiorow['apix_edi_avain'];
     $transferid      = $yhtiorow['apix_edi_tunnus'];
-    $software        = "PupesoftEDI";
+    $software        = $soft;
     $version         = "1.0";
 
     $timestamp       = gmdate("YmdHis");

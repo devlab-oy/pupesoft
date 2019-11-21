@@ -790,18 +790,32 @@ if ($desadv_host != '' and $desadv_user != '' and $desadv_pass != '' and $desadv
     }
 
     if ($error == '') {
-      // tarvitaan  $ftphost $ftpuser $ftppass $ftppath $ftpfile
-      // palautetaan $palautus ja $syy
-      $ftphost = $desadv_host;
-      $ftpuser = $desadv_user;
-      $ftppass = $desadv_pass;
-      $ftppath = $desadv_path;
-      $ftpfile = realpath($filenimi);
+      $status = "";
 
-      require "inc/ftp-send.inc";
+      if ($desadv_host == "APIXDESADV") {
+        $apixfilename  = "{$pupe_root_polku}/dataout/apix_error/";
+        $apixfilename .= "out_desadv_apix_{$desadv_laskurow['tunnus']}.dat";
+
+        rename(realpath($filenimi), $apixfilename);
+
+        $status = apix_edi_put_file($filename, $desadv_laskurow["tunnus"], $desadv_path);
+
+        $palautus = 0;
+      }
+      else {
+        // tarvitaan  $ftphost $ftpuser $ftppass $ftppath $ftpfile
+        // palautetaan $palautus ja $syy
+        $ftphost = $desadv_host;
+        $ftpuser = $desadv_user;
+        $ftppass = $desadv_pass;
+        $ftppath = $desadv_path;
+        $ftpfile = realpath($filenimi);
+
+        require "inc/ftp-send.inc";
+      }
 
       if ($palautus == 0) {
-        echo "<font class='message'>", t("Tilauksesta %s lähetettiin toimitusvahvistus.", "", $desadv_laskurow["tunnus"])."</font><br><br>\n";
+        echo "<font class='message'>", t("Tilauksesta %s lähetettiin toimitusvahvistus.", "", $desadv_laskurow["tunnus"])." {$status}</font><br><br>\n";
       }
     }
     else {

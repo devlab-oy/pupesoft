@@ -171,9 +171,64 @@ while (false !== ($file = readdir($handle))) {
     }
 
     pupesoft_log('logmaster_outbound_delivery_confirmation', "Sanomassa {$file} ".count($tilausrivit)." uniikkia tilausriviä.");
+    echo "\n";
+
+    $query = "SELECT *
+              FROM asiakkaan_avainsanat
+              WHERE yhtio       = '{$kukarow['yhtio']}'
+              AND liitostunnus  = '{$laskurow['liitostunnus']}'
+              AND laji          = 'KICK_EDI'
+              AND avainsana    != ''";
+    $edi_chk_res = pupe_query($query);
+    $packageinfo = FALSE;
+
+    // Special EDI case, tarkistetaan löytyykö <Packages>-segmentti
+    if (mysql_num_rows($edi_chk_res) and isset($xml->CustPackingSlip->Packages)) {
+      // Poistetaan keryserät ja luodaan ne uudestaan Packages-elementin tietojen perusteella
+      $query = "DELETE
+                FROM kerayserat
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND otunnus = '{$laskurow['tunnus']}'";
+      pupe_query($query);
+      $pklask = 1;
+
+      foreach ($xml->CustPackingSlip->Packages->PackageId as $package) {
+        $package_sscc = $package->attributes()->No;
+
+        foreach ($package->PacItemLine as $packageitem) {
+          $package_rivitunnus = $packageitem->OrdTransId;
+          $package_tuoteno = $packageitem->PacItemNumber;
+          $package_maara = $packageitem->PacQuantity;
+
+          $query = "INSERT INTO kerayserat SET
+                    yhtio         = '{$kukarow['yhtio']}',
+                    nro           = {$laskurow['tunnus']},
+                    keraysvyohyke = 0,
+                    tila          = '',
+                    sscc          = '{$laskurow['tunnus']}',
+                    sscc_ulkoinen = '{$package_sscc}',
+                    otunnus       = '{$laskurow['tunnus']}',
+                    tilausrivi    = '{$package_rivitunnus}',
+                    pakkaus       = '0',
+                    pakkausnro    = '{$pklask}',
+                    kpl           = '{$package_maara}',
+                    kpl_keratty   = '{$package_maara}',
+                    keratty       = '{$kukarow['kuka']}',
+                    kerattyaika   = '{$toimaika}',
+                    laatija       = '{$kukarow['kuka']}',
+                    luontiaika    = now(),
+                    muutospvm     = now(),
+                    muuttaja      = '{$kukarow['kuka']}'";
+          pupe_query($query);
+          $packageinfo = TRUE;
+        }
+        $pklask++;
+      }
+    }
 
     $paivitettiin_tilausrivi_onnistuneesti = false;
     $keratty_yhteensa = 0;
+    echo "\n";
 
     // tsekataan mahollinen var arvo
     $_var = $yhtiorow['kerayspoikkeama_kasittely'] == 'J' ? "J" : "P";
@@ -391,9 +446,14 @@ while (false !== ($file = readdir($handle))) {
 
         paivita_rahtikirjat_tulostetuksi_ja_toimitetuksi(array('otunnukset' => $laskurow['tunnus'], 'kilotyht' => $tuotteiden_paino));
 
-        // seurantakoodien lähetys
-        if (!empty($tracking_code)) {
+        $pupe_root_polku = dirname(dirname(dirname(__FILE__)));
 
+        if ($packageinfo) {
+          // Special EDI case, lähetetään toimitusvahvistus
+          pupesoft_toimitusvahvistus($laskurow['tunnus']);
+        }
+        elseif (!empty($tracking_code)) {
+          // seurantakoodien lähetys
           $tilausnumero = $laskurow['tunnus'];
           $seurantakoodi = $tracking_code;
 

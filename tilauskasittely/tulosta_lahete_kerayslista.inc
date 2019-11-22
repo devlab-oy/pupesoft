@@ -1332,7 +1332,7 @@ if (!function_exists('loppu_kerayslista')) {
       }
 
       if ($isoasiakasfooter) {
-        $asiakasfont["height"]    = 50;
+        $asiakasfont["height"]    = 42;
         $asiakasfont["font"]      = "Times-Bold";
 
         $pdf->draw_rectangle(70, 20, 20, 580, $thispage, $rectparam);
@@ -1344,7 +1344,7 @@ if (!function_exists('loppu_kerayslista')) {
           $y_pos++;
         }
 
-        $pdf->draw_text(30, 30 + $y_pos, $s, $thispage, $asiakasfont);
+        $pdf->draw_text(30, 28 + $y_pos, $s, $thispage, $asiakasfont);
       }
       else {
         //Alimmat kolme laatikkoa, yhtiötietoja

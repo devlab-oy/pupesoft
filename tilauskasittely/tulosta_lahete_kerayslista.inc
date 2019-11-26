@@ -1338,7 +1338,7 @@ if (!function_exists('loppu_kerayslista')) {
         $pdf->draw_rectangle(70, 20, 20, 580, $thispage, $rectparam);
 
         $y_pos = 0;
-        $s = strtoupper($laskurow['nimi']);
+        $s = strtoupper($laskurow['toim_nimi']);
         while($pdf->strlen($s, $asiakasfont) > 545 and $asiakasfont["height"] > 1) {
           $asiakasfont["height"] -= 2;
           $y_pos++;

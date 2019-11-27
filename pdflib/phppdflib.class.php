@@ -973,6 +973,11 @@ class pdffile {
   }
 
   function mb_strlen($string , $params = false, $tabwidth = 4) {
+    $string = str_replace("Ü", "U", $string);
+    $string = str_replace("ü", "u", $string);
+    $string = str_replace("Õ", "O", $string);
+    $string = str_replace("õ", "o", $string);
+
     if ($this->needsset) {
       require dirname(__FILE__) . '/strlen.inc.php';
     }

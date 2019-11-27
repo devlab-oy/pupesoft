@@ -17,6 +17,8 @@ if (php_sapi_name() == 'cli') {
   // Logitetaan ajo
   cron_log();
 
+  pupesoft_flock();
+
   $yhtio = trim($argv[1]);
 
   //yhtiötä ei ole annettu

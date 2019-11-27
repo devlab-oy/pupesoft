@@ -1005,6 +1005,12 @@ class pdffile {
       $tab .= ' ';
     }
     $string = str_replace(chr(9), $tab, $string);
+
+    $string = str_replace("Ü", "U", $string);
+    $string = str_replace("ü", "u", $string);
+    $string = str_replace("Õ", "O", $string);
+    $string = str_replace("õ", "o", $string);
+
     if (substr($font, 0, 7) == "Courier") {
       // Courier is a fixed-width font
       $width = strlen($string) * 600;

@@ -1316,36 +1316,68 @@ if (!function_exists('loppu_kerayslista')) {
         }
       }
 
-      //Alimmat kolme laatikkoa, yhtiötietoja
-      $pdf->draw_rectangle(70, 20, 20, 580,  $thispage, $rectparam);
-      $pdf->draw_rectangle(70, 207, 20, 580,  $thispage, $rectparam);
-      $pdf->draw_rectangle(70, 394, 20, 580,  $thispage, $rectparam);
+      $query = "SELECT nouto 
+                FROM lasku l
+                INNER JOIN toimitustapa tt
+                  ON (tt.yhtio = l.yhtio AND tt.selite = l.toimitustapa)
+                WHERE l.yhtio = '$laskurow[yhtio]'
+                  AND l.tunnus = '$laskurow[tunnus]'";
+      $tt_result = pupe_query($query);
+      if (mysql_num_rows($tt_result) == 1) {
+        $tt_row = mysql_fetch_assoc($tt_result);
+        $isoasiakasfooter = ($tt_row['nouto'] == 'o');
+      }
+      else {
+        $isoasiakasfooter = false;
+      }
 
-      $pdf->draw_text(30, 55, $y_nimi,    $thispage, $pieni);
-      $pdf->draw_text(30, 45, $y_osoite,    $thispage, $pieni);
-      $pdf->draw_text(30, 35, $y_postino."  ".$y_postitp,  $thispage, $pieni);
-      $pdf->draw_text(30, 25, $y_maa,      $thispage, $pieni);
+      if ($isoasiakasfooter) {
+        $asiakasfont["height"]    = 42;
+        $asiakasfont["font"]      = "Times-Bold";
 
-      $pdf->draw_text(217, 55, t("Puhelin", $kieli).":",      $thispage, $pieni);
-      $pdf->draw_text(257, 55, $y_puhelin,            $thispage, $pieni);
-      $pdf->draw_text(217, 45, t("Telefax", $kieli).":",      $thispage, $pieni);
-      $pdf->draw_text(257, 45, $y_fax,              $thispage, $pieni);
-      $pdf->draw_text(217, 35, t("Sähköposti", $kieli).":",    $thispage, $pieni);
-      $pdf->draw_text(257, 35, $y_email,              $thispage, $pieni);
-      $pdf->draw_text(217, 25, t("Web", $kieli).":",        $thispage, $pieni);
-      $pdf->draw_text(257, 25, $y_www,              $thispage, $pieni);
+        $pdf->draw_rectangle(70, 20, 20, 580, $thispage, $rectparam);
 
-      $pdf->draw_text(404, 55, t("Y-tunnus", $kieli).":",      $thispage, $pieni);
-      $pdf->draw_text(444, 55, tulosta_ytunnus($y_vatnumero, $y_maa, $laskurow["vienti"]), $thispage, $pieni);
-      $pdf->draw_text(404, 45, t("Kotipaikka", $kieli).":",    $thispage, $pieni);
-      $pdf->draw_text(444, 45, $y_kotipaikka,    $thispage, $pieni);
+        $y_pos = 0;
+        $s = strtoupper($laskurow['toim_nimi']);
+        while($pdf->strlen($s, $asiakasfont) > 545 and $asiakasfont["height"] > 1) {
+          $asiakasfont["height"] -= 2;
+          $y_pos++;
+        }
+
+        $pdf->draw_text(30, 28 + $y_pos, $s, $thispage, $asiakasfont);
+      }
+      else {
+        //Alimmat kolme laatikkoa, yhtiötietoja
+        $pdf->draw_rectangle(70, 20, 20, 580, $thispage, $rectparam);
+        $pdf->draw_rectangle(70, 207, 20, 580, $thispage, $rectparam);
+        $pdf->draw_rectangle(70, 394, 20, 580, $thispage, $rectparam);
+
+        $pdf->draw_text(30, 55, $y_nimi, $thispage, $pieni);
+        $pdf->draw_text(30, 45, $y_osoite, $thispage, $pieni);
+        $pdf->draw_text(30, 35, $y_postino . "  " . $y_postitp, $thispage, $pieni);
+        $pdf->draw_text(30, 25, $y_maa, $thispage, $pieni);
+
+        $pdf->draw_text(217, 55, t("Puhelin", $kieli) . ":", $thispage, $pieni);
+        $pdf->draw_text(257, 55, $y_puhelin, $thispage, $pieni);
+        $pdf->draw_text(217, 45, t("Telefax", $kieli) . ":", $thispage, $pieni);
+        $pdf->draw_text(257, 45, $y_fax, $thispage, $pieni);
+        $pdf->draw_text(217, 35, t("Sähköposti", $kieli) . ":", $thispage, $pieni);
+        $pdf->draw_text(257, 35, $y_email, $thispage, $pieni);
+        $pdf->draw_text(217, 25, t("Web", $kieli) . ":", $thispage, $pieni);
+        $pdf->draw_text(257, 25, $y_www, $thispage, $pieni);
+
+        $pdf->draw_text(404, 55, t("Y-tunnus", $kieli) . ":", $thispage, $pieni);
+        $pdf->draw_text(444, 55, tulosta_ytunnus($y_vatnumero, $y_maa, $laskurow["vienti"]), $thispage, $pieni);
+        $pdf->draw_text(404, 45, t("Kotipaikka", $kieli) . ":", $thispage, $pieni);
+        $pdf->draw_text(444, 45, $y_kotipaikka, $thispage, $pieni);
+      }
 
       if ($tots != 1) {
         $pdf->draw_text(530, 72, t("Jatkuu", $kieli)."...",   $thispage, $norm);
       }
 
       if ($tots == 1) {
-        if ($paino != 0) {
+        if ($paino != 0 and !$isoasiakasfooter) {
           $pdf->draw_text(440, 25, t("Tilauksen paino", $kieli).":",  $thispage, $norm);
           $oikpos = $pdf->strlen($paino." kg", $boldi);
           $pdf->draw_text(575-$oikpos, 25, $paino." kg",        $thispage, $boldi);

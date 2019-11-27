@@ -18336,7 +18336,7 @@ if (!function_exists("tee_keraysera")) {
     // Kun käyttäjän takana on keräysvyöhykkeiden monivalinta, joudutaan tilauksen order by ja group by tekemään niin, että pienimmän prioriteetin ja kellonajan mukaan järjestetään
     // tilaukset tulemaan keräysvyöhykkeittäin. Jos prio ja aika on sama, otetaan randomisti jonkun keräysvyöhykkeen tilauksia (kumpi nyt sattuu tulemaan ensiksi),
     // muuten prio ja aika määrää minkä keräysvyöhykkeen tilaukset tulevat ensiksi.
-    $query = "(SELECT SQL_NO_CACHE
+    $query = "(SELECT SQL_NO_CACHE 
                lasku.prioriteettinro as prioriteetti,
                (TIME_TO_SEC(TIMEDIFF(lahdot.lahdon_kellonaika, CURTIME())) / 60) as erotus,
                lasku.ohjausmerkki,
@@ -18558,11 +18558,11 @@ if (!function_exists("tee_keraysera")) {
       ) AS prioriteetti,
       ";
 
-      $_group_by_lisa = "GROUP BY 2,3,4,5,6,7";
+      $_group_by_lisa = "GROUP BY 2,3,4,5,6,7,8";
     }
     else {
       $prioriteettilisa = "lasku.prioriteettinro as prioriteetti,";
-      $_group_by_lisa   = "GROUP BY 1,2,3,4,5,6,7";
+      $_group_by_lisa   = "GROUP BY 1,2,3,4,5,6,7,8";
     }
 
     $query = "LOCK TABLES
@@ -18587,6 +18587,7 @@ if (!function_exists("tee_keraysera")) {
                 lasku.ohjausmerkki,
                 lasku.liitostunnus,
                 maksuehto.jv,
+                toimitustapa.nouto,
                 TRIM(CONCAT(lasku.toim_nimi, ' ', lasku.toim_nimitark, ' ', lasku.toim_osoite, ' ', lasku.toim_postino, ' ', lasku.toim_postitp)) as asiakas_nimi,
                 CONCAT_WS('!¡!', lahdot.tunnus, lahdot.asiakasluokka, lahdot.lahdon_kellonaika) as lahdon_tiedot,
                 AVG(DATE_FORMAT(lasku.h1time, '%y%m%d%H%i')) h1time,
@@ -18643,6 +18644,7 @@ if (!function_exists("tee_keraysera")) {
                 lasku.ohjausmerkki,
                 lasku.liitostunnus,
                 maksuehto.jv,
+                toimitustapa.nouto,
                 TRIM(CONCAT(lasku.toim_nimi, ' ', lasku.toim_nimitark, ' ', lasku.toim_osoite, ' ', lasku.toim_postino, ' ', lasku.toim_postitp)) as asiakas_nimi,
                 CONCAT_WS('!¡!', 999999999999, 999999999999, 999999999999) lahdon_tiedot,
                 AVG(DATE_FORMAT(lasku.h1time, '%y%m%d%H%i')) h1time,
@@ -18703,6 +18705,7 @@ if (!function_exists("tee_keraysera")) {
     $kerailyniput        = array();
     $kerailyniput_key    = array();
     $kerailyniput_tiedot = array();
+    $kasitellaan_noutoja = '';
 
     $ed_prioriteetti = '';
     $ed_asiakas      = '';
@@ -18711,6 +18714,9 @@ if (!function_exists("tee_keraysera")) {
     $i = 1;
 
     while ($row = mysql_fetch_assoc($res)) {
+      if ($kasitellaan_noutoja == '') {
+        $kasitellaan_noutoja = ($row['nouto'] == 'o') ? 'joo' : 'ei';
+      }
 
       list($row["lahto"], $row["asiakasluokka"], $row["lahdon_kellonaika"]) = explode("!¡!", $row["lahdon_tiedot"]);
 
@@ -18722,6 +18728,21 @@ if (!function_exists("tee_keraysera")) {
       if (strpos($keraysvyohyketiedot['yhdistelysaanto'], 'K') === false and trim($ed_lahto) != '' and $ed_lahto != $row['lahto']) {
         if (isset($kukarow['debugstring'])) $kukarow['debugstring'] .= "(E60): EI SAA OLLA USEITA LÄHTÖJÄ! BREAK<br>\n";
         break;
+      }
+
+      if ($kasitellaan_noutoja == 'joo') {
+        if ($row['nouto'] == 'o' and trim($ed_asiakas) != '' and $ed_asiakas != $row['asiakas_nimi']) {
+          continue;
+        }
+
+        if ($row['nouto'] != 'o') {
+          continue;
+        }
+      }
+      else {
+        if ($row['nouto'] == 'o') {
+          continue;
+        }
       }
 
       if (strpos($keraysvyohyketiedot['yhdistelysaanto'], 'S') === false and trim($ed_asiakas) != '' and $ed_asiakas != $row['asiakas_nimi']) {
@@ -18869,7 +18890,12 @@ if (!function_exists("tee_keraysera")) {
 
           if ($cnt_tmp_arr < $askelvali) continue;
 
-          $std_deviation = round(stats_standard_deviation($tmp_arr, TRUE), 0);
+          if (function_exists("stats_standard_deviation")) {
+            $std_deviation = round(stats_standard_deviation($tmp_arr, TRUE), 0);
+          }
+          else {
+            $std_deviation = 1;
+          }
 
           $get_indx_from = array_chunk($tmp_arr, $cnt_tmp_arr / 2, TRUE);
           $indx_from = array_pop($get_indx_from);

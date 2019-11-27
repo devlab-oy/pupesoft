@@ -542,6 +542,7 @@ if ($tee != '') {
       $kukarow = $keraajarow;
 
       $loop_counter = TRUE;
+      $kasitellaan_noutoja = '';
 
       if ($tulosta_kaikki == "JOO" and $naytetaan_tulosta_kaikki == 0) {
         // jos yritetään tulostaa kaikki niin tsekataan vielä käyttöoikeudet

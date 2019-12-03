@@ -10,6 +10,8 @@ else exit;
 if (!isset($tee)) $tee = "";
 if (!isset($viivakoodi)) $viivakoodi = "";
 
+$viivakoodi = str_replace("+", "-", $viivakoodi);
+
 echo "<font class='head'>", t("Pullopalautus"), "</font><hr>";
 
 if ($tee == 'NAYTATILAUS') {
@@ -124,15 +126,15 @@ if ($tee == "HYVITA") {
           }
         }
         else {
-          echo "<font class='error'>" . t("Sarjanumerolla oleva pullo on merkitty noudossa myydyksi.") . "</font><br>";
+          echo "<font class='error'>" . t("Sarjanumerolla oleva pullo on merkitty noudossa myydyksi.") . " $viivakoodi</font><br>";
         }
       }
       else {
-        echo "<font class='error'>" . t("Sarjanumerolla oleva pullo on jo merkitty palauteksi.") . "</font><br>";
+        echo "<font class='error'>" . t("Sarjanumerolla oleva pullo on jo merkitty palauteksi.") . " $viivakoodi</font><br>";
       }
     }
     else {
-      echo "<font class='error'>" . t("Annettua sarjanumeroa ei löydy.") . "</font><br>";
+      echo "<font class='error'>" . t("Annettua sarjanumeroa ei löydy.") . " $viivakoodi</font><br>";
     }
   }
   else {

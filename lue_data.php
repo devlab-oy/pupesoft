@@ -1449,6 +1449,11 @@ if ($kasitellaan_tiedosto) {
             $valinta .= " and liitostunnus='$tpttrow[tunnus]' ";
           }
         }
+        elseif ($table_mysql == "tuotteen_avainsanat") {
+          if (in_array("SELITE", $taulunotsikot[$taulu])) {
+            $valinta .= " and selite = '" . $taulunrivit[$taulu][$eriviindex][array_search("SELITE", $taulunotsikot[$taulu])] . "'";
+          }
+        }
 
         $query = "SELECT *
                   FROM $table_mysql

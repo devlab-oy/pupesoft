@@ -1822,7 +1822,8 @@ while ($tietue = fgets($fd)) {
 
       if ($edi_laatija =="Stock") {
           $editilaus_tila = 'N';
-          $editilaus_alatila = '';
+          $editilaus_alatila = 'F';
+          $editilaus_hyvaksyttava = "JOO";
           $tilaustyyppilisa = '2';
       }
 

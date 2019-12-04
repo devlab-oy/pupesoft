@@ -55,6 +55,11 @@ if ($php_cli) {
     $edi_tyyppi = 'harbour';
   }
 
+  // tunnistetaan woo commerce -tyyppinen k‰sittely tiedostonimest‰
+  if ($edi_tyyppi == 'futursoft' and preg_match("/^stock\-order/", $verkkokauppa_filename) === 1) {
+    $edi_tyyppi = 'stock';
+  }
+
   // tunnistetaan apix-edi -tyyppinen k‰sittely tiedostonimest‰
   if ($edi_tyyppi == 'futursoft' and preg_match("/^apix_/", $verkkokauppa_filename) === 1) {
     $edi_tyyppi = 'apix_edi';
@@ -352,6 +357,11 @@ elseif ($edi_tyyppi == "woo") {
 elseif ($edi_tyyppi == "harbour") {
   $edi_subj = "Sis‰‰ntuleva Verkkokauppa-tilaus";
   $edi_laatija = "Harbour";
+  $edi_tyyppi = "magento"; // woocommerce toimii t‰‰ll‰ samaan tapaan kuin magento
+}
+elseif ($edi_tyyppi == "stock") {
+  $edi_subj = "Sis‰‰ntuleva Verkkokauppa-tilaus";
+  $edi_laatija = "Stock";
   $edi_tyyppi = "magento"; // woocommerce toimii t‰‰ll‰ samaan tapaan kuin magento
 }
 elseif ($edi_tyyppi == "edifact911") {
@@ -1808,6 +1818,10 @@ while ($tietue = fgets($fd)) {
       if ($edi_laatija =="Harbour") {
           $editilaus_alatila = 'A';
           $tilaustyyppilisa = 'E';
+      }
+
+      if ($edi_laatija =="Stock") {
+          $tilaustyyppilisa = '2';
       }
 
       // Lis‰t‰‰n otsikko

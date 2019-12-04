@@ -1822,9 +1822,8 @@ while ($tietue = fgets($fd)) {
 
       if ($edi_laatija =="Stock") {
           $editilaus_tila = 'N';
-          $editilaus_alatila = 'F';
+          $editilaus_alatila = '';
           $tilaustyyppilisa = '2';
-          $ei_esteta_laskutusta = true;
       }
 
       // Lis‰t‰‰n otsikko

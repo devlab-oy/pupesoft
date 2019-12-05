@@ -34302,10 +34302,10 @@ if (!function_exists('osaluettelo_hinta_tarkistus')) {
     $ale_query_select_lisa = generoi_alekentta_select('yhteen', 'M');
     $query_ale_lisa = generoi_alekentta('M');
 
-    $rivilisa = "";
+    $rivilisa = " and tyyppi = 'L' ";
 
     if (!empty($rivitunnus)) {
-      $rivilisa = " and tilausrivi.tunnus = $rivitunnus ";
+      $rivilisa = " and tilausrivi.tunnus = $rivitunnus and tyyppi != 'D' ";
     }
 
     $osaluettelovirhe = "";

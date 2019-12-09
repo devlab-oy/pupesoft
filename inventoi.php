@@ -729,15 +729,15 @@ if ($tee == 'VALMIS') {
           echo "<font class='error'>".t("VIRHE: Sarjanumeroiden määrä on oltava sama kuin laskettu syötetty määrä")."! $tuoteno $kpl</font><br>";
           $virhe = 1;
         }
-        elseif (substr($kpl, 0, 1) == '+' and is_array($sarjanumero_kaikki[$i]) and $onko_vanhoja > 0) {
+        elseif ($tuote_row['sarjanumeroseuranta'] != 'T' and substr($kpl, 0, 1) == '+' and is_array($sarjanumero_kaikki[$i]) and $onko_vanhoja > 0) {
           echo "<font class='error'>".t("VIRHE: Et voi lisätä kuin uusia sarjanumeroita relatiivisella määrällä")."! $tuoteno $kpl</font><br>";
           $virhe = 1;
         }
-        elseif (substr($kpl, 0, 1) == '-' and is_array($sarjanumero_kaikki[$i]) and count($sarjanumero_valitut[$i]) != (int) substr($kpl, 1)) {
+        elseif ($tuote_row['sarjanumeroseuranta'] != 'T' and substr($kpl, 0, 1) == '-' and is_array($sarjanumero_kaikki[$i]) and count($sarjanumero_valitut[$i]) != (int) substr($kpl, 1)) {
           echo "<font class='error'>".t("VIRHE: Sarjanumeroiden määrä on oltava sama kuin laskettu syötetty määrä")."! $tuoteno $kpl</font><br>";
           $virhe = 1;
         }
-        elseif (substr($kpl, 0, 1) != '-' and substr($kpl, 0, 1) != '+' and is_array($sarjanumero_kaikki[$i]) and count($sarjanumero_valitut[$i]) != (int) $kpl) {
+        elseif ($tuote_row['sarjanumeroseuranta'] != 'T' and substr($kpl, 0, 1) != '-' and substr($kpl, 0, 1) != '+' and is_array($sarjanumero_kaikki[$i]) and count($sarjanumero_valitut[$i]) != (int) $kpl) {
           echo "<font class='error'>".t("VIRHE: Sarjanumeroiden määrä on oltava sama kuin laskettu syötetty määrä")."! $tuoteno $kpl</font><br>";
           $virhe = 1;
         }

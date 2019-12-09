@@ -636,7 +636,7 @@ if ($tee == 'VALMIS') {
           }
         }
 
-        if ($tuote_row['sarjanumeroseuranta'] != '' and !is_array($sarjanumero_kaikki[$i]) and !is_array($eranumero_kaikki[$i]) and (substr($kpl, 0, 1) == '+' or substr($kpl, 0, 1) == '-' or (float) $kpl != 0)) {
+        if ($tuote_row['sarjanumeroseuranta'] != '' and $tuote_row['sarjanumeroseuranta'] != 'T' and !is_array($sarjanumero_kaikki[$i]) and !is_array($eranumero_kaikki[$i]) and (substr($kpl, 0, 1) == '+' or substr($kpl, 0, 1) == '-' or (float) $kpl != 0)) {
           echo "<font class='error'>".t("VIRHE: Et valinnut yhtään sarja- tai eränumeroa").": $tuoteno!</font><br>";
           $virhe = 1;
         }

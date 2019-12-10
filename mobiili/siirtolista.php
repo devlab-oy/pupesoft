@@ -78,6 +78,9 @@ if (isset($submit)) {
       // Rakennetaan parametrit kentistä
       $url = http_build_query($data);
 
+      $query = "UPDATE kuka SET kesken = {$data['siirtolista']} WHERE yhtio = '{$kukarow['yhtio']}' AND kuka = '{$kukarow['kuka']}'";
+      $result = pupe_query($query);
+
       echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=siirtolistalla_useita_tuotteita.php?{$url}'>"; exit();
       break;
 

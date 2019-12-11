@@ -2319,7 +2319,7 @@ if ($tee == 'INVENTOI') {
       }
 
       if (in_array($tuoterow["sarjanumeroseuranta"], array("S", "T", "V"))) {
-        echo "<td valign='top' class='back'>".t("Tuote on sarjanumeroseurannassa").". ".t("Inventoidaan varastosaldoa")."!<br><font class='error'>".t("Huom: Mik‰li sarjanumerot halutaan s‰ilytt‰‰ niin niiden tulee olla valittuna!")."</font></td>";
+        echo "<td valign='top' class='back'>".t("Tuote on sarjanumeroseurannassa").". ".t("Inventoidaan varastosaldoa")."!<br><font class='error'>".t("Huom: Mik‰li sarjanumeroita on olemassa ja ne halutaan s‰ilytt‰‰ niin niiden tulee olla valittuna!")."</font></td>";
       }
       elseif (in_array($tuoterow["sarjanumeroseuranta"], array("E", "F", "G"))) {
         echo "<td valign='top' class='back'>".t("Tuote on er‰numeroseurannassa").". ".t("Inventoidaan varastosaldoa")."!</td>";
@@ -2401,7 +2401,7 @@ if ($tee == 'INVENTOI') {
       echo "</td>";
 
       if (in_array($tuoterow["sarjanumeroseuranta"], array("S", "T", "V"))) {
-        echo "<td valign='top' class='back'>".t("Tuote on sarjanumeroseurannassa").". ".t("Inventoidaan varastosaldoa")."!<br><font class='error'>".t("Huom: Mik‰li sarjanumerot halutaan s‰ilytt‰‰ niin niiden tulee olla valittuna!")."</font></td>";
+        echo "<td valign='top' class='back'>".t("Tuote on sarjanumeroseurannassa").". ".t("Inventoidaan varastosaldoa")."!<br><font class='error'>".t("Huom: Mik‰li sarjanumeroita on olemassa ja ne halutaan s‰ilytt‰‰ niin niiden tulee olla valittuna!")."</font></td>";
       }
       elseif (in_array($tuoterow["sarjanumeroseuranta"], array("E", "F", "G"))) {
         echo "<td valign='top' class='back'>".t("Tuote on er‰numeroseurannassa").". ".t("Inventoidaan varastosaldoa")."!</td>";

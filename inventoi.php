@@ -729,7 +729,7 @@ if ($tee == 'VALMIS') {
           echo "<font class='error'>".t("VIRHE: Sarjanumeroiden m‰‰r‰ on oltava sama kuin laskettu syˆtetty m‰‰r‰")."! $tuoteno $kpl</font><br>";
           $virhe = 1;
         }
-        elseif ($tuote_row['sarjanumeroseuranta'] != 'T' and substr($kpl, 0, 1) == '+' and is_array($sarjanumero_kaikki[$i]) and $onko_vanhoja > 0) {
+        elseif (substr($kpl, 0, 1) == '+' and is_array($sarjanumero_kaikki[$i]) and $onko_vanhoja > 0) {
           echo "<font class='error'>".t("VIRHE: Et voi lis‰t‰ kuin uusia sarjanumeroita relatiivisella m‰‰r‰ll‰")."! $tuoteno $kpl</font><br>";
           $virhe = 1;
         }
@@ -2319,7 +2319,7 @@ if ($tee == 'INVENTOI') {
       }
 
       if (in_array($tuoterow["sarjanumeroseuranta"], array("S", "T", "V"))) {
-        echo "<td valign='top' class='back'>".t("Tuote on sarjanumeroseurannassa").". ".t("Inventoidaan varastosaldoa")."!</td>";
+        echo "<td valign='top' class='back'>".t("Tuote on sarjanumeroseurannassa").". ".t("Inventoidaan varastosaldoa")."!<br><font class='error'>".t("Huom: Mik‰li sarjanumerot halutaan s‰ilytt‰‰ niin niiden tulee olla valittuna!")."</font></td>";
       }
       elseif (in_array($tuoterow["sarjanumeroseuranta"], array("E", "F", "G"))) {
         echo "<td valign='top' class='back'>".t("Tuote on er‰numeroseurannassa").". ".t("Inventoidaan varastosaldoa")."!</td>";
@@ -2401,7 +2401,7 @@ if ($tee == 'INVENTOI') {
       echo "</td>";
 
       if (in_array($tuoterow["sarjanumeroseuranta"], array("S", "T", "V"))) {
-        echo "<td valign='top' class='back'>".t("Tuote on sarjanumeroseurannassa").". ".t("Inventoidaan varastosaldoa")."!</td>";
+        echo "<td valign='top' class='back'>".t("Tuote on sarjanumeroseurannassa").". ".t("Inventoidaan varastosaldoa")."!<br><font class='error'>".t("Huom: Mik‰li sarjanumerot halutaan s‰ilytt‰‰ niin niiden tulee olla valittuna!")."</font></td>";
       }
       elseif (in_array($tuoterow["sarjanumeroseuranta"], array("E", "F", "G"))) {
         echo "<td valign='top' class='back'>".t("Tuote on er‰numeroseurannassa").". ".t("Inventoidaan varastosaldoa")."!</td>";

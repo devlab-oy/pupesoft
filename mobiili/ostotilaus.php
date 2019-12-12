@@ -153,8 +153,19 @@ echo "<script type='text/javascript'>
      document.getElementById('myHiddenButton').click();
   }
 
-  setTimeout('clickButton()', 1000);
+  function clickOK() {
+     document.getElementById('haku_nappi').click();
+  }
 
-</script>
+  
 ";
+
+if (isset($jatka)) {
+  echo "setTimeout('clickOK()', 300);";
+}
+else {
+  echo "setTimeout('clickButton()', 1000);";
+}
+
+echo "</script>";
 require 'inc/footer.inc';

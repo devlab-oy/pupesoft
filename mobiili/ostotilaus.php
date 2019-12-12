@@ -86,11 +86,12 @@ if (isset($submit)) {
 
 $ostotilaus = (!empty($ostotilaus)) ? $ostotilaus : '';
 $saapumisnro_haku = !empty($saapumisnro_haku) ? $saapumisnro_haku : '';
+$params = "ostotilaus={$ostotilaus}&saapumisnro_haku={$saapumisnro_haku}";
 
 //## UI ###
 echo "
 <div class='header'>
-  <button onclick='window.location.href=\"tulouta.php\"' class='button left'><img src='back2.png'></button>
+  <button onclick='window.location.href=\"tulouta.php?" . $params . "\"' class='button left'><img src='back2.png'></button>
   <h1>", t("OSTOTILAUS"), "</h1>
 </div>";
 

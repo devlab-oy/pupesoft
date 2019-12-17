@@ -1200,7 +1200,7 @@ function piirra_kokopaivantapahtumat($kuu, $paiva, $year) {
   }
 
   $query = "SELECT kalenteri.*,
-            datediff(left(pvmloppu,10), if(left(pvmalku, 10) < '$ekapaiva', '$ekapaiva', pvmalku)) kesto,
+            datediff(left(pvmloppu,10), if(left(pvmalku, 10) < '$ekapaiva', '$ekapaiva', pvmalku)) + 1 kesto,
             if (pvmalku < '$ekapaiva', '$ekapaiva', left(pvmalku, 10)) korjattualku,
             kuka.nimi
             FROM kalenteri

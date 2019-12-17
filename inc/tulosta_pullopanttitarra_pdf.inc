@@ -169,7 +169,7 @@ if (!function_exists('tulosta_pullopanttitarra_pdf')) {
       $data = file_get_contents("../pics/mustavalkologo.jpg", true);
       
       $image = $pdf_zebra_tarra->jfif_embed($data);
-      $pdf_zebra_tarra->image_place($image, 140, -50, $page_zebra_tarra[$sivu], array("scale" => 0.3));
+      $pdf_zebra_tarra->image_place($image, 160, -50, $page_zebra_tarra[$sivu], array("scale" => 0.3));
 
       $pdf_zebra_tarra->draw_text(-40, 120, $yhtiorow["www"], $page_zebra_tarra[$sivu], $iso);
       $posti_osoite = $yhtiorow["osoite"].", ".$yhtiorow["postino"]." ".$yhtiorow["postitp"];

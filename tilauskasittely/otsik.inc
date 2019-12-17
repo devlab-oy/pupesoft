@@ -811,7 +811,8 @@ if ($tila == "" and !isset($jatka)) {
         $puhlisa = "";
       }
 
-      $squery = "SELECT asiakas.*, tilaus_viesti as viesti, myynti_kommentti1 as comments,
+      $squery = "SELECT asiakas.*, asiakas.tilaus_viesti as viesti, asiakas.myynti_kommentti1 as comments,
+                 if(asiakas.laskutyyppi != -9, asiakas.laskutyyppi, yhtion_parametrit.laskutyyppi) AS laskutyyppi,
                  $puhlisa
                  asiakas.tunnus liitostunnus,
                  'O' kohdistettu, '' kohde, '' kauppatapahtuman_luonne,
@@ -819,7 +820,8 @@ if ($tila == "" and !isset($jatka)) {
                    if(asiakas.tyopuhelin != '', asiakas.tyopuhelin,
                      if(asiakas.puhelin != '', asiakas.puhelin, ''))) AS toim_puh
                  FROM asiakas
-                 WHERE tunnus = '$asiakasid'";
+                  JOIN yhtion_parametrit ON (yhtion_parametrit.yhtio = asiakas.yhtio)
+                 WHERE asiakas.tunnus = '$asiakasid'";
 
       $srow_from = "ASIAKAS";
     }

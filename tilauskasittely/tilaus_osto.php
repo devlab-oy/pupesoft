@@ -511,6 +511,7 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
             $hyllyres = pupe_query($query);
             $hyllyrow =  mysql_fetch_assoc($hyllyres);
 
+            // Katotaan onko tuotteella oletuspaikkaa ja jos ei ole niin tehd‰‰n uudesta paikasta oletus
             $on_jo_oletus = executescalar("SELECT COUNT(*) AS maara FROM tuotepaikat WHERE tuoteno = '{$ostotilausrivit['tuoteno']}' AND oletus != '' AND yhtio = '$kukarow[yhtio]'");
             if ($on_jo_oletus == null or $on_jo_oletus == 0) {
               $oletus = 'X';

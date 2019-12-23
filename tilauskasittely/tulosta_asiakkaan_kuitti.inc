@@ -153,9 +153,15 @@ function tulosta_asiakkaan_kuitti($laskunro, $tulostimen_tunnus, $params = array
     $kala-=10;
 
     $yht_tieto = "";
-    if (t_avainsana("KUITTI_YHTTIETO", '', '', '', '', "selite") == "kuka_email") {
+    $yht_tieto_parametri = t_avainsana("KUITTI_YHTTIETO", '', '', '', '', "selite");
+    if ($yht_tieto_parametri == "kuka_email_puh") {
       if (!empty($kukarow['eposti'])) {
         $yht_tieto = t("E-mail") . ": " . $kukarow['eposti'];
+      }
+
+      if (!empty($kukarow['puhno'])) {
+        draw_center_aligned($pdf, $firstpage, "Puh. " . $kukarow['puhno'], $norm, $kala);
+        $kala-=10;
       }
     }
     else {

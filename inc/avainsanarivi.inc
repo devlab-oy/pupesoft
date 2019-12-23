@@ -1103,12 +1103,12 @@ if ($avain_sel["KUITTI_YHTTIETO"] == "SELECTED") {
 
   if ($_selite) {
     $sel_puh = ($trow[$i] == 'yhtio_puh') or ($trow['$i'] == '') ? 'selected' : '';
-    $sel_email = $trow[$i] == 'kuka_email' ? 'selected' : '';
+    $sel_email = $trow[$i] == 'kuka_email_puh' ? 'selected' : '';
 
     $ulos = "<td>";
     $ulos .= "<select name='{$nimi}'>";
     $ulos .= "<option value='yhtio_puh' $sel_puh>" . t('Yrityksen puhelin') . "</option>";
-    $ulos .= "<option value='kuka_email' {$sel_email}>" . t('Käyttäjän sähköposti') . "</option>";
+    $ulos .= "<option value='kuka_email_puh' {$sel_email}>" . t('Käyttäjän puhelin ja sähköposti') . "</option>";
     $ulos .= "</select>";
     $ulos .= "</td>";
 

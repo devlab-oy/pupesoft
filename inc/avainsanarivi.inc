@@ -88,6 +88,7 @@ if ($_selitetark_2 and
     $avain_sel['KUKAASEMA'] == "SELECTED" or
     $avain_sel['LAHETETYYPPI'] == "SELECTED" or
     $avain_sel['LASKUTUS_SAATE'] == "SELECTED" or
+    $avain_sel['KUITTI_YHTTIETO'] == "SELECTED" or
     $avain_sel['LITETY'] == "SELECTED" or
     $avain_sel['MERCASVHKER'] == "SELECTED" or
     $avain_sel['MYSQLALIAS'] == "SELECTED" or
@@ -292,6 +293,7 @@ if (mysql_field_name($result, $i) == "laji") {
   if ($lukitse_laji== "" or $lukitse_laji == "VAKIOVIESTI") $ulos .= "<option value='VAKIOVIESTI' $avain_sel[VAKIOVIESTI]>".t("Laskun vakioviesti")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "MAINOSTXT_LASKU") $ulos .= "<option value='MAINOSTXT_LASKU' {$avain_sel['MAINOSTXT_LASKU']}>".t("Laskun mainosteksti")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "LASKUTUS_SAATE") $ulos .= "<option value='LASKUTUS_SAATE' $avain_sel[LASKUTUS_SAATE]>".t("Laskun sähköpostisaatekirje asiakkaalle")."</option>";
+  if ($lukitse_laji== "" or $lukitse_laji == "KUITTI_YHTTIETO") $ulos .= "<option value='KUITTI_YHTTIETO' $avain_sel[KUITTI_YHTTIETO]>".t("Kassakuitin yhteystieto")."</option>";
   if ($lukitse_laji== "") $ulos .= "</optgroup>";
 
   if ($lukitse_laji== "") $ulos .= "<optgroup label='".t("CRM avainsanat")."'>";
@@ -1091,6 +1093,27 @@ if (($avain_sel["PSHOP_SYNONYMS"] == "SELECTED") and $_selitetark) {
 if (($avain_sel['LASKUTUS_SAATE'] == "SELECTED" or $avain_sel['PALAUTUS_SAATE'] == "SELECTED" or $avain_sel['KAANTALVVIESTI'] == "SELECTED") and $_selitetark_2) {
   $ulos = "<td><textarea rows=30 cols=50 name='$nimi'>$trow[$i]</textarea></td>";
   $jatko = 0;
+}
+
+if ($avain_sel["KUITTI_YHTTIETO"] == "SELECTED") {
+  // ei näytetä selitetarkia tai järjestystä
+  if ($_selitetark or $_jarjestys) {
+    $tyyppi = 0;
+  }
+
+  if ($_selite) {
+    $sel_puh = ($trow[$i] == 'yhtio_puh') or ($trow['$i'] == '') ? 'selected' : '';
+    $sel_email = $trow[$i] == 'kuka_email_puh' ? 'selected' : '';
+
+    $ulos = "<td>";
+    $ulos .= "<select name='{$nimi}'>";
+    $ulos .= "<option value='yhtio_puh' $sel_puh>" . t('Yrityksen puhelin') . "</option>";
+    $ulos .= "<option value='kuka_email_puh' {$sel_email}>" . t('Käyttäjän puhelin ja sähköposti') . "</option>";
+    $ulos .= "</select>";
+    $ulos .= "</td>";
+
+    $jatko = 0;
+  }
 }
 
 if (($avain_sel['VAKIOVIESTI'] == "SELECTED" or $avain_sel['MAINOSTXT_LASKU'] == "SELECTED" or $avain_sel['VAKIOVIESTI_TIL'] == "SELECTED") and ($_selite or $_selitetark)) {

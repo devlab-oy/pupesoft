@@ -152,8 +152,26 @@ function tulosta_asiakkaan_kuitti($laskunro, $tulostimen_tunnus, $params = array
     draw_center_aligned($pdf, $firstpage, "Y-tunnus: {$yhtion_ytunnus}", $norm, $kala);
     $kala-=10;
 
-    draw_center_aligned($pdf, $firstpage, "Puh. {$yhtion_puhelinnumero}", $norm, $kala);
-    $kala-=10;
+    $yht_tieto = "";
+    $yht_tieto_parametri = t_avainsana("KUITTI_YHTTIETO", '', '', '', '', "selite");
+    if ($yht_tieto_parametri == "kuka_email_puh") {
+      if (!empty($kukarow['eposti'])) {
+        $yht_tieto = t("E-mail") . ": " . $kukarow['eposti'];
+      }
+
+      if (!empty($kukarow['puhno'])) {
+        draw_center_aligned($pdf, $firstpage, "Puh. " . $kukarow['puhno'], $norm, $kala);
+        $kala-=10;
+      }
+    }
+    else {
+      $yht_tieto = "Puh. {$yhtion_puhelinnumero}";
+    }
+
+    if (!empty($yht_tieto)) {
+      draw_center_aligned($pdf, $firstpage, $yht_tieto, $norm, $kala);
+      $kala-=10;
+    }
 
     if ($header_teksti) {
       draw_center_aligned($pdf, $firstpage, "{$header_teksti}", $norm, $kala);

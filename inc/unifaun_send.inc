@@ -521,7 +521,7 @@ class Unifaun {
           $rahtisopimusnro = 999999;
         }
 
-        if ($this->toitarow['virallinen_selite'] == "KLGRP" and strlen($rahtisopimusnro) < 7) {
+        if ($this->toitarow['virallinen_selite'] == "KLGRP" and strlen($rahtisopimusnro) <= 3) {
           $rahtisopimusnro = 9999999;
         }
       }

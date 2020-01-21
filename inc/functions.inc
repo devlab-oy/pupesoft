@@ -214,6 +214,19 @@ if (!function_exists("pupe_query")) {
   }
 }
 
+if (!function_exists('executescalar')) {
+  function executescalar($sql)
+  {
+    $result = pupe_query($sql);
+    if (mysql_num_rows($result) > 0) {
+      $row = mysql_fetch_array($result);
+      return $row[0];
+    }
+
+    return null;
+  }
+}
+
 // Käytetään slavea jos sellainen on
 if (!function_exists("pupeslave_start")) {
   function pupeslave_start() {
@@ -1320,7 +1333,7 @@ if (!function_exists("apix_invoice_put_file")) {
 }
 
 if (!function_exists("apix_edi_put_file")) {
-  function apix_edi_put_file($apixzipfile, $apix_ordernum) {
+  function apix_edi_put_file($apixzipfile, $apix_ordernum, $soft = "PupesoftEDI") {
     global $kukarow, $yhtiorow, $pupe_root_polku;
 
     // siirretään laskutiedosto operaattorille
@@ -1328,7 +1341,7 @@ if (!function_exists("apix_edi_put_file")) {
     $url             = "https://api.apix.fi/invoices";
     $transferkey     = $yhtiorow['apix_edi_avain'];
     $transferid      = $yhtiorow['apix_edi_tunnus'];
-    $software        = "PupesoftEDI";
+    $software        = $soft;
     $version         = "1.0";
 
     $timestamp       = gmdate("YmdHis");
@@ -12404,6 +12417,26 @@ if (!function_exists('t_tuotteen_avainsanat')) {
       // palautetaan laji kun mitäs muutakaan tässä tekisi
       return $laji;
     }
+  }
+}
+
+// Tämä funktio kääntää tuotteen avainsanan tai palautta avainsanan yhtiön oletuskielellä mikäli käännöstä ei löydy.
+if (!function_exists('t_tuotteen_avainsana')) {
+  function t_tuotteen_avainsana($tuoterow, $laji, $kieli = '')
+  {
+    global $yhtiorow;
+
+    $result = t_tuotteen_avainsanat($tuoterow, $laji, $kieli);
+
+    if ($result == $laji) {
+      $result = t_tuotteen_avainsanat($tuoterow, $laji, $yhtiorow['kieli']);
+
+      if ($result == $laji) {
+        $result = "";
+      }
+    }
+
+    return $result;
   }
 }
 
@@ -23962,14 +23995,28 @@ if (!function_exists('tee_keraysera_painon_perusteella')) {
     global $kukarow, $yhtiorow;
 
     $_pakkaus = (int) $_pakkaus;
-
     $pakkaukset = array();
+
+    $tuoterajaus = "AND tuote.tuotemassa != 0";
+
+    $query = "SELECT *
+              FROM asiakkaan_avainsanat
+              WHERE yhtio       = '{$kukarow['yhtio']}'
+              AND liitostunnus  = '{$laskurow[liitostunnus]}'
+              AND laji          = 'KICK_EDI'
+              AND avainsana    != ''";
+    $edi_chk_res = pupe_query($query);
+
+    // Special EDI case
+    if (mysql_num_rows($edi_chk_res)) {
+      $tuoterajaus = "";
+    }
 
     if ($_pakkaus == 0) {
       // valitaan sopiva pakkaus painon perusteella
       $query = "SELECT SUM(tuote.tuotemassa * tilausrivi.varattu) AS paino
                 FROM tilausrivi
-                JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.tuotemassa != 0)
+                JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno {$tuoterajaus})
                 WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
                 AND tilausrivi.var     not in ('P','J','O','S')
                 AND tilausrivi.otunnus IN ($tilausnumeroita)";
@@ -24001,7 +24048,7 @@ if (!function_exists('tee_keraysera_painon_perusteella')) {
     // katsotaan tarvitaanko jakaa tilausrivejä myyntierällä
     $query = "SELECT tilausrivi.tunnus, tilausrivi.tuoteno, tilausrivi.otunnus, tilausrivi.varattu, tuote.tuotemassa, tuote.tuotemassa * tilausrivi.varattu AS paino, IF(tuote.myynti_era = 0, 1, myynti_era) myynti_era, {$sorttauskentta}
               FROM tilausrivi
-              JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.tuotemassa != 0)
+              JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno {$tuoterajaus})
               WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
               AND tilausrivi.var     not in ('P','J','O','S')
               AND tilausrivi.otunnus IN ($tilausnumeroita)
@@ -24035,7 +24082,7 @@ if (!function_exists('tee_keraysera_painon_perusteella')) {
             $pakkausnro++;
             $pakkauksen_kaytetty_paino = ($kerayseran_rivit[$i]['data']['tuotemassa'] * $jaljella);
 
-            $sscc          = uusi_sscc_nro();
+            $sscc = uusi_sscc_nro();
 
             if (!empty($yhtiorow['ean'])) {
               $_selitetark = t_avainsana("GS1_SSCC", "", "and avainsana.selite = '{$laskurow['toimitustapa']}'", "", "", "selitetark");
@@ -33730,6 +33777,10 @@ if (!function_exists('pupesoft_toimitusvahvistus')) {
       $desadv_version = "fi0089";
       $laskurow["toimitusvahvistus"] = "toimitusvahvistus_desadv.inc";
     }
+    elseif ($laskurow["toimitusvahvistus"] == "toimitusvahvistus_desadv_ean005.inc") {
+      $desadv_version = "ean005";
+      $laskurow["toimitusvahvistus"] = "toimitusvahvistus_desadv.inc";
+    }
     else {
       $desadv_version = "";
     }
@@ -34251,10 +34302,10 @@ if (!function_exists('osaluettelo_hinta_tarkistus')) {
     $ale_query_select_lisa = generoi_alekentta_select('yhteen', 'M');
     $query_ale_lisa = generoi_alekentta('M');
 
-    $rivilisa = "";
+    $rivilisa = " and tyyppi = 'L' ";
 
     if (!empty($rivitunnus)) {
-      $rivilisa = " and tilausrivi.tunnus = $rivitunnus ";
+      $rivilisa = " and tilausrivi.tunnus = $rivitunnus and tyyppi != 'D' ";
     }
 
     $osaluettelovirhe = "";
@@ -35568,5 +35619,57 @@ if (!function_exists('toimita_kaikki_tarkistus')) {
     }
 
     return $toimita_kaikki;
+  }
+}
+
+if (!function_exists('generoi_sarjanumero')) {
+  function generoi_sarjanumero($tuote, $tunnuskentta = "")
+  {
+    global $kukarow;
+
+    switch ($tuote["automaattinen_sarjanumerointi"]) {
+      case 1:
+        if (empty($tunnuskentta)) break;
+
+        $query = "SELECT max(substring(sarjanumero, position('-' IN sarjanumero) + 1) + 0) + 1 sarjanumero
+              FROM sarjanumeroseuranta
+              WHERE yhtio = '{$kukarow["yhtio"]}'
+              AND tuoteno = '{$tuote["tuoteno"]}'
+              AND {$tunnuskentta} = '{$tuote["tunnus"]}'";
+
+        $result = pupe_query($query);
+        $row = mysql_fetch_assoc($result);
+
+        $sarjanumero = $tuote["nimitys"];
+
+        if ($row["sarjanumero"] > 0) {
+          $sarjanumero = $sarjanumero . "-" . $row["sarjanumero"];
+        } else {
+          $sarjanumero = $sarjanumero . "-1";
+        }
+
+        break;
+      case 2:
+        $query = "SELECT max(substring(sarjanumero, 6)) AS kuluvan_vuoden_suurin_numero
+              FROM sarjanumeroseuranta
+              WHERE yhtio = '{$kukarow["yhtio"]}'
+              AND substring(sarjanumero, 1, 4) = year(now())";
+
+        $result = pupe_query($query);
+        $row = mysql_fetch_assoc($result);
+
+        if ($row["kuluvan_vuoden_suurin_numero"]) {
+          $sarjanumero = date("Y") . "-" . ($row["kuluvan_vuoden_suurin_numero"] + 1);
+        } else {
+          $sarjanumero = date("Y") . "-1000";
+        }
+
+        break;
+
+      default:
+        $sarjanumero = "";
+    }
+
+    return $sarjanumero;
   }
 }

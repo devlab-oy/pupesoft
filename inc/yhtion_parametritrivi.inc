@@ -3443,10 +3443,12 @@ if ($fieldname == "extranet_tilaus_varaa_saldoa") {
 if ($fieldname == "extranet_nayta_saldo") {
   $ulos = "<td><select name='$nimi' " . js_alasvetoMaxWidth($nimi, 400) . ">";
 
-  $sel = $trow[$i] == 'Y' ? ' selected' : '';
+  $selY = $trow[$i] == 'Y' ? ' selected' : '';
+  $selX = $trow[$i] == 'X' ? ' selected' : '';
 
   $ulos .= "<option value = ''>" . t("Ei n‰ytet‰ saldoa extranetiss‰");
-  $ulos .= "<option value = 'Y' $sel>" . t("N‰ytet‰‰n saldo extranetiss‰");
+  $ulos .= "<option value = 'Y' $selY>" . t("N‰ytet‰‰n saldo extranetin tuotehaussa");
+  $ulos .= "<option value = 'X' $selX>" . t("N‰ytet‰‰n saldo extranetiss‰");
   $ulos .= "</select></td>";
 
   $jatko = 0;
@@ -4219,10 +4221,12 @@ if ($fieldname == 'oletusvarasto_tilaukselle') {
 if ($fieldname == 'siirtolistatyyppi') {
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
 
-  $sel = $trow[$i] == 'A' ? ' selected' : '';
+  $selA = $trow[$i] == 'A' ? ' selected' : '';
+  $selB = $trow[$i] == 'B' ? ' selected' : '';
 
-  $ulos .= "<option value = ''>".t("Siirtolistalla ei n‰ytet‰ tuotteen myyntihintaa")."</option>";
-  $ulos .= "<option value = 'A' {$sel}>".t("Siirtolistalla n‰ytet‰‰n tuotteen myyntihinta")."</option>";
+  $ulos .= "<option value = ''>".t("Siirtolistalla ei n‰ytet‰ tuotteiden hintoja")."</option>";
+  $ulos .= "<option value = 'A' {$selA}>".t("Siirtolistalla n‰ytet‰‰n tuotteen myyntihinta")."</option>";
+  $ulos .= "<option value = 'B' {$selB}>".t("Siirtolistalla n‰ytet‰‰n tuotteiden ostohintojen summa")."</option>";
   $ulos .= "</select></td>";
 
   $jatko = 0;

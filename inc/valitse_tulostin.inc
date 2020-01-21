@@ -102,6 +102,9 @@ if ($toim == "OSTO" or $tulostimet[0] == "Ostotilaus") {
 
   echo "<tr><th>", t("Tulosta nimitykset ostotilaukselle"), "</th><td><input type='checkbox' name='nimitykset' {$chk}></td></tr>";
 
+  $chk = (isset($varit) and $varit != '') ? 'checked' : '';
+  echo "<tr><th>", t("Tulosta värit ostotilaukselle"), "</th><td><input type='checkbox' name='varit' {$chk}></td></tr>";
+
   $chk = empty($asiakkaiden_nimet) ? '' : 'checked';
   echo "<tr><th>", t("Tulosta myös asiakkaiden nimet"), "</th><td><input type='checkbox' name='asiakkaiden_nimet' {$chk}></td></tr>";
 
@@ -435,6 +438,11 @@ foreach ($tulostimet as $tulostin) {
   if ($toim == 'TILAUSVAHVISTUS') {
     echo "<option value='excel_lahete_geodis_wilson'>".t("Excel-tilausvahvistus")."</option>";
     echo "<option value='excel_lahete_hinnoilla'>".t("Excel-tilausvahvistus hintatiedoilla")."</option>";
+    echo "<option value='excel_lahete_hinta_muillatiedoilla'>".t("Excel-tilausvahvistus hinta- ja kuvaustiedoilla")."</option>";
+  }
+
+  if ($toim == 'SIIRTOLISTA') {
+    echo "<option value='excel_siirtolista'>".t("Excel-siirtolista")."</option>";
   }
 
   if ($toim == 'TARJOUS') {

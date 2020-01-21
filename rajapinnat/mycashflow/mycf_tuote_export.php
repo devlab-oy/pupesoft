@@ -121,7 +121,7 @@ if (mycf_ajetaanko_sykronointi('tilaukset', $synkronoi)) {
   $mycf_orders->set_verkkokauppa_asiakasnro($mycf_asiakasnro);
   $mycf_orders->set_mycf_maksuehto_ohjaus(array());
   $mycf_orders->set_mycf_erikoiskasittely(array());
-
+  $mycf_orders->set_mycf_kaupat($mycf_kaupat);
 
   $mycf_orders->fetch_orders();
 }

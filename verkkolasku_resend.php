@@ -253,6 +253,13 @@ if ($handle = opendir($kansio)) {
         $maventaerrorreport = t("Maventa-laskun %s lähetys epäonnistui", "", $laskunro)."!\n\n";
         $maventaerrorreport .= t("Lähetetyn tiedoston nimi").": $lasku \n\n";
 
+        $maventaerrorreport .= "\n\n__________________________________________________\n";
+        $maventaerrorreport .= "Teknisempää tietoa virheestä:\n";
+        $maventaerrorreport .= "Status: $status\n\n";
+
+        // Printataan virhe myös Pupen omaan errorlogiin
+        error_log(print_r("Virhe laskun {$laskunro} lähetyksessä Maventaan, status: {$status}", true));
+
         // Laitetaan sähköposti admin osoitteeseen siinä tapauksessa,
         // jos talhal tai alert email osoitteita ei ole kumpaakaan setattu
         $error_email = $yhtiorow["admin_email"];
@@ -405,11 +412,22 @@ if ($handle = opendir($kansio)) {
     // Logitetaan ajo
     cron_log("{$pupe_root_polku}/dataout/$lasku");
 
-    $ftphost = "213.214.148.38";
+    if (isset($visma_ppg_host)) {
+      $ftphost = $visma_ppg_host;
+    }
+    else {
+      $ftphost = "213.214.148.38";
+    }
+    
+    if (isset($visma_ftppath)) {
+      $ftppath = $visma_ftppath;
+    }
+    else {
+      $ftppath = "/";
+    }
+    
     $ftpuser = $yhtiorow['verkkotunnus_lah'];
     $ftppass = $yhtiorow['verkkosala_lah'];
-    //$ftppath = "test/invoice/finvoice/";
-    $ftppath = "/";
     $ftpfile = $kansio.$lasku;
     $ftpsucc = "{$pupe_root_polku}/dataout/";
 

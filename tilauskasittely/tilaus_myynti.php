@@ -6853,6 +6853,15 @@ if ($tee == '') {
     $headerit .= "<th>".t("Tuotenumero")."</th><th>".t("Määrä")."</th><th>".t("Tila")."</th>";
     $sarakkeet += 3;
 
+    if ($yhtiorow["extranet_nayta_saldo"] == 'X' and $kukarow['extranet'] != '') {
+      $nayta_extranet_saldo = true;
+      $headerit .= "<th>".t("Varastossa")."</th>";
+      $sarakkeet++;
+
+      $avainsana_result = t_avainsana("TILRIVI_VIILAUS");
+      $extranet_saldo_varjays = mysql_fetch_assoc($avainsana_result);
+    }
+
     if ($_onko_valmistus and $yhtiorow["varastonarvon_jako_usealle_valmisteelle"] == "K") {
       $headerit .= "<th>".t("Arvo")."</th><th>".t("Lukitse arvo")."</th>";
       $sarakkeet += 2;
@@ -8028,9 +8037,20 @@ if ($tee == '') {
           }
         }
         elseif ((($toim != "TARJOUS" and $toim != "EXTTARJOUS") or $yhtiorow['tarjouksen_tuotepaikat'] == "") and $muokkauslukko_rivi == "" and ($kukarow['extranet'] == '' or ($kukarow['extranet'] != '' and $yhtiorow['tuoteperhe_suoratoimitus'] == 'E')) and $trow["ei_saldoa"] == "") {
-          if ($paikat != '') {
+          
+          $avainsana_result = t_avainsana("TILRIVI_VIILAUS");
+          $avainsana_tulos = mysql_fetch_assoc($avainsana_result);
 
-            echo "  <td $class align='left' nowrap>";
+          if ($avainsana_tulos and $selpaikkamyytavissa < 0) {
+            $tyyli = "style='color:white' bgcolor='red'";
+          }
+          else {
+            $tyyli = "";
+          }
+          
+          if ($paikat != '') {
+            
+            echo "  <td $class $tyyli align='left' nowrap>";
 
             //valitaan näytetävä lippu varaston tai yhtiön maanperusteella
             if ($selpaikkamaa != '' and $yhtiorow['varastopaikan_lippu'] != '') {
@@ -8070,7 +8090,7 @@ if ($tee == '') {
                 if ($row['var'] == 'U' or $row['var'] == 'T') echo t("Suoratoimitus");
               }
               else {
-                echo "<td $class align='left' nowrap> $row[hyllyalue] $row[hyllynro] $row[hyllyvali] $row[hyllytaso] ($selpaikkamyytavissa) ";
+                echo "<td $class align='left' $tyyli nowrap> $row[hyllyalue] $row[hyllynro] $row[hyllyvali] $row[hyllytaso] ($selpaikkamyytavissa) ";
               }
             }
 
@@ -8514,6 +8534,18 @@ if ($tee == '') {
             echo '<input type="checkbox" class="valmiste_lukko" data-tunnus="'.$row['tunnus'].'" data-perheid="'.$row['perheid'].'" />';
           }
           echo '</td>';
+        }
+
+        if (isset($nayta_extranet_saldo) and $nayta_extranet_saldo) {
+          list($extranet_saldo, $extranet_hyllyssa, $extranet_myytavissa) = saldo_myytavissa($row["tuoteno"], "", 0, "", "", "", "", "", $laskurow["toim_maa"], $saldoaikalisa);
+
+          if ($extranet_saldo_varjays and $extranet_myytavissa < 0) {
+            $bgcolor = " style='color:white' bgcolor='red'";
+          } else {
+            $bgcolor = "";
+          }
+
+          echo "<td {$class} align='right' nowrap{$bgcolor}>{$extranet_myytavissa}</td>";
         }
 
         if ($toim != "VALMISTAVARASTOON" and $toim != "SIIRTOLISTA") {
@@ -9748,7 +9780,18 @@ if ($tee == '') {
           $kaikkiyhteensa = 0;
         }
 
-        if ((($kaikkiyhteensa > $rahtivapaa_alarajasumma or $etayhtio_totaalisumma > $rahtivapaa_alarajasumma) and $rahtivapaa_alarajasumma != 0) or $laskurow["rahtivapaa"] != "") {
+        // Rahtivapaa_alarajasumma on verollisia jos myyntihinnat ovat verollisia, tai verottomia vice versa, joten verrataan sitä oikeaan summaan
+        if ($yhtiorow["alv_kasittely"] == "o" and isset($arvo) and (float) $arvo != 0) {
+          $rahtivapaa_vertailu = yhtioval($arvo, $laskurow["vienti_kurssi"]);
+        }
+        elseif (isset($summa) and (float) $summa != 0) {
+          $rahtivapaa_vertailu = yhtioval($summa, $laskurow["vienti_kurssi"]);
+        }
+        else {
+          $rahtivapaa_vertailu = 0;
+        }
+
+        if ((($rahtivapaa_vertailu > $rahtivapaa_alarajasumma or $etayhtio_totaalisumma > $rahtivapaa_alarajasumma) and $rahtivapaa_alarajasumma != 0) or $laskurow["rahtivapaa"] != "") {
           echo "<tr>$jarjlisa<td class='back' colspan='".($sarakkeet_alku-5)."'>&nbsp;</td><th colspan='5' align='right'>".t("Rahtikulu").":</th><td class='spec' align='right'>0.00</td>";
           if ($kukarow['extranet'] == '' and $naytetaanko_kate) {
             echo "<td class='spec' align='right'>&nbsp;</td>";
@@ -10347,6 +10390,13 @@ if ($tee == '') {
       $kateista_annettu = isset($kateista_annettu) ? $kateista_annettu : 0;
       $korttimaksutapahtuman_status =
         isset($korttimaksutapahtuman_status) ? $korttimaksutapahtuman_status : "";
+
+      if (!isset($maksettavaa_jaljella)) {
+        list($loytyy_maksutapahtumia, $maksettavaa_jaljella, $kateismaksu["luottokortti"],
+          $kateismaksu["pankkikortti"]) =
+          jaljella_oleva_maksupaatesumma($laskurow["tunnus"], $kaikkiyhteensa);
+      }
+
       piirra_maksupaate_formi($laskurow, $kaikkiyhteensa, $kateinen, $maksettavaa_jaljella,
         $loytyy_maksutapahtumia, $kateismaksu, $kateista_annettu,
         $korttimaksutapahtuman_status);

@@ -395,7 +395,7 @@ function hae_tilaukset($params, $asiakas_tunnus) {
             sum(if (tapvm >= '{$params['alkuvv']}-{$params['alkukk']}-{$params['alkupp']}'    and tapvm <= '{$params['loppuvv']}-{$params['loppukk']}-{$params['loppupp']}', tilausrivi.kpl, 0)) kplva,
             sum(if (tapvm >= '{$params['edalkupvm']}'                      and tapvm <= '{$params['edloppupvm']}', tilausrivi.kpl, 0)) kpled
             FROM lasku USE INDEX (yhtio_tila_liitostunnus_tapvm)
-            JOIN tilausrivi USE INDEX (yhtio_otunnus) ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi = 'L' and tilausrivi.try > 0)
+            JOIN tilausrivi USE INDEX (yhtio_otunnus) ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi = 'L' and tilausrivi.try >= 0)
             JOIN tuote ON (tuote.yhtio = lasku.yhtio and tuote.tuoteno = tilausrivi.tuoteno)
             WHERE lasku.yhtio      = '{$kukarow['yhtio']}'
             AND lasku.liitostunnus = '{$asiakas_tunnus}'

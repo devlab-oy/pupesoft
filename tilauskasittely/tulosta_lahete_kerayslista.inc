@@ -55,7 +55,7 @@ if (!function_exists('alku_kerayslista')) {
 
       $kala = 9;
     }
-    elseif ($kerayslistatyyppi == 'EXCEL2' or $kerayslistatyyppi == 'EXCEL3') {
+    elseif ($kerayslistatyyppi == 'EXCEL2' or $kerayslistatyyppi == 'EXCEL3' or $kerayslistatyyppi == 'EXCEL4') {
 
       include 'inc/pupeExcel.inc';
 
@@ -350,6 +350,18 @@ if (!function_exists('alku_kerayslista')) {
         $pdf->draw_text(310, 614, $keraaja_teksti,   $thispage, $keraaja_font);
       }
 
+      if ($yhtiorow["siirtolistatyyppi"] == "B" and $asrow["asiakasnro"] == "SIIRTO") {
+        // Haetaan siirtolistan rivien ostohinta yhteensä
+        $query = "SELECT ROUND(SUM(tuotteen_toimittajat.ostohinta * (tilausrivi.varattu + tilausrivi.kpl)), 2) AS ostohinta_summa
+                  FROM tilausrivi
+                    JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = tilausrivi.yhtio AND tuotteen_toimittajat.tuoteno = tilausrivi.tuoteno)
+                  WHERE tilausrivi.yhtio = '{$kukarow["yhtio"]}'
+                    AND tilausrivi.otunnus IN ($tilausnumeroita)";
+        $ostohinta_sum = mysql_fetch_assoc(pupe_query($query));
+
+        $pdf->draw_text(300, 604, t("Ostohinnat yhteensä:", $kieli),   $thispage, $norm);
+        $pdf->draw_text(390, 604, $ostohinta_sum["ostohinta_summa"],   $thispage, $norm);
+      }
 
       $komm = "";
 
@@ -642,16 +654,26 @@ if (!function_exists('rivi_otsikot_kerayslista')) {
 
       $kala++;
     }
-    elseif ($kerayslistatyyppi == 'EXCEL2' or $kerayslistatyyppi == 'EXCEL3') {
+    elseif ($kerayslistatyyppi == 'EXCEL2' or $kerayslistatyyppi == 'EXCEL3' or $kerayslistatyyppi == 'EXCEL4') {
       $thispage->writeString($kala, 0, "Items", $boldi);
       $thispage->writeString($kala, 1, "Code", $boldi);
       $thispage->writeString($kala, 2, "Description", $boldi);
       $thispage->writeString($kala, 3, "EAN code", $boldi);
       $thispage->writeString($kala, 4, "Pcs", $boldi);
 
-      if ($kerayslistatyyppi == 'EXCEL3') {
+      if ($kerayslistatyyppi == 'EXCEL3' or $kerayslistatyyppi == 'EXCEL4') {
         $thispage->writeString($kala, 5, "Price", $boldi);
         $thispage->writeString($kala, 6, "Row price", $boldi);
+        if ($kerayslistatyyppi == 'EXCEL4') {
+          $thispage->writeString($kala, 7, "Gross price", $boldi);
+          $thispage->writeString($kala, 8, "RRP", $boldi);
+          $thispage->writeString($kala, 9, "Composition", $boldi);
+          $thispage->writeString($kala, 10, "Description", $boldi);
+          $thispage->writeString($kala, 11, "Tariff heading", $boldi);
+          $thispage->writeString($kala, 12, "Origin", $boldi);
+          $thispage->writeString($kala, 13, "Weight", $boldi);
+          $thispage->writeString($kala, 14, "Color", $boldi);
+        }
       }
 
       $kala++;
@@ -724,7 +746,7 @@ if (!function_exists('rivi_kerayslista')) {
 
       $kala++;
     }
-    elseif ($kerayslistatyyppi == 'EXCEL2' or $kerayslistatyyppi == 'EXCEL3') {
+    elseif ($kerayslistatyyppi == 'EXCEL2' or $kerayslistatyyppi == 'EXCEL3' or $kerayslistatyyppi == 'EXCEL4') {
       $thispage->writeString($kala, 0, "");
       $thispage->writeString($kala, 1, $row["tuoteno"]);
       $thispage->writeString($kala, 2, $row["nimitys"]);
@@ -734,11 +756,50 @@ if (!function_exists('rivi_kerayslista')) {
         $thispage->write($kala, 4, $row["tilkpl"]);
       }
 
-      if ($kerayslistatyyppi == 'EXCEL3') {
+      if ($kerayslistatyyppi == 'EXCEL3' or $kerayslistatyyppi == 'EXCEL4') {
         if ($row["var"] == "" or  $row["var"] == "H") {
           $thispage->writeString($kala, 5, (float) round($row['kplhinta'], 2));
           $thispage->writeString($kala, 6, (float) round($row['rivihinta'], 2));
           $yhteensasumma = $yhteensasumma + $row['rivihinta'];
+          
+          if ($kerayslistatyyppi == 'EXCEL4') {
+            $query = "select alkuperamaa 
+                      from tuotteen_toimittajat 
+                      where yhtio = '$kukarow[yhtio]' 
+                        and tuoteno = '$row[tuoteno]' 
+                      ORDER BY if (jarjestys = 0, 9999, jarjestys) LIMIT 1";
+            $ttares = pupe_query($query);
+            $ttarow = mysql_fetch_assoc($ttares);  
+            
+            $hinquery = "select hinta 
+                      from hinnasto 
+                      where yhtio = '$kukarow[yhtio]' 
+                        and tuoteno = '$row[tuoteno]'
+                        and maa      = '$row[maa]'
+                        and laji     = ''
+                        and ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) 
+                        or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
+                        order by ifnull(to_days(current_date)-to_days(alkupvm),9999999999999)
+                        limit 1";
+            $hinres = pupe_query($hinquery);
+            
+            if (mysql_num_rows($hinres) == 1) {
+              $hinrow = mysql_fetch_assoc($hinres); 
+              $myhinta = $hinrow['hinta'];
+            }
+            else {
+              $myhinta = $row['myyntihinta'];
+            }
+           
+            $thispage->writeString($kala, 7, (float) round($myhinta, 2));
+            $thispage->writeString($kala, 8, (float) round($row['myymalahinta'], 2));
+            $thispage->writeString($kala, 9, $row["lyhytkuvaus"]);
+            $thispage->writeString($kala, 10, $row["kuvaus"]);
+            $thispage->writeString($kala, 11, $row["tullinimike1"]." ".$row["tullinimike2"]);
+            $thispage->writeString($kala, 12, $ttarow["alkuperamaa"]);
+            $thispage->writeString($kala, 13, (float) round($row['tuotemassa'], 2));
+            $thispage->writeString($kala, 14, $row["tahtituote"]);
+          }
         }
       }
 
@@ -821,7 +882,15 @@ if (!function_exists('rivi_kerayslista')) {
           if (mysql_num_rows($perheresult) > 0) {
             $perherow = mysql_fetch_assoc($perheresult);
 
-            $query = "SELECT distinct tilausrivi.tuoteno, tilausrivi.nimitys, varattu
+            $query = "SELECT distinct tilausrivi.tuoteno, tilausrivi.nimitys, varattu,
+                      tuote.myyntihinta,
+                      tuote.myymalahinta,
+                      tuote.lyhytkuvaus,
+                      tuote.kuvaus,
+                      tuote.tuotemassa,
+                      tuote.tullinimike1,
+                      tuote.tullinimike2,
+                      tuote.tahtituote
                       FROM tilausrivi
                       JOIN tuote tuote ON tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno
                       WHERE tilausrivi.yhtio  = '$kukarow[yhtio]'
@@ -1270,7 +1339,7 @@ if (!function_exists('loppu_kerayslista')) {
     if ($kerayslistatyyppi == 'EXCEL1' or $kerayslistatyyppi == 'EXCEL2') {
       // Tässä pärjätään ilman footteria....
     }
-    elseif ($kerayslistatyyppi == 'EXCEL3') {
+    elseif ($kerayslistatyyppi == 'EXCEL3' or $kerayslistatyyppi == 'EXCEL4') {
       $thispage->writeString($kala, 5, "Total:", $boldi);
       $thispage->writeString($kala, 6, (float) round($yhteensasumma, 2));
     }
@@ -1430,7 +1499,7 @@ if (!function_exists('print_pdf_kerayslista')) {
             <input type='hidden' name='tee' value='NAYTATILAUS'>
             <input type='submit' value='".t("Keräyslista").": {$laskurow['tunnus']}' onClick=\"js_openFormInNewWindow('tulostakopioform_{$laskurow['tunnus']}', ''); return false;\"></form><br>";
     }
-    elseif ($kerayslistatyyppi == 'EXCEL1' or $kerayslistatyyppi == 'EXCEL2' or $kerayslistatyyppi == 'EXCEL3') {
+    elseif ($kerayslistatyyppi == 'EXCEL1' or $kerayslistatyyppi == 'EXCEL2' or $kerayslistatyyppi == 'EXCEL3' or $kerayslistatyyppi == 'EXCEL4') {
       $excelnimi = $thispage->close();
 
       $liite['excel'] = "/tmp/".$excelnimi;

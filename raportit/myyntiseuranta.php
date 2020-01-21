@@ -1803,12 +1803,14 @@ if ((isset($aja_raportti) or isset($valitse_asiakas)) and count($_REQUEST) > 0) 
           if ($ajotapa == 'tilausjaauki') {
             $tuotelista2_select .= ", sum(if(tilausrivi.tuoteno = '{$tuote}' and {$pvm_vertailu1}, {$kpl_kentta1}, 0)) +
             sum(if(tilausrivi.tuoteno = '{$tuote}' and {$pvm_vertailu2}, {$kpl_kentta2}, 0)) '{$tuote}'";
+            $tuotelista2_having .= "(sum(if(tilausrivi.tuoteno = '{$tuote}' and {$pvm_vertailu1}, {$kpl_kentta1}, 0)) +
+            sum(if(tilausrivi.tuoteno = '{$tuote}' and {$pvm_vertailu2}, {$kpl_kentta2}, 0))) > 0 and ";
           }
           else {
             $tuotelista2_select .= ", sum(if(tilausrivi.tuoteno = '{$tuote}' and {$pvm_vertailu}, {$kpl_kentta}, 0)) '{$tuote}'";
+            $tuotelista2_having .= "sum(if(tilausrivi.tuoteno = '{$tuote}' and {$pvm_vertailu}, {$kpl_kentta}, 0)) > 0 and ";
           }
 
-          $tuotelista2_having .= "'{$tuote}' > 0 and ";
           $_i++;
         }
       }

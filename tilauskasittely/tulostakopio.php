@@ -219,7 +219,7 @@ if (isset($muutparametrit) and $muutparametrit != '') {
   $kka     = $muut[1];
   $ppa     = $muut[2];
   $vvl     = $muut[3];
-  $kkl    = $muut[4];
+  $kkl     = $muut[4];
   $ppl     = $muut[5];
 }
 
@@ -730,7 +730,7 @@ if ($tee == "ETSILASKU") {
     $use = " use index (yhtio_tila_tapvm) ";
   }
 
-  if (in_array($toim, array("LAHETE", "KOONTILAHETE", "PAKKALISTA", "DGD"))) {
+  if (in_array($toim, array("LAHETE", "KOONTILAHETE", "PAKKALISTA", "DGD", "PULLOPANTTITARRAT"))) {
     //myyntitilaus. Tulostetaan lähete.
     $where1 .= " lasku.tila in ('L','N','V','G') ";
 
@@ -1325,6 +1325,15 @@ if ($tee == "ETSILASKU") {
   }
 }
 
+if ($toim == "SIIRTORAPORTTI") {
+  $tulostimet[0] = 'Siirtoraportti';
+
+  require_once "inc/tulosta_siirtoraportti_pdf.inc";
+  $pdf_zebra_tarra = tulosta_siirtoraportti_pdf($params);
+  
+  $tee = "";
+}
+
 if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
 
   if (!isset($kappaleet)) $kappaleet = 0;
@@ -1719,10 +1728,18 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
 
     $pos  = strpos($komento_tilausvahvistus, "excel_lahete_geodis_wilson");
     $pos2 = strpos($komento_tilausvahvistus, "excel_lahete_hinnoilla");
+    $pos3 = strpos($komento_tilausvahvistus, "excel_lahete_hinta_muillatiedoilla");
 
     if ($pos !== FALSE and $toim == "TILAUSVAHVISTUS") {
       $toim = "KERAYSLISTA";
       $tilausvahvistus_onkin_kerayslista = "JOO";
+    }
+
+    $komento_siirtolista = empty($komento['Siirtolista']) ? '' : $komento['Siirtolista'];
+    $pos  = strpos($komento_siirtolista, "excel_siirtolista");
+    if ($pos !== FALSE and $toim == "SIIRTOLISTA") {
+      $toim = "KERAYSLISTA";
+      $siirtolista_excel = "JOO";
     }
 
     if ($pos2 !== FALSE and in_array($toim, array("TILAUSVAHVISTUS", "TARJOUS"))) {
@@ -1736,6 +1753,12 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
       }
     }
 
+    if ($pos3 !== FALSE and $toim == "TILAUSVAHVISTUS") {
+      $toim = "KERAYSLISTA";
+      $excel_lahete_hinta_muillatiedoilla = 'JOO';
+      $excel_tarjous = "JOO";
+    }
+    
     if ($toim == "TILAUSVAHVISTUS" or $toim == "YLLAPITOSOPIMUS") {
 
       if (isset($seltvtyyppi) and $seltvtyyppi != "") {
@@ -2275,7 +2298,8 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
                 AND rahtikirjanro                   = (SELECT rahtikirjanro
                                      FROM rahtikirjat
                                      WHERE yhtio    = '{$kukarow["yhtio"]}'
-                                     AND otsikkonro = '{$laskurow["tunnus"]}')";
+                                     AND otsikkonro = '{$laskurow["tunnus"]}'
+                                     GROUP BY rahtikirjanro)";
       $rahti_result = pupe_query($query);
 
       $tunnukset = mysql_fetch_assoc($rahti_result);
@@ -2359,10 +2383,14 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
       $pjat_sortlisa = "";
       $kerayslistatyyppi = "";
 
+      if ($excel_lahete_hinta_muillatiedoilla != '') {
+        $kerayslistatyyppi = "EXCEL4";
+      }
+      else
       if ($excel_lahete_hinnoilla != '') {
         $kerayslistatyyppi = "EXCEL3";
       }
-      elseif ($varastorow["ulkoinen_jarjestelma"] == "G" or $tilausvahvistus_onkin_kerayslista != "") {
+      elseif ($varastorow["ulkoinen_jarjestelma"] == "G" or $tilausvahvistus_onkin_kerayslista != "" or $siirtolista_excel) {
         $kerayslistatyyppi = "EXCEL2";
       }
       elseif ($varastorow["ulkoinen_jarjestelma"] == "C") {
@@ -2429,6 +2457,14 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
                   kerayserat.tunnus as ker_tunnus,
                   kerayserat.pakkaus,
                   kerayserat.pakkausnro,
+                  tuote.myyntihinta,
+                  tuote.myymalahinta,
+                  tuote.lyhytkuvaus,
+                  tuote.kuvaus,
+                  tuote.tuotemassa,
+                  tuote.tullinimike1,
+                  tuote.tullinimike2,
+                  tuote.tahtituote,
                   {$sorttauskentta}
                   FROM kerayserat
                   JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio AND tilausrivi.tunnus = kerayserat.tilausrivi AND tilausrivi.tyyppi != 'D')
@@ -2449,6 +2485,15 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
                   if (tuote.myyntihinta_maara=0, 1, tuote.myyntihinta_maara) myyntihinta_maara,
                   tuote.sarjanumeroseuranta,
                   tuote.eankoodi,
+                  tuote.myyntihinta,
+                  tuote.myymalahinta,
+                  tuote.lyhytkuvaus,
+                  tuote.kuvaus,
+                  tuote.tuotemassa,
+                  tuote.tullinimike1,
+                  tuote.tullinimike2,
+                  tuote.tahtituote,
+                  lasku.maa,
                   abs(tilausrivin_lisatiedot.asiakkaan_positio) asiakkaan_positio
                   FROM tilausrivi
                   JOIN lasku ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus
@@ -2550,7 +2595,13 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
       if ($tilausvahvistus_onkin_kerayslista != '') {
         $params_kerayslista['uusiotsikko'] = "Lähete";
       }
+      elseif ($siirtolista_excel != '') {
+        $params_kerayslista['uusiotsikko'] = "Siirtolista";
+      }
       elseif ($excel_lahete_hinnoilla != '') {
+        $params_kerayslista['uusiotsikko'] = "Tilausvahvistus";
+      }
+      elseif ($excel_lahete_hinta_muillatiedoilla != '') {
         $params_kerayslista['uusiotsikko'] = "Tilausvahvistus";
       }
       elseif ($excel_tarjous != '') {

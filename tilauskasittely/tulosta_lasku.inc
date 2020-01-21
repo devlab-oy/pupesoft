@@ -1998,7 +1998,7 @@ if (!function_exists('rivi_perhe')) {
 
 if (!function_exists('loppu')) {
   function loppu($laskurow, $asiakasrow, $kieli, $pdf_lasku, $toim, $thispage, $masrow, $sivu, $summa, $arvo, $page, $vientikala, $laskutyyppi, $vikasivu = "") {
-    global $yhtiorow, $kukarow;
+    global $yhtiorow, $kukarow, $pupe_root_polku;
 
     // Fonttimuuttujat
     extract(lasku_fontit($laskutyyppi));
@@ -2359,17 +2359,27 @@ if (!function_exists('loppu')) {
       }
     }
 
-    //Alimmat kolme laatikkoa, yhtiötietoja
+    // Alimmat kolme laatikkoa, yhtiötietoja
+    if (file_exists("{$pupe_root_polku}/pics/footer_logo.jpg")) {
+      $data = file_get_contents("{$pupe_root_polku}/pics/footer_logo.jpg", true);
+      $image = $pdf_lasku->jfif_embed($data);
+      $pdf_lasku->image_place($image, 25 + $tileja + $barcode_korkeus, 25, $thispage, array("scale" => 0.175));
+      $x = 80;
+    }
+    else {
+      $x = 30;
+    }
+
     $pdf_lasku->draw_rectangle(70 + $tileja + $barcode_korkeus, 20, 20 + $tileja + $barcode_korkeus, 580, $thispage, $rectparam);
     $pdf_lasku->draw_rectangle(70 + $tileja + $barcode_korkeus, 207, 20 + $tileja + $barcode_korkeus, 580, $thispage, $rectparam);
     $pdf_lasku->draw_rectangle(70 + $tileja + $barcode_korkeus, 394, 20 + $tileja + $barcode_korkeus, 580, $thispage, $rectparam);
 
-    $pdf_lasku->draw_text(30, 55 + $tileja + $barcode_korkeus, $y_nimi, $thispage, $pieni);
-    $pdf_lasku->draw_text(30, 45 + $tileja + $barcode_korkeus, $y_osoite, $thispage, $pieni);
-    $pdf_lasku->draw_text(30, 35 + $tileja + $barcode_korkeus, $y_postino."  ".$y_postitp, $thispage, $pieni);
+    $pdf_lasku->draw_text($x, 55 + $tileja + $barcode_korkeus, $y_nimi, $thispage, $pieni);
+    $pdf_lasku->draw_text($x, 45 + $tileja + $barcode_korkeus, $y_osoite, $thispage, $pieni);
+    $pdf_lasku->draw_text($x, 35 + $tileja + $barcode_korkeus, $y_postino."  ".$y_postitp, $thispage, $pieni);
 
     $maan_tiedot = hae_maa(array('maakoodi' => $y_maa));
-    $pdf_lasku->draw_text(30, 25 + $tileja + $barcode_korkeus, $maan_tiedot['nimi'], $thispage, $pieni);
+    $pdf_lasku->draw_text($x, 25 + $tileja + $barcode_korkeus, $maan_tiedot['nimi'], $thispage, $pieni);
 
     $pdf_lasku->draw_text(217, 55 + $tileja + $barcode_korkeus, t("Puhelin", $kieli).": $y_puhelin", $thispage, $pieni);
     $pdf_lasku->draw_text(217, 45 + $tileja + $barcode_korkeus, t("Sähköposti", $kieli).": $y_email", $thispage, $pieni);

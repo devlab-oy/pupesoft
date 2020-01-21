@@ -100,6 +100,7 @@ $pp  = sprintf("%02d", trim($pp));
 $kk  = sprintf("%02d", trim($kk));
 $vv  = sprintf("%04d", trim($vv));
 
+if (!isset($myynnit))                $myynnit = "";
 if (!isset($kiertoviilasku))         $kiertoviilasku = "";
 if (!isset($huomioi_varastosiirrot)) $huomioi_varastosiirrot = "";
 if (!isset($saldo_myytavissa))       $saldo_myytavissa = '';
@@ -352,6 +353,14 @@ if (!$php_cli) {
   echo "<input type='checkbox' name='saldo_myytavissa' {$chk}/>";
   echo "</td></tr>";
 
+  echo "<tr><th>", t("3kk ja 12kk myynnit"), ":</th>";
+  echo "<td>";
+
+  $chk = !empty($myynnit) ? 'checked' : '';
+
+  echo "<input type='checkbox' name='myynnit' {$chk}/>";
+  echo "</td></tr>";
+
   echo "<tr><th>", t("Näytä tuotteen ostohinta"), ":</th>";
   echo "<td>";
 
@@ -367,6 +376,14 @@ if (!$php_cli) {
   echo "<th>", t("Huomioi varastosiirrot viimeisin osto ja myyntitiedoissa"), ":</th>";
   echo "<td><input type='checkbox' name='huomioi_varastosiirrot' {$chk} /></td>";
   echo "</tr>";
+
+  $chk = !empty($nayta_halyraja) ? "checked" : "";
+
+  echo "<tr>";
+  echo "<th>", t("Näytä tuotepaikkakohtainen hälytysraja raportilla"), ":</th>";
+  echo "<td><input type='checkbox' name='nayta_halyraja' {$chk} /></td>";
+
+  echo "<td class='back' valign='top'>".t('Summaustaso tulee olla: Varastonarvo varastopaikoittain').".</td></tr>";
 
   if ($piilotetut_varastot != 'on') {
     $piilotetut_varastot_where = ' AND tyyppi != "P"';
@@ -447,6 +464,10 @@ if (isset($supertee) and $supertee == "RAPORTOI") {
   //################# Jos summaustaso on paikka, otetaan paikat mukaan selectiin ##################
   $paikka_lisa1 = "";
   $paikka_lisa2 = "";
+
+  if (isset($nayta_halyraja) and isset($summaustaso) and $summaustaso != "P") {
+    echo "<font class='error'>", t("Huom. Otettaessa tuotepaikkakohtainen hälytysraja raportille, tulee summaustason olla: Varastonarvo varastopaikoittain"), "!</font><br/>";
+  }
 
   if (isset($summaustaso) and $summaustaso == "P") {
     $paikka_lisa1 = ",   tapahtuma.hyllyalue,
@@ -869,6 +890,39 @@ if (isset($supertee) and $supertee == "RAPORTOI") {
     }
   }
 
+  if (isset($nayta_halyraja) and $summaustaso == "P") {
+    if ($tallennusmuoto_check) {
+      $worksheet->writeString($excelrivi, $excelsarake, t("Hälytysraja"), $format_bold);
+      $excelsarake++;
+    }
+    else {
+      fwrite($fh, pupesoft_csvstring(t("Hälytysraja"))."\t");
+    }
+  }
+
+  if ($myynnit) {
+    if ($tallennusmuoto_check) {
+      $worksheet->writeString($excelrivi, $excelsarake, t("Myynti 3kk"), $format_bold);
+      $excelsarake++;
+
+      $worksheet->writeString($excelrivi, $excelsarake, t("Edellinen 3kk"), $format_bold);
+      $excelsarake++;
+
+      $worksheet->writeString($excelrivi, $excelsarake, t("Myynti 12kk"), $format_bold);
+      $excelsarake++;
+
+      $worksheet->writeString($excelrivi, $excelsarake, t("Edellinen 12kk"), $format_bold);
+      $excelsarake++;
+
+    }
+    else {
+      fwrite($fh, pupesoft_csvstring(t("Myynti 3kk"))."\t");
+      fwrite($fh, pupesoft_csvstring(t("Edellinen 3kk"))."\t");
+      fwrite($fh, pupesoft_csvstring(t("Myynti 12kk"))."\t");
+      fwrite($fh, pupesoft_csvstring(t("Edellinen 12kk"))."\t");
+    }
+  }
+
   if ($tallennusmuoto_check) {
     $worksheet->writeString($excelrivi, $excelsarake, t("Kehahin"), $format_bold);
     $excelsarake++;
@@ -1081,9 +1135,17 @@ if (isset($supertee) and $supertee == "RAPORTOI") {
         $summaus_lisa = "";
       }
 
+      if (isset($nayta_halyraja) and $summaustaso == "P") {
+        $halyraja_kentta = ", tuotepaikat.halytysraja";
+      }
+      else {
+        $halyraja_kentta = "";
+      }
+
       $query = "SELECT sum(tuotepaikat.saldo) saldo,
                 sum(tuotepaikat.saldo*if(tuote.epakurantti100pvm = '0000-00-00', if(tuote.epakurantti75pvm = '0000-00-00', if(tuote.epakurantti50pvm = '0000-00-00', if(tuote.epakurantti25pvm = '0000-00-00', tuote.kehahin, tuote.kehahin * 0.75), tuote.kehahin * 0.5), tuote.kehahin * 0.25), 0)) varasto,
                 sum(tuotepaikat.saldo*tuote.kehahin) bruttovarasto
+                {$halyraja_kentta}
                 FROM tuotepaikat
                 JOIN tuote ON (tuote.tuoteno = tuotepaikat.tuoteno and tuote.yhtio = tuotepaikat.yhtio and tuote.ei_saldoa = '')
                 WHERE tuotepaikat.yhtio = '$kukarow[yhtio]'
@@ -1101,6 +1163,7 @@ if (isset($supertee) and $supertee == "RAPORTOI") {
         hinta_kuluineen($row["tuoteno"], (float) $varattu_varastonarvo);
       $bruttovaraston_arvo =
         hinta_kuluineen($row["tuoteno"], (float) $vararvorow["bruttovarasto"]);
+      $halyraja_arvo = $vararvorow["halytysraja"];
     }
 
     // jos summaustaso on per paikka, otetaan varastonmuutos vain siltä paikalta
@@ -1567,6 +1630,16 @@ if (isset($supertee) and $supertee == "RAPORTOI") {
         }
       }
 
+      if (isset($nayta_halyraja) and $summaustaso == "P") {
+        if ($tallennusmuoto_check) {
+          $worksheet->writeString($excelrivi, $excelsarake, $halyraja_arvo);
+          $excelsarake++;
+        }
+        else {
+          fwrite($fh, pupesoft_csvstring($halyraja_arvo)."\t");
+        }
+      }
+
       if ($nayta_ostohinta) {
         $query = "SELECT ostohinta, IF(jarjestys = 0, 9999, jarjestys) sorttaus
                   FROM tuotteen_toimittajat
@@ -1575,6 +1648,48 @@ if (isset($supertee) and $supertee == "RAPORTOI") {
                   ORDER BY sorttaus";
         $ttres = pupe_query($query);
         $ttrow = mysql_fetch_assoc($ttres);
+      }
+
+      if ($myynnit) {
+        $query = "SELECT
+                    round(sum(if(laskutettuaika >= date_sub('{$vv}-{$kk}-{$pp}', interval 3 month), kpl, 0))) myynti3kk,
+                    round(sum(if(laskutettuaika >= date_sub('{$vv}-{$kk}-{$pp}', interval 15 month) AND laskutettuaika <= date_sub('{$vv}-{$kk}-{$pp}', interval 12 month), kpl, 0))) edelliset3kk,
+                    round(sum(if(laskutettuaika >= date_sub('{$vv}-{$kk}-{$pp}', interval 12 month), kpl, 0))) myynti12kk,
+                    round(sum(if(laskutettuaika >= date_sub('{$vv}-{$kk}-{$pp}', interval 24 month) AND laskutettuaika <= date_sub('{$vv}-{$kk}-{$pp}', interval 12 month), kpl, 0))) edelliset12kk
+                  FROM tilausrivi
+                  WHERE yhtio          = '{$kukarow["yhtio"]}'
+                    AND tuoteno        = '{$row["tuoteno"]}'
+                    AND tyyppi         = 'L'
+                    AND laskutettuaika >= date_sub('{$vv}-{$kk}-{$pp}', interval 24 month)
+                    AND kpl            != 0";
+
+        if ($varastontunnukset != "") {
+          $query .= " AND varasto in ({$varastontunnukset})";
+        }
+
+        $myyntiresult = pupe_query($query);
+        $myyntirivi = mysql_fetch_assoc($myyntiresult);
+
+        if ($tallennusmuoto_check) {
+          $worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f", $myyntirivi['myynti3kk']));
+          $excelsarake++;
+
+          $worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f", $myyntirivi['edelliset3kk']));
+          $excelsarake++;
+
+          $worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f", $myyntirivi['myynti12kk']));
+          $excelsarake++;
+
+          $worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f", $myyntirivi['edelliset12kk']));
+          $excelsarake++;
+
+        }
+        else {
+          fwrite($fh, pupesoft_csvstring(sprintf("%.06f", $myyntirivi['myynti3kk']))."\t");
+          fwrite($fh, pupesoft_csvstring(sprintf("%.06f", $myyntirivi['edelliset3kk']))."\t");
+          fwrite($fh, pupesoft_csvstring(sprintf("%.06f", $myyntirivi['myynti12kk']))."\t");
+          fwrite($fh, pupesoft_csvstring(sprintf("%.06f", $myyntirivi['edelliset12kk']))."\t");
+        }
       }
 
       if ($tallennusmuoto_check) {

@@ -68,6 +68,9 @@ if (!function_exists('finvoice_otsik')) {
     case 'FITEK':
         $tulostuspalvelu  = "PRINT";
         break;
+    case '003703575029':
+        $tulostuspalvelu  = "TULOSTUSPALVELU";
+        break;
     default:
       // Katsotaan löytyykö avainsanoista sopivaa, muuten laitetaan tyhjäksi
       $avainsana       = t_avainsana("FINV_TULPALVELU", '', "AND selite = '{$senderintermediator}'", '', '', "selitetark");
@@ -495,6 +498,15 @@ if (!function_exists('finvoice_otsik')) {
         xml_add("BuyerEmailaddressIdentifier", $receiverpartyid, $tootfinvoice, 35);
         fputs($tootfinvoice, "</BuyerCommunicationDetails>\r\n");
       }
+      else {
+        $BuyerEmailaddressIdentifier_avainsana_where = "and selitetark = 'BuyerEmailaddressIdentifier' and selitetark_2 !='' ";
+        $BuyerEmailaddressIdentifier_avainsana_kentta = t_avainsana("VERKLASKKENTSIS", "", $BuyerEmailaddressIdentifier_avainsana_where, "", "", "selitetark_2");
+        if ($BuyerEmailaddressIdentifier_avainsana_kentta != "" and isset($asiakasrow[$BuyerEmailaddressIdentifier_avainsana_kentta])){
+          fputs($tootfinvoice, "<BuyerCommunicationDetails>\r\n");
+          xml_add("BuyerEmailaddressIdentifier", $asiakasrow[$BuyerEmailaddressIdentifier_avainsana_kentta], $tootfinvoice, 35);
+          fputs($tootfinvoice, "</BuyerCommunicationDetails>\r\n");
+        } 
+      } 
 
       fputs($tootfinvoice, "<DeliveryPartyDetails>\r\n");
       xml_add("DeliveryPartyIdentifier", tulosta_ytunnus($lasrow['ytunnus'], $lasrow['maa'], ""), $tootfinvoice, 35);
@@ -551,7 +563,10 @@ if (!function_exists('finvoice_otsik')) {
       xml_add("InvoiceDate Format=\"CCYYMMDD\"", vlas_dateconv($lasrow['tapvm']), $tootfinvoice);
       xml_add("SellerReferenceIdentifier", substr($lasrow['tilausnumerot'], 0, 35), $tootfinvoice, 35);
 
-      if ($yhtiorow["verkkolasku_lah"] == "talenom" or $yhtiorow["verkkolasku_lah"] == "arvato") {
+      $sellersbuyeridentifier_avainsana_where = "AND selite = '{$yhtiorow["verkkolasku_lah"]}' AND selitetark = 'SellersBuyerIdentifier'";
+      $sellersbuyeridentifier_avainsana_kentta = t_avainsana("VERKLASKKENTSIS", "", $sellersbuyeridentifier_avainsana_where, "", "", "selitetark_2");
+
+      if ($yhtiorow["verkkolasku_lah"] == "talenom" or $yhtiorow["verkkolasku_lah"] == "arvato" or $sellersbuyeridentifier_avainsana_kentta == "asiakasnro") {
         xml_add("SellersBuyerIdentifier", substr($asiakasrow["asiakasnro"], 0, 35), $tootfinvoice, 35);
       }
       elseif (trim($lasrow['asiakkaan_tilausnumero']) != "") {
@@ -561,7 +576,13 @@ if (!function_exists('finvoice_otsik')) {
         xml_add("SellersBuyerIdentifier", substr($lasrow['viesti'], 0, 35), $tootfinvoice, 35);
       }
 
-      if (trim($lasrow['asiakkaan_tilausnumero']) != "") {
+      $orderidentifier_avainsana_where = "AND selite = '{$yhtiorow["verkkolasku_lah"]}' AND selitetark = 'OrderIdentifier'";
+      $orderidentifier_avainsana_kentta = t_avainsana("VERKLASKKENTSIS", "", $orderidentifier_avainsana_where, "", "", "selitetark_2");
+
+      if ($orderidentifier_avainsana_kentta == "tyhja") {
+        xml_add("OrderIdentifier", "", $tootfinvoice, 35);
+      }
+      elseif (trim($lasrow['asiakkaan_tilausnumero']) != "") {
         xml_add("OrderIdentifier", substr($lasrow['asiakkaan_tilausnumero'], 0, 35), $tootfinvoice, 35);
       }
       else {
@@ -688,6 +709,11 @@ if (!function_exists('finvoice_rivi')) {
       fputs($tootfinvoice, "<InvoiceRow>\r\n");
       xml_add("ArticleIdentifier", $tilrow['tuoteno'], $tootfinvoice, 35);
       xml_add("ArticleName", $tilrow['nimitys'], $tootfinvoice, 100);
+
+      if ($laskutyyppi == 7 and $tilrow["eankoodi"] != "") {
+        xml_add("EanCode", $tilrow['eankoodi'], $tootfinvoice, 35);
+      }
+
       xml_add("DeliveredQuantity QuantityUnitCode=\"$tilrow[yksikko]\"", pp($tilrow['kpl'], 2), $tootfinvoice);
       xml_add("OrderedQuantity QuantityUnitCode=\"$tilrow[yksikko]\"", pp($tilrow['tilkpl'], 2), $tootfinvoice);
       xml_add("UnitPriceAmount AmountCurrencyIdentifier=\"$lasrow[valkoodi]\"", pp($tilrow['hinta'], $yhtiorow["hintapyoristys"], 5, 2), $tootfinvoice);

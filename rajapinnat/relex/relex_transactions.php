@@ -97,6 +97,8 @@ $header  = "date;location;product;clean_product;type;quantity;value;sales_purcha
 
 if ($extra_laskutiedot) $header .= ";profit;invoicenumber;rownumber;shipped;ordernumber";
 
+$header .= ";sale1";
+
 $header .= "\n";
 
 fwrite($fp, $header);
@@ -177,7 +179,8 @@ $query = "(SELECT
            lasku.laskunro,
            tilausrivi.tunnus AS rivinro,
            if (tilausrivi.tyyppi = 'O', tilausrivi.laskutettuaika, tilausrivi.toimitettuaika) AS toimitettuaika,
-           tilausrivi.otunnus
+           tilausrivi.otunnus,
+           tilausrivi.ale1
            FROM tapahtuma
            JOIN tuote ON (tuote.yhtio = tapahtuma.yhtio
              AND tuote.tuoteno     = tapahtuma.tuoteno
@@ -214,7 +217,8 @@ $query = "(SELECT
            lasku.laskunro,
            tilausrivi.tunnus AS rivinro,
            tilausrivi.toimitettuaika,
-           tilausrivi.otunnus
+           tilausrivi.otunnus,
+           tilausrivi.ale1
            FROM tilausrivi
            JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio
              AND tuote.tuoteno     = tilausrivi.tuoteno
@@ -366,6 +370,8 @@ foreach ($relex_transactions as $row) {
     $rivi .= ";{$row['toimitettuaika']}";
     $rivi .= ";{$row['otunnus']}";
   }
+
+  $rivi .= ";{$row['ale1']}";
 
   $rivi .= "\n";
 

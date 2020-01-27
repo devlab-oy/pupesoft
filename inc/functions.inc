@@ -1336,8 +1336,8 @@ if (!function_exists("apix_edi_put_file")) {
   function apix_edi_put_file($apixzipfile, $apix_ordernum, $soft = "PupesoftEDI") {
     global $kukarow, $yhtiorow, $pupe_root_polku;
 
-    // siirret‰‰n laskutiedosto operaattorille
-    // $url           = "https://test-api.apix.fi/invoices";
+    // siirret‰‰n tiedosto Apixille
+    //$url           = "https://test-api.apix.fi/invoices";
     $url             = "https://api.apix.fi/invoices";
     $transferkey     = $yhtiorow['apix_edi_avain'];
     $transferid      = $yhtiorow['apix_edi_tunnus'];

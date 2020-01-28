@@ -248,7 +248,7 @@ if ($paiva_ajo and !empty($relex_ftphost)) {
   $ftpuser = $relex_ftpuser;
   $ftppass = $relex_ftppass;
   $ftpfile = $filepath;
-  require "inc/ftp-send.inc";
+  require "inc/sftp-send.inc";
 }
 
 echo date("d.m.Y @ G:i:s") . ": Relex tilausrivit valmis.\n\n";

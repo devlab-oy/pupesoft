@@ -807,7 +807,7 @@ if ($desadv_host != '' and $desadv_user != '' and $desadv_pass != '' and $desadv
 
         rename($filenimi, $apixfilepath.$apixfilename);
 
-        $status = apix_edi_put_file($apixfilename, $desadv_laskurow["tunnus"]);
+        $status = apix_edi_put_file($apixfilename, $desadv_laskurow["tunnus"], "PupesoftEdifact");
 
         $palautus = 0;
       }

@@ -33504,6 +33504,7 @@ if (!function_exists("piirra_maksupaate_formi")) {
             <input type='button'
                    name='korttimaksunappi'
                    id='korttimaksunappi'
+                   onClick=\"this.disabled=true; this.value='" . t("Käsitellään") . "...';\"
                    value='" . t("Kortti") . " (Alt+K)'
                    accesskey='k'>";
 

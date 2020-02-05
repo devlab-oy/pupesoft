@@ -31,15 +31,11 @@ if ($php_cli) {
   $edi_tyyppi  = trim($argv[2]);
 
   $verkkokauppa_filename = strtolower(basename($filename));
+  $verkkokauppa_filenamet = "/^(anvia|magento|presta)\-order/";
 
   // tunnistetaan magento -tyyppinen käsittely tiedostonimestä
-  if ($edi_tyyppi == 'futursoft' and preg_match("/^magento\-order/", $verkkokauppa_filename) === 1) {
+  if ($edi_tyyppi == 'futursoft' and preg_match($verkkokauppa_filenamet, $verkkokauppa_filename) === 1) {
     $edi_tyyppi = 'magento';
-  }
-
-  // tunnistetaan presta -tyyppinen käsittely tiedostonimestä
-  if ($edi_tyyppi == 'futursoft' and preg_match("/^presta\-order/", $verkkokauppa_filename) === 1) {
-    $edi_tyyppi = 'presta';
   }
 
   // Pupeasennuksen root
@@ -189,6 +185,9 @@ unset($laskpp, $laskkk, $laskvv);
 $asiakkaan_tilausnumero       = "";
 $editilaus_alatila            = "";
 $editilaus_hyvaksyttava       = "";
+$editilaus_orumnet            = "";
+$editilaus_futursoft          = "";
+$editilaus_laskutyyppi        = 0;
 $editilaus_eilahetetta        = "";
 $editilaus_kassalipas         = "";
 $editilaus_loppuhinta         = "";
@@ -265,6 +264,7 @@ $sallitaanjt       = "";
 $editilaus_hinta   = "";
 $editilaus_alennus = "";
 $rivikommentti     = "";
+$rekisterinumero   = "";
 
 // Mihin tilaan laitetaan verkkokauppatilauksen tuotteet, jos saldo on loppu Pupesta
 if (empty($verkkokauppa_oletus_loppuneet) or !in_array($verkkokauppa_oletus_loppuneet, array('H', 'J'))) {
@@ -588,13 +588,6 @@ while ($tietue = fgets($fd)) {
     //Toimitustapa
     if (trim($tieto) != '') {
       $editilaus_toimitustapa = $tieto;
-    }
-    break;
-
-  case 'OSTOTIL.OT_RAHTIVAPAA' :
-    // halutaanko tilaus rahtivapaana
-    if ($edi_tyyppi == "magento" and $tieto == "1") {
-      $editilaus_rahtivapaa = "o";
     }
     break;
 
@@ -931,6 +924,14 @@ while ($tietue = fgets($fd)) {
 
   case 'OSTOTIL.OT_HYVAKSYTTAVA':
     $editilaus_hyvaksyttava = trim($tieto);
+    break;
+
+  case 'OSTOTIL.OT_ORUMNET':
+    $editilaus_orumnet = trim($tieto);
+    break;
+
+  case 'OSTOTIL.OT_FUTURSOFT':
+    $editilaus_futursoft = trim($tieto);
     break;
 
   case 'ONADPL_PC' :
@@ -1625,6 +1626,24 @@ while ($tietue = fgets($fd)) {
         $editilaus_alatila = 'F';
       }
 
+      # Haetaan laskutyyppi asiakkaan takaa, mikäli asiakkaan takana on "oletus", haetaan laskutyyppi yhtiön parametreistä
+      if ($arow["laskutyyppi"] != -9) {
+        $editilaus_laskutyyppi = $arow["laskutyyppi"];
+      }
+      else {
+        $editilaus_laskutyyppi = $yhtiorow["laskutyyppi"];
+      }
+
+      if ($editilaus_orumnet != "") {
+        // Laitetaan seurantaa varten Örumnet-tilauksille oma laatija
+        $edi_laatija = 'NewOrumnet';
+      }
+
+      if ($editilaus_futursoft != "") {
+        // Laitetaan seurantaa varten Futursoft-tilauksille oma laatija
+        $edi_laatija = 'NewFutursoft';
+      }
+
       // Jos asiakas on syöttänyt verkkokaupassa oman tilausnumeron tai viitteen yliajetaan viesti
       if (trim($ot_verkkokauppa_tilausviesti) != "") {
         $viite = $ot_verkkokauppa_tilausviesti;
@@ -1636,7 +1655,7 @@ while ($tietue = fgets($fd)) {
         $insertvarasto = $varasto;
       }
 
-      // Jos toim.puhelinnro tulee OSTOTIL.OT_YHTEYSHENKILONPUH:ssä
+      // Anvian verkkokaupasta toim.puhelinnro tulee OSTOTIL.OT_YHTEYSHENKILONPUH:ssä
       if ($yhteyshenkilon_puhelin != '' and $ltoim_puh == '') {
         $tpuh = $yhteyshenkilon_puhelin;
       }
@@ -1754,7 +1773,8 @@ while ($tietue = fgets($fd)) {
                 yhtio_postitp           = '$yhtiorow[postitp]',
                 yhtio_toimipaikka       = '$kukarow[toimipaikka]',
                 ytunnus                 = '$arow[ytunnus]',
-                ohjelma_moduli          = '$ohjelmamoduli'";
+                ohjelma_moduli          = '$ohjelmamoduli',
+                laskutyyppi             = '{$editilaus_laskutyyppi}'";
       $result = pupe_query($query);
       $id = mysql_insert_id($GLOBALS["masterlink"]);
 
@@ -2137,6 +2157,10 @@ while ($tietue = fgets($fd)) {
     $rivikommentti = pupesoft_cleanstring($tieto);
     break;
 
+  case 'OSTOTILRIV.OTR_REKNRO' :
+    $rekisterinumero = trim($tieto);
+    break;
+
   case 'OLIN21_QT' :
   case 'OSTOTILRIV.OTR_TILATTUMAARA' :
   case 'QTY':
@@ -2422,6 +2446,7 @@ while ($tietue = fgets($fd)) {
     $editilaus_hinta   = "";
     $editilaus_alennus = "";
     $rivikommentti     = "";
+    $rekisterinumero   = "";
     break;
 
   case 'OMSG__END' :
@@ -2473,6 +2498,26 @@ while ($tietue = fgets($fd)) {
       $query    = "SELECT * FROM lasku WHERE tunnus='$id' AND yhtio='$kukarow[yhtio]'";
       $result   = pupe_query($query);
       $laskurow = mysql_fetch_assoc($result);
+
+      // Sähköisen lähetteen lähetyslogiikka jos Örumnet eikä hyväksyttävä
+      if ($editilaus_orumnet != "" && $editilaus_hyvaksyttava === "") {
+        $sahkoinen_lahete = @file_exists("../inc/sahkoinen_lahete.class.inc");
+
+        $query = "SELECT asiakkaan_avainsanat.*
+                  FROM asiakkaan_avainsanat
+                  WHERE asiakkaan_avainsanat.yhtio       = '{$kukarow['yhtio']}'
+                  and asiakkaan_avainsanat.laji          = 'futur_sahkoinen_lahete'
+                  and asiakkaan_avainsanat.avainsana    != ''
+                  AND asiakkaan_avainsanat.liitostunnus  = '{$laskurow['liitostunnus']}'";
+        $as_avain_chk_res = pupe_query($query);
+
+        if (!empty($sahkoinen_lahete) && mysql_num_rows($as_avain_chk_res) > 0) {
+
+          require_once "inc/sahkoinen_lahete.class.inc";
+
+          sahkoinen_lahete($laskurow);
+        }
+      }
 
       // tarvitaan $kukarow[yhtio], $kukarow[kesken], $laskurow ja $yhtiorow
       $kukarow["kesken"] = $laskurow["tunnus"];
@@ -2600,6 +2645,7 @@ while ($tietue = fgets($fd)) {
     $editilaus_liitetiedosto      = "";
     $editilaus_ytunnus            = "";
     $editilaus_tilausaika         = "";
+    $editilaus_laskutyyppi        = 0;
     $edi_kommentti                = "";
     $id                           = "";
     $ketjutus                     = "";

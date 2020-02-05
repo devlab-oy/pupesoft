@@ -1,0 +1,1 @@
+scp ../inc/jquery.min.js ../inc/parametrit.inc ../inc/footer.inc ../inc/functions.inc ../inc/connect.inc ../yhteensopivuus.php ../tilauskasittely/monivalintalaatikot.inc view.php joni@JOKUPALVELIN:/var/www/html/arwidson/selain

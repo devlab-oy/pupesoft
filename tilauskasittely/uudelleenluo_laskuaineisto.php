@@ -128,9 +128,9 @@ if (isset($tee) and $tee == "fitek_siirto") {
 
     for ($a = 1; $a < $fitek_laskumaara; $a++) {
       preg_match("/\<InvoiceNumber\>(.*?)\<\/InvoiceNumber\>/i", $fitek_laskuarray[$a], $invoice_number);
-      
+
       $fitek_invoice = "<?xml version=".$fitek_laskuarray[$a];
-    
+
       $status = fitek_queue($fitek_invoice, $invoice_number[1], $kieli);
 
       echo "Fitek-lasku $invoice_number[1]: $status<br>\n";
@@ -459,7 +459,7 @@ if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumer
       $lasrow['chn_orig'] = $lasrow['chn'];
 
       //HUOM: Tässä kaikki sallitut verkkopuolen chn:ät
-      if (!in_array($lasrow['chn'], array("100", "010", "001", "020", "111", "112"))) {
+      if (!in_array($lasrow['chn'], array("100", "010", "001", "020", "111", "112", "113"))) {
         //Paperi by default
         $lasrow['chn'] = "100";
       }

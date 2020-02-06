@@ -1156,9 +1156,6 @@ if (!function_exists("fitek_queue")) {
       // Aineisto lähetysjonoon
       exec("cp $fitek_tmpdirnimi/$fitekzipfile {$pupe_root_polku}/dataout/fitek_error/");
 
-      // Poistetaan apix-tmpdir
-      #exec("rm -rf $fitek_tmpdirnimi");
-
       $fitek_ulos .= "Lasku $fitek_invoicenum siirretty lähetysjonoon<br>\n";
     }
     else {
@@ -1249,7 +1246,20 @@ if (!function_exists("apix_invoice_put_file")) {
     $version         = "1.0";
 
     if ($yhtiorow["finvoice_versio"] == "2") {
-      $version       = "1.1";
+      $version = "1.1";
+    }
+
+    $query = "SELECT chn
+              FROM lasku
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              and tila = 'U'
+              and alatila = 'X'
+              and laskunro ='$apix_invoicenum'";
+    $chnres = pupe_query($query);
+    $chnrow = mysql_fetch_assoc($chnres);
+
+    if ($chnrow['chn'] == '113') {
+      $software = "SprintItEDI";
     }
 
     $timestamp       = gmdate("YmdHis");
@@ -25005,6 +25015,8 @@ if  (!function_exists('hae_chn_teksti')) {
       return t("Itella EDI: EIH-1.4 sähköinen lasku", $kieli);
     case '112':
       return t("Pupesoft-Finvoice: Verkkolasku Pupesoftista-Pupesoftiin", $kieli);
+    case '113':
+        return t("EDI-lasku", $kieli);
     case '666':
       return t("Sähköposti", $kieli);
     case '667':

@@ -176,6 +176,8 @@ $query = "SELECT lasku.tunnus laskutunnus,
           WHERE lasku.yhtio  = '$kukarow[yhtio]'
           AND lasku.tila     in ('N','E','L','G')
           AND lasku.alatila != 'X'
+          AND lasku.laatija != 'NewOrumnet'
+          AND lasku.luontiaika < (NOW() - INTERVAL 1 DAY)
           GROUP BY 1,2
           HAVING dellatut > 0 and kaikki = dellatut";
 $result = pupe_query($query);

@@ -1,0 +1,18 @@
+TESTIEN AJO
+
+HUOM: Testit ajettava siten että perinnän taulut ovat tyhjiä.
+
+-Lasku-
+
+phpunit lasku_test.php <tunnus1> <tunnus2>
+
+jossa <tunnus1> ja <tunnus2> ovat saman asiakkaan kahden myöhässä olevan laskun
+tunnukset.
+
+
+-Suoritus-
+
+phpunit suoritus_test.php <laskun_viite>
+
+jossa <laskun_viite> on sellaisen laskun viite, jolta löytyy suoritustaulusta
+vähintään yksi suoritus.

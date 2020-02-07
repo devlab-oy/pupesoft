@@ -53,10 +53,18 @@ $ei_oteta_kulua_pois = FALSE;
 if (strtoupper($laskuttajan_toimittajanumero) == "ELRING") {
   $laskuttajan_toimittajanumero = "123312";
 }
-elseif (strtoupper($laskuttajan_toimittajanumero) == "BOSCH" or strtoupper($laskuttajan_toimittajanumero) == "AA_FI"
-  or strtoupper($laskuttajan_toimittajanumero) == "AA_FI_BA") {
+elseif (strtoupper($laskuttajan_toimittajanumero) == "BOSCH" or strtoupper($laskuttajan_toimittajanumero) == "AA_FI") {
   $laskuttajan_toimittajanumero = "123067";
 
+  // Tarkistusnumero
+  $viite = $laskun_numero;
+
+  // Menee tasan samalla systeemilla kuin viitenumeron tarkistusnumeron laskeminen..
+  include "inc/generoiviite.inc";
+
+  $laskun_pankkiviite = $viite;
+}
+elseif (strtoupper($laskuttajan_toimittajanumero) == "AA_FI_BA") {
   // Tarkistusnumero
   $viite = $laskun_numero;
 

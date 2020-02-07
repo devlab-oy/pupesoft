@@ -1,0 +1,86 @@
+<?php
+//<!-- DataTables CSS -->
+echo "<link rel='stylesheet' type='text/css' href='{$palvelin2}perinta/css/perinta.css' />";
+//<!-- DataTables -->
+echo "<script type='text/javascript' charset='utf8' src='{$palvelin2}perinta/js/jquery.dataTables.min.js'></script>";
+//<!-- date.de.js -->
+echo "<script type='text/javascript' charset='utf8' src='{$palvelin2}perinta/js/date-de.js'></script>";
+
+?>
+
+<noscript>Your browser does not support Javascript!</noscript>
+<div class="perintaWrapper">
+    <font class="head">Perintä</font>
+    <hr/>
+    <br/>
+    <div id="koontiLaatikko">
+        <div id="laskuLaatikko">
+            <div class="tieto">
+                <input id="submitSiirraPerintaan" type="submit" value="-" onclick="toimintaPainike();" disabled="disabled"/>
+            </div>
+
+            <dl>
+                <div id="tietoNimi" class="tieto">
+                    <dt>Nimi</dt>
+                    <dd id="ddNimi">(ei valittuja)</dd>
+                    <div id="naytaLaskut"></div>
+                </div>
+                <div class="tieto">
+                    <dt>Myöhässä</dt>
+                    <dd id="ddMyohassa">-</dd>
+                </div>
+                <div class="tieto">
+                    <dt>Myöhässä yhteensä</dt>
+                    <dd id="ddMyohassaYht">-</dd>
+                </div>
+                <div class="tieto">
+                    <dt>Joista perinnässä</dt>
+                    <dd id="ddPerinnassa">-</dd>
+                </div>
+                <div class="tieto">
+                    <dt>Kohdistamattomia suorituksia</dt>
+                    <dd id="ddKohdistamattomia">-</dd>
+                </div>
+            </dl>
+        </div>
+        <div id="perintaLaatikko">
+            <div class="tieto">
+                <dt>Perittyjä</dt>
+                <dd id="ddPeritty">-</dd>
+            </div>
+            <div class="tieto">
+                <dt>Perityt yhteensä</dt>
+                <dd id="ddPerittyYhteensa">-</dd>
+            </div>
+        </div>
+    </div>
+    <table id="laskuTaulu" class="display" width="100%">
+        <thead>
+            <tr>
+                <th><input id="checkboxValitseKaikki" type="checkbox" name="checkboxValitseKaikki" class="selectionCheckbox" onclick="valitseKaikki();"/></th>
+                <th><span id="sort1">Y-Tunnus</span><br/></th>
+                <th><span id="sort2">Nimi</span><br/></th>
+                <th><span id="sort3">Laskun<br/> tunniste</span></th>
+                <th><span id="sort4">Laskun<br/> numero</span></th>
+                <th><span id="sort5">Laskun<br/> viite</span></th>
+                <th><span id="sort6">Eräpäivä</span><br/></th>
+                <th><span id="sort7">Summa</span><br/></th>
+                <th><span id="sort8">Saatu</span><br/></th>
+                <th><span id="sort9">Karhut</span><br/></th>
+                <th><span id="sort10">Toimeksiannon<br /> numero</span></th>
+                <th><span id="sort11">Siirretty<br/> perintään</span></th>
+                <th><span id="sort12">Perintään<br/> siirtäjä</span></th>
+                <th><span id="sort13">Tila</span><br/></th>
+            </tr>
+        </thead>
+    </table>
+</div>
+<?php
+echo "<script type='text/javascript'>var tunnus = ".$kukarow['tunnus'].";</script>";
+echo "<script type='text/javascript'>var ajaxUrl = '{$palvelin2}perinta/ajax/ajax.php';</script>";
+echo "<script type='text/javascript' src='{$palvelin2}perinta/js/taulutieto.js'></script>";
+echo "<script type='text/javascript' src='{$palvelin2}perinta/js/asiakastieto.js'></script>";
+echo "<script type='text/javascript' src='{$palvelin2}perinta/js/laskutieto.js'></script>";
+echo "<script type='text/javascript' src='{$palvelin2}perinta/js/ajax.js'></script>";
+echo "<script type='text/javascript' src='{$palvelin2}perinta/js/perinta.js'></script>";
+?>

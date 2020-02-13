@@ -60,7 +60,7 @@ if ($palautus == "") {
 if ($palautus == "") {
   $remotefile = $ftppath.basename($ftpfile);
 
-  $stream = fopen("ssh2.sftp://$sftp/$remotefile", "w");
+  $stream = fopen("ssh2.sftp://".intval($sftp)."/$remotefile", "w");
 
   if (!$stream) {
     $palautus = "Could not open file ($remotefile)";

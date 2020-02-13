@@ -11,9 +11,12 @@
 class SFTPConnection {
   private $connection;
   private $sftp;
+  private $ftpfilt;
 
-  public function __construct($host, $port = 22) {
+  public function __construct($host, $port = 22, $filt = "") {
     $this->connection = ssh2_connect($host, $port);
+
+    $this->ftpfilt = $filt;
 
     if (!$this->connection) {
       throw new Exception("Could not connect to remote host. ($host)");
@@ -34,7 +37,7 @@ class SFTPConnection {
 
   private function scanDirectory($path) {
     $sftp = $this->sftp;
-    $dir = "ssh2.sftp://".$sftp.$path;
+    $dir = "ssh2.sftp://".intval($sftp).$path;
 
     $handle = opendir($dir);
 
@@ -47,12 +50,19 @@ class SFTPConnection {
 
   public function getFilesFrom($path, $dest) {
     $sftp = $this->sftp;
-    $dir = "ssh2.sftp://".$sftp.$path;
+    $dir = "ssh2.sftp://".intval($sftp).$path;
 
     $handle = $this->scanDirectory($path);
 
     while (false !== ($file = readdir($handle))) {
       if (in_array($file, array('.', '..'))) continue;
+
+      if (isset($this->ftpfilt) and $this->ftpfilt != "") {
+        // Skipataan ne tiedostot joissa ei ole määriteltyä stringiä nimessä
+        if (stripos($file, $this->ftpfilt) === FALSE) {
+          continue;
+        }
+      }
 
       $stream = fopen($dir.$file, 'r');
 
@@ -79,7 +89,7 @@ if (substr($ftpdest, -1) != "/") {
 }
 
 try {
-  $sftp = new SFTPConnection($ftphost, $ftpport);
+  $sftp = new SFTPConnection($ftphost, $ftpport, $ftpfilt);
   $sftp->login($ftpuser, $ftppass);
   $sftp->getFilesFrom($ftppath, $ftpdest);
 }

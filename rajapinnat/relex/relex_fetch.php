@@ -53,6 +53,17 @@ if (!is_dir($ftpget_dest[$operaattori])) {
 // Setataan tämä, niin ftp-get.php toimii niin kuin pitäisikin
 $argv[1] = $operaattori;
 
+$ftphost = $ftpget_host[$operaattori];
+$ftpport = $ftpget_port[$operaattori];
+
+$ftpdest = $ftpget_dest[$operaattori];
+$ftppath = $ftpget_path[$operaattori];
+
+$ftpuser = $ftpget_user[$operaattori];
+$ftppass = $ftpget_pass[$operaattori];
+
+$ftpfilt = $ftpget_filt[$operaattori];
+
 require 'sftp-get.php';
 
 if ($handle = opendir($ftpget_dest[$operaattori])) {

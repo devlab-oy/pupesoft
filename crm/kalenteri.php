@@ -370,7 +370,10 @@ if ($tee == "SYOTA") {
     <script type='text/javascript'>
       function paivita_loppukello () {
         alku = $('#alkukello option:selected').val();
-        $('#loppukello').val(alku).change();
+        loppu = $('#loppukello option:selected').val();
+        
+        if (loppu < alku)
+          $('#loppukello').val(alku).change();
       }
     </script>
 

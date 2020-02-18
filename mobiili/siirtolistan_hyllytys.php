@@ -57,18 +57,22 @@ $clearing = $row['clearing'];
 if (!isset($maara)) $maara = $row['varattu'];
 if (!isset($hylly) or $hylly == "") $hylly = $row['kerayspaikka'];
 
+if (!(is_numeric($maara) and $maara > 0)) {
+  $errors[] = t("Tarkista määrä!");
+}
+
 // Päivitetään kuka.kesken
 $update_kuka = "UPDATE kuka SET kesken = {$siirtolista} WHERE yhtio = '{$kukarow['yhtio']}' AND kuka = '{$kukarow['kuka']}'";
 $updated = pupe_query($update_kuka);
 
 // Kontrolleri
-if (isset($submit)) {
+if (isset($submit) and empty($errors)) {
   $url = "&kerayspaikka={$hylly}&varasto={$clearing}&viivakoodi={$viivakoodi}&tilausten_lukumaara={$riveja}&saapumisnro_haku={$saapumisnro_haku}&manuaalisesti_syotetty_ostotilausnro={$manuaalisesti_syotetty_ostotilausnro}&ennaltakohdistettu={$ennaltakohdistettu}&tuotenumero=".urlencode($tuotenumero);
 
   switch ($submit) {
     case 'ok':
       // Vahvista keräyspaikka
-      echo "<META HTTP-EQUIV='Refresh'CONTENT='1;URL=vahvista_kerayspaikka.php?siirtolista{$url}&maara={$maara}&saapuminen={$saapuminen}&alusta_tunnus={$row['suuntalava']}&liitostunnus={$row['liitostunnus']}'>";
+      echo "<META HTTP-EQUIV='Refresh'CONTENT='1;URL=vahvista_kerayspaikka.php?varasto={$clearing}&hylly={$hylly}&siirtolista={$siirtolista}&maara={$maara}&viivakoodi={$viivakoodi}&alusta_tunnus=&liitostunnus=&saapumisnro_haku=&tilausrivi={$tilausrivi}&ostotilaus={$siirtolista}&tilausten_lukumaara={$riveja}&tuotenumero=".urlencode($tuotenumero)."'>";
       exit();
       break;
 
@@ -130,7 +134,7 @@ $url = "siirtolista&varasto={$clearing}&hylly={$hylly}&viivakoodi={$viivakoodi}&
 
 // Napit
 echo "<div class='controls'>";
-echo "<button type='submit' class='button left' onclick=\"f1.action='vahvista_kerayspaikka.php?{$url}'\">", t("OK"), "</button>";
+echo "<button name='submit' class='button left' value='ok' onclick='submit();'>", t("OK"), "</button>";
 echo "<button name='submit' class='button right' id='submit' value='kerayspaikka' onclick='submit();'>", t("UUSI KERÄYSPAIKKA"), "</button>";
 
 echo "</div>";

@@ -126,7 +126,7 @@ if (!empty($relex_ftphost)) {
   $ftpuser = $relex_ftpuser;
   $ftppass = $relex_ftppass;
   $ftpfile = $filepath;
-  require "inc/ftp-send.inc";
+  require "inc/sftp-send.inc";
 }
 
 echo date("d.m.Y @ G:i:s") . ": Relex tuotepaikat valmis.\n\n";

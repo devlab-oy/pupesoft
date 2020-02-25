@@ -273,8 +273,10 @@ if ($tee == 'paikat') {
 
   $virheita = 0;
 
-  //käydään kaikki rivit läpi ja tarkastetaan varastopaika ja perustetaan uusia jos on tarvis
+  //käydään kaikki rivit läpi ja tarkastetaan varastopaikka ja perustetaan uusia jos on tarvis
   foreach ($tunnus as $tun) {
+    if (isset($vastaanotetaan) and $vastaanotetaan[$tun] == "")
+      continue;
 
     $t1[$tun] = trim($t1[$tun]);
     $t2[$tun] = trim($t2[$tun]);
@@ -294,9 +296,7 @@ if ($tee == 'paikat') {
     $tilausrivirow = mysql_fetch_assoc($result);
 
     if (mysql_num_rows($result) != 1) {
-      if ($echotaanko) {
-        echo "<font class='error'>".t("VIRHE: Riviä ei löydy tai se on jo siirretty uudelle paikalle")."!</font><br>";
-      }
+      lisaa_virhe("<font class='error'>", "VIRHE: Riviä ei löydy tai se on jo siirretty uudelle paikalle", "</font><br>");
     }
     elseif ($tilausrivirow["ei_saldoa"] == "") {
 
@@ -374,22 +374,18 @@ if ($tee == 'paikat') {
                 echo "<font class='message'>".t("Tuote")." $tilausrivirow[tuoteno] ".t("siirretty myyntitiliin").".</font><br>";
               }
               else {
-                echo "<font class='message'>".t("Perustan")." ".t("Tuotenumerolle")." $tilausrivirow[tuoteno] ".t("perustetaan uusi paikka")." $t1[$tun]-$t2[$tun]-$t3[$tun]-$t4[$tun]</font><br>";
+                echo "<font class='message'>".t("Tuotenumerolle")." $tilausrivirow[tuoteno] ".t("perustetaan uusi paikka")." $t1[$tun]-$t2[$tun]-$t3[$tun]-$t4[$tun]</font><br>";
               }
             }
 
           }
           else {
-            if ($echotaanko) {
-              echo "<font class='error'>".t("VIRHE: Tuotenumerolle")." $tilausrivirow[tuoteno]. ".t("ei voitu perustaa tyhjää varastopaikkaa")."!</font><br>";
-            }
+            lisaa_virhe("<font class='error'>", t("VIRHE: Tuotenumerolle")." $tilausrivirow[tuoteno]. ".t("ei voitu perustaa tyhjää varastopaikkaa"), "</font><br>");
             $virheita++;
           }
         }
         else {
-          if ($echotaanko) {
-            echo "<font class='error'>".t("VIRHE: Syöttämäsi varastopaikka ei kuulu kohdevaraston alueeseen")."!</font><br>";
-          }
+          lisaa_virhe("<font class='error'>", t("VIRHE: Syöttämäsi varastopaikka ei kuulu kohdevaraston alueeseen"), "</font><br>");
 
           $t1[$tun] = '';
           $t2[$tun] = '';
@@ -403,9 +399,7 @@ if ($tee == 'paikat') {
         $paikkarow = mysql_fetch_assoc($result);
 
         if ($paikkarow["inventointilistatunnus"] !== null) {
-          if ($echotaanko) {
-            echo "<font class='error'>$paikkarow[hyllyalue]-$paikkarow[hyllynro]-$paikkarow[hyllyvali]-$paikkarow[hyllytaso] ".t("VIRHE: Kohdepaikalla on inventointi kesken, ei voida jatkaa")."!</font><br>";
-          }
+          lisaa_virhe("<font class='error'>", "paikkarow[hyllyalue]-$paikkarow[hyllynro]-$paikkarow[hyllyvali]-$paikkarow[hyllytaso] ".t("VIRHE: Kohdepaikalla on inventointi kesken, ei voida jatkaa"), "</font><br>");
           $virheita++;
         }
 
@@ -458,9 +452,7 @@ if ($tee == 'paikat') {
     $prow = mysql_fetch_assoc($presult);
 
     if ($prow["tunnus"] !== null) {
-      if ($echotaanko) {
-        echo "<font class='error'>$tilausrivirow[hyllyalue]-$tilausrivirow[hyllynro]-$tilausrivirow[hyllyvali]-$tilausrivirow[hyllytaso] ".t("VIRHE: Lähdepaikalla on inventointi kesken, ei voida jatkaa")."!</font><br>";
-      }
+      lisaa_virhe("<font class='error'>", "$tilausrivirow[hyllyalue]-$tilausrivirow[hyllynro]-$tilausrivirow[hyllyvali]-$tilausrivirow[hyllytaso] ".t("VIRHE: Lähdepaikalla on inventointi kesken, ei voida jatkaa"), "</font><br>");
       $virheita++;
     }
   }
@@ -487,12 +479,16 @@ if ($tee == 'valmis') {
   );
 
   if (!pupesoft_flock($lock_params)) {
-    echo "Ruuhkaa varastosiirtojen vastaanotossa, yritä myöhemmin uudelleen!";
+    lisaa_virhe("<font class='error'>", t("Ruuhkaa varastosiirtojen vastaanotossa, yritä myöhemmin uudelleen!"), "</font><br>");
     exit();
   }
 
+  $poikkeava_maara_email = "";
+
   //käydään kaikki riviti läpi ja siirretään saldoja
   foreach ($tunnus as $tun) {
+    if (isset($vastaanotetaan) and $vastaanotetaan[$tun] == "")
+      continue;
 
     //nollataan nämä tärkeät
     $tuoteno  = '';
@@ -502,7 +498,7 @@ if ($tee == 'valmis') {
 
     $t1[$tun]=strtoupper($t1[$tun]);
 
-    $query = "SELECT tilausrivi.tuoteno, tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso, tilausrivi.varattu, tuote.ei_saldoa, tuote.sarjanumeroseuranta
+    $query = "SELECT tilausrivi.tunnus, tilausrivi.tuoteno, tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso, tilausrivi.varattu, tuote.ei_saldoa, tuote.sarjanumeroseuranta
               FROM tilausrivi
               JOIN tuote on tilausrivi.yhtio=tuote.yhtio and tilausrivi.tuoteno=tuote.tuoteno
               WHERE tilausrivi.tunnus   = '$tun'
@@ -512,9 +508,7 @@ if ($tee == 'valmis') {
     $result = pupe_query($query);
 
     if (mysql_num_rows($result) != 1) {
-      if ($echotaanko) {
-        echo "<font class='error'>".t("VIRHE: Riviä ei löydy tai se on jo siirretty uudelle paikalle")."!</font><br>";
-      }
+      lisaa_virhe("<font class='error'>", t("VIRHE: Riviä ei löydy tai se on jo siirretty uudelle paikalle"), "</font><br>");
     }
     else {
       $tilausrivirow = mysql_fetch_assoc($result);
@@ -523,11 +517,29 @@ if ($tee == 'valmis') {
       $asaldo  = $tilausrivirow["varattu"];
       $tee    = "";
 
-      if ($asaldo != 0 and $tilausrivirow["ei_saldoa"] == "") {
+      if (isset($vastaanotettu_maara[$tun]) and ($vastaanotettu_maara[$tun] != "") and is_numeric($vastaanotettu_maara[$tun]) and $vastaanotettu_maara[$tun] > 0) {
+        if ($vastaanotettu_maara[$tun] != $tilausrivirow["varattu"]) {
+          $asaldo = $vastaanotettu_maara[$tun];
+          $alkup_varattu = $tilausrivirow["varattu"];
+          $tilausrivirow["varattu"] = $asaldo;
 
-        $tkpl = $asaldo;
-        //haetaan antavan varastopaikan tunnus
-        $query = "SELECT tunnus
+          if ($asaldo < $alkup_varattu) {
+            splittaa_tilausrivi($tilausrivirow['tunnus'], $alkup_varattu - $asaldo);
+          }
+
+          paivita_tilausrivin_kpl($tilausrivirow['tunnus'], $asaldo);
+
+          if ($poikkeava_maara_email == "") {
+            $poikkeava_maara_email = t("tuotetta vastaanotettiin eri määrä kuin merkattiin kerätyksi") . "\n\n";
+          }
+          $poikkeava_maara_email .= $tilausrivirow['tuoteno'] . ": " . $tilausrivirow["varattu"] . " / " . $alkup_varattu . "\n";
+        }
+
+        if ($asaldo != 0 and $tilausrivirow["ei_saldoa"] == "") {
+
+          $tkpl = $asaldo;
+          //haetaan antavan varastopaikan tunnus
+          $query = "SELECT tunnus
                   FROM tuotepaikat
                   WHERE yhtio   = '$kukarow[yhtio]'
                   and hyllyalue = '$tilausrivirow[hyllyalue]'
@@ -535,27 +547,25 @@ if ($tee == 'valmis') {
                   and hyllyvali = '$tilausrivirow[hyllyvali]'
                   and hyllytaso = '$tilausrivirow[hyllytaso]'
                   and tuoteno   = '$tilausrivirow[tuoteno]'";
-        $presult = pupe_query($query);
+          $presult = pupe_query($query);
 
-        if (mysql_num_rows($presult) == 0) {
-          if ($echotaanko) {
-            echo "<font style='error'>".t("VIRHE: Antavaa varastopaikkaa ei löydy")."$tuoteno!</font>";
-            exit;
+          if (mysql_num_rows($presult) == 0) {
+            lisaa_virhe("<font class='error'>", t("VIRHE: Antavaa varastopaikkaa ei löydy") . " $tuoteno!", "</font>");
+            if ($echotaanko) {
+              exit;
+            } else {
+              // jos antavaa paikka ei löydy, niin lisätään se jos ajetan komentoriviltä
+              lisaa_virhe("<font class='error'>", t("VIRHE: Antavaa varastopaikkaa ei löydy") . " $tuoteno", "</font>");
+              $lisatty_paikka = lisaa_tuotepaikka($tilausrivirow["tuoteno"], $tilausrivirow["hyllyalue"], $tilausrivirow["hyllynro"], $tilausrivirow["hyllyvali"], $tilausrivirow["hyllytaso"], 'Varastosiirron vastaanotossa, koska lähdepaikka oli kateissa', '', 0, 0, 0);
+              $mista = $lisatty_paikka["tuotepaikan_tunnus"];
+            }
+          } else {
+            $prow = mysql_fetch_assoc($presult);
+            $mista = $prow["tunnus"];
           }
-          else {
-            // jos antavaa paikka ei löydy, niin lisätään se jos ajetan komentoriviltä
-            echo "<font style='error'>".t("VIRHE: Antavaa varastopaikkaa ei löydy")."$tuoteno!</font>";
-            $lisatty_paikka = lisaa_tuotepaikka($tilausrivirow["tuoteno"], $tilausrivirow["hyllyalue"], $tilausrivirow["hyllynro"], $tilausrivirow["hyllyvali"], $tilausrivirow["hyllytaso"], 'Varastosiirron vastaanotossa, koska lähdepaikka oli kateissa', '', 0, 0, 0);
-            $mista = $lisatty_paikka["tuotepaikan_tunnus"];
-          }
-        }
-        else {
-          $prow = mysql_fetch_assoc($presult);
-          $mista = $prow["tunnus"];
-        }
 
-        //haetaan vastaanottavan varastopaikan tunnus
-        $query = "SELECT tunnus
+          //haetaan vastaanottavan varastopaikan tunnus
+          $query = "SELECT tunnus
                   FROM tuotepaikat
                   WHERE yhtio   = '$kukarow[yhtio]'
                   and hyllyalue = '$t1[$tun]'
@@ -563,36 +573,33 @@ if ($tee == 'valmis') {
                   and hyllyvali = '$t3[$tun]'
                   and hyllytaso = '$t4[$tun]'
                   and tuoteno   = '$tilausrivirow[tuoteno]'";
-        $presult = pupe_query($query);
+          $presult = pupe_query($query);
 
-        if (mysql_num_rows($presult) != 1) {
-          if ($echotaanko) {
-            echo "<font style='error'>".t("VIRHE: Vastaanottavaa varastopaikkaa ei löydy")."$tuoteno!</font>";
+          if (mysql_num_rows($presult) != 1) {
+            lisaa_virhe("<font class='error'>", t("VIRHE: Vastaanottavaa varastopaikkaa ei löydy") . " $tuoteno!", "</font>");
+          } else {
+            $prow = mysql_fetch_assoc($presult);
+
+            $minne = $prow["tunnus"];
+            $uusiol = $prow["tunnus"];
           }
-        }
-        else {
-          $prow = mysql_fetch_assoc($presult);
 
-          $minne = $prow["tunnus"];
-          $uusiol = $prow["tunnus"];
-        }
-
-        //laitetaan sarjanumerot kuntoon
-        if ($tilausrivirow["sarjanumeroseuranta"] != "") {
-          $query = "SELECT tunnus, era_kpl, sarjanumero
+          //laitetaan sarjanumerot kuntoon
+          if ($tilausrivirow["sarjanumeroseuranta"] != "") {
+            $query = "SELECT tunnus, era_kpl, sarjanumero
                     FROM sarjanumeroseuranta
                     WHERE siirtorivitunnus = '$tun'
                     and yhtio              = '$kukarow[yhtio]'";
-          $sarjares = pupe_query($query);
+            $sarjares = pupe_query($query);
 
-          $sarjano_array = array();
+            $sarjano_array = array();
 
-          while ($sarjarow = mysql_fetch_assoc($sarjares)) {
-            if ($tilausrivirow["sarjanumeroseuranta"] == "E" or $tilausrivirow["sarjanumeroseuranta"] == "F" or $tilausrivirow["sarjanumeroseuranta"] == "G") {
-              // eränumeroseurannassa pitää etsiä ostotunnuksella erä josta kappaleeet otetaan
+            while ($sarjarow = mysql_fetch_assoc($sarjares)) {
+              if ($tilausrivirow["sarjanumeroseuranta"] == "E" or $tilausrivirow["sarjanumeroseuranta"] == "F" or $tilausrivirow["sarjanumeroseuranta"] == "G") {
+                // eränumeroseurannassa pitää etsiä ostotunnuksella erä josta kappaleeet otetaan
 
-              // koitetaan löytää vapaita ostettuja eriä mitä myydä
-              $query =   "SELECT era_kpl, tunnus, ostorivitunnus
+                // koitetaan löytää vapaita ostettuja eriä mitä myydä
+                $query = "SELECT era_kpl, tunnus, ostorivitunnus
                           FROM sarjanumeroseuranta
                           WHERE yhtio          = '$kukarow[yhtio]'
                           and tuoteno          = '$tilausrivirow[tuoteno]'
@@ -606,78 +613,76 @@ if ($tee == 'valmis') {
                           and hyllytaso        = '$tilausrivirow[hyllytaso]'
                           ORDER BY era_kpl DESC, tunnus
                           LIMIT 1";
-              $erajaljella_res = pupe_query($query);
+                $erajaljella_res = pupe_query($query);
 
-              // jos löytyy ostettuja eriä myytäväks niin mennään tänne
-              if (mysql_num_rows($erajaljella_res) == 1) {
-                $erajaljella_row = mysql_fetch_assoc($erajaljella_res);
+                // jos löytyy ostettuja eriä myytäväks niin mennään tänne
+                if (mysql_num_rows($erajaljella_res) == 1) {
+                  $erajaljella_row = mysql_fetch_assoc($erajaljella_res);
 
 
-
-                $sarjano_array[] = $erajaljella_row["tunnus"];
-                $sarjano_kpl_array[$erajaljella_row["tunnus"]] = $erajaljella_row["era_kpl"];
+                  $sarjano_array[] = $erajaljella_row["tunnus"];
+                  $sarjano_kpl_array[$erajaljella_row["tunnus"]] = $erajaljella_row["era_kpl"];
+                }
+              } else {
+                $sarjano_array[] = $sarjarow["tunnus"];
               }
             }
-            else {
-              $sarjano_array[] = $sarjarow["tunnus"];
+          }
+
+          // muuvarastopaikka.php palauttaa tee=X jos törmättiin johonkin virheeseen
+          $tee = "N";
+          $kutsuja = "vastaanota.php";
+          $tilattumaara = $asaldo;
+
+          require "muuvarastopaikka.php";
+
+          if (isset($eancheck[$tun]) and $eancheck[$tun] != '' and (int)$kirjoitin > 0) {
+            $query = "SELECT komento from kirjoittimet where yhtio='$kukarow[yhtio]' and tunnus = '$kirjoitin'";
+            $komres = pupe_query($query);
+            $komrow = mysql_fetch_assoc($komres);
+
+            $komento = $komrow['komento'];
+
+            for ($a = 0; $a < $tkpl; $a++) {
+              require "inc/tulosta_tuotetarrat_tec.inc";
             }
           }
-        }
 
-        // muuvarastopaikka.php palauttaa tee=X jos törmättiin johonkin virheeseen
-        $tee = "N";
-        $kutsuja = "vastaanota.php";
+          if ($tee != 'X') {
+            if (isset($oletuspaiv) and $oletuspaiv != '') {
+              if ($echotaanko) {
+                echo "<font class='message'>" . t("Siirretään oletuspaikka") . "</font><br><br>";
+              }
 
-        require "muuvarastopaikka.php";
-
-        if (isset($eancheck[$tun]) and $eancheck[$tun] != '' and (int) $kirjoitin > 0) {
-          $query = "SELECT komento from kirjoittimet where yhtio='$kukarow[yhtio]' and tunnus = '$kirjoitin'";
-          $komres = pupe_query($query);
-          $komrow = mysql_fetch_assoc($komres);
-
-          $komento = $komrow['komento'];
-
-          for ($a = 0; $a < $tkpl; $a++) {
-            require "inc/tulosta_tuotetarrat_tec.inc";
-          }
-        }
-
-        if ($tee != 'X') {
-          if (isset($oletuspaiv) and $oletuspaiv != '') {
-            if ($echotaanko) {
-              echo "<font class='message'>".t("Siirretään oletuspaikka")."</font><br><br>";
-            }
-
-            $query = "UPDATE tuotepaikat
+              $query = "UPDATE tuotepaikat
                       SET oletus   = '',
                       muuttaja      = '$kukarow[kuka]',
                       muutospvm     = now()
                       WHERE tuoteno = '$tuoteno' and yhtio = '$kukarow[yhtio]'";
-            pupe_query($query);
+              pupe_query($query);
 
-            $query = "UPDATE tuotepaikat
+              $query = "UPDATE tuotepaikat
                       SET oletus = 'X',
                       muuttaja      = '$kukarow[kuka]',
                       muutospvm     = now()
                       WHERE tuoteno = '$tuoteno' and yhtio = '$kukarow[yhtio]' and tunnus='$uusiol'";
-            pupe_query($query);
+              pupe_query($query);
+            }
           }
         }
-      }
 
-      if ($tee != 'X') {
+        if ($tee != 'X') {
 
-        if ($_poikkeavalaskutuspvm != '') {
-          $_laadittu = $_poikkeavalaskutuspvm." 23:59:59";
-          $_tapvm = $_poikkeavalaskutuspvm;
-        }
-        else {
-          $_laadittu = date("Y-m-d H:i:s");
-          $_tapvm = date("Y-m-d");
-        }
+          if ($_poikkeavalaskutuspvm != '') {
+            $_laadittu = $_poikkeavalaskutuspvm . " 23:59:59";
+            $_tapvm = $_poikkeavalaskutuspvm;
+          } else {
+            $_laadittu = date("Y-m-d H:i:s");
+            $_tapvm = date("Y-m-d");
+          }
 
-        // jos kaikki meni ok niin päivitetään rivi vastaanotetuksi, laitetaan rivihinnaks tuotteen myyntihinat (tätä käytetään sit intrastatissa jos on tarve)
-        $query = "UPDATE tilausrivi, tuote
+          // jos kaikki meni ok niin päivitetään rivi vastaanotetuksi, laitetaan rivihinnaks tuotteen myyntihinat (tätä käytetään sit intrastatissa jos on tarve)
+          $query = "UPDATE tilausrivi, tuote
                   SET tilausrivi.toimitettu  = '$kukarow[kuka]',
                   toimitettuaika          = '$_laadittu',
                   kpl                     = varattu,
@@ -688,33 +693,54 @@ if ($tee == 'valmis') {
                   and tilausrivi.tyyppi   = 'G'
                   and tuote.yhtio         = tilausrivi.yhtio
                   and tuote.tuoteno       = tilausrivi.tuoteno";
-        pupe_query($query);
+          pupe_query($query);
 
-        //Irrotetaan sarjanumerot
-        if ($tilausrivirow["sarjanumeroseuranta"] != "") {
-          $query = "UPDATE sarjanumeroseuranta
+          //Irrotetaan sarjanumerot
+          if ($tilausrivirow["sarjanumeroseuranta"] != "") {
+            $query = "UPDATE sarjanumeroseuranta
                     SET siirtorivitunnus = 0
                     WHERE siirtorivitunnus = '$tun'
                     and yhtio              = '$kukarow[yhtio]'";
-          pupe_query($query);
-        }
+            pupe_query($query);
+          }
 
-        if ($toim == "MYYNTITILI") {
-          $uprquery = "UPDATE tilausrivi SET
+          if ($toim == "MYYNTITILI") {
+            $uprquery = "UPDATE tilausrivi SET
                        hyllyalue   = '$t1[$tun]',
                        hyllynro    = '$t2[$tun]',
                        hyllyvali   = '$t3[$tun]',
                        hyllytaso   = '$t4[$tun]'
                        WHERE yhtio = '$kukarow[yhtio]'
                        and tunnus  = '$tun'";
-          pupe_query($uprquery);
+            pupe_query($uprquery);
+          }
+        }
+
+        if ($tee == "X") {
+          // Summataan virhecountteria
+          $virheita++;
         }
       }
-
-      if ($tee == "X") {
-        // Summataan virhecountteria
-        $virheita++;
+      else {
+        lisaa_virhe("<font class='error'>", t("VIRHE: Tarkista määrä tuotteelle"), " {$tilausrivirow['tuoteno']}</font><br>");
       }
+    }
+  }
+
+  if ($poikkeava_maara_email != "") {
+    $query = "SELECT kerayspoikkeus_email FROM varastopaikat WHERE tunnus = (SELECT varasto FROM tilausrivi WHERE tunnus = {$tun} AND yhtio = '$kukarow[yhtio]') and yhtio = '$kukarow[yhtio]'";
+    $paikka_result = pupe_query($query);
+    $paikka_row = mysql_fetch_assoc($paikka_result);
+    $email = $paikka_row['kerayspoikkeus_email'];
+
+    if ($email != "") {
+      $parametrit = array(
+        "to"      => $email,
+        "subject" => t("Varastosiirtojen vastaanotossa poikkeava määrä"),
+        "body"    => $poikkeava_maara_email,
+      );
+
+      pupesoft_sahkoposti($parametrit);
     }
   }
 
@@ -803,7 +829,27 @@ if ($tee == 'valmis') {
     echo "<br><br>";
   }
 
-  if ($virheita == 0) {
+  if ($id != "") {
+    $query  = "SELECT COUNT(*) AS toimittamatta
+              FROM tilausrivi
+              WHERE yhtio = '$kukarow[yhtio]'
+              AND otunnus IN ($id)
+              AND toimitettu = ''";
+    $result = pupe_query($query);
+
+    if (mysql_num_rows($result) > 0) {
+      $toimittamatta_array = mysql_fetch_assoc($result);
+      $toimittamatta = $toimittamatta_array['toimittamatta'];  
+    }
+    else {
+      $toimittamatta = 0;
+    }
+  }
+  else {
+    $toimittamatta = 0;
+  }
+
+  if ($virheita == 0 and $toimittamatta == 0) {
 
     //päivitetään otsikko vastaanotetuksi ja tapvmmään päivä
     $query  = "SELECT otunnus, sum(rivihinta) rivihinta
@@ -854,8 +900,10 @@ if (($tee == "OK" or $tee == "paikat") and !empty($id) and $toim != "MYYNTITILI"
     require 'tulosta_purkulista.inc';
   }
 
-  $id      = 0;
-  $varasto = "";
+  if ($toimittamatta == 0) {
+    $id      = 0;
+    $varasto = "";
+  }
 }
 elseif ($tee == "OK" and !empty($id) and $toim == "MYYNTITILI") {
   $id      = 0;
@@ -1428,6 +1476,8 @@ if (!empty($id) and $echotaanko) {
   //itse rivit
   echo "<tr>";
 
+  echo "<th>&nbsp;</th>";
+
   if ($toim == "" and $yhtiorow['siirtolistat_vastaanotetaan_per_lahto'] == 'K') {
     echo "<th>", t("Siirtolista"), "</th>";
   }
@@ -1504,6 +1554,8 @@ if (!empty($id) and $echotaanko) {
     echo "<tr>";
     echo "<input type='hidden' name='tunnus[]' value='$rivirow[tunnus]'>";
 
+    echo "<td align='center'><input type='checkbox' id='vastaanotetaan[$rivirow[tunnus]]' name='vastaanotetaan[$rivirow[tunnus]]' checked>";
+
     if ($toim == "" and $yhtiorow['siirtolistat_vastaanotetaan_per_lahto'] == 'K') {
       echo "<td>{$rivirow['otunnus']}</td>";
     }
@@ -1528,7 +1580,12 @@ if (!empty($id) and $echotaanko) {
       echo "<td>$rivirow[paikka]</td>";
     }
 
-    echo "<td>$rivirow[varattu]</td>";
+    $m = $rivirow[varattu];
+    if (isset($vastaanotettu_maara[$rivirow[tunnus]])) {
+      $m = $vastaanotettu_maara[$rivirow[tunnus]];
+    }
+
+    echo "<td><input type='text' id='vastaanotettu_maara[$rivirow[tunnus]]' name='vastaanotettu_maara[$rivirow[tunnus]]' value='$m' maxlength='10' size='10'></td>";
 
     // Myyntitileillä on speciaali vastaanotto
     if ($toim == "MYYNTITILI") {
@@ -1630,7 +1687,7 @@ if (!empty($id) and $echotaanko) {
             echo "</td>";
           }
           else {
-            echo "<td><font class='error'>".t("Ei varastopaikkaa")."!</font></td>";
+            lisaa_virhe("<font class='error'>", t("Ei varastopaikkaa"), "</font></td>");
           }
         }
 
@@ -1664,7 +1721,7 @@ if (!empty($id) and $echotaanko) {
   }
 
   if ($toim != "MYYNTITILI") {
-    $_colspan = 4;
+    $_colspan = 5;
 
     if ($toim == "" and $yhtiorow['siirtolistat_vastaanotetaan_per_lahto'] == 'K') $_colspan++;
 

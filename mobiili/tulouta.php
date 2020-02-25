@@ -23,7 +23,20 @@ if ($yhtiorow['suuntalavat'] != "") {
 
 echo "<li><a href='ostotilaus.php?uusi' class='button'>", t("Ostotilaus"), "</a>";
 
-echo "<a href='ostotilaus.php' class='button'><font color='chucknorris'>(".t("Jatka edellistä").")</font></a>";
+$ostotilaus = !empty($ostotilaus) ? $ostotilaus : '';
+$saapumisnro_haku = !empty($saapumisnro_haku) ? $saapumisnro_haku : '';
+$params = "ostotilaus={$ostotilaus}&saapumisnro_haku={$saapumisnro_haku}";
+if (!empty($ostotilaus) or !empty($saapumisnro_haku)) {
+  $params .= "&jatka=1";
+}
+
+echo "<a href='ostotilaus.php?{$params}' class='button'><font color='chucknorris'>(".t("Jatka edellistä").")</font></a>";
+
+echo "</li>";
+
+echo "<li><a href='siirtolista.php?uusi' class='button'>", t("Siirtolista"), "</a>";
+
+echo "<a href='siirtolista.php' class='button'><font color='chucknorris'>(".t("Jatka edellistä").")</font></a>";
 
 echo "</li>";
 

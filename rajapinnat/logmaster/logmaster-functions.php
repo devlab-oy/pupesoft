@@ -249,7 +249,8 @@ if (!function_exists('logmaster_outbounddelivery')) {
               tuote.eankoodi,
               tuote.ei_saldoa,
               tuote.tullinimike1,
-              laskun_lisatiedot.noutopisteen_tunnus
+              laskun_lisatiedot.noutopisteen_tunnus,
+              varastopaikat.ulkoisen_jarjestelman_tunnus
               FROM lasku
               LEFT JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus)
               JOIN tilausrivi ON (
@@ -266,6 +267,10 @@ if (!function_exists('logmaster_outbounddelivery')) {
               LEFT JOIN laskun_lisatiedot ON (
                 laskun_lisatiedot.yhtio         = lasku.yhtio AND
                 laskun_lisatiedot.otunnus       = lasku.tunnus
+              )
+              LEFT JOIN varastopaikat ON (
+                varastopaikat.yhtio  = tilausrivi.yhtio AND
+                varastopaikat.tunnus = tilausrivi.varasto                
               )
               WHERE lasku.yhtio     = '{$kukarow['yhtio']}'
               AND lasku.tunnus      = '{$otunnus}'";
@@ -392,7 +397,7 @@ if (!function_exists('logmaster_outbounddelivery')) {
     $custpickinglist->addChild('PickingInstruction', xml_cleanstring($looprow['sisviesti2'], 128));
     $custpickinglist->addChild('SalesOffice',        0);
     $custpickinglist->addChild('SalesContact',       0);
-    $custpickinglist->addChild('Warehouse',          0);
+    $custpickinglist->addChild('Warehouse',          xml_cleanstring($looprow['ulkoisen_jarjestelman_tunnus']));
     $custpickinglist->addChild('InvoiceAmounth',     0);
 
     $orderedby = $custpickinglist->addChild('OrderedBy');

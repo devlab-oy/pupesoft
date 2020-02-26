@@ -75,6 +75,12 @@ class SFTPConnection {
       }
 
       fclose($stream);
+
+      if (filesize($dest.$file) == 0) {
+        unlink($dest.$file);
+      }
+
+      ssh2_sftp_unlink($sftp, $dir.$file);
     }
   }
 }

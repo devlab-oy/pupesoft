@@ -1069,7 +1069,7 @@ if (!function_exists('tarjous_rivi_hinta_ale')) {
     }
 
     if (trim($row["perhe_kommentti"]) != '' and $yhtiorow['tarjoustyyppi'] != 5) {
-      $pohja = $pdf_tarjous->draw_paragraph($kala+$norm["height"], 45, 60, 480, $row["perhe_kommentti"],  $page_tarjous[$sivu], $norm);
+      $pohja = $pdf_tarjous->draw_paragraph($kala+$norm["height"], 45, 60, 480, $row["perhe_kommentti"]." ",  $page_tarjous[$sivu], $norm);
       if (is_numeric($pohja)) {
         $kala = $pohja - $rivinkorkeus;
       }
@@ -1194,7 +1194,7 @@ if (!function_exists('tarjous_rivi_hinta_ale')) {
       $kala -= $rivinkorkeus;
 
       if ($row["kommentti"] != '') {
-        $pohja = $pdf_tarjous->draw_paragraph($kala+$norm["height"]+2, 80, 60, 575, $row["kommentti"], $page_tarjous[$sivu], $norm);
+        $pohja = $pdf_tarjous->draw_paragraph($kala+$norm["height"]+2, 80, 60, 575, $row["kommentti"]." ", $page_tarjous[$sivu], $norm);
         if (is_numeric($pohja)) {
           $kala = $pohja - $rivinkorkeus;
         }
@@ -1204,7 +1204,7 @@ if (!function_exists('tarjous_rivi_hinta_ale')) {
       }
 
       if (trim($row["perhe_kommentti"]) != '') {
-        $pohja = $pdf_tarjous->draw_paragraph($kala+$norm["height"], 80, 60, 575, $row["perhe_kommentti"],  $page_tarjous[$sivu], $norm);
+        $pohja = $pdf_tarjous->draw_paragraph($kala+$norm["height"], 80, 60, 575, $row["perhe_kommentti"]." ",  $page_tarjous[$sivu], $norm);
         if (is_numeric($pohja)) {
           $kala = $pohja - $rivinkorkeus -10;
         }
@@ -1219,7 +1219,7 @@ if (!function_exists('tarjous_rivi_hinta_ale')) {
     }
 
     if ($row["kommentti"] != '' and $yhtiorow['tarjoustyyppi'] != 5) {
-      $pohja = $pdf_tarjous->draw_paragraph($kala+$norm["height"]+2, 45, 60, 480, $row["kommentti"], $page_tarjous[$sivu], $norm);
+      $pohja = $pdf_tarjous->draw_paragraph($kala+$norm["height"]+2, 45, 60, 480, $row["kommentti"]." ", $page_tarjous[$sivu], $norm);
       if (is_numeric($pohja)) {
         $kala = $pohja - $rivinkorkeus;
       }
@@ -1248,7 +1248,7 @@ if (!function_exists('tarjous_rivi_custom')) {
     $rivinkorkeus = 12;
 
     if (trim($row["perhe_kommentti"]) != '' and $yhtiorow["tarjoustyyppi"] != 1) {
-      $pohja = $pdf_tarjous->draw_paragraph($kala+$norm["height"], 150, 60, 480, $row["perhe_kommentti"],  $page_tarjous[$sivu], $norm);
+      $pohja = $pdf_tarjous->draw_paragraph($kala+$norm["height"], 150, 60, 480, $row["perhe_kommentti"]." ",  $page_tarjous[$sivu], $norm);
       if (is_numeric($pohja)) {
         $kala = $pohja - $rivinkorkeus;
       }
@@ -1366,7 +1366,7 @@ if (!function_exists('tarjous_rivi_custom')) {
     }
 
     if (trim($row["perhe_kommentti"]) != '' and $yhtiorow["tarjoustyyppi"] == 1) {
-      $pohja = $pdf_tarjous->draw_paragraph($kala+$norm["height"], 150, 60, 480, $row["perhe_kommentti"],  $page_tarjous[$sivu], $norm);
+      $pohja = $pdf_tarjous->draw_paragraph($kala+$norm["height"], 150, 60, 480, $row["perhe_kommentti"]." ",  $page_tarjous[$sivu], $norm);
       if (is_numeric($pohja)) {
         $kala = $pohja - $rivinkorkeus;
       }

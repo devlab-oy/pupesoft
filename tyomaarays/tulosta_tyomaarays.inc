@@ -645,7 +645,7 @@ if (!function_exists('tyomaarays_rivi')) {
     }
 
     if (trim($row["perhe_kommentti"]) != '') {
-      $pohja = $pdf->draw_paragraph($kala+$norm["height"], 45, 60, 480, $row["perhe_kommentti"], $thispage, $norm);
+      $pohja = $pdf->draw_paragraph($kala+$norm["height"], 45, 60, 480, $row["perhe_kommentti"]." ", $thispage, $norm);
       $kala = $pohja - $rivinkorkeus;
     }
 

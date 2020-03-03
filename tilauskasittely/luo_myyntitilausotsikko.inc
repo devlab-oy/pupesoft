@@ -61,6 +61,14 @@ if (!function_exists("luo_myyntitilausotsikko")) {
       $laskutyyppi       = $asiakasrow["laskutyyppi"];
       $lahetetyyppi      = pupesoft_lahetetyyppi(0, $asiakasrow['tunnus']);
 
+      if ($toim == "PIKATILAUS") {
+        $laskutyyppi = executescalar("SELECT IF(asiakas.laskutyyppi != -9, asiakas.laskutyyppi, yhtion_parametrit.laskutyyppi) AS laskutyyppi
+                                      FROM asiakas
+                                      JOIN yhtion_parametrit ON (yhtion_parametrit.yhtio = asiakas.yhtio)
+                                      WHERE asiakas.tunnus = '{$asiakasid}'
+                                        AND asiakas.yhtio = '$kukarow[yhtio]'");
+      }
+
       if ((int) $kukarow["kesken"] == 0 and $asiakasrow['toimipaikka'] != 0) {
         if ($kukarow['toimipaikka'] != $asiakasrow['toimipaikka'] and $yhtiorow['myyntitilauksen_toimipaikka'] == 'A') {
           $kukarow['toimipaikka'] = $asiakasrow['toimipaikka'];

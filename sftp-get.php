@@ -80,7 +80,7 @@ class SFTPConnection {
         unlink($dest.$file);
       }
 
-      ssh2_sftp_rename($sftp, $dir.$file, $dir."done/".$file);
+      ssh2_sftp_rename($sftp, $path.$file, $path."done/".$file);
     }
   }
 }

@@ -480,15 +480,15 @@ if (!function_exists('finvoice_otsik')) {
       xml_add("SellerReferenceIdentifier", $lasrow['tunnus'], $tootfinvoice);
 
       if (trim($lasrow['asiakkaan_tilausnumero']) != "") {
-        xml_add("SellersBuyerIdentifier", substr($lasrow['asiakkaan_tilausnumero'], 0, 35), $tootfinvoice, 35);
-        xml_add("OrderIdentifier", substr($lasrow['asiakkaan_tilausnumero'], 0, 35), $tootfinvoice, 35);
+        xml_add("SellersBuyerIdentifier", substr($lasrow['asiakkaan_tilausnumero'], 0, 100), $tootfinvoice, 100);
+        xml_add("OrderIdentifier", substr($lasrow['asiakkaan_tilausnumero'], 0, 100), $tootfinvoice, 100);
       }
       else {
-        xml_add("SellersBuyerIdentifier", substr($lasrow['viesti'], 0, 35), $tootfinvoice, 35);
-        xml_add("OrderIdentifier", substr($lasrow['viesti'], 0, 35), $tootfinvoice, 35);
+        xml_add("SellersBuyerIdentifier", substr($lasrow['viesti'], 0, 100), $tootfinvoice, 100);
+        xml_add("OrderIdentifier", substr($lasrow['viesti'], 0, 100), $tootfinvoice, 100);
       }
 
-      xml_add("AgreementIdentifier", substr($lasrow['viesti'], 0, 35), $tootfinvoice, 35);
+      xml_add("AgreementIdentifier", substr($lasrow['viesti'], 0, 100), $tootfinvoice, 100);
 
       xml_add("InvoiceTotalVatExcludedAmount AmountCurrencyIdentifier=\"$lasrow[valkoodi]\"", pp($lasrow['arvo'], 2), $tootfinvoice);
       xml_add("InvoiceTotalVatAmount AmountCurrencyIdentifier=\"$lasrow[valkoodi]\"", pp(($lasrow['summa']-$lasrow['arvo']), 2), $tootfinvoice);

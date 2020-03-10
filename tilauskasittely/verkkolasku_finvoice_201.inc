@@ -65,9 +65,6 @@ if (!function_exists('finvoice_otsik')) {
     case 'ITELFIHH':
       $tulostuspalvelu  = "TULOSTUSPALVELU";
       break;
-    case 'FITEK':
-        $tulostuspalvelu  = "PRINT";
-        break;
     case '003703575029':
         $tulostuspalvelu  = "TULOSTUSPALVELU";
         break;

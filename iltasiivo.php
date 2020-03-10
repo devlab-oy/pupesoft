@@ -266,6 +266,33 @@ if ($laskuri > 0) $iltasiivo .= is_log("Arkistoitiin $laskuri ostotilausta.");
 
 $laskuri = 0;
 
+// Siivotaan vastaanotetut siirtolistat valmiiksi, jos niillä ei ole enää mitään vastaanotettavaa
+$query = "SELECT DISTINCT(lasku.tunnus) AS laskutunnus,
+            SUM(tilausrivi.varattu) AS tilausrivivaraa
+          FROM lasku
+            JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus)
+          WHERE lasku.yhtio = '$kukarow[yhtio]'
+            AND lasku.tila = 'G'
+            AND lasku.alatila IN ('C', 'D')
+            AND tilausrivi.tyyppi = 'G'
+          GROUP BY lasku.tunnus
+          HAVING tilausrivivaraa = 0";
+$result = pupe_query($query);
+$numofrows = mysql_num_rows($result);
+
+while ($row = mysql_fetch_assoc($result)) {
+  $query = "UPDATE lasku
+            SET alatila = 'X'
+            WHERE yhtio = '$kukarow[yhtio]'
+            AND tunnus  = '$row[laskutunnus]'";
+  pupe_query($query);
+  $laskuri++;
+}
+
+if ($laskuri > 0) $iltasiivo .= is_log("Käsiteltäviä siirtolistoja: $numofrows ja merkittiin $laskuri siirtolistaa valmiiksi.");
+
+$laskuri = 0;
+
 // Vapautetaan holdissa olevat tilaukset, jos niillä on maksupositioita ja ennakkolaskut ovat maksettu
 // Holdissa olevat tilaukset ovat tilassa N B
 $query = "SELECT DISTINCT jaksotettu

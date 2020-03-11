@@ -9,6 +9,11 @@ if (mysql_field_name($result, $i) == "yhtio") {
 }
 
 if (mysql_field_name($result, $i) == "tuoteno") {
+  if ($lukitse_avaimeen != "") {
+    $ulos = "<td><input type='hidden' name='$nimi' value='$lukitse_avaimeen'>$lukitse_avaimeen</td>";
+    $jatko = 0;
+  }
+
   $tuoteno = $trow[$i];
 }
 

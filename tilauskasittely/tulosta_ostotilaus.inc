@@ -481,7 +481,7 @@ else {
         $pdf->draw_text(45, $kala, "(".$row["tuoteno"].")", $thispage, $norm);
       }
 
-      $nimitykset_tulostetaan = (isset($nimitykset) and $nimitykset != "") or (!isset($nimitykset) and $yhtiorow['ostotilaustyyppi'] == 'A') or $toim == "HAAMU";
+      $nimitykset_tulostetaan = ((isset($nimitykset) and $nimitykset != "") or (!isset($nimitykset) and $yhtiorow['ostotilaustyyppi'] == 'A') or $toim == "HAAMU");
       if ($nimitykset_tulostetaan) {
 
         //K‰‰nnet‰‰n nimitys

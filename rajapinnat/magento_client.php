@@ -376,7 +376,7 @@ class MagentoClient {
           $this->log('magento_tuotteet', "Erikoisparametri {$key}: {$tuote[$erikoisparametri['arvo']]}");
         }
         else {
-          $this->log('magento_tuotteet', "Erikoisparametri {$key}: {$tuote[$erikoisparametri['arvo']]} #!isset, j‰tet‰‰n p‰ivitt‰m‰tt‰");
+          $this->log('magento_tuotteet', "Erikoisparametri {$key}: {$erikoisparametri['arvo']} #!isset, j‰tet‰‰n p‰ivitt‰m‰tt‰");
         }
       }
 

@@ -1,5 +1,8 @@
 <?php
 
+// DataTables päälle
+$pupe_DataTables = 'pullopantit_taulukko';
+
 if (isset($_POST["tee"])) {
   if ($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
   if ($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/", "", $_POST["kaunisnimi"]);
@@ -17,10 +20,6 @@ if ($tee == "lataa_tiedosto") {
   readfile("/tmp/" . $tmpfilenimi);
   exit;
 }
-
-// DataTables päälle
-$pupe_DataTables = 'pullopantit';
-
 
 echo "<font class='head'>", t("Pullopantit"), "</font><hr>";
 
@@ -48,24 +47,24 @@ if ($tee == 'NAYTATILAUS') {
 if ($tee == 'LISTAUS') {
 
   if ($excel != "") {
-    echo "<table>";
+    echo "<table>\n";
   }
   else {
     pupe_DataTables(array(array($pupe_DataTables, 8, 8, false, false)));
-    echo "<table class='display dataTable' id='$pupe_DataTables'>";
+    echo "\n<table class='display dataTable' id='$pupe_DataTables'>\n";
   }
 
-  echo "<thead>";
-  echo "<tr>";
-  echo "<th>", t("asiakas"), "</th>";
-  echo "<th>", t("tuote"), "</th>";
-  echo "<th>", t("nimitys"), "</th>";
-  echo "<th>", t("tilausnumero"), "</th>";
-  echo "<th>", t("sarjanumero"), "</th>";
-  echo "<th>", t("luovutus pvm"), "</th>";
-  echo "<th>", t("status"), "</th>";
-  echo "<th>", t("päiviä"), "</th>";
-  echo "</tr>";
+  echo "<thead>\n";
+  echo "<tr>\n";
+  echo "<th>", t("asiakas"), "</th>\n";
+  echo "<th>", t("tuote"), "</th>\n";
+  echo "<th>", t("nimitys"), "</th>\n";
+  echo "<th>", t("tilausnumero"), "</th>\n";
+  echo "<th>", t("sarjanumero"), "</th>\n";
+  echo "<th>", t("luovutus pvm"), "</th>\n";
+  echo "<th>", t("status"), "</th>\n";
+  echo "<th>", t("päiviä"), "</th>\n";
+  echo "</tr>\n";
 
   if ($excel != "") {
     include 'inc/pupeExcel.inc';
@@ -85,20 +84,20 @@ if ($tee == 'LISTAUS') {
     $worksheet->writeString($excelrivi, $excelsarake, t("Päiviä"), $format_bold); $excelsarake++;
   }
   else {
-    echo "<tr>";
-    echo "<td><input type='text' class='search_field' name='search_asikas'></td>";
-    echo "<td><input type='text' class='search_field' name='search_tuote'></td>";
-    echo "<td><input type='text' class='search_field' name='search_nimitys'></td>";
-    echo "<td><input type='text' class='search_field' name='search_tilausnumero'></td>";
-    echo "<td><input type='text' class='search_field' name='search_sarjanumero'></td>";
-    echo "<td><input type='text' class='search_field' name='search_status'></td>";
-    echo "<td><input type='text' class='search_field' name='search_luovutuspvm'></td>";
-    echo "<td><input type='text' class='search_field' name='search_paivia'></td>";
-    echo "</tr>";
+    echo "<tr>\n";
+    echo "<td><input type='text' class='search_field' name='search_asikas'></td>\n";
+    echo "<td><input type='text' class='search_field' name='search_tuote'></td>\n";
+    echo "<td><input type='text' class='search_field' name='search_nimitys'></td>\n";
+    echo "<td><input type='text' class='search_field' name='search_tilausnumero'></td>\n";
+    echo "<td><input type='text' class='search_field' name='search_sarjanumero'></td>\n";
+    echo "<td><input type='text' class='search_field' name='search_status'></td>\n";
+    echo "<td><input type='text' class='search_field' name='search_luovutuspvm'></td>\n";
+    echo "<td><input type='text' class='search_field' name='search_paivia'></td>\n";
+    echo "</tr>\n";
   }
 
-  echo "</thead>";
-  echo "<tbody>";
+  echo "</thead>\n";
+  echo "<tbody>\n";
 
   $query = "
     SELECT sns.sarjanumero, sns.ostorivitunnus, sns.panttirivitunnus,
@@ -145,11 +144,11 @@ if ($tee == 'LISTAUS') {
     $query .= "  AND r.hinta > 0";
   }
   elseif ($status != "") {
-    $query .= "  AND sns.ostorivitunnus = 0";
+    $query .= "  AND r.hinta = 0 AND sns.ostorivitunnus = 0";
   }
 
   if ($status == "3") {
-    $query .= " AND l.alatila = 'C' HAVING paivia >= 0 AND paivia <= 150";
+    $query .= " HAVING paivia >= 0 AND paivia <= 150";
   }
   elseif ($status == "4") {
     $query .= " HAVING paivia > 150 AND paivia <= 180";
@@ -212,16 +211,16 @@ if ($tee == 'LISTAUS') {
       $tila = "-";
     }
 
-    echo "<tr>";
-    echo "<td>{$tulrow['nimi']}</td>";
-    echo "<td>" . js_openUrlNewWindow("{$palvelin2}tuote.php?tee=Z&tuoteno=".urlencode($tulrow["tuoteno"]), $tulrow['tuoteno'], NULL, 1000, 800) . "</td>";
-    echo "<td>{$tulrow['nimitys']}</td>";
-    echo "<td>" . js_openUrlNewWindow("{$palvelin2}raportit/pullopantit.php?tee=NAYTATILAUS&tunnus={$tulrow['tunnus']}", $tulrow['tunnus'], NULL, 1000, 800) . "</td>";
-    echo "<td>{$palautuslinkki_aloitus}{$tulrow['sarjanumero']}{$palautuslinkki_lopetus}</td>";
-    echo "<td>" . pupe_DataTablesEchoSort($tulrow['toimaika']).tv1dateconv($tulrow['toimaika']) . "</td>";
-    echo "<td>{$tila}</td>";
-    echo "<td>{$paivia}</td>";
-    echo "</tr>";
+    echo "<tr>\n";
+    echo "  <td>{$tulrow['nimi']}</td>\n";
+    echo "  <td>" . js_openUrlNewWindow("{$palvelin2}tuote.php?tee=Z&tuoteno=".urlencode($tulrow["tuoteno"]), $tulrow['tuoteno'], NULL, 1000, 800) . "</td>\n";
+    echo "  <td>{$tulrow['nimitys']}</td>\n";
+    echo "  <td>" . js_openUrlNewWindow("{$palvelin2}raportit/pullopantit.php?tee=NAYTATILAUS&tunnus={$tulrow['tunnus']}", $tulrow['tunnus'], NULL, 1000, 800) . "</td>\n";
+    echo "  <td>{$palautuslinkki_aloitus}{$tulrow['sarjanumero']}{$palautuslinkki_lopetus}</td>\n";
+    echo "  <td>" . pupe_DataTablesEchoSort($tulrow['toimaika']).tv1dateconv($tulrow['toimaika']) . "</td>\n";
+    echo "  <td>{$tila}</td>\n";
+    echo "  <td>{$paivia}</td>\n";
+    echo "</tr>\n";
 
     if ($excel != "") {
       $excelrivi++;
@@ -238,8 +237,8 @@ if ($tee == 'LISTAUS') {
     }
   }
 
-  echo "</tbody>";
-  echo "</table>";
+  echo "</tbody>\n";
+  echo "</table>\n";
 
   if ($excel != "") {
     $excelnimi = $worksheet->close();

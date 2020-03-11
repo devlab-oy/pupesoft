@@ -245,6 +245,7 @@ if (!function_exists('logmaster_outbounddelivery')) {
               asiakas.email,
               lasku.toim_email,
               asiakas.asiakasnro,
+              asiakas.tunnus asiakastunnus,
               tuote.eankoodi,
               tuote.ei_saldoa,
               tuote.tullinimike1,
@@ -272,13 +273,26 @@ if (!function_exists('logmaster_outbounddelivery')) {
 
     if (mysql_num_rows($loopres) == 0) {
       pupesoft_log('logmaster_outbound_delivery', "Yhtään riviä ei löytynyt tilaukselle {$otunnus}. Sanoman luonti epäonnistui.");
-
       return false;
     }
 
     $looprow = mysql_fetch_assoc($loopres);
 
     $varastorow = hae_varasto($looprow['otsikon_varasto']);
+
+    $query = "SELECT *
+              FROM asiakkaan_avainsanat
+              WHERE yhtio       = '{$kukarow['yhtio']}'
+              AND liitostunnus  = '{$looprow['asiakastunnus']}'
+              AND laji          = 'KICK_EDI'
+              AND avainsana    != ''";
+    $edi_chk_res = pupe_query($query);
+
+    // Special EDI case
+    $edi_pack_process = FALSE;
+    if (mysql_num_rows($edi_chk_res)) {
+      $edi_pack_process = TRUE;
+    }
 
     switch ($varastorow['ulkoinen_jarjestelma']) {
     case 'L':
@@ -293,7 +307,7 @@ if (!function_exists('logmaster_outbounddelivery')) {
       return false;
     }
 
-    # Säädetaan muuttujia kuntoon
+    # S��det��n muuttujia kuntoon
     $query = "SELECT tunnus
               FROM toimitustapa
               WHERE yhtio = '{$kukarow['yhtio']}'
@@ -328,17 +342,20 @@ if (!function_exists('logmaster_outbounddelivery')) {
     elseif ($looprow['tilaustyyppi'] == 'U') {
       $tilaustyyppi = 7;
     }
+    elseif ($edi_pack_process) {
+      $tilaustyyppi = 'K';
+    }
     else {
       $tilaustyyppi = '';
     }
-    
+
     $CustOrderNumber = $looprow['asiakkaan_tilausnumero'];
 
     // Katsotaan onko CustOrderNumber kenttään erillistä määritystä
     $query = "SELECT *
               FROM toimitustavan_avainsanat
               WHERE yhtio = '{$kukarow['yhtio']}'
-              AND liitostunnus   = '{$toimitustapa_chk_row['tunnus']}'
+              AND liitostunnus = '{$toimitustapa_chk_row['tunnus']}'
               AND laji = 'ulk_var_param'
               AND selite = 'CustOrderNumber'";
     $toimitustavan_avainsanat_res = pupe_query($query);

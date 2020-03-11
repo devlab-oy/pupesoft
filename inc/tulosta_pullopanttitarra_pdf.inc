@@ -32,7 +32,10 @@ if (!function_exists('tulosta_pullopanttitarra_pdf')) {
     $sivu = 0;
     $tarrat = "";
 
-    $query = "SELECT r.tuoteno, r.nimitys, r.tunnus, r.varattu - IFNULL(sarjanumeroita.kpl, 0) puuttuu
+    $sorttaus = generoi_sorttauskentta($yhtiorow["tilauksen_jarjestys"]);
+    $sorttaus = str_replace("tilausrivi.", "r.", $sorttaus);
+
+    $query = "SELECT r.tuoteno, r.nimitys, r.tunnus, r.varattu - IFNULL(sarjanumeroita.kpl, 0) puuttuu, {$sorttaus}
               FROM tilausrivi r
               INNER JOIN tuote t
                 ON (t.yhtio = r.yhtio AND t.tuoteno = r.tuoteno)
@@ -45,9 +48,11 @@ if (!function_exists('tulosta_pullopanttitarra_pdf')) {
               ) sarjanumeroita
                 ON (sarjanumeroita.yhtio = r.yhtio AND sarjanumeroita.myyntirivitunnus = r.tunnus)
               WHERE t.pullopanttitarratulostus_kerayksessa = 'T'
+                AND r.var NOT IN ('P','J','O','S')
                 AND r.yhtio = '$kukarow[yhtio]'
                 AND r.otunnus = '$laskurow[tunnus]'
-              HAVING puuttuu > 0";
+              HAVING puuttuu > 0
+              ORDER BY sorttauskentta";
     $sarjanumerot = pupe_query($query);
 
     while ($tilausrivi = mysql_fetch_assoc($sarjanumerot)) {
@@ -120,15 +125,20 @@ if (!function_exists('tulosta_pullopanttitarra_pdf')) {
       }
     }
 
+    $sorttaus = generoi_sorttauskentta($yhtiorow["tilauksen_jarjestys"]);
     $query = "SELECT tilausrivi.tuoteno,
                 tilausrivi.nimitys,
                 tilausrivi.tunnus,
-                sarjanumeroseuranta.sarjanumero
+                sarjanumeroseuranta.sarjanumero,
+                tuote.lyhytkuvaus AS kylma_aine,
+                {$sorttaus}
               FROM tilausrivi
                 JOIN sarjanumeroseuranta ON (sarjanumeroseuranta.yhtio = tilausrivi.yhtio AND sarjanumeroseuranta.myyntirivitunnus = tilausrivi.tunnus)
+                LEFT JOIN tilausrivi aine ON (aine.yhtio = tilausrivi.yhtio AND aine.tunnus = tilausrivi.perheid)
+                LEFT JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = aine.tuoteno)
               WHERE tilausrivi.yhtio = '{$yhtiorow['yhtio']}'
                 AND tilausrivi.otunnus = '{$laskurow['tunnus']}'
-              ORDER BY sarjanumeroseuranta.sarjanumero";
+              ORDER BY sorttauskentta";
     $tuotetiedot_res = (pupe_query($query));
 
     while ($tilausrivi = mysql_fetch_assoc($tuotetiedot_res)){
@@ -159,7 +169,7 @@ if (!function_exists('tulosta_pullopanttitarra_pdf')) {
       $data = file_get_contents("../pics/mustavalkologo.jpg", true);
       
       $image = $pdf_zebra_tarra->jfif_embed($data);
-      $pdf_zebra_tarra->image_place($image, 140, -50, $page_zebra_tarra[$sivu], array("scale" => 0.3));
+      $pdf_zebra_tarra->image_place($image, 160, -50, $page_zebra_tarra[$sivu], array("scale" => 0.3));
 
       $pdf_zebra_tarra->draw_text(-40, 120, $yhtiorow["www"], $page_zebra_tarra[$sivu], $iso);
       $posti_osoite = $yhtiorow["osoite"].", ".$yhtiorow["postino"]." ".$yhtiorow["postitp"];
@@ -169,11 +179,12 @@ if (!function_exists('tulosta_pullopanttitarra_pdf')) {
       $pdf_zebra_tarra->draw_text(400, 205, $laskurow["tunnus"], $page_zebra_tarra[$sivu], $iso);
       $pdf_zebra_tarra->draw_text(280, 180, "Pvm:", $page_zebra_tarra[$sivu], $iso);
       $pdf_zebra_tarra->draw_text(400, 180, date("d.m.Y"), $page_zebra_tarra[$sivu], $iso);
-
-      $pdf_zebra_tarra->draw_text(200, 40, $tilausrivi["sarjanumero"], $page_zebra_tarra[$sivu], $keski);
+      $pdf_zebra_tarra->draw_text(280, 155, "Sarjanro:", $page_zebra_tarra[$sivu], $iso);
+      $pdf_zebra_tarra->draw_text(400, 155, $tilausrivi["sarjanumero"], $page_zebra_tarra[$sivu], $iso);
 
       $pdf_zebra_tarra->draw_text(-40, 70, t("Veloitukseton palautus viimeistään:"), $page_zebra_tarra[$sivu], $iso);
       $pdf_zebra_tarra->draw_text(360, 70, date("d.m.Y", strtotime("+6 months")), $page_zebra_tarra[$sivu], $iso);
+      $pdf_zebra_tarra->draw_text(-40, 45, $tilausrivi["kylma_aine"], $page_zebra_tarra[$sivu], $iso);
 
       $fh = fopen($filename, "w");
       if (fwrite($fh, $pdf_zebra_tarra->generate()) === FALSE) die("PDF create error $filename");

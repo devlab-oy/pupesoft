@@ -1,10 +1,11 @@
 <?php
 
-// Kutsutaanko CLI:stä
+// Kutsutaanko CLI:stÃ¤
 if (php_sapi_name() != 'cli') {
-  die("Tätä scriptiä voi ajaa vain komentoriviltä!");
+  die("TÃ¤tÃ¤ scriptiÃ¤ voi ajaa vain komentoriviltÃ¤!");
 }
 
+$pupe_root_polku = dirname(__FILE__);
 $PHP_CLI = true;
 
 if (!isset($argv[1])) {
@@ -26,16 +27,16 @@ cron_log();
 
 error_reporting(E_ALL & ~E_NOTICE & ~E_DEPRECATED);
 
-// Tehdään oletukset
+// TehdÃ¤Ã¤n oletukset
 $yhtio = mysql_real_escape_string($argv[1]);
 $yhtiorow = hae_yhtion_parametrit($yhtio);
 if (empty($yhtiorow)) {
-  die("Yhtiö ei löydy.");
+  die("YhtiÃ¶ ei lÃ¶ydy.");
 }
 
 $kukarow = hae_kukarow('admin', $yhtio);
 if (empty($kukarow)) {
-  die("Admin -käyttäjä ei löydy.");
+  die("Admin -kÃ¤yttÃ¤jÃ¤ ei lÃ¶ydy.");
 }
 
 $query = "SELECT *
@@ -44,11 +45,27 @@ $query = "SELECT *
             AND tilaustyyppi = 'P'
             AND tila = 'N'";
 $hyvitystilaukset = pupe_query($query);
+$laskutettavat = array();
+
 while ($laskurow = mysql_fetch_assoc($hyvitystilaukset)) {
-  echo "Käsitellään lasku " . $laskurow['tunnus'] . "\n";
+  echo "KÃ¤sitellÃ¤Ã¤n lasku " . $laskurow['tunnus'] . "\n";
 
   $kukarow["kesken"] = $laskurow['tunnus'];
   require "tilauskasittely/tilaus-valmis.inc";
+
+  $laskutettavat[] = $laskurow['tunnus'];
+}
+
+if (!empty($laskutettavat)) {
+  $laskutettavat = implode(",", $laskutettavat);
+
+  echo "Verkkolaskutetaan: " . $laskutettavat . "\n";
+
+  $tee           = "TARKISTA";
+  $laskutakaikki = "KYLLA";
+  $silent        = "VIENTI";
+
+  require "{$pupe_root_polku}/tilauskasittely/verkkolasku.php";
 }
 
 $kukarow['kesken'] = "0";

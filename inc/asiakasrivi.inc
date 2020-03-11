@@ -145,6 +145,7 @@ if ($fieldname == "chn") {
   $ulos .= "<option value='030' {$sel['030']}>".hae_chn_teksti('030')."</option>";
   $ulos .= "<option value='111' {$sel['111']}>".hae_chn_teksti('111')."</option>";
   $ulos .= "<option value='112' {$sel['112']}>".hae_chn_teksti('112')."</option>";
+  $ulos .= "<option value='113' {$sel['113']}>".hae_chn_teksti('113')."</option>";
   $ulos .= "<option value='666' {$sel['666']}>".hae_chn_teksti('666')."</option>";
   $ulos .= "<option value='667' {$sel['667']}>".hae_chn_teksti('667')."</option>";
   $ulos .= "<option value='999' {$sel['999']}>".hae_chn_teksti('999')."</option>";

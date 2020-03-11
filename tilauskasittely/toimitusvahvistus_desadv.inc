@@ -802,12 +802,12 @@ if ($desadv_host != '' and $desadv_user != '' and $desadv_pass != '' and $desadv
       $status = "";
 
       if ($desadv_host == "APIXDESADV") {
-        $apixfilename  = "{$pupe_root_polku}/dataout/apix_error/";
-        $apixfilename .= "out_desadv_apix_{$desadv_laskurow['tunnus']}.dat";
+        $apixfilepath = "{$pupe_root_polku}/dataout/apix_error/";
+        $apixfilename = "out_desadv_apix_{$desadv_laskurow['tunnus']}.dat";
 
-        rename($filenimi, $apixfilename);
+        rename($filenimi, $apixfilepath.$apixfilename);
 
-        $status = apix_edi_put_file($filename, $desadv_laskurow["tunnus"], $desadv_path);
+        $status = apix_edi_put_file($apixfilename, $desadv_laskurow["tunnus"], "PupesoftEdifact");
 
         $palautus = 0;
       }

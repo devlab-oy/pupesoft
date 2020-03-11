@@ -370,7 +370,10 @@ if ($tee == "SYOTA") {
     <script type='text/javascript'>
       function paivita_loppukello () {
         alku = $('#alkukello option:selected').val();
-        $('#loppukello').val(alku).change();
+        loppu = $('#loppukello option:selected').val();
+        
+        if (loppu < alku)
+          $('#loppukello').val(alku).change();
       }
     </script>
 
@@ -407,28 +410,26 @@ if ($tee == "SYOTA") {
     $kello = "08:00";
   }
 
-  $loophh = "{$AIKA_ARRAY[0]}";
-  $loopmm = "{$aikavali}";
-
   list($whlopt, $whlopm) = explode(":", $AIKA_ARRAY[count($AIKA_ARRAY)-1]);
   $whileloppu = sprintf("%02d", $whlopt+1);
 
   if ($whileloppu >= 24) $whileloppu = sprintf("%02d", $whileloppu-24);
 
   $whileloppu = $whileloppu.":".$whlopm;
+
   $loopdate = "";
-
+  $loophh = substr($AIKA_ARRAY[0], 0, 2);
+  $loopmm = substr($AIKA_ARRAY[0], 3, 2);
   while ($loopdate != $whileloppu) {
-    $loopdate = date("H:i", mktime($loophh, $loopmm+$aikavali, 0));
-    $loophh   = date("H",   mktime($loophh, $loopmm+$aikavali, 0));
-    $loopmm   = date("i",   mktime($loophh, $loopmm+$aikavali, 0));
-
-    $sel = '';
-    if ($loopdate == substr($kello, 0, 5)) {
-      $sel = "SELECTED";
-    }
-
+    $loopdate = date("H:i", mktime($loophh, $loopmm, 0));
+    $sel = $loopdate == $kello ? " SELECTED" : "";
     $lisays .= "<option value='$loopdate' $sel>$loopdate</option>";
+
+    $loopmm += $aikavali;
+    while ($loopmm >= 60) {
+      $loopmm -= 60;
+      $loophh++;
+    }
   }
 
   $lisays .= "</select> ";
@@ -445,22 +446,24 @@ if ($tee == "SYOTA") {
   $loopmm = "{$aikavali}";
 
   if (empty($lkello)) {
-    $lkello = date("H:i", strtotime('+{$aikavali} minutes', strtotime($kello)));
+    $loppuhh = substr($kello, 0, 2);
+    $loppumm = substr($kello, 3, 2);
+    $lkello = date("H:i", mktime($loppuhh, $loppumm + $aikavali, 0));
   }
 
   $loopdate = "";
-
+  $loophh = substr($AIKA_ARRAY[0], 0, 2);
+  $loopmm = substr($AIKA_ARRAY[0], 3, 2) + $aikavali;
   while ($loopdate != $whileloppu) {
-    $loophh   = date("H", mktime($loophh, $loopmm+$aikavali, 0));
-    $loopmm   = date("i", mktime($loophh, $loopmm+$aikavali, 0));
-    $loopdate = date("H:i", mktime($loophh, $loopmm+$aikavali, 0));
-
-    $sel = '';
-    if ($loopdate == substr($lkello, 0, 5)) {
-      $sel = "SELECTED";
-    }
-
+    $loopdate = date("H:i", mktime($loophh, $loopmm, 0));
+    $sel = $loopdate == $lkello ? " SELECTED" : "";
     $lisays .= "<option value='$loopdate' $sel>$loopdate</option>";
+
+    $loopmm += $aikavali;
+    while ($loopmm >= 60) {
+      $loopmm -= 60;
+      $loophh++;
+    }
   }
 
   $sel = (!empty($kokopaiva)) ? "SELECTED" : "";

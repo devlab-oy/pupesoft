@@ -70,9 +70,6 @@ if ($fieldname == "verkkolasku_lah") {
   elseif ($trow[$i] == 'arvato') {
     $selB = "selected";
   }
-  elseif ($trow[$i] == 'fitek') {
-    $selC = "selected";
-  }
   else {
     $sel1 = "selected";
   }
@@ -88,7 +85,6 @@ if ($fieldname == "verkkolasku_lah") {
   $ulos .= "<option value = 'sepa' $sel9>".t("SEPA-pankkiyhteys");
   $ulos .= "<option value = 'talenom' $selA>".t("Talenom Myyntilaskutuspalvelu");
   $ulos .= "<option value = 'arvato' $selB>".t("Arvato Laskutuspalvelu");
-  $ulos .= "<option value = 'fitek' $selC>".t("Fitek-verkkolaskut");
   $ulos .= "</select></td>";
 
   $jatko = 0;

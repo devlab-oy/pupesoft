@@ -177,6 +177,11 @@ if (empty($magento_sisaanluvun_esto)) {
   $magento_sisaanluvun_esto = 'YES';
 }
 
+// Verollinen yksikköhinta (tarkistetaan halutaanko ottaa eri kentästä, custom syistä johtuen)
+if (empty($verkkokauppa_verollisen_hinnan_kentta)) {
+  $verkkokauppa_verollisen_hinnan_kentta = '';
+}
+
 // Halutaanko merkata kaikki uudet tuotteet aina samaan tuoteryhmään ja
 // estää tuoteryhmän yliajo tuotepäivityksessä
 if (empty($magento_universal_tuoteryhma)) {

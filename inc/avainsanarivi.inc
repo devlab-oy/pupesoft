@@ -287,6 +287,7 @@ if (mysql_field_name($result, $i) == "laji") {
   if ($lukitse_laji== "" or $lukitse_laji == "TIL-LITETY") $ulos .= "<option value='TIL-LITETY' ".$avain_sel["TIL-LITETY"].">".t("Tilauksen liitetiedostotyyppi")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "TRIVITYYPPI") $ulos .= "<option value='TRIVITYYPPI' $avain_sel[TRIVITYYPPI]>".t("Tilausrivin tyyppi")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "TILRIVI_VIILAUS") $ulos .= "<option value='TILRIVI_VIILAUS' $avain_sel[TILRIVI_VIILAUS]>".t("Tilausrivin ulkoasun muutos")."</option>";
+  if ($lukitse_laji== "" or $lukitse_laji == "EDITIL_TILA") $ulos .= "<option value='EDITIL_TILA' $avain_sel[EDITIL_TILA]>".t("Uuden editilauksen tila ja alatila")."</option>";
   if ($lukitse_laji== "") $ulos .= "</optgroup>";
 
   if ($lukitse_laji== "") $ulos .= "<optgroup label='".t("Laskun avainsanat")."'>";

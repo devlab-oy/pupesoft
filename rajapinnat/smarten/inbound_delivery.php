@@ -131,25 +131,101 @@ while ($rivit_row = mysql_fetch_array($rivit_res)) {
 
 mysql_data_seek($rivit_res, 0);
 
-if ($varasto_check['L'] > 0 and $varasto_check['P'] == 0) {
-  $uj_nimi = "Velox";
-}
-elseif ($varasto_check['L'] == 0 and $varasto_check['P'] > 0) {
-  $uj_nimi = "Postnord";
+if ($varasto_check['L'] == 0 and $varasto_check['P'] == 0 and $varasto_check['S'] > 0) {
+  $uj_nimi = "Smarten";
 }
 else {
-  pupesoft_log('smarten_inbound_delivery', "Saapuminen {$row['laskunro']} sis‰lt‰‰ useamman ulkoisen varaston tuotteita. Ei saa sis‰lt‰‰ kuin yht‰.");
-  exit("Saapuminen {$row['laskunro']} sis‰lt‰‰ useamman ulkoisen varaston tuotteita. Ei saa sis‰lt‰‰ kuin yht‰.");
+  pupesoft_log('smarten_inbound_delivery', "Saapuminen {$row['laskunro']} sis‰lt‰‰ muitakin kuin Smarten varaston tuotteita.");
+  exit("Saapuminen {$row['laskunro']} sis‰lt‰‰ muitakin kuin Smarten varaston tuotteita.");
 }
 
 # Rakennetaan XML
-$xml = simplexml_load_string("<?xml version='1.0' encoding='UTF-8'?><Message></Message>");
+$xml = simplexml_load_string("<?xml version='1.0' encoding='UTF-8'?><E-Document></E-Document>");
 
-$header = $xml->addChild('MessageHeader');
-$header->addChild('MessageType', 'inboundDelivery');
-$header->addChild('Sender',      xml_cleanstring($yhtiorow['nimi']));
-$header->addChild('Receiver',    'smarten');
+$header = $xml->addChild('Header');
+$header->addChild('DateIssued', 'inboundDelivery');   // CHECK: Current time
+$header->addChild('SenderGLN', "BNNB");
+$header->addChild('ReceiverGLN', 'smarten');
 
+$document = $xml->addChild('Document');
+$document->addChild('DocumentType', 'order');
+$document->addChild('DocumentFunction', 'original');
+
+$documentparties = $document->addChild('DocumentParties');
+
+$buyerparty = $documentparties->addChild('BuyerParty');
+$buyerparty->addChild('PartyCode', 'BNNB');
+$buyerparty->addChild('Name', xml_cleanstring($yhtiorow['nimi']));
+
+//$payerparty = $documentparties->addChild('PayerParty');
+//$payerparty->addChild('PartyCode', 'BNNB');
+//$payerparty->addChild('Name', 'Partner name');
+
+$supplierparty = $documentparties->addChild('SupplierParty');
+$supplierparty->addChild('PartyCode', "2818");
+$supplierparty->addChild('Name', xml_cleanstring(trim($row['nimi'] . " " . $row['nimitark'])));
+
+$contactdata = $supplierparty->addChild("ContactData");
+
+$actualaddress = $contactdata->addChild("ActualAddress");
+$actualaddress->addChild("Address1", xml_cleanstring($row['osoite']));
+$actualaddress->addChild("City", xml_cleanstring($row['postitp']));
+$actualaddress->addChild("PostalCode", xml_cleanstring($row['postino']));
+$actualaddress->addChild("CountryCode", xml_cleanstring($row['maa']));
+
+$documentinfo = $document->addChild('DocumentInfo');
+$documentinfo->addChild('DocumentSubType');
+$documentinfo->addChild('DocumentName', "PurchaseOrder");
+$documentinfo->addChild('DocumentNum', $tilasnumero_row['otunnus']);
+
+$dateinfo = $documentinfo->addChild('DateInfo');
+$dateinfo->addChild('OrderDate', tv1dateconv($row['luontiaika']));
+$dateinfo->addChild('DeliveryDateRequested', tv1dateconv($tilasnumero_row['toimaika']));
+
+$refinfo = $documentinfo->addChild('RefInfo');
+$sourcedocument = $refinfo->addChild('SourceDocument');
+$sourcedocument->addChild('SourceDocumentNum');
+
+// $documentsumgroup = $document->addChild("DocumentSumGroup");
+// $documentsumgroup->addChild("Currency", xml_cleanstring($row['valkoodi']));
+
+$documentitem = $document->addChild('DocumentItem');
+
+$varastotunnus = xml_cleanstring($row['ulkoisen_jarjestelman_tunnus']);
+if (empty($varastotunnus)) {
+  $varastotunnus = xml_cleanstring($row['varasto']);
+}
+
+while ($rivit_row = mysql_fetch_assoc($rivit_res)) {
+  $itementry = $documentitem->addChild('ItemEntry');
+  $itementry->addChild("LineItemNum", $rivit_row['tunnus']);
+  $itementry->addChild("GTIN", $rivit_row['ean']);
+  $itementry->addChild("BuyerItemCode", xml_cleanstring($rivit_row['tuoteno']));
+  $itementry->addChild("ItemDescription", xml_cleanstring($rivit_row['nimitys']));
+
+  $itemreserve = $itementry->addChild("ItemReserve");
+
+  $itemreserveunit = $itemreserve->addChild("ItemReserveUnit");
+  // $itemreserveunit->addChild("ItemUnit", xml_cleanstring($rivit_row['yksikko']));
+  $itemreserveunit->addChild("AmountActual", xml_cleanstring($rivit_row['varattu']));
+
+  $location = $itemreserve->addChild("Location");
+  $location->addChild("WarehouseCode", $varastotunnus);
+}
+
+$additionalinfo = $document->addChild('AdditionalInfo');
+
+$extension = $additionalinfo->addChild("Extension");
+$extension->addAttribute("extensionId", "internalremarks");
+$extension->addChild("InfoContent", xml_cleanstring($row['kommentti']));
+
+
+
+
+
+
+
+/*
 $body = $xml->addChild('VendReceiptsList');
 $body->addChild('PurchId',          $row['laskunro']);
 $body->addChild('ReceiptsListId',   $tilasnumero_row['otunnus']);
@@ -200,6 +276,7 @@ while ($rivit_row = mysql_fetch_assoc($rivit_res)) {
 }
 
 $xml_chk = (isset($xml->VendReceiptsList) and isset($xml->VendReceiptsList->Lines));
+*/
 
 if ($xml_chk) {
   $ostotilaukset = array_unique($ostotilaukset);

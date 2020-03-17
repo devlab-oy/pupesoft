@@ -173,6 +173,8 @@ while (false !== ($file = readdir($handle))) {
     pupesoft_log('smarten_outbound_delivery_confirmation', "Sanomassa {$file} ".count($tilausrivit)." uniikkia tilausriviä.");
     echo "\n";
 
+    /*
+     *  Kommentoitu pois, koska tällä hetkellä ei ole Kicksiä
     $query = "SELECT *
               FROM asiakkaan_avainsanat
               WHERE yhtio       = '{$kukarow['yhtio']}'
@@ -225,6 +227,8 @@ while (false !== ($file = readdir($handle))) {
         $pklask++;
       }
     }
+
+    */
 
     $paivitettiin_tilausrivi_onnistuneesti = false;
     $keratty_yhteensa = 0;

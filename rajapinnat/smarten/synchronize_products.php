@@ -66,26 +66,89 @@ if (mysql_num_rows($res) > 0) {
     echo "</tr>";
   }
   else {
-    if ($ulkoinen_jarjestelma == 'L') {
-      $uj_nimi = "Velox";
-    }
-    else {
-      $uj_nimi = "PostNord";
-    }
+    $uj_nimi = "Smarten";
 
-    $xml = simplexml_load_string("<?xml version='1.0' encoding='UTF-8'?><Message></Message>");
+    $worksheet   = new pupeExcel();
+    $excelrivi   = 0;
+    $excelsarake = 0;
 
-    $messageheader = $xml->addChild('MessageHeader');
-    $messageheader->addChild('MessageType', 'MaterialMaster');
-    $messageheader->addChild('Sender',      xml_cleanstring($yhtiorow['nimi']));
-    $messageheader->addChild('Receiver',    $uj_nimi);
-
-    $iteminformation = $xml->addChild('ItemInformation');
-    $iteminformation->addChild('TransDate', date('d-m-Y'));
-    $iteminformation->addChild('TransTime', date('H:i:s'));
-
-    $items = $iteminformation->addChild('Items');
-
+    $worksheet->writeString($excelrivi, $excelsarake,"Versioon"); $excelsarake++;
+    $worksheet->writeString($excelrivi, $excelsarake,"Artikliklass"); $excelsarake++;
+    $worksheet->writeString($excelrivi, $excelsarake,"Tootekood"); $excelsarake++;
+    $worksheet->writeString($excelrivi, $excelsarake,"Nimetus"); $excelsarake++;
+    $worksheet->writeString($excelrivi, $excelsarake,"Yhik"); $excelsarake++;
+    $worksheet->writeString($excelrivi, $excelsarake,"EAN"); $excelsarake++;
+    $worksheet->writeString($excelrivi, $excelsarake,"KastiEAN"); $excelsarake++;
+    $worksheet->writeString($excelrivi, $excelsarake,"Kastis"); $excelsarake++;
+    $worksheet->writeString($excelrivi, $excelsarake,"Alusel"); $excelsarake++;
+    $worksheet->writeString($excelrivi, $excelsarake,"KogusKihis"); $excelsarake++;
+    $worksheet->writeString($excelrivi, $excelsarake,"HankijaKood"); $excelsarake++;
+    $worksheet->writeString($excelrivi, $excelsarake,"BaashindEEK"); $excelsarake++;
+    $worksheet->writeString($excelrivi, $excelsarake,"HankijaTooteKood"); $excelsarake++;
+    $worksheet->writeString($excelrivi, $excelsarake,"SvtJaehindEEK"); $excelsarake++;
+    $worksheet->writeString($excelrivi, $excelsarake,"KNKood"); $excelsarake++;
+    $worksheet->writeString($excelrivi, $excelsarake,"ParitoluRiik"); $excelsarake++;
+    $worksheet->writeString($excelrivi, $excelsarake,"BrutomassKG"); $excelsarake++;
+    $worksheet->writeString($excelrivi, $excelsarake,"NetomassKG"); $excelsarake++;
+    $worksheet->writeString($excelrivi, $excelsarake,"MahtM3"); $excelsarake++;
+    $worksheet->writeString($excelrivi, $excelsarake,"ParimPaeviOst"); $excelsarake++;
+    $worksheet->writeString($excelrivi, $excelsarake,"ParimPaeviVarud"); $excelsarake++;
+    $worksheet->writeString($excelrivi, $excelsarake,"ParimPaeviMyyk"); $excelsarake++;
+    $worksheet->writeString($excelrivi, $excelsarake,"Ostuladu"); $excelsarake++;
+    $worksheet->writeString($excelrivi, $excelsarake,"Varudeladu"); $excelsarake++;
+    $worksheet->writeString($excelrivi, $excelsarake,"Myygiladu"); $excelsarake++;
+    $worksheet->writeString($excelrivi, $excelsarake,"HankijaNimetus"); $excelsarake++;
+    $worksheet->writeString($excelrivi, $excelsarake,"VeebVarjatud"); $excelsarake++;
+    $worksheet->writeString($excelrivi, $excelsarake,"Peatatud"); $excelsarake++;
+    $worksheet->writeString($excelrivi, $excelsarake,"Kleebitav"); $excelsarake++;
+    $worksheet->writeString($excelrivi, $excelsarake,"SisseostjaGrupp"); $excelsarake++;
+    $worksheet->writeString($excelrivi, $excelsarake,"Aktiivkoht"); $excelsarake++;
+    $worksheet->writeString($excelrivi, $excelsarake,"VootkoodiTyyp"); $excelsarake++;
+    $worksheet->writeString($excelrivi, $excelsarake,"KastiVootkoodiTyyp"); $excelsarake++;
+    $worksheet->writeString($excelrivi, $excelsarake,"Kaubagrupp"); $excelsarake++;
+    $worksheet->writeString($excelrivi, $excelsarake,"Laomudeligrupp"); $excelsarake++;
+    $worksheet->writeString($excelrivi, $excelsarake,"DimgruppJalg"); $excelsarake++;
+    $worksheet->writeString($excelrivi, $excelsarake,"Kaibemaksugrupp"); $excelsarake++;
+    $worksheet->writeString($excelrivi, $excelsarake,"OstuHind"); $excelsarake++;
+    $worksheet->writeString($excelrivi, $excelsarake,"OstuhinnaValuuta"); $excelsarake++;
+    $worksheet->writeString($excelrivi, $excelsarake,"EluigaOstes"); $excelsarake++;
+    $worksheet->writeString($excelrivi, $excelsarake,"EluigaPaevades"); $excelsarake++;
+    $worksheet->writeString($excelrivi, $excelsarake,"Tekst"); $excelsarake++;
+    $worksheet->writeString($excelrivi, $excelsarake,"VaikimisiPartii"); $excelsarake++;
+    $worksheet->writeString($excelrivi, $excelsarake,"LisakaubagruppOst"); $excelsarake++;
+    $worksheet->writeString($excelrivi, $excelsarake,"LisakaubagruppMyyk"); $excelsarake++;
+    $worksheet->writeString($excelrivi, $excelsarake,"AlkLiik"); $excelsarake++;
+    $worksheet->writeString($excelrivi, $excelsarake,"AlkGrupp"); $excelsarake++;
+    $worksheet->writeString($excelrivi, $excelsarake,"AlkRegNr"); $excelsarake++;
+    $worksheet->writeString($excelrivi, $excelsarake,"AlkProtsent"); $excelsarake++;
+    $worksheet->writeString($excelrivi, $excelsarake,"AlkVarvus"); $excelsarake++;
+    $worksheet->writeString($excelrivi, $excelsarake,"AlkMahtLiiter"); $excelsarake++;
+    $worksheet->writeString($excelrivi, $excelsarake,"AlkTkUhikus"); $excelsarake++;
+    $worksheet->writeString($excelrivi, $excelsarake,"AlkMaksumark"); $excelsarake++;
+    $worksheet->writeString($excelrivi, $excelsarake,"Pooltoodang"); $excelsarake++;
+    $worksheet->writeString($excelrivi, $excelsarake,"Pakend"); $excelsarake++;
+    $worksheet->writeString($excelrivi, $excelsarake,"TootjaNimetus"); $excelsarake++;
+    $worksheet->writeString($excelrivi, $excelsarake,"NoppeLisaInfo"); $excelsarake++;
+    $worksheet->writeString($excelrivi, $excelsarake,"Aastakaik"); $excelsarake++;
+    $worksheet->writeString($excelrivi, $excelsarake,"PartneriKaubagrupp1"); $excelsarake++;
+    $worksheet->writeString($excelrivi, $excelsarake,"PartneriKaubagrupp2"); $excelsarake++;
+    $worksheet->writeString($excelrivi, $excelsarake,"KastiSygavus"); $excelsarake++;
+    $worksheet->writeString($excelrivi, $excelsarake,"KastiLaius"); $excelsarake++;
+    $worksheet->writeString($excelrivi, $excelsarake,"KastiKorgus"); $excelsarake++;
+    $worksheet->writeString($excelrivi, $excelsarake,"Plokis"); $excelsarake++;
+    $worksheet->writeString($excelrivi, $excelsarake,"Loomne"); $excelsarake++;
+    $worksheet->writeString($excelrivi, $excelsarake,"Mahetoode"); $excelsarake++;
+    $worksheet->writeString($excelrivi, $excelsarake,"DimgruppReserv"); $excelsarake++;
+    $worksheet->writeString($excelrivi, $excelsarake,"PartiiValik"); $excelsarake++;
+    $worksheet->writeString($excelrivi, $excelsarake,"Suunamine"); $excelsarake++;
+    $worksheet->writeString($excelrivi, $excelsarake,"Filter1"); $excelsarake++;
+    $worksheet->writeString($excelrivi, $excelsarake,"Filter2"); $excelsarake++;
+    $worksheet->writeString($excelrivi, $excelsarake,"Filter3"); $excelsarake++;
+    $worksheet->writeString($excelrivi, $excelsarake,"Filter4"); $excelsarake++;
+    $worksheet->writeString($excelrivi, $excelsarake,"TsooniId"); $excelsarake++;
+    $worksheet->writeString($excelrivi, $excelsarake,"Yhikugrupp"); $excelsarake++;
+    $worksheet->writeString($excelrivi, $excelsarake,"YhikugruppKompl"); $excelsarake++;
+    																																																
     $i = 1;
   }
 
@@ -119,96 +182,90 @@ if (mysql_num_rows($res) > 0) {
         $type = 'U';
       }
 
-      $line = $items->addChild('Line');
-      $line->addAttribute('No', $i);
-      $line->addChild('Type',                  $type);
-      if ($uj_nimi == "Velox") {
-        $line->addChild('ItemNumber',          xml_cleanstring($row[$smarten_itemnumberfield], 32));
-      }
-      else {
-        $line->addChild('ItemNumber',          xml_cleanstring($row[$smarten_itemnumberfield], 20));
-      }
-      $line->addChild('ItemName',              xml_cleanstring($row['nimitys'], 50));
-      $line->addChild('ProdGroup1',            xml_cleanstring($row[$smarten_prodgroup1field], 6));
-      $line->addChild('ProdGroup2',            xml_cleanstring($row[$smarten_prodgroup2field], 6));
-      $line->addChild('SalesPrice',            '');
-      $line->addChild('Unit1',                 xml_cleanstring($row['yksikko'], 10));
-      $line->addChild('Unit2',                 '');
-      $line->addChild('Relation',              '');
-      $line->addChild('Weight',                round($row['tuotemassa'], 3));
-      $line->addChild('NetWeight',             '');
-      $line->addChild('Volume',                '');
-      $line->addChild('Height',                '');
-      $line->addChild('Width',                 '');
-      $line->addChild('Length',                '');
-      $line->addChild('PackageSize',           '');
-      $line->addChild('PalletSize',            '');
-      $line->addChild('Status',                $status);
-      $line->addChild('WholesalePackageSize',  '');
-      $line->addChild('EANCode',               xml_cleanstring($row['eankoodi'], 20));
-      $line->addChild('EANCode2',              '');
-      $line->addChild('CustomsTariffNum',      xml_cleanstring($row['tullinimike1'], 14));
-      if ($uj_nimi == "Velox") {
-        $line->addChild('CustomsTariffTreat',  xml_cleanstring($row['tullikohtelu'], 4));
-        $line->addChild('Brand',               xml_cleanstring($row['tuotemerkki'], 30));
-        $line->addChild('ProviderNum',         xml_cleanstring($row['toim_tuoteno'], 30));
-      }
-      if ($uj_nimi == "PostNord") {
-        $line->addChild('AlarmLimit',            $row['halytysraja']);
-      } 
-      else {
-        $line->addChild('AlarmLimit',          '');
-      }
-      $line->addChild('QualPeriod1',           '');
-      $line->addChild('QualPeriod2',           '');
-      $line->addChild('QualPeriod3',           '');
-      $line->addChild('FactoryNum',            '');
-      $line->addChild('UNCode',                '');
-      $line->addChild('BBDateCollect',         '');
-      $line->addChild('SerialNumbers',         '');
-      $line->addChild('SerialNumInArrival',    '');
-      $line->addChild('TaxCode',               '');
-      $line->addChild('CountryofOrigin',       '');
-      $line->addChild('PlatformQuantity',      '');
-      $line->addChild('PlatformType',          '');
-      $line->addChild('PurchasePrice',         '');
-      $line->addChild('ConsumerPrice',         '');
-      $line->addChild('OperRecommendation',    '');
-      $line->addChild('FreeText',              xml_cleanstring($row['tuoteno'], 100));
-      $line->addChild('PurchaseUnit',          '');
-      $line->addChild('ManufactItemNum',       '');
-      $line->addChild('InternationalItemNum',  '');
-      $line->addChild('Flashpoint',            '');
-      $line->addChild('SalesCurrency',         '');
-      $line->addChild('PurchaseCurrency',      '');
-      $line->addChild('Model',                 '');
-      $line->addChild('ModelOrder',            '');
-      $line->addChild('TransportTemperature',  '');
+      $excelsarake = 0;
+      $excelrivi++;
 
-      if (is_null($row['synkronointi'])) {
-        $query = "INSERT INTO tuotteen_avainsanat SET
-                  yhtio      = '{$kukarow['yhtio']}',
-                  tuoteno    = '{$row['tuoteno']}',
-                  kieli      = '{$yhtiorow['kieli']}',
-                  laji       = 'synkronointi',
-                  selite     = 'x',
-                  laatija    = '{$kukarow['kuka']}',
-                  luontiaika = now(),
-                  muutospvm  = now(),
-                  muuttaja   = '{$kukarow['kuka']}'";
-        pupe_query($query);
-      }
-      else {
-        $query = "UPDATE tuotteen_avainsanat SET
-                  selite      = 'x'
-                  WHERE yhtio = '{$kukarow['yhtio']}'
-                  AND tuoteno = '{$row['tuoteno']}'
-                  AND laji    = 'synkronointi'";
-        pupe_query($query);
-      }
-
-      $i++;
+      $worksheet->writeString($excelrivi, $excelsarake, "112" /*"Versioon"*/); $excelsarake++;
+      $worksheet->writeString($excelrivi, $excelsarake, "BNNB" /*"Artikliklass"*/); $excelsarake++;
+      $worksheet->writeString($excelrivi, $excelsarake, $row['tuoteno'] /*"Tootekood"*/); $excelsarake++;
+      $worksheet->writeString($excelrivi, $excelsarake, $row['nimitys'] /*"Nimetus"*/); $excelsarake++;
+      $worksheet->writeString($excelrivi, $excelsarake, "" /*"Yhik"*/); $excelsarake++;
+      $worksheet->writeString($excelrivi, $excelsarake, $row['eankoodi'] /*"EAN"*/); $excelsarake++;
+      $worksheet->writeString($excelrivi, $excelsarake, "" /*"KastiEAN"*/); $excelsarake++;
+      $worksheet->writeString($excelrivi, $excelsarake, $row['myynti_era'] /*"Kastis"*/); $excelsarake++;         // CHECK: quantity of pieces
+      $worksheet->writeString($excelrivi, $excelsarake, "" /*"Alusel"*/); $excelsarake++;
+      $worksheet->writeString($excelrivi, $excelsarake, "" /*"KogusKihis"*/); $excelsarake++;
+      $worksheet->writeString($excelrivi, $excelsarake, "2818" /*"HankijaKood"*/); $excelsarake++;
+      $worksheet->writeString($excelrivi, $excelsarake, "" /*"BaashindEEK"*/); $excelsarake++;
+      $worksheet->writeString($excelrivi, $excelsarake, $row['tuoteno'] /*"HankijaTooteKood"*/); $excelsarake++;  // CHECK: supplier's item/aritcle code
+      $worksheet->writeString($excelrivi, $excelsarake, "" /*"SvtJaehindEEK"*/); $excelsarake++;
+      $worksheet->writeString($excelrivi, $excelsarake, "" /*"KNKood"*/); $excelsarake++;
+      $worksheet->writeString($excelrivi, $excelsarake, "" /*"ParitoluRiik"*/); $excelsarake++;
+      $worksheet->writeString($excelrivi, $excelsarake, $row['tuotemassa'] /*"BrutomassKG"*/); $excelsarake++;
+      $worksheet->writeString($excelrivi, $excelsarake, "" /*"NetomassKG"*/); $excelsarake++;
+      $worksheet->writeString($excelrivi, $excelsarake, "" /*"MahtM3"*/); $excelsarake++;
+      $worksheet->writeString($excelrivi, $excelsarake, "" /*"ParimPaeviOst"*/); $excelsarake++;
+      $worksheet->writeString($excelrivi, $excelsarake, "" /*"ParimPaeviVarud"*/); $excelsarake++;
+      $worksheet->writeString($excelrivi, $excelsarake, "" /*"ParimPaeviMyyk"*/); $excelsarake++;
+      $worksheet->writeString($excelrivi, $excelsarake, "" /*"Ostuladu"*/); $excelsarake++;
+      $worksheet->writeString($excelrivi, $excelsarake, "" /*"Varudeladu"*/); $excelsarake++;
+      $worksheet->writeString($excelrivi, $excelsarake, "" /*"Myygiladu"*/); $excelsarake++;
+      $worksheet->writeString($excelrivi, $excelsarake, "" /*"HankijaNimetus"*/); $excelsarake++;
+      $worksheet->writeString($excelrivi, $excelsarake, "" /*"VeebVarjatud"*/); $excelsarake++;
+      $worksheet->writeString($excelrivi, $excelsarake, "" /*"Peatatud"*/); $excelsarake++;
+      $worksheet->writeString($excelrivi, $excelsarake, $row['purkukommentti'] /*"Kleebitav"*/); $excelsarake++;   // CHECK: this should indicate if the product needs labeling (value: 0 or 1)
+      $worksheet->writeString($excelrivi, $excelsarake, "" /*"SisseostjaGrupp"*/); $excelsarake++;
+      $worksheet->writeString($excelrivi, $excelsarake, "" /*"Aktiivkoht"*/); $excelsarake++;
+      $worksheet->writeString($excelrivi, $excelsarake, "" /*"VootkoodiTyyp"*/); $excelsarake++;
+      $worksheet->writeString($excelrivi, $excelsarake, "" /*"KastiVootkoodiTyyp"*/); $excelsarake++;
+      $worksheet->writeString($excelrivi, $excelsarake, "" /*"Kaubagrupp"*/); $excelsarake++;
+      $worksheet->writeString($excelrivi, $excelsarake, "" /*"Laomudeligrupp"*/); $excelsarake++;
+      $worksheet->writeString($excelrivi, $excelsarake, "" /*"DimgruppJalg"*/); $excelsarake++;
+      $worksheet->writeString($excelrivi, $excelsarake, "" /*"Kaibemaksugrupp"*/); $excelsarake++;
+      $worksheet->writeString($excelrivi, $excelsarake, "" /*"OstuHind"*/); $excelsarake++;
+      $worksheet->writeString($excelrivi, $excelsarake, "" /*"OstuhinnaValuuta"*/); $excelsarake++;
+      $worksheet->writeString($excelrivi, $excelsarake, "" /*"EluigaOstes"*/); $excelsarake++;
+      $worksheet->writeString($excelrivi, $excelsarake, "" /*"EluigaPaevades"*/); $excelsarake++;
+      $worksheet->writeString($excelrivi, $excelsarake, "" /*"Tekst"*/); $excelsarake++;
+      $worksheet->writeString($excelrivi, $excelsarake, "" /*"VaikimisiPartii"*/); $excelsarake++;
+      $worksheet->writeString($excelrivi, $excelsarake, "" /*"LisakaubagruppOst"*/); $excelsarake++;
+      $worksheet->writeString($excelrivi, $excelsarake, "" /*"LisakaubagruppMyyk"*/); $excelsarake++;
+      $worksheet->writeString($excelrivi, $excelsarake, "" /*"AlkLiik"*/); $excelsarake++;
+      $worksheet->writeString($excelrivi, $excelsarake, "" /*"AlkGrupp"*/); $excelsarake++;
+      $worksheet->writeString($excelrivi, $excelsarake, "" /*"AlkRegNr"*/); $excelsarake++;
+      $worksheet->writeString($excelrivi, $excelsarake, "" /*"AlkProtsent"*/); $excelsarake++;
+      $worksheet->writeString($excelrivi, $excelsarake, "" /*"AlkVarvus"*/); $excelsarake++;
+      $worksheet->writeString($excelrivi, $excelsarake, "" /*"AlkMahtLiiter"*/); $excelsarake++;
+      $worksheet->writeString($excelrivi, $excelsarake, "" /*"AlkTkUhikus"*/); $excelsarake++;
+      $worksheet->writeString($excelrivi, $excelsarake, "" /*"AlkMaksumark"*/); $excelsarake++;
+      $worksheet->writeString($excelrivi, $excelsarake, "" /*"Pooltoodang"*/); $excelsarake++;
+      $worksheet->writeString($excelrivi, $excelsarake, "" /*"Pakend"*/); $excelsarake++;
+      $worksheet->writeString($excelrivi, $excelsarake, "" /*"TootjaNimetus"*/); $excelsarake++;
+      $worksheet->writeString($excelrivi, $excelsarake, "" /*"NoppeLisaInfo"*/); $excelsarake++;       // CHECK: this is instructions field for picking, not printed, remark for warehouse (for example: fragile or something)
+      $worksheet->writeString($excelrivi, $excelsarake, "" /*"Aastakaik"*/); $excelsarake++;
+      $worksheet->writeString($excelrivi, $excelsarake, "" /*"PartneriKaubagrupp1"*/); $excelsarake++;
+      $worksheet->writeString($excelrivi, $excelsarake, "" /*"PartneriKaubagrupp2"*/); $excelsarake++;
+      $worksheet->writeString($excelrivi, $excelsarake, "" /*"KastiSygavus"*/); $excelsarake++;
+      $worksheet->writeString($excelrivi, $excelsarake, "" /*"KastiLaius"*/); $excelsarake++;
+      $worksheet->writeString($excelrivi, $excelsarake, "" /*"KastiKorgus"*/); $excelsarake++;
+      $worksheet->writeString($excelrivi, $excelsarake, "" /*"Plokis"*/); $excelsarake++;
+      $worksheet->writeString($excelrivi, $excelsarake, "" /*"Loomne"*/); $excelsarake++;
+      $worksheet->writeString($excelrivi, $excelsarake, "" /*"Mahetoode"*/); $excelsarake++;
+      $worksheet->writeString($excelrivi, $excelsarake, "" /*"DimgruppReserv"*/); $excelsarake++;
+      $worksheet->writeString($excelrivi, $excelsarake, "" /*"PartiiValik"*/); $excelsarake++;
+      $worksheet->writeString($excelrivi, $excelsarake, "" /*"Suunamine"*/); $excelsarake++;
+      $worksheet->writeString($excelrivi, $excelsarake, "" /*"Filter1"*/); $excelsarake++;
+      $worksheet->writeString($excelrivi, $excelsarake, "" /*"Filter2"*/); $excelsarake++;
+      $worksheet->writeString($excelrivi, $excelsarake, "" /*"Filter3"*/); $excelsarake++;
+      $worksheet->writeString($excelrivi, $excelsarake, "" /*"Filter4"*/); $excelsarake++;
+      $worksheet->writeString($excelrivi, $excelsarake, "" /*"TsooniId"*/); $excelsarake++;
+      $worksheet->writeString($excelrivi, $excelsarake, "" /*"Yhikugrupp"*/); $excelsarake++;
+      $worksheet->writeString($excelrivi, $excelsarake, "" /*"YhikugruppKompl"*/); $excelsarake++;
     }
+  }
+
+  if (isset($worksheet)) {
+    $excelnimi = $worksheet->close();
   }
 
   if ($tee == '') {

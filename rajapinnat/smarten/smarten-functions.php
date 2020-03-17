@@ -228,6 +228,13 @@ if (!function_exists('smarten_message_type')) {
   }
 }
 
+if (!function_exists('smarten_timestamp')) {
+  function smarten_timestamp($time)
+  {
+    return date("Y-m-d\TH:i:s.v", $time);
+  }
+}
+
 if (!function_exists('smarten_outbounddelivery')) {
   function smarten_outbounddelivery($otunnus) {
 
@@ -300,11 +307,8 @@ if (!function_exists('smarten_outbounddelivery')) {
     }
 
     switch ($varastorow['ulkoinen_jarjestelma']) {
-    case 'L':
-      $uj_nimi = "Velox";
-      break;
-    case 'P':
-      $uj_nimi = "PostNord";
+    case 'S':
+      $uj_nimi = "Smarten";
       break;
     default:
       pupesoft_log('smarten_outbound_delivery', "Tilauksen {$otunnus} varaston ulkoinen järjestelmä oli virheellinen.");
@@ -374,14 +378,139 @@ if (!function_exists('smarten_outbounddelivery')) {
       }
     }
 
+    $smarten_itemnumberfield = smarten_field('ItemNumber');
+
     # Rakennetaan XML
-    $xml = simplexml_load_string("<?xml version='1.0' encoding='UTF-8'?><Message></Message>");
+    $xml = simplexml_load_string("<?xml version='1.0' encoding='UTF-8'?><E-Document></E-Document>");
 
-    $messageheader = $xml->addChild('MessageHeader');
-    $messageheader->addChild('MessageType', 'OutboundDelivery');
-    $messageheader->addChild('Sender',       xml_cleanstring($yhtiorow['nimi']));
-    $messageheader->addChild('Receiver',     $uj_nimi);
+    $header = $xml->addChild('Header');
+    $header->addChild('DateIssued', smarten_timestamp($looprow['luontiaika']));
+    $header->addChild('Version',    "1");
+    $header->addChild('SenderID',   "BNNB");
+    $header->addChild('ReceiverID', "SMTN");
 
+    $document = $xml->addChild('Document');
+    $document->addChild('DocumentType', "desorder");
+
+    $documentparties = $document->addChild('DocumentParties');
+
+    $buyerparty = $documentparties->addChild("BuyerParty");
+    $buyerparty->addChild("Name", xml_cleanstring($looprow['nimi']));
+
+    $deliveryparty = $documentparties->addChild("BuyerParty");
+    $deliveryparty->addChild("PartyCode", "");
+    $deliveryparty->addChild("Name", xml_cleanstring($looprow['toim_nimi']));
+
+    $contactdata = $deliveryparty->addChild("ContactData");
+
+    $actualaddress = $contactdata->addChild("ActualAddress");
+    $actualaddress->addChild("Address1", xml_cleanstring($looprow['toim_osoite']));
+    $actualaddress->addChild("City", xml_cleanstring($looprow['toim_postitp']));
+    $actualaddress->addChild("PostalCode", xml_cleanstring($looprow['toim_postino']));
+    $actualaddress->addChild("CountryCode", xml_cleanstring($looprow['toim_maa']));
+
+    $contactdata->addChild("PhoneNum", "");
+    $contactdata->addChild("MobileNum", xml_cleanstring($looprow['toim_puh']));
+
+    $sellerparty = $documentparties->addChild("SellerParty");
+    $sellerparty->addChild("PartyCode", "BNNB");
+
+    $documentinfo = $document->addChild('DocumentInfo');
+    $documentinfo->addChild("DocumentName", "SalesOrder");
+    $documentinfo->addChild("DocumentNum", $otunnus);
+    $documentinfo->addChild("PaymentTerm", xml_cleanstring($looprow['maksuteksti']));
+
+    $dateinfo = $documentinfo->addChild("DateInfo");
+    // $dateinfo->addChild("DueDate", "");
+    $dateinfo->addChild("DeliveryDateRequested", smarten_timestamp($looprow['lasku_toimaika']));
+    //$dateinfo->addChild("IssueDate", "");
+
+    $refinfo = $documentinfo->addChild("RefInfo");
+
+    $sourcedocument = $refinfo->addChild("DueDate");
+    $sourcedocument->addAttribute("type", "order");
+    $sourcedocument->addChild("SourceDocumentNum", $looprow['asiakkaan_tilausnumero']);
+    $sourcedocument->addChild("SourceDocumentDate", "");
+
+    // $refinfo->addChild("TransportReferenceID", "");
+
+    if ($looprow['sisviesti3'] == "TEST") {
+      $documentinfo->addChild("CreatedBy", "TEST");
+    }
+
+    $documentitem = $document->addChild('DocumentItem');
+
+    $varastotunnus = xml_cleanstring($looprow['ulkoisen_jarjestelman_tunnus']);
+    if (empty($varastotunnus)) {
+      $varastotunnus = xml_cleanstring($looprow['varasto']);
+    }
+
+    mysql_data_seek($loopres, 0);
+    while ($looprow = mysql_fetch_assoc($loopres)) {
+      $itementry = $documentitem->addChild('ItemEntry');
+
+      $itementry->addChild("LineItemNum", $looprow['tilausrivin_tunnus']);
+      $itementry->addChild("SellerItemCode", xml_cleanstring($looprow['tuoteno']));
+      $itementry->addChild("ItemDescription", xml_cleanstring($looprow['nimitys']));
+
+      //$itemunitrecord = $itementry->addChild("ItemUnitRecord");
+      //$itemunitrecord->addChild("ItemUnit", xml_cleanstring($looprow['yksikko']));
+
+      //$itementry->addChild("BaseUnit", xml_cleanstring($looprow['yksikko']));
+      $itementry->addChild("AmountOrdered", xml_cleanstring($looprow['kpl']));
+      $itementry->addChild("ItemPrice", xml_cleanstring($looprow['hinta']));
+      // $itementry->addChild("ItemBasePrice", xml_cleanstring($looprow['hinta_alkuperainen']));
+      // $itementry->addChild("ItemSum", xml_cleanstring($looprow['rivihinta']));
+
+      // $addition = $itementry->addChild("Addition");
+      // $addition->addAttribute("addCode", "DSC");
+      // $addition->addChild("AddContent", "");
+      // $addition->addChild("AddRate", "");
+      // $addition->addChild("AddSum", "");
+
+      // $vat = $itementry->addChild("VAT");
+      // $vat->addAttribute("vatID", "");
+      // $vat->addChild("SumBeforeVAT", xml_cleanstring($looprow['rivihinta']));
+      // $vat->addChild("VATRate", xml_cleanstring($looprow['alv']));
+      // $vat->addChild("VATSum", xml_cleanstring($looprow['rivihinta']));
+
+      // $itementry->addChild("ItemTotal", "");
+
+      $itemreserve = $itementry->addChild("ItemReserve");
+
+      $itemreserveunit = $itemreserve->addChild("ItemReserveUnit");
+      // $itemreserveunit->addChild("ItemUnit", "");
+      $itemreserveunit->addChild("AmountActual", xml_cleanstring($looprow['kpl']));
+
+      $location = $itemreserve->addChild("Location");
+      $location->addChild("WarehouseCode", $varastotunnus);
+
+      // $additionalinfo = $itementry->addChild("AdditionalInfo");
+
+      // $extension = $additionalinfo->addChild("Extension");
+      // $extension->addAttribute("extensionId", "externalremarks");
+      // $extension->addChild("InfoContent", xml_cleanstring($looprow['kommentti']));
+    }
+
+    mysql_data_seek($loopres, 0);
+    $looprow = mysql_fetch_assoc($loopres);
+
+    $additionalinfo = $document->addChild('AdditionalInfo');
+
+    $extension = $additionalinfo->addChild("Extension");
+    $extension->addAttribute("extensionId", "internalremarks");
+    $extension->addChild("InfoContent", xml_cleanstring($looprow['sisviesti2']));
+
+    $extension = $additionalinfo->addChild("Extension");
+    $extension->addAttribute("extensionId", "externalremarks");
+    $extension->addChild("InfoContent", xml_cleanstring($looprow['kommentti']));
+
+
+
+
+
+
+/*
     $custpickinglist = $xml->addChild('CustPickingList');
     $custpickinglist->addChild('SalesId',             substr($otunnus, 0, 20));
     $custpickinglist->addChild('PickingListId',       substr($otunnus, 0, 20));
@@ -501,7 +630,7 @@ if (!function_exists('smarten_outbounddelivery')) {
 
       $_line_i++;
     }
-
+*/
     pupesoft_log('smarten_outbound_delivery', "Tilauksen {$otunnus} sanomalle lisätty ".($_line_i - 1)." riviä.");
 
     $_name = substr("out_{$otunnus}_".md5(uniqid()), 0, 25);

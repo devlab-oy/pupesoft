@@ -1003,7 +1003,7 @@ class MagentoClient {
   }
 
   // P‰ivitet‰‰n sadot
-  public function paivita_saldot(array $dnstock, $ajetaanko_kaikki) {
+  public function paivita_saldot(array $dnstock, $ajetaanko_kaikki = false) {
     $this->log('magento_saldot', "P‰ivitet‰‰n saldot");
 
 

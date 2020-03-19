@@ -432,7 +432,7 @@ if (in_array('saldot', $magento_ajolista)) {
 
   // Saldot
   tuote_export_echo("Päivitetään tuotteiden saldot");
-  $magento_client->paivita_saldot($dnstock);
+  $magento_client->paivita_saldot($dnstock, $ajetaanko_kaikki);
 }
 
 if (in_array('tuoteryhmat', $magento_ajolista)) {

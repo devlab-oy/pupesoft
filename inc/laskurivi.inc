@@ -1,7 +1,7 @@
 <?php
 
 $ulos = "";
-$jatko = 1; // oletetaan normaali käsittely
+$jatko = 1; // oletetaan normaali kï¿½sittely
 $tyyppi = 2;
 
 if (mysql_field_name($result, $i) == "yhtio" or
@@ -106,6 +106,25 @@ if (mysql_field_name($result, $i) == "toimaika") {
   $tyyppi = 1.5;
 }
 
+if ($fieldname == "laskutyyppi") {
+
+  $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
+
+  $apu = $trow[$i];
+  $sel = array();
+  $sel[$apu] = "selected";
+
+  $ulos .= "<option value = '-9'>".t("Oletus")."</option>";
+
+  foreach (pupesoft_laskutyypit() as $ltyynumero => $ltyyteksti) {
+    $ulos .= "<option value = '$ltyynumero' $sel[$ltyynumero]>".t($ltyyteksti)."</option>";
+  }
+
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
 if (mysql_field_name($result, $i) == "sisviesti1") {
   $ulos = "<td><textarea cols='45' rows='5' name='$nimi'>$trow[$i]</textarea></td>";
   $jatko = 0;
@@ -147,14 +166,14 @@ if (mysql_field_name($result, $i) == "chn") {
   $ulos  = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
   $ulos .= "<option value='100' $sel[100]>".t("Verkkolasku, tulostuspalvelu")."</option>";
   $ulos .= "<option value='010' $sel[010]>".t("Verkkolasku")."</option>";
-  //$ulos .= "<option value='001' $sel[001]>".t("Itella Pupevoice: EDI, sähköinen lasku")."</option>";
+  //$ulos .= "<option value='001' $sel[001]>".t("Itella Pupevoice: EDI, sï¿½hkï¿½inen lasku")."</option>";
   $ulos .= "<option value='020' $sel[020]>".t("Vienti-Verkkolasku (EU)")."</option>";
   $ulos .= "<option value='030' $sel[030]>".t("Vienti-Verkkolasku, tulostuspalvelu (EU)")."</option>";
-  $ulos .= "<option value='111' $sel[111]>".t("Itella EDI: EIH-1.4 sähköinen lasku")."</option>";
+  $ulos .= "<option value='111' $sel[111]>".t("Itella EDI: EIH-1.4 sï¿½hkï¿½inen lasku")."</option>";
   $ulos .= "<option value='112' $sel[112]>".t("Pupesoft-Finvoice: Verkkolasku Pupesoftista-Pupesoftiin")."</option>";
-  $ulos .= "<option value='666' $sel[666]>".t("Sähköposti")."</option>";
-  $ulos .= "<option value='667' $sel[667]>".t("Paperilasku, käsitellään manuaalisesti")."</option>";
-  $ulos .= "<option value='999' $sel[999]>".t("Laskutuskielto, laskutusta ei tehdä")."</option>";
+  $ulos .= "<option value='666' $sel[666]>".t("Sï¿½hkï¿½posti")."</option>";
+  $ulos .= "<option value='667' $sel[667]>".t("Paperilasku, kï¿½sitellï¿½ï¿½n manuaalisesti")."</option>";
+  $ulos .= "<option value='999' $sel[999]>".t("Laskutuskielto, laskutusta ei tehdï¿½")."</option>";
   $ulos .= "</select></td>";
 
   $jatko = 0;
@@ -167,12 +186,12 @@ if (mysql_field_name($result, $i) == "tilaustyyppi") {
   $sel[$apu] = "SELECTED";
 
   $ulos  = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
-  $ulos .= "<option value='0' $sel[0]>".t("Ylläpitosopimus")."</option>";
-  $ulos .= "<option value='2' $sel[2]>".t("Varastotäydennys")."</option>";
+  $ulos .= "<option value='0' $sel[0]>".t("Yllï¿½pitosopimus")."</option>";
+  $ulos .= "<option value='2' $sel[2]>".t("Varastotï¿½ydennys")."</option>";
   $ulos .= "<option value='7' $sel[7]>".t("Tehdastilaus")."</option>";
   $ulos .= "<option value='8' $sel[8]>".t("Muiden mukana")."</option>";
   $ulos .= "<option value='9' $sel[9]>".t("Tehdaspalautus")."</option>";
-  $ulos .= "<option value='A' $sel[A]>".t("Työmääräys")."</option>";
+  $ulos .= "<option value='A' $sel[A]>".t("Tyï¿½mï¿½ï¿½rï¿½ys")."</option>";
   $ulos .= "<option value='E' $sel[E]>".t("Ennakkotilaus")."</option>";
   $ulos .= "<option value='M' $sel[M]>".t("Myyntitili")."</option>";
   $ulos .= "<option value='N' $sel[N]>".t("Normaalitilaus")."</option>";

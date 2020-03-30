@@ -106,7 +106,7 @@ if (mysql_field_name($result, $i) == "toimaika") {
   $tyyppi = 1.5;
 }
 
-if ($fieldname == "laskutyyppi") {
+if (mysql_field_name($result, $i) == "laskutyyppi") {
 
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
 

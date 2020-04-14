@@ -246,6 +246,7 @@ if (mysql_field_name($result, $i) == "ulkoinen_jarjestelma") {
   $ulos .= "<option value='C'{$sel['C']}>".t("Kiinalainen tehdas")."</option>";
   $ulos .= "<option value='P'{$sel['P']}>".t("PostNord")."</option>";
   $ulos .= "<option value='L'{$sel['L']}>".t("Velox")."</option>";
+  $ulos .= "<option value='S'{$sel['L']}>".t("Smarten")."</option>";
   $ulos .= "</select>";
   $ulos .= "</td>";
   $jatko = 0;

@@ -52,7 +52,7 @@ $query = "SELECT DISTINCT lasku.tunnus
             varastopaikat.yhtio   = lasku.yhtio AND
             varastopaikat.tunnus  = lasku.varasto AND
             varastopaikat.tyyppi != 'P' AND
-            varastopaikat.ulkoinen_jarjestelma IN ('L','P')
+            varastopaikat.ulkoinen_jarjestelma IN ('S')
           )
           JOIN tilausrivi ON (
             tilausrivi.yhtio    = lasku.yhtio AND

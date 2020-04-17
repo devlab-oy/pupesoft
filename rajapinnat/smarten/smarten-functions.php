@@ -231,7 +231,8 @@ if (!function_exists('smarten_message_type')) {
 if (!function_exists('smarten_timestamp')) {
   function smarten_timestamp($time)
   {
-    return date("Y-m-d\TH:i:s.v", $time);
+    $result = str_replace(" ", "T", $time);
+    return $result;
   }
 }
 
@@ -397,7 +398,7 @@ if (!function_exists('smarten_outbounddelivery')) {
     $buyerparty = $documentparties->addChild("BuyerParty");
     $buyerparty->addChild("Name", xml_cleanstring($looprow['nimi']));
 
-    $deliveryparty = $documentparties->addChild("BuyerParty");
+    $deliveryparty = $documentparties->addChild("DeliveryParty");
     $deliveryparty->addChild("PartyCode", "");
     $deliveryparty->addChild("Name", xml_cleanstring($looprow['toim_nimi']));
 
@@ -427,7 +428,7 @@ if (!function_exists('smarten_outbounddelivery')) {
 
     $refinfo = $documentinfo->addChild("RefInfo");
 
-    $sourcedocument = $refinfo->addChild("DueDate");
+    $sourcedocument = $refinfo->addChild("SourceDocument");
     $sourcedocument->addAttribute("type", "order");
     $sourcedocument->addChild("SourceDocumentNum", $looprow['asiakkaan_tilausnumero']);
     $sourcedocument->addChild("SourceDocumentDate", "");
@@ -631,7 +632,7 @@ if (!function_exists('smarten_outbounddelivery')) {
       $_line_i++;
     }
 */
-    pupesoft_log('smarten_outbound_delivery', "Tilauksen {$otunnus} sanomalle lisätty ".($_line_i - 1)." riviä.");
+    pupesoft_log('smarten_outbound_delivery', "Tilauksen {$otunnus} sanomalle lisätty.");
 
     $_name = substr("out_{$otunnus}_".md5(uniqid()), 0, 25);
     $filename = $pupe_root_polku."/dataout/{$_name}.xml";

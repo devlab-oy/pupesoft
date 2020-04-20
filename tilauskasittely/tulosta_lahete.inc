@@ -3794,12 +3794,12 @@ if (!function_exists('loppu_lahete')) {
             $vakioteksti = wordwrap($vakioteksti, 100, "\n");
             foreach (explode("\n", $vakioteksti) as $teksi) {
               $pdf->draw_text(200,  $_y, $teksi, $thispage, $norm);
-              $_y = $_y - 13;
+              $_y = $_y - 11;
             }
           }
           else {
             $pdf->draw_text(200,  $_y, $vakioteksti, $thispage, $norm);
-            $_y = $_y - 13;
+            $_y = $_y - 11;
           }
 
           $kala = $_y + 70;

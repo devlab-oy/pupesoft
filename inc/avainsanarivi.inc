@@ -283,6 +283,7 @@ if (mysql_field_name($result, $i) == "laji") {
 
   if ($lukitse_laji== "") $ulos .= "<optgroup label='".t("Tilauksen avainsanat")."'>";
   if ($lukitse_laji== "" or $lukitse_laji == "VAKIOVIESTI_TIL") $ulos .= "<option value='VAKIOVIESTI_TIL' {$avain_sel['VAKIOVIESTI_TIL']}>".t("Tilausvahvistuksen vakioviesti")."</option>";
+  if ($lukitse_laji== "" or $lukitse_laji == "TILAUSVAH_EHDOT") $ulos .= "<option value='TILAUSVAH_EHDOT' {$avain_sel['TILAUSVAH_EHDOT']}>".t("Kauppaehdot tilausvahvistukselle")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "KAANTALVVIESTI") $ulos .= "<option value='KAANTALVVIESTI' $avain_sel[KAANTALVVIESTI]>".t("Tilauksen/Laskun k‰‰nteisen verotuksen viesti")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "TIL-LITETY") $ulos .= "<option value='TIL-LITETY' ".$avain_sel["TIL-LITETY"].">".t("Tilauksen liitetiedostotyyppi")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "TRIVITYYPPI") $ulos .= "<option value='TRIVITYYPPI' $avain_sel[TRIVITYYPPI]>".t("Tilausrivin tyyppi")."</option>";
@@ -735,6 +736,9 @@ if ($avain_sel["TARJOUS_VAKIOTE"] == "SELECTED" and ($_selite or $_selitetark_2 
 if ($avain_sel["TARJOUS_EHDOT"] == "SELECTED" and ($_selite or $_selitetark_2 or $_selitetark_3 or $_selitetark_4)) {
   $tyyppi = 0;
 }
+if ($avain_sel["TILAUSVAH_EHDOT"] == "SELECTED" and ($_selite or $_selitetark_2 or $_selitetark_3 or $_selitetark_4)) {
+  $tyyppi = 0;
+}
 if ($avain_sel["TARJOUS_KAUPEHD"] == "SELECTED" and ($_selite or $_selitetark_2 or $_selitetark_3 or $_selitetark_4)) {
   $tyyppi = 0;
 }
@@ -1062,6 +1066,7 @@ if (($avain_sel["KARHUVIESTI"] == "SELECTED"
     or $avain_sel['KAANTALVVIESTI'] == "SELECTED"
     or $avain_sel['TARJOUS_VAKIOTE'] == "SELECTED"
     or $avain_sel['TARJOUS_EHDOT'] == "SELECTED"
+    or $avain_sel['TILAUSVAH_EHDOT'] == "SELECTED"
     or $avain_sel['TARJOUS_KAUPEHD'] == "SELECTED"
     or $avain_sel["SALDOVAHVISTUS"] == "SELECTED"
     or $avain_sel["MYYNTITILASTO"] == "SELECTED")

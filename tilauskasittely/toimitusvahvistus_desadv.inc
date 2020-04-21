@@ -145,7 +145,7 @@ if (!function_exists('desadv_header')) {
         $query = "SELECT avainsana
                   FROM asiakkaan_avainsanat
                   WHERE yhtio       = '{$kukarow['yhtio']}'
-                  AND liitostunnus  = '{$laskurow[liitostunnus]}'
+                  AND liitostunnus  = '{$desadv_laskurow[liitostunnus]}'
                   AND laji          = 'KICK_EDI'
                   AND avainsana    != ''";
         $edi_chk_res = pupe_query($query);

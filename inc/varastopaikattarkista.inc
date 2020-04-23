@@ -98,7 +98,10 @@ if (!function_exists("varastopaikattarkista")) {
 
     if (mysql_field_name($result, $i) == "ulkoinen_jarjestelma") {
       if (in_array($t[$i], array('L','P')) and !LOGMASTER_RAJAPINTA) {
-        $virhe[$i] .= t("Valittuun ulkoiseen j‰rjestelm‰‰n vaaditut FTP-tiedot puuttuvat")."!";
+        $virhe[$i] .= t("Valitun ulkoisen j‰rjestelm‰n vaatimat FTP-tiedot puuttuvat")."!";
+      }
+      if ($t[$i] == 'S' and !SMARTEN_RAJAPINTA) {
+        $virhe[$i] .= t("Valitun ulkoisen j‰rjestelm‰n vaatimat FTP-tiedot puuttuvat")."!";
       }
     }
   }

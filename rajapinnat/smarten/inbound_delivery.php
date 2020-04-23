@@ -115,7 +115,7 @@ $query = "SELECT varastopaikat.*, tilausrivi.*
             varastopaikat.yhtio   = tilausrivi.yhtio AND
             varastopaikat.tunnus  = tilausrivi.varasto AND
             varastopaikat.tyyppi != 'P' AND
-            varastopaikat.ulkoinen_jarjestelma IN ('L','P')
+            varastopaikat.ulkoinen_jarjestelma = 'S'
           )
           WHERE tilausrivi.yhtio     = '{$kukarow['yhtio']}'
           AND tilausrivi.tyyppi      = 'O'

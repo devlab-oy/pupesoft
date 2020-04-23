@@ -62,7 +62,7 @@ if ($handle === false) {
 
 while (false !== ($file = readdir($handle))) {
   $full_filepath = $path.$file;
-  $message_type = smarten_message_type($full_filepath);
+  list($message_type, $message_subtype) = smarten_message_type($full_filepath);
 
   if ($message_type != 'OutboundDeliveryConfirmation') {
     continue;

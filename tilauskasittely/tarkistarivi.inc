@@ -170,6 +170,16 @@ foreach ($logmaster_errors as $error) {
   $riviok++;
 }
 
+$smarten_errors = smarten_verify_row($row['tunnus'], $toim);
+
+foreach ($smarten_errors as $error) {
+  echo "<font class='error'>";
+  echo "{$error}<br><br>";
+  echo "</font>";
+  $tilausok++;
+  $riviok++;
+}
+
 if ($kukarow['extranet'] != '' and $trow['sarjanumeroseuranta'] != '' and $row['varattu'] != 1) {
   $varaosavirhe .= t("HUOM: T‰m‰ on sarjanumeroseurannallinen tuote. Kappalem‰‰r‰ pit‰‰ olla 1")."!<br>";
   $riviok++;

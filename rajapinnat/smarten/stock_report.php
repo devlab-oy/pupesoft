@@ -56,40 +56,12 @@ if ($handle === false) {
   exit;
 }
 
-$query = "SELECT *
-              FROM avainsana
-              WHERE yhtio = '{$kukarow['yhtio']}'
-              AND laji    = 'INVEN_LAJI'";
-$result = pupe_query($query);
-$inventointi_selitteet = array();
-while ($inventointi_selite = mysql_fetch_assoc($result)) {
-  $inventointi_selitteet[] = $inventointi_selite;
-  echo "INVEN_LAJI: {$inventointi_selite}\n";
-}
-
-if (sizeof($inventointi_selitteet) == 1) {
-  $inventointi_seliteen_tunnus = $inventointi_selitteet[0];
-}
-
-if (!empty($inventointi_seliteen_tunnus)) {
-  $query = "SELECT *
-              FROM avainsana
-              WHERE yhtio = '{$kukarow['yhtio']}'
-              AND tunnus  = '{$inventointi_seliteen_tunnus}'";
-  $result = pupe_query($query);
-  $row = mysql_fetch_assoc($result);
-
-  $inven_laji = $row['selite'];
-}
-else {
-  $inven_laji = "";
-}
-
 while (false !== ($file = readdir($handle))) {
   $full_filepath = $path.$file;
-  $message_type = smarten_message_type($full_filepath);
+  list($message_type, $message_subtype) = smarten_message_type($full_filepath);
 
-  if ($message_type != 'StockReport') {
+  // Tyypin tulee olla INVRPT ja subtyypin tyhj‰
+  if ($message_type != 'INVRPT' or $message_subtype != "") {
     continue;
   }
 
@@ -97,108 +69,120 @@ while (false !== ($file = readdir($handle))) {
 
   pupesoft_log('smarten_stock_report', "K‰sitell‰‰n sanoma {$file}");
 
-  $luontiaika = $xml->InvCounting->TransDate;
-
-  unset($xml->InvCounting->TransDate);
+  $luontiaika = (string) $xml->Document->DocumentInfo->DateInfo->IssueDate;
 
   $saldoeroja = array();
+  $saldosummat = array();
 
-  foreach ($xml->InvCounting->Line as $line) {
-    $item_number = $line->ItemNumber;
-    $item_number = str_replace(chr(194) . chr(160), " ", $item_number);
+  foreach ($xml->Document->DocumentItem->ItemEntry as $line) {
+    $item_number = (string) $line->SellerItemCode;
+    // TODO: Korjaa t‰m‰
+    $smartenmaara = (float) $line->AmountActual;
+    $varastotunnus = (string) $line->xpath('AdditionalInfo/Extension[@extensionId="StockAddress"]/InfoContent')[0];
 
-    $kpl                       = (float) $line->Quantity;
-    $smarten_itemnumberfield = smarten_field('ItemNumber');
-
-    $query = "SELECT tuoteno, nimitys
-              FROM tuote
-              WHERE yhtio  = '{$kukarow['yhtio']}'
-              AND {$smarten_itemnumberfield} = '{$item_number}'";
-    $tuoteres = pupe_query($query);
-    $tuoterow = mysql_fetch_assoc($tuoteres);
-
-    if (mysql_num_rows($tuoteres) == 0) {
-      $saldoeroja[] = array(
-        "varasto"   => "",
-        "item"      => $item_number,
-        "smarten" => $kpl,
-        "nimitys"   => "",
-        "pupe"      => "",
-        "tuoteno"   => "",
-        "lisatieto" => "Tuotetta ei lˆydy",
-      );
-
-      continue;
-    }
-
-    $tuoteno = $tuoterow["tuoteno"];
-
-    $query = "SELECT *
-              FROM varastopaikat
-              WHERE yhtio = '{$kukarow['yhtio']}'
-                AND ulkoinen_jarjestelma = 'P'
-                AND ulkoisen_jarjestelman_tunnus = '" . $line->Stock . "'";
-    $varastores = pupe_query($query);
-    if (mysql_num_rows($varastores) == 1) {
-      $varastorow = mysql_fetch_assoc($varastores);
+    // Pidet‰‰n yll‰ tuote-/varastokohtaista saldosummaa
+    if (!empty($saldosummat[$item_number][$varastotunnus])) {
+      $saldosummat[$item_number][$varastotunnus] += $smartenmaara;
     }
     else {
-      $saldoeroja[] = array(
-        "varasto"   => "",
-        "item"      => $item_number,
-        "smarten" => $kpl,
-        "nimitys"   => $tuoterow['nimitys'],
-        "pupe"      => "",
-        "tuoteno"   => $tuoteno,
-        "lisatieto" => t("Ulkoisen j‰rjestelm‰n varastotunnusta ei lˆydy") . ": " . $line->Stock,
-      );
-
-      continue;
+      $saldosummat[$item_number][$varastotunnus] = $smartenmaara;
     }
+  }
 
-    list($saldo, $hyllyssa, $myytavissa, $devnull) = saldo_myytavissa($tuoterow["tuoteno"], "KAIKKI", $varastorow['tunnus']);
+  foreach ($saldosummat as $item_number => $varastot) {
+    foreach($varastot as $varastotunnus => $smartenmaara) {
 
-    // Etuk‰teen maksetut tilaukset, jotka ovat ker‰‰m‰tt‰ mutta tilaus jo laskutettu
-    // Lasketaan ne mukaan Pupen hyllyss‰ m‰‰r‰‰n, koska saldo_myytavissa ei huomioi niit‰
-    $query = "SELECT ifnull(sum(tilausrivi.kpl), 0) AS keraamatta
-              FROM tilausrivi
-              INNER JOIN lasku on (lasku.yhtio = tilausrivi.yhtio
-                AND lasku.tunnus          = tilausrivi.otunnus
-                AND lasku.mapvm          != '0000-00-00'
-                AND lasku.chn             = '999')
-              WHERE tilausrivi.yhtio      = '{$kukarow['yhtio']}'
-              AND tilausrivi.tyyppi       = 'L'
-              AND tilausrivi.var         != 'P'
-              AND tilausrivi.keratty      = ''
-              AND tilausrivi.kerattyaika  = '0000-00-00 00:00:00'
-              AND tilausrivi.tuoteno      = '{$tuoterow['tuoteno']}'";
-    $ker_result = pupe_query($query);
-    $ker_rivi = mysql_fetch_assoc($ker_result);
+      echo "$item_number, $smartenmaara, $varastotunnus\n";
 
-    $hyllyssa += $ker_rivi['keraamatta'];
+      $query = "SELECT tuoteno, nimitys
+                FROM tuote
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND tuoteno = '{$item_number}'";
+      $tuoteres = pupe_query($query);
+      $tuoterow = mysql_fetch_assoc($tuoteres);
 
-    // Vertailukonversio
-    $a = (int) $kpl * 10000;
-    $b = (int) $hyllyssa * 10000;
+      if (mysql_num_rows($tuoteres) == 0) {
+        $saldoeroja[] = array(
+          "varasto"   => "",
+          "item"      => $item_number,
+          "smarten"   => $smartenmaara,
+          "nimitys"   => "",
+          "pupe"      => "",
+          "tuoteno"   => "",
+          "lisatieto" => "Tuotetta {$item_number} ei lˆydy",
+        );
 
-    if ($a != $b) {
-      $lisatieto = "";
+        continue;
+      }
 
-      if (isset($varastorow)) {
+      $tuoteno = $tuoterow["tuoteno"];
+
+      $query = "SELECT *
+                FROM varastopaikat
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND ulkoinen_jarjestelma = 'S'
+                AND ulkoisen_jarjestelman_tunnus = '$varastotunnus'";
+      $varastores = pupe_query($query);
+
+      if (mysql_num_rows($varastores) == 1) {
+        $varastorow = mysql_fetch_assoc($varastores);
+      }
+      else {
+        $saldoeroja[] = array(
+          "varasto"   => "",
+          "item"      => $item_number,
+          "smarten"   => $smartenmaara,
+          "nimitys"   => $tuoterow['nimitys'],
+          "pupe"      => "",
+          "tuoteno"   => $tuoteno,
+          "lisatieto" => "Ulkoisen j‰rjestelm‰n varastotunnusta ei lˆydy: {$varastotunnus}",
+        );
+
+        continue;
+      }
+
+      list($saldo, $hyllyssa, $myytavissa, $devnull) = saldo_myytavissa($tuoterow["tuoteno"], "KAIKKI", $varastorow['tunnus']);
+
+      // Etuk‰teen maksetut tilaukset, jotka ovat ker‰‰m‰tt‰ mutta tilaus jo laskutettu
+      // Lasketaan ne mukaan Pupen hyllyss‰ m‰‰r‰‰n, koska saldo_myytavissa ei huomioi niit‰
+      $query = "SELECT ifnull(sum(tilausrivi.kpl), 0) AS keraamatta
+                FROM tilausrivi
+                INNER JOIN lasku on (lasku.yhtio = tilausrivi.yhtio
+                  AND lasku.tunnus          = tilausrivi.otunnus
+                  AND lasku.mapvm          != '0000-00-00'
+                  AND lasku.chn             = '999')
+                WHERE tilausrivi.yhtio      = '{$kukarow['yhtio']}'
+                AND tilausrivi.tyyppi       = 'L'
+                AND tilausrivi.var         != 'P'
+                AND tilausrivi.keratty      = ''
+                AND tilausrivi.kerattyaika  = '0000-00-00 00:00:00'
+                AND tilausrivi.tuoteno      = '{$tuoterow['tuoteno']}'";
+      $ker_result = pupe_query($query);
+      $ker_rivi = mysql_fetch_assoc($ker_result);
+
+      $hyllyssa += $ker_rivi['keraamatta'];
+
+      // Vertailukonversio
+      $a = (int) $smartenmaara * 10000;
+      $b = (int) $hyllyssa * 10000;
+
+      if ($a != $b) {
         $query = "SELECT *, concat_ws('-', hyllyalue, hyllynro, hyllyvali, hyllytaso) AS tuotepaikka
                   FROM tuotepaikat
                   WHERE yhtio = '{$kukarow['yhtio']}'
-                    AND varasto = '{$varastorow['tunnus']}'
-                    AND tuoteno = '{$tuoteno}'
+                  AND varasto = '{$varastorow['tunnus']}'
+                  AND tuoteno = '{$tuoteno}'
                   ORDER BY oletus DESC, prio, hyllyalue, hyllynro, hyllytaso, hyllypaikka";
         $tuotepaikat = pupe_query($query);
 
         if (mysql_num_rows($tuotepaikat) > 0) {
+          $lisatieto = "";
+
           while ($tuotepaikka_row = mysql_fetch_array($tuotepaikat)) {
             $tuotepaikka = $tuotepaikka_row['tuotepaikka'];
 
             if ($lisatieto == "") {
-              $uusi_maara = $kpl;
+              $uusi_maara = $smartenmaara;
               $lisatieto = t("Inventoitu tuotepaikalle") . " {$tuotepaikka}";
             }
             else {
@@ -211,7 +195,7 @@ while (false !== ($file = readdir($handle))) {
             $tuote = array($tuotepaikka_row['tunnus'] => $hash);
             $maara = array($tuotepaikka_row['tunnus'] => $uusi_maara);
             $tee = 'VALMIS';
-            $lisaselite = t("smarten");
+            $lisaselite = t("Smarten");
             $mobiili = 'YES';
 
             require 'inventoi.php';
@@ -220,27 +204,24 @@ while (false !== ($file = readdir($handle))) {
         else {
           $lisatieto = t("Ei inventoitu") . ": '" . $varastorow['nimitys'] . "' " . t("varastosta ei lˆydy tuotepaikkaa tuotteelle") . " '{$tuoteno}'";
         }
-      }
-      else {
-        $lisatieto = t("Ei inventoitu") . ": '" . $line->Stock . "' ". t("varastoa ei lˆydy tuotteelle") . " '{$tuoteno}'";
-      }
 
-      $saldoeroja[] = array(
-        "varasto"   => $varastorow['tunnus'] . " " . $varastorow['nimitys'],
-        "item"      => $item_number,
-        "smarten" => $kpl,
-        "nimitys"   => $tuoterow['nimitys'],
-        "pupe"      => $hyllyssa,
-        "tuoteno"   => $tuoteno,
-        "lisatieto" => $lisatieto,
-      );
+        $saldoeroja[] = array(
+          "varasto"   => $varastorow['tunnus'] . " " . $varastorow['nimitys'],
+          "item"      => $item_number,
+          "smarten"   => $smartenmaara,
+          "nimitys"   => $tuoterow['nimitys'],
+          "pupe"      => $hyllyssa,
+          "tuoteno"   => $tuoteno,
+          "lisatieto" => $lisatieto,
+        );
+      }
     }
   }
 
   if (count($saldoeroja) > 0) {
 
     $email_array[] = t("Seuraavien tuotteiden saldovertailuissa on havaittu eroja").":";
-    $email_array[] = t("Varasto").";".t("smarten-tuoteno").";".t("Tuoteno").";".t("Nimitys").";".t("smarten-kpl").";".t("Pupesoft-kpl").";".t("Lis‰tieto");
+    $email_array[] = t("Varasto").";".t("Smarten-tuoteno").";".t("Tuoteno").";".t("Nimitys").";".t("Smarten-kpl").";".t("Pupesoft-kpl").";".t("Lis‰tieto");
 
     foreach ($saldoeroja as $ero) {
       $email_array[] = "{$ero['varasto']};{$ero['item']};{$ero['tuoteno']};{$ero['nimitys']};{$ero['smarten']};{$ero['pupe']};{$ero['lisatieto']}";
@@ -267,7 +248,7 @@ while (false !== ($file = readdir($handle))) {
   echo "\n";
 
   // siirret‰‰n tiedosto done-kansioon
-  rename($full_filepath, $path.'done/'.$file);
+  //rename($full_filepath, $path.'done/'.$file);
 
   pupesoft_log('smarten_stock_report', "Sanoman {$file} saldovertailu k‰sitelty");
 }

@@ -470,131 +470,6 @@ if (!function_exists('smarten_outbounddelivery')) {
     $extension->addAttribute("extensionId", "externalremarks");
     $extension->addChild("InfoContent", xml_cleanstring($looprow['kommentti']));
 
-
-
-
-
-
-/*
-    $custpickinglist = $xml->addChild('CustPickingList');
-    $custpickinglist->addChild('SalesId',             substr($otunnus, 0, 20));
-    $custpickinglist->addChild('PickingListId',       substr($otunnus, 0, 20));
-    $custpickinglist->addChild('CustOrderNumber',     xml_cleanstring($CustOrderNumber, 20));
-    $custpickinglist->addChild('CustReference',       xml_cleanstring($looprow['viesti'], 50));
-    $custpickinglist->addChild('OrderCode',          $tilaustyyppi);
-    $custpickinglist->addChild('OrderType',          'SO');
-    $custpickinglist->addChild('PickingListDate',    $pickinglistdate);
-    $custpickinglist->addChild('DeliveryDate',       $deliverydate);
-    $custpickinglist->addChild('UnloadingDate',      0);
-    $custpickinglist->addChild('OrderDate',          0);
-    $custpickinglist->addChild('DlvTerm',            xml_cleanstring($looprow['toimitusehto'], 3));
-    $custpickinglist->addChild('PickingInstruction', xml_cleanstring($looprow['sisviesti2'], 128));
-    $custpickinglist->addChild('SalesOffice',        0);
-    $custpickinglist->addChild('SalesContact',       0);
-    $custpickinglist->addChild('Warehouse',          xml_cleanstring($looprow['ulkoisen_jarjestelman_tunnus']));
-    $custpickinglist->addChild('InvoiceAmounth',     0);
-
-    $orderedby = $custpickinglist->addChild('OrderedBy');
-    $orderedby->addChild('CustAccount',  0);
-    $orderedby->addChild('CustName',     xml_cleanstring($cust_name, 50));
-    $orderedby->addChild('CustStreet',   xml_cleanstring($looprow['osoite'], 50));
-    $orderedby->addChild('CustStreet2',  xml_cleanstring($looprow['osoite'], 50));
-    $orderedby->addChild('CustPostCode', xml_cleanstring($looprow['postino'], 10));
-    $orderedby->addChild('CustCity',     xml_cleanstring($looprow['postitp'], 30));
-    $orderedby->addChild('CustCountry',  xml_cleanstring($looprow['maa'], 10));
-    if ($looprow['toim_email'] == '') {
-      $orderedby->addChild('Email',        xml_cleanstring($looprow['email']));
-    }
-      else {
-      $orderedby->addChild('Email',        xml_cleanstring($looprow['toim_email']));
-    }
-
-    if ($uj_nimi == "Velox") {
-      $orderedby->addChild('Custnr',        xml_cleanstring($looprow['asiakasnro']));
-      $orderedby->addChild('PaymentTerm',   xml_cleanstring($looprow['maksuehto']));
-      $orderedby->addChild('Seller',        xml_cleanstring($looprow['myyja']));
-    }
-
-    $receiver = $custpickinglist->addChild('Receiver');
-    $receiver->addChild('RecCustAccount',  0);
-    $receiver->addChild('RecCustName',     xml_cleanstring($rec_cust_name, 50));
-    $receiver->addChild('RecCustStreet',   xml_cleanstring($rec_cust_street, 50));
-    $receiver->addChild('RecCustStreet2',  xml_cleanstring($rec_cust_street2, 50));
-    $receiver->addChild('RecCustPostCode', xml_cleanstring($looprow['toim_postino'], 10));
-    $receiver->addChild('RecCustCity',     xml_cleanstring($looprow['toim_postitp'], 30));
-    $receiver->addChild('RecCustCountry',  xml_cleanstring($looprow['toim_maa'], 10));
-    $receiver->addChild('RecCustPhone',    xml_cleanstring($looprow['toim_puh'], 20));
-    if ($looprow['toim_maa'] == 'FI' or $looprow['toim_maa'] == '') {
-      $rec_lang = 'FI';
-    }
-      else {
-      $rec_lang = 'EN';
-    }
-    $receiver->addChild('RecCustLanguage',    xml_cleanstring($rec_lang, 2));
-
-    $transport = $custpickinglist->addChild('Transport');
-    $transport->addChild('TransportAccount',      $transport_account);
-    $transport->addChild('TransportInstruction',  substr('', 0, 250));
-    $transport->addChild('FreightPayer',          'sender');
-    $transport->addChild('DropPoint',      $droppoint);
-
-    $lines = $custpickinglist->addChild('Lines');
-
-    mysql_data_seek($loopres, 0);
-
-    $_line_i = 1;
-
-    while ($looprow = mysql_fetch_assoc($loopres)) {
-      // Laitetaan kappalemäärät kuntoon
-      $looprow['kpl'] = $looprow['var'] == 'J' ? 0 : $looprow['kpl'];
-
-      if ($uj_nimi == 'PostNord' and $looprow['ei_saldoa'] == 'o') continue;
-
-      $line = $lines->addChild('Line');
-      $line->addAttribute('No', $_line_i);
-      $line->addChild('TransId',           xml_cleanstring($looprow['tilausrivin_tunnus'], 20));
-
-      if ($uj_nimi == "Velox") {
-        $line->addChild('ItemNumber',        xml_cleanstring($looprow['tuoteno'], 32));
-        $line->addChild('CustItemNumber',    0);
-        $line->addChild('ItemName',          xml_cleanstring($looprow['nimitys'], 100));
-        $line->addChild('ItemText',          0);
-        $line->addChild('BatchId',           0);
-        $line->addChild('CustItemName',      0);
-        $line->addChild('Type',              $looprow['tyyppi']);
-        $line->addChild('BBDate',            0);
-        $line->addChild('OrderedQuantity',   $looprow['kpl']);
-        $line->addChild('DeliveredQuantity', $looprow['kpl']);
-        $line->addChild('Unit',              xml_cleanstring($looprow['yksikko']));
-        $line->addChild('Price',             $looprow['hinta']);
-        $line->addChild('DiscountPercent',   $looprow['ale1']);
-        $line->addChild('CurrencyCode',      $looprow['valkoodi']);
-        $line->addChild('TaxCode',           $looprow['alv']);
-        $line->addChild('Stockable',         $looprow['keratty']);
-      }
-      else {
-        $line->addChild('ItemNumber',        xml_cleanstring($looprow['tuoteno'], 22));
-        $line->addChild('CustItemNumber',    0);
-        $line->addChild('ItemName',          0);
-        $line->addChild('ItemText',          0);
-        $line->addChild('BatchId',           0);
-        $line->addChild('CustItemName',      0);
-        $line->addChild('Type',              1);
-        $line->addChild('BBDate',            0);
-        $line->addChild('OrderedQuantity',   $looprow['kpl']);
-        $line->addChild('DeliveredQuantity', $looprow['kpl']);
-        $line->addChild('Unit',              0);
-        $line->addChild('Price',             0);
-        $line->addChild('DiscountPercent',   0);
-        $line->addChild('CurrencyCode',      0);
-        $line->addChild('TaxCode',           0);
-      }
-
-      $line->addChild('LineInfo',          xml_cleanstring($looprow['kommentti'], 92));
-
-      $_line_i++;
-    }
-*/
     pupesoft_log('smarten_outbound_delivery', "Tilauksen {$otunnus} sanomalle lisätty.");
 
     $_name = substr("out_{$otunnus}_".md5(uniqid()), 0, 25);
@@ -640,7 +515,7 @@ if (!function_exists('smarten_warehouses')) {
               FROM varastopaikat
               WHERE yhtio = '{$kukarow['yhtio']}'
               AND tyyppi != 'P'
-              AND ulkoinen_jarjestelma IN ('L','P')";
+              AND ulkoinen_jarjestelma = 'S'";
     $varastores = pupe_query($query);
     $varastorow = mysql_fetch_assoc($varastores);
 

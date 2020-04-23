@@ -75,6 +75,7 @@ if (!isset($toimipaikka))    $toimipaikka = $kukarow['toimipaikka'];
 
 $onkolaajattoimipaikat = ($yhtiorow['toimipaikkakasittely'] == "L" and $toimipaikat_res = hae_yhtion_toimipaikat($kukarow['yhtio']) and mysql_num_rows($toimipaikat_res) > 0) ? TRUE : FALSE;
 $onkologmaster = (LOGMASTER_RAJAPINTA and in_array($yhtiorow['ulkoinen_jarjestelma'], array('', 'S')));
+$onkosmarten = (SMARTEN_RAJAPINTA and in_array($yhtiorow['ulkoinen_jarjestelma'], array('', 'S')));
 
 if ($onkolaajattoimipaikat and isset($otunnus)) {
 
@@ -356,6 +357,14 @@ if ($onkologmaster and $toiminto == "saapuminen_ulkoiseen_jarjestelmaan") {
   $saapumisnro = $otunnus;
 
   require "rajapinnat/logmaster/inbound_delivery.php";
+
+  $toiminto = "kohdista";
+}
+
+if ($onkosmarten and $toiminto == "saapuminen_ulkoiseen_jarjestelmaan") {
+  $saapumisnro = $otunnus;
+
+  require "rajapinnat/smarten/inbound_delivery.php";
 
   $toiminto = "kohdista";
 }
@@ -1171,7 +1180,7 @@ if ($toiminto == "" and (($ytunnus != "" or $keikkarajaus != '') and $toimittaja
       $maara = 10;
     }
 
-    if ($onkologmaster) {
+    if ($onkologmaster or $onkosmarten) {
       $maara++;
     }
 
@@ -1183,7 +1192,7 @@ if ($toiminto == "" and (($ytunnus != "" or $keikkarajaus != '') and $toimittaja
     if ($onkolaajattoimipaikat and isset($toimipaikka) and $toimipaikka == 'kaikki') {
       echo "<th valign='top'>".t("toimipaikka")."</th>";
     }
-    if ($onkologmaster) {
+    if ($onkologmaster or $onkosmarten) {
       echo "<th valign='top'>".t("Ulkoinen järjestelmä")."</th>";
     }
     echo "<th valign='top'>".t("saapuminen")."</th>";
@@ -1201,7 +1210,7 @@ if ($toiminto == "" and (($ytunnus != "" or $keikkarajaus != '') and $toimittaja
     if ($onkolaajattoimipaikat and isset($toimipaikka) and $toimipaikka == 'kaikki') {
       echo "<td><input type='text'   class='search_field' name='search_toimipaikka'></td>";
     }
-    if ($onkologmaster) {
+    if ($onkologmaster or $onkosmarten) {
       echo "<td><input type='hidden' class='search_field' name='search_eimitaan'></td>";
     }
     echo "<td><input type='text'   class='search_field' name='search_saapuminen'></td>";
@@ -1255,7 +1264,7 @@ if ($toiminto == "" and (($ytunnus != "" or $keikkarajaus != '') and $toimittaja
       if ($onkolaajattoimipaikat and isset($toimipaikka) and $toimipaikka == 'kaikki') {
         echo "<td valign='top'>$row[toimipaikka_nimi]</td>";
       }
-      if ($onkologmaster) {
+      if ($onkologmaster or $onkosmarten) {
         echo "<td valign='top'>";
 
         switch ($row['sisviesti3']) {

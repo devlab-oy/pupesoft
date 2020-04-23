@@ -63,14 +63,13 @@ if ($livesearch_tee == "TUOTEHAKU") {
   exit;
 }
 
-// Enaboidaan ajax kikkare
-enable_ajax();
-
 if (strpos($_SERVER['SCRIPT_NAME'], "inventoi.php") !== FALSE) {
+  // Enabloidaan ajax kikkare
+  enable_ajax();
 
   $koko_url = $_SERVER['SCRIPT_NAME'].'?'.$_SERVER['QUERY_STRING'];
 
-  echo "  <script type='text/javascript'>
+  echo "<script type='text/javascript'>
         $(function() {
           $('#inven_laji').on('change', function() {
             var select_value = $(this).val();

@@ -14,15 +14,15 @@ if (!function_exists('smarten_send_email')) {
 
     switch ($log_name) {
     case 'smarten_outbound_delivery_confirmation':
-      $subject = t("smarten: Ker√§yksen kuittaus");
+      $subject = t("Smarten: Ker‰yksen kuittaus");
       break;
 
     case 'smarten_inbound_delivery_confirmation':
-      $subject = t("smarten: Saapumisen kuittaus");
+      $subject = t("Smarten: Saapumisen kuittaus");
       break;
 
     case 'smarten_stock_report':
-      $subject = t("smarten saldovertailu");
+      $subject = t("Smarten saldovertailu");
       break;
 
     default:
@@ -42,10 +42,10 @@ if (!function_exists('smarten_send_email')) {
     );
 
     if (pupesoft_sahkoposti($args)) {
-      pupesoft_log($log_name, "S√§hk√∂posti l√§hetetty onnistuneesti osoitteeseen {$email}");
+      pupesoft_log($log_name, "S‰hkˆposti l‰hetetty onnistuneesti osoitteeseen {$email}");
     }
     else {
-      pupesoft_log($log_name, "S√§hk√∂postin l√§hetys ep√§onnistui osoitteeseen {$email}");
+      pupesoft_log($log_name, "S‰hkˆpostin l‰hetys ep‰onnistui osoitteeseen {$email}");
     }
   }
 }
@@ -54,10 +54,10 @@ if (!function_exists('smarten_send_file')) {
   function smarten_send_file($filename, $binary = FALSE) {
     global $kukarow, $yhtiorow, $smarten;
 
-    // L√§hetet√§√§n aina UTF-8 muodossa
+    // L‰hetet‰‰n aina UTF-8 muodossa
     $ftputf8 = true;
 
-    # Ei haluta ett√§ tulostetaan mit√§√§n ruudulle
+    # Ei haluta ett‰ tulostetaan mit‰‰n ruudulle
     $tulos_ulos = "foobar";
 
     $ftphost = $smarten['host'];
@@ -115,7 +115,7 @@ if (!function_exists('smarten_mark_as_sent')) {
 
     switch ($laskurow['tila']) {
     case 'N':
-      # T√§ll√§ yhti√∂n parametrilla pystyt√§√§n ohittamaan tulostus
+      # T‰ll‰ yhtiˆn parametrilla pystyt‰‰n ohittamaan tulostus
       $yhtiorow["lahetteen_tulostustapa"] = "X";
       $laskuja = 1;
       $tilausnumeroita = $laskurow['tunnus'];
@@ -132,7 +132,7 @@ if (!function_exists('smarten_mark_as_sent')) {
     case 'G':
       $toim         = "SIIRTOLISTA";
       $tulostetaan  = "OK";
-      # T√§ll√§ yhti√∂n parametrilla pystyt√§√§n ohittamaan ker√§yslistan tulostus
+      # T‰ll‰ yhtiˆn parametrilla pystyt‰‰n ohittamaan ker‰yslistan tulostus
       $yhtiorow['tulosta_valmistus_tulosteet'] = 'foobar';
 
       ob_start();
@@ -146,42 +146,6 @@ if (!function_exists('smarten_mark_as_sent')) {
     default:
       return false;
     }
-  }
-}
-
-if (!function_exists('smarten_field')) {
-  function smarten_field($column_name) {
-
-    switch ($column_name) {
-    case 'ItemNumber':
-      $key = t_avainsana('POSTEN_TKOODI', '', " and avainsana.selite = 'ItemNumber' ", '', '', 'selitetark');
-
-      if (empty($key)) {
-        $key = 'tuoteno';
-      }
-
-      break;
-    case 'ProdGroup1':
-      $key = t_avainsana('POSTEN_TKOODI', '', " and avainsana.selite = 'ProdGroup1' ", '', '', 'selitetark');
-
-      if (empty($key)) {
-        $key = 'try';
-      }
-
-      break;
-      case 'ProdGroup2':
-        $key = t_avainsana('POSTEN_TKOODI', '', " and avainsana.selite = 'ProdGroup2' ", '', '', 'selitetark');
-
-        if (empty($key)) {
-          $key = '';
-        }
-
-        break;
-    default:
-      die(t('Annettu arvo ei ole k√§yt√∂ss√§'));
-    }
-
-    return mysql_real_escape_string($key);
   }
 }
 
@@ -220,11 +184,18 @@ if (!function_exists('smarten_message_type')) {
       return false;
     }
 
-    if (isset($xml->MessageHeader) and isset($xml->MessageHeader->MessageType)) {
-      return trim($xml->MessageHeader->MessageType);
+    $dtype = "";
+    $dsubtype = "";
+
+    if (isset($xml->Document) and isset($xml->Document->DocumentType)) {
+      $dtype = trim($xml->Document->DocumentType);
     }
 
-    return false;
+    if (isset($xml->Document->DocumentInfo) and isset($xml->Document->DocumentInfo->DocumentSubType)) {
+      $dsubtype = trim($xml->Document->DocumentInfo->DocumentSubType);
+    }
+
+    return [$dtype, $dsubtype];
   }
 }
 
@@ -278,14 +249,14 @@ if (!function_exists('smarten_outbounddelivery')) {
               )
               LEFT JOIN varastopaikat ON (
                 varastopaikat.yhtio  = tilausrivi.yhtio AND
-                varastopaikat.tunnus = tilausrivi.varasto                
+                varastopaikat.tunnus = tilausrivi.varasto
               )
               WHERE lasku.yhtio     = '{$kukarow['yhtio']}'
               AND lasku.tunnus      = '{$otunnus}'";
     $loopres = pupe_query($query);
 
     if (mysql_num_rows($loopres) == 0) {
-      pupesoft_log('smarten_outbound_delivery', "Yht√§√§n rivi√§ ei l√∂ytynyt tilaukselle {$otunnus}. Sanoman luonti ep√§onnistui.");
+      pupesoft_log('smarten_outbound_delivery', "Yht‰‰n rivi‰ ei lˆytynyt tilaukselle {$otunnus}. Sanoman luonti ep‰onnistui.");
       return false;
     }
 
@@ -307,13 +278,8 @@ if (!function_exists('smarten_outbounddelivery')) {
       $edi_pack_process = TRUE;
     }
 
-    switch ($varastorow['ulkoinen_jarjestelma']) {
-    case 'S':
-      $uj_nimi = "Smarten";
-      break;
-    default:
-      pupesoft_log('smarten_outbound_delivery', "Tilauksen {$otunnus} varaston ulkoinen j√§rjestelm√§ oli virheellinen.");
-
+    if ($varastorow['ulkoinen_jarjestelma'] != "S") {
+      pupesoft_log('smarten_outbound_delivery', "Tilauksen {$otunnus} varaston ulkoinen j‰rjestelm oli virheellinen.");
       return false;
     }
 
@@ -361,7 +327,7 @@ if (!function_exists('smarten_outbounddelivery')) {
 
     $CustOrderNumber = $looprow['asiakkaan_tilausnumero'];
 
-    // Katsotaan onko CustOrderNumber kentt√§√§n erillist√§ m√§√§rityst√§
+    // Katsotaan onko CustOrderNumber kentt‰‰n erillist‰ m‰‰rityst‰
     $query = "SELECT *
               FROM toimitustavan_avainsanat
               WHERE yhtio = '{$kukarow['yhtio']}'
@@ -378,8 +344,6 @@ if (!function_exists('smarten_outbounddelivery')) {
         $CustOrderNumber = $otunnus;
       }
     }
-
-    $smarten_itemnumberfield = smarten_field('ItemNumber');
 
     # Rakennetaan XML
     $xml = simplexml_load_string("<?xml version='1.0' encoding='UTF-8'?><E-Document></E-Document>");
@@ -579,10 +543,9 @@ if (!function_exists('smarten_outbounddelivery')) {
     mysql_data_seek($loopres, 0);
 
     $_line_i = 1;
-    $smarten_itemnumberfield = smarten_field('ItemNumber');
 
     while ($looprow = mysql_fetch_assoc($loopres)) {
-      // Laitetaan kappalem√§√§r√§t kuntoon
+      // Laitetaan kappalem‰‰r‰t kuntoon
       $looprow['kpl'] = $looprow['var'] == 'J' ? 0 : $looprow['kpl'];
 
       if ($uj_nimi == 'PostNord' and $looprow['ei_saldoa'] == 'o') continue;
@@ -592,7 +555,7 @@ if (!function_exists('smarten_outbounddelivery')) {
       $line->addChild('TransId',           xml_cleanstring($looprow['tilausrivin_tunnus'], 20));
 
       if ($uj_nimi == "Velox") {
-        $line->addChild('ItemNumber',        xml_cleanstring($looprow[$smarten_itemnumberfield], 32));
+        $line->addChild('ItemNumber',        xml_cleanstring($looprow['tuoteno'], 32));
         $line->addChild('CustItemNumber',    0);
         $line->addChild('ItemName',          xml_cleanstring($looprow['nimitys'], 100));
         $line->addChild('ItemText',          0);
@@ -610,7 +573,7 @@ if (!function_exists('smarten_outbounddelivery')) {
         $line->addChild('Stockable',         $looprow['keratty']);
       }
       else {
-        $line->addChild('ItemNumber',        xml_cleanstring($looprow[$smarten_itemnumberfield], 22));
+        $line->addChild('ItemNumber',        xml_cleanstring($looprow['tuoteno'], 22));
         $line->addChild('CustItemNumber',    0);
         $line->addChild('ItemName',          0);
         $line->addChild('ItemText',          0);
@@ -632,17 +595,17 @@ if (!function_exists('smarten_outbounddelivery')) {
       $_line_i++;
     }
 */
-    pupesoft_log('smarten_outbound_delivery', "Tilauksen {$otunnus} sanomalle lis√§tty.");
+    pupesoft_log('smarten_outbound_delivery', "Tilauksen {$otunnus} sanomalle lis‰tty.");
 
     $_name = substr("out_{$otunnus}_".md5(uniqid()), 0, 25);
     $filename = $pupe_root_polku."/dataout/{$_name}.xml";
 
     if (file_put_contents($filename, $xml->asXML())) {
-      pupesoft_log('smarten_outbound_delivery', "Tilauksen {$otunnus} sanoman luonti {$uj_nimi} -j√§rjestelm√§√§n onnistui.");
+      pupesoft_log('smarten_outbound_delivery', "Tilauksen {$otunnus} sanoman luonti Smarten-j‰rjestelm‰‰n onnistui.");
       return $filename;
     }
 
-    pupesoft_log('smarten_outbound_delivery', "Tilauksen {$otunnus} sanoman luonti {$uj_nimi} -j√§rjestelm√§√§n ep√§onnistui.");
+    pupesoft_log('smarten_outbound_delivery', "Tilauksen {$otunnus} sanoman luonti Smarten-j‰rjestelm‰‰n ep‰onnistui.");
     return false;
   }
 }
@@ -651,7 +614,7 @@ if (!function_exists('smarten_check_params')) {
   function smarten_check_params($toim) {
     global $kukarow, $yhtiorow;
 
-    $onkosmarten  = smarten_RAJAPINTA;
+    $onkosmarten  = SMARTEN_RAJAPINTA;
     $onkosmarten &= (in_array($yhtiorow['ulkoinen_jarjestelma'], array('', 'K')));
     $onkosmarten &= (in_array($toim, array('RIVISYOTTO','PIKATILAUS')));
 
@@ -739,7 +702,7 @@ if (!function_exists('smarten_verify_row')) {
     }
 
     # Sarjanumerollisia tuotteita ei tueta
-    # Tilausrivien t√§ytyy sis√§lt√§√§ vain kokonaislukuja
+    # Tilausrivien t‰ytyy sis‰lt‰‰ vain kokonaislukuja
     $smarten_rivi_res = smarten_fetch_rows($tunnus);
 
     if ($smarten_rivi_res === false) {
@@ -773,7 +736,7 @@ if (!function_exists('smarten_verify_order')) {
       return array();
     }
 
-    # Maksuehto ei saa olla j√§lkivaatimus
+    # Maksuehto ei saa olla j‰lkivaatimus
     $query = "SELECT lasku.*, maksuehto.jv
               FROM lasku
               LEFT JOIN maksuehto ON (
@@ -785,7 +748,7 @@ if (!function_exists('smarten_verify_order')) {
     $laskures = pupe_query($query);
     $laskurow = mysql_fetch_assoc($laskures);
 
-    # Tarkistetaan onko smarteniin menevi√§ tilausrivej√§
+    # Tarkistetaan onko smarteniin menevi‰ tilausrivej‰
     $smarten_rivi_res = smarten_fetch_rows(0, $tunnus);
 
     if ($smarten_rivi_res === false) {
@@ -793,7 +756,7 @@ if (!function_exists('smarten_verify_order')) {
     }
 
     if (mysql_num_rows($smarten_rivi_res) > 0 and $laskurow['jv'] != '') {
-      $errors[] = t("VIRHE: J√§lkivaatimuksia ei sallita ulkoisessa varastossa")."!";
+      $errors[] = t("VIRHE: J‰lkivaatimuksia ei sallita ulkoisessa varastossa")."!";
     }
 
     return $errors;

@@ -28,10 +28,6 @@ if (empty($ulkoinen_jarjestelma)) {
   exit;
 }
 
-$smarten_itemnumberfield = smarten_field('ItemNumber');
-$smarten_prodgroup1field = smarten_field('ProdGroup1');
-$smarten_prodgroup2field = smarten_field('ProdGroup2');
-
 $query = "SELECT tuote.*, ta.selite AS synkronointi, ta.tunnus AS ta_tunnus, toim_tuoteno
           FROM tuote
           LEFT JOIN tuotteen_avainsanat AS ta ON (ta.yhtio = tuote.yhtio AND ta.tuoteno = tuote.tuoteno AND ta.laji = 'synkronointi')
@@ -39,13 +35,11 @@ $query = "SELECT tuote.*, ta.selite AS synkronointi, ta.tunnus AS ta_tunnus, toi
           WHERE tuote.yhtio   = '{$kukarow['yhtio']}'
           AND tuote.ei_saldoa = ''
           AND tuote.tuotetyyppi NOT IN ('A', 'B')
-          AND tuote.{$smarten_itemnumberfield} != ''
+          AND tuote.tuoteno != ''
           GROUP BY tuoteno
           HAVING (ta.tunnus IS NOT NULL AND ta.selite = '') OR
                   # jos avainsanaa ei ole olemassa ja status P niin ei haluta näitä tuotteita jatkossakaan
-                 (ta.tunnus IS NULL AND tuote.status != 'P') OR
-                 # paitsi jos kyseessä Velox niin siirretään
-                 (ta.tunnus IS NULL AND '{$ulkoinen_jarjestelma}' = 'L')";
+                 (ta.tunnus IS NULL AND tuote.status != 'P')";
 $res = pupe_query($query);
 
 if (mysql_num_rows($res) > 0) {
@@ -148,7 +142,7 @@ if (mysql_num_rows($res) > 0) {
     $worksheet->writeString($excelrivi, $excelsarake,"TsooniId"); $excelsarake++;
     $worksheet->writeString($excelrivi, $excelsarake,"Yhikugrupp"); $excelsarake++;
     $worksheet->writeString($excelrivi, $excelsarake,"YhikugruppKompl"); $excelsarake++;
-    																																																
+
     $i = 1;
   }
 

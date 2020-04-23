@@ -10,7 +10,7 @@ $tee = empty($tee) ? '' : $tee;
 
 echo "<font class='head'>".t("Uudelleenlähetä smarten-keräyssanoma")."</font><hr>";
 
-if (!smarten_RAJAPINTA or !in_array($yhtiorow['ulkoinen_jarjestelma'], array('', 'K'))) {
+if (!SMARTEN_RAJAPINTA or !in_array($yhtiorow['ulkoinen_jarjestelma'], array('', 'K'))) {
   echo t("Kerättävien tilauksien lähettäminen estetty yhtiötasolla")."!<br>";
   $tee = '';
 }
@@ -27,7 +27,7 @@ if ($tee == "laheta" and $tilaukset != "") {
             FROM lasku
             JOIN varastopaikat ON (lasku.yhtio = varastopaikat.yhtio
               AND lasku.varasto = varastopaikat.tunnus
-              AND varastopaikat.ulkoinen_jarjestelma IN ('L','P')
+              AND varastopaikat.ulkoinen_jarjestelma = 'S'
             )
             WHERE lasku.yhtio = '{$kukarow['yhtio']}'
             AND lasku.lahetetty_ulkoiseen_varastoon > 0

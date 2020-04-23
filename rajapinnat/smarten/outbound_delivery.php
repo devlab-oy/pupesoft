@@ -52,7 +52,7 @@ $query = "SELECT DISTINCT lasku.tunnus
             varastopaikat.yhtio   = lasku.yhtio AND
             varastopaikat.tunnus  = lasku.varasto AND
             varastopaikat.tyyppi != 'P' AND
-            varastopaikat.ulkoinen_jarjestelma IN ('S')
+            varastopaikat.ulkoinen_jarjestelma = 'S'
           )
           JOIN tilausrivi ON (
             tilausrivi.yhtio    = lasku.yhtio AND
@@ -83,7 +83,7 @@ $query = "SELECT DISTINCT lasku.tunnus
               lasku.toimitustavan_lahto = 0
             )
           )
-          AND NOW() >= DATE_ADD(lasku.h1time, INTERVAL (if(varastopaikat.ulkoinen_jarjestelma='L', 1, 15)) MINUTE)
+          AND NOW() >= DATE_ADD(lasku.h1time, INTERVAL (if(varastopaikat.ulkoinen_jarjestelma='S', 1, 15)) MINUTE)
           AND (lasku.lahetetty_ulkoiseen_varastoon IS NULL or lasku.lahetetty_ulkoiseen_varastoon = 0)
           AND (maksuehto.jv IS NULL OR maksuehto.jv = '')
           AND kuka.kesken IS NULL";

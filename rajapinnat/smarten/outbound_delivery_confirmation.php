@@ -241,9 +241,7 @@ while (false !== ($file = readdir($handle))) {
 
       $item_number = $data['item_number'];
       $keratty     = $data['keratty'];
-
-      $smarten_itemnumberfield = smarten_field('ItemNumber');
-      $tuotelisa = "AND tuote.{$smarten_itemnumberfield} = '{$item_number}'";
+      $tuotelisa   = "AND tuote.tuoteno = '{$item_number}'";
 
       $query = "SELECT tilausrivi.*
                 FROM tilausrivi

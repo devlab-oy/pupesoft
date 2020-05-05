@@ -69,10 +69,8 @@ require "rajapinnat/logmaster/logmaster-functions.php";
 $saapumisnro = (int) $saapumisnro;
 $ordercode = !isset($ordercode) ? 'U' : $ordercode;
 
-$query = "SELECT lasku.*, varastopaikat.ulkoisen_jarjestelman_tunnus
+$query = "SELECT *
           FROM lasku
-          INNER JOIN varastopaikat
-            ON (varastopaikat.yhtio = lasku.yhtio AND varastopaikat.tunnus = lasku.varasto)
           WHERE yhtio = '{$kukarow['yhtio']}'
           AND tila    = 'K'
           AND alatila = ''
@@ -160,7 +158,7 @@ $body->addChild('DeliveryDate',     tv1dateconv($tilasnumero_row['toimaika']));
 if ($uj_nimi == "Velox") {
   $body->addChild('Comments',        xml_cleanstring($row['comments']));
 }
-$body->addChild('Warehouse',        xml_cleanstring($row['ulkoisen_jarjestelman_tunnus']));
+$body->addChild('Warehouse',        '');
 
 $vendor = $body->addChild('Vendor');
 $vendor->addChild('VendAccount',  xml_cleanstring($toimirow['toimittajanro']));

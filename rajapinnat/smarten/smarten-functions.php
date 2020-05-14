@@ -492,14 +492,14 @@ if (!function_exists('smarten_outbounddelivery')) {
               FROM liitetiedostot
               WHERE yhtio         = '{$kukarow["yhtio"]}'
               AND liitos          = 'lasku'
-              AND liitostunnus    = {$tilausnumero}
+              AND liitostunnus    = {$otunnus}
               AND kayttotarkoitus = 'SMARTEN'";
     $liiteres = pupe_query($query);
 
     while ($liitetiedosto = mysql_fetch_assoc($liiteres)) {
       $path_parts = pathinfo($liitetiedosto['filename']);
       $ext = strtoupper($path_parts['extension']);
-      $filename = "{$tilausnumero}_{$liitetiedosto['tunnus']}.{$ext}";
+      $filename = "{$otunnus}_{$liitetiedosto['tunnus']}.{$ext}";
 
       $extension = $additionalinfo->addChild("Extension");
       $extension->addAttribute("extensionId", "file");

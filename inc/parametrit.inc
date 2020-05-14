@@ -1019,7 +1019,7 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
   $_smarten_rajapinta &= (!empty($smarten['host']));
   $_smarten_rajapinta &= (!empty($smarten['user']));
   $_smarten_rajapinta &= (!empty($smarten['pass']));
-  $_smarten_rajapinta &= (!empty($smarten['path']));
+  $_smarten_rajapinta &= (!empty($smarten['path_to']));
   $_smarten_rajapinta &= ($yhtiorow['lahetteen_tulostustapa'] == 'K');
   $_smarten_rajapinta &= ($yhtiorow['siirtolistan_tulostustapa'] == 'K');
 

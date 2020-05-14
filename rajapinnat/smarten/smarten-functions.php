@@ -67,7 +67,7 @@ if (!function_exists('smarten_send_file')) {
     $ftphost = $smarten['host'];
     $ftpuser = $smarten['user'];
     $ftppass = $smarten['pass'];
-    $ftppath = $smarten['path'];
+    $ftppath = $smarten['path_to'];
     $ftpport = $smarten['port'];
     $ftpskey = $smarten['skey'];
 

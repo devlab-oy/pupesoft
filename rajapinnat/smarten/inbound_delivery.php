@@ -225,8 +225,7 @@ if ($xml_chk) {
   $ostotilaukset = array_unique($ostotilaukset);
 
   $_name = substr("in_{$row['laskunro']}_".implode('_', $ostotilaukset), 0, 25);
-  //$filename = $pupe_root_polku."/dataout/{$_name}.xml";
-  $filename = "/tmp/{$_name}.xml";
+  $filename = $pupe_root_polku."/dataout/{$_name}.xml";
 
   if (file_put_contents($filename, $xml->asXML())) {
 

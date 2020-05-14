@@ -84,7 +84,6 @@ $query = "SELECT DISTINCT lasku.tunnus
             )
           )
           #AND NOW() >= DATE_ADD(lasku.h1time, INTERVAL 5 MINUTE)
-          #AND lasku.tunnus=292821
           AND (lasku.lahetetty_ulkoiseen_varastoon IS NULL or lasku.lahetetty_ulkoiseen_varastoon = 0)
           AND (maksuehto.jv IS NULL OR maksuehto.jv = '')
           AND kuka.kesken IS NULL";

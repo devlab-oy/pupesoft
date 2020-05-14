@@ -7,7 +7,7 @@
 // $ftppath --> Kansio FTP-palvelimella jonne failit työnnetään
 // $ftpdest --> Minne tallennetaan
 // $ftpport --> Custom portti, ei pakollinen
-// $ftpskey --> SSH avain
+// $ftpskey --> SSH avain, ei pakollinen
 
 if (empty($ftpskey)) {
   $ftpskey = "";

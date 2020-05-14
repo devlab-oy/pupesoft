@@ -68,12 +68,14 @@ if (!function_exists('smarten_send_file')) {
     $ftpuser = $smarten['user'];
     $ftppass = $smarten['pass'];
     $ftppath = $smarten['path'];
+    $ftpport = $smarten['port'];
+    $ftpskey = $smarten['skey'];
 
     $ftpbinary = $binary;
 
     $ftpfile = realpath($filename);
 
-    require "inc/ftp-send.inc";
+    require "inc/sftp-send.inc";
 
     return $palautus;
   }

@@ -11,11 +11,10 @@ else exit;
 // $ftppath --> Kansio FTP-palvelimella jonne failit työnnetään
 // $ftpfile --> Siirrettävä tiedosto
 // $ftpport --> Custom portti, ei pakollinen
-// $ftpskey --> SSH avain
+// $ftpskey --> SSH avain, ei pakollinen
 
 // $ftpfail --> Kansio jonne laitetaan failit jos siirto feilaa, ei pakollinen
 // $ftpsucc --> Kansio jonne tallennetaan failit jos siirto onnistuu, ei pakollinen
-// $ftptype --> FTP-palvelimen tyyppi esim "AS400", ei pakollinen
 // $ftptmpr --> Käytetäänkö .TMP päätettä siirron aikana.
 
 // Palautetaan:

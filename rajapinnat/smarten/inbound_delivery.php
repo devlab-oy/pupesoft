@@ -109,8 +109,10 @@ $toimirow = mysql_fetch_assoc($toimires);
 // haetaan tilausrivit
 $query = "SELECT varastopaikat.ulkoinen_jarjestelma,
           varastopaikat.ulkoisen_jarjestelman_tunnus,
+          tuote.purkukommentti,
           tilausrivi.*
           FROM tilausrivi
+          JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno)
           LEFT JOIN varastopaikat ON (
             varastopaikat.yhtio   = tilausrivi.yhtio AND
             varastopaikat.tunnus  = tilausrivi.varasto AND
@@ -136,7 +138,7 @@ mysql_data_seek($rivit_res, 0);
 $xml = simplexml_load_string("<?xml version='1.0' encoding='UTF-8'?><E-Document></E-Document>");
 
 $header = $xml->addChild('Header');
-$header->addChild('DateIssued', 'inboundDelivery');   // CHECK: Current time
+$header->addChild('DateIssued', date('Y-m-d'));
 $header->addChild('SenderGLN', "BNNB");
 $header->addChild('ReceiverGLN', 'smarten');
 
@@ -155,7 +157,7 @@ $buyerparty->addChild('Name', xml_cleanstring($yhtiorow['nimi']));
 //$payerparty->addChild('Name', 'Partner name');
 
 $supplierparty = $documentparties->addChild('SupplierParty');
-$supplierparty->addChild('PartyCode', "2818");
+$supplierparty->addChild('PartyCode', "4544");
 $supplierparty->addChild('Name', xml_cleanstring(trim($row['nimi'] . " " . $row['nimitark'])));
 
 $contactdata = $supplierparty->addChild("ContactData");
@@ -169,10 +171,10 @@ $actualaddress->addChild("CountryCode", xml_cleanstring($row['maa']));
 $documentinfo = $document->addChild('DocumentInfo');
 $documentinfo->addChild('DocumentSubType');
 $documentinfo->addChild('DocumentName', "PurchaseOrder");
-$documentinfo->addChild('DocumentNum', $tilasnumero_row['otunnus']);
+$documentinfo->addChild('DocumentNum', $row['laskunro']);
 
 $dateinfo = $documentinfo->addChild('DateInfo');
-$dateinfo->addChild('OrderDate', tv1dateconv($row['luontiaika']));
+$dateinfo->addChild('OrderDate', tv1dateconv($tilasnumero_row['luontiaika']));
 $dateinfo->addChild('DeliveryDateRequested', tv1dateconv($tilasnumero_row['toimaika']));
 
 $refinfo = $documentinfo->addChild('RefInfo');
@@ -183,8 +185,11 @@ $sourcedocument->addChild('SourceDocumentNum');
 // $documentsumgroup->addChild("Currency", xml_cleanstring($row['valkoodi']));
 
 $documentitem = $document->addChild('DocumentItem');
+$ostotilaukset = array();
 
 while ($rivit_row = mysql_fetch_assoc($rivit_res)) {
+  $ostotilaukset[] = $rivit_row['otunnus'];
+
   $itementry = $documentitem->addChild('ItemEntry');
   $itementry->addChild("LineItemNum", $rivit_row['tunnus']);
   $itementry->addChild("GTIN", $rivit_row['ean']);
@@ -198,7 +203,14 @@ while ($rivit_row = mysql_fetch_assoc($rivit_res)) {
   $itemreserveunit->addChild("AmountActual", xml_cleanstring($rivit_row['varattu']));
 
   $location = $itemreserve->addChild("Location");
-  $location->addChild("WarehouseCode", $rivit_row['ulkoisen_jarjestelman_tunnus']);
+
+  // Tämä tuote viedään aina erikoisvarastoon
+  if (!empty($rivit_row['purkukommentti']) and !empty($smarten['vas_varasto'])) {
+    $location->addChild("WarehouseCode", $smarten['vas_varasto']);
+  }
+  else {
+    $location->addChild("WarehouseCode", $rivit_row['ulkoisen_jarjestelman_tunnus']);
+  }
 }
 
 $additionalinfo = $document->addChild('AdditionalInfo');
@@ -213,7 +225,7 @@ if ($xml_chk) {
   $ostotilaukset = array_unique($ostotilaukset);
 
   $_name = substr("in_{$row['laskunro']}_".implode('_', $ostotilaukset), 0, 25);
-  $filename = $pupe_root_polku."/dataout/{$_name}.xml";
+  //$filename = $pupe_root_polku."/dataout/{$_name}.xml";
   $filename = "/tmp/{$_name}.xml";
 
   if (file_put_contents($filename, $xml->asXML())) {

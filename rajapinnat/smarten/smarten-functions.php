@@ -41,12 +41,16 @@ if (!function_exists('smarten_send_email')) {
       'to' => $email,
     );
 
+    var_dump($args);
+
+    /*
     if (pupesoft_sahkoposti($args)) {
       pupesoft_log($log_name, "Sähköposti lähetetty onnistuneesti osoitteeseen {$email}");
     }
     else {
       pupesoft_log($log_name, "Sähköpostin lähetys epäonnistui osoitteeseen {$email}");
     }
+    */
   }
 }
 
@@ -115,7 +119,7 @@ if (!function_exists('smarten_mark_as_sent')) {
 
     switch ($laskurow['tila']) {
     case 'N':
-      # Tällä yhtiön parametrilla pystytään ohittamaan tulostus
+      # Tällä yhtiän parametrilla pystytään ohittamaan tulostus
       $yhtiorow["lahetteen_tulostustapa"] = "X";
       $laskuja = 1;
       $tilausnumeroita = $laskurow['tunnus'];
@@ -240,8 +244,9 @@ if (!function_exists('smarten_outbounddelivery')) {
                 tilausrivi.var     != 'J'
               )
               JOIN tuote ON (
-                tuote.yhtio         = tilausrivi.yhtio AND
-                tuote.tuoteno       = tilausrivi.tuoteno
+                tuote.yhtio     = tilausrivi.yhtio AND
+                tuote.tuoteno   = tilausrivi.tuoteno AND
+                tuote.ei_saldoa = ''
               )
               LEFT JOIN laskun_lisatiedot ON (
                 laskun_lisatiedot.yhtio         = lasku.yhtio AND
@@ -256,12 +261,11 @@ if (!function_exists('smarten_outbounddelivery')) {
     $loopres = pupe_query($query);
 
     if (mysql_num_rows($loopres) == 0) {
-      pupesoft_log('smarten_outbound_delivery', "Yhtään riviä ei löytynyt tilaukselle {$otunnus}. Sanoman luonti epäonnistui.");
+      pupesoft_log('smarten_outbound_delivery', "Yhtään riviä ei läytynyt tilaukselle {$otunnus}. Sanoman luonti epäonnistui.");
       return false;
     }
 
     $looprow = mysql_fetch_assoc($loopres);
-
     $varastorow = hae_varasto($looprow['otsikon_varasto']);
 
     $query = "SELECT *
@@ -290,9 +294,9 @@ if (!function_exists('smarten_outbounddelivery')) {
               AND selite  = '{$looprow['toimitustapa']}'";
     $toimitustapa_chk_res = pupe_query($query);
     $toimitustapa_chk_row = mysql_fetch_assoc($toimitustapa_chk_res);
+
     $toim_ta = $looprow['ohjelma_moduli'] == 'MAGENTO' ? t_avainsana('TOIM_TAPA_TA', '', '', '', '', 'selitetark') : null;
     $transport_account = $toim_ta ? $toim_ta : substr($toimitustapa_chk_row['tunnus'], 0, 10);
-    $droppoint   = $looprow['noutopisteen_tunnus'];
 
     $h1time = explode("-", substr($looprow['h1time'], 0, 10));
     $pickinglistdate = "{$h1time[2]}-{$h1time[1]}-{$h1time[0]}";
@@ -377,6 +381,12 @@ if (!function_exists('smarten_outbounddelivery')) {
     $contactdata->addChild("PhoneNum", "");
     $contactdata->addChild("MobileNum", xml_cleanstring($looprow['toim_puh']));
 
+    if (!empty($looprow['noutopisteen_tunnus'])) {
+      $recipientparty = $documentparties->addChild("RecipientParty");
+      $recipientparty->addChild("PartyCode", $looprow['noutopisteen_tunnus']);
+      $recipientparty->addChild("Name", $looprow['noutopisteen_tunnus']);
+    }
+
     $sellerparty = $documentparties->addChild("SellerParty");
     $sellerparty->addChild("PartyCode", "BNNB");
 
@@ -394,7 +404,7 @@ if (!function_exists('smarten_outbounddelivery')) {
 
     $sourcedocument = $refinfo->addChild("SourceDocument");
     $sourcedocument->addAttribute("type", "order");
-    $sourcedocument->addChild("SourceDocumentNum", $looprow['asiakkaan_tilausnumero']);
+    $sourcedocument->addChild("SourceDocumentNum", $CustOrderNumber);
     $sourcedocument->addChild("SourceDocumentDate", "");
 
     // $refinfo->addChild("TransportReferenceID", "");
@@ -470,6 +480,12 @@ if (!function_exists('smarten_outbounddelivery')) {
     $extension->addAttribute("extensionId", "externalremarks");
     $extension->addChild("InfoContent", xml_cleanstring($looprow['kommentti']));
 
+    if (!empty($looprow['noutopisteen_tunnus'])) {
+      $extension = $additionalinfo->addChild("Extension");
+      $extension->addAttribute("extensionId", "ParcelMachine");
+      $extension->addChild("InfoContent", "1");
+    }
+
     pupesoft_log('smarten_outbound_delivery', "Tilauksen {$otunnus} sanomalle lisätty.");
 
     $_name = substr("out_{$otunnus}_".md5(uniqid()), 0, 25);
@@ -484,6 +500,36 @@ if (!function_exists('smarten_outbounddelivery')) {
     return false;
   }
 }
+
+if (!function_exists("smarten_outbounddelivery_attachments")) {
+  function smarten_outbounddelivery_attachments($tilausnumero) {
+    global $kukarow;
+
+    $query = "SELECT filename, data
+              FROM liitetiedostot
+              WHERE yhtio         = '{$kukarow["yhtio"]}'
+              AND liitos          = 'lasku'
+              AND liitostunnus    = ({$tilausnumero})
+              AND kayttotarkoitus = 'SMART'";
+    $result = pupe_query($query);
+
+    $liitetiedostot = array();
+
+    while ($liitetiedosto = mysql_fetch_assoc($result)) {
+      $filename    = $liitetiedosto["filename"];
+      $filename    = explode(".", $filename);
+      $filename[0] = "{$filename[0]}-" . md5(uniqid(rand(), true));
+      $filename    = implode(".", $filename);
+
+      echo "$filename\n";
+
+      $liitetiedostot[$filename] = $liitetiedosto["data"];
+    }
+
+    return $liitetiedostot;
+  }
+}
+
 
 if (!function_exists('smarten_check_params')) {
   function smarten_check_params($toim) {

@@ -56,7 +56,7 @@ while (false !== ($file = readdir($handle))) {
   $full_filepath = $path.$file;
   list($message_type, $message_subtype) = smarten_message_type($full_filepath);
 
-  if ($message_type != 'InboundDeliveryConfirmation') {
+  if ($message_type != 'RECADV') {
     continue;
   }
 
@@ -66,8 +66,8 @@ while (false !== ($file = readdir($handle))) {
   pupesoft_log('smarten_inbound_delivery_confirmation', "Käsitellään sanoma {$file}");
 
   $xml = simplexml_load_file($full_filepath);
-  $node = $xml->VendPackingSlip;
-  $saapumisnro = (int) $node->PurchId;
+
+  $saapumisnro = $xml->xpath('Document/DocumentInfo/RefInfo/SourceDocument[@type="order"]/SourceDocumentNum')[0];
 
   $email_array[] = "";
   $email_array[] = t("Saapuminen %s", "", $saapumisnro);
@@ -91,26 +91,31 @@ while (false !== ($file = readdir($handle))) {
     $email_array[] = t("Kuittausta odottavaa saapumista ei löydy saapumisnumerolla %d", "", $saapumisnro);
 
     rename($full_filepath, $path."error/".$file);
-
     continue;
   }
 
-  // Otetaan talteen Lines-elementti sieltä missä se on
-  if (isset($xml->Lines)) {
-    $sanoman_kaikki_rivit = $xml->Lines;
+  // Smarten-varastot
+  $query = "SELECT *
+            FROM varastopaikat
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND ulkoinen_jarjestelma = 'S'
+            AND ulkoisen_jarjestelman_tunnus != ''";
+  $varastores = pupe_query($query);
+  $varastot = array();
+
+  while ($varastorow = mysql_fetch_assoc($varastores)) {
+    $varastot[$varastorow['ulkoisen_jarjestelman_tunnus']] = $varastorow;
   }
 
-  if (isset($node->Lines)) {
-    $sanoman_kaikki_rivit = $node->Lines;
-  }
+  // Otetaan rivit talteen
+  $sanoman_kaikki_rivit = $xml->Document->DocumentItem;
 
-  if (empty($sanoman_kaikki_rivit) or !isset($sanoman_kaikki_rivit->Line)) {
+  if (empty($sanoman_kaikki_rivit) or !isset($sanoman_kaikki_rivit->ItemEntry)) {
     pupesoft_log('smarten_inbound_delivery_confirmation', "Sanomassa {$file} ei ollut rivejä");
 
     $email_array[] = t("Saapumisen %d kuittaussanomassa ei löytynyt rivejä", "", $saapumisnro);
 
     rename($full_filepath, $path."error/".$file);
-
     continue;
   }
 
@@ -127,25 +132,32 @@ while (false !== ($file = readdir($handle))) {
 
   // Loopataan rivit tilausrivit-arrayseen
   // koska Pupesoftin tilausrivi voi tulla monella aineiston rivillä
-  foreach ($sanoman_kaikki_rivit->Line as $key => $line) {
-    $rivitunnus = (int) $line->TransId;
-    $tuoteno    = (string) $line->ItemNumber;
-    $kpl        = (float) $line->ArrivedQuantity;
+  foreach ($sanoman_kaikki_rivit->ItemEntry as $line) {
+    $rivitunnus = (int) $line->xpath('RefInfo/SourceDocument[@type="order"]/SourceDocumentLineItemNum')[0];
+    $tuoteno    = (string) $line->BuyerItemCode;
 
-    if (!isset($tilausrivit[$rivitunnus])) {
-      $tilausrivit[$rivitunnus] = array(
-        'kpl'     => $kpl,
-        'tuoteno' => $tuoteno,
-      );
-    }
-    else {
-      $tilausrivit[$rivitunnus]['kpl'] += $kpl;
+    foreach ($line->ItemReserve as $stock_item) {
+      $kpl = (float) $stock_item->ItemReserveUnit->AmountActual;
+      $varastotunnus = (string) $stock_item->Location->WarehouseCode;
+
+      if (!isset($tilausrivit[$rivitunnus])) {
+        $tilausrivit[$rivitunnus] = array(
+          'kpl'     => $kpl,
+          'tuoteno' => $tuoteno,
+          'varastotunnus' => $varastotunnus,
+        );
+      }
+      else {
+        $tilausrivit[$rivitunnus]['kpl'] += $kpl;
+      }
     }
   }
 
   foreach ($tilausrivit as $rivitunnus => $data) {
     $tuoteno = $data['tuoteno'];
-    $kpl     = (int) $data['kpl'];
+    $kpl = round($data['kpl']);
+    $varastotunnus = $data['varastotunnus'];
+
     $uusi_id = 0;
 
     $query = "SELECT *
@@ -166,7 +178,6 @@ while (false !== ($file = readdir($handle))) {
       );
 
        pupesoft_log('smarten_inbound_delivery_confirmation', "Tilausriviä ei löydy rivitunnuksella {$rivitunnus} ja tuotenumerolla {$tuoteno}.");
-
        continue;
     }
 
@@ -180,7 +191,6 @@ while (false !== ($file = readdir($handle))) {
       );
 
       pupesoft_log('smarten_inbound_delivery_confirmation', "Sanoman kpl oli pienempi kuin 1. Rivitunnus {$rivitunnus}.");
-
       continue;
     }
 
@@ -215,9 +225,18 @@ while (false !== ($file = readdir($handle))) {
       }
     }
 
-    # Päivitetään varattu ja kohdistetaan rivi
+    $hyllylisa = "";
+    if (!empty($varastot[$varastotunnus])) {
+      $hyllylisa = "hyllyalue = '".$varastot[$varastotunnus]['alkuhyllyalue']."',
+                    hyllynro  = '".$varastot[$varastotunnus]['alkuhyllynro']."',
+                    hyllyvali = '0',
+                    hyllytaso = '0',";
+    }
+
+    # Päivitetään varattu ja tuotepaikka ja kohdistetaan rivi
     $query = "UPDATE tilausrivi SET
               varattu         = '{$kpl}',
+              {$hyllylisa}
               varastoon       = 1
               WHERE yhtio     = '{$yhtio}'
               AND tyyppi      = 'O'
@@ -232,6 +251,20 @@ while (false !== ($file = readdir($handle))) {
         'smarten_kpl' => $kpl,
         'pupesoft_kpl' => $tilausrivirow['varattu'],
       );
+
+      // Varmistetaan, että tuotteella on paikka siinä varastossa, johon se on menossa
+      $query = "SELECT
+                hyllyalue,
+                hyllynro,
+                hyllyvali,
+                hyllytaso
+                FROM  tilausrivi
+                WHERE yhtio = '{$yhtio}'
+                AND tunnus = '{$rivitunnus}'";
+      $paikkares = pupe_query($query);
+      $paikkarow = mysql_fetch_assoc($paikkares);
+
+      lisaa_tuotepaikka($tuoteno, $paikkarow['hyllyalue'], $paikkarow['hyllynro'], $paikkarow['hyllyvali'], $paikkarow['hyllytaso']);
     }
     else {
       $tilausrivit_error[] = array(
@@ -305,5 +338,4 @@ $params = array(
 );
 
 smarten_send_email($params);
-
 closedir($handle);

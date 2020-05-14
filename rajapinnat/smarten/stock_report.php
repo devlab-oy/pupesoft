@@ -76,28 +76,23 @@ while (false !== ($file = readdir($handle))) {
 
   foreach ($xml->Document->DocumentItem->ItemEntry as $line) {
     $item_number = (string) $line->SellerItemCode;
-    // TODO: Korjaa t‰m‰
-    $smartenmaara = (float) $line->AmountActual;
 
-    if (in_array($message_subtype, array('CORRMVM','CORRADJ'))) {
-      $varastotunnus = (string) $line->ItemReserve->Location->WarehouseCode;
-    }
-    else {
-      $varastotunnus = (string) $line->xpath('AdditionalInfo/Extension[@extensionId="StockAddress"]/InfoContent')[0];
-    }
+    foreach ($line->ItemReserve as $stock_item) {
+      $smartenmaara = (float) $stock_item->ItemReserveUnit->AmountActual;
+      $varastotunnus = (string) $stock_item->Location->WarehouseCode;
 
-    // Pidet‰‰n yll‰ tuote-/varastokohtaista saldosummaa
-    if (!empty($saldosummat[$item_number][$varastotunnus])) {
-      $saldosummat[$item_number][$varastotunnus] += $smartenmaara;
-    }
-    else {
-      $saldosummat[$item_number][$varastotunnus] = $smartenmaara;
+      // Pidet‰‰n yll‰ tuote-/varastokohtaista saldosummaa
+      if (!empty($saldosummat[$item_number][$varastotunnus])) {
+        $saldosummat[$item_number][$varastotunnus] += $smartenmaara;
+      }
+      else {
+        $saldosummat[$item_number][$varastotunnus] = $smartenmaara;
+      }
     }
   }
 
   foreach ($saldosummat as $item_number => $varastot) {
     foreach($varastot as $varastotunnus => $smartenmaara) {
-
       echo "$message_subtype: $item_number, $smartenmaara, $varastotunnus\n";
 
       $query = "SELECT tuoteno, nimitys
@@ -275,17 +270,10 @@ while (false !== ($file = readdir($handle))) {
     'log_name' => 'smarten_stock_report',
   );
 
-  // smarten_send_email($params);
-
-  echo "\n";
-  foreach($email_array as $line) {
-    echo "{$line}\n";
-  }
-  echo "\n";
+  smarten_send_email($params);
 
   // siirret‰‰n tiedosto done-kansioon
-  //rename($full_filepath, $path.'done/'.$file);
-
+  rename($full_filepath, $path.'done/'.$file);
   pupesoft_log('smarten_stock_report', "Sanoman {$file} saldovertailu k‰sitelty");
 }
 

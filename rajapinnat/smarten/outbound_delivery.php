@@ -83,7 +83,8 @@ $query = "SELECT DISTINCT lasku.tunnus
               lasku.toimitustavan_lahto = 0
             )
           )
-          AND NOW() >= DATE_ADD(lasku.h1time, INTERVAL 5 MINUTE)
+          #AND NOW() >= DATE_ADD(lasku.h1time, INTERVAL 5 MINUTE)
+          #AND lasku.tunnus=292821
           AND (lasku.lahetetty_ulkoiseen_varastoon IS NULL or lasku.lahetetty_ulkoiseen_varastoon = 0)
           AND (maksuehto.jv IS NULL OR maksuehto.jv = '')
           AND kuka.kesken IS NULL";
@@ -96,12 +97,19 @@ while ($laskurow = mysql_fetch_assoc($laskures)) {
     continue;
   }
 
+  // Siirretään myös tilauksen liitetiedostot
+  smarten_outbounddelivery_attachments($laskurow['tunnus']);
+
   $palautus = smarten_send_file($filename);
 
   if ($palautus == 0) {
-    smarten_sent_timestamp($laskurow['tunnus']);
-    smarten_mark_as_sent($laskurow['tunnus']);
+    //smarten_sent_timestamp($laskurow['tunnus']);
+    //smarten_mark_as_sent($laskurow['tunnus']);
     pupesoft_log('smarten_outbound_delivery', "Siirretiin tilaus {$laskurow['tunnus']}.");
+
+    // Siirretään myös tilauksen liitetiedostot
+    smarten_outbounddelivery_attachments($laskurow['tunnus']);
+
   }
   else {
     pupesoft_log('smarten_outbound_delivery', "Tilauksen {$laskurow['tunnus']} siirto epäonnistui.");

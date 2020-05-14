@@ -64,7 +64,7 @@ while (false !== ($file = readdir($handle))) {
   $full_filepath = $path.$file;
   list($message_type, $message_subtype) = smarten_message_type($full_filepath);
 
-  if ($message_type != 'OutboundDeliveryConfirmation') {
+  if ($message_type != 'invoice') {
     continue;
   }
 
@@ -72,47 +72,42 @@ while (false !== ($file = readdir($handle))) {
 
   pupesoft_log('smarten_outbound_delivery_confirmation', "Käsitellään sanoma {$file}");
 
-  $otunnus = (int) $xml->CustPackingSlip->PickingListId;
+  $otunnus = (int) $xml->xpath('Document/DocumentInfo/RefInfo/SourceDocument[@type="desorder"]/SourceDocumentNum')[0];
 
   $tracking_code = "";
 
-  if (isset($xml->CustPackingSlip->Tracking_code) and !empty($xml->CustPackingSlip->Tracking_code)) {
-    $tracking_code = $xml->CustPackingSlip->Tracking_code;
+  $parcel_ids = $xml->xpath('Document/DocumentInfo/RefInfo/SourceDocument[@type="ParcelId"]');
+
+  foreach ($parcel_ids as $parcel_id) {
+    $tracking_code .= $parcel_id->SourceDocumentNum."\n";
   }
 
-  if ($otunnus == 0) {
+  $tracking_code = trim($tracking_code);
+
+  if (empty($otunnus)) {
     pupesoft_log('smarten_outbound_delivery_confirmation', "Tilausnumeroa ei löytynyt sanomasta {$file}");
 
     $email_array[] = t("Tilausnumeroa ei löytynyt sanomasta %s", "", $file);
 
     rename($full_filepath, $path.'error/'.$file);
-
     continue;
   }
 
-  if (isset($xml->CustPackingSlip->DeliveryDate)) {
-    //<DeliveryDate>20-04-2016</DeliveryDate>
-    $delivery_date = $xml->CustPackingSlip->DeliveryDate;
-    $toimaika = date("Y-m-d 00:00:00", strtotime($delivery_date));
-  }
-  elseif (isset($xml->CustPackingSlip->Deliverydate)) {
-    //HHV-case
-    //<Deliverydate>2016-04-20T12:34:56</Deliverydate>
-    $delivery_date = $xml->CustPackingSlip->Deliverydate;
-    $toimaika = date("Y-m-d H:i:s", strtotime($delivery_date));
-  }
-  else {
-    $toimaika = '0000-00-00 00:00:00';
-  }
+  $delivery_date = $xml->Document->DocumentInfo->DateInfo->DeliveryDateActual;
+  $toimaika = date("Y-m-d 00:00:00", strtotime($delivery_date));
 
+  /*
+  TODO:
+  Tarvitaanko?
   $toimitustavan_tunnus = (int) $xml->CustPackingSlip->TransportAccount;
+  */
 
   $query = "SELECT *
             FROM lasku
             WHERE yhtio = '{$kukarow['yhtio']}'
             AND tunnus  = '{$otunnus}'
-            AND tila    IN ('L', 'V', 'G', 'S')
-            AND alatila IN ('A', 'E', 'J')";
+            AND tila    IN ('L', 'V', 'G', 'S', 'N')
+            AND alatila IN ('A', 'E', 'J', 'T')";
   $laskures = pupe_query($query);
 
   $tuotteiden_paino = 0;
@@ -121,118 +116,25 @@ while (false !== ($file = readdir($handle))) {
   if (mysql_num_rows($laskures) > 0) {
     $laskurow = mysql_fetch_assoc($laskures);
 
-    # katsotaan missä rivit ovat
-    if (isset($xml->Lines)) {
-      $lines = $xml->Lines;
-    }
-    elseif (isset($xml->CustPackingSlip->Lines)) {
-      $lines = $xml->CustPackingSlip->Lines;
-    }
-    else {
-      pupesoft_log('smarten_outbound_delivery_confirmation', "Rivit-elementtiä ei löytynyt sanomasta {$file}. Skipataan sanoma.");
+    foreach ($xml->Document->DocumentItem->ItemEntry as $line) {
+      $tilausrivin_tunnus = (int) $line->xpath('RefInfo/SourceDocument[@type="desorder"]/SourceDocumentLineItemNum')[0];
 
-      $email_array[] = t("Rivit-elementtiä ei löytynyt sanomasta %s", "", $file);
-
-      rename($full_filepath, $path.'error/'.$file);
-
-      continue;
-    }
-
-    # katsotaan missä yksittäinen rivi sijaitsee
-    if (isset($lines->Line->TransId)) {
-      $lines = $lines->Line;
-    }
-    elseif (isset($lines->TransId)) {
-      # rivit onkin suoraan lines elementtejä
-    }
-    else {
-      pupesoft_log('smarten_outbound_delivery_confirmation', "Rivin TransId-elementtiä ei löytynyt sanomasta {$file}. Skipataan sanoma.");
-
-      $email_array[] = t("Rivin TransId-elementtiä ei löytynyt sanomasta %s", "", $file);
-
-      rename($full_filepath, $path.'error/'.$file);
-
-      continue;
-    }
-
-    foreach ($lines as $line) {
-
-      $tilausrivin_tunnus = (int) $line->TransId;
 
       if (!isset($tilausrivit[$tilausrivin_tunnus])) {
         $tilausrivit[$tilausrivin_tunnus] = array(
-          'item_number' => mysql_real_escape_string($line->ItemNumber),
-          'keratty'     => (float) $line->DeliveredQuantity,
+          'item_number' => mysql_real_escape_string($line->SellerItemCode),
+          'keratty'     => (float) $line->AmountActual,
         );
       }
       else {
-        $tilausrivit[$tilausrivin_tunnus]['keratty'] += (float) $line->DeliveredQuantity;
+        $tilausrivit[$tilausrivin_tunnus]['keratty'] += (float) $line->AmountActual;
       }
     }
 
     pupesoft_log('smarten_outbound_delivery_confirmation', "Sanomassa {$file} ".count($tilausrivit)." uniikkia tilausriviä.");
-    echo "\n";
-
-    /*
-     *  Kommentoitu pois, koska tällä hetkellä ei ole Kicksiä
-    $query = "SELECT *
-              FROM asiakkaan_avainsanat
-              WHERE yhtio       = '{$kukarow['yhtio']}'
-              AND liitostunnus  = '{$laskurow['liitostunnus']}'
-              AND laji          = 'KICK_EDI'
-              AND avainsana    != ''";
-    $edi_chk_res = pupe_query($query);
-    $packageinfo = FALSE;
-
-    // Special EDI case, tarkistetaan löytyykö <Packages>-segmentti
-    if (mysql_num_rows($edi_chk_res) and isset($xml->CustPackingSlip->Packages)) {
-      // Poistetaan keryserät ja luodaan ne uudestaan Packages-elementin tietojen perusteella
-      $query = "DELETE
-                FROM kerayserat
-                WHERE yhtio = '{$kukarow['yhtio']}'
-                AND otunnus = '{$laskurow['tunnus']}'";
-      pupe_query($query);
-      $pklask = 1;
-
-      foreach ($xml->CustPackingSlip->Packages->PackageId as $package) {
-        $package_sscc = $package->attributes()->No;
-
-        foreach ($package->PacItemLine as $packageitem) {
-          $package_rivitunnus = $packageitem->OrdTransId;
-          $package_tuoteno = $packageitem->PacItemNumber;
-          $package_maara = $packageitem->PacQuantity;
-
-          $query = "INSERT INTO kerayserat SET
-                    yhtio         = '{$kukarow['yhtio']}',
-                    nro           = {$laskurow['tunnus']},
-                    keraysvyohyke = 0,
-                    tila          = '',
-                    sscc          = '{$laskurow['tunnus']}',
-                    sscc_ulkoinen = '{$package_sscc}',
-                    otunnus       = '{$laskurow['tunnus']}',
-                    tilausrivi    = '{$package_rivitunnus}',
-                    pakkaus       = '0',
-                    pakkausnro    = '{$pklask}',
-                    kpl           = '{$package_maara}',
-                    kpl_keratty   = '{$package_maara}',
-                    keratty       = '{$kukarow['kuka']}',
-                    kerattyaika   = '{$toimaika}',
-                    laatija       = '{$kukarow['kuka']}',
-                    luontiaika    = now(),
-                    muutospvm     = now(),
-                    muuttaja      = '{$kukarow['kuka']}'";
-          pupe_query($query);
-          $packageinfo = TRUE;
-        }
-        $pklask++;
-      }
-    }
-
-    */
 
     $paivitettiin_tilausrivi_onnistuneesti = false;
     $keratty_yhteensa = 0;
-    echo "\n";
 
     // tsekataan mahollinen var arvo
     $_var = $yhtiorow['kerayspoikkeama_kasittely'] == 'J' ? "J" : "P";
@@ -450,7 +352,7 @@ while (false !== ($file = readdir($handle))) {
 
         $pupe_root_polku = dirname(dirname(dirname(__FILE__)));
 
-        if ($packageinfo) {
+        if (!empty($packageinfo)) {
           // Special EDI case, lähetetään toimitusvahvistus
           pupesoft_toimitusvahvistus($laskurow['tunnus']);
         }
@@ -639,7 +541,7 @@ while (false !== ($file = readdir($handle))) {
   smarten_send_email($params);
 
   // siirretään tiedosto done-kansioon
-  rename($full_filepath, $path.'done/'.$file);
+  # rename($full_filepath, $path.'done/'.$file);
 }
 
 closedir($handle);

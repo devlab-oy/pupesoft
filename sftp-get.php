@@ -7,6 +7,11 @@
 // $ftppath --> Kansio FTP-palvelimella jonne failit työnnetään
 // $ftpdest --> Minne tallennetaan
 // $ftpport --> Custom portti, ei pakollinen
+// $ftpskey --> SSH avain
+
+if (empty($ftpskey)) {
+  $ftpskey = "";
+}
 
 class SFTPConnection {
   private $connection;
@@ -20,7 +25,12 @@ class SFTPConnection {
     }
   }
 
-  public function login($username, $password) {
+  public function login($username, $password, $ftpskey) {
+
+    if (!empty($ftpskey)) {
+      ssh2_auth_pubkey_file($connection, $ftpuser, $ftpskey.'pub', $ftpskey);
+    }
+
     if (!ssh2_auth_password($this->connection, $username, $password)) {
       throw new Exception("Could not login to remote host ($username, $password)");
     }
@@ -80,7 +90,7 @@ if (substr($ftpdest, -1) != "/") {
 
 try {
   $sftp = new SFTPConnection($ftphost, $ftpport);
-  $sftp->login($ftpuser, $ftppass);
+  $sftp->login($ftpuser, $ftppass, $ftpskey);
   $sftp->getFilesFrom($ftppath, $ftpdest);
 }
 catch(Exception $e) {

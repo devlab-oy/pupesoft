@@ -82,8 +82,6 @@ while (false !== ($file = readdir($handle))) {
     $maara = (float) $line->AmountActual;
     $varastokoodi = (string) $line->ItemReserve->Location->WarehouseCode;
 
-    echo "$item_number, $lineid, $sourcelineid, $maara\n";
-
     if (!empty($sourcelineid)) {
       $lahteet[$lineid] = array(
         'sourcelineid' => $sourcelineid,
@@ -103,7 +101,6 @@ while (false !== ($file = readdir($handle))) {
 
   foreach ($lahteet as $lahde) {
     $kohde = $kohteet[$lahde['sourcelineid']];
-    echo "$lahde[tuoteno], $lahde[maara], $lahde[varastokoodi], $kohde[varastokoodi]\n";
 
     // Tuote
     $query = "SELECT tuoteno, nimitys
@@ -112,14 +109,12 @@ while (false !== ($file = readdir($handle))) {
               AND tuoteno = '{$lahde['tuoteno']}'";
     $tuoteres = pupe_query($query);
 
-    echo "$query\n";
-
     if (mysql_num_rows($tuoteres) == 1) {
       $tuoterow = mysql_fetch_assoc($tuoteres);
     }
     else {
-      // TODO: Korjaa t‰m‰
-      echo "VIRHE!";
+      pupesoft_log('smarten_stock_transfer_report', "VIRHE: Tuntematon tuote {$lahde['tuoteno']}");
+      continue;
     }
 
     // L‰hdepaikka
@@ -134,8 +129,6 @@ while (false !== ($file = readdir($handle))) {
               AND varastopaikat.ulkoinen_jarjestelma = 'S'
               AND varastopaikat.ulkoisen_jarjestelman_tunnus = '{$lahde['varastokoodi']}'";
     $lahdevarastores = pupe_query($query);
-
-    echo "$query\n";
 
     if (mysql_num_rows($lahdevarastores) == 1) {
       $lahdepaikkarow = mysql_fetch_assoc($lahdevarastores);
@@ -155,8 +148,8 @@ while (false !== ($file = readdir($handle))) {
       }
     }
     else {
-      // TODO Korjaa t‰m‰
-      echo "VIRHE!";
+      pupesoft_log('smarten_stock_transfer_report', "VIRHE: Tuntematon l‰hdevarasto {$lahde['varastokoodi']}");
+      continue;
     }
 
     // Kohdepaikka
@@ -191,8 +184,8 @@ while (false !== ($file = readdir($handle))) {
       }
     }
     else {
-      // TODO Korjaa t‰m‰
-      echo "VIRHE!";
+      pupesoft_log('smarten_stock_transfer_report', "VIRHE: Tuntematon lkohdevarasto {$kohde['varastokoodi']}");
+      continue;
     }
 
     // Tarvitsemme
@@ -213,8 +206,7 @@ while (false !== ($file = readdir($handle))) {
   }
 
   // siirret‰‰n tiedosto done-kansioon
-  //rename($full_filepath, $path.'done/'.$file);
-
+  rename($full_filepath, $path.'done/'.$file);
   pupesoft_log('smarten_stock_transfer_report', "Sanoman {$file} varasosiirrot k‰sitelty");
 }
 

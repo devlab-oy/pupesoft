@@ -488,6 +488,24 @@ if (!function_exists('smarten_outbounddelivery')) {
       $extension->addChild("InfoContent", "1");
     }
 
+    $query = "SELECT filename, tunnus
+              FROM liitetiedostot
+              WHERE yhtio         = '{$kukarow["yhtio"]}'
+              AND liitos          = 'lasku'
+              AND liitostunnus    = {$tilausnumero}
+              AND kayttotarkoitus = 'SMARTEN'";
+    $liiteres = pupe_query($query);
+
+    while ($liitetiedosto = mysql_fetch_assoc($liiteres)) {
+      $path_parts = pathinfo($liitetiedosto['filename']);
+      $ext = strtoupper($path_parts['extension']);
+      $filename = "{$tilausnumero}_{$liitetiedosto['tunnus']}.{$ext}";
+
+      $extension = $additionalinfo->addChild("Extension");
+      $extension->addAttribute("extensionId", "file");
+      $extension->addChild("InfoContent", $filename);
+    }
+
     pupesoft_log('smarten_outbound_delivery', "Tilauksen {$otunnus} sanomalle lisätty.");
 
     $_name = substr("out_{$otunnus}_".md5(uniqid()), 0, 25);
@@ -507,28 +525,23 @@ if (!function_exists("smarten_outbounddelivery_attachments")) {
   function smarten_outbounddelivery_attachments($tilausnumero) {
     global $kukarow;
 
-    $query = "SELECT filename, data
+    $query = "SELECT filename, data, tunnus
               FROM liitetiedostot
               WHERE yhtio         = '{$kukarow["yhtio"]}'
               AND liitos          = 'lasku'
-              AND liitostunnus    = ({$tilausnumero})
-              AND kayttotarkoitus = 'SMART'";
+              AND liitostunnus    = {$tilausnumero}
+              AND kayttotarkoitus = 'SMARTEN'";
     $result = pupe_query($query);
 
     $liitetiedostot = array();
 
     while ($liitetiedosto = mysql_fetch_assoc($result)) {
-      $filename    = $liitetiedosto["filename"];
-      $filename    = explode(".", $filename);
-      $filename[0] = "{$filename[0]}-" . md5(uniqid(rand(), true));
-      $filename    = implode(".", $filename);
-
-      echo "$filename\n";
-
-      $liitetiedostot[$filename] = $liitetiedosto["data"];
+      $path_parts = pathinfo($liitetiedosto['filename']);
+      $ext = strtoupper($path_parts['extension']);
+      $filename = "/tmp/{$tilausnumero}_{$liitetiedosto['tunnus']}.{$ext}";
+      file_put_contents($filename, $liitetiedosto["data"]);
+      smarten_send_file($filename);
     }
-
-    return $liitetiedostot;
   }
 }
 

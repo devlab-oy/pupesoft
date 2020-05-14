@@ -532,7 +532,6 @@ if (!function_exists("smarten_outbounddelivery_attachments")) {
   }
 }
 
-
 if (!function_exists('smarten_check_params')) {
   function smarten_check_params($toim) {
     global $kukarow, $yhtiorow;

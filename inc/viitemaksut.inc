@@ -96,30 +96,27 @@ elseif ($type == '3' or ($type == 'S' and
     }
   }
 
-  // Katotaan löytyykö viiiteaineistosääntö
-  $query = "SELECT tilino
+  // Katotaan löytyykö viiteaineistosääntö
+  $query = "SELECT tunnus
             FROM tiliotesaanto
             WHERE yhtio     = '$yritirow[yhtio]'
             and pankkitili  = 'x'
             and nimitieto   = '$payer_name'
-            and selite      = '$reference'
-            and tilino     != ''";
+            and nimitieto  != ''
+            and selite      = '$reference'";
   $tiliotesaantoresult = pupe_query($query);
 
   if (!mysql_num_rows($tiliotesaantoresult)) {
-    $query = "SELECT tilino
+    $query = "SELECT tunnus
               FROM tiliotesaanto
               WHERE yhtio     = '$yritirow[yhtio]'
               and pankkitili  = 'x'
               and nimitieto   = '$payer_name'
-              and tilino     != ''";
+              and nimitieto  != ''";
     $tiliotesaantoresult = pupe_query($query);
   }
 
-  if (!mysql_num_rows($tiliotesaantoresult)) {
-    $tee_viitemaksu_kohdistus = false;
-    $tee_selvittely = true;
-
+  if (mysql_num_rows($tiliotesaantoresult)) {
     $pvm = substr(str_replace("-", "", $payment_date), 2);
     $vientiselite = "$payer_name suoritus viiteainesitolta";
     $tkesken = 1;
@@ -130,8 +127,13 @@ elseif ($type == '3' or ($type == 'S' and
     $vastavienti = $sum;
     $vastavienti_valuutassa = $sum;
     $tiliotedataid = $tiliotedatarow["tunnus"];
+    
+    $tiliointisaantorow = mysql_fetch_array($tiliotesaantoresult);
+    $tiliotesaantotunnus = $tiliointisaantorow['tunnus'];
 
     require "inc/teeselvittely.inc";
+
+    unset($tiliotesaantotunnus);
   }
   else {
     // arkistointitunnus

@@ -173,7 +173,7 @@ if (strlen($pankkitili) != 0) {
               ORDER BY 2,3,4";
   }
   else {
-    $query = "SELECT tunnus, nimitieto, selite viitenumero, tilino
+    $query = "SELECT tunnus, nimitieto, selite viitenumero, tilino, kustp
               FROM tiliotesaanto
               WHERE yhtio    = '$kukarow[yhtio]'
               and pankkitili = '$pankkitili'
@@ -315,6 +315,7 @@ if (strlen($pankkitili) != 0) {
           <input type='text' name='nimitieto' size='15' value = '$nimitieto'></td>
         <td><input type='text' name='selite' size='15' value = '$selite'></td>
         <td><input type='text' name='tilino' size='6' value = '$tilino'></td>
+        <td>$ulos</td>
         <td class='back'>$virhe <input type='submit' value = '".t("Lis‰‰")."'>
         </form>
         </td>
@@ -322,7 +323,7 @@ if (strlen($pankkitili) != 0) {
   }
 }
 else {
-  // T‰ll‰ ollaan, jos olemme vasta valitsemassa pankkitili‰
+  // T‰‰ll‰ ollaan, jos olemme vasta valitsemassa pankkitili‰
   $query = "SELECT *
             FROM yriti
             WHERE yhtio  = '$kukarow[yhtio]'

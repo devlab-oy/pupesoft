@@ -224,11 +224,10 @@ $xml_chk = (isset($xml->Document->DocumentItem) and isset($xml->Document->Docume
 if ($xml_chk) {
   $ostotilaukset = array_unique($ostotilaukset);
 
-  $_name = substr("in_{$row['laskunro']}_".implode('_', $ostotilaukset), 0, 25);
-  $filename = $pupe_root_polku."/dataout/{$_name}.xml";
+  $_date = date("Ymd_His");
+  $filename = $pupe_root_polku."/dataout/{$_date}_order_BNNB_{$row['laskunro']}.xml";
 
   if (file_put_contents($filename, $xml->asXML())) {
-
     $palautus = smarten_send_file($filename);
 
     if ($palautus == 0) {

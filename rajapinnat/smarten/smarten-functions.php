@@ -55,7 +55,7 @@ if (!function_exists('smarten_send_email')) {
 }
 
 if (!function_exists('smarten_send_file')) {
-  function smarten_send_file($filename, $binary = FALSE) {
+  function smarten_send_file($filename, $path = "") {
     global $kukarow, $yhtiorow, $smarten;
 
     // Lähetetään aina UTF-8 muodossa
@@ -71,7 +71,9 @@ if (!function_exists('smarten_send_file')) {
     $ftpport = $smarten['port'];
     $ftpskey = $smarten['skey'];
 
-    $ftpbinary = $binary;
+    if (!empty($path)) {
+      $ftppath = $path;
+    }
 
     $ftpfile = realpath($filename);
 
@@ -215,7 +217,6 @@ if (!function_exists('smarten_timestamp')) {
 
 if (!function_exists('smarten_outbounddelivery')) {
   function smarten_outbounddelivery($otunnus) {
-
     global $kukarow, $yhtiorow;
 
     $pupe_root_polku = dirname(dirname(dirname(__FILE__)));
@@ -508,8 +509,8 @@ if (!function_exists('smarten_outbounddelivery')) {
 
     pupesoft_log('smarten_outbound_delivery', "Tilauksen {$otunnus} sanomalle lisätty.");
 
-    $_name = substr("out_{$otunnus}_".md5(uniqid()), 0, 25);
-    $filename = $pupe_root_polku."/dataout/{$_name}.xml";
+    $_date = date("Ymd_His");
+    $filename = $pupe_root_polku."/dataout/{$_date}_desorder_BNNB_{$otunnus}.xml";
 
     if (file_put_contents($filename, $xml->asXML())) {
       pupesoft_log('smarten_outbound_delivery', "Tilauksen {$otunnus} sanoman luonti Smarten-järjestelmään onnistui.");

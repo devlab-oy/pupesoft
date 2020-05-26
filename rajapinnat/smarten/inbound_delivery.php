@@ -1,8 +1,9 @@
 <?php
 
+date_default_timezone_set('Europe/Helsinki');
+
 // Kutsutaanko CLI:stä
 if (php_sapi_name() != 'cli') {
-
   $_cli = false;
 
   if (strpos($_SERVER['SCRIPT_NAME'], "inbound_delivery.php") !== false) {
@@ -10,10 +11,7 @@ if (php_sapi_name() != 'cli') {
   }
 }
 else {
-
   $_cli = true;
-
-  date_default_timezone_set('Europe/Helsinki');
 
   if (trim($argv[1]) == '') {
     die ("Et antanut lähettävää yhtiötä!\n");

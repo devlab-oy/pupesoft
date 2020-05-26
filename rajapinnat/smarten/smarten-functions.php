@@ -524,7 +524,7 @@ if (!function_exists('smarten_outbounddelivery')) {
 
 if (!function_exists("smarten_outbounddelivery_attachments")) {
   function smarten_outbounddelivery_attachments($tilausnumero) {
-    global $kukarow;
+    global $kukarow, $smarten;
 
     $query = "SELECT filename, data, tunnus
               FROM liitetiedostot
@@ -541,7 +541,7 @@ if (!function_exists("smarten_outbounddelivery_attachments")) {
       $ext = strtoupper($path_parts['extension']);
       $filename = "/tmp/{$tilausnumero}_{$liitetiedosto['tunnus']}.{$ext}";
       file_put_contents($filename, $liitetiedosto["data"]);
-      smarten_send_file($filename);
+      smarten_send_file($filename, $smarten['path_to_files']);
     }
   }
 }

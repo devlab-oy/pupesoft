@@ -118,16 +118,16 @@ elseif ($type == '3' or ($type == 'S' and
 
   if (mysql_num_rows($tiliotesaantoresult)) {
     $pvm = substr(str_replace("-", "", $payment_date), 2);
-    $vientiselite = "$payer_name suoritus viiteainesitolta";
+    $vientiselite = "$payer_name ".t("viitesuoritus");
     $tkesken = 1;
     $laskuid = 0;
     $tilinvaluutta = $valkoodi;
-    $maara = $sum * -1;
-    $kohdm = $sum * -1;
-    $vastavienti = $sum;
-    $vastavienti_valuutassa = $sum;
+    $maara = $sum;
+    $kohdm = $sum;
+    $vastavienti = $sum * -1;
+    $vastavienti_valuutassa = $sum * -1;
     $tiliotedataid = $tiliotedatarow["tunnus"];
-    
+
     $tiliointisaantorow = mysql_fetch_array($tiliotesaantoresult);
     $tiliotesaantotunnus = $tiliointisaantorow['tunnus'];
 

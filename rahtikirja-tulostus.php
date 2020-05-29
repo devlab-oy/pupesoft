@@ -519,7 +519,8 @@ if ($tee == 'tulosta') {
               rahtikirjat WRITE,
               rahtisopimukset READ,
               tilausrivi WRITE,
-              tuote READ";
+              tuote READ,
+              toimitustapa READ";
     $res = pupe_query($query);
   }
 
@@ -536,7 +537,8 @@ if ($tee == 'tulosta') {
             IF(lasku.toim_puh != '', lasku.toim_puh,
             IF(asiakas.gsm != '', asiakas.gsm,
             IF(asiakas.tyopuhelin != '', asiakas.tyopuhelin,
-            IF(asiakas.puhelin != '', asiakas.puhelin, '')))) puhelin
+            IF(asiakas.puhelin != '', asiakas.puhelin, '')))) puhelin,
+            toimitustapa.nouto
             FROM rahtikirjat
             JOIN lasku USE INDEX (PRIMARY) on (lasku.tunnus=rahtikirjat.otsikkonro and lasku.yhtio=rahtikirjat.yhtio and lasku.tila in ('L','G') ";
 
@@ -549,6 +551,7 @@ if ($tee == 'tulosta') {
         LEFT JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus)
         LEFT JOIN maksuehto on lasku.yhtio = maksuehto.yhtio and lasku.maksuehto = maksuehto.tunnus
         LEFT JOIN rahtisopimukset on lasku.ytunnus = rahtisopimukset.ytunnus and rahtikirjat.toimitustapa = rahtisopimukset.toimitustapa and rahtikirjat.rahtisopimus = rahtisopimukset.rahtisopimus
+        JOIN toimitustapa ON (toimitustapa.yhtio = rahtikirjat.yhtio AND toimitustapa.selite = rahtikirjat.toimitustapa)
         WHERE rahtikirjat.yhtio  = '$kukarow[yhtio]' ";
 
   // Jos keräyserät ja lähdöt on päällä, niin Unifaun 'hetitulostus' tilaukset merkataan tässä toimitetuiksi ja siksi näin
@@ -619,9 +622,15 @@ if ($tee == 'tulosta') {
       }
 
       // haetaan tälle rahtikirjalle kuuluvat tunnukset
-      $query = "SELECT rahtikirjat.rahtikirjanro, rahtikirjat.tunnus rtunnus, lasku.tunnus otunnus, merahti, lasku.ytunnus, if(maksuehto.jv is null,'',maksuehto.jv) jv, lasku.asiakkaan_tilausnumero
+      $query = "SELECT rahtikirjat.rahtikirjanro,
+                  rahtikirjat.tunnus rtunnus,
+                  lasku.tunnus otunnus, 
+                  rahtikirjat.merahti, 
+                  lasku.ytunnus, 
+                  if(maksuehto.jv is null,'',maksuehto.jv) jv, 
+                  lasku.asiakkaan_tilausnumero
                 FROM rahtikirjat
-                JOIN lasku USE INDEX (PRIMARY) on (lasku.tunnus=rahtikirjat.otsikkonro and lasku.yhtio=rahtikirjat.yhtio and lasku.tila in ('L','G') ";
+                JOIN lasku USE INDEX (PRIMARY) on (lasku.tunnus=rahtikirjat.otsikkonro and lasku.yhtio=rahtikirjat.yhtio and lasku.tila in ('L','G')";
 
       if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE) {
         $query .= " and lasku.alatila = 'B' ";
@@ -959,7 +968,7 @@ if ($tee == 'tulosta') {
       $rahinta   = "";
 
       // jos kyseessä on jälkivaatimus
-      if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE and ($rakir_row['jv'] != '' or $rakir_row['toimitusehto'] == '21- Arvega')) {
+      if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE and ($rakir_row['jv'] != '' or ($rakir_row['toimitusehto'] == '21- Arvega' and $rakir_row['nouto'] == ''))) {
         $tee       = "TARKISTA";
         $laskutakaikki   = "KYLLA";
         $silent       = "KYLLA";

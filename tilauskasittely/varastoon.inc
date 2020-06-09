@@ -61,7 +61,7 @@ if ($tee == "" and empty($kauttalaskutus) and !$tullaan_automaattikohdistuksesta
 
 if (empty($kauttalaskutus) and !$tullaan_automaattikohdistuksesta) {
 
-  !empty($tv_kaytossa) = tarkista_onko_taric_veroperusteet_kaytossa();
+  $tv_kaytossa = tarkista_onko_taric_veroperusteet_kaytossa();
 
   $varastoon_msg .= "  <table><tr>
             <th valign='top'>".t("Varastoon")."</th>

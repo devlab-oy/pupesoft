@@ -48,7 +48,7 @@ if (!$connection) {
 
 if ($palautus == "") {
   if (!empty($ftpskey)) {
-    ssh2_auth_pubkey_file($connection, $ftpuser, $ftpskey.'.pub', $ftpskey);
+    @ssh2_auth_pubkey_file($connection, $ftpuser, $ftpskey.'.pub', $ftpskey);
   }
 
   if (!ssh2_auth_password($connection, $ftpuser, $ftppass)) {

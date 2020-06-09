@@ -39,6 +39,7 @@ $ftpskey = $smarten['skey'];
 
 $ftppath = $smarten['path_from'];
 $ftpdest = $path;
+$ftpsdel = TRUE;
 
 require 'sftp-get.php';
 

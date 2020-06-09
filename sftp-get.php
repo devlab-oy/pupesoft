@@ -80,7 +80,7 @@ class SFTPConnection {
 
       fclose($stream);
 
-      if ($ftpsdel === TRUE) {
+      if ($this->ftpsdel === TRUE) {
         ssh2_sftp_unlink($sftp, $dir.$file);
       }
     }

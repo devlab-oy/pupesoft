@@ -598,7 +598,7 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
 
   // Jos ollaan tultu mobiilista ja rivin paikka onkin eri kuin oletuspaikka
   // niin setataan se paika johon ollaan tulouttamassa oletuspaikaksi
-  if ($mobiili_keikka == "yes"
+  if (!empty($mobiili_keikka)
     and $hyllyalue != ""
     and $hyllynro != ""
     and $hyllyvali != ""
@@ -1356,7 +1356,7 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
 
   $varastoon_msg .= "</tr>";
 
-  if ($mobiili_keikka == "yes") {
+  if (!empty($mobiili_keikka)) {
     echo "<font class='message'>".t("Vietiin tuotetta")." $tilrivirow[tuoteno] ".t("varastoon").": $tilrivirow[varattu] ".t("kappaletta").".</font><br>";
   }
 }

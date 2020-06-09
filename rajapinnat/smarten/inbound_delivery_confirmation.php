@@ -61,7 +61,7 @@ while (false !== ($file = readdir($handle))) {
   }
 
   $sanoman_kaikki_rivit = '';
-  $tilausrivit = $tilausrivit_error = $tilausrivit_success = array();
+  $tilausrivit = $tilausrivit_error = $tilausrivit_success = $kasitellyt_rivitunnukset = array();
 
   pupesoft_log('smarten_inbound_delivery_confirmation', "K‰sitell‰‰n sanoma {$file}");
 
@@ -144,21 +144,29 @@ while (false !== ($file = readdir($handle))) {
         $tilausrivit[$rivitunnus] = array(
           'kpl'     => $kpl,
           'tuoteno' => $tuoteno,
-          'varastotunnus' => $varastotunnus,
+          'varastot'=> array()
         );
       }
       else {
         $tilausrivit[$rivitunnus]['kpl'] += $kpl;
       }
+
+      // Paikkakohtainen m‰‰r‰
+      if (!isset($tilausrivit[$rivitunnus]['varastot'][$varastotunnus])) {
+        $tilausrivit[$rivitunnus]['varastot'][$varastotunnus] = $kpl;
+      }
+      else {
+        $tilausrivit[$rivitunnus]['varastot'][$varastotunnus] += $kpl;
+      }
     }
   }
+
+
 
   foreach ($tilausrivit as $rivitunnus => $data) {
     $tuoteno = $data['tuoteno'];
     $kpl = round($data['kpl']);
-    $varastotunnus = $data['varastotunnus'];
-
-    $uusi_id = 0;
+    $varastomaarat = $data['varastot'];
 
     $query = "SELECT *
               FROM tilausrivi
@@ -177,8 +185,8 @@ while (false !== ($file = readdir($handle))) {
         'pupesoft_kpl' => '',
       );
 
-       pupesoft_log('smarten_inbound_delivery_confirmation', "Tilausrivi‰ ei lˆydy rivitunnuksella {$rivitunnus} ja tuotenumerolla {$tuoteno}.");
-       continue;
+      pupesoft_log('smarten_inbound_delivery_confirmation', "Tilausrivi‰ ei lˆydy rivitunnuksella {$rivitunnus} ja tuotenumerolla {$tuoteno}.");
+      continue;
     }
 
     $tilausrivirow = mysql_fetch_assoc($tilausrivires);
@@ -196,84 +204,98 @@ while (false !== ($file = readdir($handle))) {
 
     if ($kpl > $tilausrivirow['varattu']) {
       $email_array[] = t("Sanomassa tuotteella {$tuoteno} kappalem‰‰r‰ oli suurempi kuin tietokannassa. Sanomalla {$kpl}, tietokannassa {$tilausrivirow['varattu']}.");
-
       pupesoft_log('smarten_inbound_delivery_confirmation', "Sanoman kpl suurempi kuin tietokannassa. Rivitunnus {$rivitunnus}, sanoman kpl {$kpl}, tietokannan varattu {$tilausrivirow['varattu']}.");
     }
 
-    # splitataan rivi
     if ($kpl < $tilausrivirow['varattu']) {
-      $erotus = ($tilausrivirow['varattu'] - $kpl);
-      $uusi_id = splittaa_tilausrivi($rivitunnus, $kpl);
+      $erotus = ($tilausrivirow['varattu'] - $varastomaara);
+      $email_array[] = t("Sanomassa tuotteella {$tuoteno} kappalem‰‰r‰ oli pienempi kuin tietokannassa. Saavutettiin {$kpl}, saavuttamatta {$erotus}.");
+      pupesoft_log('smarten_inbound_delivery_confirmation', "Tilausrivi {$rivitunnus} splitattiin. Saavutettiin {$kpl}, saavuttamatta {$erotus}.");
+    }
 
-      if ($uusi_id != 0) {
-        # J‰tet‰‰n alkuper‰iselle tilausriville j‰ljelle j‰‰v‰ kappalem‰‰r‰
-        # Halutaan ett‰ uusi splitattu rivi menee varastoon
-        $query = "UPDATE tilausrivi SET
-                  varattu   = '{$erotus}'
-                  WHERE yhtio     = '{$yhtio}'
-                  AND tyyppi      = 'O'
-                  AND kpl         = 0
-                  AND tuoteno     = '{$tuoteno}'
-                  AND tunnus      = '{$rivitunnus}'";
-        $updres = pupe_query($query);
+    foreach ($varastomaarat as $varastotunnus => $varastomaara) {
 
-        $email_array[] = t("Sanomassa tuotteella {$tuoteno} kappalem‰‰r‰ oli pienempi kuin tietokannassa. Saavutettiin {$kpl}, saavuttamatta {$erotus}.");
+      $rivitunnus_varastoon = $rivitunnus;
 
-        pupesoft_log('smarten_inbound_delivery_confirmation', "Tilausrivi {$rivitunnus} splitattiin. Uusi k‰ytetty tunnus on {$uusi_id}. Saavutettiin {$kpl}, saavuttamatta {$erotus}.");
+      # Splitataan rivi
+      if ($varastomaara < $tilausrivirow['varattu']) {
+        $erotus = ($tilausrivirow['varattu'] - $varastomaara);
+        $uusi_id = splittaa_tilausrivi($rivitunnus, $varastomaara);
 
-        $rivitunnus = $uusi_id;
+        if ($uusi_id != 0) {
+          # J‰tet‰‰n alkuper‰iselle tilausriville j‰ljelle j‰‰v‰ kappalem‰‰r‰
+          # Halutaan ett‰ uusi splitattu rivi menee varastoon
+          $query = "UPDATE tilausrivi SET
+                    varattu = '{$erotus}'
+                    WHERE yhtio     = '{$yhtio}'
+                    AND tyyppi      = 'O'
+                    AND kpl         = 0
+                    AND tuoteno     = '{$tuoteno}'
+                    AND tunnus      = '{$rivitunnus}'";
+          $updres = pupe_query($query);
+
+          $tilausrivirow['varattu'] = $erotus;
+          $rivitunnus_varastoon = $uusi_id;
+        }
       }
-    }
+      elseif (isset($kasitellyt_rivitunnukset[$rivitunnus])) {
+        // T‰m‰ rivi on jo menossa varastoon, tarvitaan uusi
+        $rivitunnus_varastoon = splittaa_tilausrivi($rivitunnus, $varastomaara);
+      }
 
-    $hyllylisa = "";
-    if (!empty($varastot[$varastotunnus])) {
-      $hyllylisa = "hyllyalue = '".$varastot[$varastotunnus]['alkuhyllyalue']."',
-                    hyllynro  = '".$varastot[$varastotunnus]['alkuhyllynro']."',
-                    hyllyvali = '0',
-                    hyllytaso = '0',";
-    }
+      $hyllylisa = "";
+      if (!empty($varastot[$varastotunnus])) {
+        $hyllylisa = "hyllyalue = '".$varastot[$varastotunnus]['alkuhyllyalue']."',
+                      hyllynro  = '".$varastot[$varastotunnus]['alkuhyllynro']."',
+                      hyllyvali = '0',
+                      hyllytaso = '0',";
+      }
 
-    # P‰ivitet‰‰n varattu ja tuotepaikka ja kohdistetaan rivi
-    $query = "UPDATE tilausrivi SET
-              varattu         = '{$kpl}',
-              {$hyllylisa}
-              varastoon       = 1
-              WHERE yhtio     = '{$yhtio}'
-              AND tyyppi      = 'O'
-              AND kpl         = 0
-              AND tuoteno     = '{$tuoteno}'
-              AND tunnus      = '{$rivitunnus}'";
-    $updres = pupe_query($query);
+      # P‰ivitet‰‰n varattu ja tuotepaikka ja kohdistetaan rivi
+      $query = "UPDATE tilausrivi SET
+                varattu         = '{$varastomaara}',
+                {$hyllylisa}
+                varastoon       = 1
+                WHERE yhtio     = '{$yhtio}'
+                AND tyyppi      = 'O'
+                AND kpl         = 0
+                AND tuoteno     = '{$tuoteno}'
+                AND tunnus      = '{$rivitunnus_varastoon}'";
+      $updres = pupe_query($query);
 
-    if (mysql_affected_rows() == 1) {
-      $tilausrivit_success[] = array(
-        'tuoteno' => $tuoteno,
-        'smarten_kpl' => $kpl,
-        'pupesoft_kpl' => $tilausrivirow['varattu'],
-      );
+      // T‰m‰ rivi on jo menossa varastoon...
+      $kasitellyt_rivitunnukset[$rivitunnus_varastoon] = $rivitunnus_varastoon;
 
-      // Varmistetaan, ett‰ tuotteella on paikka siin‰ varastossa, johon se on menossa
-      $query = "SELECT
-                hyllyalue,
-                hyllynro,
-                hyllyvali,
-                hyllytaso
-                FROM  tilausrivi
-                WHERE yhtio = '{$yhtio}'
-                AND tunnus = '{$rivitunnus}'";
-      $paikkares = pupe_query($query);
-      $paikkarow = mysql_fetch_assoc($paikkares);
+      if (mysql_affected_rows() == 1) {
+        $tilausrivit_success[] = array(
+          'tuoteno' => $tuoteno,
+          'smarten_kpl' => $varastomaara,
+          'pupesoft_kpl' => $tilausrivirow['varattu'],
+        );
 
-      lisaa_tuotepaikka($tuoteno, $paikkarow['hyllyalue'], $paikkarow['hyllynro'], $paikkarow['hyllyvali'], $paikkarow['hyllytaso']);
-    }
-    else {
-      $tilausrivit_error[] = array(
-        'tuoteno' => $tuoteno,
-        'smarten_kpl' => $kpl,
-        'pupesoft_kpl' => $tilausrivirow['varattu'],
-      );
+        // Varmistetaan, ett‰ tuotteella on paikka siin‰ varastossa, johon se on menossa
+        $query = "SELECT
+                  hyllyalue,
+                  hyllynro,
+                  hyllyvali,
+                  hyllytaso
+                  FROM  tilausrivi
+                  WHERE yhtio = '{$yhtio}'
+                  AND tunnus = '{$rivitunnus}'";
+        $paikkares = pupe_query($query);
+        $paikkarow = mysql_fetch_assoc($paikkares);
 
-      pupesoft_log('smarten_inbound_delivery_confirmation', "Saapumisen {$saapumisnro} sanoman rivi‰ {$rivitunnus} (tuoteno {$tuoteno}) ei p‰ivitetty.");
+        lisaa_tuotepaikka($tuoteno, $paikkarow['hyllyalue'], $paikkarow['hyllynro'], $paikkarow['hyllyvali'], $paikkarow['hyllytaso']);
+      }
+      else {
+        $tilausrivit_error[] = array(
+          'tuoteno' => $tuoteno,
+          'smarten_kpl' => $varastomaara,
+          'pupesoft_kpl' => $tilausrivirow['varattu'],
+        );
+
+        pupesoft_log('smarten_inbound_delivery_confirmation', "Saapumisen {$saapumisnro} sanoman rivi‰ {$rivitunnus} (tuoteno {$tuoteno}) ei p‰ivitetty.");
+      }
     }
   }
 

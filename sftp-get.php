@@ -8,9 +8,13 @@
 // $ftpdest --> Minne tallennetaan
 // $ftpport --> Custom portti, ei pakollinen
 // $ftpskey --> SSH avain, ei pakollinen
+// $ftpsdel --> Poista haettu faili palvelimelta, ei pakollinen
 
 if (empty($ftpskey)) {
   $ftpskey = "";
+}
+if (empty($ftpsdel)) {
+  $ftpsdel = FALSE;
 }
 
 class SFTPConnection {
@@ -75,6 +79,10 @@ class SFTPConnection {
       }
 
       fclose($stream);
+
+      if ($ftpsdel === TRUE) {
+        ssh2_sftp_unlink($sftp, $dir.$file);
+      }
     }
   }
 }
@@ -91,7 +99,7 @@ if (substr($ftpdest, -1) != "/") {
 try {
   $sftp = new SFTPConnection($ftphost, $ftpport);
   $sftp->login($ftpuser, $ftppass, $ftpskey);
-  $sftp->getFilesFrom($ftppath, $ftpdest);
+  $sftp->getFilesFrom($ftppath, $ftpdest, $ftpsdel);
 }
 catch(Exception $e) {
   pupesoft_log("sftp_get", "Error: $e\n");

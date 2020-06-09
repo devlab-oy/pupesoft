@@ -208,7 +208,7 @@ while (false !== ($file = readdir($handle))) {
     }
 
     if ($kpl < $tilausrivirow['varattu']) {
-      $erotus = ($tilausrivirow['varattu'] - $varastomaara);
+      $erotus = ($tilausrivirow['varattu'] - $kpl);
       $email_array[] = t("Sanomassa tuotteella {$tuoteno} kappalemäärä oli pienempi kuin tietokannassa. Saavutettiin {$kpl}, saavuttamatta {$erotus}.");
       pupesoft_log('smarten_inbound_delivery_confirmation', "Tilausrivi {$rivitunnus} splitattiin. Saavutettiin {$kpl}, saavuttamatta {$erotus}.");
     }
@@ -285,7 +285,7 @@ while (false !== ($file = readdir($handle))) {
         $paikkares = pupe_query($query);
         $paikkarow = mysql_fetch_assoc($paikkares);
 
-        lisaa_tuotepaikka($tuoteno, $paikkarow['hyllyalue'], $paikkarow['hyllynro'], $paikkarow['hyllyvali'], $paikkarow['hyllytaso']);
+        lisaa_tuotepaikka($tuoteno, $paikkarow['hyllyalue'], $paikkarow['hyllynro'], $paikkarow['hyllyvali'], $paikkarow['hyllytaso'], "Smarten vastaanotto");
       }
       else {
         $tilausrivit_error[] = array(
@@ -316,6 +316,7 @@ while (false !== ($file = readdir($handle))) {
     # Setataan parametrit varastoon.incille
     $tullaan_automaattikohdistuksesta = true;
     $toiminto = "kalkyyli";
+    $otunnus = $saapumistunnus;
     $tee = "varastoon";
 
     require "tilauskasittely/varastoon.inc";

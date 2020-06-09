@@ -59,7 +59,7 @@ class SFTPConnection {
     return $handle;
   }
 
-  public function getFilesFrom($path, $dest) {
+  public function getFilesFrom($path, $dest, $ftpsdel) {
     $sftp = $this->sftp;
     $dir = "ssh2.sftp://".$sftp.$path;
 
@@ -80,7 +80,7 @@ class SFTPConnection {
 
       fclose($stream);
 
-      if ($this->ftpsdel === TRUE) {
+      if ($ftpsdel === TRUE) {
         ssh2_sftp_unlink($sftp, $dir.$file);
       }
     }

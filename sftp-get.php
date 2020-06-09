@@ -32,7 +32,7 @@ class SFTPConnection {
   public function login($username, $password, $ftpskey) {
 
     if (!empty($ftpskey)) {
-      ssh2_auth_pubkey_file($this->connection, $username, $ftpskey.'.pub', $ftpskey);
+      @ssh2_auth_pubkey_file($this->connection, $username, $ftpskey.'.pub', $ftpskey);
     }
 
     if (!ssh2_auth_password($this->connection, $username, $password)) {

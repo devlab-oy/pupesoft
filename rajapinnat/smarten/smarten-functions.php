@@ -309,28 +309,6 @@ if (!function_exists('smarten_outbounddelivery')) {
 
     $cust_name         = trim($looprow['nimi'].' '.$looprow['nimitark']);
     $rec_cust_name     = trim($looprow['toim_nimi'].' '.$looprow['toim_nimitark']);
-    $rec_cust_street   = $looprow['toim_osoite'];
-    $rec_cust_street2  = '';
-
-    if (!empty($looprow['kohde'])) {
-      $rec_cust_street2 = $looprow['kohde'];
-    }
-
-    if ($looprow['ohjelma_moduli'] == 'MAGENTO' and $looprow['ohjausmerkki'] != 'VARASTOTÄYDENNYS') {
-      $tilaustyyppi = 8;
-    }
-    elseif ($looprow['clearing'] == 'ENNAKKOTILAUS') {
-      $tilaustyyppi = 9;
-    }
-    elseif ($looprow['tilaustyyppi'] == 'U') {
-      $tilaustyyppi = 7;
-    }
-    elseif ($edi_pack_process) {
-      $tilaustyyppi = 'K';
-    }
-    else {
-      $tilaustyyppi = '';
-    }
 
     $CustOrderNumber = $looprow['asiakkaan_tilausnumero'];
 
@@ -367,11 +345,11 @@ if (!function_exists('smarten_outbounddelivery')) {
     $documentparties = $document->addChild('DocumentParties');
 
     $buyerparty = $documentparties->addChild("BuyerParty");
-    $buyerparty->addChild("Name", xml_cleanstring($looprow['nimi']));
+    $buyerparty->addChild("Name", xml_cleanstring($cust_name));
 
     $deliveryparty = $documentparties->addChild("DeliveryParty");
     $deliveryparty->addChild("PartyCode", "");
-    $deliveryparty->addChild("Name", xml_cleanstring($looprow['toim_nimi']));
+    $deliveryparty->addChild("Name", xml_cleanstring($rec_cust_name));
 
     $contactdata = $deliveryparty->addChild("ContactData");
 
@@ -384,7 +362,12 @@ if (!function_exists('smarten_outbounddelivery')) {
     $contactdata->addChild("PhoneNum", "");
     $contactdata->addChild("MobileNum", xml_cleanstring($looprow['toim_puh']));
 
-    if (!empty($looprow['noutopisteen_tunnus'])) {
+    if ($edi_pack_process) {
+      $recipientparty = $documentparties->addChild("RecipientParty");
+      $recipientparty->addChild("PartyCode", $looprow['viesti']);
+      $recipientparty->addChild("Name", $looprow['viesti']);
+    }
+    elseif (!empty($looprow['noutopisteen_tunnus'])) {
       $recipientparty = $documentparties->addChild("RecipientParty");
       $recipientparty->addChild("PartyCode", $looprow['noutopisteen_tunnus']);
       $recipientparty->addChild("Name", $looprow['noutopisteen_tunnus']);
@@ -483,7 +466,12 @@ if (!function_exists('smarten_outbounddelivery')) {
     $extension->addAttribute("extensionId", "externalremarks");
     $extension->addChild("InfoContent", xml_cleanstring($looprow['kommentti']));
 
-    if (!empty($looprow['noutopisteen_tunnus'])) {
+    if ($edi_pack_process) {
+      $extension = $additionalinfo->addChild("Extension");
+      $extension->addAttribute("extensionId", "SSCC");
+      $extension->addChild("InfoContent", "1");
+    }
+    elseif (!empty($looprow['noutopisteen_tunnus'])) {
       $extension = $additionalinfo->addChild("Extension");
       $extension->addAttribute("extensionId", "ParcelMachine");
       $extension->addChild("InfoContent", "1");

@@ -111,6 +111,7 @@ while (false !== ($file = readdir($handle))) {
   $laskures = pupe_query($query);
 
   $tuotteiden_paino = 0;
+  $packageinfo_sanomalla = FALSE;
   $kerayspoikkeama = $tilausrivit = $tilausrivit_error = array();
 
   if (mysql_num_rows($laskures) > 0) {
@@ -119,19 +120,91 @@ while (false !== ($file = readdir($handle))) {
     foreach ($xml->Document->DocumentItem->ItemEntry as $line) {
       $tilausrivin_tunnus = (int) $line->xpath('RefInfo/SourceDocument[@type="desorder"]/SourceDocumentLineItemNum')[0];
 
+      foreach ($line->ItemReserve as $stock_item) {
+        $kpl = (float) $stock_item->ItemReserveUnit->AmountActual;
+        $varastotunnus = (string) $stock_item->Location->WarehouseCode;
 
-      if (!isset($tilausrivit[$tilausrivin_tunnus])) {
-        $tilausrivit[$tilausrivin_tunnus] = array(
-          'item_number' => mysql_real_escape_string($line->SellerItemCode),
-          'keratty'     => (float) $line->AmountActual,
-        );
-      }
-      else {
-        $tilausrivit[$tilausrivin_tunnus]['keratty'] += (float) $line->AmountActual;
+        if (!isset($tilausrivit[$tilausrivin_tunnus])) {
+          $tilausrivit[$tilausrivin_tunnus] = array(
+            'item_number' => mysql_real_escape_string($line->SellerItemCode),
+            'keratty'     => $kpl,
+            'kollit'      => array()
+          );
+        }
+        else {
+          $tilausrivit[$tilausrivin_tunnus]['keratty'] += $kpl;
+        }
+
+        // Kollikohtainen määrä
+        if (!empty($stock_item->SSCC)) {
+          $packageinfo_sanomalla = TRUE;
+          $sscc = (string) $stock_item->SSCC;
+
+          if (!isset($tilausrivit[$rivitunnus]['kollit'][$sscc])) {
+            $tilausrivit[$rivitunnus]['kollit'][$sscc] = $kpl;
+          }
+          else {
+            $tilausrivit[$rivitunnus]['kollit'][$sscc] += $kpl;
+          }
+        }
       }
     }
 
     pupesoft_log('smarten_outbound_delivery_confirmation', "Sanomassa {$file} ".count($tilausrivit)." uniikkia tilausriviä.");
+
+    $query = "SELECT *
+              FROM asiakkaan_avainsanat
+              WHERE yhtio       = '{$kukarow['yhtio']}'
+              AND liitostunnus  = '{$laskurow['liitostunnus']}'
+              AND laji          = 'KICK_EDI'
+              AND avainsana    != ''";
+    $edi_chk_res = pupe_query($query);
+    $packageinfo = FALSE;
+
+    // Special EDI case, tarkistetaan löytyykö <Packages>-segmentti
+    if (mysql_num_rows($edi_chk_res) and $packageinfo_sanomalla) {
+      // Poistetaan keryserät ja luodaan ne uudestaan Packages-elementin tietojen perusteella
+      $query = "DELETE
+                FROM kerayserat
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND otunnus = '{$laskurow['tunnus']}'";
+      pupe_query($query);
+      $pklask = 1;
+
+      foreach ($tilausrivit as $rivitunnus => $data) {
+        $kollimaarat = $data['kollit'];
+        $package_tuoteno = $data['item_number'];
+        $package_rivitunnus = $rivitunnus;
+
+        foreach ($kollimaarat as $kolli => $kollimaara) {
+          $package_sscc = $kolli;
+          $package_maara = $kollimaara;
+
+          $query = "INSERT INTO kerayserat SET
+                    yhtio         = '{$kukarow['yhtio']}',
+                    nro           = {$laskurow['tunnus']},
+                    keraysvyohyke = 0,
+                    tila          = '',
+                    sscc          = '{$laskurow['tunnus']}',
+                    sscc_ulkoinen = '{$package_sscc}',
+                    otunnus       = '{$laskurow['tunnus']}',
+                    tilausrivi    = '{$package_rivitunnus}',
+                    pakkaus       = '0',
+                    pakkausnro    = '{$pklask}',
+                    kpl           = '{$package_maara}',
+                    kpl_keratty   = '{$package_maara}',
+                    keratty       = '{$kukarow['kuka']}',
+                    kerattyaika   = '{$toimaika}',
+                    laatija       = '{$kukarow['kuka']}',
+                    luontiaika    = now(),
+                    muutospvm     = now(),
+                    muuttaja      = '{$kukarow['kuka']}'";
+          pupe_query($query);
+          $packageinfo = TRUE;
+        }
+        $pklask++;
+      }
+    }
 
     $paivitettiin_tilausrivi_onnistuneesti = false;
     $keratty_yhteensa = 0;
@@ -541,7 +614,7 @@ while (false !== ($file = readdir($handle))) {
   smarten_send_email($params);
 
   // siirretään tiedosto done-kansioon
-  # rename($full_filepath, $path.'done/'.$file);
+  rename($full_filepath, $path.'done/'.$file);
 }
 
 closedir($handle);

@@ -140,11 +140,11 @@ while (false !== ($file = readdir($handle))) {
           $packageinfo_sanomalla = TRUE;
           $sscc = (string) $stock_item->SSCC;
 
-          if (!isset($tilausrivit[$rivitunnus]['kollit'][$sscc])) {
-            $tilausrivit[$rivitunnus]['kollit'][$sscc] = $kpl;
+          if (!isset($tilausrivit[$tilausrivin_tunnus]['kollit'][$sscc])) {
+            $tilausrivit[$tilausrivin_tunnus]['kollit'][$sscc] = $kpl;
           }
           else {
-            $tilausrivit[$rivitunnus]['kollit'][$sscc] += $kpl;
+            $tilausrivit[$tilausrivin_tunnus]['kollit'][$sscc] += $kpl;
           }
         }
       }

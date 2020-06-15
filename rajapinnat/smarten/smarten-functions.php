@@ -286,7 +286,7 @@ if (!function_exists('smarten_outbounddelivery')) {
     }
 
     if ($varastorow['ulkoinen_jarjestelma'] != "S") {
-      pupesoft_log('smarten_outbound_delivery', "Tilauksen {$otunnus} varaston ulkoinen järjestelm oli virheellinen.");
+      pupesoft_log('smarten_outbound_delivery', "Tilauksen {$otunnus} varaston ulkoinen järjestelmä oli virheellinen.");
       return false;
     }
 
@@ -314,22 +314,6 @@ if (!function_exists('smarten_outbounddelivery')) {
 
     if (!empty($looprow['kohde'])) {
       $rec_cust_street2 = $looprow['kohde'];
-    }
-
-    if ($looprow['ohjelma_moduli'] == 'MAGENTO' and $looprow['ohjausmerkki'] != 'VARASTOTÃ„YDENNYS') {
-      $tilaustyyppi = 8;
-    }
-    elseif ($looprow['clearing'] == 'ENNAKKOTILAUS') {
-      $tilaustyyppi = 9;
-    }
-    elseif ($looprow['tilaustyyppi'] == 'U') {
-      $tilaustyyppi = 7;
-    }
-    elseif ($edi_pack_process) {
-      $tilaustyyppi = 'K';
-    }
-    else {
-      $tilaustyyppi = '';
     }
 
     $CustOrderNumber = $looprow['asiakkaan_tilausnumero'];
@@ -486,6 +470,12 @@ if (!function_exists('smarten_outbounddelivery')) {
     if (!empty($looprow['noutopisteen_tunnus'])) {
       $extension = $additionalinfo->addChild("Extension");
       $extension->addAttribute("extensionId", "ParcelMachine");
+      $extension->addChild("InfoContent", "1");
+    }
+
+    if ($edi_pack_process) {
+      $extension = $additionalinfo->addChild("Extension");
+      $extension->addAttribute("extensionId", "SSCC");
       $extension->addChild("InfoContent", "1");
     }
 

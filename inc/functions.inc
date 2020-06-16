@@ -4352,7 +4352,7 @@ if (!function_exists("alehinta")) {
                     where yhtio = '$kukarow[yhtio]'
                     and laji = 'ALVULK'
                     and selitetark = 'o'
-                    and selitetark_2 = '$asiakrow[maa]'";
+                    and selitetark_2 = '$laskurow[maa]'";
           $alhire = pupe_query($query);
 
           // Ei löytynyt alvia, se on pakko löytyä

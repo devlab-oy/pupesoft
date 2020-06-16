@@ -4328,20 +4328,44 @@ if (!function_exists("alehinta")) {
     if ((isset($yhtiorow["vat_numero"]) and $yhtiorow["vat_numero"] != "") or ($laskurow["maa"] != "" and $laskurow["maa"] != $yhtiorow["maa"])) {
 
       // tutkitaan ollaanko siellä alv-rekisteröity
-      $query = "SELECT * from yhtion_toimipaikat where yhtio='$kukarow[yhtio]' and maa='$laskurow[maa]' and vat_numero != ''";
+      $query = "SELECT *
+                FROM yhtion_toimipaikat
+                WHERE yhtio = '$kukarow[yhtio]'
+                AND maa = '$laskurow[maa]'
+                AND vat_numero != ''";
       $alhire = pupe_query($query);
 
-      // ollaan alv-rekisteröity, haetaan tuotteelle oikea ALV
+      // Ollaan alv-rekisteröity, haetaan tuotteelle oikea ALV
       if (mysql_num_rows($alhire) == 1) {
-        $query = "SELECT * from tuotteen_alv where yhtio='$kukarow[yhtio]' and maa='$laskurow[maa]' and tuoteno='$trow[tuoteno]' limit 1";
+        $query = "SELECT *
+                  FROM tuotteen_alv
+                  WHERE yhtio = '$kukarow[yhtio]'
+                  and maa = '$laskurow[maa]'
+                  and tuoteno = '$trow[tuoteno]'
+                  limit 1";
         $alhire = pupe_query($query);
 
-        // ei löytynyt alvia, se on pakko löytyä
         if (mysql_num_rows($alhire) == 0) {
-          $alehinta_alv = -999.99; // tää on näin että tiedetään että kävi huonosti ja ei anneta lisätä tuotetta
-          $alv          = -999.99;
-          $netto        = "";
-          $hinta        = "0";
+          // Käytetään oletusalvia
+          $query = "SELECT selite alv
+                    from avainsana
+                    where yhtio = '$kukarow[yhtio]'
+                    and laji = 'ALVULK'
+                    and selitetark = 'o'
+                    and selitetark_2 = '$asiakrow[maa]'";
+          $alhire = pupe_query($query);
+
+          // Ei löytynyt alvia, se on pakko löytyä
+          if (mysql_num_rows($alhire) == 0) {
+            $alehinta_alv = -999.99; // tää on näin että tiedetään että kävi huonosti ja ei anneta lisätä tuotetta
+            $alv          = -999.99;
+            $netto        = "";
+            $hinta        = "0";
+          }
+          else {
+            $alehi_alrow = mysql_fetch_assoc($alhire);
+            $alehinta_alv = $alehi_alrow["alv"];
+          }
         }
         else {
           $alehi_alrow = mysql_fetch_assoc($alhire);

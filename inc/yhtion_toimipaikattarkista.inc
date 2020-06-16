@@ -120,7 +120,6 @@ if (!function_exists("yhtion_toimipaikattarkista")) {
         }
 
         if ($tem_email == "" or
-          $tem_fax == "" or
           $tem_kotipaikka == "" or
           $tem_maa == "" or
           $tem_nimi == "" or
@@ -128,7 +127,6 @@ if (!function_exists("yhtion_toimipaikattarkista")) {
           $tem_ovtlisa == "" or
           $tem_postino == "" or
           $tem_postitp == "" or
-          $tem_puhelin == "" or
           $tem_vatnumero == "") {
 
           $virhe[$tem_vatnumeroind] = $virhe[$i] = t("Kaikki tiedot on syötettävä alv-velvolliselle toimipaikalle!");

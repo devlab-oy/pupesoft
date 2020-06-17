@@ -37,7 +37,7 @@ elseif ($type == '3' or ($type == 'S' and
     $account = substr($tietue, 1, 14);
   }
 
-  $payer_name = substr($tietue, 63, 12);
+  $payer_name = trim(substr($tietue, 63, 12));
   $reference = ltrim(substr($tietue, 43, 20), '0');
   $sum = substr($tietue, 77, 10);
   $sum = $sum / 100; // XXX summa on sentteinä, etunollatäytöllä.
@@ -96,26 +96,67 @@ elseif ($type == '3' or ($type == 'S' and
     }
   }
 
-  // arkistointitunnus
-  $query = "INSERT INTO suoritus SET
-            yhtio        = '$yritirow[yhtio]',
-            tilino       = '$account',
-            nimi_maksaja = '$payer_name',
-            viite        = '$reference',
-            summa        = $sum,
-            valkoodi     = '$valkoodi',
-            kurssi       = '$kurssi',
-            maksupvm     = '$payment_date',
-            kirjpvm      = '$entry_date'";
-  $result = pupe_query($query);
-  $tiliointitunnus = mysql_insert_id($GLOBALS["masterlink"]);
+  // Katotaan löytyykö viiteaineistosääntö
+  $query = "SELECT tunnus
+            FROM tiliotesaanto
+            WHERE yhtio     = '$yritirow[yhtio]'
+            and pankkitili  = 'x'
+            and nimitieto   = '$payer_name'
+            and nimitieto  != ''
+            and selite      = '$reference'";
+  $tiliotesaantoresult = pupe_query($query);
 
-  // päivitetään suorituksen tunnnus tiliotedataan ja tiliotedata käsitellyksi
-  $query = "UPDATE tiliotedata SET
-            tiliointitunnus = '$tiliointitunnus',
-            kasitelty       = now()
-            WHERE tunnus    = '$tiliotedatarow[tunnus]'";
-  $dataupdres = pupe_query($query);
+  if (!mysql_num_rows($tiliotesaantoresult)) {
+    $query = "SELECT tunnus
+              FROM tiliotesaanto
+              WHERE yhtio     = '$yritirow[yhtio]'
+              and pankkitili  = 'x'
+              and nimitieto   = '$payer_name'
+              and nimitieto  != ''";
+    $tiliotesaantoresult = pupe_query($query);
+  }
+
+  if (mysql_num_rows($tiliotesaantoresult)) {
+    $pvm = substr(str_replace("-", "", $payment_date), 2);
+    $vientiselite = "$payer_name ".t("viitesuoritus");
+    $tkesken = 1;
+    $laskuid = 0;
+    $tilinvaluutta = $valkoodi;
+    $maara = $sum;
+    $kohdm = $sum;
+    $vastavienti = $sum * -1;
+    $vastavienti_valuutassa = $sum * -1;
+    $tiliotedataid = $tiliotedatarow["tunnus"];
+
+    $tiliointisaantorow = mysql_fetch_array($tiliotesaantoresult);
+    $tiliotesaantotunnus = $tiliointisaantorow['tunnus'];
+
+    require "inc/teeselvittely.inc";
+
+    unset($tiliotesaantotunnus);
+  }
+  else {
+    // arkistointitunnus
+    $query = "INSERT INTO suoritus SET
+              yhtio        = '$yritirow[yhtio]',
+              tilino       = '$account',
+              nimi_maksaja = '$payer_name',
+              viite        = '$reference',
+              summa        = $sum,
+              valkoodi     = '$valkoodi',
+              kurssi       = '$kurssi',
+              maksupvm     = '$payment_date',
+              kirjpvm      = '$entry_date'";
+    $result = pupe_query($query);
+    $tiliointitunnus = mysql_insert_id($GLOBALS["masterlink"]);
+
+    // päivitetään suorituksen tunnnus tiliotedataan ja tiliotedata käsitellyksi
+    $query = "UPDATE tiliotedata SET
+              tiliointitunnus = '$tiliointitunnus',
+              kasitelty       = now()
+              WHERE tunnus    = '$tiliotedatarow[tunnus]'";
+    $dataupdres = pupe_query($query);
+  }
 }
 elseif ($type != 'S' and $type != '9') {
   // Ei herjata summarivistä eikä oikaisurivistä, silloin kun sitä ei haluta käsitellä

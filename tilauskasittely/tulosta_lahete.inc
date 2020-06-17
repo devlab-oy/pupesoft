@@ -3782,8 +3782,32 @@ if (!function_exists('loppu_lahete')) {
         $pdf->draw_text(200, $kala-38, t_tunnus_avainsanat($masrow, "teksti", "MAKSUEHTOKV", $kieli)." ".t("tai erillisen maksupostiohjelman mukaan", $kieli), $thispage, $norm);
 
         $pdf->draw_text(50,  $kala-51, t("Myynti- ja toimitusehdot", $kieli), $thispage, $boldi);
-        $pdf->draw_text(200, $kala-51, $yhtiorow['nimi'].t(":n yleiset kauppaehdot", $kieli)." 30.6.2014", $thispage, $norm);
-        $pdf->draw_text(200, $kala-61, $yhtiorow['nimi'].':n '.t("tilaajavastuulain mukaiset asiakirjat löydät www.tilaajavastuulaki.fi", $kieli), $thispage, $norm);
+
+        $result = t_avainsana('TILAUSVAH_EHDOT', $kieli);
+        $vakioteksti_row = mysql_fetch_assoc($result);
+        $vakioteksti = $vakioteksti_row['selitetark'];
+
+        if (!empty($vakioteksti)) {
+          $_y = $kala - 52;
+
+          if (strlen($vakioteksti) > 100) {
+            $vakioteksti = wordwrap($vakioteksti, 100, "\n");
+            foreach (explode("\n", $vakioteksti) as $teksi) {
+              $pdf->draw_text(200,  $_y, $teksi, $thispage, $norm);
+              $_y = $_y - 11;
+            }
+          }
+          else {
+            $pdf->draw_text(200,  $_y, $vakioteksti, $thispage, $norm);
+            $_y = $_y - 11;
+          }
+
+          $kala = $_y + 70;
+        }
+        else {
+          $pdf->draw_text(200, $kala-51, $yhtiorow['nimi'].t(":n yleiset kauppaehdot", $kieli)." 30.6.2014", $thispage, $norm);
+          $pdf->draw_text(200, $kala-61, $yhtiorow['nimi'].':n '.t("tilaajavastuulain mukaiset asiakirjat löydät www.tilaajavastuulaki.fi", $kieli), $thispage, $norm);
+        }
 
         $pdf->draw_text(50, $kala-71, t("Salassapito", $kieli), $thispage, $boldi);
         $pdf->draw_text(200, $kala-71, t("Tämä asiakirja liitteineen on luottamuksellinen eikä sitä saa ilman ", $kieli).$yhtiorow['nimi'].':n ', $thispage, $norm);

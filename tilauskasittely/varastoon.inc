@@ -3,6 +3,10 @@
 // tarvitaan $laskurow array, jossa on meid‰n keikan otsikko
 $debug = 0; // 0 = ei echoilla debug koodia, 1 = ehchoillaa infoa, 2 = echoillaan infoa plus queryt
 
+if (!isset($mobiili_keikka)) {
+  $mobiili_keikka = '';
+}
+
 // Muuttuja kun vied‰‰n tilausrivi kerrallaan.
 $varastoon_tilausrivirajaus = "";
 if (!isset($tullaan_automaattikohdistuksesta)) $tullaan_automaattikohdistuksesta = false;

@@ -19,18 +19,18 @@ if ($tee == 'P') {
     exit;
   }
 
-  $tiliointirow   = mysql_fetch_array($result);
-  $koodi       = $tiliointirow['koodi'];
+  $tiliointirow = mysql_fetch_array($result);
+  $koodi        = $tiliointirow['koodi'];
   $koodiselite  = $tiliointirow['koodiselite'];
-  $nimitieto     = $tiliointirow['nimitieto'];
-  $selite     = $tiliointirow['selite'];
-  $tilino     = $tiliointirow['tilino'];
-  $tilino2     = $tiliointirow['tilino2'];
-  $kustp       = $tiliointirow['kustp'];
-  $kustp2     = $tiliointirow['kustp2'];
+  $nimitieto    = $tiliointirow['nimitieto'];
+  $selite       = $tiliointirow['selite'];
+  $tilino       = $tiliointirow['tilino'];
+  $tilino2      = $tiliointirow['tilino2'];
+  $kustp        = $tiliointirow['kustp'];
+  $kustp2       = $tiliointirow['kustp2'];
   $pankkitili   = $tiliointirow['pankkitili'];
   $erittely     = $tiliointirow['erittely'];
-  $ok       = 1;
+  $ok           = 1;
 
   $query = "DELETE from tiliotesaanto WHERE tunnus = '$tunnus' and yhtio = '$kukarow[yhtio]'";
   $result = pupe_query($query);
@@ -42,7 +42,8 @@ if ($tee == 'U') {
     $virhe="";
     $query = "SELECT tilino
               FROM tili
-              WHERE tilino = '$tilino' and yhtio = '$kukarow[yhtio]'";
+              WHERE tilino = '$tilino'
+              and yhtio = '$kukarow[yhtio]'";
     $result = pupe_query($query);
 
     if (mysql_num_rows($result) == 0) {
@@ -56,7 +57,8 @@ if ($tee == 'U') {
     if (($nimitieto=="LUOTTOKUNTA-KREDITLAGET") or ($nimitieto=="LUOTTOKUNTA") or ($nimitieto=="LUOTTOKUNTA/VISA") or ($nimitieto=="LUOTTOKUNTA OY") or ($nimitieto=="NETS OY") or ($nimitieto=="NETS DENMARK A/S FILIAL I FINLAND") or ($nimitieto=="NETS DENMARK AS FILIAL I FINLAND")) {
       $query = "SELECT tilino
                 FROM tili
-                WHERE tilino = '$tilino2' and yhtio = '$kukarow[yhtio]'";
+                WHERE tilino = '$tilino2'
+                and yhtio = '$kukarow[yhtio]'";
       $result = pupe_query($query);
 
       if (mysql_num_rows($result) == 0) {
@@ -162,7 +164,7 @@ if (strlen($pankkitili) != 0) {
 
   echo "<font class='head'>".t("Säännöt")."</font><hr><table>";
 
-  // Näytetään vanhat säännöt muutosta varten (viitesäännöille himan eri pohja)
+  // Näytetään vanhat säännöt muutosta varten (viitesäännöille hieman eri pohja)
   if ($pankkitili != 'x') {
     $query = "SELECT tunnus, koodi, koodiselite, nimitieto, selite, erittely, tilino, kustp, tilino2, kustp2
               FROM tiliotesaanto
@@ -171,7 +173,7 @@ if (strlen($pankkitili) != 0) {
               ORDER BY 2,3,4";
   }
   else {
-    $query = "SELECT tunnus, selite, tilino
+    $query = "SELECT tunnus, nimitieto, selite viitenumero, tilino, kustp
               FROM tiliotesaanto
               WHERE yhtio    = '$kukarow[yhtio]'
               and pankkitili = '$pankkitili'
@@ -230,7 +232,8 @@ if (strlen($pankkitili) != 0) {
         <input type='hidden' name='tunnus' value = '$tiliointirow[0]'>
         <input type='hidden' name='tee' value = 'P'>
         <input type='submit' value = '".t("Muuta")."'>
-      </td></tr></form>";
+        </form>
+      </td></tr>";
   }
 
   // Annetaan mahdollisuus tehdä uusi sääntö
@@ -305,20 +308,22 @@ if (strlen($pankkitili) != 0) {
   }
   else {
     echo "<tr>
-        <td class='back'><form method='post'>
+        <td><form method='post'>
           <input type='hidden' name='lopetus' value = '$lopetus'>
           <input type='hidden' name='tee' value = 'U'>
           <input type='hidden' name='pankkitili' value = '$pankkitili'>
-          <input type='text' name='selite' size='15' value = '$selite'></td>
+          <input type='text' name='nimitieto' size='15' value = '$nimitieto'></td>
+        <td><input type='text' name='selite' size='15' value = '$selite'></td>
         <td><input type='text' name='tilino' size='6' value = '$tilino'></td>
-        <td>$virhe <input type='submit' value = '".t("Lisää")."'>
+        <td>$ulos</td>
+        <td class='back'>$virhe <input type='submit' value = '".t("Lisää")."'>
         </form>
         </td>
       </tr></table>";
   }
 }
 else {
-  // Tällä ollaan, jos olemme vasta valitsemassa pankkitiliä
+  // Täällä ollaan, jos olemme vasta valitsemassa pankkitiliä
   $query = "SELECT *
             FROM yriti
             WHERE yhtio  = '$kukarow[yhtio]'

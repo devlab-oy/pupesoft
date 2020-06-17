@@ -376,7 +376,7 @@ class MagentoClient {
           $this->log('magento_tuotteet', "Erikoisparametri {$key}: {$tuote[$erikoisparametri['arvo']]}");
         }
         else {
-          $this->log('magento_tuotteet', "Erikoisparametri {$key}: {$tuote[$erikoisparametri['arvo']]} #!isset, j‰tet‰‰n p‰ivitt‰m‰tt‰");
+          $this->log('magento_tuotteet', "Erikoisparametri {$key}: {$erikoisparametri['arvo']} #!isset, j‰tet‰‰n p‰ivitt‰m‰tt‰");
         }
       }
 
@@ -1003,8 +1003,16 @@ class MagentoClient {
   }
 
   // P‰ivitet‰‰n sadot
-  public function paivita_saldot(array $dnstock) {
+  public function paivita_saldot(array $dnstock, $ajetaanko_kaikki = false) {
     $this->log('magento_saldot', "P‰ivitet‰‰n saldot");
+
+
+    if ($ajetaanko_kaikki === false) {
+      $this->log('magento_saldot', "P‰ivitet‰‰n muuttuneet");
+    }
+    else {
+      $this->log('magento_saldot', "P‰ivitet‰‰n kaikki");
+    }
 
     $count = 0;
     $total_count = count($dnstock);

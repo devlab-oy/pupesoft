@@ -729,7 +729,7 @@ if ((int) $chk_row["ok"] == (int) $chk_row["kaikki"] and (int) $chk_row["ok"] !=
     }
   }
 
-  if ($valittu_tulostin == "-88") {
+  if (!empty($valittu_tulostin) and $valittu_tulostin == "-88") {
     echo "<br>";
   }
 }

@@ -942,7 +942,7 @@ if (!function_exists('rivi_lasku')) {
 
     if ($laskutyyppi == 7) {
 
-      if ($row["eankoodi"] != "") {
+      if (!empty($row["eankoodi"])) {
         $row["kommentti"] = "EAN: $row[eankoodi]\n$row[kommentti]";
       }
 

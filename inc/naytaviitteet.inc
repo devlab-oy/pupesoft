@@ -15,7 +15,12 @@ if ($type == '0' and substr($tietue, 0, 3) != "\$\$E" and substr($tietue, 0, 3) 
   $kk = substr($pvm, 2, 2);
   $pp = substr($pvm, 4, 2);
 
-  if (!isset($lopetus) or $lopetus == "") $lopetus = "/SPLIT/${palvelin2}tilioteselailu.php////toim=$toim//tee=T//pvm=$vv-$kk-$pp//tyyppi=3//tilino=$tilino";
+  if (!isset($lopetus) or $lopetus == "") {
+    $lopetus = "${palvelin2}tilioteselailu.php////toim=$toim//tee=T//pvm=$vv-$kk-$pp//tyyppi=3//tilino=$tilino";
+  }
+  else {
+    $lopetus = "$lopetus/SPLIT/${palvelin2}tilioteselailu.php////toim=$toim//tee=T//pvm=$vv-$kk-$pp//tyyppi=3//tilino=$tilino";
+  }
 
   if ($tilioteselailu_oikrow !== FALSE) {
     echo "<a href='${palvelin2}tilioteselailu.php?toim=$toim&tilino=$tiliotedatarow[tilino]&pvm=$tiliotedatarow[alku]&tee=XXS&lopetus=$lopetus'>&laquo; ".t("Edellinen")."</a>&nbsp;&nbsp;&nbsp;&nbsp;
@@ -87,6 +92,17 @@ elseif ($type == '3' or $type == 'S') {
       }
       else {
         echo "<font class='error'>".t("Kohdistamatta asiakkaaseen")."</font>";
+      }
+    }
+    else {
+      // Tästä on tehty oma tosite
+      $query = "SELECT tiliointi.tilino tilino, tili.nimi nimi, concat_ws('@',korjattu, korjausaika) korjattu, ltunnus
+                FROM tiliointi
+                LEFT JOIN tili on tili.yhtio=tiliointi.yhtio and tili.tilino=tiliointi.tilino
+                WHERE tiliointi.tunnus = '$tiliotedatarow[tiliointitunnus]'";
+      $tiliointiresult = pupe_query($query);
+      if ($tiliointirow = mysql_fetch_array($tiliointiresult)) {
+        echo "<a href='${palvelin2}muutosite.php?tee=E&tunnus=$tiliointirow[ltunnus]&lopetus=$lopetus'>Viitemaksusta luotu tosite</a></font>";
       }
     }
   }

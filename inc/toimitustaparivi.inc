@@ -33,6 +33,13 @@ if (mysql_field_name($result, $i) == "lauantai") {
   $jatko = 0;
 }
 
+if (mysql_field_name($result, $i) == "smarten_partycode") {
+  // Piilota, jos Smarten-rajaopinta ei ole käytössä
+  if (!SMARTEN_RAJAPINTA) {
+    $tyyppi = 0;
+  }
+}
+
 if (mysql_field_name($result, $i) == "virallinen_selite") {
 
   $sel = '';
@@ -133,7 +140,7 @@ if (mysql_field_name($result, $i) == "virallinen_selite") {
   $ulos .= "<optgroup label='Unifaun / DANX'>";
   $ulos .= "<option value='DANXSTD' {$sel["DANXSTD"]}>DANX</option>";
   $ulos .= "</optgroup>";
-  
+
   $ulos .= "<optgroup label='Unifaun / DB SCHENKER Parcel - kotimaan pakettikuljetukset'>";
   $ulos .= "<option value='SBTLFIEXP' {$sel["SBTLFIEXP"]}>DB SCHENKERparcel (Suomi)</option>";
   $ulos .= "</optgroup>";

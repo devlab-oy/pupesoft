@@ -291,7 +291,7 @@ if (!function_exists('smarten_outbounddelivery')) {
     }
 
     # Säädetään muuttujia kuntoon
-    $query = "SELECT tunnus
+    $query = "SELECT *
               FROM toimitustapa
               WHERE yhtio = '{$kukarow['yhtio']}'
               AND selite  = '{$looprow['toimitustapa']}'";
@@ -348,7 +348,7 @@ if (!function_exists('smarten_outbounddelivery')) {
     $buyerparty->addChild("Name", xml_cleanstring($cust_name));
 
     $deliveryparty = $documentparties->addChild("DeliveryParty");
-    $deliveryparty->addChild("PartyCode", "");
+    $deliveryparty->addChild("PartyCode", $toimitustapa_chk_row['smarten_partycode']);
     $deliveryparty->addChild("Name", xml_cleanstring($rec_cust_name));
 
     $contactdata = $deliveryparty->addChild("ContactData");

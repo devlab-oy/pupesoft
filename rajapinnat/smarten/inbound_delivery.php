@@ -155,7 +155,7 @@ $buyerparty->addChild('Name', xml_cleanstring($yhtiorow['nimi']));
 //$payerparty->addChild('Name', 'Partner name');
 
 $supplierparty = $documentparties->addChild('SupplierParty');
-$supplierparty->addChild('PartyCode', "4544");
+$supplierparty->addChild('PartyCode', "5511");
 $supplierparty->addChild('Name', xml_cleanstring(trim($row['nimi'] . " " . $row['nimitark'])));
 
 $contactdata = $supplierparty->addChild("ContactData");

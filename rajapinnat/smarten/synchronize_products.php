@@ -195,7 +195,7 @@ if (mysql_num_rows($res) > 0) {
       $worksheet->writeString($excelrivi, $excelsarake, $row['myynti_era'] /*"Kastis"*/); $excelsarake++;         // CHECK: quantity of pieces
       $worksheet->writeString($excelrivi, $excelsarake, "" /*"Alusel"*/); $excelsarake++;
       $worksheet->writeString($excelrivi, $excelsarake, "" /*"KogusKihis"*/); $excelsarake++;
-      $worksheet->writeString($excelrivi, $excelsarake, "4544" /*"HankijaKood"*/); $excelsarake++;
+      $worksheet->writeString($excelrivi, $excelsarake, "5511" /*"HankijaKood"*/); $excelsarake++;
       $worksheet->writeString($excelrivi, $excelsarake, "" /*"BaashindEEK"*/); $excelsarake++;
       $worksheet->writeString($excelrivi, $excelsarake, $row['tuoteno'] /*"HankijaTooteKood"*/); $excelsarake++;  // CHECK: supplier's item/aritcle code
       $worksheet->writeString($excelrivi, $excelsarake, "" /*"SvtJaehindEEK"*/); $excelsarake++;

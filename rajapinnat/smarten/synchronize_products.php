@@ -18,7 +18,7 @@ if (empty($ulkoinen_jarjestelma)) {
   echo "</select>";
   echo "</td>";
   echo "<td>";
-  echo "<button type='submit' name='tee' value=''>", t("Lähetä"), "</button>";
+  echo "<button type='submit'>", t("Lähetä"), "</button>";
   echo "</td>";
   echo "</tr>";
   echo "</table>";
@@ -44,7 +44,7 @@ $res = pupe_query($query);
 
 if (mysql_num_rows($res) > 0) {
 
-  if ($tee == '') {
+  if (empty($tee)) {
     echo "<font class='message'>", t("Tuotteet joita ei ole synkronoitu"), "</font><br />";
     echo "<font class='message'>", t("Yhteensä %d kappaletta", "", mysql_num_rows($res)), "</font><br /><br />";
 

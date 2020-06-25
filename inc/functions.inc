@@ -12613,6 +12613,24 @@ if (!function_exists("hae_yhtion_parametrit")) {
         $yhtion_toimipaikkarow = mysql_fetch_assoc($result);
 
         unset($yhtion_toimipaikkarow["tunnus"]);
+        unset($yhtion_toimipaikkarow["nimitys"]);
+
+        // Jos toimipaikka on varastotoimipaikka, niin ei käytetä sen yhteystietoja
+        if (!empty( $yhtion_toimipaikkarow['varastotoimipaikka'])) {
+          unset($yhtion_toimipaikkarow["ovtlisa"]);
+          unset($yhtion_toimipaikkarow["kotipaikka"]);
+          unset($yhtion_toimipaikkarow["nimi"]);
+          unset($yhtion_toimipaikkarow["osoite"]);
+          unset($yhtion_toimipaikkarow["postino"]);
+          unset($yhtion_toimipaikkarow["postitp"]);
+          unset($yhtion_toimipaikkarow["maa"]);
+          unset($yhtion_toimipaikkarow["fax"]);
+          unset($yhtion_toimipaikkarow["puhelin"]);
+          unset($yhtion_toimipaikkarow["email"]);
+          unset($yhtion_toimipaikkarow["postittaja_email"]);
+          unset($yhtion_toimipaikkarow["www"]);
+          unset($yhtion_toimipaikkarow["lasku_logo"]);
+        }
 
         if (trim($yhtion_toimipaikkarow['postittaja_email']) == '') {
           $yhtion_toimipaikkarow['postittaja_email'] = $yhtion_parametritrow['postittaja_email'];

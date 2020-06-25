@@ -213,8 +213,7 @@ if (mysql_field_name($result, $i) == "toimipaikka") {
 
   $query = "SELECT *
             FROM yhtion_toimipaikat
-            WHERE yhtio    = '{$kukarow['yhtio']}'
-            AND vat_numero = ''
+            WHERE yhtio = '{$kukarow['yhtio']}'
             ORDER BY nimi";
   $vresult = pupe_query($query);
 
@@ -224,7 +223,12 @@ if (mysql_field_name($result, $i) == "toimipaikka") {
       $sel = "selected";
     }
 
-    $ulos .= "<option value='{$vrow['tunnus']}' {$sel}>{$vrow['ovtlisa']} {$vrow['nimi']}</option>";
+    $t_nimi = $vrow['nimitys'];
+    if (empty($t_nimi)) {
+      $t_nimi = "{$vrow['ovtlisa']} {$vrow['nimi']}";
+    }
+
+    $ulos .= "<option value='{$vrow['tunnus']}' {$sel}>$t_nimi</option>";
   }
 
   $ulos .= "</select></td>";

@@ -28,6 +28,22 @@ if (mysql_field_name($result, $i) == "maa") {
   $jatko = 0;
 }
 
+if (mysql_field_name($result, $i) == "varastotoimipaikka") {
+    $sela = $selb = '';
+    if ($trow[$i] != '') {
+      $selb = "SELECTED";
+    }
+    else {
+      $sela = "SELECTED";
+    }
+
+    $ulos  = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
+    $ulos .= "<option value = '' $sela>".t("Ei")."</option>";
+    $ulos .= "<option value = 'o' $selb>".t("Kyllä")."</option>";
+    $ulos .= "</select></td>";
+    $jatko = 0;
+}
+
 if ((mysql_field_name($result, $i) == "tilino") or
   (mysql_field_name($result, $i) == "tilino_eu") or
   (mysql_field_name($result, $i) == "tilino_ei_eu") or

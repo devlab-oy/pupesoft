@@ -237,6 +237,20 @@ if (isset($mehtorow["directdebit_id"])) {
   }
 }
 
+if ($lasrow["vienti"] == '' and $lasrow["alv"] == 0 and $lasrow["yhtio_toimipaikka"] > 0) {
+  // Onko verovelvollinen toimipaikka ulkomailla?
+  $query = "SELECT *
+            FROM yhtion_toimipaikat
+            WHERE yhtio = '$kukarow[yhtio]'
+            and tunnus = '$lasrow[yhtio_toimipaikka]'
+            and vat_numero != ''
+            and maa != '$lasrow[maa]'";
+  $toimipaikres = pupe_query($query);
+  if (mysql_num_rows($toimipaikres)) {
+    if (stripos($sisviestit1, "VAT 0% Intra community supply.") === FALSE) $lisa_comments .= "VAT 0% Intra community supply. \n";
+  }
+}
+
 if ($lasrow["vienti"] == 'E') {
 
   if ($lasrow['kolmikantakauppa'] != "") {

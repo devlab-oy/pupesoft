@@ -235,7 +235,7 @@ if (mysql_num_rows($res) > 0) {
       $worksheet->writeString($excelrivi, $excelsarake++, "" /*"Pooltoodang"*/);
       $worksheet->writeString($excelrivi, $excelsarake++, "" /*"Pakend"*/);
       $worksheet->writeString($excelrivi, $excelsarake++, "" /*"TootjaNimetus"*/);
-      $worksheet->writeString($excelrivi, $excelsarake++, "" /*"NoppeLisaInfo"*/);       // CHECK: this is instructions field for picking, not printed, remark for warehouse (for example: fragile or something)
+      $worksheet->writeString($excelrivi, $excelsarake++, $row['vakkoodi'] /*"NoppeLisaInfo"*/);       // CHECK: this is instructions field for picking, not printed, remark for warehouse (for example: fragile or something)
       $worksheet->writeString($excelrivi, $excelsarake++, "" /*"Aastakaik"*/);
       $worksheet->writeString($excelrivi, $excelsarake++, "" /*"PartneriKaubagrupp1"*/);
       $worksheet->writeString($excelrivi, $excelsarake++, "" /*"PartneriKaubagrupp2"*/);

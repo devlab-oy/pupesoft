@@ -31,11 +31,11 @@ if (empty($ulkoinen_jarjestelma)) {
 $query = "SELECT tuote.*, ta.selite AS synkronointi, ta.tunnus AS ta_tunnus, toim_tuoteno
           FROM tuote
           LEFT JOIN tuotteen_avainsanat AS ta ON (ta.yhtio = tuote.yhtio AND ta.tuoteno = tuote.tuoteno AND ta.laji = 'synkronointi')
-          LEFT JOIN tuotteen_toimittajat AS tt ON (tt.yhtio = tuote.yhtio AND tt.tuoteno = tuote.tuoteno)
           WHERE tuote.yhtio   = '{$kukarow['yhtio']}'
           AND tuote.ei_saldoa = ''
           AND tuote.tuotetyyppi NOT IN ('A', 'B')
           AND tuote.tuoteno != ''
+          and (tuote.status not in ('P','X') or (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) > 0)
           GROUP BY tuoteno
           HAVING (ta.tunnus IS NOT NULL AND ta.selite = '') OR
                   # jos avainsanaa ei ole olemassa ja status P niin ei haluta näitä tuotteita jatkossakaan

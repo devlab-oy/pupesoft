@@ -3,7 +3,7 @@
 $ulos = "";
 $jatko = 1; // oletetaan normaali käsittely
 $tyyppi = 1; // oletetaan rivin näkyvyys
-$fieldname = $fieldname;
+$fieldname = mysql_field_name($result, $i);
 
 if ($fieldname == "tunnus" or
   $fieldname == "yhtio") {

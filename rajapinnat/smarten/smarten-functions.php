@@ -41,16 +41,12 @@ if (!function_exists('smarten_send_email')) {
       'to' => $email,
     );
 
-    var_dump($args);
-
-    /*
     if (pupesoft_sahkoposti($args)) {
       pupesoft_log($log_name, "Sähköposti lähetetty onnistuneesti osoitteeseen {$email}");
     }
     else {
       pupesoft_log($log_name, "Sähköpostin lähetys epäonnistui osoitteeseen {$email}");
     }
-    */
   }
 }
 
@@ -466,14 +462,14 @@ if (!function_exists('smarten_outbounddelivery')) {
     $extension->addAttribute("extensionId", "externalremarks");
     $extension->addChild("InfoContent", xml_cleanstring($looprow['kommentti']));
 
-    if ($edi_pack_process) {
-      $extension = $additionalinfo->addChild("Extension");
-      $extension->addAttribute("extensionId", "SSCC");
-      $extension->addChild("InfoContent", "1");
-    }
-    elseif (!empty($looprow['noutopisteen_tunnus'])) {
+    if (!empty($looprow['noutopisteen_tunnus'])) {
       $extension = $additionalinfo->addChild("Extension");
       $extension->addAttribute("extensionId", "ParcelMachine");
+      $extension->addChild("InfoContent", "1");
+    }
+    elseif (!empty($toimitustapa_chk_row['smarten_partycode'])) {
+      $extension = $additionalinfo->addChild("Extension");
+      $extension->addAttribute("extensionId", $toimitustapa_chk_row['smarten_partycode']);
       $extension->addChild("InfoContent", "1");
     }
 

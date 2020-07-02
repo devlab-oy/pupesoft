@@ -7,6 +7,7 @@ require 'validation/Validation.php';
 require 'valmistuslinjat.inc';
 
 $onkologmaster = (LOGMASTER_RAJAPINTA and in_array($yhtiorow['ulkoinen_jarjestelma'], array('', 'K')));
+$onkosmarten = (SMARTEN_RAJAPINTA and in_array($yhtiorow['ulkoinen_jarjestelma'], array('', 'K')));
 
 if (isset($tee) and $tee == "TILAA_AJAX") {
   require_once "inc/tilaa_ajax.inc";
@@ -625,7 +626,7 @@ if ($tee2 == 'VALITSE') {
       echo "</table><br><br>";
       echo "<input type='hidden' name='lasku_yhtio' value='$kukarow[yhtio]'>";
 
-      if ($onkologmaster and in_array($prirow['ulkoinen_jarjestelma'], array('L','P'))) {
+      if (($onkologmaster or $onkosmarten) and in_array($prirow['ulkoinen_jarjestelma'], array('L','P'))) {
         echo t("Ulkoisen varaston tilaus");
       }
       else {
@@ -1268,6 +1269,7 @@ if ($tee2 == '') {
       $prirow = mysql_fetch_array($prires);
 
       $onkologmaster_varasto = ($onkologmaster and in_array($prirow['ulkoinen_jarjestelma'], array('L','P')));
+      $onkosmarten_varasto = ($onkosmarten and $prirow['ulkoinen_jarjestelma'] == 'S');
 
       if ($tilrow["tilauksia"] > 1) {
         echo "<$ero valign='top'></$ero>";
@@ -1391,7 +1393,7 @@ if ($tee2 == '') {
         echo "<input type='hidden' name='lasku_yhtio'   value='$tilrow[yhtio]'>";
         echo "<$ero valign='top'>";
 
-        if ($onkologmaster_varasto) {
+        if ($onkologmaster_varasto or $onkosmarten_varasto) {
           echo t("Ulkoisen varaston tilaus");
 
           $keskenres = tilaus_aktiivinen_kayttajalla($tilrow['otunnus']);
@@ -1436,7 +1438,7 @@ if ($tee2 == '') {
       }
 
       // Ker‰t‰‰n tunnukset tulosta kaikki-toimintoa varten
-      if (!$onkologmaster_varasto) {
+      if (!$onkologmaster_varasto and !$onkosmarten_varasto) {
         $tulostakaikki_tun[$tilrow['otunnus']] = $tilrow["yhtio"];
       }
 

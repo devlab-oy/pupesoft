@@ -199,7 +199,7 @@ if (!function_exists('smarten_message_type')) {
       $dsubtype = trim($xml->Document->DocumentInfo->DocumentSubType);
     }
 
-    return [$dtype, $dsubtype];
+    return array($dtype, $dsubtype);
   }
 }
 

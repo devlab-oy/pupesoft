@@ -272,6 +272,7 @@ unset($magento_api_ht_pas);
 unset($magento_api_ht_edi);
 
 unset($logmaster);
+unset($smarten);
 unset($woo_config);
 
 unset($pupesoft_commandlinelog);
@@ -1012,4 +1013,15 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
   $_logmaster_rajapinta &= ($yhtiorow['siirtolistan_tulostustapa'] == 'K');
 
   define('LOGMASTER_RAJAPINTA', $_logmaster_rajapinta == 1 ? true : false);
+
+  # Katsotaan onko Pupesoftissa Smarten-rajapinta asetettuna
+  $_smarten_rajapinta = true;
+  $_smarten_rajapinta &= (!empty($smarten['host']));
+  $_smarten_rajapinta &= (!empty($smarten['user']));
+  $_smarten_rajapinta &= (!empty($smarten['pass']));
+  $_smarten_rajapinta &= (!empty($smarten['path_to']));
+  $_smarten_rajapinta &= ($yhtiorow['lahetteen_tulostustapa'] == 'K');
+  $_smarten_rajapinta &= ($yhtiorow['siirtolistan_tulostustapa'] == 'K');
+
+  define('SMARTEN_RAJAPINTA', $_smarten_rajapinta == 1 ? true : false);
 }

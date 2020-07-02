@@ -2278,16 +2278,6 @@ if (!function_exists('loppu')) {
         20 + $tileja + $barcode_korkeus, 580, $thispage, $rectparam);
     }
 
-    if (!empty($laskurow["yhtio_toimipaikka"])) {
-      $query = "SELECT vat_numero
-                FROM yhtion_toimipaikat
-                WHERE yhtio = '{$kukarow["yhtio"]}'
-                AND tunnus  = '{$laskurow["yhtio_toimipaikka"]}'";
-
-      $toimipaikka_result = pupe_query($query);
-
-      $toimipaikkarow = mysql_fetch_assoc($toimipaikka_result);
-    }
 
     // yhtiötiedot
     $y_tiedot_ok = FALSE;
@@ -2301,35 +2291,43 @@ if (!function_exists('loppu')) {
     if ($laskurow['yhtio_maa'] == 'EE') {
       $y_vatnumero = $yhtiorow["ytunnus"];
     }
-    elseif (!empty($toimipaikkarow["vat_numero"])) {
-      $y_vatnumero = preg_replace("/^0037/", "", $toimipaikkarow["vat_numero"]);
-    }
     else {
       $y_vatnumero = preg_replace("/^0037/", "", $laskurow["yhtio_ovttunnus"]);
     }
     $y_iban = $yhtiorow['pankkiiban1'];
     $y_swift = $yhtiorow['pankkiswift1'];
+    $y_toimipaikan_vat = "";
 
-    if ((int) $laskurow["yhtio_toimipaikka"] != 0) {
-      // haetaan toimipaikan tiedot
-      $alhqur = "SELECT puhelin, fax, email, www from yhtion_toimipaikat where yhtio='$laskurow[yhtio]' and tunnus='$laskurow[yhtio_toimipaikka]'";
-      $alhire = pupe_query($alhqur);
+    if (!empty($laskurow["yhtio_toimipaikka"])) {
+      $query = "SELECT *
+                FROM yhtion_toimipaikat
+                WHERE yhtio = '{$kukarow["yhtio"]}'
+                AND tunnus  = '{$laskurow["yhtio_toimipaikka"]}'";
+      $toimipaikka_result = pupe_query($query);
+      $toimipaikkarow = mysql_fetch_assoc($toimipaikka_result);
 
-      if (mysql_num_rows($alhire) == 1) {
-        $alhiro = mysql_fetch_assoc($alhire);
-
+      if (empty($toimipaikkarow['varastotoimipaikka'])) {
+        if (!empty($toimipaikkarow["vat_numero"])) {
+          $y_vatnumero = preg_replace("/^0037/", "", $toimipaikkarow["vat_numero"]);
+        }
         $y_tiedot_ok = TRUE;
-        $y_puhelin = $alhiro['puhelin'];
-        $y_fax = $alhiro['fax'];
-        $y_email = $alhiro['email'];
-        $y_www = $alhiro['www'];
+        $y_puhelin = $toimipaikkarow['puhelin'];
+        $y_fax = $toimipaikkarow['fax'];
+        $y_email = $toimipaikkarow['email'];
+        $y_www = $toimipaikkarow['www'];
+      }
+      else {
+        $y_toimipaikan_vat = $toimipaikkarow["vat_numero"];
       }
     }
 
     // jos meillä on lasku menossa ulkomaille ja se laskutetaan eri ovttunnuksella
     if ($laskurow["yhtio_ovttunnus"] != "" and $laskurow["yhtio_ovttunnus"] != $yhtiorow["ovttunnus"]) {
       // haetaan toimipaikan tiedot
-      $alhqur = "SELECT puhelin, fax, email, www from yhtion_toimipaikat where yhtio='$laskurow[yhtio]' and vat_numero='$laskurow[yhtio_ovttunnus]'";
+      $alhqur = " SELECT puhelin, fax, email, www
+                  from yhtion_toimipaikat
+                  where yhtio = '$laskurow[yhtio]'
+                  and vat_numero = '$laskurow[yhtio_ovttunnus]'";
       $alhire = pupe_query($alhqur);
 
       if (mysql_num_rows($alhire) == 1) {
@@ -2346,7 +2344,9 @@ if (!function_exists('loppu')) {
     // jos ei olla haettu muualta, niin haetaan tiedot yhtiöltä
     if (!$y_tiedot_ok) {
       // haetaan toimipaikan tiedot
-      $alhqur = "SELECT puhelin, fax, email, www from yhtio where yhtio='$laskurow[yhtio]'";
+      $alhqur = " SELECT puhelin, fax, email, www
+                  from yhtio
+                  where yhtio = '$laskurow[yhtio]'";
       $alhire = pupe_query($alhqur);
 
       if (mysql_num_rows($alhire) == 1) {
@@ -2389,7 +2389,10 @@ if (!function_exists('loppu')) {
     $pdf_lasku->draw_text(404, 55 + $tileja + $barcode_korkeus, t("Y-tunnus", $kieli).": ".tulosta_ytunnus($y_vatnumero, $y_maa, $laskurow["vienti"]), $thispage, $pieni);
     $pdf_lasku->draw_text(404, 45 + $tileja + $barcode_korkeus, t("Kotipaikka", $kieli).": $y_kotipaikka", $thispage, $pieni);
 
-    if (strtoupper($y_maa) == 'FI') {
+    if (!empty($y_toimipaikan_vat)) {
+      $pdf_lasku->draw_text(404, 35 + $tileja + $barcode_korkeus, t("Alv-tunnus", $kieli).": ".$y_toimipaikan_vat, $thispage, $pieni);
+    }
+    elseif (strtoupper($y_maa) == 'FI') {
       $pdf_lasku->draw_text(404, 35 + $tileja + $barcode_korkeus, t("Enn.per.rek", $kieli), $thispage, $pieni);
       $pdf_lasku->draw_text(404, 25 + $tileja + $barcode_korkeus, t("Alv.rek", $kieli), $thispage, $pieni);
     }

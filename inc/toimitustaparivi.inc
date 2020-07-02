@@ -3,13 +3,14 @@
 $ulos = "";
 $jatko = 1; // oletetaan normaali käsittely
 $tyyppi = 1; // oletetaan rivin näkyvyys
+$fieldname = mysql_field_name($result, $i);
 
-if (mysql_field_name($result, $i) == "tunnus" or
-  mysql_field_name($result, $i) == "yhtio") {
+if ($fieldname == "tunnus" or
+  $fieldname == "yhtio") {
   $tyyppi = 0;
 }
 
-if (mysql_field_name($result, $i) == "nouto") {
+if ($fieldname == "nouto") {
 
   $sel='';
   if ($trow[$i]!='') $sel = 'SELECTED';
@@ -21,7 +22,7 @@ if (mysql_field_name($result, $i) == "nouto") {
   $jatko = 0;
 }
 
-if (mysql_field_name($result, $i) == "lauantai") {
+if ($fieldname == "lauantai") {
 
   $sel='';
   if ($trow[$i]!='') $sel = 'SELECTED';
@@ -33,7 +34,14 @@ if (mysql_field_name($result, $i) == "lauantai") {
   $jatko = 0;
 }
 
-if (mysql_field_name($result, $i) == "virallinen_selite") {
+if ($fieldname == "smarten_partycode" or $fieldname == "smarten_serviceid") {
+  // Piilota, jos Smarten-rajaopinta ei ole käytössä
+  if (!SMARTEN_RAJAPINTA) {
+    $tyyppi = 0;
+  }
+}
+
+if ($fieldname == "virallinen_selite") {
 
   $sel = '';
   if ($trow[$i] != '') $sel[$trow[$i]] = 'SELECTED';
@@ -133,7 +141,7 @@ if (mysql_field_name($result, $i) == "virallinen_selite") {
   $ulos .= "<optgroup label='Unifaun / DANX'>";
   $ulos .= "<option value='DANXSTD' {$sel["DANXSTD"]}>DANX</option>";
   $ulos .= "</optgroup>";
-  
+
   $ulos .= "<optgroup label='Unifaun / DB SCHENKER Parcel - kotimaan pakettikuljetukset'>";
   $ulos .= "<option value='SBTLFIEXP' {$sel["SBTLFIEXP"]}>DB SCHENKERparcel (Suomi)</option>";
   $ulos .= "</optgroup>";
@@ -331,7 +339,7 @@ if (mysql_field_name($result, $i) == "virallinen_selite") {
   $jatko = 0;
 }
 
-if (mysql_field_name($result, $i) == "rahdinkuljettaja") {
+if ($fieldname == "rahdinkuljettaja") {
 
   $ulos = "<td><select name='{$nimi}'>";
 
@@ -354,7 +362,7 @@ if (mysql_field_name($result, $i) == "rahdinkuljettaja") {
   $jatko = 0;
 }
 
-if (mysql_field_name($result, $i) == "logy_rahtikirjanumerot") {
+if ($fieldname == "logy_rahtikirjanumerot") {
 
   $sel1='';
   $sel2='';
@@ -371,7 +379,7 @@ if (mysql_field_name($result, $i) == "logy_rahtikirjanumerot") {
   $jatko = 0;
 }
 
-if (mysql_field_name($result, $i) == "merahti") {
+if ($fieldname == "merahti") {
   $sel1='';
   $sel2='';
 
@@ -387,7 +395,7 @@ if (mysql_field_name($result, $i) == "merahti") {
   $jatko = 0;
 }
 
-if (mysql_field_name($result, $i) == "tulostustapa") {
+if ($fieldname == "tulostustapa") {
   $sel      = array();
   $sel[$trow[$i]]  = " selected";
 
@@ -402,7 +410,7 @@ if (mysql_field_name($result, $i) == "tulostustapa") {
   $jatko = 0;
 }
 
-if (mysql_field_name($result, $i) == "extranet") {
+if ($fieldname == "extranet") {
   $sel      = array();
   $sel[$trow[$i]]  = " selected";
 
@@ -414,7 +422,7 @@ if (mysql_field_name($result, $i) == "extranet") {
   $jatko = 0;
 }
 
-if (mysql_field_name($result, $i) == "rahtikirja") {
+if ($fieldname == "rahtikirja") {
 
   $vresult = t_avainsana("RAHTIKIRJA");
 
@@ -430,7 +438,7 @@ if (mysql_field_name($result, $i) == "rahtikirja") {
   $jatko = 0;
 }
 
-if (mysql_field_name($result, $i) == "osoitelappu") {
+if ($fieldname == "osoitelappu") {
   $sel1 = '';
   $sel2 = '';
   $sel3 = '';
@@ -468,7 +476,7 @@ if (mysql_field_name($result, $i) == "osoitelappu") {
   $jatko = 0;
 }
 
-if (mysql_field_name($result, $i) == "sisamaan_kuljetusmuoto" or mysql_field_name($result, $i) == "kuljetusmuoto") {
+if ($fieldname == "sisamaan_kuljetusmuoto" or $fieldname == "kuljetusmuoto") {
 
   $ulos = "<td><select name='$nimi'>";
   $ulos .= "<option value = '' >".t("Valitse")."</option>";
@@ -488,7 +496,7 @@ if (mysql_field_name($result, $i) == "sisamaan_kuljetusmuoto" or mysql_field_nam
 }
 
 
-if (mysql_field_name($result, $i) == "kauppatapahtuman_luonne") {
+if ($fieldname == "kauppatapahtuman_luonne") {
 
   $ulos = "<td><select name='$nimi'>";
   $ulos .= "<option value = '' >".t("Valitse")."</option>";
@@ -507,7 +515,7 @@ if (mysql_field_name($result, $i) == "kauppatapahtuman_luonne") {
   $jatko = 0;
 }
 
-if (mysql_field_name($result, $i) == "poistumistoimipaikka_koodi") {
+if ($fieldname == "poistumistoimipaikka_koodi") {
 
   $ulos = "<td><select name='$nimi'>";
   $ulos .= "<option value = ''>".t("Valitse")."</option>";
@@ -526,7 +534,7 @@ if (mysql_field_name($result, $i) == "poistumistoimipaikka_koodi") {
   $jatko = 0;
 }
 
-if (mysql_field_name($result, $i) == "lajittelupiste") {
+if ($fieldname == "lajittelupiste") {
 
   $ulos = "<td><select name='{$nimi}'>";
   $ulos .= "<option value = ''>".t("Valitse")."</option>";
@@ -542,7 +550,7 @@ if (mysql_field_name($result, $i) == "lajittelupiste") {
   $jatko = 0;
 }
 
-if (mysql_field_name($result, $i) == "kontti") {
+if ($fieldname == "kontti") {
 
   $ulos  = "<td><select name='$nimi'>";
   $ulos .= "<option value = ''>".t("Valitse")."</option>";
@@ -564,7 +572,7 @@ if (mysql_field_name($result, $i) == "kontti") {
   $jatko = 0;
 }
 
-if (mysql_field_name($result, $i) == "jvkielto") {
+if ($fieldname == "jvkielto") {
 
   $sel = $sela = '';
   if ($trow[$i]!='') $sel = 'SELECTED';
@@ -577,7 +585,7 @@ if (mysql_field_name($result, $i) == "jvkielto") {
   $jatko = 0;
 }
 
-if (mysql_field_name($result, $i) == "vak_kielto") {
+if ($fieldname == "vak_kielto") {
 
   $sel      = array();
   $sel[$trow[$i]]  = " selected";
@@ -601,7 +609,7 @@ if (mysql_field_name($result, $i) == "vak_kielto") {
   $jatko = 0;
 }
 
-if (mysql_field_name($result, $i) == "vaihtoehtoinen_vak_toimitustapa") {
+if ($fieldname == "vaihtoehtoinen_vak_toimitustapa") {
 
   $sel = array();
   $sel[$trow[$i]] = "selected";
@@ -628,7 +636,7 @@ if (mysql_field_name($result, $i) == "vaihtoehtoinen_vak_toimitustapa") {
 }
 
 
-if (mysql_field_name($result, $i) == "erikoispakkaus_kielto") {
+if ($fieldname == "erikoispakkaus_kielto") {
 
   $sel = $sela = '';
   if ($trow[$i] != '') {
@@ -645,7 +653,7 @@ if (mysql_field_name($result, $i) == "erikoispakkaus_kielto") {
   $jatko = 0;
 }
 
-if (mysql_field_name($result, $i) == "ei_pakkaamoa") {
+if ($fieldname == "ei_pakkaamoa") {
 
   $ulos  = "<td><select name='$nimi'>";
   $chk1 = '';
@@ -665,7 +673,7 @@ if (mysql_field_name($result, $i) == "ei_pakkaamoa") {
   $jatko = 0;
 }
 
-if (mysql_field_name($result, $i) == "erittely") {
+if ($fieldname == "erittely") {
 
   $ulos  = "<td><select name='$nimi'>";
   $chk1 = '';
@@ -690,7 +698,7 @@ if (mysql_field_name($result, $i) == "erittely") {
   $jatko = 0;
 }
 
-if (mysql_field_name($result, $i) == "uudet_pakkaustiedot") {
+if ($fieldname == "uudet_pakkaustiedot") {
 
   $ulos  = "<td><select name='$nimi'>";
 
@@ -704,17 +712,17 @@ if (mysql_field_name($result, $i) == "uudet_pakkaustiedot") {
   $jatko = 0;
 }
 
-if (mysql_field_name($result, $i) == "jvkulu" or
-  mysql_field_name($result, $i) == "kuluprosentti" or
-  mysql_field_name($result, $i) == "ulkomaanlisa" or
-  mysql_field_name($result, $i) == "kuljetusvakuutus") {
+if ($fieldname == "jvkulu" or
+  $fieldname == "kuluprosentti" or
+  $fieldname == "ulkomaanlisa" or
+  $fieldname == "kuljetusvakuutus") {
 
   if ($trow[$i] == 0) {
     $trow[$i] = "";
   }
 }
 
-if (mysql_field_name($result, $i) == "kuljetusvakuutus_tyyppi") {
+if ($fieldname == "kuljetusvakuutus_tyyppi") {
 
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
 
@@ -733,8 +741,8 @@ if (mysql_field_name($result, $i) == "kuljetusvakuutus_tyyppi") {
   $jatko = 0;
 }
 
-if (mysql_field_name($result, $i) == "toim_maa" or
-  mysql_field_name($result, $i) == "maa_maara") {
+if ($fieldname == "toim_maa" or
+  $fieldname == "maa_maara") {
 
   $query = "SELECT distinct koodi, nimi
             FROM maat

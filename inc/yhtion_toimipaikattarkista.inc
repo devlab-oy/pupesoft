@@ -4,7 +4,7 @@ if (!function_exists("yhtion_toimipaikattarkista")) {
   function yhtion_toimipaikattarkista(&$t, $i, $result, $tunnus, &$virhe, $trow) {
     global $kukarow, $yhtiorow, $alias_set, $ulosarray;
 
-    static $tem_email, $tem_fax, $tem_kotipaikka, $tem_maa, $tem_maaind, $tem_nimi, $tem_osoite, $tem_ovtlisa, $tem_postino, $tem_postitp, $tem_puhelin, $tem_vatnumero, $tem_vatnumeroind;
+    static $tem_varastotoimipaikka, $tem_email, $tem_fax, $tem_kotipaikka, $tem_maa, $tem_maaind, $tem_nimi, $tem_osoite, $tem_ovtlisa, $tem_postino, $tem_postitp, $tem_puhelin, $tem_vatnumero, $tem_vatnumeroind;
 
     if (((mysql_field_name($result, $i) == "tilino") or
         (mysql_field_name($result, $i) == "tilino_eu") or
@@ -43,6 +43,10 @@ if (!function_exists("yhtion_toimipaikattarkista")) {
         }
         if ($virhe[$i] == '') $virhe[$i] = t("Tiliä ei löydy");
       }
+    }
+
+    if (mysql_field_name($result, $i) == "varastotoimipaikka") {
+      $tem_varastotoimipaikka = $t[$i];
     }
 
     if (mysql_field_name($result, $i) == "ovtlisa") {
@@ -100,7 +104,9 @@ if (!function_exists("yhtion_toimipaikattarkista")) {
       if ($tem_vatnumero != "") {
         $query = "SELECT selite
                   FROM avainsana
-                  WHERE yhtio = '$kukarow[yhtio]' and laji = 'alvulk' and selitetark_2 = '$tem_maa'";
+                  WHERE yhtio = '$kukarow[yhtio]'
+                  and laji = 'alvulk'
+                  and selitetark_2 = '$tem_maa'";
         $vresult = pupe_query($query);
 
         if (mysql_num_rows($vresult) == 0) {
@@ -109,9 +115,9 @@ if (!function_exists("yhtion_toimipaikattarkista")) {
 
         $query = "SELECT *
                   FROM yhtion_toimipaikat
-                  WHERE yhtio     = '$kukarow[yhtio]'
-                  and maa         = '$tem_maa'
-                  and tunnus     != '$tunnus'
+                  WHERE yhtio = '$kukarow[yhtio]'
+                  and maa = '$tem_maa'
+                  and tunnus != '$tunnus'
                   and vat_numero != ''";
         $vresult = pupe_query($query);
 
@@ -119,8 +125,8 @@ if (!function_exists("yhtion_toimipaikattarkista")) {
           $virhe[$tem_vatnumeroind] = $virhe[$i] = t("Yksi vat tunnus per maa sallittu!");
         }
 
-        if ($tem_email == "" or
-          $tem_fax == "" or
+        if (empty($tem_varastotoimipaikka) and (
+          $tem_email == "" or
           $tem_kotipaikka == "" or
           $tem_maa == "" or
           $tem_nimi == "" or
@@ -128,8 +134,7 @@ if (!function_exists("yhtion_toimipaikattarkista")) {
           $tem_ovtlisa == "" or
           $tem_postino == "" or
           $tem_postitp == "" or
-          $tem_puhelin == "" or
-          $tem_vatnumero == "") {
+          $tem_vatnumero == "")) {
 
           $virhe[$tem_vatnumeroind] = $virhe[$i] = t("Kaikki tiedot on syötettävä alv-velvolliselle toimipaikalle!");
         }

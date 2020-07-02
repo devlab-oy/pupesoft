@@ -1252,6 +1252,32 @@ if ($tila == "" and !isset($jatka)) {
     }
   }
 
+  // Onko valittuun varastoon kytketty verovelvollinen varastotoimipaikka?
+  if (!empty($oletusvarasto)) {
+    $query = "SELECT yhtion_toimipaikat.*
+              FROM varastopaikat
+              JOIN yhtion_toimipaikat ON (
+                varastopaikat.yhtio=yhtion_toimipaikat.yhtio and
+                varastopaikat.toimipaikka=yhtion_toimipaikat.tunnus and
+                yhtion_toimipaikat.vat_numero != ''
+              )
+              WHERE varastopaikat.yhtio = '$kukarow[yhtio]'
+              and varastopaikat.tunnus = '$oletusvarasto'";
+    $varatoimires = pupe_query($query);
+
+    if ($varatoimirow = mysql_fetch_assoc($varatoimires)) {
+      // Valitaan tämä toimipaikaksi
+      $yhtiotoimipaikka = $varatoimirow['tunnus'];
+
+      if (strtoupper($yhtiotoimipaikka['maa']) != strtoupper($srow["maa"]) and
+        strtoupper($yhtiorow['maa']) == strtoupper($srow["maa"]) and
+        $srow["laji"] != 'H'
+      ) {
+        $srow['alv'] = 0;
+      }
+    }
+  }
+
   if (!isset($nimi)) {$nimi = "";}
   if (!isset($nimitark)) {$nimitark = "";}
   if (!isset($osoite)) {$osoite = "";}
@@ -2350,10 +2376,14 @@ if ($tila == "" and !isset($jatka)) {
       while ($yht_toimpaik_row = mysql_fetch_assoc($yht_toimpaik_res)) {
 
         $sel = $yhtiotoimipaikka == $yht_toimpaik_row['tunnus'] ? "selected" : "";
-
         if ($sel != "") $predefined_yhtiotoimipaikka = $yhtiotoimipaikka;
 
-        $oikea_sarake[$oikea] .= "<option value='{$yht_toimpaik_row['tunnus']}' {$sel}>{$yht_toimpaik_row['nimi']}</option>";
+        $t_nimi = $yht_toimpaik_row['nimitys'];
+        if (empty($t_nimi)) {
+          $t_nimi = $yht_toimpaik_row['nimi'];
+        }
+
+        $oikea_sarake[$oikea] .= "<option value='{$yht_toimpaik_row['tunnus']}' {$sel}>{$t_nimi}</option>";
       }
 
       $oikea_sarake[$oikea] .= "</select>";

@@ -467,9 +467,9 @@ if (!function_exists('smarten_outbounddelivery')) {
       $extension->addAttribute("extensionId", "ParcelMachine");
       $extension->addChild("InfoContent", "1");
     }
-    elseif (!empty($toimitustapa_chk_row['smarten_partycode'])) {
+    elseif (!empty($toimitustapa_chk_row['smarten_serviceid'])) {
       $extension = $additionalinfo->addChild("Extension");
-      $extension->addAttribute("extensionId", $toimitustapa_chk_row['smarten_partycode']);
+      $extension->addAttribute("extensionId", $toimitustapa_chk_row['smarten_serviceid']);
       $extension->addChild("InfoContent", "1");
     }
 

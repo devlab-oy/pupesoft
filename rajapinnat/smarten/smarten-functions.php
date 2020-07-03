@@ -500,7 +500,7 @@ if (!function_exists('smarten_outbounddelivery')) {
     pupesoft_log('smarten_outbound_delivery', "Tilauksen {$otunnus} sanomalle lisätty.");
 
     $_date = date("Ymd_His");
-    $filename = $pupe_root_polku."/dataout/{$_date}_desorder_BNNB_{$otunnus}.xml";
+    $filename = "/home/smarten/out/{$_date}_desorder_BNNB_{$otunnus}.xml";
 
     if (file_put_contents($filename, $xml->asXML())) {
       pupesoft_log('smarten_outbound_delivery', "Tilauksen {$otunnus} sanoman luonti Smarten-järjestelmään onnistui.");

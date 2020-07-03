@@ -223,7 +223,7 @@ if ($xml_chk) {
   $ostotilaukset = array_unique($ostotilaukset);
 
   $_date = date("Ymd_His");
-  $filename = $pupe_root_polku."/dataout/{$_date}_order_BNNB_{$row['laskunro']}.xml";
+  $filename = "/home/smarten/out/{$_date}_order_BNNB_{$row['laskunro']}.xml";
 
   if (file_put_contents($filename, $xml->asXML())) {
     $palautus = smarten_send_file($filename);

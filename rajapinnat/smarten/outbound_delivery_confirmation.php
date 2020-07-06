@@ -72,7 +72,7 @@ while (false !== ($file = readdir($handle))) {
 
   pupesoft_log('smarten_outbound_delivery_confirmation', "Käsitellään sanoma {$file}");
 
-  $otunnus = (int) $xml->xpath('Document/DocumentInfo/RefInfo/SourceDocument[@type="desorder"]/SourceDocumentNum')[0];
+  $otunnus = (int) array_shift($xml->xpath('Document/DocumentInfo/RefInfo/SourceDocument[@type="desorder"]/SourceDocumentNum'));
 
   $tracking_code = "";
 
@@ -118,7 +118,7 @@ while (false !== ($file = readdir($handle))) {
     $laskurow = mysql_fetch_assoc($laskures);
 
     foreach ($xml->Document->DocumentItem->ItemEntry as $line) {
-      $tilausrivin_tunnus = (int) $line->xpath('RefInfo/SourceDocument[@type="desorder"]/SourceDocumentLineItemNum')[0];
+      $tilausrivin_tunnus = (int) array_shift($line->xpath('RefInfo/SourceDocument[@type="desorder"]/SourceDocumentLineItemNum'));
 
       foreach ($line->ItemReserve as $stock_item) {
         $kpl = (float) $stock_item->ItemReserveUnit->AmountActual;

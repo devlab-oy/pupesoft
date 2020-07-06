@@ -67,7 +67,7 @@ while (false !== ($file = readdir($handle))) {
 
   $xml = simplexml_load_file($full_filepath);
 
-  $saapumisnro = $xml->xpath('Document/DocumentInfo/RefInfo/SourceDocument[@type="order"]/SourceDocumentNum')[0];
+  $saapumisnro = (int) array_shift($xml->xpath('Document/DocumentInfo/RefInfo/SourceDocument[@type="order"]/SourceDocumentNum'));
 
   $email_array[] = "";
   $email_array[] = t("Saapuminen %s", "", $saapumisnro);
@@ -133,7 +133,7 @@ while (false !== ($file = readdir($handle))) {
   // Loopataan rivit tilausrivit-arrayseen
   // koska Pupesoftin tilausrivi voi tulla monella aineiston rivillä
   foreach ($sanoman_kaikki_rivit->ItemEntry as $line) {
-    $rivitunnus = (int) $line->xpath('RefInfo/SourceDocument[@type="order"]/SourceDocumentLineItemNum')[0];
+    $rivitunnus = (int) array_shift($line->xpath('RefInfo/SourceDocument[@type="order"]/SourceDocumentLineItemNum'));
     $tuoteno    = (string) $line->BuyerItemCode;
 
     foreach ($line->ItemReserve as $stock_item) {

@@ -359,10 +359,10 @@ if (!function_exists('smarten_outbounddelivery')) {
     $contactdata->addChild("MobileNum", xml_cleanstring($looprow['toim_puh']));
 
     if ($looprow['toim_email'] == '') {
-      $contactdata->addChild('Email', xml_cleanstring($looprow['email']));
+      $contactdata->addChild('EmailAddress', xml_cleanstring($looprow['email']));
     }
     else {
-      $contactdata->addChild('Email', xml_cleanstring($looprow['toim_email']));
+      $contactdata->addChild('EmailAddress', xml_cleanstring($looprow['toim_email']));
     }
 
     if ($edi_pack_process) {

@@ -76,7 +76,7 @@ while (false !== ($file = readdir($handle))) {
 
   $tracking_code = "";
 
-  $parcel_ids = $xml->xpath('Document/DocumentInfo/RefInfo/SourceDocument[@type="ParcelId"]');
+  $parcel_ids = $xml->xpath('Document/DocumentInfo/RefInfo/SourceDocument[@type="ParcelID"]');
 
   foreach ($parcel_ids as $parcel_id) {
     $tracking_code .= $parcel_id->SourceDocumentNum."\n";

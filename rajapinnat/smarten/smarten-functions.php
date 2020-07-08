@@ -357,12 +357,16 @@ if (!function_exists('smarten_outbounddelivery')) {
 
     $contactdata->addChild("PhoneNum", "");
     $contactdata->addChild("MobileNum", xml_cleanstring($looprow['toim_puh']));
-
+    
     if ($looprow['toim_email'] == '') {
-      $contactdata->addChild('EmailAddress', xml_cleanstring($looprow['email']));
+      // Unifaun/Smarten only wants the first Email address if there's many...
+      $emaili = trim(array_shift(explode(',', $looprow['email'])));
+      $contactdata->addChild('EmailAddress', xml_cleanstring($emaili));
     }
     else {
-      $contactdata->addChild('EmailAddress', xml_cleanstring($looprow['toim_email']));
+      // Unifaun/Smarten only wants the first Email address if there's many...
+      $emaili = trim(array_shift(explode(',', $looprow['email'])));
+      $contactdata->addChild('EmailAddress', xml_cleanstring($emaili));
     }
 
     if ($edi_pack_process) {

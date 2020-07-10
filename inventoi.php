@@ -1015,6 +1015,11 @@ if ($tee == 'VALMIS') {
               $virhe = 2;
             }
 
+            if (!empty($smarten_inventointi) and $erotus == 0) {
+              $smarten_inventointi = FALSE;
+              continue;
+            }
+
             //echo "Tuoteno: $tuoteno Saldomuutos: $saldomuutos Kerätty: $kerattymuut Syötetty: $kpl Hyllyssä: $hyllyssa Nykyinen: $nykyinensaldo Erotus: $erotus<br>";
 
             ///* Inventointipoikkeama prosenteissa *///

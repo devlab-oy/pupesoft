@@ -12548,7 +12548,8 @@ if (!function_exists("hae_yhtion_parametrit")) {
       $toimipaikka = (int) $toimipaikka;
     }
 
-    $query = "SELECT *
+    $query = "SELECT *,
+              maa as maa_vero
               FROM yhtio
               WHERE yhtio = '$yhtio'";
     $result = pupe_query($query);
@@ -12603,7 +12604,9 @@ if (!function_exists("hae_yhtion_parametrit")) {
 
     // Jos meillä on toimipaikka, ylikirjataan yhtion parametrit toimipaikan parametreillä
     if ($toimipaikka > 0) {
-      $query = "SELECT *, tunnus yhtion_toimipaikat_tunnus
+      $query = "SELECT *, 
+                maa as maa_vero, 
+                tunnus as yhtion_toimipaikat_tunnus
                 FROM yhtion_toimipaikat
                 WHERE yhtio = '$yhtio'
                 and tunnus  = '$toimipaikka'";
@@ -12616,7 +12619,7 @@ if (!function_exists("hae_yhtion_parametrit")) {
         unset($yhtion_toimipaikkarow["nimitys"]);
 
         // Jos toimipaikka on varastotoimipaikka, niin ei käytetä sen yhteystietoja
-        if (!empty( $yhtion_toimipaikkarow['varastotoimipaikka'])) {
+        if (!empty($yhtion_toimipaikkarow['varastotoimipaikka'])) {
           unset($yhtion_toimipaikkarow["ovtlisa"]);
           unset($yhtion_toimipaikkarow["kotipaikka"]);
           unset($yhtion_toimipaikkarow["nimi"]);

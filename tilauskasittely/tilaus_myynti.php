@@ -8094,7 +8094,7 @@ if ($tee == '') {
             if ($varow['maa'] != '' and $yhtiorow['varastopaikan_lippu'] != '') {
               echo "<td $class align='left' nowrap><font class='error'><img src='{$palvelin2}pics/flag_icons/gif/".strtolower($varow['maa']).".gif'> $row[hyllyalue] $row[hyllynro] $row[hyllyvali] $row[hyllytaso] ($selpaikkamyytavissa) </font>";
             }
-            elseif ($varow['maa'] != '' and strtoupper($varow['maa']) != strtoupper($yhtiorow['maa'])) {
+            elseif ($varow['maa'] != '' and strtoupper($varow['maa']) != strtoupper($yhtiorow['maa_vero'])) {
               echo "<td $class align='left' nowrap><font class='error'>".strtoupper($varow['maa'])." $row[hyllyalue] $row[hyllynro] $row[hyllyvali] $row[hyllytaso] ($selpaikkamyytavissa) </font>";
             }
             else {
@@ -8165,7 +8165,7 @@ if ($tee == '') {
           if ($varow['maa'] != '' and $yhtiorow['varastopaikan_lippu'] != '') {
             echo "<td $class align='left'><font class='error'><img src='{$palvelin2}pics/flag_icons/gif/".strtolower($varow['maa']).".gif'> $row[hyllyalue] $row[hyllynro] $row[hyllyvali] $row[hyllytaso]</font></td>";
           }
-          elseif ($varow['maa'] != '' and strtoupper($varow['maa']) != strtoupper($yhtiorow['maa'])) {
+          elseif ($varow['maa'] != '' and strtoupper($varow['maa']) != strtoupper($yhtiorow['maa_vero'])) {
             echo "<td $class align='left'><font class='error'>".strtoupper($varow['maa'])." $row[hyllyalue] $row[hyllynro] $row[hyllyvali] $row[hyllytaso]</font></td>";
           }
           else {
@@ -9353,7 +9353,7 @@ if ($tee == '') {
 
       if ($kukarow['hinnat'] != -1 and $toim != "SIIRTOTYOMAARAYS" and $toim != "VALMISTAVARASTOON") {
         // Laskeskellaan tilauksen loppusummaa (mitätöidyt ja raaka-aineet eivät kuulu jengiin)
-        $alvquery = "SELECT IF(ISNULL(varastopaikat.maa) or varastopaikat.maa='', '$yhtiorow[maa]', varastopaikat.maa) maa, group_concat(tilausrivi.tunnus) rivit
+        $alvquery = "SELECT IF(ISNULL(varastopaikat.maa) or varastopaikat.maa='', '$yhtiorow[maa_vero]', varastopaikat.maa) maa, group_concat(tilausrivi.tunnus) rivit
                      FROM tilausrivi
                      LEFT JOIN varastopaikat ON (varastopaikat.yhtio =
                        IF(tilausrivi.var = 'S',

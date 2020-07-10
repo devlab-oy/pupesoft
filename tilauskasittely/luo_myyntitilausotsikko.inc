@@ -302,7 +302,8 @@ if (!function_exists("luo_myyntitilausotsikko")) {
                 JOIN yhtion_toimipaikat ON (
                   varastopaikat.yhtio=yhtion_toimipaikat.yhtio and
                   varastopaikat.toimipaikka=yhtion_toimipaikat.tunnus and
-                  yhtion_toimipaikat.vat_numero != ''
+                  yhtion_toimipaikat.vat_numero != '' and
+                  yhtion_toimipaikat.varastotoimipaikka != ''
                 )
                 WHERE varastopaikat.yhtio = '$kukarow[yhtio]'
                 and varastopaikat.tunnus = '$varasto'";
@@ -312,7 +313,7 @@ if (!function_exists("luo_myyntitilausotsikko")) {
         // Valitaan tämä toimipaikaksi
         $yhtiotoimipaikka = $varatoimirow['tunnus'];
 
-        if (strtoupper($yhtiotoimipaikka['maa']) != strtoupper($asiakasrow["maa"]) and
+        if (strtoupper($varatoimirow['maa']) != strtoupper($asiakasrow["maa"]) and
           strtoupper($yhtiorow['maa']) == strtoupper($asiakasrow["maa"]) and
           $asiakasrow["laji"] != 'H'
         ) {

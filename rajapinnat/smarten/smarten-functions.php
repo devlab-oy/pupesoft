@@ -365,7 +365,7 @@ if (!function_exists('smarten_outbounddelivery')) {
     }
     else {
       // Unifaun/Smarten only wants the first Email address if there's many...
-      $emaili = trim(array_shift(explode(',', $looprow['email'])));
+      $emaili = trim(array_shift(explode(',', $looprow['toim_email'])));
       $contactdata->addChild('EmailAddress', xml_cleanstring($emaili));
     }
 

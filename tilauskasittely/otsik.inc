@@ -1924,8 +1924,22 @@ if ($tila == "" and !isset($jatka)) {
     $oikea_sarake[$oikea] = "<td>".t("Alv").":</td>";
 
     if ($alv_velvollisuus != "") {
-      $oikea_sarake[$oikea] .= " <td>".t("Verollinen myynti (ulkomaan VAT)")."
-          <input type='hidden' name='alv' value='$alv'>
+      if (isset($srow)) {
+        if ($srow['alv'] == 0) {
+          $sel_veroton    = 'selected';
+          $sel_verollinen = '';
+        }
+        if ($srow['alv'] == $wtrow["selite"]) {
+          $sel_verollinen = 'selected';
+          $sel_veroton    = '';
+        }
+      }
+
+      $oikea_sarake[$oikea] .= "<td>
+          <select name='alv'>
+          <option value='$alv' $sel_verollinen>".t("Verollinen myynti (ulkomaan VAT)")."</option>
+          <option value='0' $sel_veroton>".t("Veroton myynti (ulkomaan VAT)")."</option>
+          </select>
           </td>";
     }
     elseif ($srow["vienti"] == '' or $asiarow["laji"] == "H") {

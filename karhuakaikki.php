@@ -17,12 +17,22 @@ require "inc/functions.inc";
 // Logitetaan ajo
 cron_log();
 
+// vain n‰in monta p‰iv‰‰ sitten er‰‰ntyneet
+// laskut huomioidaan n‰kym‰sss‰ - 3 koska 3-5 & 6-9
 if ($argv[2] != "") {
   $lpvm_aikaa = $argv[2];
 }
 
+// vain n‰in monta p‰iv‰‰ sitten karhutut
+// laskut huomioidaan n‰kym‰sss‰ - ma & to ja 3-5 & 6-9 -> ei niin v‰li‰ kunhan max 4?
 if ($argv[3] != "") {
   $kpvm_aikaa = $argv[3];
+}
+
+// maksimikarhuamisp‰iv‰t
+// maksimissaan n‰in monta p‰iv‰‰ sitten vanhentuneita viel‰ karhutaan automaattisesti
+if ($argv[3] != "") {
+  $maxpvm_aikaa = $argv[4];
 }
 
 $query    = "SELECT * from kuka where kuka='$argv[1]' limit 1";

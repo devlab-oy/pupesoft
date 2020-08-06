@@ -18,6 +18,8 @@ if (!isset($lpvm_aikaa)) {
   $lpvm_aikaa = 7;
 }
 
+// maksimi päivät == 9 ja kutsuja == karhuakaikki on setattu - croniajo
+
 // näin monta kertaa karhutun jälkeen ehdotetaan asiakkaalle myyntikieltoa
 if (!isset($karhu_kertaa_myyntikielto)) {
   $karhu_kertaa_myyntikielto = 2;
@@ -168,6 +170,23 @@ if ($tee == "ALOITAKARHUAMINEN") {
     $maa_lisa = "and lasku.maa = '$lasku_maa'";
   }
 
+  $kommenttirajausrajaus = "";
+  $asiakasrajaus = "";
+
+  if ($karhuakaikki != "") {
+    // karhuakaikki on setattu eli tullaan automatiikasta, tehdään kommenttirajaus
+    $aresult = t_avainsana("KRHAUTOESTO");
+
+    while ($arow = mysql_fetch_assoc($aresult)) {
+      $kommenttirajausrajaus = "AND lasku.comments NOT LIKE '%{$arow["selite"]}%'";
+      //rajattava kommentti $arow["selite"]
+    }
+
+    // tehdään myös asiakasrajaus
+    $asiakasrajaus = "AND asiakas. = ''"; // TODO asiakkaan taakse uusi kenttä!
+
+  }
+
   $query = "SELECT asiakas.ytunnus,
             IF(asiakas.laskutus_nimi != '' and (asiakas.maksukehotuksen_osoitetiedot = 'B' or ('{$yhtiorow['maksukehotuksen_osoitetiedot']}' = 'K' and asiakas.maksukehotuksen_osoitetiedot = '')),
                 concat(asiakas.laskutus_nimi, asiakas.laskutus_nimitark, asiakas.laskutus_osoite, asiakas.laskutus_postino, asiakas.laskutus_postitp),
@@ -196,11 +215,13 @@ if ($tee == "ALOITAKARHUAMINEN") {
             WHERE lasku.tunnus     = laskut.tunnus
             $konslisa
             $asiakaslisa
+            $asiakasrajaus
             GROUP BY asiakas.ytunnus, asiakastiedot
             HAVING karhuttava_summa > 0
             ORDER BY asiakas.ytunnus";
   $result = pupe_query($query);
-
+  echo "205 Q $query <br><br>";
+  #exit;
   if (mysql_num_rows($result) > 0) {
     $karhuttavat = array();
     unset($pdf);
@@ -270,7 +291,7 @@ if ($tee == 'KARHUA') {
             GROUP BY lasku.tunnus
             ORDER BY lasku.erpcm";
   $result = pupe_query($query);
-
+  echo "275 Q $query <br><br>";
   //otetaan asiakastiedot ekalta laskulta
   $asiakastiedot = mysql_fetch_assoc($result);
 

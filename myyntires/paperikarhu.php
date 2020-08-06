@@ -692,35 +692,46 @@ if (!$kaatosumma) $kaatosumma = '0.00';
 if (!isset($karhuviesti)) {
 
   //  Lasketaan kuinka vanhoja laskuja t‰ss‰ karhutaan
-  $query = "SELECT count(*) kpl
+  $query = "SELECT 
+              count(*) AS kpl,
+              max(count(*)) AS max
             FROM karhu_lasku
             WHERE ltunnus IN ($ltunnukset)
             GROUP BY ltunnus";
   $res = pupe_query($query);
   $r = 0;
-
+  $max = 0;
+  echo "701 Q $query <br><br>";
   while ($a = mysql_fetch_assoc($res)) {
     $r += $a["kpl"];
+    $max = $a["max"]
   }
 
-  //  T‰m‰ on mik‰ on karhujen keskim‰‰r‰inen kierroskerta
-  $avg = floor(($r/mysql_num_rows($res))+1);
+  if (isset($karhuakaikki)) {
+    $viesti_jarj = $max;
+  }
+  else {
+    //  T‰m‰ on mik‰ on karhujen keskim‰‰r‰inen kierroskerta
+    $avg = floor(($r/mysql_num_rows($res))+1);
 
-  if ($tee_pdf == 'tulosta_karhu') {
-    $avg--;
+    if ($tee_pdf == 'tulosta_karhu') {
+      $avg--;
+    }
+
+    $viesti_jarj = $avg;
   }
 
   // Etsit‰‰n asiakkaan kielell‰:
   $query = "SELECT tunnus
             FROM avainsana
-            WHERE yhtio ='{$yhtiorow['yhtio']}' and laji = 'KARHUVIESTI' and jarjestys = '$avg' and kieli = '$kieli'";
+            WHERE yhtio ='{$yhtiorow['yhtio']}' and laji = 'KARHUVIESTI' and jarjestys = '$viesti_jarj' and kieli = '$kieli'";
   $res = pupe_query($query);
 
   if (mysql_num_rows($res) == 0) {
 
     $query = "SELECT tunnus
               FROM avainsana
-              WHERE yhtio ='{$yhtiorow['yhtio']}' and laji = 'KARHUVIESTI' and jarjestys < '$avg' and kieli = '$kieli'
+              WHERE yhtio ='{$yhtiorow['yhtio']}' and laji = 'KARHUVIESTI' and jarjestys < '$viesti_jarj' and kieli = '$kieli'
               ORDER BY jarjestys DESC
               LIMIT 1";
     $res = pupe_query($query);
@@ -729,7 +740,7 @@ if (!isset($karhuviesti)) {
 
       $query = "SELECT tunnus
                 FROM avainsana
-                WHERE yhtio ='{$yhtiorow['yhtio']}' and laji = 'KARHUVIESTI' and jarjestys > '$avg' and kieli = '$kieli'
+                WHERE yhtio ='{$yhtiorow['yhtio']}' and laji = 'KARHUVIESTI' and jarjestys > '$viesti_jarj' and kieli = '$kieli'
                 ORDER BY jarjestys ASC
                 LIMIT 1";
       $res = pupe_query($query);
@@ -740,14 +751,14 @@ if (!isset($karhuviesti)) {
   if (mysql_num_rows($res) == 0) {
     $query = "SELECT tunnus
               FROM avainsana
-              WHERE yhtio ='{$yhtiorow['yhtio']}' and laji = 'KARHUVIESTI' and jarjestys = '$avg' and kieli = '$yhtiorow[kieli]'";
+              WHERE yhtio ='{$yhtiorow['yhtio']}' and laji = 'KARHUVIESTI' and jarjestys = '$viesti_jarj' and kieli = '$yhtiorow[kieli]'";
     $res = pupe_query($query);
 
     if (mysql_num_rows($res) == 0) {
 
       $query = "SELECT tunnus
                 FROM avainsana
-                WHERE yhtio ='{$yhtiorow['yhtio']}' and laji = 'KARHUVIESTI' and jarjestys < '$avg' and kieli = '$yhtiorow[kieli]'
+                WHERE yhtio ='{$yhtiorow['yhtio']}' and laji = 'KARHUVIESTI' and jarjestys < '$viesti_jarj' and kieli = '$yhtiorow[kieli]'
                 ORDER BY jarjestys DESC
                 LIMIT 1";
       $res = pupe_query($query);
@@ -756,7 +767,7 @@ if (!isset($karhuviesti)) {
 
         $query = "SELECT tunnus
                   FROM avainsana
-                  WHERE yhtio ='{$yhtiorow['yhtio']}' and laji = 'KARHUVIESTI' and jarjestys > '$avg' and kieli = '$yhtiorow[kieli]'
+                  WHERE yhtio ='{$yhtiorow['yhtio']}' and laji = 'KARHUVIESTI' and jarjestys > '$viesti_jarj' and kieli = '$yhtiorow[kieli]'
                   ORDER BY jarjestys ASC
                   LIMIT 1";
         $res = pupe_query($query);

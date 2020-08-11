@@ -10,6 +10,7 @@ echo "<font class='head'>", t("Synkronoi tuotteet ulkoiseen järjestelmään"), "</
 if (empty($ulkoinen_jarjestelma)) {
   echo "<form action='' method='post'>";
   echo "<table>";
+
   echo "<tr>";
   echo "<th>", t("Valitse ulkoinen järjestelmä"), "</th>";
   echo "<td>";
@@ -17,15 +18,36 @@ if (empty($ulkoinen_jarjestelma)) {
   echo "<option value='S'>Smarten</option>";
   echo "</select>";
   echo "</td>";
+  echo "<td class='back'>";
+  echo "</td>";
+  echo "</tr>";
+
+  echo "<tr>";
+  echo "<th>", t("Tyyppi"), "</th>";
   echo "<td>";
+  echo "<select name='lahetystyyppi'>";
+  echo "<option value='U'>".t("Uudet tuotteet")."</option>";
+  echo "<option value='K'>".t("Kaikki tuotteet. Vain omaan sähköpostiin")."</option>";
+  echo "</select>";
+  echo "</td>";
+  echo "<td class='back'>";
   echo "<button type='submit'>", t("Lähetä"), "</button>";
   echo "</td>";
   echo "</tr>";
+
   echo "</table>";
   echo "</form>";
 
   require "inc/footer.inc";
   exit;
+}
+
+$havinglisa = "";
+
+if ($lahetystyyppi == "U") {
+  $havinglisa = " HAVING (ta.tunnus IS NOT NULL AND ta.selite = '') OR
+                  # jos avainsanaa ei ole olemassa ja status P niin ei haluta näitä tuotteita jatkossakaan
+                  (ta.tunnus IS NULL AND tuote.status != 'P')";
 }
 
 $query = "SELECT tuote.*, ta.selite AS synkronointi, ta.tunnus AS ta_tunnus
@@ -37,9 +59,7 @@ $query = "SELECT tuote.*, ta.selite AS synkronointi, ta.tunnus AS ta_tunnus
           AND tuote.tuoteno != ''
           and (tuote.status not in ('P','X') or (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) > 0)
           GROUP BY tuoteno
-          HAVING (ta.tunnus IS NOT NULL AND ta.selite = '') OR
-                  # jos avainsanaa ei ole olemassa ja status P niin ei haluta näitä tuotteita jatkossakaan
-                 (ta.tunnus IS NULL AND tuote.status != 'P')";
+          {$havinglisa}";
 $res = pupe_query($query);
 
 if (mysql_num_rows($res) > 0) {
@@ -50,6 +70,7 @@ if (mysql_num_rows($res) > 0) {
 
     echo "<form action='' method='post'>";
     echo "<input type='hidden' name='ulkoinen_jarjestelma' value='{$ulkoinen_jarjestelma}' />";
+    echo "<input type='hidden' name='lahetystyyppi' value='{$lahetystyyppi}' />";
     echo "<table>";
     echo "<tr><td class='back' colspan='2'>";
     echo "<input type='submit' name='tee' value='", t("Lähetä"), "' />";
@@ -147,7 +168,6 @@ if (mysql_num_rows($res) > 0) {
   }
 
   while ($row = mysql_fetch_assoc($res)) {
-
     if ($tee == '') {
       echo "<tr>";
       echo "<td>{$row['tuoteno']}</td>";
@@ -255,6 +275,30 @@ if (mysql_num_rows($res) > 0) {
       $worksheet->writeString($excelrivi, $excelsarake++, "" /*"TsooniId"*/);
       $worksheet->writeString($excelrivi, $excelsarake++, "" /*"Yhikugrupp"*/);
       $worksheet->writeString($excelrivi, $excelsarake++, "" /*"YhikugruppKompl"*/);
+
+      if ($lahetystyyppi == "U") {
+        if (is_null($row['synkronointi'])) {
+          $query = "INSERT INTO tuotteen_avainsanat SET
+                    yhtio      = '{$kukarow['yhtio']}',
+                    tuoteno    = '{$row['tuoteno']}',
+                    kieli      = '{$yhtiorow['kieli']}',
+                    laji       = 'synkronointi',
+                    selite     = 'x',
+                    laatija    = '{$kukarow['kuka']}',
+                    luontiaika = now(),
+                    muutospvm  = now(),
+                    muuttaja   = '{$kukarow['kuka']}'";
+          pupe_query($query);
+        }
+        else {
+          $query = "UPDATE tuotteen_avainsanat SET
+                    selite      = 'x'
+                    WHERE yhtio = '{$kukarow['yhtio']}'
+                    AND tuoteno = '{$row['tuoteno']}'
+                    AND laji    = 'synkronointi'";
+          pupe_query($query);
+        }
+      }
     }
   }
 
@@ -271,14 +315,20 @@ if (mysql_num_rows($res) > 0) {
   }
   else {
 
+    $smartmail = $smarten['product_email'];
+
+    if ($lahetystyyppi == "K") {
+      $smartmail = $kukarow['eposti'];
+    }
+
     // Smarten tuotedatasähköpostit löytyy parametrist
-    if (empty($smarten['product_email'])) {
+    if (empty($smartmail)) {
       echo "<font class='error'>", t("Smarten sähköpostiosoitetta ei löydy"), "!</font><br />";
     }
     else {
       // Sähköpostin lähetykseen parametrit
       $parametri = array(
-        "to" => $smarten['product_email'],
+        "to" => $smartmail,
         "cc" => "",
         "subject" => t("Smarten Product Catalogue"),
         "ctype" => "text",
@@ -292,11 +342,13 @@ if (mysql_num_rows($res) > 0) {
         )
       );
       $boob = pupesoft_sahkoposti($parametri);
+
+      echo "<font class='message'>", t("Smarten tuoteluettelo lähetetty osoitteeseen"), ": {$smartmail}</font><br />";
     }
   }
 }
 else {
-  echo "<font class='message'>", t("Kaikki tuotteet ovat synkronoitu"), "</font><br />";
+  echo "<font class='message'>", t("Kaikki tuotteet synkronoitu"), "!</font><br />";
 }
 
 require "inc/footer.inc";

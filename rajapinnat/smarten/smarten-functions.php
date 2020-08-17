@@ -326,6 +326,19 @@ if (!function_exists('smarten_outbounddelivery')) {
       }
     }
 
+    # Varastosiirrot
+    if ($looprow['tila'] == 'G') {
+      $query = "SELECT email, puhelin
+                FROM varastopaikat
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND tunnus = '{$looprow['clearing']}'";
+      $vvarres = pupe_query($query);
+      $vvarrow = mysql_fetch_assoc($vvarres);
+
+      $looprow['toim_puh'] = $vvarrow['puhelin'];
+      $looprow['toim_email'] = $vvarrow['email'];
+    }
+
     # Rakennetaan XML
     $xml = simplexml_load_string("<?xml version='1.0' encoding='UTF-8'?><E-Document></E-Document>");
 
@@ -357,7 +370,7 @@ if (!function_exists('smarten_outbounddelivery')) {
 
     $contactdata->addChild("PhoneNum", "");
     $contactdata->addChild("MobileNum", xml_cleanstring($looprow['toim_puh']));
-    
+
     if ($looprow['toim_email'] == '') {
       // Unifaun/Smarten only wants the first Email address if there's many...
       $emaili = trim(array_shift(explode(',', $looprow['email'])));

@@ -108,6 +108,13 @@ if ($tee == 'TOIMINNOT') {
   $fres = pupe_query($query);
   $frow = mysql_fetch_assoc($fres);
 
+  $avainsana = (int) t_avainsana("FACT_START", '', "AND selite = '{$factoring_id}'", '', '', "selitetark");
+
+  $lisahaku = "";
+  if (!empty($avainsana)) {
+    $lisahaku = " AND lasku.laskunro > $avainsana ";
+  }
+
   $query = "SELECT min(laskunro) eka, max(laskunro) vika
             FROM lasku use index (yhtio_tila_tapvm)
             JOIN maksuehto ON (lasku.yhtio = maksuehto.yhtio
@@ -116,18 +123,13 @@ if ($tee == 'TOIMINNOT') {
             WHERE lasku.yhtio                = '$kukarow[yhtio]'
             and lasku.tila                   = 'U'
             and lasku.tapvm                  > date_sub(CURDATE(), interval 6 month)
+            {$lisahaku}
             and lasku.alatila                = 'X'
             and lasku.summa                 != 0
             and lasku.factoringsiirtonumero  = 0
             and lasku.valkoodi               = '$frow[valkoodi]'";
   $aresult = pupe_query($query);
   $arow = mysql_fetch_assoc($aresult);
-
-  $query = "SELECT nimi, tunnus
-            FROM valuu
-            WHERE yhtio = '$kukarow[yhtio]'
-            ORDER BY jarjestys";
-  $vresult = pupe_query($query);
 
   echo "<tr><th>Sopimusnumero:</th><td>$frow[sopimusnumero]</td>";
   echo "<tr><th>Valuutta:</th><td>$frow[valkoodi]</td></tr>";

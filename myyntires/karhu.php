@@ -172,18 +172,23 @@ if ($tee == "ALOITAKARHUAMINEN") {
 
   $kommenttirajausrajaus = "";
   $asiakasrajaus = "";
+  $max_pvm_ehto = "";
 
   if ($karhuakaikki != "") {
     // karhuakaikki on setattu eli tullaan automatiikasta, tehdään kommenttirajaus
     $aresult = t_avainsana("KRHAUTOESTO");
 
     while ($arow = mysql_fetch_assoc($aresult)) {
-      $kommenttirajausrajaus = "AND lasku.comments NOT LIKE '%{$arow["selite"]}%'";
+      $kommenttirajausrajaus .= "AND lasku.comments NOT LIKE '%{$arow["selite"]}%'";
       //rajattava kommentti $arow["selite"]
     }
 
-    // tehdään myös asiakasrajaus
-    $asiakasrajaus = "AND asiakas. = ''"; // TODO asiakkaan taakse uusi kenttä!
+    // tehdään myös asiakasrajaus asiakkaan_avainsanat_laji = ASIAKAS_KRHAUTOESTO
+    $asiakasrajaus = "AND asiakkaan_avainsanat.tunnus IS NULL";
+
+    if (isset($maxpvm_aikaa)) {
+      $max_pvm_ehto = "and lasku.erpcm >= date_sub(now(), interval $maxpvm_aikaa day)";
+    }
 
   }
 
@@ -205,13 +210,18 @@ if ($tee == "ALOITAKARHUAMINEN") {
                 WHERE lasku.yhtio  = '$kukarow[yhtio]'
                 and lasku.tila     = 'U'
                 and lasku.mapvm    = '0000-00-00'
-                and (lasku.erpcm < date_sub(now(), interval $lpvm_aikaa day) or lasku.summa < 0)
+                and (lasku.erpcm <= date_sub(now(), interval $lpvm_aikaa day) or lasku.summa < 0)
+                $max_pvm_ehto
+                $kommenttirajausrajaus
                 and lasku.summa   != 0
                 $maksuehtolista
                 $maa_lisa
                 GROUP BY lasku.tunnus
                 HAVING (kpvm is null or kpvm < date_sub(now(), interval $kpvm_aikaa day))) as laskut
-            JOIN asiakas ON lasku.yhtio=asiakas.yhtio and lasku.liitostunnus=asiakas.tunnus
+            JOIN asiakas ON lasku.yhtio = asiakas.yhtio and lasku.liitostunnus = asiakas.tunnus
+            LEFT JOIN asiakkaan_avainsanat ON (asiakkaan_avainsanat.yhtio = lasku.yhtio 
+              AND asiakkaan_avainsanat.liitostunnus = asiakas.tunnus
+              AND asiakkaan_avainsanat.laji = 'ASIAKAS_KRHAUTOESTO')
             WHERE lasku.tunnus     = laskut.tunnus
             $konslisa
             $asiakaslisa
@@ -220,8 +230,7 @@ if ($tee == "ALOITAKARHUAMINEN") {
             HAVING karhuttava_summa > 0
             ORDER BY asiakas.ytunnus";
   $result = pupe_query($query);
-  echo "205 Q $query <br><br>";
-  #exit;
+
   if (mysql_num_rows($result) > 0) {
     $karhuttavat = array();
     unset($pdf);
@@ -291,7 +300,7 @@ if ($tee == 'KARHUA') {
             GROUP BY lasku.tunnus
             ORDER BY lasku.erpcm";
   $result = pupe_query($query);
-  echo "275 Q $query <br><br>";
+
   //otetaan asiakastiedot ekalta laskulta
   $asiakastiedot = mysql_fetch_assoc($result);
 

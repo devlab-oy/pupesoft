@@ -31,7 +31,7 @@ if ($argv[3] != "") {
 
 // maksimikarhuamisp‰iv‰t
 // maksimissaan n‰in monta p‰iv‰‰ sitten vanhentuneita viel‰ karhutaan automaattisesti
-if ($argv[3] != "") {
+if ($argv[4] != "") {
   $maxpvm_aikaa = $argv[4];
 }
 

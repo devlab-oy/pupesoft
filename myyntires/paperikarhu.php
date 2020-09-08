@@ -693,22 +693,28 @@ if (!isset($karhuviesti)) {
 
   //  Lasketaan kuinka vanhoja laskuja tässä karhutaan
   $query = "SELECT 
-              count(*) AS kpl,
-              max(count(*)) AS max
+              count(*) AS kpl
             FROM karhu_lasku
             WHERE ltunnus IN ($ltunnukset)
             GROUP BY ltunnus";
   $res = pupe_query($query);
   $r = 0;
   $max = 0;
-  echo "701 Q $query <br><br>";
+
   while ($a = mysql_fetch_assoc($res)) {
     $r += $a["kpl"];
-    $max = $a["max"]
   }
 
   if (isset($karhuakaikki)) {
-    $viesti_jarj = $max;
+    // laskutustiedoissa on järjestetty eräpäivämäärän mukaan rivit 
+    // -> vanhin tulee eka 
+    // -> joten saadaan suoraan ekan iäistä vanhimman ikä!
+    if ($laskutiedot["ika"] <= 5) {
+      $viesti_jarj = 1;
+    }
+    else {
+      $viesti_jarj = 2;
+    }
   }
   else {
     //  Tämä on mikä on karhujen keskimääräinen kierroskerta
@@ -881,9 +887,9 @@ if ($yhtiorow["verkkolasku_lah"] == "maventa" and $_REQUEST['maventa_laheta'] ==
   }
 
   // Testaus
-  //$client = new SoapClient('https://testing.maventa.com/apis/bravo/wsdl');
+  $client = new SoapClient('https://testing.maventa.com/apis/bravo/wsdl');
   // Tuotanto
-  $client = new SoapClient('https://secure.maventa.com/apis/bravo/wsdl/');
+  #$client = new SoapClient('https://secure.maventa.com/apis/bravo/wsdl/');
 
   if ($yhtiorow["finvoice_versio"] == "2") {
     require "tilauskasittely/verkkolasku_finvoice_201.inc";

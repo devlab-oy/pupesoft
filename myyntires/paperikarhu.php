@@ -707,7 +707,8 @@ if (!isset($karhuviesti)) {
     // laskutustiedoissa on järjestetty eräpäivämäärän mukaan rivit 
     // -> vanhin tulee eka 
     // -> joten saadaan suoraan ekan iäistä vanhimman ikä!
-    if ($laskutiedot["ika"] <= 5) {
+
+    if ($laskutiedot["ika"] <= $ekaviesti_takaraja) {
       $viesti_jarj = 1;
     }
     else {

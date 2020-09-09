@@ -170,7 +170,7 @@ if ($tee == "ALOITAKARHUAMINEN") {
 
   $kommenttirajausrajaus = "";
   $asiakasrajaus = "";
-  $max_pvm_ehto = "";
+  $pvm_ehto = "";
 
   if ($karhuakaikki != "") {
     // karhuakaikki on setattu eli tullaan automatiikasta, tehdään kommenttirajaus
@@ -185,9 +185,12 @@ if ($tee == "ALOITAKARHUAMINEN") {
     $asiakasrajaus = "AND asiakkaan_avainsanat.tunnus IS NULL";
 
     if (isset($maxpvm_aikaa)) {
-      $max_pvm_ehto = "and lasku.erpcm >= date_sub(now(), interval $maxpvm_aikaa day)";
+      $pvm_ehto = "(lasku.erpcm <= date_sub(now(), interval $lpvm_aikaa day) and lasku.erpcm >= date_sub(now(), interval $maxpvm_aikaa day))";
     }
 
+  }
+  else {
+    $pvm_ehto = "(lasku.erpcm <= date_sub(now(), interval $lpvm_aikaa day))";
   }
 
   $query = "SELECT asiakas.ytunnus,
@@ -208,8 +211,7 @@ if ($tee == "ALOITAKARHUAMINEN") {
                 WHERE lasku.yhtio  = '$kukarow[yhtio]'
                 and lasku.tila     = 'U'
                 and lasku.mapvm    = '0000-00-00'
-                and (lasku.erpcm <= date_sub(now(), interval $lpvm_aikaa day) or lasku.summa < 0)
-                $max_pvm_ehto
+                and ($pvm_ehto or lasku.summa < 0)
                 $kommenttirajausrajaus
                 and lasku.summa   != 0
                 $maksuehtolista

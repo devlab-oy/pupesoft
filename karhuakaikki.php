@@ -17,6 +17,7 @@ require "inc/functions.inc";
 // Logitetaan ajo
 cron_log();
 
+// HUOM! kaikki ajolle annettavat parametrit ovat pakollisia!
 // vain n‰in monta p‰iv‰‰ sitten er‰‰ntyneet
 if ($argv[2] != "") {
   $lpvm_aikaa = $argv[2];
@@ -31,6 +32,11 @@ if ($argv[3] != "") {
 // maksimissaan n‰in monta p‰iv‰‰ sitten vanhentuneita viel‰ karhutaan automaattisesti
 if ($argv[4] != "") {
   $maxpvm_aikaa = $argv[4];
+}
+
+// ensimm‰isen viestin l‰hetyksen takaraja
+if ($argv[5] != "") {
+  $ekaviesti_takaraja = $argv[5];
 }
 
 $query    = "SELECT * from kuka where kuka='$argv[1]' limit 1";

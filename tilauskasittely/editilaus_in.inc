@@ -1739,6 +1739,9 @@ while ($tietue = fgets($fd)) {
           }
         }
       }
+      elseif (!empty($editilausvarasto)) {
+        $varasto = $editilausvarasto;
+      }
 
       if ($yhtiorow['myyntitilaus_osatoimitus'] == 'E') {
         $editilaus_osatoimitus = 'o';

@@ -692,14 +692,12 @@ if (!$kaatosumma) $kaatosumma = '0.00';
 if (!isset($karhuviesti)) {
 
   //  Lasketaan kuinka vanhoja laskuja tässä karhutaan
-  $query = "SELECT 
-              count(*) AS kpl
+  $query = "SELECT count(*) AS kpl
             FROM karhu_lasku
             WHERE ltunnus IN ($ltunnukset)
             GROUP BY ltunnus";
   $res = pupe_query($query);
   $r = 0;
-  $max = 0;
 
   while ($a = mysql_fetch_assoc($res)) {
     $r += $a["kpl"];
@@ -887,9 +885,9 @@ if ($yhtiorow["verkkolasku_lah"] == "maventa" and $_REQUEST['maventa_laheta'] ==
   }
 
   // Testaus
-  $client = new SoapClient('https://testing.maventa.com/apis/bravo/wsdl');
+  //$client = new SoapClient('https://testing.maventa.com/apis/bravo/wsdl');
   // Tuotanto
-  #$client = new SoapClient('https://secure.maventa.com/apis/bravo/wsdl/');
+  $client = new SoapClient('https://secure.maventa.com/apis/bravo/wsdl/');
 
   if ($yhtiorow["finvoice_versio"] == "2") {
     require "tilauskasittely/verkkolasku_finvoice_201.inc";

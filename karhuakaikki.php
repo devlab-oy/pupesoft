@@ -18,13 +18,11 @@ require "inc/functions.inc";
 cron_log();
 
 // vain näin monta päivää sitten erääntyneet
-// laskut huomioidaan näkymässsä - 3 koska 3-5 & 6-9
 if ($argv[2] != "") {
   $lpvm_aikaa = $argv[2];
 }
 
 // vain näin monta päivää sitten karhutut
-// laskut huomioidaan näkymässsä - ma & to ja 3-5 & 6-9 -> ei niin väliä kunhan max 4?
 if ($argv[3] != "") {
   $kpvm_aikaa = $argv[3];
 }

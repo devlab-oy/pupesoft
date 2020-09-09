@@ -18,8 +18,6 @@ if (!isset($lpvm_aikaa)) {
   $lpvm_aikaa = 7;
 }
 
-// maksimi päivät == 9 ja kutsuja == karhuakaikki on setattu - croniajo
-
 // näin monta kertaa karhutun jälkeen ehdotetaan asiakkaalle myyntikieltoa
 if (!isset($karhu_kertaa_myyntikielto)) {
   $karhu_kertaa_myyntikielto = 2;

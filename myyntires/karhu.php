@@ -177,6 +177,7 @@ if ($tee == "ALOITAKARHUAMINEN") {
     $aresult = t_avainsana("KRHAUTOESTO");
 
     while ($arow = mysql_fetch_assoc($aresult)) {
+      $arow["selite"] = mysql_real_escape_string($arow["selite"]);
       $kommenttirajausrajaus .= "AND lasku.comments NOT LIKE '%{$arow["selite"]}%'";
       //rajattava kommentti $arow["selite"]
     }
@@ -221,7 +222,8 @@ if ($tee == "ALOITAKARHUAMINEN") {
             JOIN asiakas ON lasku.yhtio = asiakas.yhtio and lasku.liitostunnus = asiakas.tunnus
             LEFT JOIN asiakkaan_avainsanat ON (asiakkaan_avainsanat.yhtio = lasku.yhtio 
               AND asiakkaan_avainsanat.liitostunnus = asiakas.tunnus
-              AND asiakkaan_avainsanat.laji = 'ASIAKAS_KRHAUTOESTO')
+              AND asiakkaan_avainsanat.laji = 'ASIAKAS_KRHAUTOESTO'
+              AND asiakkaan_avainsanat.avainsana = 'STOP')
             WHERE lasku.tunnus     = laskut.tunnus
             $konslisa
             $asiakaslisa
@@ -258,6 +260,7 @@ if ($tee == "KARHUAKAIKKI") {
     try {
       // koitetaan l‰hett‰‰ eKirje sek‰ tulostaa
       require 'paperikarhu.php';
+      unlink($pdffilenimi);
     }
     catch (Exception $e) {
       $ekarhu_success = false;

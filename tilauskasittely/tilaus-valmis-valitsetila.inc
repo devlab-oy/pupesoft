@@ -377,6 +377,16 @@ elseif ($kerattavia > 0 and $kutsuja != 'keraa.php' and !$tilaus_toimitetuksi) {
     $alatila = 'D';
   }
 
+  if ($kutsuja == "EDITILAUS") {
+    $uusi_tila = t_avainsana("EDITIL_TILA", '', '', '', '', "selite");
+    $uusi_alatila = t_avainsana("EDITIL_TILA", '', '', '', '', "selitetark");
+
+    if (!empty($uusi_tila)) {
+      $tila = $uusi_tila;
+      $alatila = $uusi_alatila;
+    }
+  }
+
   // Jos yhtiön parametreissä on keräyserät A tarkistetaan asiakkaan takaa
   if ($yhtiorow['kerayserat'] == 'A') {
     // Haetaan kerayseratieto asiakkaan takaa

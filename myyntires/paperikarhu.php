@@ -711,8 +711,11 @@ if (!isset($karhuviesti)) {
     if ($laskutiedot["ika"] <= $ekaviesti_takaraja) {
       $viesti_jarj = 1;
     }
-    else {
+    elseif ($laskutiedot["ika"] <= $tokaviesti_takaraja) {
       $viesti_jarj = 2;
+    }
+    else {
+      $viesti_jarj = 3;
     }
   }
   else {
@@ -1123,6 +1126,57 @@ if (isset($_POST['ekirje_laheta']) === false and $tee_pdf != 'tulosta_karhu' and
 
     if (pupesoft_sahkoposti($params)) {
       echo t("Maksukehotus lähetetään osoitteeseen").": {$_REQUEST['karhu_email']}...\n<br>";
+
+      if (!empty($sahkoposti_cc)) {
+        echo t("Maksukehotuskopio lähetetään myös osoitteeseen").": {$sahkoposti_cc}...\n<br>";
+      }
+    }
+  }
+  elseif (isset($karhuakaikki)) {
+    if (!empty($yhtiorow['maksukehotus_cc_email'])) {
+      $asiakkaan_nimi = trim($asiakastiedot['nimi']." ".$asiakastiedot['nimitark']);
+      $asiakkaan_nimi = poista_osakeyhtio_lyhenne($asiakkaan_nimi);
+      $asiakkaan_nimi = trim(pupesoft_csvstring($asiakkaan_nimi));
+      $newfilename = t("Maksukehotus")." - ".date("Ymd")." - ".$laskutiedot['laskunro']." - ".$asiakkaan_nimi.".pdf";
+      $sahkoposti_cc = $yhtiorow['maksukehotus_cc_email'];
+    }
+    else {
+      $newfilename = $pdffilenimi;
+      $sahkoposti_cc = "";
+    }
+
+    $valittu_email = '';
+
+    if (!empty($asiakastiedot['talhal_email'])) {
+      $valittu_email = $asiakastiedot['talhal_email'];
+      echo "Lähetettiin asiakkaan talhal_email osoitteeseen. \n\n";
+    }
+    elseif (!empty($asiakastiedot['lasku_email'])) {
+      $valittu_email = $asiakastiedot['lasku_email'];
+      echo "Lähetettiin asiakkaan lasku_email osoitteeseen. \n\n";
+    }
+    else {
+      $valittu_email = $asiakastiedot['email'];
+      echo "Lähetettiin asiakkaan email osoitteeseen. \n\n";
+    }
+
+    $pathinfo = pathinfo($pdffilenimi);
+    $params = array(
+      "to"     => $valittu_email,
+      "cc" => $sahkoposti_cc,
+      "subject"  => t("Maksukehotus", $kieli),
+      "ctype"    => "text",
+      "body" => $karhuviesti."\n\n".$yhteyshenkiloteksti."\n\n\n",
+      "attachements" => array(0   => array(
+          "filename"    => $pdffilenimi,
+          "newfilename"  => $newfilename,
+          "ctype"      => $pathinfo['extension'],
+        )
+      )
+    );
+
+    if (pupesoft_sahkoposti($params)) {
+      echo t("Maksukehotus lähetetään osoitteeseen").": {$valittu_email}...\n<br>";
 
       if (!empty($sahkoposti_cc)) {
         echo t("Maksukehotuskopio lähetetään myös osoitteeseen").": {$sahkoposti_cc}...\n<br>";

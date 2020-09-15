@@ -28,15 +28,16 @@ if ($argv[3] != "") {
   $kpvm_aikaa = $argv[3];
 }
 
-// maksimikarhuamisp‰iv‰t
-// maksimissaan n‰in monta p‰iv‰‰ sitten vanhentuneita viel‰ karhutaan automaattisesti
+// ensimm‰isen viestin l‰hetyksen takaraja
+// mihin saakka l‰hetet‰‰n karhuviesti 1
 if ($argv[4] != "") {
-  $maxpvm_aikaa = $argv[4];
+  $ekaviesti_takaraja = $argv[4];
 }
 
-// ensimm‰isen viestin l‰hetyksen takaraja
+// toisen viestin l‰hetyksen takaraja
+// mihin saakka l‰hetet‰‰n karhuviesti 2
 if ($argv[5] != "") {
-  $ekaviesti_takaraja = $argv[5];
+  $tokaviesti_takaraja = $argv[5];
 }
 
 $query    = "SELECT * from kuka where kuka='$argv[1]' limit 1";

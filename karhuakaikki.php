@@ -22,10 +22,16 @@ cron_log();
 if ($argv[2] != "") {
   $lpvm_aikaa = $argv[2];
 }
+else {
+  $lpvm_aikaa = 3;
+}
 
 // vain n‰in monta p‰iv‰‰ sitten karhutut
 if ($argv[3] != "") {
   $kpvm_aikaa = $argv[3];
+}
+else {
+  $kpvm_aikaa = 1;
 }
 
 // ensimm‰isen viestin l‰hetyksen takaraja
@@ -33,11 +39,17 @@ if ($argv[3] != "") {
 if ($argv[4] != "") {
   $ekaviesti_takaraja = $argv[4];
 }
+else {
+  $ekaviesti_takaraja = 5;
+}
 
 // toisen viestin l‰hetyksen takaraja
 // mihin saakka l‰hetet‰‰n karhuviesti 2
 if ($argv[5] != "") {
   $tokaviesti_takaraja = $argv[5];
+}
+else {
+  $tokaviesti_takaraja = 9;
 }
 
 $query    = "SELECT * from kuka where kuka='$argv[1]' limit 1";

@@ -6,6 +6,14 @@ if (isset($_REQUEST["tee"]) and $_REQUEST["tee"] == 'lataa_tiedosto') {
 
 require 'inc/parametrit.inc';
 
+if (empty($tee)) {
+  $tee = "";
+}
+
+if (empty($tee_u)) {
+  $tee_u = "";
+}
+
 if ($tee == "lataa_tiedosto") {
   readfile("dataout/".$filenimi);
   exit;
@@ -40,12 +48,7 @@ else {
 $factoring_tarkista_lisa = "";
 
 if ($tee == 'TARKISTA') {
-  if (strtoupper($valkoodi) != strtoupper($ed_valkoodi)) {
-    $tee = "";
-  }
-  else {
-    $tee = "TULOSTA";
-  }
+  $tee = "TULOSTA";
 
   // lisätään tämä queryyn alle, niin ei ikinä päästä eteenpäin, jos factoring_id on virheellinen
   $factoring_tarkista_lisa = " and tunnus = '$factoring_id' ";
@@ -97,20 +100,20 @@ if ($tee == 'TOIMINNOT') {
   echo "<input type='hidden' name='factoring_id' value='$factoring_id'>";
   echo "<input type='hidden' name='tee' value='TARKISTA'>";
 
-  if ($valkoodi == '') {
-    $valkoodi = $yhtiorow["valkoodi"];
-  }
-
-  echo "<input type='hidden' name='ed_valkoodi' value='$valkoodi'>";
-
   $query = "SELECT *
             FROM factoring
             WHERE yhtio        = '$kukarow[yhtio]'
             and factoringyhtio = '$factoringyhtio'
-            and tunnus         = '$factoring_id'
-            and valkoodi       = '$valkoodi'";
+            and tunnus         = '$factoring_id'";
   $fres = pupe_query($query);
   $frow = mysql_fetch_assoc($fres);
+
+  $avainsana = (int) t_avainsana("FACT_START", '', "AND selite = '{$factoring_id}'", '', '', "selitetark");
+
+  $lisahaku = "";
+  if (!empty($avainsana)) {
+    $lisahaku = " AND lasku.laskunro > $avainsana ";
+  }
 
   $query = "SELECT min(laskunro) eka, max(laskunro) vika
             FROM lasku use index (yhtio_tila_tapvm)
@@ -120,31 +123,16 @@ if ($tee == 'TOIMINNOT') {
             WHERE lasku.yhtio                = '$kukarow[yhtio]'
             and lasku.tila                   = 'U'
             and lasku.tapvm                  > date_sub(CURDATE(), interval 6 month)
+            {$lisahaku}
             and lasku.alatila                = 'X'
             and lasku.summa                 != 0
             and lasku.factoringsiirtonumero  = 0
-            and lasku.valkoodi               = '$valkoodi'";
+            and lasku.valkoodi               = '$frow[valkoodi]'";
   $aresult = pupe_query($query);
   $arow = mysql_fetch_assoc($aresult);
 
-  $query = "SELECT nimi, tunnus
-            FROM valuu
-            WHERE yhtio = '$kukarow[yhtio]'
-            ORDER BY jarjestys";
-  $vresult = pupe_query($query);
-
   echo "<tr><th>Sopimusnumero:</th><td>$frow[sopimusnumero]</td>";
-  echo "<tr><th>Valitse valuutta:</th><td><select name='valkoodi' onchange='submit();'>";
-
-  while ($vrow = mysql_fetch_assoc($vresult)) {
-    $sel="";
-    if ($vrow['nimi'] == $valkoodi) {
-      $sel = "selected";
-    }
-    echo "<option value = '$vrow[nimi]' $sel>$vrow[nimi]</option>";
-  }
-
-  echo "</select></td></tr>";
+  echo "<tr><th>Valuutta:</th><td>$frow[valkoodi]</td></tr>";
 
   echo "<tr>
       <th>Syötä laskuvälin alku:</th>
@@ -157,6 +145,9 @@ if ($tee == 'TOIMINNOT') {
 
   $query = "SELECT max(factoringsiirtonumero)+1 seuraava
             FROM lasku use index (yhtio_tila_tapvm)
+            JOIN maksuehto ON (lasku.yhtio = maksuehto.yhtio
+              and lasku.maksuehto            = maksuehto.tunnus
+              and maksuehto.factoring_id     = '$factoring_id')
             WHERE lasku.yhtio                = '$kukarow[yhtio]'
             and lasku.tila                   = 'U'
             and lasku.tapvm                  > date_sub(CURDATE(), interval 6 month)
@@ -165,6 +156,10 @@ if ($tee == 'TOIMINNOT') {
             and lasku.factoringsiirtonumero  > 0";
   $aresult = pupe_query($query);
   $arow = mysql_fetch_assoc($aresult);
+
+  if (empty($arow["seuraava"])) {
+    $arow["seuraava"] = 1;
+  }
 
   echo "<tr><th>Siirtoluettelon numero:</th>
       <td><input type='text' name='factoringsiirtonumero' value='$arow[seuraava]' size='6'></td>";
@@ -182,39 +177,16 @@ if ($tee == 'TOIMINNOT') {
   echo "<input type='hidden' name='tee' value='TARKISTA'>";
   echo "<input type='hidden' name='tee_u' value='UUDELLEENLUO'>";
 
-  if ($valkoodi == '') {
-    $valkoodi = $yhtiorow["valkoodi"];
-  }
-
-  echo "<input type='hidden' name='ed_valkoodi' value='$valkoodi'>";
-
   $query = "SELECT *
             FROM factoring
             WHERE yhtio        = '$kukarow[yhtio]'
             and factoringyhtio = '$factoringyhtio'
-            and tunnus         = '$factoring_id'
-            and valkoodi       = '$valkoodi'";
+            and tunnus         = '$factoring_id'";
   $fres = pupe_query($query);
   $frow = mysql_fetch_assoc($fres);
 
   echo "<tr><th>Sopimusnumero:</th><td>$frow[sopimusnumero]</td>";
-  echo "<tr><th>Valitse valuutta:</th><td><select name='valkoodi' onchange='submit();'>";
-
-  $query = "SELECT nimi, tunnus
-            FROM valuu
-            WHERE yhtio = '$kukarow[yhtio]'
-             ORDER BY jarjestys";
-  $vresult = pupe_query($query);
-
-  while ($vrow = mysql_fetch_assoc($vresult)) {
-    $sel="";
-    if ($vrow['nimi'] == $valkoodi) {
-      $sel = "selected";
-    }
-    echo "<option value = '$vrow[nimi]' $sel>$vrow[nimi]</option>";
-  }
-
-  echo "</select></td></tr>";
+  echo "<tr><th>Valuutta:</th><td>$frow[valkoodi]</td></tr>";
 
   echo "<tr><th>Siirtoluettelon numero:</th>
       <td><input type='text' name='factoringsiirtonumero' value='$factoringsiirtonumero' size='6'></td>";
@@ -231,8 +203,7 @@ if ($tee == 'TULOSTA') {
             FROM factoring
             WHERE yhtio        = '$kukarow[yhtio]'
             and factoringyhtio = '$factoringyhtio'
-            and tunnus         = '$factoring_id'
-            and valkoodi       = '$valkoodi'";
+            and tunnus         = '$factoring_id'";
   $fres = pupe_query($query);
   $frow = mysql_fetch_assoc($fres);
 
@@ -270,7 +241,7 @@ if ($tee == 'TULOSTA') {
   $ulos .= sprintf('%06.6s', $luontipvm); //aineiston luontipvm
   $ulos .= sprintf('%04.4s', $luontiaika); //luontikaika
   $ulos .= sprintf('%06.6s', $frow["sopimusnumero"]); //sopimusnumero
-  $ulos .= sprintf('%-3.3s', $valkoodi); //valuutta
+  $ulos .= sprintf('%-3.3s', $frow["valkoodi"]); //valuutta
 
   if ($toim == "OKO") {
     $ulos .= sprintf('%-2.2s', "OP"); //rahoitusyhtiön tunnus
@@ -326,7 +297,7 @@ if ($tee == 'TULOSTA') {
              and lasku.tila               = 'U'
              and lasku.alatila            = 'X'
              and lasku.summa             != 0
-             and lasku.valkoodi           = '$valkoodi'
+             and lasku.valkoodi           = '$frow[valkoodi]'
              $where";
   $dresult = pupe_query($dquery);
 
@@ -371,7 +342,7 @@ if ($tee == 'TULOSTA') {
             and lasku.tila                = 'U'
             and lasku.alatila             = 'X'
             and lasku.summa              != 0
-            and lasku.valkoodi            = '$valkoodi'
+            and lasku.valkoodi            = '$frow[valkoodi]'
             $where
             ORDER BY laskunro";
   $laskures = pupe_query($query);
@@ -747,7 +718,7 @@ if ($tee == 'TULOSTA') {
                    and lasku.laskunro               >= '$ppa'
                    and lasku.laskunro               <= '$ppl'
                    and lasku.factoringsiirtonumero  = 0
-                   and lasku.valkoodi               = '$valkoodi'
+                   and lasku.valkoodi               = '$frow[valkoodi]'
                    and lasku.yhtio                  = maksuehto.yhtio
                    and lasku.maksuehto              = maksuehto.tunnus
                    and maksuehto.factoring_id       = '$factoring_id'";

@@ -278,20 +278,47 @@ if (!function_exists("luo_myyntitilausotsikko")) {
       $alv = (float) $xwtrow["selite"];
 
       $ytunnus = "*";
+    }
 
-      // Jos on varasto setattuna, pässätään eteenpäin
-      $varasto = 0;
+    // Jos on varasto setattuna, pässätään eteenpäin
+    $varasto = 0;
 
-      if ($toim == "REKLAMAATIO" and $tilaustyyppi == 'U' and $yhtiorow['takuuvarasto'] != 0) {
-        $varasto = $yhtiorow['takuuvarasto'];
-      }
-      elseif (strpos($kukarow["varasto"], ',') === FALSE and (int) $kukarow["varasto"] > 0) {
-        // Jos kukarow varasto on vain YKSI varasto, niin silloin valitaan $kukarow['varasto']
-        $varasto = $kukarow['varasto'];
-      }
-      elseif ($yhtiorow['oletusvarasto_tilaukselle'] == 'O' and (int) $kukarow["oletus_varasto"] > 0) {
-        // jos kukarow['oletus_varasto'] valittu ja myyntitilauksella ei ole varastoa valittuna, valitaan käyttäjän oletusvarasto
-        $varasto = $kukarow['oletus_varasto'];
+    if ($toim == "REKLAMAATIO" and $tilaustyyppi == 'U' and $yhtiorow['takuuvarasto'] != 0) {
+      $varasto = $yhtiorow['takuuvarasto'];
+    }
+    elseif (strpos($kukarow["varasto"], ',') === FALSE and (int) $kukarow["varasto"] > 0) {
+      // Jos kukarow varasto on vain YKSI varasto, niin silloin valitaan $kukarow['varasto']
+      $varasto = $kukarow['varasto'];
+    }
+    elseif ($yhtiorow['oletusvarasto_tilaukselle'] == 'O' and (int) $kukarow["oletus_varasto"] > 0) {
+      // jos kukarow['oletus_varasto'] valittu ja myyntitilauksella ei ole varastoa valittuna, valitaan käyttäjän oletusvarasto
+      $varasto = $kukarow['oletus_varasto'];
+    }
+
+    // Onko valittuun varastoon kytketty verovelvollinen varastotoimipaikka?
+    if (!empty($varasto)) {
+      $query = "SELECT yhtion_toimipaikat.*
+                FROM varastopaikat
+                JOIN yhtion_toimipaikat ON (
+                  varastopaikat.yhtio=yhtion_toimipaikat.yhtio and
+                  varastopaikat.toimipaikka=yhtion_toimipaikat.tunnus and
+                  yhtion_toimipaikat.vat_numero != '' and
+                  yhtion_toimipaikat.varastotoimipaikka != ''
+                )
+                WHERE varastopaikat.yhtio = '$kukarow[yhtio]'
+                and varastopaikat.tunnus = '$varasto'";
+      $varatoimires = pupe_query($query);
+
+      if ($varatoimirow = mysql_fetch_assoc($varatoimires)) {
+        // Valitaan tämä toimipaikaksi
+        $yhtiotoimipaikka = $varatoimirow['tunnus'];
+
+        if (strtoupper($varatoimirow['maa']) != strtoupper($asiakasrow["maa"]) and
+          strtoupper($yhtiorow['maa']) == strtoupper($asiakasrow["maa"]) and
+          $asiakasrow["laji"] != 'H'
+        ) {
+          $alv = 0;
+        }
       }
     }
 

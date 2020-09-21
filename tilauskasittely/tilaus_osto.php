@@ -605,20 +605,22 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
                           AND uusiotunnus = 0";
           pupe_query($kohdistus_q);
 
-          $onkologmaster = in_array($yhtiorow['ulkoinen_jarjestelma'], array('','S'));
-          $ulkoinen_varasto = false;
-
           // L‰hetet‰‰n sanoma vain, jos valitulla varastolla on ulkoinen jarjestelma
-          if ($laskurow['varasto'] > 0) {
-            $v_query = "SELECT *
+          if (in_array($yhtiorow['ulkoinen_jarjestelma'], array('','S')) and $laskurow['varasto'] > 0) {
+            $v_query = "SELECT ulkoinen_jarjestelma
                         FROM varastopaikat
                         WHERE yhtio = '{$kukarow['yhtio']}'
-                        AND tunnus = '{$laskurow['varasto']}'
-                        AND ulkoinen_jarjestelma IN ('P')";
+                        AND tunnus = '{$laskurow['varasto']}'";
             $v_result = pupe_query($v_query);
+            $v_row = mysql_fetch_assoc($v_result);
 
-            if (mysql_num_rows($v_result) == 1) {
-              $ulkoinen_varasto = true;
+            if (in_array($v_row['ulkoinen_jarjestelma'], array('L','P'))) {
+              // L‰hetet‰‰n ulkoiseen j‰rjestelm‰‰n
+              require "rajapinnat/logmaster/inbound_delivery.php";
+            }
+            if ($v_row['ulkoinen_jarjestelma'] == 'S') {
+              // L‰hetet‰‰n ulkoiseen j‰rjestelm‰‰n
+              require "rajapinnat/smarten/inbound_delivery.php";
             }
           }
 

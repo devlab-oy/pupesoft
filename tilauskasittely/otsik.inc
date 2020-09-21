@@ -1148,7 +1148,7 @@ if ($tila == "" and !isset($jatka)) {
 
   if (!isset($srow['yhtio_toimipaikka'])
     and !empty($srow['maa'])
-    and $srow['maa'] != $yhtiorow['maa']) {
+    and $srow['maa'] != $yhtiorow['maa_vero']) {
     $alhqur = "SELECT tunnus
                FROM yhtion_toimipaikat
                WHERE yhtio     = '$kukarow[yhtio]'
@@ -1163,7 +1163,7 @@ if ($tila == "" and !isset($jatka)) {
   }
   elseif (!empty($srow['yhtio_toimipaikka'])
     and !empty($srow['maa'])
-    and $srow['maa'] != $yhtiorow['maa']) {
+    and $srow['maa'] != $yhtiorow['maa_vero']) {
     $kukarow['toimipaikka'] = $srow['yhtio_toimipaikka'];
   }
 
@@ -1208,8 +1208,8 @@ if ($tila == "" and !isset($jatka)) {
   $asiares = pupe_query($asiaqu);
   $asiarow = mysql_fetch_assoc($asiares);
 
-  // jos meillä on lasku menossa ulkomaille
-  if ($yhtiorow['maa'] == $srow['maa'] and $yhtiorow['vat_numero'] != '') {
+  // jos meillä on lasku menossa verovelvolliselta ulkomaantoimipaikalta
+  if ($yhtiorow['maa_vero'] == $srow['maa'] and $yhtiorow['vat_numero'] != '') {
     // haetaan maan oletusalvi
     $query = "SELECT selite from avainsana where yhtio='$kukarow[yhtio]' and laji='ALVULK' and selitetark='o' and selitetark_2='$srow[maa]'";
     $alhire = pupe_query($query);
@@ -1249,6 +1249,32 @@ if ($tila == "" and !isset($jatka)) {
     if (mysql_num_rows($result) == 1) {
       $extra_asiakas = mysql_fetch_assoc($result);
       $srow["nimi"]  = $extra_asiakas["ytunnus"];
+    }
+  }
+
+  // Onko valittuun varastoon kytketty verovelvollinen varastotoimipaikka?
+  if (!empty($oletusvarasto)) {
+    $query = "SELECT yhtion_toimipaikat.*
+              FROM varastopaikat
+              JOIN yhtion_toimipaikat ON (
+                varastopaikat.yhtio=yhtion_toimipaikat.yhtio and
+                varastopaikat.toimipaikka=yhtion_toimipaikat.tunnus and
+                yhtion_toimipaikat.vat_numero != ''
+              )
+              WHERE varastopaikat.yhtio = '$kukarow[yhtio]'
+              and varastopaikat.tunnus = '$oletusvarasto'";
+    $varatoimires = pupe_query($query);
+
+    if ($varatoimirow = mysql_fetch_assoc($varatoimires)) {
+      // Valitaan tämä toimipaikaksi
+      $yhtiotoimipaikka = $varatoimirow['tunnus'];
+
+      if (strtoupper($varatoimirow['maa']) != strtoupper($srow["maa"]) and
+        strtoupper($yhtiorow['maa']) == strtoupper($srow["maa"]) and
+        $srow["laji"] != 'H'
+      ) {
+        $srow['alv'] = 0;
+      }
     }
   }
 
@@ -2350,10 +2376,14 @@ if ($tila == "" and !isset($jatka)) {
       while ($yht_toimpaik_row = mysql_fetch_assoc($yht_toimpaik_res)) {
 
         $sel = $yhtiotoimipaikka == $yht_toimpaik_row['tunnus'] ? "selected" : "";
-
         if ($sel != "") $predefined_yhtiotoimipaikka = $yhtiotoimipaikka;
 
-        $oikea_sarake[$oikea] .= "<option value='{$yht_toimpaik_row['tunnus']}' {$sel}>{$yht_toimpaik_row['nimi']}</option>";
+        $t_nimi = $yht_toimpaik_row['nimitys'];
+        if (empty($t_nimi)) {
+          $t_nimi = $yht_toimpaik_row['nimi'];
+        }
+
+        $oikea_sarake[$oikea] .= "<option value='{$yht_toimpaik_row['tunnus']}' {$sel}>{$t_nimi}</option>";
       }
 
       $oikea_sarake[$oikea] .= "</select>";
@@ -4328,7 +4358,7 @@ if (isset($jatka)) {
   }
 
   if (($kukarow['kesken'] == 0 and isset($predefined_yhtiotoimipaikka) and $predefined_yhtiotoimipaikka != $yhtiotoimipaikka) or
-    (isset($otsikon_laskurow['yhtio_toimipaikka']) and $otsikon_laskurow['yhtio_toimipaikka'] != $yhtiotoimipaikka and ($yhtiorow['maa'] != $srow['maa'] or $yhtiorow['vat_numero'] == ''))
+    (isset($otsikon_laskurow['yhtio_toimipaikka']) and $otsikon_laskurow['yhtio_toimipaikka'] != $yhtiotoimipaikka and ($yhtiorow['maa_vero'] != $srow['maa'] or $yhtiorow['vat_numero'] == ''))
   ) {
     $alv    = $asiarow['alv'];
     $vienti = $asiarow['vienti'];

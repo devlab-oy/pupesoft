@@ -704,14 +704,26 @@ if (!isset($karhuviesti)) {
   }
 
   if (isset($karhuakaikki)) {
-    // laskutustiedoissa on järjestetty eräpäivämäärän mukaan rivit 
-    // -> vanhin tulee eka 
-    // -> joten saadaan suoraan ekan iäistä vanhimman ikä!
+    $max_ika = 0;
+    // haetaan vanhimman ei hyvityksen ikä
+    // teoreettisesti jos olisi _vain_ hyvityksiä jäisi $max_ika nollaksi, 
+    // niin se ei haittaa koska silloin menee eka viesti ja tämä lienee paras ratkaisu siihen tilanteeseen
+    while ($ika_row = mysql_fetch_assoc($result)) {
+      if ($max_ika == 0 and $ika_row["summa"] > 0) {
+        $max_ika = $ika_row["ika"];
+      }
+      elseif ($max_ika < $ika_row['ika'] and $ika_row['summa'] > 0) {
+        $max_ika = $ika_row["ika"];
+      }
+    }
 
-    if ($laskutiedot["ika"] <= $ekaviesti_takaraja) {
+    //ja kelataan akuun
+    mysql_data_seek($result, 0);
+
+    if ($max_ika <= $ekaviesti_takaraja) {
       $viesti_jarj = 1;
     }
-    elseif ($laskutiedot["ika"] <= $tokaviesti_takaraja) {
+    elseif ($max_ika <= $tokaviesti_takaraja) {
       $viesti_jarj = 2;
     }
     else {
@@ -1096,16 +1108,12 @@ if (isset($_POST['ekirje_laheta']) === false and $tee_pdf != 'tulosta_karhu' and
   }
 
   if (isset($_REQUEST['email_laheta']) and $_REQUEST['karhu_email'] != "") {
+    $newfilename = t("Maksukehotus", $kieli)." - ".date("d.m.Y").".pdf";
 
     if (!empty($yhtiorow['maksukehotus_cc_email'])) {
-      $asiakkaan_nimi = trim($asiakastiedot['nimi']." ".$asiakastiedot['nimitark']);
-      $asiakkaan_nimi = poista_osakeyhtio_lyhenne($asiakkaan_nimi);
-      $asiakkaan_nimi = trim(pupesoft_csvstring($asiakkaan_nimi));
-      $newfilename = t("Maksukehotus")." - ".date("Ymd")." - ".$laskutiedot['laskunro']." - ".$asiakkaan_nimi.".pdf";
       $sahkoposti_cc = $yhtiorow['maksukehotus_cc_email'];
     }
     else {
-      $newfilename = $pdffilenimi;
       $sahkoposti_cc = "";
     }
 
@@ -1133,15 +1141,12 @@ if (isset($_POST['ekirje_laheta']) === false and $tee_pdf != 'tulosta_karhu' and
     }
   }
   elseif (isset($karhuakaikki)) {
+    $newfilename = t("Maksukehotus", $kieli)." - ".date("d.m.Y").".pdf";
+
     if (!empty($yhtiorow['maksukehotus_cc_email'])) {
-      $asiakkaan_nimi = trim($asiakastiedot['nimi']." ".$asiakastiedot['nimitark']);
-      $asiakkaan_nimi = poista_osakeyhtio_lyhenne($asiakkaan_nimi);
-      $asiakkaan_nimi = trim(pupesoft_csvstring($asiakkaan_nimi));
-      $newfilename = t("Maksukehotus")." - ".date("Ymd")." - ".$laskutiedot['laskunro']." - ".$asiakkaan_nimi.".pdf";
       $sahkoposti_cc = $yhtiorow['maksukehotus_cc_email'];
     }
     else {
-      $newfilename = $pdffilenimi;
       $sahkoposti_cc = "";
     }
 

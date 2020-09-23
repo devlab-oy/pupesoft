@@ -150,6 +150,34 @@ while (false !== ($file = readdir($handle))) {
       }
     }
 
+    // Tarkistetaan mitkä rivit on kokonaan keräämättä, eli puuttuvat sanomalta ja lisätään ne nollariveinä
+    $keratyt_tunnukset = join(',', array_keys($tilausrivit));
+
+    if (!empty($keratyt_tunnukset)) {
+      $query = "SELECT tilausrivi.*
+                FROM tilausrivi
+                JOIN tuote ON (
+                  tuote.yhtio = tilausrivi.yhtio
+                  AND tuote.tuoteno = tilausrivi.tuoteno
+                  AND tuote.ei_saldoa = ''
+                )
+                WHERE tilausrivi.yhtio     = '{$kukarow['yhtio']}'
+                AND tilausrivi.tyyppi     != 'D'
+                AND tilausrivi.tunnus not in ($keratyt_tunnukset)
+                AND tilausrivi.otunnus     = '{$laskurow['tunnus']}'
+                AND tilausrivi.keratty     = ''
+                AND tilausrivi.toimitettu  = ''";
+      $ei_keratyt_res = pupe_query($query);
+
+      while ($ei_keratyt_row = mysql_fetch_assoc($ei_keratyt_res)) {
+        $tilausrivit[$ei_keratyt_row['tunnus']] = array(
+          'item_number' => $ei_keratyt_row['tuoteno'],
+          'keratty'     => 0,
+          'kollit'      => array()
+        );
+      }
+    }
+
     pupesoft_log('smarten_outbound_delivery_confirmation', "Sanomassa {$file} ".count($tilausrivit)." uniikkia tilausriviä.");
 
     $query = "SELECT *
@@ -357,7 +385,6 @@ while (false !== ($file = readdir($handle))) {
       pupe_query($query);
     }
     else {
-
       // Jatketaan normaalisti jos oli jotain kerättävää
       // Päivitetään saldottomat tuotteet myös toimitetuksi
       $query = "UPDATE tilausrivi

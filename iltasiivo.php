@@ -494,6 +494,58 @@ if ($yhtiorow['iltasiivo_mitatoi_ext_tilauksia'] != '') {
   }
 }
 
+// mitätöidään keskenolevia kassamyynti-tilauksia, jos ne on liian vanhoja ja yhtiön parametri on päällä
+if ($yhtiorow['iltasiivo_mitatoi_kassamyynti_tilauksia'] != '') {
+
+  $laskuri = 0;
+  $ytunnukset = join("','", explode(',', mysql_real_escape_string($yhtiorow['iltasiivo_mitatoi_kassamyynti_tilauksia'])));
+
+  $query = "SELECT lasku.tunnus laskutunnus
+            FROM lasku
+            JOIN maksuehto ON (lasku.yhtio = maksuehto.yhtio
+              and lasku.maksuehto = maksuehto.tunnus
+              and maksuehto.kateinen != '')
+            WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+            AND lasku.ytunnus in ('{$ytunnukset}')
+            AND lasku.tila = 'N'
+            AND lasku.alatila = ''
+            AND lasku.kassalipas != ''
+            AND lasku.luontiaika < DATE_SUB(now(), INTERVAL 14 DAY)";
+  $result = pupe_query($query);
+
+  while ($row = mysql_fetch_assoc($result)) {
+    $komm = "({$kukarow['kuka']}@".date('Y-m-d').")".t("Mitätöi ohjelmassa iltasiivo.php")." (4)<br>";
+
+    $query = "UPDATE lasku SET
+              alatila     = 'N',
+              tila        = 'D',
+              comments    = '$komm'
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              and tunnus  = '{$row['laskutunnus']}'";
+    pupe_query($query);
+
+    $query = "UPDATE tilausrivi SET
+              tyyppi       = 'D'
+              WHERE yhtio  = '{$kukarow['yhtio']}'
+              AND otunnus  = '{$row['laskutunnus']}'
+              and var     != 'P'";
+    pupe_query($query);
+
+    //poistetaan TIETENKIN kukarow[kesken] ettei voi syöttää extranetissä rivejä tälle
+    $query = "UPDATE kuka SET
+              kesken      = ''
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND kesken  = '{$row['laskutunnus']}'";
+    pupe_query($query);
+
+    $laskuri++;
+  }
+
+  if ($laskuri > 0) {
+    $iltasiivo .= is_log("Mitätöitiin $laskuri keskeneräistä kassamyynti-tilausta, jotka olivat yli 14 päivää vanhoja.");
+  }
+}
+
 if (table_exists('suorituskykyloki')) {
   $query = "DELETE FROM suorituskykyloki
             WHERE yhtio    = '{$kukarow['yhtio']}'

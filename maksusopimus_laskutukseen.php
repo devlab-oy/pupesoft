@@ -11,6 +11,9 @@ if (strpos($_SERVER['SCRIPT_NAME'], "maksusopimus_laskutukseen.php") !== FALSE) 
 if (!function_exists("ennakkolaskuta")) {
   function ennakkolaskuta($tunnus) {
     global $kukarow, $yhtiorow;
+    
+    // Laitetaan debug p‰‰lle
+    // $debug = 1;
 
     ///* Etsit‰‰n laskun kaikki tiedot jolle maksusopimus on tehty *///
     $query = "SELECT *
@@ -351,6 +354,8 @@ if (!function_exists("ennakkolaskuta")) {
             $ale_kentat .=  ",ale{$i}";
             $ale_arvot .= ", '".$row["ale{$i}"]."'";
           }
+          $ale_kentat .= ", erikoisale";
+          $ale_arvot .= ",{$row['erikoisale']}";
         }
 
         $summa = round($summa, 6);

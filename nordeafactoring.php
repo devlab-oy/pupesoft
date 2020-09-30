@@ -70,7 +70,7 @@ elseif (mysql_num_rows($factoring_result) == 1) {
   // meillä on vaan yksi, ei tarvitse valita
   $vrow = mysql_fetch_assoc($factoring_result);
   $factoring_id = $vrow['tunnus'];
-  $tee = isset($tee) ? $tee : 'TOIMINNOT';
+  $tee = !empty($tee) ? $tee : 'TOIMINNOT';
 }
 
 if ($tee == '') {

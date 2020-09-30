@@ -158,7 +158,7 @@ if (round($maara, 2) != 0) {
 
     echo "<font class='message'>*** ".t("tiliöinti luotu")." ($tiliotesaantotilino) ***</font><br>\n";
 
-    if ($yhtiorow['tiliotteen_selvittelyt'] == "" and $tiliotedatarow['alku'] == $tiliotedatarow['loppu']) {
+    if (empty($ei_summata_selvittelyja) and $yhtiorow['tiliotteen_selvittelyt'] == "" and $tiliotedatarow['alku'] == $tiliotedatarow['loppu']) {
       // Jos yhtiön parametri sallii ja käsittelyssä on yhden päivän tiliote niin voidaan tiliöidä kaikki selvittelyt samalle tositteelle.
       $vastavienti += $maara;
       $vastavienti_valuutassa += $kohdm;

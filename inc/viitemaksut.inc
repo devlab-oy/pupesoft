@@ -127,12 +127,14 @@ elseif ($type == '3' or ($type == 'S' and
     $vastavienti = $sum * -1;
     $vastavienti_valuutassa = $sum * -1;
     $tiliotedataid = $tiliotedatarow["tunnus"];
+    $ei_summata_selvittelyja = TRUE;
 
     $tiliointisaantorow = mysql_fetch_array($tiliotesaantoresult);
     $tiliotesaantotunnus = $tiliointisaantorow['tunnus'];
 
     require "inc/teeselvittely.inc";
 
+    unset($ei_summata_selvittelyja);
     unset($tiliotesaantotunnus);
   }
   else {

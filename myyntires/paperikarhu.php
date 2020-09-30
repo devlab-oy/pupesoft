@@ -692,7 +692,7 @@ if (!$kaatosumma) $kaatosumma = '0.00';
 if (!isset($karhuviesti)) {
 
   //  Lasketaan kuinka vanhoja laskuja tässä karhutaan
-  $query = "SELECT count(*) kpl
+  $query = "SELECT count(*) AS kpl
             FROM karhu_lasku
             WHERE ltunnus IN ($ltunnukset)
             GROUP BY ltunnus";
@@ -703,24 +703,55 @@ if (!isset($karhuviesti)) {
     $r += $a["kpl"];
   }
 
-  //  Tämä on mikä on karhujen keskimääräinen kierroskerta
-  $avg = floor(($r/mysql_num_rows($res))+1);
+  if (isset($karhuakaikki)) {
+    $max_ika = 0;
+    // haetaan vanhimman ei hyvityksen ikä
+    // teoreettisesti jos olisi _vain_ hyvityksiä jäisi $max_ika nollaksi, 
+    // niin se ei haittaa koska silloin menee eka viesti ja tämä lienee paras ratkaisu siihen tilanteeseen
+    while ($ika_row = mysql_fetch_assoc($result)) {
+      if ($max_ika == 0 and $ika_row["summa"] > 0) {
+        $max_ika = $ika_row["ika"];
+      }
+      elseif ($max_ika < $ika_row['ika'] and $ika_row['summa'] > 0) {
+        $max_ika = $ika_row["ika"];
+      }
+    }
 
-  if ($tee_pdf == 'tulosta_karhu') {
-    $avg--;
+    //ja kelataan akuun
+    mysql_data_seek($result, 0);
+
+    if ($max_ika <= $ekaviesti_takaraja) {
+      $viesti_jarj = 1;
+    }
+    elseif ($max_ika <= $tokaviesti_takaraja) {
+      $viesti_jarj = 2;
+    }
+    else {
+      $viesti_jarj = 3;
+    }
+  }
+  else {
+    //  Tämä on mikä on karhujen keskimääräinen kierroskerta
+    $avg = floor(($r/mysql_num_rows($res))+1);
+
+    if ($tee_pdf == 'tulosta_karhu') {
+      $avg--;
+    }
+
+    $viesti_jarj = $avg;
   }
 
   // Etsitään asiakkaan kielellä:
   $query = "SELECT tunnus
             FROM avainsana
-            WHERE yhtio ='{$yhtiorow['yhtio']}' and laji = 'KARHUVIESTI' and jarjestys = '$avg' and kieli = '$kieli'";
+            WHERE yhtio ='{$yhtiorow['yhtio']}' and laji = 'KARHUVIESTI' and jarjestys = '$viesti_jarj' and kieli = '$kieli'";
   $res = pupe_query($query);
 
   if (mysql_num_rows($res) == 0) {
 
     $query = "SELECT tunnus
               FROM avainsana
-              WHERE yhtio ='{$yhtiorow['yhtio']}' and laji = 'KARHUVIESTI' and jarjestys < '$avg' and kieli = '$kieli'
+              WHERE yhtio ='{$yhtiorow['yhtio']}' and laji = 'KARHUVIESTI' and jarjestys < '$viesti_jarj' and kieli = '$kieli'
               ORDER BY jarjestys DESC
               LIMIT 1";
     $res = pupe_query($query);
@@ -729,7 +760,7 @@ if (!isset($karhuviesti)) {
 
       $query = "SELECT tunnus
                 FROM avainsana
-                WHERE yhtio ='{$yhtiorow['yhtio']}' and laji = 'KARHUVIESTI' and jarjestys > '$avg' and kieli = '$kieli'
+                WHERE yhtio ='{$yhtiorow['yhtio']}' and laji = 'KARHUVIESTI' and jarjestys > '$viesti_jarj' and kieli = '$kieli'
                 ORDER BY jarjestys ASC
                 LIMIT 1";
       $res = pupe_query($query);
@@ -740,14 +771,14 @@ if (!isset($karhuviesti)) {
   if (mysql_num_rows($res) == 0) {
     $query = "SELECT tunnus
               FROM avainsana
-              WHERE yhtio ='{$yhtiorow['yhtio']}' and laji = 'KARHUVIESTI' and jarjestys = '$avg' and kieli = '$yhtiorow[kieli]'";
+              WHERE yhtio ='{$yhtiorow['yhtio']}' and laji = 'KARHUVIESTI' and jarjestys = '$viesti_jarj' and kieli = '$yhtiorow[kieli]'";
     $res = pupe_query($query);
 
     if (mysql_num_rows($res) == 0) {
 
       $query = "SELECT tunnus
                 FROM avainsana
-                WHERE yhtio ='{$yhtiorow['yhtio']}' and laji = 'KARHUVIESTI' and jarjestys < '$avg' and kieli = '$yhtiorow[kieli]'
+                WHERE yhtio ='{$yhtiorow['yhtio']}' and laji = 'KARHUVIESTI' and jarjestys < '$viesti_jarj' and kieli = '$yhtiorow[kieli]'
                 ORDER BY jarjestys DESC
                 LIMIT 1";
       $res = pupe_query($query);
@@ -756,7 +787,7 @@ if (!isset($karhuviesti)) {
 
         $query = "SELECT tunnus
                   FROM avainsana
-                  WHERE yhtio ='{$yhtiorow['yhtio']}' and laji = 'KARHUVIESTI' and jarjestys > '$avg' and kieli = '$yhtiorow[kieli]'
+                  WHERE yhtio ='{$yhtiorow['yhtio']}' and laji = 'KARHUVIESTI' and jarjestys > '$viesti_jarj' and kieli = '$yhtiorow[kieli]'
                   ORDER BY jarjestys ASC
                   LIMIT 1";
         $res = pupe_query($query);
@@ -1077,16 +1108,12 @@ if (isset($_POST['ekirje_laheta']) === false and $tee_pdf != 'tulosta_karhu' and
   }
 
   if (isset($_REQUEST['email_laheta']) and $_REQUEST['karhu_email'] != "") {
+    $newfilename = t("Maksukehotus", $kieli)." - ".date("d.m.Y").".pdf";
 
     if (!empty($yhtiorow['maksukehotus_cc_email'])) {
-      $asiakkaan_nimi = trim($asiakastiedot['nimi']." ".$asiakastiedot['nimitark']);
-      $asiakkaan_nimi = poista_osakeyhtio_lyhenne($asiakkaan_nimi);
-      $asiakkaan_nimi = trim(pupesoft_csvstring($asiakkaan_nimi));
-      $newfilename = t("Maksukehotus")." - ".date("Ymd")." - ".$laskutiedot['laskunro']." - ".$asiakkaan_nimi.".pdf";
       $sahkoposti_cc = $yhtiorow['maksukehotus_cc_email'];
     }
     else {
-      $newfilename = $pdffilenimi;
       $sahkoposti_cc = "";
     }
 
@@ -1107,6 +1134,54 @@ if (isset($_POST['ekirje_laheta']) === false and $tee_pdf != 'tulosta_karhu' and
 
     if (pupesoft_sahkoposti($params)) {
       echo t("Maksukehotus lähetetään osoitteeseen").": {$_REQUEST['karhu_email']}...\n<br>";
+
+      if (!empty($sahkoposti_cc)) {
+        echo t("Maksukehotuskopio lähetetään myös osoitteeseen").": {$sahkoposti_cc}...\n<br>";
+      }
+    }
+  }
+  elseif (isset($karhuakaikki)) {
+    $newfilename = t("Maksukehotus", $kieli)." - ".date("d.m.Y").".pdf";
+
+    if (!empty($yhtiorow['maksukehotus_cc_email'])) {
+      $sahkoposti_cc = $yhtiorow['maksukehotus_cc_email'];
+    }
+    else {
+      $sahkoposti_cc = "";
+    }
+
+    $valittu_email = '';
+
+    if (!empty($asiakastiedot['talhal_email'])) {
+      $valittu_email = $asiakastiedot['talhal_email'];
+      echo "Lähetettiin asiakkaan talhal_email osoitteeseen. \n\n";
+    }
+    elseif (!empty($asiakastiedot['lasku_email'])) {
+      $valittu_email = $asiakastiedot['lasku_email'];
+      echo "Lähetettiin asiakkaan lasku_email osoitteeseen. \n\n";
+    }
+    else {
+      $valittu_email = $asiakastiedot['email'];
+      echo "Lähetettiin asiakkaan email osoitteeseen. \n\n";
+    }
+
+    $pathinfo = pathinfo($pdffilenimi);
+    $params = array(
+      "to"     => $valittu_email,
+      "cc" => $sahkoposti_cc,
+      "subject"  => t("Maksukehotus", $kieli),
+      "ctype"    => "text",
+      "body" => $karhuviesti."\n\n".$yhteyshenkiloteksti."\n\n\n",
+      "attachements" => array(0   => array(
+          "filename"    => $pdffilenimi,
+          "newfilename"  => $newfilename,
+          "ctype"      => $pathinfo['extension'],
+        )
+      )
+    );
+
+    if (pupesoft_sahkoposti($params)) {
+      echo t("Maksukehotus lähetetään osoitteeseen").": {$valittu_email}...\n<br>";
 
       if (!empty($sahkoposti_cc)) {
         echo t("Maksukehotuskopio lähetetään myös osoitteeseen").": {$sahkoposti_cc}...\n<br>";

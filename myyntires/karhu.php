@@ -168,6 +168,23 @@ if ($tee == "ALOITAKARHUAMINEN") {
     $maa_lisa = "and lasku.maa = '$lasku_maa'";
   }
 
+  $kommenttirajausrajaus = "";
+  $asiakasrajaus = "";
+
+  if ($karhuakaikki != "") {
+    // karhuakaikki on setattu eli tullaan automatiikasta, tehd‰‰n kommenttirajaus
+    $aresult = t_avainsana("KRHAUTOESTO");
+
+    while ($arow = mysql_fetch_assoc($aresult)) {
+      $arow["selite"] = mysql_real_escape_string($arow["selite"]);
+      $kommenttirajausrajaus .= "AND lasku.comments NOT LIKE '%{$arow["selite"]}%'";
+      //rajattava kommentti $arow["selite"]
+    }
+
+    // tehd‰‰n myˆs asiakasrajaus asiakkaan_avainsanat_laji = ASIAKAS_KRHAUTOESTO
+    $asiakasrajaus = "AND asiakkaan_avainsanat.tunnus IS NULL";
+  }
+
   $query = "SELECT asiakas.ytunnus,
             IF(asiakas.laskutus_nimi != '' and (asiakas.maksukehotuksen_osoitetiedot = 'B' or ('{$yhtiorow['maksukehotuksen_osoitetiedot']}' = 'K' and asiakas.maksukehotuksen_osoitetiedot = '')),
                 concat(asiakas.laskutus_nimi, asiakas.laskutus_nimitark, asiakas.laskutus_osoite, asiakas.laskutus_postino, asiakas.laskutus_postitp),
@@ -186,16 +203,22 @@ if ($tee == "ALOITAKARHUAMINEN") {
                 WHERE lasku.yhtio  = '$kukarow[yhtio]'
                 and lasku.tila     = 'U'
                 and lasku.mapvm    = '0000-00-00'
-                and (lasku.erpcm < date_sub(now(), interval $lpvm_aikaa day) or lasku.summa < 0)
+                and ((lasku.erpcm <= date_sub(now(), interval $lpvm_aikaa day)) or lasku.summa < 0)
+                $kommenttirajausrajaus
                 and lasku.summa   != 0
                 $maksuehtolista
                 $maa_lisa
                 GROUP BY lasku.tunnus
                 HAVING (kpvm is null or kpvm < date_sub(now(), interval $kpvm_aikaa day))) as laskut
-            JOIN asiakas ON lasku.yhtio=asiakas.yhtio and lasku.liitostunnus=asiakas.tunnus
+            JOIN asiakas ON lasku.yhtio = asiakas.yhtio and lasku.liitostunnus = asiakas.tunnus
+            LEFT JOIN asiakkaan_avainsanat ON (asiakkaan_avainsanat.yhtio = lasku.yhtio 
+              AND asiakkaan_avainsanat.liitostunnus = asiakas.tunnus
+              AND asiakkaan_avainsanat.laji = 'ASIAKAS_KRHAUTOESTO'
+              AND asiakkaan_avainsanat.avainsana = 'STOP')
             WHERE lasku.tunnus     = laskut.tunnus
             $konslisa
             $asiakaslisa
+            $asiakasrajaus
             GROUP BY asiakas.ytunnus, asiakastiedot
             HAVING karhuttava_summa > 0
             ORDER BY asiakas.ytunnus";
@@ -228,6 +251,7 @@ if ($tee == "KARHUAKAIKKI") {
     try {
       // koitetaan l‰hett‰‰ eKirje sek‰ tulostaa
       require 'paperikarhu.php';
+      unlink($pdffilenimi);
     }
     catch (Exception $e) {
       $ekarhu_success = false;

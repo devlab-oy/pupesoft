@@ -54,7 +54,15 @@ if ($tee == 'U') {
 
     $nimitieto = strtoupper($nimitieto);
 
-    if (($nimitieto=="LUOTTOKUNTA-KREDITLAGET") or ($nimitieto=="LUOTTOKUNTA") or ($nimitieto=="LUOTTOKUNTA/VISA") or ($nimitieto=="LUOTTOKUNTA OY") or ($nimitieto=="NETS OY") or ($nimitieto=="NETS DENMARK A/S FILIAL I FINLAND") or ($nimitieto=="NETS DENMARK AS FILIAL I FINLAND")) {
+    if ($pankkitili != 'x' and (
+      $nimitieto == "LUOTTOKUNTA-KREDITLAGET" or 
+      $nimitieto == "LUOTTOKUNTA" or 
+      $nimitieto == "LUOTTOKUNTA/VISA" or 
+      $nimitieto == "LUOTTOKUNTA OY" or 
+      $nimitieto == "NETS OY" or 
+      $nimitieto == "NETS DENMARK A/S FILIAL I FINLAND" or 
+      $nimitieto == "NETS DENMARK AS FILIAL I FINLAND")
+    ) {
       $query = "SELECT tilino
                 FROM tili
                 WHERE tilino = '$tilino2'

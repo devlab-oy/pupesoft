@@ -100,7 +100,7 @@ while ($suoritus = mysql_fetch_assoc($result)) {
       }
     }
 
-    // Kokeillaan eka suoraan suorituksen maksajalla, 12 merkkia, aktiiviset asiakkaat
+    // Kokeillaan suorituksen nimellä ilman osakeyhtiotunnusta, aktiiviset asiakkaat
     if (!$asiakasokmaksaja) {
       $query = "SELECT nimi, konserniyhtio, tunnus
                 FROM asiakas
@@ -116,13 +116,44 @@ while ($suoritus = mysql_fetch_assoc($result)) {
       }
     }
 
-    // Kokeillaan eka suoraan suorituksen maksajalla, 12 merkkia, kaikki asiakkaat
+    // Kokeillaan suorituksen nimellä ilman osakeyhtiotunnusta, kaikki asiakkaat
     if (!$asiakasokmaksaja) {
       $query = "SELECT nimi, konserniyhtio, tunnus
                 FROM asiakas
                 WHERE yhtio  = '$kukarow[yhtio]'
                 and laji    != 'R'
                 and MATCH (nimi) AGAINST ('\"$unimi\"' IN BOOLEAN MODE)";
+      $asres = pupe_query($query);
+
+      if (mysql_num_rows($asres) == 1) {
+        $asiakas = mysql_fetch_assoc($asres);
+        $asiakasokmaksaja = TRUE;
+      }
+    }
+
+    // Kokeillaan suorituksen nimellä ilman osakeyhtiöntunnusta, 
+    // asiakkaan nimestä 12 merkkia, aktiiviset asiakkaat
+    $query = "SELECT nimi, konserniyhtio, tunnus
+              FROM asiakas
+              WHERE yhtio  = '$kukarow[yhtio]'
+              and laji    != 'R'
+              and laji    != 'P'
+              and left(nimi, 12) LIKE '{$unimi}%'";
+    $asres = pupe_query($query);
+
+    if (mysql_num_rows($asres) == 1) {
+      $asiakas = mysql_fetch_assoc($asres);
+      $asiakasokmaksaja = TRUE;
+    }
+
+    // Kokeillaan suorituksen nimellä ilman osakeyhtiöntunnusta, 
+    // asiakkaan nimestä 12 merkkia, kaikki asiakkaat
+    if (!$asiakasokmaksaja) {
+      $query = "SELECT nimi, konserniyhtio, tunnus
+                FROM asiakas
+                WHERE yhtio  = '$kukarow[yhtio]'
+                and laji    != 'R'
+                and left(nimi, 12) LIKE '{$unimi}%'";
       $asres = pupe_query($query);
 
       if (mysql_num_rows($asres) == 1) {

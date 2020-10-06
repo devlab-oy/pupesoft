@@ -177,7 +177,7 @@ $dateinfo->addChild('DeliveryDateRequested', tv1dateconv($tilasnumero_row['toima
 
 $refinfo = $documentinfo->addChild('RefInfo');
 $sourcedocument = $refinfo->addChild('SourceDocument');
-$sourcedocument->addChild('SourceDocumentNum');
+$sourcedocument->addChild('SourceDocumentNum', $tilasnumero_row['otunnus']);
 
 // $documentsumgroup = $document->addChild("DocumentSumGroup");
 // $documentsumgroup->addChild("Currency", xml_cleanstring($row['valkoodi']));

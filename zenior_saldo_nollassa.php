@@ -59,7 +59,6 @@ while ($row = mysql_fetch_assoc($result)) {
     $set_lisakentat = "try      = (SELECT selitetark FROM tuotteen_avainsanat WHERE yhtio = '{$kukarow["yhtio"]}' AND kieli = '{$yhtiorow["kieli"]}' AND tuoteno = '{$row["tuoteno"]}' AND laji = 'zeniorparts' AND selite = 'ALKUP_TRY' LIMIT 1),
                        aleryhma = (SELECT selitetark FROM tuotteen_avainsanat WHERE yhtio = '{$kukarow["yhtio"]}' AND kieli = '{$yhtiorow["kieli"]}' AND tuoteno = '{$row["tuoteno"]}' AND laji = 'zeniorparts' AND selite = 'ALKUP_ALERYHMA' LIMIT 1),
                        osasto   = (SELECT selitetark FROM tuotteen_avainsanat WHERE yhtio = '{$kukarow["yhtio"]}' AND kieli = '{$yhtiorow["kieli"]}' AND tuoteno = '{$row["tuoteno"]}' AND laji = 'zeniorparts' AND selite = 'ALKUP_OSASTO' LIMIT 1),
-                       hinnastoon  = 'E',
                        ostoehdotus = 'E',";
   }
   else {

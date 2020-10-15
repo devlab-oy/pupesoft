@@ -13114,7 +13114,7 @@ if (!function_exists("pupesoft_cleanstring")) {
 
     if (!is_numeric($string) and !is_string($string)) return "";
 
-    $src = array("\"", "'", "<", ">", "\\", ";");
+    $src = array("\"", "'", "<", ">", "\\", ";", "?");
 
     if (!PUPE_UNICODE) {
       $rpl = array("" , "", "" , "", "", "");

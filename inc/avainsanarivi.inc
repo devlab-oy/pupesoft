@@ -504,9 +504,9 @@ if ($avain_sel['KRLSTFOOTRAJAUS'] == 'SELECTED' and $_selitetark) {
     $sel_einouto = "SELECTED";
   }
 
-  $ulos .= "<option value = 'kaikki' {$sel_kaikki}>Kaikki</option>";
-  $ulos .= "<option value = 'nouto' {$sel_nouto}>Nouto</option>";
-  $ulos .= "<option value = 'ei_nouto' {$sel_einouto}>Ei nouto</option>";
+  $ulos .= "<option value = 'kaikki' {$sel_kaikki}>".t("Kaikki")."</option>";
+  $ulos .= "<option value = 'nouto' {$sel_nouto}>".t("Nouto")."</option>";
+  $ulos .= "<option value = 'ei_nouto' {$sel_einouto}>".t("Ei nouto")."</option>";
 
   while ($toimitustapa = mysql_fetch_assoc($toimitustapa_result)) {
     if ($toimitustapa['tunnus'] == $trow[$i]) {

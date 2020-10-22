@@ -28,15 +28,18 @@ function erittele_laskut($file) {
         $type = "SOAP";
       }
 
-      if (preg_match("/\<Finvoice.*?Version\=\"([1-2]\.[0-3]{1,2})\".*?\>/i", $ln, $lnversion) > 0) {
-        $type        = "FINVOICE";
+      if (preg_match("/\<Finvoice.*?Version\=\"([1-3]\.[0-3]{1,2})\".*?\>/i", $ln, $lnversion) > 0) {
+        $type = "FINVOICE";
         $finvoiceversion = (float) $lnversion[1];
 
         $ln = substr($ln, stripos($ln, "<Finvoice"));
 
         // Lisätään varmasti oikeat DOCTYPE määritys
         // Tämä siksi että haluamme käyttää paikallista kuvausta eikä ladata kuvausta verkosta!
-        if ($finvoiceversion >= 2) {
+        if ($finvoiceversion >= 3) {
+          $ln = "<?xml version=\"1.0\" encoding=\"$xmlencoding\"?>\n<?xml-stylesheet type=\"text/xsl\" href=\"datain/Finvoice_3.0.xsl\"?>\n<Finvoice Version=\"$lnversion[1]\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:noNamespaceSchemaLocation=\"datain/Finvoice_3.0.xsd\">";
+        }
+        elseif ($finvoiceversion >= 2) {
           $ln = "<?xml version=\"1.0\" encoding=\"$xmlencoding\"?>\n<?xml-stylesheet type=\"text/xsl\" href=\"datain/Finvoice_2.0.xsl\"?>\n<Finvoice Version=\"$lnversion[1]\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:noNamespaceSchemaLocation=\"datain/Finvoice_2.0.xsd\">";
         }
         elseif ($finvoiceversion == 1.3) {

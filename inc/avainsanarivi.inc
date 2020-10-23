@@ -261,6 +261,7 @@ if (mysql_field_name($result, $i) == "laji") {
   if ($lukitse_laji== "" or $lukitse_laji == "VARTOIMTULOSTIN") $ulos .= "<option value='VARTOIMTULOSTIN' {$avain_sel['VARTOIMTULOSTIN']}>".t("Varaston toimipaikan tulostin")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "OPTISCANKOM") $ulos .= "<option value='OPTISCANKOM' $avain_sel[OPTISCANKOM]>".t("Optiscan oletuskeräyskommentti")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "ULKJARJLAHETE") $ulos .= "<option value='ULKJARJLAHETE' {$avain_sel['ULKJARJLAHETE']}>".t("Ulkoisen varastojärjestelmän lähete-email")."</option>";
+  if ($lukitse_laji== "" or $lukitse_laji == "KRLSTFOOTRAJAUS") $ulos .= "<option value='KRLSTFOOTRAJAUS' {$avain_sel['KRLSTFOOTRAJAUS']}>".t("Iso asiakkaan nimi keräyslistan footteriin")."</option>";
   if ($lukitse_laji== "") $ulos .= "</optgroup>";
 
   if ($lukitse_laji== "") $ulos .= "<optgroup label='".t("Verkkokaupan avainsanat")."'>";
@@ -453,6 +454,68 @@ if ($_siirtovarastot and $_selitetark_2) {
     $ulos .= "<option value = '{$toimitustapa['tunnus']}' {$sel}>{$toimitustapa['selite']}</option>";
     $sel = "";
   }
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+  $tyyppi = 1;
+}
+
+if ($avain_sel['KRLSTFOOTRAJAUS'] == 'SELECTED' and $_selite) {
+  $query = "SELECT *
+            FROM varastopaikat
+            WHERE yhtio = '{$kukarow['yhtio']}'
+              AND tyyppi != 'P'
+            ORDER BY nimitys ASC";
+  $varasto_result = pupe_query($query);
+
+  $ulos .= "<td>";
+  $ulos .= "<select name = '$nimi'>";
+  $sel = "";
+  while ($varasto = mysql_fetch_assoc($varasto_result)) {
+    if ($varasto['tunnus'] == $trow[$i]) {
+      $sel = "SELECTED";
+    }
+    $ulos .= "<option value = '{$varasto['tunnus']}' {$sel}>{$varasto['nimitys']}</option>";
+    $sel = "";
+  }
+  $ulos .= "</select>";
+  $ulos .= "</td>";
+
+  $jatko = 0;
+  $tyyppi = 1;
+}
+
+if ($avain_sel['KRLSTFOOTRAJAUS'] == 'SELECTED' and $_selitetark) {
+  $query = "SELECT *
+            FROM toimitustapa
+            WHERE yhtio = '{$kukarow['yhtio']}'";
+  $toimitustapa_result = pupe_query($query);
+
+  $ulos .= "<td><select name = '$nimi'>";
+  $sel = "";
+
+  if ($trow[$i] == "kaikki") {
+    $sel_kaikki = "SELECTED";
+  }
+  elseif ($trow[$i] == "nouto") {
+    $sel_nouto = "SELECTED";
+  }
+  elseif ($trow[$i] == "ei_nouto") {
+    $sel_einouto = "SELECTED";
+  }
+
+  $ulos .= "<option value = 'kaikki' {$sel_kaikki}>".t("Kaikki")."</option>";
+  $ulos .= "<option value = 'nouto' {$sel_nouto}>".t("Nouto")."</option>";
+  $ulos .= "<option value = 'ei_nouto' {$sel_einouto}>".t("Ei nouto")."</option>";
+
+  while ($toimitustapa = mysql_fetch_assoc($toimitustapa_result)) {
+    if ($toimitustapa['tunnus'] == $trow[$i]) {
+      $sel = "SELECTED";
+    }
+    $ulos .= "<option value = '{$toimitustapa['tunnus']}' {$sel}>{$toimitustapa['selite']}</option>";
+    $sel = "";
+  }
+
   $ulos .= "</select></td>";
 
   $jatko = 0;

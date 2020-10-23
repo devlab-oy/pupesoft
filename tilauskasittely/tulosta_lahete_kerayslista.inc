@@ -1316,16 +1316,46 @@ if (!function_exists('loppu_kerayslista')) {
         }
       }
 
-      $query = "SELECT nouto 
-                FROM lasku l
-                INNER JOIN toimitustapa tt
-                  ON (tt.yhtio = l.yhtio AND tt.selite = l.toimitustapa)
-                WHERE l.yhtio = '$laskurow[yhtio]'
-                  AND l.tunnus = '$laskurow[tunnus]'";
-      $tt_result = pupe_query($query);
-      if (mysql_num_rows($tt_result) == 1) {
-        $tt_row = mysql_fetch_assoc($tt_result);
-        $isoasiakasfooter = ($tt_row['nouto'] == 'o');
+      if ($laskurow['nimi'] != "Useita") {
+        $footer_avainsana = "";
+
+        $query = "SELECT toimitustapa.nouto,
+                    toimitustapa.tunnus
+                  FROM lasku
+                    INNER JOIN toimitustapa
+                      ON (toimitustapa.yhtio = lasku.yhtio 
+                        AND toimitustapa.selite = lasku.toimitustapa)
+                  WHERE lasku.yhtio = '$laskurow[yhtio]'
+                    AND lasku.tunnus = '$laskurow[tunnus]'";
+        $tt_result = pupe_query($query);
+        $tt_row = mysql_fetch_assoc($tt_result);   
+
+        // katsotaan eka onko kaikki-avainsana setattu tälle varastolle
+        // jolloin kaikkien yksittäisten asiakkaiden footeriin tuodaan iso asiakasnimi
+        $footer_avainsana = t_avainsana("KRLSTFOOTRAJAUS", "", "AND selite = {$laskurow['varasto']} AND selitetark = 'kaikki'", "", "", "selitetark");
+
+        if ($footer_avainsana == "") {
+          // sitten tarkistetaan onko toimitustapa nouto vai ei
+          // jos nouto etsitään nouto rajaus ja jos ei etsitään ei_nouto rajausta
+          if ($tt_row["nouto"] == "o") {
+            $footer_avainsana = t_avainsana("KRLSTFOOTRAJAUS", "", "AND selite = {$laskurow['varasto']} AND selitetark = 'nouto'", "", "", "selitetark");
+          }
+          else {
+            $footer_avainsana = t_avainsana("KRLSTFOOTRAJAUS", "", "AND selite = {$laskurow['varasto']} AND selitetark = 'ei_nouto'", "", "", "selitetark");
+          }          
+        }
+
+        // katsotaan vielä löytyykö tarkemmin toimitustapaan kohdistettu sääntö
+        if ($footer_avainsana == "") {
+          $footer_avainsana = t_avainsana("KRLSTFOOTRAJAUS", "", "AND selite = {$laskurow['varasto']} AND selitetark = '{$tt_row["tunnus"]}'", "", "", "selitetark");
+        }
+
+        if ($footer_avainsana != "") {
+          $isoasiakasfooter = true;
+        }
+        else {
+          $isoasiakasfooter = false;
+        }
       }
       else {
         $isoasiakasfooter = false;

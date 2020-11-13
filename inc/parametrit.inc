@@ -109,6 +109,12 @@ unset($dpd_delisprint_pass);
 unset($dpd_delisprint_path);
 unset($dpd_delisprint_user);
 
+unset($bentte_host);
+unset($bentte_pass);
+unset($bentte_path);
+unset($bentte_user);
+unset($bentte_skey);
+
 unset($dpdss);
 unset($dpdtun);
 

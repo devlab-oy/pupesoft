@@ -9,8 +9,15 @@
 //jos on laitettu kollikenttään 0 niin ei yritetä luoda siirtotiedostoa
 if ($kollityht > 0) {
 
-  // Onko varastokohtainen delisprinttiserveri?
-  if (isset($varasto) and $varasto > 0) {
+  if (!empty($bentte_siirto)) {
+    $dpd_ds_host = $bs_host;
+    $dpd_ds_user = $bs_user;
+    $dpd_ds_pass = $bs_pass;
+    $dpd_ds_path = $bs_path;
+    $dpd_ds_skey = $bs_skey;
+  }
+  elseif (isset($varasto) and $varasto > 0) {
+    // Onko varastokohtainen delisprinttiserveri?
     $dpd_ds_host = (isset($dpd_delisprint_host[$varasto]) and $dpd_delisprint_host[$varasto] != "") ? $dpd_delisprint_host[$varasto] : $dpd_delisprint_host;
     $dpd_ds_user = (isset($dpd_delisprint_user[$varasto]) and $dpd_delisprint_user[$varasto] != "") ? $dpd_delisprint_user[$varasto] : $dpd_delisprint_user;
     $dpd_ds_pass = (isset($dpd_delisprint_pass[$varasto]) and $dpd_delisprint_pass[$varasto] != "") ? $dpd_delisprint_pass[$varasto] : $dpd_delisprint_pass;
@@ -281,22 +288,41 @@ if ($kollityht > 0) {
 
     // Jos siirretään FTP:llä niin $dpd_ds_path on remote pathi ja jos ei siirretä niin $dpd_ds_path on local pathi
     if ($dpd_ds_host != "" and $dpd_ds_user != "" and $dpd_ds_pass != "" and $dpd_ds_path != "") {
+      if (!empty($bentte_siirto)) {
+        $filenimi = "/tmp/bentteimport-".md5(uniqid(rand(), true)).".dat";
 
-      $filenimi = "/tmp/dpdimport-".md5(uniqid(rand(), true)).".dat";
+        if (file_put_contents($filenimi, $aineisto) === FALSE) {
+          echo "<br><font class='error'>".t("tiedoston kirjoitus EPÄONNISTUI")."</font><br>";
+        }
 
-      if (file_put_contents($filenimi, $aineisto) === FALSE) {
-        echo "<br><font class='error'>".t("tiedoston kirjoitus EPÄONNISTUI")."</font><br>";
+        // tarvitaan  $ftphost $ftpuser $ftppass $ftppath $ftpfile $ftpskey
+        // palautetaan $palautus ja $syy
+        $ftphost = $dpd_ds_host;
+        $ftpuser = $dpd_ds_user;
+        $ftppass = $dpd_ds_pass;
+        $ftppath = (trim($toitarow['lajittelupiste']) != '') ? $dpd_ds_path . trim($toitarow['lajittelupiste']) . "/" : $dpd_ds_path;
+        $ftpfile = realpath($filenimi);
+        $ftpskey = $dpd_ds_skey;
+
+        require "inc/sftp-send.inc";
       }
+      else {
+        $filenimi = "/tmp/dpdimport-".md5(uniqid(rand(), true)).".dat";
 
-      // tarvitaan  $ftphost $ftpuser $ftppass $ftppath $ftpfile
-      // palautetaan $palautus ja $syy
-      $ftphost = $dpd_ds_host;
-      $ftpuser = $dpd_ds_user;
-      $ftppass = $dpd_ds_pass;
-      $ftppath = (trim($toitarow['lajittelupiste']) != '') ? $dpd_ds_path . trim($toitarow['lajittelupiste']) . "/" : $dpd_ds_path;
-      $ftpfile = realpath($filenimi);
+        if (file_put_contents($filenimi, $aineisto) === FALSE) {
+          echo "<br><font class='error'>".t("tiedoston kirjoitus EPÄONNISTUI")."</font><br>";
+        }
 
-      require "inc/ftp-send.inc";
+        // tarvitaan  $ftphost $ftpuser $ftppass $ftppath $ftpfile
+        // palautetaan $palautus ja $syy
+        $ftphost = $dpd_ds_host;
+        $ftpuser = $dpd_ds_user;
+        $ftppass = $dpd_ds_pass;
+        $ftppath = (trim($toitarow['lajittelupiste']) != '') ? $dpd_ds_path . trim($toitarow['lajittelupiste']) . "/" : $dpd_ds_path;
+        $ftpfile = realpath($filenimi);
+
+        require "inc/ftp-send.inc";
+      }
     }
     else {
       //kirjoitetaan faili levylle..

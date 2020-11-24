@@ -4,11 +4,11 @@ if ($kollityht > 0) {
 
   // Onko varastokohtainen bentteserveri?
   if (isset($varasto) and $varasto > 0) {
-    $bs_host = (isset($bentte_host[$varasto]) and $bentte_host[$varasto] != "") ? $bentte_host[$varasto] : $bentte_host;
-    $bs_user = (isset($bentte_user[$varasto]) and $bentte_user[$varasto] != "") ? $bentte_user[$varasto] : $bentte_user;
-    $bs_pass = (isset($bentte_pass[$varasto]) and $bentte_pass[$varasto] != "") ? $bentte_pass[$varasto] : $bentte_pass;
-    $bs_path = (isset($bentte_path[$varasto]) and $bentte_path[$varasto] != "") ? $bentte_path[$varasto] : $bentte_path;
-    $bs_key  = (isset($bentte_skey[$varasto]) and $bentte_skey[$varasto] != "") ? $bentte_skey[$varasto] : $bentte_skey;
+    $bs_host = (isset($bentte_host[$varasto])) ? $bentte_host[$varasto] : $bentte_host;
+    $bs_user = (isset($bentte_user[$varasto])) ? $bentte_user[$varasto] : $bentte_user;
+    $bs_pass = (isset($bentte_pass[$varasto])) ? $bentte_pass[$varasto] : $bentte_pass;
+    $bs_path = (isset($bentte_path[$varasto])) ? $bentte_path[$varasto] : $bentte_path;
+    $bs_key  = (isset($bentte_skey[$varasto])) ? $bentte_skey[$varasto] : $bentte_skey;
   }
   else {
     $bs_host = $bentte_host;

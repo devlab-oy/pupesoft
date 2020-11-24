@@ -51,7 +51,7 @@ if ($palautus == "") {
     @ssh2_auth_pubkey_file($connection, $ftpuser, $ftpskey.'.pub', $ftpskey);
   }
 
-  if (!ssh2_auth_password($connection, $ftpuser, $ftppass)) {
+  if (!empty($ftppass) and !ssh2_auth_password($connection, $ftpuser, $ftppass)) {
     $palautus = "Could not login to remote host ($ftpuser, $ftppass)";
   }
 }

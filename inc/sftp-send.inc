@@ -11,9 +11,10 @@ else exit;
 // $ftppath --> Kansio FTP-palvelimella jonne failit tyˆnnet‰‰n
 // $ftpfile --> Siirrett‰v‰ tiedosto
 // $ftpport --> Custom portti, ei pakollinen
+// $ftpskey --> SSH avain, ei pakollinen
+
 // $ftpfail --> Kansio jonne laitetaan failit jos siirto feilaa, ei pakollinen
 // $ftpsucc --> Kansio jonne tallennetaan failit jos siirto onnistuu, ei pakollinen
-// $ftptype --> FTP-palvelimen tyyppi esim "AS400", ei pakollinen
 // $ftptmpr --> K‰ytet‰‰nkˆ .TMP p‰‰tett‰ siirron aikana.
 
 // Palautetaan:
@@ -45,8 +46,14 @@ if (!$connection) {
   $palautus = "Could not connect to remote host. ($ftphost)";
 }
 
-if ($palautus == "" and !ssh2_auth_password($connection, $ftpuser, $ftppass)) {
-  $palautus = "Could not login to remote host ($ftpuser, $ftppass)";
+if ($palautus == "") {
+  if (!empty($ftpskey)) {
+    @ssh2_auth_pubkey_file($connection, $ftpuser, $ftpskey.'.pub', $ftpskey);
+  }
+
+  if (!ssh2_auth_password($connection, $ftpuser, $ftppass)) {
+    $palautus = "Could not login to remote host ($ftpuser, $ftppass)";
+  }
 }
 
 if ($palautus == "") {
@@ -60,7 +67,7 @@ if ($palautus == "") {
 if ($palautus == "") {
   $remotefile = $ftppath.basename($ftpfile);
 
-  $stream = fopen("ssh2.sftp://".intval($sftp)."/$remotefile", "w");
+  $stream = fopen("ssh2.sftp://$sftp/$remotefile", "w");
 
   if (!$stream) {
     $palautus = "Could not open file ($remotefile)";
@@ -85,6 +92,14 @@ if ($palautus == "" and isset($ftpsucc) and $ftpsucc != "") {
 elseif ($palautus != "" and isset($ftpfail) and $ftpfail != "") {
   // Siirret‰‰n faili outboxiin odottamaan uutta yrityst‰ jos siirto feilasi
   rename($ftpfile, $ftpfail."/".$filenimi);
+}
+
+// logia talteen
+if ($palautus == "") {
+  pupesoft_log('sftp_send', "Tiedoston '{$ftpfile}' l‰hetys palvelimelle '{$ftphost}' onnistui");
+}
+else {
+  pupesoft_log('sftp_send', "Tiedoston '{$ftpfile}' l‰hetys palvelimelle '{$ftphost}' ep‰onnistui: {$palautus}");
 }
 
 // jos siirto ep‰onnistuu ja faildirri ei oo setattu nin l‰hetet‰‰n maili

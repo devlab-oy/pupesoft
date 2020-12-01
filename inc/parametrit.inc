@@ -109,6 +109,11 @@ unset($dpd_delisprint_pass);
 unset($dpd_delisprint_path);
 unset($dpd_delisprint_user);
 
+unset($dpd_telli_host);
+unset($dpd_telli_pass);
+unset($dpd_telli_path);
+unset($dpd_telli_user);
+
 unset($bentte_host);
 unset($bentte_pass);
 unset($bentte_path);

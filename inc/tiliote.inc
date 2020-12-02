@@ -60,6 +60,7 @@ if ($tunnus != 'T11' and $tunnus != 'T81' and $maksu == 1) {
       // M‰‰r‰ valuutassa
       $kohdm = round($maara / $kurssi, 2);
       $kohdm_valkoodilisa = "";
+      echo "63 kohdm $kohdm = round(maara $maara / kurssi $kurssi, 2)";
     }
     elseif ($valuuttatili == "ON" and $kurssi != 1) {
       // M‰‰r‰ valuutassa
@@ -431,6 +432,39 @@ if ($tunnus != 'T11' and $tunnus != 'T81' and $maksu == 1) {
               $result = pupe_query($query);
             }
           }
+
+          // Muutetaan " AMP " & merkeiksi ja kokeillaan uudestaan
+          if (strripos($maksaa, " AMP ")) {
+              $maksaa_amp = str_replace(" AMP ", "&", $maksaa);
+            
+
+            if (mysql_num_rows($result) != 1) {
+              // tarkka 35 merkki‰ <-> 35 merkki‰ nimihaku k‰teisalennuksella
+              $query = "SELECT *, round(summa * vienti_kurssi, 2) 'vietysumma', round(kasumma * vienti_kurssi, 2) 'vietykasumma'
+                        FROM lasku
+                        WHERE nimi LIKE '$maksaa_amp%'
+                        and ((summa = $kohdm * -1) or (abs(summa + $kohdm - kasumma) < 0.02))
+                        and yhtio   = '$yritirow[yhtio]'
+                        and tila    = 'Q'
+                        and alatila = 'K'
+                        $kohdm_valkoodilisa";
+              $result = pupe_query($query);
+            }
+            echo "453 Q $query <br><br>";
+            // tarkka 35 merkki‰ <-> 35 merkki‰ nimihaku ilman k‰teisalennusta
+            if (mysql_num_rows($result) != 1) {
+              $query = "SELECT *, round(summa * vienti_kurssi, 2) 'vietysumma'
+                        FROM lasku
+                        WHERE nimi LIKE '$maksaa_amp%'
+                        and ((summa = $kohdm * -1) or (abs(summa + $kohdm) < 0.02))
+                        and yhtio   = '$yritirow[yhtio]'
+                        and tila    = 'Q'
+                        and alatila = ''
+                        $kohdm_valkoodilisa";
+              $result = pupe_query($query);
+              echo "465 Q $query <br><br>";
+            }
+          }  
         }
 
         if (isset($result) and mysql_num_rows($result) == 1) {

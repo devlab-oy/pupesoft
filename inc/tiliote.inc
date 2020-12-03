@@ -443,7 +443,7 @@ if ($tunnus != 'T11' and $tunnus != 'T81' and $maksu == 1) {
               $query = "SELECT *, round(summa * vienti_kurssi, 2) 'vietysumma', round(kasumma * vienti_kurssi, 2) 'vietykasumma'
                         FROM lasku
                         WHERE nimi LIKE '$maksaa_amp%'
-                        and ((summa = $kohdm * -1) or (abs(summa + $kohdm - kasumma) < 0.02))
+                        and ((summa = $kohdm * -1) or (abs(summa + $kohdm - kasumma) < 0.01))
                         and yhtio   = '$yritirow[yhtio]'
                         and tila    = 'Q'
                         and alatila = 'K'
@@ -456,7 +456,7 @@ if ($tunnus != 'T11' and $tunnus != 'T81' and $maksu == 1) {
               $query = "SELECT *, round(summa * vienti_kurssi, 2) 'vietysumma'
                         FROM lasku
                         WHERE nimi LIKE '$maksaa_amp%'
-                        and ((summa = $kohdm * -1) or (abs(summa + $kohdm) < 0.02))
+                        and ((summa = $kohdm * -1) or (abs(summa + $kohdm) < 0.01))
                         and yhtio   = '$yritirow[yhtio]'
                         and tila    = 'Q'
                         and alatila = ''

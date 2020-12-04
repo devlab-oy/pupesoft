@@ -35,6 +35,11 @@ if ((!isset($kpl) or $kpl == "") and !is_array($kpl_array) and substr($tuoteno, 
     $trow = mysql_fetch_assoc($tresult);
     $tuoteno = $trow['tuoteno'];
     $kpl = 1;
+
+    if ($trow['tahtituote'] == "-1") {
+      $kpl = -1;
+    }
+
     $enarimatch = TRUE;
   }
 }

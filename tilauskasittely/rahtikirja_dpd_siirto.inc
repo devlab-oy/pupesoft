@@ -32,7 +32,7 @@ if ($kollityht > 0) {
     $dpd_ds_skey = '';
   }
 
-  if (($dpd_ds_host != "" and $dpd_ds_user != "" and $dpd_ds_pass != "" and $dpd_ds_path != "") or $dpd_ds_path != "") {
+  if (($dpd_ds_host != "" and $dpd_ds_user != "" and $dpd_ds_path != "" and ($dpd_ds_pass != "" or $dpd_ds_skey != "")) or $dpd_ds_path != "") {
 
     if ($toitarow['logy_rahtikirjanumerot'] != "" and strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE and (!isset($muutos) or $muutos != 'yes')) {
 

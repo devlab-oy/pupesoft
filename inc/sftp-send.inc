@@ -30,6 +30,13 @@ else exit;
 // echo "ftpfail --> $ftpfail<br>";
 // echo "ftpsucc --> $ftpsucc<br>";
 
+pupesoft_log('sftp_send', "Logitetaan tiedoston '{$ftpfile}' lähetyksen parametrit:");
+pupesoft_log('sftp_send', "ftphost: '{$ftphost}'");
+pupesoft_log('sftp_send', "ftpuser: '{$ftpuser}'");
+pupesoft_log('sftp_send', "ftppass: '{$ftppass}'");
+pupesoft_log('sftp_send', "ftpskey: '{$ftpskey}'");
+pupesoft_log('sftp_send', "ftpport: '{$ftpport}'");
+
 $palautus = "";
 $tulos_ulos_ftp  = "";
 $sftpport = !empty($ftpport) ? $ftpport : 22;

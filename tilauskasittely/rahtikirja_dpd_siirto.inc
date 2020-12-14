@@ -293,7 +293,7 @@ if ($kollityht > 0) {
 
     if (!empty($dpd_telli_siirto)) {
       // Muunnetaan merkistö UTF8:ksi
-      $aineisto = utf8_encode(implode(",", array_keys($delisprintFileFormat))."\n".$aineisto);
+      $aineisto = utf8_encode(implode(";", array_keys($delisprintFileFormat))."\n".$aineisto);
     }
     else {
       // Muunnetaan merkistö Windows ANSI

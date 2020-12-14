@@ -258,23 +258,23 @@ if ($kollityht > 0) {
       // Rahtikirjanro
       // Sähköposti
       $delisprintFileFormat = array(
-        "tilausnumero",
-        "tilausnumero2",
-        "viite",
-        "yhteyshenkilo_nimi",
-        "toim_nimi",
-        "toim_osoite",
-        "toim_postino",
-        "toim_postitp",
-        "toim_maa",
-        "yhteyshenkilo_puh",
-        "kollit",
-        "lahetystapa",
-        "jv_summa",
-        "jv_valkoodi",
-        "kateinen",
-        "rahtikirjanro",
-        "toim_email",
+        "tellimus" => "tilausnumero",
+        "tellimus2" => "tilausnumero2",
+        "viide" => "viite",
+        "kontaktisik" => "yhteyshenkilo_nimi",
+        "tarne_nimi" => "toim_nimi",
+        "tarne_aadress" => "toim_osoite",
+        "tarne_indeks" => "toim_postino",
+        "tarne_linn" => "toim_postitp",
+        "tarne_riik" => "toim_maa",
+        "kontaktisik_telefon" => "yhteyshenkilo_puh",
+        "pakid" => "kollit",
+        "saatmisviis" => "lahetystapa",
+        "noude_summa" => "jv_summa",
+        "noude_valuuta" => "jv_valkoodi",
+        "sularahas" => "kateinen",
+        "veolehe_number" => "rahtikirjanro",
+        "tarne_epost" => "toim_email",
       );
     }
 
@@ -291,7 +291,7 @@ if ($kollityht > 0) {
 
     if (!empty($dpd_telli_siirto)) {
       // Muunnetaan merkistö UTF8:ksi
-      $aineisto = utf8_encode(implode(",", $delisprintFileFormat)."\n".$aineisto);
+      $aineisto = utf8_encode(implode(",", array_keys($delisprintFileFormat))."\n".$aineisto);
     }
     else {
       // Muunnetaan merkistö Windows ANSI

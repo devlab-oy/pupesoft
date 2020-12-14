@@ -266,6 +266,7 @@ if ($kollityht > 0) {
         "kontaktisik" => "yhteyshenkilo_nimi",
         "tarne_nimi" => "toim_nimi",
         "tarne_aadress" => "toim_osoite",
+        "tarne_aadress2" => "",
         "tarne_indeks" => "toim_postino",
         "tarne_linn" => "toim_postitp",
         "tarne_riik" => "toim_maa",
@@ -283,17 +284,17 @@ if ($kollityht > 0) {
     unset($aineisto);
 
     foreach ($delisprintFileFormat as $p) {
-      $aineisto .= $parcelOrder[$p].";";
-
-      // tehdään ylimääräinen ; koska formaatissa on lähiosoite 2 mitä ei ole pupessa
-      if ($p == "toim_osoite") {
+      if (!empty($p)) {
+        $aineisto .= $parcelOrder[$p].";";
+      }
+      else {
         $aineisto .= ";";
       }
     }
 
     if (!empty($dpd_telli_siirto)) {
       // Muunnetaan merkistö UTF8:ksi
-      $aineisto = utf8_encode(implode(";", array_keys($delisprintFileFormat))."\n".$aineisto);
+      $aineisto = utf8_encode(implode(";", array_keys($delisprintFileFormat)).";\n".$aineisto);
     }
     else {
       // Muunnetaan merkistö Windows ANSI

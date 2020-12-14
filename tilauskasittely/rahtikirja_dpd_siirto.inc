@@ -17,10 +17,10 @@ if ($kollityht > 0) {
     $dpd_ds_skey = $bs_skey;
   }
   elseif (!empty($dpd_telli_siirto)) {
-    $dpd_ds_host = $dpdtelli_host_host;
-    $dpd_ds_user = $dpdtelli_user_user;
-    $dpd_ds_pass = $dpdtelli_pass_pass;
-    $dpd_ds_path = $dpdtelli_path_path;
+    $dpd_ds_host = $dpdtelli_host;
+    $dpd_ds_user = $dpdtelli_user;
+    $dpd_ds_pass = $dpdtelli_pass;
+    $dpd_ds_path = $dpdtelli_path;
   }
   elseif (isset($varasto) and $varasto > 0) {
     // Onko varastokohtainen delisprinttiserveri?

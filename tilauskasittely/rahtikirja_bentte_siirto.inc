@@ -8,7 +8,7 @@ if ($kollityht > 0) {
     $bs_user = (isset($bentte_user[$varasto])) ? $bentte_user[$varasto] : $bentte_user;
     $bs_pass = (isset($bentte_pass[$varasto])) ? $bentte_pass[$varasto] : $bentte_pass;
     $bs_path = (isset($bentte_path[$varasto])) ? $bentte_path[$varasto] : $bentte_path;
-    $bs_key  = (isset($bentte_skey[$varasto])) ? $bentte_skey[$varasto] : $bentte_skey;
+    $bs_skey  = (isset($bentte_skey[$varasto])) ? $bentte_skey[$varasto] : $bentte_skey;
   }
   else {
     $bs_host = $bentte_host;

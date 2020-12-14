@@ -28,15 +28,17 @@ if ($kollityht > 0) {
     $dpd_ds_user = (isset($dpd_delisprint_user[$varasto]) and $dpd_delisprint_user[$varasto] != "") ? $dpd_delisprint_user[$varasto] : $dpd_delisprint_user;
     $dpd_ds_pass = (isset($dpd_delisprint_pass[$varasto]) and $dpd_delisprint_pass[$varasto] != "") ? $dpd_delisprint_pass[$varasto] : $dpd_delisprint_pass;
     $dpd_ds_path = (isset($dpd_delisprint_path[$varasto]) and $dpd_delisprint_path[$varasto] != "") ? $dpd_delisprint_path[$varasto] : $dpd_delisprint_path;
+    $dpd_ds_skey = '';
   }
   else {
     $dpd_ds_host = $dpd_delisprint_host;
     $dpd_ds_user = $dpd_delisprint_user;
     $dpd_ds_pass = $dpd_delisprint_pass;
     $dpd_ds_path = $dpd_delisprint_path;
+    $dpd_ds_skey = '';
   }
 
-  if (($dpd_ds_host != "" and $dpd_ds_user != "" and $dpd_ds_pass != "" and $dpd_ds_path != "") or $dpd_ds_path != "") {
+  if (($dpd_ds_host != "" and $dpd_ds_user != "" and $dpd_ds_path != "" and ($dpd_ds_pass != "" or $dpd_ds_skey != "")) or $dpd_ds_path != "") {
 
     if ($toitarow['logy_rahtikirjanumerot'] != "" and strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE and (!isset($muutos) or $muutos != 'yes')) {
 
@@ -303,7 +305,7 @@ if ($kollityht > 0) {
     }
 
     // Jos siirret‰‰n FTP:ll‰ niin $dpd_ds_path on remote pathi ja jos ei siirret‰ niin $dpd_ds_path on local pathi
-    if ($dpd_ds_host != "" and $dpd_ds_user != "" and $dpd_ds_pass != "" and $dpd_ds_path != "") {
+    if ($dpd_ds_host != "" and $dpd_ds_user != "" and $dpd_ds_path != "" and ($dpd_ds_pass != "" or $dpd_ds_skey != "")) {
       if (!empty($bentte_siirto)) {
         $filenimi = "/tmp/bentteimport-".md5(uniqid(rand(), true)).".dat";
 

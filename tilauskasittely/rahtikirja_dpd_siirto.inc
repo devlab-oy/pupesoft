@@ -238,7 +238,7 @@ if ($kollityht > 0) {
     }
 
     //  Luodaan aineostoformaatti
-    if (!is_array($delisprintFileFormat)) {
+    if (empty($delisprintFileFormat) or !is_array($delisprintFileFormat)) {
 
       //######### Uusi muokattu formaatti ##########
       // Reference
@@ -281,7 +281,7 @@ if ($kollityht > 0) {
       );
     }
 
-    unset($aineisto);
+    $aineisto = "";
 
     foreach ($delisprintFileFormat as $p) {
       if (!empty($p)) {

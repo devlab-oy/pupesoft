@@ -16,6 +16,12 @@ if ($kollityht > 0) {
     $dpd_ds_path = $bs_path;
     $dpd_ds_skey = $bs_skey;
   }
+  elseif (!empty($dpd_telli_siirto)) {
+    $dpd_ds_host = $dpdtelli_host;
+    $dpd_ds_user = $dpdtelli_user;
+    $dpd_ds_pass = $dpdtelli_pass;
+    $dpd_ds_path = $dpdtelli_path;
+  }
   elseif (isset($varasto) and $varasto > 0) {
     // Onko varastokohtainen delisprinttiserveri?
     $dpd_ds_host = (isset($dpd_delisprint_host[$varasto]) and $dpd_delisprint_host[$varasto] != "") ? $dpd_delisprint_host[$varasto] : $dpd_delisprint_host;
@@ -127,7 +133,6 @@ if ($kollityht > 0) {
       $v = $asrow[$i];
 
       //  Korvaavuksia ja näppäilyä
-
       $parcelOrder["asiakas_".$r] = $v;
     }
 
@@ -233,7 +238,7 @@ if ($kollityht > 0) {
     }
 
     //  Luodaan aineostoformaatti
-    if (!is_array($delisprintFileFormat)) {
+    if (empty($delisprintFileFormat) or !is_array($delisprintFileFormat)) {
 
       //######### Uusi muokattu formaatti ##########
       // Reference
@@ -253,40 +258,48 @@ if ($kollityht > 0) {
       // Valuutta jos jälkivaatimus, muuten ei mitään
       // Jos maksuehto on jälkivaatimus, laitetaan t("Käteinen")
       // Rahtikirjanro
+      // Sähköposti
       $delisprintFileFormat = array(
-        "tilausnumero",
-        "tilausnumero2",
-        "viite",
-        "yhteyshenkilo_nimi",
-        "toim_nimi",
-        "toim_osoite",
-        "toim_postino",
-        "toim_postitp",
-        "toim_maa",
-        "yhteyshenkilo_puh",
-        "kollit",
-        "lahetystapa",
-        "jv_summa",
-        "jv_valkoodi",
-        "kateinen",
-        "rahtikirjanro",
+        "tellimus" => "tilausnumero",
+        "tellimus2" => "tilausnumero2",
+        "viide" => "viite",
+        "kontaktisik" => "yhteyshenkilo_nimi",
+        "tarne_nimi" => "toim_nimi",
+        "tarne_aadress" => "toim_osoite",
+        "tarne_aadress2" => "",
+        "tarne_indeks" => "toim_postino",
+        "tarne_linn" => "toim_postitp",
+        "tarne_riik" => "toim_maa",
+        "kontaktisik_telefon" => "yhteyshenkilo_puh",
+        "pakid" => "kollit",
+        "saatmisviis" => "lahetystapa",
+        "noude_summa" => "jv_summa",
+        "noude_valuuta" => "jv_valkoodi",
+        "sularahas" => "kateinen",
+        "veolehe_number" => "rahtikirjanro",
+        "tarne_epost" => "toim_email",
       );
-
     }
 
-    unset($aineisto);
+    $aineisto = "";
 
     foreach ($delisprintFileFormat as $p) {
-      $aineisto .= $parcelOrder[$p].";";
-
-      // tehdään ylimääräinen ; koska formaatissa on lähiosoite 2 mitä ei ole pupessa
-      if ($p == "toim_osoite") {
+      if (!empty($p)) {
+        $aineisto .= $parcelOrder[$p].";";
+      }
+      else {
         $aineisto .= ";";
       }
     }
 
-    // Muunnetaan merkistö Windows ANSI
-    iconv("ISO-8859-1", "Windows-1252", $aineisto);
+    if (!empty($dpd_telli_siirto)) {
+      // Muunnetaan merkistö UTF8:ksi
+      $aineisto = utf8_encode(implode(";", array_keys($delisprintFileFormat)).";\n".$aineisto);
+    }
+    else {
+      // Muunnetaan merkistö Windows ANSI
+      iconv("ISO-8859-1", "Windows-1252", $aineisto);
+    }
 
     if (substr($dpd_ds_path, -1) != '/') {
       $dpd_ds_path .= '/';
@@ -342,5 +355,4 @@ if ($kollityht > 0) {
   else {
     echo "<br><font class='error'>".t("DPD aineiston luotiin tarvittavia parametrejä puuttuu!")."</font><br>";
   }
-
 }

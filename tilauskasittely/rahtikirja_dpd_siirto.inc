@@ -326,7 +326,12 @@ if ($kollityht > 0) {
         require "inc/sftp-send.inc";
       }
       else {
-        $filenimi = "/tmp/dpdimport-".md5(uniqid(rand(), true)).".dat";
+        if (!empty($dpd_telli_siirto)) {
+          $filenimi = "/tmp/dpdimport-".md5(uniqid(rand(), true)).".csv";
+        }
+        else {
+          $filenimi = "/tmp/dpdimport-".md5(uniqid(rand(), true)).".dat";
+        }
 
         if (file_put_contents($filenimi, $aineisto) === FALSE) {
           echo "<br><font class='error'>".t("tiedoston kirjoitus EPÄONNISTUI")."</font><br>";

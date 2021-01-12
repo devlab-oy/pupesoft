@@ -197,7 +197,7 @@ if (isset($_FILES['userfile']) and (is_uploaded_file($_FILES['userfile']['tmp_na
   $retval = tarkasta_liite("userfile", array("XLSX", "XLS", "ODS", "SLK", "XML", "GNUMERIC", "CSV", "TXT", "DATAIMPORT"));
 
   if ($retval !== TRUE) {
-    lue_data_echo("<font class='error'><br>".t("V‰‰r‰ tiedostomuoto")."!</font>");
+    lue_data_echo("<font class='error'><br>".t("V‰‰r‰ tiedostomuoto")."!</font><br>{$retval}");
     $kasitellaan_tiedosto = FALSE;
   }
 }

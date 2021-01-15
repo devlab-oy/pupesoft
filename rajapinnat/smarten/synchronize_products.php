@@ -50,9 +50,9 @@ if ($lahetystyyppi == "U") {
                   (ta.tunnus IS NULL AND tuote.status != 'P')";
 }
 
-$query = "SELECT tuote.*, ta.selite AS synkronointi, ta.tunnus AS ta_tunnus
+$query = "SELECT tuote.*, ta.selite AS synkronointi_smarten, ta.tunnus AS ta_tunnus
           FROM tuote
-          LEFT JOIN tuotteen_avainsanat AS ta ON (ta.yhtio = tuote.yhtio AND ta.tuoteno = tuote.tuoteno AND ta.laji = 'synkronointi')
+          LEFT JOIN tuotteen_avainsanat AS ta ON (ta.yhtio = tuote.yhtio AND ta.tuoteno = tuote.tuoteno AND ta.laji = 'synkronointi_smarten')
           WHERE tuote.yhtio   = '{$kukarow['yhtio']}'
           AND tuote.ei_saldoa = ''
           AND tuote.tuotetyyppi NOT IN ('A', 'B')
@@ -189,7 +189,7 @@ if (mysql_num_rows($res) > 0) {
       }
 
       // tyyppi
-      if (!is_null($row['synkronointi']) and $row['synkronointi'] == '') {
+      if (!is_null($row['synkronointi_smarten']) and $row['synkronointi_smarten'] == '') {
         $type = 'M';
       }
       else {
@@ -277,12 +277,12 @@ if (mysql_num_rows($res) > 0) {
       $worksheet->writeString($excelrivi, $excelsarake++, "" /*"YhikugruppKompl"*/);
 
       if ($lahetystyyppi == "U") {
-        if (is_null($row['synkronointi'])) {
+        if (is_null($row['synkronointi_smarten'])) {
           $query = "INSERT INTO tuotteen_avainsanat SET
                     yhtio      = '{$kukarow['yhtio']}',
                     tuoteno    = '{$row['tuoteno']}',
                     kieli      = '{$yhtiorow['kieli']}',
-                    laji       = 'synkronointi',
+                    laji       = 'synkronointi_smarten',
                     selite     = 'x',
                     laatija    = '{$kukarow['kuka']}',
                     luontiaika = now(),
@@ -295,7 +295,7 @@ if (mysql_num_rows($res) > 0) {
                     selite      = 'x'
                     WHERE yhtio = '{$kukarow['yhtio']}'
                     AND tuoteno = '{$row['tuoteno']}'
-                    AND laji    = 'synkronointi'";
+                    AND laji    = 'synkronointi_smarten'";
           pupe_query($query);
         }
       }

@@ -205,7 +205,7 @@ if (!function_exists("tuotetarkista")) {
     if ($fieldname == "tuotemassa") {
       $tem_tuotemassa = $t[$i];
     }
-    
+
     if ($fieldname == "halytysraja") {
       $tem_halytysraja = $t[$i];
     }
@@ -486,7 +486,7 @@ if (!function_exists("tuotetarkista")) {
         $query = "UPDATE tuotteen_avainsanat SET
                   selite      = ''
                   WHERE yhtio = '{$kukarow['yhtio']}'
-                  AND laji    = 'synkronointi'
+                  AND laji   in ('synkronointi','synkronointi_smarten')
                   AND tuoteno = '{$tem_tuoteno}'";
         $updres = pupe_query($query);
       }

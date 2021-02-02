@@ -151,6 +151,10 @@ if ($php_cli) {
   $_yhtio   = pupesoft_cleanstring($argv[1]);
   $yhtiorow = hae_yhtion_parametrit($_yhtio);
 
+  if(isset($fitek_cron_xml) && $fitek_cron_xml) {
+    $yhtiorow["verkkolasku_lah"] == "fitek";
+  }
+
   // Kukarow setataan esim editilaus_in.inc:ss‰
   if (!isset($kukarow)) {
     $kukarow = hae_kukarow('admin', $yhtiorow['yhtio']);
@@ -318,6 +322,7 @@ else {
   }
 
   if ($tee == "LASKUTA") {
+
     //Tiedostojen polut ja nimet
     //keksit‰‰n uudelle failille joku varmasti uniikki nimi:
     $nimixml = "$pupe_root_polku/dataout/laskutus-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(), true)).".xml";
@@ -337,6 +342,8 @@ else {
     else {
       $nimifinvoice = "$pupe_root_polku/dataout/laskutus-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(), true))."_finvoice.xml";
     }
+
+
 
     $nimisisainenfinvoice = "$pupe_root_polku/dataout/laskutus-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(), true))."_sisainenfinvoice.xml";
 

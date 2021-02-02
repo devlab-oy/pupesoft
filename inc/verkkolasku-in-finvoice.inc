@@ -144,6 +144,7 @@ $osto_rahti_alv = 0;
 $osto_rivi_kulu_alv = 0;
 $ei_oteta_kulua_pois = true;
 $rivien_summa_yhteensa = 0;
+$kustannuspaikat_fitek = false;
 
 if (count($tuotetiedot) > 0) {
   foreach ($tuotetiedot as $tuotetieto) {
@@ -158,6 +159,15 @@ if (count($tuotetiedot) > 0) {
     $rtuoteno[$i]["tuoteno"] = current(array_filter($tuote_elementit));
 
     if ($rtuoteno[$i]["tuoteno"] != "") {
+
+      if($fitek_xml_cron_tiedot && 
+      $tuotetieto->Accounting->JournalEntry->CostObjective->Kaubaost) {
+        $kustannuspaikat_fitek=true;
+        $rtuoteno[$i]["kirjanpito"]["kustannuspaikka"] = xml_string($tuotetieto->Accounting->JournalEntry->CostObjective->Kaubaost);
+        $rtuoteno[$i]["kirjanpito"]["alv"] = xml_string($tuotetieto->Accounting->JournalEntry->VatSum);
+        $rtuoteno[$i]["kirjanpito"]["alv_prosentti"] = xml_string($tuotetieto->Accounting->JournalEntry->VatRate);
+      }
+
       // maventa-case
       $rtuoteno[$i]['ostotilausnro'] = $laskun_asiakkaan_tilausnumero;
 

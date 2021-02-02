@@ -4,9 +4,13 @@
 // palautetaan virheviesti jos tapahtuu jotain, muuten palautetaan tyhjää
 
 if (!function_exists("verkkolasku_in")) {
-  function verkkolasku_in($file, $luolasku = TRUE) {
+  function verkkolasku_in($file, $luolasku = TRUE, $fitek_xml_cron_tiedot=false) {
     global $kukarow, $yhtiorow, $toim_asiakkaantiedot, $xmlstr, $liitetaanko_editilaus_laskulle_hakemisto, $verkkolaskut_orig;
 
+    if($file == "/Users/sprintit/Sites/mercantileoyab/pupesoft/datain/fitek_import/.DS_Store") {
+      return;
+    }
+    
     if (!is_file($file)) {
       echo "Tiedostoa $file ei löydy!\n";
       return "Tiedostoa $file ei löydy!";
@@ -21,7 +25,8 @@ if (!function_exists("verkkolasku_in")) {
     }
 
     // luetaan sisään xml
-    $xml = simplexml_load_string($xmlstr);
+    if(!$xml = simplexml_load_string($xmlstr)) {
+    }
 
     if ($xml === FALSE) {
       echo "Tiedosto $file ei ole validi XML!\n";
@@ -31,7 +36,7 @@ if (!function_exists("verkkolasku_in")) {
     require_once "inc/functions.inc";
 
     // Katsotaan mitä aineistoa käpistellään
-    if (strpos($file, "finvoice") !== false or strpos($file, "maventa") !== false) {
+    if (strpos($file, "finvoice") !== false or strpos($file, "maventa") !== false or $fitek_xml_cron_tiedot) {
       require "inc/verkkolasku-in-finvoice.inc";
     }
     elseif (strpos($file, "teccominvoice") !== false) {
@@ -101,6 +106,8 @@ if (!function_exists("verkkolasku_in")) {
     $rtuoteno[]["rivihinta_valuutassa"]
     */
 
+
+
     //siivotaan viite
     $laskun_tilausviite = pupesoft_cleanstring($laskun_tilausviite);
 
@@ -125,6 +132,13 @@ if (!function_exists("verkkolasku_in")) {
 
     if ($pos !== FALSE) {
       $verkkotunnus_vas = substr($verkkotunnus_vas, 0, $pos); // otetaan info ekaan ättämerkkiin asti
+    }
+
+    if ($fitek_xml_cron_tiedot) {
+      $yhtiorow = $fitek_xml_cron_tiedot['yhtiorow'];
+      $kukarow = $fitek_xml_cron_tiedot['kukarow'];
+      $yhtio = $fitek_xml_cron_tiedot['yhtio'];
+      $laskun_toimitunnus = $fitek_xml_cron_tiedot['toimi'];
     }
 
     if ($verkkotunnus_vas != "") {
@@ -319,6 +333,8 @@ if (!function_exists("verkkolasku_in")) {
     $laskuttajan_nimi         = trim($laskuttajan_nimi);
     $laskuttajan_toimittajanumero  = trim($laskuttajan_toimittajanumero);
     $laskun_toimitunnus       = (int) $laskun_toimitunnus;
+
+    
 
     if ($laskun_toimitunnus > 0) {
       // 0 etsitään toimittaja tunnuksella
@@ -591,6 +607,7 @@ if (!function_exists("verkkolasku_in")) {
 
       $oletustili       = $trow['tilino'];
       $oletuskust       = $trow['kustannuspaikka'];
+
       $oletuskohde      = $trow['kohde'];
       $oletusprojekti   = $trow['projekti'];
       $selite           = trim($trow['nimi']." ".$trow['nimitark'])." ".t("Laskunumero").": " . $laskun_numero;
@@ -768,6 +785,8 @@ if (!function_exists("verkkolasku_in")) {
             }
           }
 
+
+
           if ($tiliointirow['hyvak1'] == 'MAKSUUN') {
             $hyvak[1] = "";
             $hyvak[2] = "";
@@ -844,6 +863,8 @@ if (!function_exists("verkkolasku_in")) {
       if ($_yhtion_toimipaikka != 0) {
         $yhtiorow = hae_yhtion_parametrit($yhtio, $_yhtion_toimipaikka);
       }
+
+
 
       // Laitetaan tämä päivä laskun kirjauspäiväksi jos yhtiön parametri on tässä asennossa.
       if ($yhtiorow['ostolaskujen_paivays'] == "1") {
@@ -1136,10 +1157,27 @@ if (!function_exists("verkkolasku_in")) {
       $osto_kulu_alv    = (!isset($osto_kulu_alv) or trim($osto_kulu_alv) == '') ? 0 : round($osto_kulu_alv, 2);
       $osto_rahti_alv   = (!isset($osto_rahti_alv) or trim($osto_rahti_alv) == '') ? 0 : round($osto_rahti_alv, 2);
       $osto_rivi_kulu_alv = (!isset($osto_rivi_kulu_alv) or trim($osto_rivi_kulu_alv) == '') ? 0 : round($osto_rivi_kulu_alv, 2);
-
+      
+      if($fitek_xml_cron_tiedot) {
+        $tila = "U";
+        /*
+        $fitek_xml_cron_tiedot_lisa = "
+          yhtio_nimi = '".($yhtiorow['laskutus_nimi'] ? $yhtiorow['laskutus_nimi'] : $yhtiorow['nimi'])."',
+          yhtio_osoite = '".($yhtiorow['laskutus_osoite'] ? $yhtiorow['laskutus_osoite'] : $yhtiorow['osoite'])."',
+          yhtio_postino = '".($yhtiorow['laskutus_postino'] ? $yhtiorow['laskutus_postino'] : $yhtiorow['postino'])."',
+          yhtio_maa = '".($yhtiorow['laskutus_maa'] ? $yhtiorow['laskutus_maa'] : $yhtiorow['maa'])."',
+          yhtio_ovttunnus = '.$yhtiorow[ovttunnus]',
+          yhtio_kotipaikka = '$yhtiorow[kotipaikka]',
+          ";
+          */
+      }
+      
+      $fitek_xml_cron_tiedot_lisa = '';
+      
       // Kirjoitetaan lasku
       $query = "INSERT into lasku set
                 yhtio                  = '$yhtio',
+                ".$fitek_xml_cron_tiedot_lisa."
                 yhtio_toimipaikka      = '{$_yhtion_toimipaikka}',
                 summa                  = '$summa',
                 kasumma                = '$kassaale',
@@ -1266,7 +1304,7 @@ if (!function_exists("verkkolasku_in")) {
       }
 
       // Tehdän pelkät oletustiliöinnit
-      if (mysql_num_rows($result) == 0 and count($ealvi) == 1) {
+      if (mysql_num_rows($result) == 0 and count($ealvi) == 1 and !$kustannuspaikat_fitek) {
 
         if ($oletustili > 0) {
           $tili = $oletustili;
@@ -1412,7 +1450,13 @@ if (!function_exists("verkkolasku_in")) {
 
         for ($i = 0; $i < $count_rtuoteno; $i++) {
           $tili = ($oletustili > 0) ? $oletustili : $yhtiorow['muutkulut'];
-          $kustp = $oletuskust;
+
+          if($fitek_xml_cron_tiedot && isset($rtuoteno[$i]["kustannuspaikka"])) {
+            $kustp = $rtuoteno[$i]["kirjanpito"]["kustannuspaikka"];
+          } else {
+            $kustp = $oletuskust;
+          }
+          
 
           if ((float) $rtuoteno[$i]["rivihinta"] != 0) {
 
@@ -1490,6 +1534,10 @@ if (!function_exists("verkkolasku_in")) {
 
             if ($rtuoteno[$i]["alv"] != "") $vero = (float) $rtuoteno[$i]["alv"];
             else $vero = (float) $oletusalvi;
+
+            if(isset($rtuoteno[$i]["kirjanpito"])) {
+              $vero = $rtuoteno[$i]["kirjanpito"]["alv"];
+            }
 
             $summa_varasto         = $summa;
             $summa_varasto_valuutassa = $summa_valuutassa;

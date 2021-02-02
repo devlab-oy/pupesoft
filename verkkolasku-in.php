@@ -9,7 +9,7 @@ if (php_sapi_name() == 'cli') {
 
 date_default_timezone_set("Europe/Helsinki");
 
-if ($php_cli) {
+if ($php_cli && (!isset($fitek_xml_cron) && !$fitek_xml_cron)) {
   // otetaan includepath aina rootista
   ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(__FILE__).PATH_SEPARATOR."/usr/share/pear");
   error_reporting(E_ALL ^E_WARNING ^E_NOTICE);
@@ -112,22 +112,29 @@ if ($handle = opendir($laskut)) {
     unset($xmlstr);
 
     $nimi = $laskut."/".$file;
-    $laskuvirhe = verkkolasku_in($nimi, TRUE);
+
+    //Kronille oletuslaskutiedot
+    if(!isset($fitek_xml_cron_tiedot)) { $fitek_xml_cron_tiedot = false; };
+
+    $laskuvirhe = verkkolasku_in($nimi, TRUE, $fitek_xml_cron_tiedot);
 
     if ($laskuvirhe == "") {
       if (!$php_cli) {
         echo "Verkkolasku vastaanotettu onnistuneesti!<br>\n<br>\n";
       }
-
       rename($laskut."/".$file, $oklaskut."/".$file);
     }
     else {
       if (!$php_cli) {
         echo "<font class='error'>Verkkolaskun vastaanotossa virhe:</font><br>\n<pre>$laskuvirhe</pre><br>\n";
       }
+      
       $alku = $loppu = "";
       list($alku, $loppu) = explode("####", $laskuvirhe);
-
+      if($nimi != "/Users/sprintit/Sites/mercantileoyab/pupesoft/datain/fitek_import/1.xml") {
+        unlink($nimi);
+      }
+      
       if (trim($loppu) == "ASN") {
         // ei tehd‰ mit‰‰n vaan annetaan j‰‰d‰ roikkumaan kansioon seuraavaan kierrokseen saakka, tai kunnes joku lukee postit.
       }

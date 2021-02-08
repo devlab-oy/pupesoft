@@ -21,15 +21,17 @@ function hae_maksutapahtumat($tilausnumero) {
 function hae_kuitit($archive_id) {
   global $kukarow;
 
-  require "rajapinnat/lumo_client.php";
+  require "rajapinnat/NetsCloudClient.php";
 
-  $lumo_ip = explode(":", $kukarow["maksupaate_ip"]);
-  $lumo_service_address = $lumo_ip[0];
-  $lumo_service_port = $lumo_ip[1] ? $lumo_ip[1] : 1234;
+  // From salasanat.php
+  global $nets_cloud_base_url, $nets_cloud_username, $nets_cloud_password;
 
-  $lumo_client = new LumoClient($lumo_service_address, $lumo_service_port);
+  // Maksupäätteen id käyttäjän takaa
+  $nets_cloud_terminal_id = $kukarow["maksupaate_id"];
 
-  return $lumo_client->getPreviousReceipts($archive_id);
+  $client = new NetsCloudClient($nets_cloud_base_url, $nets_cloud_username, $nets_cloud_password, $nets_cloud_terminal_id);
+
+  return $client->getPreviousReceipts($archive_id);
 }
 
 function hae_asiakkaan_kuitti($tunnus) {

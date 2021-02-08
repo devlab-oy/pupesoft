@@ -606,7 +606,7 @@ if ($tee == 'MUUTA') {
               kassamyyja                    = '{$kassamyyja}',
               dynaaminen_kassamyynti        = '{$dynaaminen_kassamyynti}',
               maksupaate_kassamyynti        = '{$maksupaate_kassamyynti}',
-              maksupaate_ip                 = '{$maksupaate_ip}',
+              maksupaate_id                 = '{$maksupaate_id}',
               jyvitys                       = '{$jyvitys}',
               oletus_ohjelma                = '{$oletus_ohjelma}',
               maksuehto                     = '{$maksuehto}',
@@ -1284,13 +1284,13 @@ if ($tee == 'MUUTA') {
               </tr>";
 
         echo "<tr>
-                <th align='left'>" . t("Maksup‰‰tteen IP") . ":</th>
+                <th align='left'>" . t("Maksup‰‰tteen ID") . ":</th>
                 <td>
-                  <input id='maksupaate_ip'
+                  <input id='maksupaate_id'
                          type='text'
-                         name='maksupaate_ip'
-                         value='{$krow["maksupaate_ip"]}'
-                         placeholder='" . t("IP tai IP:portti") . "'/>
+                         name='maksupaate_id'
+                         value='{$krow["maksupaate_id"]}'
+                         placeholder='12345678'/>
                 </td>
               </tr>";
 

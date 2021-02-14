@@ -18,7 +18,7 @@ $php_cli = true;
 $fitek_xml_cron = true;
 $fitek_xml_cron_dirname = realpath('datain/fitek_import');
 
-// ytiorow. Jos ei löydy, lopeta cron
+// ytiorow. Jos ei l?ydy, lopeta cron
 if($yhtiorow = hae_yhtion_parametrit(pupesoft_cleanstring($argv[1]))) { } else { echo "Vaara yhtio"; exit; }
 // kukarow. Jos ei annettu, oletuksena on admin
 if(isset($argv[1]) && $kukarow = hae_kukarow(pupesoft_cleanstring($argv[2]), $yhtiorow['yhtio'])) { } else { $kukarow = hae_kukarow('admin', $yhtiorow['yhtio']); }

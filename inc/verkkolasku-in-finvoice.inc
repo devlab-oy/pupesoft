@@ -94,7 +94,7 @@ if ($yhtio == "") {
   $yhtio = xml_string($xml->BuyerPartyDetails->BuyerOrganisationTaxCode);
 }
 
-//FITEK XML CRON poikkeus laskun pvm ja yhtio
+//FITEK XML CRON poikkeus laskun pvm
 if($fitek_xml_cron_tiedot)
 {
   $laskun_tapvm = date("Ymd");

@@ -621,11 +621,6 @@ if (!function_exists("verkkolasku_in")) {
 
       $oletustili       = $trow['tilino'];
       $oletuskust       = $trow['kustannuspaikka'];
-      
-      //rivikohtaiset kustannuspaikat tiedot FITEK -cronille
-      if($fitek_xml_cron_tiedot) {
-        $oletuskust       = $fitek_oletus_kustannuspaikka;
-      }
 
       $oletuskohde      = $trow['kohde'];
       $oletusprojekti   = $trow['projekti'];

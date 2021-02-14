@@ -185,7 +185,7 @@ if (count($tuotetiedot) > 0) {
           $kustannuspaikat_fitek = true;
           $rtuoteno[$i]["kirjanpito"]["kustannuspaikka"] = xml_string($tuotetieto->Accounting->JournalEntry->CostObjective->Kaubaost);
         }
-        if(!isset($fitek_oletus_kustannuspaikka)) { $fitek_oletus_kustannuspaikka = $rtuoteno[$i]["kirjanpito"]["kustannuspaikka"]; }
+        
         // Yritetään etsiä tuote nimellä ja saada oikea tuoteno
         $query = "SELECT
                   tuoteno

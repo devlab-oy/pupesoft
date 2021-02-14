@@ -41,10 +41,4 @@ $verkkolaskut_error  = $fitek_xml_cron_dirname."/error";
 $verkkolaskut_reject = $fitek_xml_cron_dirname."/reject";
 
 include_once("verkkolasku-in.php");
-
-
-//chdir("tilauskasittely");
-
-//$laskutettavat = array("154");
-//include_once("verkkolasku.php");
 ?>

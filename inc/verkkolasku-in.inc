@@ -138,7 +138,11 @@ if (!function_exists("verkkolasku_in")) {
       $yhtiorow = $fitek_xml_cron_tiedot['yhtiorow'];
       $kukarow = $fitek_xml_cron_tiedot['kukarow'];
       $yhtio = $fitek_xml_cron_tiedot['yhtio'];
-      $laskun_toimitunnus = $fitek_xml_cron_tiedot['toimi'];
+      if($fitek_xml_cron_tiedot['toimi']) {
+        $laskun_toimitunnus = $fitek_xml_cron_tiedot['toimi'];
+      }
+    } else { 
+      $fitek_xml_cron_tiedot = false;
     }
 
     if ($verkkotunnus_vas != "") {
@@ -334,8 +338,6 @@ if (!function_exists("verkkolasku_in")) {
     $laskuttajan_toimittajanumero  = trim($laskuttajan_toimittajanumero);
     $laskun_toimitunnus       = (int) $laskun_toimitunnus;
 
-    
-
     if ($laskun_toimitunnus > 0) {
       // 0 etsitään toimittaja tunnuksella
       $query  = "SELECT *
@@ -479,9 +481,7 @@ if (!function_exists("verkkolasku_in")) {
     }
 
     if (!isset($trow) and $laskuttajan_nimi != "") {
-
       $laskuttajan_nimi = str_replace(" ", "", $laskuttajan_nimi);
-
       // 8 etsitään IBAN-numerolla. (Maventa special: Jos laskulta puuttuu ytunnus, niin IBAN-työnnetaan laskun nimi-kenttään...)
       $query = "SELECT *
                 FROM toimi
@@ -489,6 +489,20 @@ if (!function_exists("verkkolasku_in")) {
                 and ultilno  = '$laskuttajan_nimi'
                 and ultilno  not in ('','0')
                 and tyyppi  != 'P'";
+      $result = pupe_query($query);
+
+      if (mysql_num_rows($result) == 1) {
+        $trow = mysql_fetch_assoc($result);
+      }
+    }
+
+    if (!isset($trow) and !$laskun_toimitunnus and $fitek_xml_cron_tiedot) {
+      // 10 etsitään vain joku toimi, jos kaytossa FITEK CRON
+      $query = "SELECT *
+                FROM toimi
+                WHERE yhtio        = '$yhtio'
+                and tyyppi        != 'P' 
+                LIMIT 0,1";
       $result = pupe_query($query);
 
       if (mysql_num_rows($result) == 1) {
@@ -607,6 +621,11 @@ if (!function_exists("verkkolasku_in")) {
 
       $oletustili       = $trow['tilino'];
       $oletuskust       = $trow['kustannuspaikka'];
+      
+      //rivikohtaiset kustannuspaikat tiedot FITEK -cronille
+      if($fitek_xml_cron_tiedot) {
+        $oletuskust       = $fitek_oletus_kustannuspaikka;
+      }
 
       $oletuskohde      = $trow['kohde'];
       $oletusprojekti   = $trow['projekti'];
@@ -1160,24 +1179,11 @@ if (!function_exists("verkkolasku_in")) {
       
       if($fitek_xml_cron_tiedot) {
         $tila = "U";
-        /*
-        $fitek_xml_cron_tiedot_lisa = "
-          yhtio_nimi = '".($yhtiorow['laskutus_nimi'] ? $yhtiorow['laskutus_nimi'] : $yhtiorow['nimi'])."',
-          yhtio_osoite = '".($yhtiorow['laskutus_osoite'] ? $yhtiorow['laskutus_osoite'] : $yhtiorow['osoite'])."',
-          yhtio_postino = '".($yhtiorow['laskutus_postino'] ? $yhtiorow['laskutus_postino'] : $yhtiorow['postino'])."',
-          yhtio_maa = '".($yhtiorow['laskutus_maa'] ? $yhtiorow['laskutus_maa'] : $yhtiorow['maa'])."',
-          yhtio_ovttunnus = '.$yhtiorow[ovttunnus]',
-          yhtio_kotipaikka = '$yhtiorow[kotipaikka]',
-          ";
-          */
       }
-      
-      $fitek_xml_cron_tiedot_lisa = '';
       
       // Kirjoitetaan lasku
       $query = "INSERT into lasku set
                 yhtio                  = '$yhtio',
-                ".$fitek_xml_cron_tiedot_lisa."
                 yhtio_toimipaikka      = '{$_yhtion_toimipaikka}',
                 summa                  = '$summa',
                 kasumma                = '$kassaale',
@@ -1304,7 +1310,7 @@ if (!function_exists("verkkolasku_in")) {
       }
 
       // Tehdän pelkät oletustiliöinnit
-      if (mysql_num_rows($result) == 0 and count($ealvi) == 1 and !$kustannuspaikat_fitek) {
+      if (mysql_num_rows($result) == 0 and count($ealvi) == 1 and !$fitek_xml_cron_tiedot) {
 
         if ($oletustili > 0) {
           $tili = $oletustili;
@@ -1535,8 +1541,10 @@ if (!function_exists("verkkolasku_in")) {
             if ($rtuoteno[$i]["alv"] != "") $vero = (float) $rtuoteno[$i]["alv"];
             else $vero = (float) $oletusalvi;
 
+            // FITEK kirjanpito tiedot
             if(isset($rtuoteno[$i]["kirjanpito"])) {
               $vero = $rtuoteno[$i]["kirjanpito"]["alv"];
+              $tili = $rtuoteno[$i]["kirjanpito"]["tili"];
             }
 
             $summa_varasto         = $summa;

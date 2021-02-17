@@ -152,6 +152,14 @@ if ($kollityht > 0) {
     if ($rakir_row['jv'] != "") {
       $parcelOrder["lahetystapa"] = "NP,NN,CD";
     }
+    elseif (!empty($dpd_telli_siirto)) {
+      if (!empty($toitarow['lajittelupiste'])) {
+        $parcelOrder["lahetystapa"] = "NP,{$toitarow['lajittelupiste']}";
+      }
+      else {
+        $parcelOrder["lahetystapa"] = "NP";
+      }
+    }
     else {
       if (strtolower($toitarow['lajittelupiste']) == 'sameday') {
         //$parcelOrder["lahetystapa"] = "NP,SD"; Toistaiseksi tuo SD pois DPD:n pyynnöstä "sameday" tapauksessa.
@@ -342,7 +350,7 @@ if ($kollityht > 0) {
         $ftphost = $dpd_ds_host;
         $ftpuser = $dpd_ds_user;
         $ftppass = $dpd_ds_pass;
-        $ftppath = (trim($toitarow['lajittelupiste']) != '') ? $dpd_ds_path . trim($toitarow['lajittelupiste']) . "/" : $dpd_ds_path;
+        $ftppath = (trim($toitarow['lajittelupiste']) != '' and empty($dpd_telli_siirto)) ? $dpd_ds_path . trim($toitarow['lajittelupiste']) . "/" : $dpd_ds_path;
         $ftpfile = realpath($filenimi);
 
         require "inc/ftp-send.inc";

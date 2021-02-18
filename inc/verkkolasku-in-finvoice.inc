@@ -99,6 +99,7 @@ if($fitek_xml_cron_tiedot)
 {
   $laskun_tapvm = date("Ymd");
   $laskun_lapvm = $laskun_tapvm;
+  $laskun_saapumisnumero = xml_string($xml->InvoiceDetails->OrderIdentifier);
 }
 
 // Onko tunnus IBAN-muodossa, jos ei niin varmistetaan, että se on ovtmuodossa

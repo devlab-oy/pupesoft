@@ -1174,10 +1174,16 @@ if (!function_exists("verkkolasku_in")) {
       
       if($fitek_xml_cron_tiedot) {
         $tila = "M";
+        $fitek_xml_cron_lisa = 
+        "saapumisnumero = '$laskun_saapumisnumero',
+        ";
+      } else {
+        $fitek_xml_cron_lisa = "";
       }
       
       // Kirjoitetaan lasku
       $query = "INSERT into lasku set
+                ".$fitek_xml_cron_lisa."
                 yhtio                  = '$yhtio',
                 yhtio_toimipaikka      = '{$_yhtion_toimipaikka}',
                 summa                  = '$summa',
@@ -1233,6 +1239,7 @@ if (!function_exists("verkkolasku_in")) {
                 osto_rahti_alv         = '{$osto_rahti_alv}',
                 osto_kulu_alv          = '{$osto_kulu_alv}',
                 osto_rivi_kulu_alv     = '{$osto_rivi_kulu_alv}'";
+
       $result = pupe_query($query);
       $tunnus = mysql_insert_id($GLOBALS["masterlink"]);
 

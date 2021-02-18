@@ -188,11 +188,11 @@ if (count($tuotetiedot) > 0) {
         
         // Yritet‰‰n etsi‰ tuote nimell‰ ja saada oikea tuoteno
         $query = "SELECT
-                  tuoteno
+                    tuoteno
                   FROM
-                  tuote
+                    tuote
                   WHERE
-                  yhtio = '".$fitek_xml_cron_tiedot['yhtio']."' AND nimitys = '".$rtuoteno[$i]["nimitys"]."'";
+                    yhtio = '".$fitek_xml_cron_tiedot['yhtio']."' AND nimitys = '".$rtuoteno[$i]["nimitys"]."'";
         $result = pupe_query($query);
         if (mysql_num_rows($result) != 0) {
           $rtuoteno[$i]["tuoteno"] = mysql_fetch_assoc($result)['tuoteno'];

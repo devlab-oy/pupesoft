@@ -1452,12 +1452,11 @@ if (!function_exists("verkkolasku_in")) {
         for ($i = 0; $i < $count_rtuoteno; $i++) {
           $tili = ($oletustili > 0) ? $oletustili : $yhtiorow['muutkulut'];
 
-          if($fitek_xml_cron_tiedot && isset($rtuoteno[$i]["kustannuspaikka"])) {
+          if($fitek_xml_cron_tiedot && isset($rtuoteno[$i]["kirjanpito"])) {
             $kustp = $rtuoteno[$i]["kirjanpito"]["kustannuspaikka"];
           } else {
             $kustp = $oletuskust;
           }
-          
 
           if ((float) $rtuoteno[$i]["rivihinta"] != 0) {
 

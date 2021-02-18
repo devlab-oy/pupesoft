@@ -7,10 +7,6 @@ if (!function_exists("verkkolasku_in")) {
   function verkkolasku_in($file, $luolasku = TRUE, $fitek_xml_cron_tiedot=false) {
     global $kukarow, $yhtiorow, $toim_asiakkaantiedot, $xmlstr, $liitetaanko_editilaus_laskulle_hakemisto, $verkkolaskut_orig;
 
-    if($file == "/Users/sprintit/Sites/mercantileoyab/pupesoft/datain/fitek_import/.DS_Store") {
-      return;
-    }
-    
     if (!is_file($file)) {
       echo "Tiedostoa $file ei löydy!\n";
       return "Tiedostoa $file ei löydy!";

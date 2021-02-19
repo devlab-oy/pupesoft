@@ -180,7 +180,7 @@ if ($tee == "KOPIOI") {
             $insert_lisa .= "hintatyyppi = '{$kop_hintatyypp[$kop_index]}',";
           }
 
-          $query = "INSERT into  tuoteperhe set
+          $query = "INSERT into tuoteperhe set
                     isatuoteno   = '$kop_isatuo',
                     tuoteno      = '$kop_tuoteno[$kop_index]',
                     kerroin      = '$kop_kerroin[$kop_index]',
@@ -192,8 +192,10 @@ if ($tee == "KOPIOI") {
                     yhtio        = '$kukarow[yhtio]',
                     laatija      = '$kukarow[kuka]',
                     luontiaika   = now(),
+                    muuttaja     = '$kukarow[kuka]',
+                    muutospvm    = now(),
                     tyyppi       = '$hakutyyppi'";
-          $result = pupe_query($query);
+          pupe_query($query);
         }
       }
 
@@ -441,8 +443,10 @@ if ($tee == 'LISAA' and $oikeurow['paivitys'] == '1') {
 
         if ($tunnus == "") {
           $query = "  INSERT INTO ";
-          $postq = " , laatija  = '$kukarow[kuka]',
-                       luontiaika  = now()";
+          $postq = " , laatija = '$kukarow[kuka]',
+                       luontiaika = now(),
+                       muuttaja = '$kukarow[kuka]',
+                       muutospvm = now()";
         }
         else {
           $query = "   UPDATE ";
@@ -477,7 +481,7 @@ if ($tee == 'LISAA' and $oikeurow['paivitys'] == '1') {
                 hintatyyppi    = '$hintatyyppi',
                 ei_nayteta     = '$ei_nayteta'
                 $postq";
-        $result = pupe_query($query);
+        pupe_query($query);
 
         $tunnus = "";
         $tee   = "";
@@ -489,7 +493,7 @@ if ($tee == 'LISAA' and $oikeurow['paivitys'] == '1') {
     }
   }
   else {
-    echo t("Tuoteperheen is‰ ei voi olla sek‰ is‰ ett‰ lapsi samassa perhess‰")."!<br>";
+    echo t("Tuoteperheen is‰ ei voi olla sek‰ is‰ ett‰ lapsi samassa perheess‰")."!<br>";
   }
   $tee = "";
 }
@@ -519,7 +523,7 @@ if ($tee == 'POISTA' and $oikeurow['paivitys'] == '1') {
              where tunnus = '$tunnus'
              and yhtio    = '$kukarow[yhtio]'
              and tyyppi   = '$hakutyyppi'";
-  $result = pupe_query($query);
+  pupe_query($query);
   $tunnus = '';
 }
 
@@ -533,26 +537,30 @@ if ($tee == 'TALLENNAFAKTA' and $oikeurow['paivitys'] == '1') {
             WHERE yhtio    = '$kukarow[yhtio]'
             and tyyppi     = '$hakutyyppi'
             and isatuoteno = '$isatuoteno'";
-  $result = pupe_query($query);
+  pupe_query($query);
 
   $query = "UPDATE tuoteperhe SET
             fakta          = '$fakta',
             fakta2         = '$fakta2',
-            omasivu        = '$omasivu'
+            omasivu        = '$omasivu',
+            muuttaja       = '$kukarow[kuka]',
+            muutospvm      = now()
             WHERE yhtio    = '$kukarow[yhtio]'
             and tyyppi     = '$hakutyyppi'
             and isatuoteno = '$isatuoteno'
             ORDER BY isatuoteno, tuoteno
             LIMIT 1";
-  $result = pupe_query($query);
+  pupe_query($query);
 
   if (isset($ei_nayteta)) {
     $query = "UPDATE tuoteperhe
-              SET ei_nayteta = '$ei_nayteta'
+              SET ei_nayteta = '$ei_nayteta',
+              muuttaja       = '$kukarow[kuka]',
+              muutospvm      = now()
               WHERE yhtio    = '$kukarow[yhtio]'
               and tyyppi     = '$hakutyyppi'
               and isatuoteno = '$isatuoteno'";
-    $result = pupe_query($query);
+    pupe_query($query);
   }
 
   // P‰ivitet‰‰n hintatyyppi tuoteperheelle
@@ -601,11 +609,13 @@ if ($tee == 'TALLENNAFAKTA' and $oikeurow['paivitys'] == '1') {
     }
 
     $query = "UPDATE tuoteperhe
-              SET hintatyyppi = '$hintatyyppi'
+              SET hintatyyppi = '$hintatyyppi',
+              muuttaja        = '$kukarow[kuka]',
+              muutospvm       = now()
               WHERE yhtio    = '$kukarow[yhtio]'
               and tyyppi     = '$hakutyyppi'
               and isatuoteno = '$isatuoteno'";
-    $result = pupe_query($query);
+    pupe_query($query);
   }
 
   echo "<br>";
@@ -1025,6 +1035,55 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
         echo "</tr>";
       }
 
+      $query = "SELECT tuoteperhe.muuttaja,
+                tuoteperhe.muutospvm,
+                tuoteperhe.laatija,
+                tuoteperhe.luontiaika,
+                muuttaja.nimi mnimi,
+                laatija.nimi lnimi
+                FROM tuoteperhe
+                LEFT JOIN kuka as muuttaja ON (muuttaja.yhtio = tuoteperhe.yhtio and muuttaja.kuka = tuoteperhe.muuttaja)
+                LEFT JOIN kuka as laatija ON (laatija.yhtio = tuoteperhe.yhtio and laatija.kuka = tuoteperhe.laatija)
+                WHERE tuoteperhe.yhtio    = '$kukarow[yhtio]'
+                AND tuoteperhe.tyyppi     = '$hakutyyppi'
+                AND tuoteperhe.isatuoteno = '$isatuoteno'
+                ORDER BY if(tuoteperhe.muutospvm!='0000-00-00 00:00:00', tuoteperhe.muutospvm, tuoteperhe.luontiaika) DESC
+                LIMIT 1";
+      $ressu = pupe_query($query);
+      $muuttajarow = mysql_fetch_assoc($ressu);
+
+      echo "<tr>";
+      echo "<th>",t("Muuttaja"),":</th>";
+      echo "<td>";
+
+      if (!empty($muuttajarow['muuttaja'])) {
+        if (!empty($muuttajarow['mnimi'])) {
+          echo $muuttajarow['mnimi'];
+        }
+        else {
+          echo $muuttajarow['muuttaja'];
+        }
+      }
+      else {
+        if (!empty($muuttajarow['lnimi'])) {
+          echo $muuttajarow['lnimi'];
+        }
+        else {
+          echo $muuttajarow['laatija'];
+        }
+      }
+
+      echo " @ ";
+
+      if (!empty($muuttajarow['muuttaja'])) {
+        echo tv1dateconv($muuttajarow['muutospvm'], "PITKA");
+      }
+      else {
+        echo tv1dateconv($muuttajarow['luontiaika'], "PITKA");
+      }
+
+      echo "</td>";
+      echo "</tr>";
       echo "</table>";
 
       if ($oikeurow['paivitys'] == '1') {

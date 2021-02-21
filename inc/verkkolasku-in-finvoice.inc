@@ -178,25 +178,12 @@ if (count($tuotetiedot) > 0) {
       // fitek XML muutoksia lis‰t‰‰n array:iin, jota voidaan k‰ytt‰‰ tulevaisuudessa
       if($fitek_xml_cron_tiedot)
       {
-        $rtuoteno[$i]["tuoteno"] = false;
         $rtuoteno[$i]["kirjanpito"]["alv"] = xml_string($tuotetieto->Accounting->JournalEntry->VatSum);
         $rtuoteno[$i]["kirjanpito"]["alv_prosentti"] = xml_string($tuotetieto->Accounting->JournalEntry->VatRate);
         $rtuoteno[$i]["kirjanpito"]["tili"] = xml_string($tuotetieto->Accounting->JournalEntry->GeneralLedger);
         if($tuotetieto->Accounting->JournalEntry->CostObjective->Kaubaost) {
           $kustannuspaikat_fitek = true;
           $rtuoteno[$i]["kirjanpito"]["kustannuspaikka"] = xml_string($tuotetieto->Accounting->JournalEntry->CostObjective->Kaubaost);
-        }
-        
-        // Yritet‰‰n etsi‰ tuote nimell‰ ja saada oikea tuoteno
-        $query = "SELECT
-                    tuoteno
-                  FROM
-                    tuote
-                  WHERE
-                    yhtio = '".$fitek_xml_cron_tiedot['yhtio']."' AND nimitys = '".$rtuoteno[$i]["nimitys"]."'";
-        $result = pupe_query($query);
-        if (mysql_num_rows($result) != 0) {
-          $rtuoteno[$i]["tuoteno"] = mysql_fetch_assoc($result)['tuoteno'];
         }
       }
 

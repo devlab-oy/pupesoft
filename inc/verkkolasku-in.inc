@@ -492,20 +492,6 @@ if (!function_exists("verkkolasku_in")) {
       }
     }
 
-    if (!isset($trow) and !$laskun_toimitunnus and $fitek_xml_cron_tiedot) {
-      // 10 etsitään vain joku toimi, jos kaytossa FITEK CRON
-      $query = "SELECT *
-                FROM toimi
-                WHERE yhtio        = '$yhtio'
-                and tyyppi        != 'P' 
-                LIMIT 0,1";
-      $result = pupe_query($query);
-
-      if (mysql_num_rows($result) == 1) {
-        $trow = mysql_fetch_assoc($result);
-      }
-    }
-
     // vaihtoehtoiset_verkkolaskutunnukset poikkeus tarkistus
     if (!isset($trow)) {
       $poikkeus_arvot = array(

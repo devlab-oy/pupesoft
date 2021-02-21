@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Finvoice Version="2.01">
+   <SellerPartyDetails>
+      <SellerPartyIdentifier>20428100</SellerPartyIdentifier>
+      <SellerOrganisationName>Örum OY Ab</SellerOrganisationName>
+      <SellerOrganisationTaxCode>3720428100</SellerOrganisationTaxCode>
+   </SellerPartyDetails>
+   <BuyerPartyDetails>
+      <BuyerOrganisationName>Mercantile AS</BuyerOrganisationName>
+      <BuyerOrganisationTaxCode>EE100293092</BuyerOrganisationTaxCode>
+   </BuyerPartyDetails>
+   <InvoiceDetails>
+      <InvoiceTypeCode>INV01</InvoiceTypeCode>
+      <InvoiceTypeText>LASKU</InvoiceTypeText>
+      <OriginCode>Copy</OriginCode>
+      <InvoiceNumber>613582966</InvoiceNumber>
+      <InvoiceDate Format="CCYYMMDD">20200210</InvoiceDate>
+      <OrderIdentifier>111000</OrderIdentifier>
+      <BuyerReferenceIdentifier>6135829668</BuyerReferenceIdentifier>
+      <InvoiceTotalVatExcludedAmount AmountCurrencyIdentifier="EUR">1168,8700</InvoiceTotalVatExcludedAmount>
+      <InvoiceTotalVatAmount AmountCurrencyIdentifier="EUR">0,0000</InvoiceTotalVatAmount>
+      <InvoiceTotalVatIncludedAmount AmountCurrencyIdentifier="EUR">1168,8700</InvoiceTotalVatIncludedAmount>
+      <PaymentTermsDetails>
+         <PaymentTermsFreeText/>
+         <InvoiceDueDate Format="CCYYMMDD">20200410</InvoiceDueDate>
+      </PaymentTermsDetails>
+   </InvoiceDetails>
+   <InvoiceRow>
+      <ArticleIdentifier/>
+      <ArticleName>Korjaussarja, pyöräntuenta</ArticleName>
+      <DeliveredQuantity QuantityUnitCode=""/>
+      <UnitPriceAmount AmountCurrencyIdentifier="EUR"/>
+      <RowFreeText/>
+      <RowVatRatePercent>0,0000</RowVatRatePercent>
+      <RowVatAmount AmountCurrencyIdentifier="EUR">0,0000</RowVatAmount>
+      <RowVatExcludedAmount AmountCurrencyIdentifier="EUR">350,6600</RowVatExcludedAmount>
+      <Accounting>
+         <Description>Korjaussarja, pyöräntuenta</Description>
+         <JournalEntry>
+            <GeneralLedger>44112</GeneralLedger>
+            <CostObjective>
+               <Description/>
+               <VatCode>2</VatCode>
+               <AccountingDate/>
+               <PurchaseLedger/>
+               <Kaubaost>1000</Kaubaost>
+            </CostObjective>
+            <Sum>350.6600</Sum>
+            <VatSum>0.0000</VatSum>
+            <VatRate>0.0000</VatRate>
+         </JournalEntry>
+      </Accounting>
+   </InvoiceRow>
+   <InvoiceRow>
+      <ArticleIdentifier/>
+      <ArticleName>Korjaussarja, pyöräntuenta</ArticleName>
+      <DeliveredQuantity QuantityUnitCode=""/>
+      <UnitPriceAmount AmountCurrencyIdentifier="EUR"/>
+      <RowFreeText/>
+      <RowVatRatePercent>0,0000</RowVatRatePercent>
+      <RowVatAmount AmountCurrencyIdentifier="EUR">0,0000</RowVatAmount>
+      <RowVatExcludedAmount AmountCurrencyIdentifier="EUR">818,2100</RowVatExcludedAmount>
+      <Accounting>
+         <Description>Korjaussarja, pyöräntuenta</Description>
+         <JournalEntry>
+            <GeneralLedger>12211</GeneralLedger>
+            <CostObjective>
+               <Description/>
+               <VatCode>2</VatCode>
+               <AccountingDate/>
+               <PurchaseLedger/>
+               <Kaubaost>180</Kaubaost>
+            </CostObjective>
+            <Sum>818.2100</Sum>
+            <VatSum>0.0000</VatSum>
+            <VatRate>0.0000</VatRate>
+         </JournalEntry>
+      </Accounting>
+   </InvoiceRow>
+   <EpiDetails>
+      <EpiIdentificationDetails>
+         <EpiDate Format="CCYYMMDD">20200410</EpiDate>
+         <EpiReference/>
+      </EpiIdentificationDetails>
+      <EpiPartyDetails>
+         <EpiBfiPartyDetails/>
+         <EpiBeneficiaryPartyDetails>
+            <EpiAccountID IdentificationSchemeName="IBAN"/>
+         </EpiBeneficiaryPartyDetails>
+      </EpiPartyDetails>
+      <EpiPaymentInstructionDetails>
+         <EpiInstructedAmount AmountCurrencyIdentifier="EUR">1168,8700</EpiInstructedAmount>
+         <EpiCharge ChargeOption="SHA">SHA</EpiCharge>
+         <EpiDateOptionDate Format="CCYYMMDD">20200410</EpiDateOptionDate>
+      </EpiPaymentInstructionDetails>
+   </EpiDetails>
+</Finvoice>

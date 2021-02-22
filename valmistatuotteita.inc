@@ -383,6 +383,19 @@ if ($tee == 'UV') { //Tehdään tuotteet!
                     and tunnus  = '$erajaljella_row[tunnus]'";
           $lisa_res = pupe_query($query);
 
+          // Jos ostorivin (sarjanumeroseuranta taulun rivi) määrä vähenee nollaan,
+          // poistetaan se ettei jäisi roikkumaan 0 kpl eränumerorivejä
+          if ($erajaljella_row["era_kpl"] - $eravahennetaan == 0) {
+            $delete_q = "DELETE FROM sarjanumeroseuranta
+                         WHERE yhtio          = '$kukarow[yhtio]'
+                          AND tuoteno          = '$raakaainerow[tuoteno]'
+                          AND myyntirivitunnus = 0
+                          AND era_kpl          = 0
+                          AND sarjanumero      = '$lisa_row[sarjanumero]'
+                          AND tunnus           = '$erajaljella_row[tunnus]'";
+            pupe_query($delete_q);
+          }          
+
           $raakaerarow = array('tunnus' => 0, 'ostorivitunnus' => 0);
 
           if ($ederaostorivi == 0 and $lisa_row['era_kpl'] == 0) {

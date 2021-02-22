@@ -97,14 +97,12 @@ if ($yhtio == "") {
 //FITEK XML CRON poikkeus laskun pvm
 if($fitek_xml_cron_tiedot)
 {
-  $laskun_tapvm = date("Ymd");
-  $laskun_lapvm = $laskun_tapvm;
   $laskun_saapumisnumero = xml_string($xml->InvoiceDetails->OrderIdentifier);
 }
 
-// Onko tunnus IBAN-muodossa, jos ei niin varmistetaan, että se on ovtmuodossa
+// Onko tunnus IBAN-muodossa, jos ei niin varmistetaan, ettÃ¤ se on ovtmuodossa
 if (strlen($yhtio) != 18 or strtoupper(substr($yhtio, 0, 2)) != "FI") {
-  // Varmistetaan, että tunnus on ovtunnus muodossa
+  // Varmistetaan, ettÃ¤ tunnus on ovtunnus muodossa
   $yhtio = preg_replace("/[^0-9]/", "", $yhtio);
 
   if (strpos($yhtio, "0037") === false) {
@@ -133,12 +131,12 @@ if ($laskun_summa_eur == 0) {
   $laskun_summa_eur = xml_float($xml->InvoiceDetails->InvoiceTotalVatIncludedAmount);
 }
 
-// Varmistetaan, että tunnus on ytunnus muodossa
-// Finvoicessa täällä tulee vastanottajan ytunnus FI etuliitteellä
+// Varmistetaan, ettÃ¤ tunnus on ytunnus muodossa
+// Finvoicessa tÃ¤Ã¤llÃ¤ tulee vastanottajan ytunnus FI etuliitteellÃ¤
 $verkkotunnus_vas = preg_replace("/[^0-9]/", "", $verkkotunnus_vas);
 
 if ($laskun_tyyppi == "INV02") {
-  // Hyvityslaskut pitää merkata hyvitykseksi jotta ne osataan käsitellä oikein
+  // Hyvityslaskut pitÃ¤Ã¤ merkata hyvitykseksi jotta ne osataan kÃ¤sitellÃ¤ oikein
   $laskun_tyyppi = "381";
 }
 
@@ -162,7 +160,7 @@ $loydetyt_tuotteet = array();
 if (count($tuotetiedot) > 0) {
   foreach ($tuotetiedot as $tuotetieto) {
 
-    // Lista elementeistä prioriteettijärjestyksessä, josta tuotetieto voi riviltä löytyä
+    // Lista elementeistÃ¤ prioriteettijÃ¤rjestyksessÃ¤, josta tuotetieto voi riviltÃ¤ lÃ¶ytyÃ¤
     $tuote_elementit = array(
       xml_string($tuotetieto->ArticleIdentifier),
       xml_string($tuotetieto->ArticleName),
@@ -175,7 +173,7 @@ if (count($tuotetiedot) > 0) {
 
       $rtuoteno[$i]["nimitys"] = xml_string($tuotetieto->ArticleName);
 
-      // fitek XML muutoksia lis�t��n array:iin, jota voidaan k�ytt�� tulevaisuudessa
+      // fitek XML muutoksia lisätään array:iin, jota voidaan käyttää tulevaisuudessa
       if($fitek_xml_cron_tiedot)
       {
         $rtuoteno[$i]["kirjanpito"]["alv"] = xml_string($tuotetieto->Accounting->JournalEntry->VatSum);
@@ -190,7 +188,7 @@ if (count($tuotetiedot) > 0) {
       // maventa-case
       $rtuoteno[$i]['ostotilausnro'] = $laskun_asiakkaan_tilausnumero;
 
-      // Tallennetaan riville jos tämä on kauttalaskutusta
+      // Tallennetaan riville jos tÃ¤mÃ¤ on kauttalaskutusta
       if ($kauttalaskutus == "KAUTTALASKUTUS") {
         $rtuoteno[$i]["kauttalaskutus"] = "KAUTTALASKUTUS";
       }
@@ -205,7 +203,7 @@ if (count($tuotetiedot) > 0) {
 
       $rivien_summa_yhteensa += $rtuoteno[$i]["rivihinta_verolli"];
 
-      // Tämä pitää olla stringi (?!?), koska sitä käsittellään niin verkkolasku-in.incissä
+      // TÃ¤mÃ¤ pitÃ¤Ã¤ olla stringi (?!?), koska sitÃ¤ kÃ¤sittellÃ¤Ã¤n niin verkkolasku-in.incissÃ¤
       $xvati = str_replace(",", ".", $tuotetieto->RowVatRatePercent);
 
       $rtuoteno[$i]["alv"] = $xvati;
@@ -214,7 +212,7 @@ if (count($tuotetiedot) > 0) {
       $rtuoteno[$i]["ale"] = xml_float($tuotetieto->RowDiscountPercent);
       $rtuoteno[$i]["hinta"] = round(xml_float($tuotetieto->UnitPriceAmount), 2);
 
-      // rivikommentti (kommentti putsataan ja decoodataan kokonaisuudessaan myöhemmin)
+      // rivikommentti (kommentti putsataan ja decoodataan kokonaisuudessaan myÃ¶hemmin)
       $xrinfo = $tuotetieto->RowFreeText;
 
       if (is_array($xrinfo)) {
@@ -226,11 +224,11 @@ if (count($tuotetiedot) > 0) {
         $rtuoteno[$i]["kommentti"] = $xrinfo;
       }
 
-      // tilausnumero putsataan ja decoodataan kokonaisuudessaan myöhemmin
+      // tilausnumero putsataan ja decoodataan kokonaisuudessaan myÃ¶hemmin
       $_tilausnumero = trim($tuotetieto->RowIdentifierUrlText);
 
       if ($_tilausnumero != "") {
-        // alkuperäinen tilausnumero rivikommenttiin mukaan
+        // alkuperÃ¤inen tilausnumero rivikommenttiin mukaan
         $rtuoteno[$i]["kommentti"] = "Tilausnumero: {$_tilausnumero}\n" . $rtuoteno[$i]["kommentti"];
       }
 
@@ -241,7 +239,7 @@ if (count($tuotetiedot) > 0) {
       $rtuoteno[$i]["lapsi"] = "";
     }
     else {
-      // Poistetaan tämä tietue
+      // Poistetaan tÃ¤mÃ¤ tietue
       unset($rtuoteno[$i]);
       $i--;
     }

@@ -33,9 +33,14 @@ $logmaster_itemnumberfield = logmaster_field('ItemNumber');
 $logmaster_prodgroup1field = logmaster_field('ProdGroup1');
 $logmaster_prodgroup2field = logmaster_field('ProdGroup2');
 
-$query = "SELECT tuote.*, ta.selite AS synkronointi, ta.tunnus AS ta_tunnus, toim_tuoteno
+$query = "SELECT tuote.*,
+          ta.selite AS synkronointi,
+          ta.tunnus AS ta_tunnus,
+          ta_bbd.selite AS best_before_flag,
+          tt.toim_tuoteno
           FROM tuote
           LEFT JOIN tuotteen_avainsanat AS ta ON (ta.yhtio = tuote.yhtio AND ta.tuoteno = tuote.tuoteno AND ta.laji = 'synkronointi')
+          LEFT JOIN tuotteen_avainsanat AS ta_bbd ON (ta_bbd.yhtio = tuote.yhtio AND ta_bbd.tuoteno = tuote.tuoteno AND ta_bbd.laji = 'parametri_BBD')
           LEFT JOIN tuotteen_toimittajat AS tt ON (tt.yhtio = tuote.yhtio AND tt.tuoteno = tuote.tuoteno)
           WHERE tuote.yhtio   = '{$kukarow['yhtio']}'
           AND tuote.ei_saldoa = ''
@@ -156,7 +161,7 @@ if (mysql_num_rows($res) > 0) {
       }
       if ($uj_nimi == "PostNord") {
         $line->addChild('AlarmLimit',            $row['halytysraja']);
-      } 
+      }
       else {
         $line->addChild('AlarmLimit',          '');
       }
@@ -165,7 +170,14 @@ if (mysql_num_rows($res) > 0) {
       $line->addChild('QualPeriod3',           '');
       $line->addChild('FactoryNum',            '');
       $line->addChild('UNCode',                '');
-      $line->addChild('BBDateCollect',         '');
+
+      // Dest before date seuranta päällä vai ei
+      $BBDateCollect = '';
+      if (!empty($row['best_before_flag'])) {
+        $BBDateCollect = '1';
+      }
+
+      $line->addChild('BBDateCollect',         $BBDateCollect);
       $line->addChild('SerialNumbers',         '');
       $line->addChild('SerialNumInArrival',    '');
       $line->addChild('TaxCode',               '');

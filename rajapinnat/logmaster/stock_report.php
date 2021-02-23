@@ -68,15 +68,6 @@ while (false !== ($file = readdir($handle))) {
 
   pupesoft_log('logmaster_stock_report', "K‰sitell‰‰n sanoma {$file}");
 
-  // tuki vain yhdelle Logmaster-varastolle
-  $query = "SELECT *
-            FROM varastopaikat
-            WHERE yhtio              = '{$kukarow['yhtio']}'
-            AND ulkoinen_jarjestelma = 'P'
-            LIMIT 1";
-  $varastores = pupe_query($query);
-  $varastorow = mysql_fetch_assoc($varastores);
-
   $luontiaika = $xml->InvCounting->TransDate;
 
   unset($xml->InvCounting->TransDate);
@@ -84,7 +75,9 @@ while (false !== ($file = readdir($handle))) {
   $saldoeroja = array();
 
   foreach ($xml->InvCounting->Line as $line) {
-    $item_number               = $line->ItemNumber;
+    $item_number = $line->ItemNumber;
+    $item_number = str_replace(chr(194) . chr(160), " ", $item_number);
+
     $kpl                       = (float) $line->Quantity;
     $logmaster_itemnumberfield = logmaster_field('ItemNumber');
 
@@ -94,6 +87,46 @@ while (false !== ($file = readdir($handle))) {
               AND {$logmaster_itemnumberfield} = '{$item_number}'";
     $tuoteres = pupe_query($query);
     $tuoterow = mysql_fetch_assoc($tuoteres);
+
+    if (mysql_num_rows($tuoteres) == 0) {
+      $saldoeroja[] = array(
+        "varasto"   => "",
+        "item"      => $item_number,
+        "logmaster" => $kpl,
+        "nimitys"   => "",
+        "pupe"      => "",
+        "tuoteno"   => "",
+        "lisatieto" => "Tuotetta ei lˆydy",
+      );
+
+      continue;
+    }
+
+    $tuoteno = $tuoterow["tuoteno"];
+
+    $query = "SELECT *
+              FROM varastopaikat
+              WHERE yhtio = '{$kukarow['yhtio']}'
+                AND ulkoinen_jarjestelma = 'P'
+                AND ulkoisen_jarjestelman_tunnus = '" . $line->Stock . "'";
+    $varastores = pupe_query($query);
+
+    if (mysql_num_rows($varastores) == 1) {
+      $varastorow = mysql_fetch_assoc($varastores);
+    }
+    else {
+      $saldoeroja[] = array(
+        "varasto"   => "",
+        "item"      => $item_number,
+        "logmaster" => $kpl,
+        "nimitys"   => $tuoterow['nimitys'],
+        "pupe"      => "",
+        "tuoteno"   => $tuoteno,
+        "lisatieto" => t("Ulkoisen j‰rjestelm‰n varastotunnusta ei lˆydy") . ": " . $line->Stock,
+      );
+
+      continue;
+    }
 
     list($saldo, $hyllyssa, $myytavissa, $devnull) = saldo_myytavissa($tuoterow["tuoteno"], "KAIKKI", $varastorow['tunnus']);
 
@@ -121,12 +154,57 @@ while (false !== ($file = readdir($handle))) {
     $b = (int) $hyllyssa * 10000;
 
     if ($a != $b) {
+      $lisatieto = "";
+
+      if (isset($varastorow)) {
+        $query = "SELECT *, concat_ws('-', hyllyalue, hyllynro, hyllyvali, hyllytaso) AS tuotepaikka
+                  FROM tuotepaikat
+                  WHERE yhtio = '{$kukarow['yhtio']}'
+                    AND varasto = '{$varastorow['tunnus']}'
+                    AND tuoteno = '{$tuoteno}'
+                  ORDER BY oletus DESC, prio, hyllyalue, hyllynro, hyllytaso, hyllypaikka";
+        $tuotepaikat = pupe_query($query);
+
+        if (mysql_num_rows($tuotepaikat) > 0) {
+          while ($tuotepaikka_row = mysql_fetch_array($tuotepaikat)) {
+            $tuotepaikka = $tuotepaikka_row['tuotepaikka'];
+
+            if ($lisatieto == "") {
+              $uusi_maara = $kpl;
+              $lisatieto = t("Inventoitu tuotepaikalle") . " {$tuotepaikka}";
+            }
+            else {
+              $uusi_maara = 0;
+              $lisatieto .= ", " . t("paikan") . " {$tuotepaikka} " . t("saldo nollattu");
+            }
+
+            $hylly = array($tuoteno, $tuotepaikka_row['hyllyalue'], $tuotepaikka_row['hyllynro'], $tuotepaikka_row['hyllyvali'], $tuotepaikka_row['hyllytaso']);
+            $hash = implode('###', $hylly);
+            $tuote = array($tuotepaikka_row['tunnus'] => $hash);
+            $maara = array($tuotepaikka_row['tunnus'] => $uusi_maara);
+            $tee = 'VALMIS';
+            $lisaselite = t("Logmaster");
+            $mobiili = 'YES';
+
+            require 'inventoi.php';
+          }
+        }
+        else {
+          $lisatieto = t("Ei inventoitu") . ": '" . $varastorow['nimitys'] . "' " . t("varastosta ei lˆydy tuotepaikkaa tuotteelle") . " '{$tuoteno}'";
+        }
+      }
+      else {
+        $lisatieto = t("Ei inventoitu") . ": '" . $line->Stock . "' ". t("varastoa ei lˆydy tuotteelle") . " '{$tuoteno}'";
+      }
+
       $saldoeroja[] = array(
+        "varasto"   => $varastorow['tunnus'] . " " . $varastorow['nimitys'],
         "item"      => $item_number,
         "logmaster" => $kpl,
         "nimitys"   => $tuoterow['nimitys'],
         "pupe"      => $hyllyssa,
-        "tuoteno"   => $tuoterow['tuoteno'],
+        "tuoteno"   => $tuoteno,
+        "lisatieto" => $lisatieto,
       );
     }
   }
@@ -134,10 +212,10 @@ while (false !== ($file = readdir($handle))) {
   if (count($saldoeroja) > 0) {
 
     $email_array[] = t("Seuraavien tuotteiden saldovertailuissa on havaittu eroja").":";
-    $email_array[] = t("Logmaster-tuoteno").";".t("Tuoteno").";".t("Nimitys").";".t("Logmaster-kpl").";".t("Pupesoft-kpl");
+    $email_array[] = t("Varasto").";".t("Logmaster-tuoteno").";".t("Tuoteno").";".t("Nimitys").";".t("Logmaster-kpl").";".t("Pupesoft-kpl").";".t("Lis‰tieto");
 
     foreach ($saldoeroja as $ero) {
-      $email_array[] = "{$ero['item']};{$ero['tuoteno']};{$ero['nimitys']};{$ero['logmaster']};{$ero['pupe']}";
+      $email_array[] = "{$ero['varasto']};{$ero['item']};{$ero['tuoteno']};{$ero['nimitys']};{$ero['logmaster']};{$ero['pupe']};{$ero['lisatieto']}";
     }
 
     pupesoft_log('logmaster_stock_report', "Sanoman {$file} saldovertailussa oli eroja.");
@@ -152,7 +230,13 @@ while (false !== ($file = readdir($handle))) {
     'log_name' => 'logmaster_stock_report',
   );
 
-  logmaster_send_email($params);
+  // logmaster_send_email($params);
+
+  echo "\n";
+  foreach($email_array as $line) {
+    echo "{$line}\n";
+  }
+  echo "\n";
 
   // siirret‰‰n tiedosto done-kansioon
   rename($full_filepath, $path.'done/'.$file);

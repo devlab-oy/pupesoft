@@ -85,14 +85,19 @@ if ($row['sisviesti3'] != '') {
 }
 
 // Tämän saapumisen "pää"-ostotilaus.
-$query = "SELECT otunnus, min(toimaika) toimaika, count(*) maara
+$query = "SELECT
+          tilausrivi.otunnus,
+          varastopaikat.ulkoisen_jarjestelman_tunnus,
+          min(tilausrivi.toimaika) toimaika,
+          count(tilausrivi.tunnus) maara
           FROM tilausrivi
-          WHERE yhtio     = '{$kukarow['yhtio']}'
-          AND tyyppi      = 'O'
-          AND kpl         = 0
-          AND varattu     > 0
-          AND uusiotunnus = '{$saapumisnro}'
-          GROUP BY otunnus
+          LEFT JOIN varastopaikat ON (varastopaikat.yhtio = tilausrivi.yhtio AND varastopaikat.tunnus = tilausrivi.varasto)
+          WHERE tilausrivi.yhtio     = '{$kukarow['yhtio']}'
+          AND tilausrivi.tyyppi      = 'O'
+          AND tilausrivi.kpl         = 0
+          AND tilausrivi.varattu     > 0
+          AND tilausrivi.uusiotunnus = '{$saapumisnro}'
+          GROUP BY 1, 2
           ORDER BY maara DESC
           LIMIT 1";
 $tilasnumero_res = pupe_query($query);
@@ -158,7 +163,8 @@ $body->addChild('DeliveryDate',     tv1dateconv($tilasnumero_row['toimaika']));
 if ($uj_nimi == "Velox") {
   $body->addChild('Comments',        xml_cleanstring($row['comments']));
 }
-$body->addChild('Warehouse',        '');
+
+$body->addChild('Warehouse',        xml_cleanstring($tilasnumero_row['ulkoisen_jarjestelman_tunnus']));
 
 $vendor = $body->addChild('Vendor');
 $vendor->addChild('VendAccount',  xml_cleanstring($toimirow['toimittajanro']));

@@ -392,7 +392,7 @@ if (!function_exists('logmaster_outbounddelivery')) {
     $custpickinglist->addChild('PickingInstruction', xml_cleanstring($looprow['sisviesti2'], 128));
     $custpickinglist->addChild('SalesOffice',        0);
     $custpickinglist->addChild('SalesContact',       0);
-    $custpickinglist->addChild('Warehouse',          0);
+    $custpickinglist->addChild('Warehouse',          xml_cleanstring($varastorow['ulkoisen_jarjestelman_tunnus']));
     $custpickinglist->addChild('InvoiceAmounth',     0);
 
     $orderedby = $custpickinglist->addChild('OrderedBy');

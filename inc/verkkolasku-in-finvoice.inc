@@ -97,6 +97,7 @@ if ($yhtio == "") {
 //FITEK XML CRON poikkeus laskun pvm
 if($fitek_xml_cron_tiedot)
 {
+  $laskuttajan_nimi = utf8_decode($laskuttajan_nimi);
   $laskun_saapumisnumero = xml_string($xml->InvoiceDetails->OrderIdentifier);
 }
 

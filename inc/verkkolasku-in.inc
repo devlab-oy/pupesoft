@@ -1440,9 +1440,23 @@ if (!function_exists("verkkolasku_in")) {
 
         for ($i = 0; $i < $count_rtuoteno; $i++) {
           $tili = ($oletustili > 0) ? $oletustili : $yhtiorow['muutkulut'];
-
+          
           if($fitek_xml_cron_tiedot && isset($rtuoteno[$i]["kirjanpito"]["kustannuspaikka"])) {
-            $kustp = $rtuoteno[$i]["kirjanpito"]["kustannuspaikka"];
+            $tuotekohtainen_fitek_kpai = $rtuoteno[$i]["kirjanpito"]["kustannuspaikka"];
+            $query = "SELECT
+                        tunnus
+                      FROM
+                        kustannuspaikka
+                      WHERE
+                        yhtio = '".$fitek_xml_cron_tiedot['yhtio']."' AND koodi = '".$tuotekohtainen_fitek_kpai."'";
+            $result_fitek_cron = pupe_query($query);
+
+            if (mysql_num_rows($result_fitek_cron) != 0) {
+              $kustp = mysql_fetch_assoc($result_fitek_cron)['tunnus'];
+
+            } else {
+              $kustp = $oletuskust;
+            }
           } else {
             $kustp = $oletuskust;
           }

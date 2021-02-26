@@ -4,7 +4,10 @@ if (php_sapi_name() != 'cli') {
   die ("Tätä scriptiä voi ajaa vain komentoriviltä!");
 }
 
-if(!isset($argv[1]) || !$argv[1]) { echo "Anna yhtio"; exit; }
+if (!isset($argv[1]) || !$argv[1]) { 
+  echo "Anna yhtio"; 
+  exit; 
+}
 
 date_default_timezone_set('Europe/Helsinki');
 
@@ -20,13 +23,15 @@ $fitek_xml_cron_dirname = realpath('datain/fitek_import');
 
 // ytiorow. Jos ei l?ydy, lopeta cron
 if($yhtiorow = hae_yhtion_parametrit(pupesoft_cleanstring($argv[1]))) {
-} else { 
+} 
+else { 
   echo "Vaara yhtio"; exit; 
 }
 
 // kukarow. Jos ei annettu, oletuksena on admin
 if(isset($argv[1]) && $kukarow = hae_kukarow(pupesoft_cleanstring($argv[2]), $yhtiorow['yhtio'])) {
-} else {
+} 
+else {
   $kukarow = hae_kukarow('admin', $yhtiorow['yhtio']); 
 }
 
@@ -54,4 +59,3 @@ $verkkolaskut_error  = $fitek_xml_cron_dirname."/error";
 $verkkolaskut_reject = $fitek_xml_cron_dirname."/reject";
 
 include_once("verkkolasku-in.php");
-?>

@@ -102,8 +102,6 @@ if (!function_exists("verkkolasku_in")) {
     $rtuoteno[]["rivihinta_valuutassa"]
     */
 
-
-
     //siivotaan viite
     $laskun_tilausviite = pupesoft_cleanstring($laskun_tilausviite);
 
@@ -137,7 +135,8 @@ if (!function_exists("verkkolasku_in")) {
       if($fitek_xml_cron_tiedot['toimi']) {
         $laskun_toimitunnus = $fitek_xml_cron_tiedot['toimi'];
       }
-    } else { 
+    } 
+    else { 
       $fitek_xml_cron_tiedot = false;
     }
 
@@ -781,8 +780,6 @@ if (!function_exists("verkkolasku_in")) {
             }
           }
 
-
-
           if ($tiliointirow['hyvak1'] == 'MAKSUUN') {
             $hyvak[1] = "";
             $hyvak[2] = "";
@@ -859,8 +856,6 @@ if (!function_exists("verkkolasku_in")) {
       if ($_yhtion_toimipaikka != 0) {
         $yhtiorow = hae_yhtion_parametrit($yhtio, $_yhtion_toimipaikka);
       }
-
-
 
       // Laitetaan tämä päivä laskun kirjauspäiväksi jos yhtiön parametri on tässä asennossa.
       if ($yhtiorow['ostolaskujen_paivays'] == "1") {
@@ -1154,18 +1149,17 @@ if (!function_exists("verkkolasku_in")) {
       $osto_rahti_alv   = (!isset($osto_rahti_alv) or trim($osto_rahti_alv) == '') ? 0 : round($osto_rahti_alv, 2);
       $osto_rivi_kulu_alv = (!isset($osto_rivi_kulu_alv) or trim($osto_rivi_kulu_alv) == '') ? 0 : round($osto_rivi_kulu_alv, 2);
       
-      if($fitek_xml_cron_tiedot) {
+      if ($fitek_xml_cron_tiedot) {
         $tila = "M";
-        $fitek_xml_cron_lisa = 
-        "saapumisnumero = '$laskun_saapumisnumero',
-        ";
-      } else {
+        $fitek_xml_cron_lisa = "saapumisnumero = '$laskun_saapumisnumero',";
+      } 
+      else {
         $fitek_xml_cron_lisa = "";
       }
       
       // Kirjoitetaan lasku
       $query = "INSERT into lasku set
-                ".$fitek_xml_cron_lisa."
+                $fitek_xml_cron_lisa
                 yhtio                  = '$yhtio',
                 yhtio_toimipaikka      = '{$_yhtion_toimipaikka}',
                 summa                  = '$summa',
@@ -1441,23 +1435,23 @@ if (!function_exists("verkkolasku_in")) {
         for ($i = 0; $i < $count_rtuoteno; $i++) {
           $tili = ($oletustili > 0) ? $oletustili : $yhtiorow['muutkulut'];
           
-          if($fitek_xml_cron_tiedot && isset($rtuoteno[$i]["kirjanpito"]["kustannuspaikka"])) {
+          if ($fitek_xml_cron_tiedot && isset($rtuoteno[$i]["kirjanpito"]["kustannuspaikka"])) {
             $tuotekohtainen_fitek_kpai = $rtuoteno[$i]["kirjanpito"]["kustannuspaikka"];
-            $query = "SELECT
-                        tunnus
-                      FROM
-                        kustannuspaikka
-                      WHERE
-                        yhtio = '".$fitek_xml_cron_tiedot['yhtio']."' AND koodi = '".$tuotekohtainen_fitek_kpai."'";
+            $query = "SELECT tunnus
+                      FROM kustannuspaikka
+                      WHERE yhtio = '{$fitek_xml_cron_tiedot["yhtio"]}' 
+                        AND koodi = '$tuotekohtainen_fitek_kpai'";
             $result_fitek_cron = pupe_query($query);
 
             if (mysql_num_rows($result_fitek_cron) != 0) {
               $kustp = mysql_fetch_assoc($result_fitek_cron)['tunnus'];
 
-            } else {
+            } 
+            else {
               $kustp = $oletuskust;
             }
-          } else {
+          } 
+          else {
             $kustp = $oletuskust;
           }
 
@@ -1539,7 +1533,7 @@ if (!function_exists("verkkolasku_in")) {
             else $vero = (float) $oletusalvi;
 
             // FITEK kirjanpito tiedot
-            if(isset($rtuoteno[$i]["kirjanpito"])) {
+            if (isset($rtuoteno[$i]["kirjanpito"])) {
               $vero = $rtuoteno[$i]["kirjanpito"]["alv"];
               $tili = $rtuoteno[$i]["kirjanpito"]["tili"];
             }

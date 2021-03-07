@@ -131,11 +131,8 @@ if ($handle = opendir($laskut)) {
       
       $alku = $loppu = "";
       list($alku, $loppu) = explode("####", $laskuvirhe);
-      if($nimi != "/Users/sprintit/Sites/mercantileoyab/pupesoft/datain/fitek_import/1.xml") {
-        unlink($nimi);
-      }
       
-      if (trim($loppu) == "ASN") {
+      if (trim($loppu) == "ASN" && (!isset($fitek_xml_cron))) {
         // ei tehd‰ mit‰‰n vaan annetaan j‰‰d‰ roikkumaan kansioon seuraavaan kierrokseen saakka, tai kunnes joku lukee postit.
       }
       else {

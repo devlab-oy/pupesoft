@@ -1156,9 +1156,11 @@ if (!function_exists("verkkolasku_in")) {
       
       if($fitek_xml_cron_tiedot) {
         $tila = "M";
+        /*
         $fitek_xml_cron_lisa = 
         "saapumisnumero = '$laskun_saapumisnumero',
         ";
+        */
       } else {
         $fitek_xml_cron_lisa = "";
       }

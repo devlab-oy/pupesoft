@@ -114,7 +114,9 @@ if ($handle = opendir($laskut)) {
     $nimi = $laskut."/".$file;
 
     //Kronille oletuslaskutiedot
-    if(!isset($fitek_xml_cron_tiedot)) { $fitek_xml_cron_tiedot = false; };
+    if (!isset($fitek_xml_cron_tiedot)) { 
+      $fitek_xml_cron_tiedot = false; 
+    }
 
     $laskuvirhe = verkkolasku_in($nimi, TRUE, $fitek_xml_cron_tiedot);
 

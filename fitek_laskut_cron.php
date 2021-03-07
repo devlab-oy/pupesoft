@@ -4,7 +4,10 @@ if (php_sapi_name() != 'cli') {
   die ("Tätä scriptiä voi ajaa vain komentoriviltä!");
 }
 
-if(!isset($argv[1]) || !$argv[1]) { echo "Anna yhtio"; exit; }
+if (!isset($argv[1]) || !$argv[1]) { 
+  echo "Anna yhtio"; 
+  exit; 
+}
 
 date_default_timezone_set('Europe/Helsinki');
 
@@ -55,4 +58,3 @@ $verkkolaskut_error  = $fitek_xml_cron_dirname."/error";
 $verkkolaskut_reject = $fitek_xml_cron_dirname."/reject";
 
 include_once("verkkolasku-in.php");
-?>

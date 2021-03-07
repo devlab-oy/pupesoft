@@ -95,9 +95,7 @@ if ($yhtio == "") {
 }
 
 //FITEK XML CRON poikkeus laskun pvm
-if($fitek_xml_cron_tiedot)
-{
-  $laskuttajan_nimi = utf8_decode($laskuttajan_nimi);
+if ($fitek_xml_cron_tiedot) {
   $laskun_saapumisnumero = xml_string($xml->InvoiceDetails->OrderIdentifier);
 }
 
@@ -110,7 +108,6 @@ if (strlen($yhtio) != 18 or strtoupper(substr($yhtio, 0, 2)) != "FI") {
     $yhtio = "0037".$yhtio;
   }
 }
-
 
 if ($laskun_erapaiva == "") {
   $laskun_erapaiva = xml_string($xml->PaymentTermsDetails->InvoiceDueDate);
@@ -175,8 +172,7 @@ if (count($tuotetiedot) > 0) {
       $rtuoteno[$i]["nimitys"] = xml_string($tuotetieto->ArticleName);
 
       // fitek XML muutoksia lisätään array:iin, jota voidaan käyttää tulevaisuudessa
-      if($fitek_xml_cron_tiedot)
-      {
+      if ($fitek_xml_cron_tiedot) {
         $rtuoteno[$i]["kirjanpito"]["alv"] = xml_string($tuotetieto->Accounting->JournalEntry->VatSum);
         $rtuoteno[$i]["kirjanpito"]["alv_prosentti"] = xml_string($tuotetieto->Accounting->JournalEntry->VatRate);
         $rtuoteno[$i]["kirjanpito"]["tili"] = xml_string($tuotetieto->Accounting->JournalEntry->GeneralLedger);
@@ -248,8 +244,6 @@ if (count($tuotetiedot) > 0) {
     $i++;
   }
 }
-
-
 
 // Verotiedot
 $vattiedot = $xml->InvoiceDetails->VatSpecificationDetails;

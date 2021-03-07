@@ -322,7 +322,6 @@ else {
   }
 
   if ($tee == "LASKUTA") {
-
     //Tiedostojen polut ja nimet
     //keksit‰‰n uudelle failille joku varmasti uniikki nimi:
     $nimixml = "$pupe_root_polku/dataout/laskutus-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(), true)).".xml";
@@ -342,8 +341,6 @@ else {
     else {
       $nimifinvoice = "$pupe_root_polku/dataout/laskutus-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(), true))."_finvoice.xml";
     }
-
-
 
     $nimisisainenfinvoice = "$pupe_root_polku/dataout/laskutus-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(), true))."_sisainenfinvoice.xml";
 

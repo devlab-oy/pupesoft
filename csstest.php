@@ -49,6 +49,7 @@ $css_kuvaus = array(
   ,  'ASIAKASFAKTA_COLOR'     =>  'Asiakasfakta otsikolla ja myyntitilauksella'
   ,  'SUBMITBUTTON_BACKGROUND'          =>  'Normaalin Submit-nappulan tausta'
   ,  'SUBMITBUTTON_LISAA_BACKGROUND'    =>  'Lisää Submit-nappulan tausta'
+  ,  'SUBMITBUTTON_TEE_TILAUKSESTA_TARJOUS_BACKGROUND' => '"Tee tilauksesta tarjous" Submit-nappulan tausta'
   ,  'SUBMITBUTTON_HAE_BACKGROUND'      =>  'Hae Submit-nappulan tausta'
   ,  'SUBMITBUTTON_TALLENNA_BACKGROUND' =>  'Tallenna Submit-nappulan tausta'
   ,  'SUBMITBUTTON_POISTA_BACKGROUND'   =>  'Poista Submit-nappulan tausta'

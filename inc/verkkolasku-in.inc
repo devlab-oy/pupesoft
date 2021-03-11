@@ -1287,8 +1287,16 @@ if (!function_exists("verkkolasku_in")) {
         }
       }
 
+      if($fitek_xml_cron_tiedot and !empty($fitek_xml_loydetyt_kustannuspaikat) and count($fitek_xml_loydetyt_kustannuspaikat) == 1) {
+        $cron_yksi_kustannuspaika = true;
+      } else if(!$fitek_xml_cron_tiedot) {
+        $cron_yksi_kustannuspaika = true;
+      } else {
+        $cron_yksi_kustannuspaika = false;
+      }
+
       // Tehdän pelkät oletustiliöinnit
-      if (mysql_num_rows($result) == 0 and count($ealvi) == 1 and !$fitek_xml_cron_tiedot) {
+      if (mysql_num_rows($result) == 0 and count($ealvi) == 1 and $cron_yksi_kustannuspaika) {
 
         if ($oletustili > 0) {
           $tili = $oletustili;

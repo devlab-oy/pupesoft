@@ -100,6 +100,7 @@ Tässä näkee miten formit käyttäytyy:<hr>
 <input type='submit' class='hae_btn' value='Hae submit-nappula'>
 <input type='submit' class='tallenna_btn' value='Tallenna submit-nappula'>
 <input type='submit' class='poista_btn' value='Poista submit-nappula'>
+<input type='submit' class='tee_tarjous_btn' value='", t("Tee tilauksesta tarjous"), "'>
 </form>
 
 <br>

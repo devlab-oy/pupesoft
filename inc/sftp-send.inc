@@ -48,47 +48,63 @@ if (substr($ftppath, -1) != "/") {
   $ftppath .= "/";
 }
 
-$connection = ssh2_connect($ftphost, $sftpport);
+if ($bentte_siirto) {
+  $scp_return = shell_exec("scp -i {$ftpskey} {$ftpfile} {$ftpuser}@{$ftphost}:{$ftppath}");
 
-if (!$connection) {
-  $palautus = "Could not connect to remote host. ($ftphost)";
-}
+  pupesoft_log('sftp_send', "scp -i {$ftpskey} {$ftpfile} {$ftpuser}@{$ftphost}:{$ftppath} \n\n\n");
 
-if ($palautus == "") {
-  if (!empty($ftpskey)) {
-    @ssh2_auth_pubkey_file($connection, $ftpuser, $ftpskey.'.pub', $ftpskey);
+  if ($scp_return == 0) {
+    $palautus = "";
+  }
+  else {
+    $palautus = "SCP error: $scp_return";
   }
 
-  if (!empty($ftppass) and !ssh2_auth_password($connection, $ftpuser, $ftppass)) {
-    $palautus = "Could not login to remote host ($ftpuser, $ftppass)";
-  }
+  pupesoft_log('sftp_send', "SCP return: '{$scp_return}'");
 }
+else {
+  $connection = ssh2_connect($ftphost, $sftpport);
 
-if ($palautus == "") {
-  $sftp = ssh2_sftp($connection);
-
-  if (!$sftp) {
-    $palautus = "Could not initialize SFTP subsystem";
-  }
-}
-
-if ($palautus == "") {
-  $remotefile = $ftppath.basename($ftpfile);
-
-  $stream = fopen("ssh2.sftp://$sftp/$remotefile", "w");
-
-  if (!$stream) {
-    $palautus = "Could not open file ($remotefile)";
+  if (!$connection) {
+    $palautus = "Could not connect to remote host. ($ftphost)";
   }
 
   if ($palautus == "") {
-    $data_to_send = file_get_contents($ftpfile);
-
-    if (fwrite($stream, $data_to_send) === false) {
-      $palautus = "Could not send data from file: $ftpfile";
+    if (!empty($ftpskey)) {
+      @ssh2_auth_pubkey_file($connection, $ftpuser, $ftpskey.'.pub', $ftpskey);
     }
 
-    fclose($stream);
+    if (!empty($ftppass) and !ssh2_auth_password($connection, $ftpuser, $ftppass)) {
+      $palautus = "Could not login to remote host ($ftpuser, $ftppass)";
+    }
+  }
+
+  if ($palautus == "") {
+    $sftp = ssh2_sftp($connection);
+
+    if (!$sftp) {
+      $palautus = "Could not initialize SFTP subsystem";
+    }
+  }
+
+  if ($palautus == "") {
+    $remotefile = $ftppath.basename($ftpfile);
+
+    $stream = fopen("ssh2.sftp://$sftp/$remotefile", "w");
+
+    if (!$stream) {
+      $palautus = "Could not open file ($remotefile)";
+    }
+
+    if ($palautus == "") {
+      $data_to_send = file_get_contents($ftpfile);
+
+      if (fwrite($stream, $data_to_send) === false) {
+        $palautus = "Could not send data from file: $ftpfile";
+      }
+
+      fclose($stream);
+    }
   }
 }
 

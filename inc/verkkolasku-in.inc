@@ -554,6 +554,7 @@ if (!function_exists("verkkolasku_in")) {
         $return .= "Toimittaja: $trow[ytunnus]/$trow[ovttunnus] - $trow[nimi]\nEpäonnistumisen syy: ";
       }
 
+
       // Perusta lasku
       $summa = $laskun_summa_eur;
       $onko_hyvityslasku = FALSE;
@@ -1287,7 +1288,7 @@ if (!function_exists("verkkolasku_in")) {
         }
       }
 
-      if($fitek_xml_cron_tiedot and !empty($fitek_xml_loydetyt_kustannuspaikat) and count($fitek_xml_loydetyt_kustannuspaikat) == 1) {
+      if($fitek_xml_cron_tiedot and !empty($fitek_xml_loydetyt_kustannuspaikat) and (count($fitek_xml_loydetyt_kustannuspaikat) == 1 and count($rtuoteno) > 1)) {
         $cron_yksi_kustannuspaika = true;
       } else if(!$fitek_xml_cron_tiedot) {
         $cron_yksi_kustannuspaika = true;
@@ -1442,7 +1443,7 @@ if (!function_exists("verkkolasku_in")) {
 
         for ($i = 0; $i < $count_rtuoteno; $i++) {
           $tili = ($oletustili > 0) ? $oletustili : $yhtiorow['muutkulut'];
-          
+
           if ($fitek_xml_cron_tiedot && isset($rtuoteno[$i]["kirjanpito"]["kustannuspaikka"])) {
             $tuotekohtainen_fitek_kpai = $rtuoteno[$i]["kirjanpito"]["kustannuspaikka"];
             $query = "SELECT tunnus
@@ -1450,10 +1451,8 @@ if (!function_exists("verkkolasku_in")) {
                       WHERE yhtio = '{$fitek_xml_cron_tiedot["yhtio"]}' 
                         AND koodi = '$tuotekohtainen_fitek_kpai'";
             $result_fitek_cron = pupe_query($query);
-
             if (mysql_num_rows($result_fitek_cron) != 0) {
               $kustp = mysql_fetch_assoc($result_fitek_cron)['tunnus'];
-
             } 
             else {
               $kustp = $oletuskust;

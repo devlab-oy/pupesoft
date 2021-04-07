@@ -1,5 +1,11 @@
 <?php
 
+ini_set("memory_limit", "5G");
+ini_set("post_max_size", "100M");
+ini_set("upload_max_filesize", "100M");
+ini_set("mysql.connect_timeout", 600);
+ini_set("max_execution_time", 18000);
+
 require "inc/parametrit.inc";
 
 echo "<font class='head'>".t("TecDoc-tietojen sis‰‰nluku")."</font><hr>";

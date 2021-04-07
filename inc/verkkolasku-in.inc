@@ -1288,7 +1288,7 @@ if (!function_exists("verkkolasku_in")) {
         }
       }
 
-      if($fitek_xml_cron_tiedot and !empty($fitek_xml_loydetyt_kustannuspaikat) and (count($fitek_xml_loydetyt_kustannuspaikat) == 1 and count($rtuoteno) > 1)) {
+      if($fitek_xml_cron_tiedot and !empty($fitek_xml_loydetyt_kustannuspaikat) and count($fitek_xml_loydetyt_kustannuspaikat) == 1) {
         $cron_yksi_kustannuspaika = true;
       } else if(!$fitek_xml_cron_tiedot) {
         $cron_yksi_kustannuspaika = true;
@@ -1333,24 +1333,38 @@ if (!function_exists("verkkolasku_in")) {
 
         // Jos on toimipaikat käytössä ja toimipaikan takaa katsotaan tarkenteita toimittajan jälkeen, niin katsotaan ne tässä
         if ($_yhtion_toimipaikka != 0 and ($oletuskust == 0 or $oletuskohde == 0 or $oletusprojekti == 0) and $yhtiorow['tarkenteiden_prioriteetti'] == "") {
-
           $query = "SELECT kustp, kohde, projekti
                     FROM yhtion_toimipaikat
                     WHERE yhtio = '{$yhtio}'
                     AND tunnus  = '{$_yhtion_toimipaikka}'";
           $toimipaikka_kustp_res = pupe_query($query);
           $toimipaikka_kustp_row = mysql_fetch_assoc($toimipaikka_kustp_res);
-
           $oletuskust   = $oletuskust == 0     ? $toimipaikka_kustp_row['kustp']     : $oletuskust;
           $oletuskohde   = $oletuskohde == 0   ? $toimipaikka_kustp_row['kohde']     : $oletuskohde;
           $oletusprojekti = $oletusprojekti == 0   ? $toimipaikka_kustp_row['projekti']   : $oletusprojekti;
+        }
+
+        if($cron_yksi_kustannuspaika and isset($fitek_xml_cron_tiedot["kustannuspaikka"])) {
+          $query = "SELECT tunnus
+                    FROM kustannuspaikka
+                    WHERE yhtio = '{$fitek_xml_cron_tiedot["yhtio"]}' 
+                      AND koodi = '{$fitek_xml_cron_tiedot["kustannuspaikka"]}'";
+          $result_fitek_cron = pupe_query($query);
+          if (mysql_num_rows($result_fitek_cron) != 0) {
+            $kustp = mysql_fetch_assoc($result_fitek_cron)['tunnus'];
+          }
+          else {
+            $kustp = $oletuskust;
+          }
+        }
+        else {
+          $kustp = $oletuskust;
         }
 
         $summa            = $kirjattava_summa;
         $summa_valuutassa    = round($summa / $vrow['kurssi'], 2);
         $totsumma         = $kirjattava_summa;
         $totsumma_valuutassa   = $summa;
-        $kustp                = $oletuskust;
         $kohde                = $oletuskohde;
         $projekti             = $oletusprojekti;
         $kukarow['yhtio']     = $yhtio;
@@ -1376,7 +1390,7 @@ if (!function_exists("verkkolasku_in")) {
           }
 
           list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($varastotili, $kustp, $kohde, $projekti);
-
+          
           // Varasto
           $query = "INSERT into tiliointi set
                     yhtio            = '$yhtio',

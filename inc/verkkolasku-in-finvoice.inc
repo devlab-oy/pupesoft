@@ -171,12 +171,11 @@ if (count($tuotetiedot) > 0) {
 
       $rtuoteno[$i]["nimitys"] = xml_string($tuotetieto->ArticleName);
 
-
-
       // fitek XML muutoksia lisätään array:iin, jota voidaan käyttää tulevaisuudessa
       if ($fitek_xml_cron_tiedot) {
         //Tutkitaan että ovatko kustannuspaikat erilaiset tuotteille, muuten Array'ssa on 1 key.
         $fitek_xml_loydetyt_kustannuspaikat[xml_string($tuotetieto->Accounting->JournalEntry->CostObjective->Kaubaost)] = true;
+        $fitek_xml_cron_tiedot["kustannuspaikka"] = xml_string($tuotetieto->Accounting->JournalEntry->CostObjective->Kaubaost);
         $rtuoteno[$i]["kirjanpito"]["alv"] = xml_string($tuotetieto->Accounting->JournalEntry->VatSum);
         $rtuoteno[$i]["kirjanpito"]["alv_prosentti"] = xml_string($tuotetieto->Accounting->JournalEntry->VatRate);
         $rtuoteno[$i]["kirjanpito"]["tili"] = xml_string($tuotetieto->Accounting->JournalEntry->GeneralLedger);

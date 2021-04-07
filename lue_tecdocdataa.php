@@ -197,10 +197,9 @@ if ($kasitellaan_tiedosto) {
     }
   }
 
-  echo t("Päivitettiin"), " $updlask ", t("tietuetta"), "!<br>";
-  echo t("Lisättiin"), " $inslask ", t("tietuetta"), "!<br>";
+  echo t("Päivitettiin"), " $updlask -  $table ", t("tietuetta"), "!<br>";
+  echo t("Lisättiin"), " $inslask -  $table ", t("tietuetta"), "!<br>";
 }
-
 
 echo "<br><br>
     <form method='post' name='sendfile' enctype='multipart/form-data'>

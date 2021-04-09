@@ -41,8 +41,6 @@ else {
   $fitek_xml_cron_toimi = false;
 }
 
-echo "\nValittu kayttaja: ".$kukarow["kuka"].", valittu toimitus: ".$fitek_xml_cron_toimi."\n";
-
 $fitek_xml_cron_tiedot = array(
   "yhtiorow" => $yhtiorow,
   "kukarow" => $kukarow,

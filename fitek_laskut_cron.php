@@ -34,9 +34,8 @@ if(!isset($argv[1]) or !$kukarow) {
 }
 
 // toimi. Jos ei annettu, yriteraan etsia laskusta.
-$fitek_xml_cron_toimi = pupesoft_cleanstring($argv[3]);
 if(isset($argv[3])) { 
-  
+  $fitek_xml_cron_toimi = pupesoft_cleanstring($argv[3]);
 }
 else {
   $fitek_xml_cron_toimi = false;

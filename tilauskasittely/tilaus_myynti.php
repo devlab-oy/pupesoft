@@ -11009,7 +11009,7 @@ if ($tee == '') {
             <input type='hidden' name='toim' value='{$toim}'>
             <input type='hidden' name='tilausnumero' value='{$tilausnumero}'>
             <input type='hidden' name='tee' value='TEE_MYYNTITILAUKSESTA_TARJOUS'>
-            <input type='submit' value='", t("Tee tilauksesta tarjous"), "'>
+            <input type='submit' class='tee_tarjous_btn' value='", t("Tee tilauksesta tarjous"), "'>
             </form>";
       }
 

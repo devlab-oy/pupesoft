@@ -54,4 +54,8 @@ $verkkolaskut_orig   = $fitek_xml_cron_dirname."/orig";
 $verkkolaskut_error  = $fitek_xml_cron_dirname."/error";
 $verkkolaskut_reject = $fitek_xml_cron_dirname."/reject";
 
+$ftp_exclude_files = array_diff(scandir($verkkolaskut_orig), array('..', '.'));
+
+require 'sftp-get.php';
+
 include_once("verkkolasku-in.php");

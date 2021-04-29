@@ -121,6 +121,19 @@ class MyCashflowTilaukset {
 
     foreach ($xml->Order as $order) {
 
+      // Ohitetaan duplikaatit
+      $query = "SELECT asiakkaan_tilausnumero
+                FROM lasku
+                WHERE yhtio = '{$GLOBALS["yhtiorow"]['yhtio']}'
+                AND asiakkaan_tilausnumero = '{$order->OrderNumber}'
+                AND ohjelma_moduli = 'MAGENTO'";
+      $result = pupe_query($query);
+
+      if (mysql_num_rows($result)) {
+        $this->logger->log("Duplikaattitilaus ohitettiin: '{$order->OrderNumber}'");
+        continue;
+      }
+
       // Kaupan tiedot
       $kauppaversio = (int) $order->OrderVersionID;
 

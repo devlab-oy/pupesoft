@@ -131,6 +131,8 @@ class MyCashflowTilaukset {
 
       if (mysql_num_rows($result)) {
         $this->logger->log("Duplikaattitilaus ohitettiin: '{$order->OrderNumber}'");
+        $tilausaika = $order->OrderedAt->attributes()->timestamp;
+        cron_aikaleima("MYCF_ORDR_CRON", $tilausaika);
         continue;
       }
 

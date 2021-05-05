@@ -308,6 +308,7 @@ if (mysql_field_name($result, $i) == "laji") {
 
   if ($lukitse_laji== "") $ulos .= "<optgroup label='".t("Verkkokaupan avainsanat")."'>";
   if ($lukitse_laji== "" or $lukitse_laji == "VERKKOKAULINKKI") $ulos .= "<option value='VERKKOKAULINKKI' $avain_sel[VERKKOKAULINKKI]>".t("Verkkokauppalinkki")."</option>";
+  if ($lukitse_laji== "" or $lukitse_laji == "VERKKOKAUKURSSI") $ulos .= "<option value='VERKKOKAUKURSSI' $avain_sel[VERKKOKAUKURSSI]>".t("Oma valuuttakurssi")."</option>";
   if ($lukitse_laji== "") $ulos .= "</optgroup>";
 
   if ($lukitse_laji== "") $ulos .= "<optgroup label='".t("Muut avainsanat")."'>";

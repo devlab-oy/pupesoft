@@ -163,8 +163,6 @@ class MyCashflowTilaukset {
 
     foreach ($xml->Order as $order) {
 
-      $order->OrderNumber = rand(0,99999999);
-
       // Ohitetaan duplikaatit
       $query = "SELECT asiakkaan_tilausnumero
                 FROM lasku

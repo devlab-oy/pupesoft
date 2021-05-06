@@ -1,0 +1,166 @@
+<?php
+
+if (! $fd = fopen ( $filename, "r" ))
+	die ( "Filen '$filename' avaus epäonnistui!" );
+
+$edytunnus = "jokuarvovaan, että mennään ekalla luupilla jo sisään";
+
+/* FILEFORMAATTI:
+	ytunnus
+	toim_ovttunnus
+	tuoteno
+	kpl
+	alv
+	toimaika
+	hinta
+	ale
+	netto
+	var
+	kommentti
+*/
+
+while ( $xmlrivi = fgets ( $fd ) ) {
+	
+	if(strpos($xmlrivi, "<CompletedOrders") !== false)
+    {	
+		$poista = array ("\"", "'", "\\", "<", ">" );
+		$riviarry = str_replace ( $poista, "", $xmlrivi );		
+		$riviarry = explode ( " ", trim ( $riviarry ) );
+		
+		    foreach ($riviarry as $value) {
+		    	$tieto = explode ("=",$value);
+		    	$tilaaja[$tieto[0]] = $tieto[1];
+		    }
+		
+    
+	$ytunnus = "17605997";
+	$toim_ovttunnus = "003717605997".trim ( $tilaaja[STORENO] );
+	
+	
+	$tarkytunnus = $ytunnus . $toim_ovttunnus;
+	
+	if ($ytunnus != "") 
+	{
+		1==1;
+		// asiakas vaihtuu, uusi otsikko
+		if ($tarkytunnus != $edytunnus) {
+			
+			$query = "	UPDATE kuka
+						SET kesken=0
+						WHERE session = '$session'";
+			$result = mysql_query ( $query ) or pupe_error ( $query );
+			
+			$kukarow ['kesken'] = 0;
+			$tilausnumero = 0;
+			
+			if ($toim_ovttunnus != '') {
+				$toim_lis = " and toim_ovttunnus='$toim_ovttunnus' ";
+			} else {
+				$toim_lis = "";
+			}
+			
+			$query = "	SELECT tunnus
+ 						FROM asiakas
+ 						WHERE yhtio = '$kukarow[yhtio]'
+						and ytunnus = '$ytunnus'
+						$toim_lis
+ 						ORDER BY tunnus
+ 						LIMIT 1";
+			$result = mysql_query ( $query ) or die ( $query );
+			
+			if (mysql_num_rows ( $result ) == 0) {
+				#die ( "virheellinen asiakasnumero tiedostossa! ytunnus ='$ytunnus' $toim_lis" );
+				echo "Virheellinen asiakasnumero tiedostossa! ytunnus ='$ytunnus' $toim_lis" ;
+				$toim_lis = "";
+				
+				$query = "	SELECT tunnus
+ 						FROM asiakas
+ 						WHERE yhtio = '$kukarow[yhtio]'
+						and ytunnus = '0'						
+ 						ORDER BY tunnus
+ 						LIMIT 1";
+				$result = mysql_query ( $query ) or die ( $query );
+				
+				
+				
+			}
+		}
+			$arow = mysql_fetch_array ( $result );
+			
+			// Luodaan uusi myyntitilausotsikko
+			require_once ("tilauskasittely/luo_myyntitilausotsikko.inc");
+			
+			$viesti = $tilaaja[ORDERNO];
+			
+			$id = luo_myyntitilausotsikko ( "RIVISYOTTO", $arow ["tunnus"],"","",$viesti );
+			
+			echo "Tehtiin tilaus $id asiakkaalle $ytunnus<br>";
+			
+			// haetaan tilauksen tiedot
+			$query = "SELECT * from lasku where tunnus='$id' and yhtio='$kukarow[yhtio]'";
+			$result = mysql_query ( $query ) or die ( $query );
+			$laskurow = mysql_fetch_array ( $result );
+		}
+    }
+		
+		//onko tuoterivi?
+	    if(strpos($xmlrivi, "<CompletedOrderLine") !== false)
+	    {	
+			$poista = array ("\"", "'", "\\", "<", ">", "/" );
+			$riviarry = str_replace ( $poista, "", $xmlrivi );		
+			$riviarry = explode ( " ", trim ( $riviarry ) );
+			
+			    foreach ($riviarry as $value) {
+			    	$tieto = explode ("=",$value);
+			    	$tilaus[$tieto[0]] = $tieto[1];
+			    }
+			    $tuoteno = substr($tilaus[ITEMID], 7, 5);
+	    
+		
+				$query = "	SELECT *
+		 					FROM tuote
+		 					WHERE tuoteno = '$tuoteno'
+							and yhtio = '$kukarow[yhtio]'";
+				$rarresult = mysql_query ( $query ) or pupe_error ( $query );
+				
+				if (mysql_num_rows ( $rarresult ) == 1) {
+					$trow = mysql_fetch_array ( $rarresult );
+					
+					$ytunnus = $laskurow ["ytunnus"];
+					$kpl = ( float ) str_replace ( ",", ".", $tilaus[QTY] );
+					$tuoteno = $trow ["tuoteno"];
+					$toimaika = $rivi [5] != "" ? $rivi [5] : $laskurow ["toimaika"];
+					$kerayspvm = $laskurow ["kerayspvm"];
+					$hinta = str_replace ( ",", ".", $rivi [6] );
+					$netto = strtoupper ( trim ( $rivi [8] ) );
+					$ale = str_replace ( ",", ".", $rivi [7] );
+					$alv = str_replace ( ",", ".", $rivi [4] );
+					$var = strtoupper ( trim ( $rivi [9] ) );
+					$varasto = "";
+					$rivitunnus = "";
+					$korvaavakielto = "";
+					$jtkielto = $laskurow ['jtkielto'];
+					$varataan_saldoa = "";
+					$myy_sarjatunnus = "";
+					$kommentti = trim ( $rivi [10] );
+					$paikka = "";
+					
+					if ($hinta == 0) {
+						$hinta = "";
+					}
+					
+					//lisätään rivi
+					require ("lisaarivi.inc");
+					
+				}
+		}
+		
+		$edytunnus = $tarkytunnus;
+	
+	
+
+}
+
+fclose ( $fd );
+
+?>

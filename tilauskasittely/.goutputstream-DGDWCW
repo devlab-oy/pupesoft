@@ -1,0 +1,7 @@
+<?php
+
+if (!function_exists('finvoice_otsik')) {
+	function finvoice_otsik($tootfinvoice, $lasrow, $kieli, $pankkitiedot, $masrow, $myyrow, $tyyppi, $toimaikarow, $tulos_ulos, $silent, $nosoap = "") {
+		global $yhtiorow, $err_finvoice, $tulos_ulos, $palvelin2;
+
+		//	Koitetaan ollaanko virheett

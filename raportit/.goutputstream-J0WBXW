@@ -1,0 +1,8 @@
+<?php
+
+	if (strpos($_SERVER['SCRIPT_NAME'], "viranomaisilmoitukset.php") === FALSE) {
+		require("../inc/parametrit.inc");
+	}
+
+	/*
+	300 "Vero kotimaan myynnist

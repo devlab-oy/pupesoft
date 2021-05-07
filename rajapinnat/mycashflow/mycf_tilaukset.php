@@ -79,6 +79,48 @@ class MyCashflowTilaukset {
     $this->mycf_kaupat = $value;
   }
 
+  public function get_asiakastiedot($asiakasnro, $etsi_asiakas) {
+
+    // vain version 6 asiakkaan tiedot haetaan
+    if(!in_array($asiakasnro, array(99999))) {
+      return;
+    }
+    
+    // yritetään hakea oikea asiakas
+    $query = "SELECT * 
+                FROM asiakas 
+                WHERE yhtio = '{$GLOBALS["yhtiorow"]['yhtio']}' 
+                AND ytunnus = '{$etsi_asiakas->BusinessID}'
+              ";
+    $result = pupe_query($query);
+    if (!mysql_num_rows($result)) {
+      return;
+    }
+
+    $loydetty_asiakas = mysql_fetch_assoc($result);
+
+    // saadaan kurssit avainsanoista.
+    $kurssi_avainsanat = t_avainsana("VERKKOKAUKURSSI");
+    $kurssi_kerroin = 1;
+    while ($kurssi = mysql_fetch_assoc($kurssi_avainsanat)) {
+      if($kurssi['selite'] == $loydetty_asiakas['valkoodi']) {
+        // saadaan kerroin
+        $kurssi_filteroity = floatval(str_replace(",", ".", $kurssi['selitetark']));
+        $kurssi_kerroin = 1/$kurssi_filteroity;
+        if($kurssi_kerroin > 1) { 
+          $kurssi_kerroin = 1-$kurssi_kerroin;
+        }
+        $kurssi_kerroin = round($kurssi_kerroin, 9);
+        break;
+      }
+    }
+
+    return array(
+      'asiakasnro' => $loydetty_asiakas['asiakasnro'],
+      'kurssi_kerroin' => $kurssi_kerroin
+    );
+  }
+
   public function fetch_orders() {
     $this->logger->log('---------Aloitetaan tilausten haku---------');
 
@@ -204,8 +246,17 @@ class MyCashflowTilaukset {
       // Valuutta
       $tilaus['order_currency_code'] = "EUR";
 
+      // Valuutan kurssi. 1 on EUR
+      $kurssi_kerroin = 1;
+
       // Tuotteet
       $tilaus['items'] = array();
+
+      // Yritetään hakea erikoisasiakastiedot ja muut tiedot
+      if($asiakastiedot = $this->get_asiakastiedot($options['asiakasnro'], $order->CustomerInformation)) {
+        $options['asiakasnro'] = $asiakastiedot['asiakasnro'];
+        $kurssi_kerroin = $asiakastiedot['kurssi_kerroin'];
+      }
 
       foreach ($order->Products->Product as $product) {
 
@@ -218,7 +269,7 @@ class MyCashflowTilaukset {
         // Rahtimaksu
         if (!empty($product->ProductID->attributes()->ShippingID)) {
           // Rahtikulu, veroton
-          $tilaus['shipping_amount'] = (float) $product->Total - (float) $product->TotalTax;
+          $tilaus['shipping_amount'] = ((float) $product->Total - (float) $product->TotalTax) * $kurssi_kerroin;
 
           // Toimitustavan nimi
           $tilaus['shipping_description'] = $product->ProductName;
@@ -232,7 +283,7 @@ class MyCashflowTilaukset {
           }
 
           // Veron määrä
-          $tilaus['shipping_tax_amount'] = $product->TotalTax;
+          $tilaus['shipping_tax_amount'] = $product->TotalTax * $kurssi_kerroin;
           continue;
         }
 
@@ -267,17 +318,17 @@ class MyCashflowTilaukset {
         $item['discount_percent'] = 0;
 
         // Verollinen yksikköhinta
-        $item['original_price'] = $product->UnitPrice * $kerroin;
+        $item['original_price'] = $product->UnitPrice * $kerroin * $kurssi_kerroin;
 
         // Veroton yksikköhinta
-        $item['price'] = ((float) $product->UnitPrice - (float) $product->UnitTax) * $kerroin;
+        $item['price'] = ((float) $product->UnitPrice - (float) $product->UnitTax) * $kerroin * $kurssi_kerroin;
 
         // Verokanta
         $item['tax_percent'] = $product->UnitPrice->attributes()->vat;
 
         // Yheensäsumma
-        $tilaus['grand_total'] += (float) $product->Total * $kerroin;
-        $tilaus['tax_amount'] += (float) $product->TotalTax * $kerroin;
+        $tilaus['grand_total'] += (float) $product->Total * $kerroin * $kurssi_kerroin;
+        $tilaus['tax_amount'] += (float) $product->TotalTax * $kerroin * $kurssi_kerroin;
 
         // Ei käytössä
         $item['parent_item_id'] = "";

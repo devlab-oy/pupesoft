@@ -485,6 +485,29 @@ if ($tee == 'valmis') {
 
   $poikkeava_maara_email = "";
 
+  // tarkistetaan virheet tuotteissa etuk‰teen, kuten saldot jne.
+  foreach ($tunnus as $tun) {
+    if (isset($vastaanotetaan) and $vastaanotetaan[$tun] == "")
+    continue;
+    $query = "SELECT tilausrivi.tunnus, tilausrivi.tuoteno, tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso, tilausrivi.varattu, tuote.ei_saldoa, tuote.sarjanumeroseuranta
+              FROM tilausrivi
+              JOIN tuote on tilausrivi.yhtio=tuote.yhtio and tilausrivi.tuoteno=tuote.tuoteno
+              WHERE tilausrivi.tunnus   = '$tun'
+              and tilausrivi.yhtio      = '$kukarow[yhtio]'
+              and tilausrivi.tyyppi     = 'G'
+              and tilausrivi.toimitettu = ''";
+    $result = pupe_query($query);
+    if (mysql_num_rows($result) == 1) {
+      if (isset($vastaanotettu_maara[$tun]) and ($vastaanotettu_maara[$tun] != "") and is_numeric($vastaanotettu_maara[$tun]) and $vastaanotettu_maara[$tun] > 0) {
+      } else {
+        $tilausrivirowtarkista = mysql_fetch_assoc($result);
+        $tilausrivirowtarkistatuotenro = $tilausrivirowtarkista["tuoteno"];
+        lisaa_virhe("<font class='error'>", t("VIRHE: Tarkista m‰‰r‰ tuotteelle"), ": ".$tilausrivirowtarkistatuotenro, "</font><br>");
+        exit();
+      }
+    }
+  }
+
   //k‰yd‰‰n kaikki riviti l‰pi ja siirret‰‰n saldoja
   foreach ($tunnus as $tun) {
     if (isset($vastaanotetaan) and $vastaanotetaan[$tun] == "")
@@ -720,9 +743,6 @@ if ($tee == 'valmis') {
           // Summataan virhecountteria
           $virheita++;
         }
-      }
-      else {
-        lisaa_virhe("<font class='error'>", t("VIRHE: Tarkista m‰‰r‰ tuotteelle"), " {$tilausrivirow['tuoteno']}</font><br>");
       }
     }
   }

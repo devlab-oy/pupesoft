@@ -256,7 +256,6 @@ class MyCashflowTilaukset {
       $tilaus['items'] = array();
 
       // Yritetään hakea erikoisasiakastiedot ja muut tiedot
-      
       if($asiakastiedot = $this->get_asiakastiedot($kauppaversio, $order->CustomerInformation)) {
         $options['asiakasnro'] = $asiakastiedot['asiakasnro'];
         $kurssi_kerroin = $asiakastiedot['kurssi_kerroin'];

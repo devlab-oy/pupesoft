@@ -79,10 +79,10 @@ class MyCashflowTilaukset {
     $this->mycf_kaupat = $value;
   }
 
-  public function get_asiakastiedot($asiakasnro, $etsi_asiakas) {
+  public function get_asiakastiedot($kauppaversio, $etsi_asiakas) {
 
     // vain version 6 asiakkaan tiedot haetaan
-    if(!in_array($asiakasnro, array(99999))) {
+    if(!in_array($kauppaversio, array(6))) {
       return;
     }
     
@@ -162,7 +162,7 @@ class MyCashflowTilaukset {
     $tilaus = array();
 
     foreach ($xml->Order as $order) {
-
+      
       // Ohitetaan duplikaatit
       $query = "SELECT asiakkaan_tilausnumero
                 FROM lasku
@@ -249,19 +249,26 @@ class MyCashflowTilaukset {
       // Valuutan kurssi. 1 on EUR
       $kurssi_kerroin = 1;
 
+      //Kustomoitu maksutapa oletuksena pois
+      $custom_payment_method = false;
+
       // Tuotteet
       $tilaus['items'] = array();
 
       // Yritetään hakea erikoisasiakastiedot ja muut tiedot
-      if($asiakastiedot = $this->get_asiakastiedot($options['asiakasnro'], $order->CustomerInformation)) {
+      
+      if($asiakastiedot = $this->get_asiakastiedot($kauppaversio, $order->CustomerInformation)) {
         $options['asiakasnro'] = $asiakastiedot['asiakasnro'];
         $kurssi_kerroin = $asiakastiedot['kurssi_kerroin'];
+        $custom_payment_method = (array) $order->PaymentMethod;
+        $tilaus['payment']['method'] = $custom_payment_method[0];
+        $tilaus['status'] = "";
       }
 
       foreach ($order->Products->Product as $product) {
 
         // Maksutavan hinta
-        if (!empty($product->ProductID->attributes()->PaymentID)) {
+        if (!$custom_payment_method and !empty($product->ProductID->attributes()->PaymentID)) {
           $tilaus['payment']['method'] = "";
           continue;
         }

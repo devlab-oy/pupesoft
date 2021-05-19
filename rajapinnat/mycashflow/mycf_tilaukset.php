@@ -249,10 +249,14 @@ class MyCashflowTilaukset {
       // Valuutan kurssi. 1 on EUR
       $kurssi_kerroin = 1;
 
+      //Kustomoitu maksutapa oletuksena pois
+      $custom_payment_method = false;
+
       // Tuotteet
       $tilaus['items'] = array();
 
       // Yritetään hakea erikoisasiakastiedot ja muut tiedot
+      
       if($asiakastiedot = $this->get_asiakastiedot($kauppaversio, $order->CustomerInformation)) {
         $options['asiakasnro'] = $asiakastiedot['asiakasnro'];
         $kurssi_kerroin = $asiakastiedot['kurssi_kerroin'];
@@ -264,7 +268,7 @@ class MyCashflowTilaukset {
       foreach ($order->Products->Product as $product) {
 
         // Maksutavan hinta
-        if (!isset($custom_payment_method) and !empty($product->ProductID->attributes()->PaymentID)) {
+        if (!$custom_payment_method and !empty($product->ProductID->attributes()->PaymentID)) {
           $tilaus['payment']['method'] = "";
           continue;
         }

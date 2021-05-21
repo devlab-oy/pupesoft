@@ -364,6 +364,23 @@ else {
 
 $edi_ulos .= "$edi_subj\n";
 
+// Haetaan kostomoidut rivit, mitkä voidaan lukea ja lisätään niitä (array) $kustomoidut_edi_rivit
+// Toimii jos annettu oletusyhtio josta haetaan avainsana(t) $edi_oletusyhtio_kustomoidutrivit
+if(isset($edi_oletusyhtio_kustomoidutrivit) and $edi_oletusyhtio_kustomoidutrivit) {
+  $kustomoidut_edi_rivit = array();
+  $kustomoidut_edi_rivit_query = "SELECT distinct selite
+            FROM avainsana 
+            where yhtio = '$edi_oletusyhtio_kustomoidutrivit' 
+            and laji  = 'VERKKOKAUEDIKUS' 
+            ";
+  $kustomoidut_edi_rivit_kysely = pupe_query($kustomoidut_edi_rivit_query);
+  if (mysql_num_rows($kustomoidut_edi_rivit_kysely) > 0) {
+    while ($kustomoidut_edi_rivi = mysql_fetch_assoc($kustomoidut_edi_rivit_kysely)) {
+      $kustomoidut_edi_rivit[$kustomoidut_edi_rivi['selite']] = 1;
+    }
+  }
+}
+
 while ($tietue = fgets($fd)) {
 
   // Tyhjät rivit skipataan
@@ -2103,6 +2120,14 @@ while ($tietue = fgets($fd)) {
     $verokanta = (int) trim($tieto);
     break;
 
+    // customoitu rivisumma, jos laitettu avainsanoihin
+  case 'OSTOTILRIV.OTR_RIVISUMMA' :
+    $edi_oma_hinta_test = (float) trim(str_replace( ",", ".", $tieto));
+    if(isset($kustomoidut_edi_rivit['OSTOTILRIV.OTR_RIVISUMMA']) && $edi_oma_hinta_test != "" && strlen($edi_oma_hinta_test > 0)) {
+      $edi_oma_hinta = $edi_oma_hinta_test;
+    }
+    break;
+
   case 'OSTOTILRIV.OTR_OSTOHINTA' :
     // Kun tullaan magentosta ja meillä on rahtikulu, niin otetaan hinta talteeen
     // TAI kun tullaan magentosta ja me luotetaan verkkokaupan hintoihin.
@@ -2285,6 +2310,10 @@ while ($tietue = fgets($fd)) {
           }
           elseif (is_array($hyvityssaanto_hinta_array) and isset($hyvityssaanto_hinta_array[$hyvityssaanto_indeksi]) and isset($hyvityssaanto_hinta_array[$hyvityssaanto_indeksi][$tuoteno])) {
             $hinta = $hyvityssaanto_hinta_array[$hyvityssaanto_indeksi][$tuoteno];
+          }
+
+          if(isset($edi_oma_hinta)) {
+            $hinta = $edi_oma_hinta;
           }
 
           // jos tullaan magentosta ja alennus on tiedossa

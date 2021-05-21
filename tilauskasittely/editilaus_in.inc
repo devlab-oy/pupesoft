@@ -365,16 +365,19 @@ else {
 $edi_ulos .= "$edi_subj\n";
 
 // Haetaan kostomoidut rivit, mitkä voidaan lukea ja lisätään niitä (array) $kustomoidut_edi_rivit
-$kustomoidut_edi_rivit = array();
-$kustomoidut_edi_rivit_query = "SELECT distinct selite
+// Toimii jos annettu oletusyhtio josta haetaan avainsana(t) $edi_oletusyhtio_kustomoidutrivit
+if(isset($edi_oletusyhtio_kustomoidutrivit) and $edi_oletusyhtio_kustomoidutrivit) {
+  $kustomoidut_edi_rivit = array();
+  $kustomoidut_edi_rivit_query = "SELECT distinct selite
             FROM avainsana 
             where yhtio = '$edi_oletusyhtio_kustomoidutrivit' 
             and laji  = 'VERKKOKAUEDIKUS' 
             ";
-$kustomoidut_edi_rivit_kysely = pupe_query($kustomoidut_edi_rivit_query);
-if (mysql_num_rows($kustomoidut_edi_rivit_kysely) > 0) {
-  while ($kustomoidut_edi_rivi = mysql_fetch_assoc($kustomoidut_edi_rivit_kysely)) {
-    $kustomoidut_edi_rivit[$kustomoidut_edi_rivi['selite']] = 1;
+  $kustomoidut_edi_rivit_kysely = pupe_query($kustomoidut_edi_rivit_query);
+  if (mysql_num_rows($kustomoidut_edi_rivit_kysely) > 0) {
+    while ($kustomoidut_edi_rivi = mysql_fetch_assoc($kustomoidut_edi_rivit_kysely)) {
+      $kustomoidut_edi_rivit[$kustomoidut_edi_rivi['selite']] = 1;
+    }
   }
 }
 

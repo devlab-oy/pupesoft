@@ -364,17 +364,18 @@ else {
 
 $edi_ulos .= "$edi_subj\n";
 
-// Haetaan kostomoidut rivit
+// Haetaan kostomoidut rivit, mitkä voidaan lukea ja lisätään niitä (array) $kustomoidut_edi_rivit
 $kustomoidut_edi_rivit = array();
-$kustomoidut_edi_rivit_kysely = t_avainsana("VERKKOKAUEDIKUS", "'ee'", "", "'mergr'");
 $kustomoidut_edi_rivit_query = "SELECT distinct selite
             FROM avainsana 
             where yhtio = '$edi_oletusyhtio_kustomoidutrivit' 
             and laji  = 'VERKKOKAUEDIKUS' 
             ";
 $kustomoidut_edi_rivit_kysely = pupe_query($kustomoidut_edi_rivit_query);
-while ($kustomoidut_edi_rivi = mysql_fetch_assoc($kustomoidut_edi_rivit_kysely)) {
-  $kustomoidut_edi_rivit[$kustomoidut_edi_rivi['selite']] = 1;
+if (mysql_num_rows($kustomoidut_edi_rivit_kysely) > 0) {
+  while ($kustomoidut_edi_rivi = mysql_fetch_assoc($kustomoidut_edi_rivit_kysely)) {
+    $kustomoidut_edi_rivit[$kustomoidut_edi_rivi['selite']] = 1;
+  }
 }
 
 while ($tietue = fgets($fd)) {
@@ -2116,9 +2117,11 @@ while ($tietue = fgets($fd)) {
     $verokanta = (int) trim($tieto);
     break;
 
+    // customoitu rivisumma, jos laitettu avainsanoihin
   case 'OSTOTILRIV.OTR_RIVISUMMA' :
-    if(isset($kustomoidut_edi_rivit['OSTOTILRIV.OTR_RIVISUMMA'])) {
-      $editilaus_hinta = (float) trim(str_replace( ",", ".", $tieto));
+    $edi_oma_hinta_test = (float) trim(str_replace( ",", ".", $tieto));
+    if(isset($kustomoidut_edi_rivit['OSTOTILRIV.OTR_RIVISUMMA']) && $edi_oma_hinta_test != "" && strlen($edi_oma_hinta_test > 0)) {
+      $edi_oma_hinta = $edi_oma_hinta_test;
     }
     break;
 
@@ -2304,6 +2307,10 @@ while ($tietue = fgets($fd)) {
           }
           elseif (is_array($hyvityssaanto_hinta_array) and isset($hyvityssaanto_hinta_array[$hyvityssaanto_indeksi]) and isset($hyvityssaanto_hinta_array[$hyvityssaanto_indeksi][$tuoteno])) {
             $hinta = $hyvityssaanto_hinta_array[$hyvityssaanto_indeksi][$tuoteno];
+          }
+
+          if(isset($edi_oma_hinta)) {
+            $hinta = $edi_oma_hinta;
           }
 
           // jos tullaan magentosta ja alennus on tiedossa

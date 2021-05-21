@@ -2106,7 +2106,6 @@ while ($tietue = fgets($fd)) {
         $tuoteerror = 0; // tuote ok
       }
     }
-
     break;
 
   case 'OLIN8__IF' :
@@ -2122,8 +2121,9 @@ while ($tietue = fgets($fd)) {
 
     // customoitu rivisumma, jos laitettu avainsanoihin
   case 'OSTOTILRIV.OTR_RIVISUMMA' :
+    $edi_oma_hinta = false;
     $edi_oma_hinta_test = (float) trim(str_replace( ",", ".", $tieto));
-    if(isset($kustomoidut_edi_rivit['OSTOTILRIV.OTR_RIVISUMMA']) && $edi_oma_hinta_test != "" && strlen($edi_oma_hinta_test > 0)) {
+    if(isset($kustomoidut_edi_rivit['OSTOTILRIV.OTR_RIVISUMMA']) and $edi_oma_hinta_test != "" and strlen($edi_oma_hinta_test > 0)) {
       $edi_oma_hinta = $edi_oma_hinta_test;
     }
     break;
@@ -2312,7 +2312,7 @@ while ($tietue = fgets($fd)) {
             $hinta = $hyvityssaanto_hinta_array[$hyvityssaanto_indeksi][$tuoteno];
           }
 
-          if(isset($edi_oma_hinta)) {
+          if(isset($edi_oma_hinta) and $edi_oma_hinta) {
             $hinta = $edi_oma_hinta;
           }
 
@@ -2329,7 +2329,6 @@ while ($tietue = fgets($fd)) {
               ${'ale'.$alepostfix} = 0;
             }
           }
-
 
           // Magento-tilauksessa katsotaan onko tilattavalla tuotteella saldoa.
           // Jos tilattu kpl-m‰‰r‰ on suurempi kuin myyt‰viss‰ oleva kpl-m‰‰r‰, niin pakotetaan rivi hyv‰ksytyksi tai j‰lkk‰riksi

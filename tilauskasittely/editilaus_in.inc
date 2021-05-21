@@ -364,6 +364,19 @@ else {
 
 $edi_ulos .= "$edi_subj\n";
 
+// Haetaan kostomoidut rivit
+$kustomoidut_edi_rivit = array();
+$kustomoidut_edi_rivit_kysely = t_avainsana("VERKKOKAUEDIKUS", "'ee'", "", "'mergr'");
+$kustomoidut_edi_rivit_query = "SELECT distinct selite
+            FROM avainsana 
+            where yhtio = '$edi_oletusyhtio_kustomoidutrivit' 
+            and laji  = 'VERKKOKAUEDIKUS' 
+            ";
+$kustomoidut_edi_rivit_kysely = pupe_query($kustomoidut_edi_rivit_query);
+while ($kustomoidut_edi_rivi = mysql_fetch_assoc($kustomoidut_edi_rivit_kysely)) {
+  $kustomoidut_edi_rivit[$kustomoidut_edi_rivi['selite']] = 1;
+}
+
 while ($tietue = fgets($fd)) {
 
   // Tyhj‰t rivit skipataan
@@ -2101,6 +2114,12 @@ while ($tietue = fgets($fd)) {
   case 'OSTOTILRIV.OTR_VEROKANTA':
     // magento-keisiss‰, tilausrivin veron m‰‰r‰
     $verokanta = (int) trim($tieto);
+    break;
+
+  case 'OSTOTILRIV.OTR_RIVISUMMA' :
+    if(isset($kustomoidut_edi_rivit['OSTOTILRIV.OTR_RIVISUMMA'])) {
+      $editilaus_hinta = (float) trim(str_replace( ",", ".", $tieto));
+    }
     break;
 
   case 'OSTOTILRIV.OTR_OSTOHINTA' :

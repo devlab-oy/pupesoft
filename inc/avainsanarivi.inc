@@ -266,6 +266,7 @@ if (mysql_field_name($result, $i) == "laji") {
 
   if ($lukitse_laji== "") $ulos .= "<optgroup label='".t("Verkkokaupan avainsanat")."'>";
   if ($lukitse_laji== "" or $lukitse_laji == "VERKKOKAULINKKI") $ulos .= "<option value='VERKKOKAULINKKI' $avain_sel[VERKKOKAULINKKI]>".t("Verkkokauppalinkki")."</option>";
+  if ($lukitse_laji== "" or $lukitse_laji == "VERKKOKAUEDIKUS") $ulos .= "<option value='VERKKOKAUEDIKUS' $avain_sel[VERKKOKAUEDIKUS]>".t("EDI:ssa yritetään myös lukea kustomoidut rivit")."</option>";
   if ($lukitse_laji== "") $ulos .= "</optgroup>";
 
   if ($lukitse_laji== "") $ulos .= "<optgroup label='".t("Viennin avainsanat")."'>";

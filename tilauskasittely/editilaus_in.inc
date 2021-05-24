@@ -419,6 +419,9 @@ while ($tietue = fgets($fd)) {
   $orig_tieto = str_replace($from, $to, $tieto);
   $tieto    = str_replace($from, $to, pupesoft_cleanstring($tieto));
 
+  // resetoidaan $edi_oma_hinta
+  $edi_oma_hinta = false;
+
   // Jos kyseess‰ on UNH (ensimm‰inen Orders 91.1 segmentti), niin etsit‰‰n t‰ss‰ vaiheessa NAD SE
   if ($tunnus == "UNH") {
     $tunnus = "NADSE"; // Myyj‰
@@ -2332,9 +2335,6 @@ while ($tietue = fgets($fd)) {
               ${'ale'.$alepostfix} = 0;
             }
           }
-
-          // resetoidaan $edi_oma_hinta
-          $edi_oma_hinta = false;
 
           // Magento-tilauksessa katsotaan onko tilattavalla tuotteella saldoa.
           // Jos tilattu kpl-m‰‰r‰ on suurempi kuin myyt‰viss‰ oleva kpl-m‰‰r‰, niin pakotetaan rivi hyv‰ksytyksi tai j‰lkk‰riksi

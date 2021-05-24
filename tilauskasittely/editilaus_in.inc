@@ -2333,9 +2333,6 @@ while ($tietue = fgets($fd)) {
             }
           }
 
-          // resetoidaan $edi_oma_hinta
-          $edi_oma_hinta = false;
-
           // Magento-tilauksessa katsotaan onko tilattavalla tuotteella saldoa.
           // Jos tilattu kpl-määrä on suurempi kuin myytävissä oleva kpl-määrä, niin pakotetaan rivi hyväksytyksi tai jälkkäriksi
           if ($edi_tyyppi == "magento" and $tuoteno != '' and $kpl > 0 and $trow["ei_saldoa"] == "") {

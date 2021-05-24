@@ -2161,8 +2161,9 @@ while ($tietue = fgets($fd)) {
     break;
 
   case 'OSTOTILRIV.OTR_ALENNUS' :
-    // Kun tullaan magentosta ja meillä on alennus, niin otetaan alennus talteen jos me luotetaan verkkokaupan hintoihin.
-    if ($edi_tyyppi == "magento" and (isset($verkkokauppa_hinnatedifailista) and $verkkokauppa_hinnatedifailista == "JOO") and $tieto != '') {
+    // Kun tullaan magentosta ja meillä on alennus, tai jos annettu oma hinta, niin otetaan alennus talteen jos me luotetaan verkkokaupan hintoihin.
+    if ((isset($edi_oma_hinta) and $edi_oma_hinta and $tieto != '') 
+    or ($edi_tyyppi == "magento" and (isset($verkkokauppa_hinnatedifailista) and $verkkokauppa_hinnatedifailista == "JOO") and $tieto != '')) {
       $editilaus_alennus = (float) trim($tieto);
     }
     break;
@@ -2312,12 +2313,14 @@ while ($tietue = fgets($fd)) {
             $hinta = $hyvityssaanto_hinta_array[$hyvityssaanto_indeksi][$tuoteno];
           }
 
+          // jos rivihinta on annettu edi tilauksessa
           if(isset($edi_oma_hinta) and $edi_oma_hinta) {
             $hinta = $edi_oma_hinta;
           }
 
-          // jos tullaan magentosta ja alennus on tiedossa
-          if ($edi_tyyppi == "magento" and (isset($verkkokauppa_hinnatedifailista) and $verkkokauppa_hinnatedifailista == "JOO") and $editilaus_alennus >= 0) {
+          // jos tullaan magentosta ja alennus on tiedossa tai jos on oma hinta annettu tuotteelle
+          if ((isset($edi_oma_hinta) and $edi_oma_hinta and $editilaus_alennus >= 0) or 
+          ($edi_tyyppi == "magento" and (isset($verkkokauppa_hinnatedifailista) and $verkkokauppa_hinnatedifailista == "JOO") and $editilaus_alennus >= 0)) {
             $ale1 = $editilaus_alennus;
           }
           elseif (is_array($hyvityssaanto_ale_array) and isset($hyvityssaanto_ale_array[$hyvityssaanto_indeksi]) and isset($hyvityssaanto_ale_array[$hyvityssaanto_indeksi][$tuoteno])) {

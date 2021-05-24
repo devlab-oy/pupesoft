@@ -419,9 +419,6 @@ while ($tietue = fgets($fd)) {
   $orig_tieto = str_replace($from, $to, $tieto);
   $tieto    = str_replace($from, $to, pupesoft_cleanstring($tieto));
 
-  // resetoidaan $edi_oma_hinta
-  $edi_oma_hinta = false;
-
   // Jos kyseess‰ on UNH (ensimm‰inen Orders 91.1 segmentti), niin etsit‰‰n t‰ss‰ vaiheessa NAD SE
   if ($tunnus == "UNH") {
     $tunnus = "NADSE"; // Myyj‰

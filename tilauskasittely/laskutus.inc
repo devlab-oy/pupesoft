@@ -95,6 +95,12 @@ else {
       $valres = pupe_query($query);
 
       if ($valrow = mysql_fetch_assoc($valres)) {
+
+        // jos oma kurssi tulee edi-tilauksesta
+        if(isset($editilaus_asiakaskurssi) && $editilaus_asiakaskurssi) {
+          $valrow['kurssi'] = $editilaus_asiakaskurssi;
+        }
+
         // Kurssi löytyi ja se vaihtuu
         if (!empty($valrow['kurssi']) and $orow["vienti_kurssi"] != $valrow['kurssi']) {
 

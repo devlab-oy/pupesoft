@@ -102,22 +102,55 @@ class MyCashflowTilaukset {
     // saadaan kurssit avainsanoista.
     $kurssi_avainsanat = t_avainsana("VERKKOKAUKURSSI");
     $kurssi_kerroin = 1;
+    $asiakaskurssi=false;
     while ($kurssi = mysql_fetch_assoc($kurssi_avainsanat)) {
       if($kurssi['selite'] == $loydetty_asiakas['valkoodi']) {
         // saadaan kerroin
-        $kurssi_filteroity = floatval(str_replace(",", ".", $kurssi['selitetark']));
-        $kurssi_kerroin = 1/$kurssi_filteroity;
-        if($kurssi_kerroin > 1) { 
-          $kurssi_kerroin = 1-$kurssi_kerroin;
-        }
+        $kurssi_kerroin = floatval(str_replace(",", ".", $kurssi['selitetark']));
         $kurssi_kerroin = round($kurssi_kerroin, 9);
+        $asiakaskurssi = round(1/$kurssi_kerroin, 9);
         break;
+      }
+    }
+
+    // jos kurssi ei löydy - haetaan pupeesta kurssi.
+    if(!$asiakaskurssi) {
+      $query = "SELECT kurssi
+                  FROM valuu
+                  WHERE yhtio = '{$GLOBALS["yhtiorow"]['yhtio']}'
+                  AND nimi    = '{$loydetty_asiakas['valkoodi']}'";
+      $valres = pupe_query($query);
+
+      if ($valrow = mysql_fetch_assoc($valres)) {
+        $kurssi_kerroin = floatval(str_replace(",", ".", $valrow['kurssi']));
+        $kurssi_kerroin = round($kurssi_kerroin*100, 9);
+        $asiakaskurssi = round(1/$kurssi_kerroin, 9);
+      } else {
+        return;
+      }
+    }
+
+    // haetaan asiakkaan maksuehto
+    $asiakasmaksuehto = false;
+    if(!empty($loydetty_asiakas['maksuehto'])) {
+      $query = "SELECT teksti 
+                  FROM maksuehto 
+                  WHERE yhtio = '{$GLOBALS["yhtiorow"]['yhtio']}' 
+                  AND tunnus = '{$loydetty_asiakas['maksuehto']}'
+                ";
+      $result = pupe_query($query);
+      if (mysql_num_rows($result)) {
+        $loydetty_asiakasmaksuehto = mysql_fetch_assoc($result);
+        $asiakasmaksuehto = $loydetty_asiakasmaksuehto['teksti'];
       }
     }
 
     return array(
       'asiakasnro' => $loydetty_asiakas['asiakasnro'],
-      'kurssi_kerroin' => $kurssi_kerroin
+      'kurssi_kerroin' => $kurssi_kerroin,
+      'asiakasvaluuta' => $loydetty_asiakas['valkoodi'],
+      'maksuehto' => $asiakasmaksuehto,
+      'asiakaskurssi' => $asiakaskurssi
     );
   }
 
@@ -260,8 +293,14 @@ class MyCashflowTilaukset {
         $options['asiakasnro'] = $asiakastiedot['asiakasnro'];
         $kurssi_kerroin = $asiakastiedot['kurssi_kerroin'];
         $custom_payment_method = (array) $order->PaymentMethod;
-        $tilaus['payment']['method'] = $custom_payment_method[0];
-        $tilaus['status'] = "";
+        if($asiakastiedot['maksuehto']) {
+          $tilaus['payment']['method'] = $asiakastiedot['maksuehto'];
+        } else {
+          $tilaus['payment']['method'] = $custom_payment_method[0];
+        }
+        $options['oma_kurssi'] = "JOO";
+        $options['asiakasvaluuta'] = $asiakastiedot['asiakasvaluuta'];
+        $options['asiakaskurssi'] = $asiakastiedot['asiakaskurssi'];
       }
 
       foreach ($order->Products->Product as $product) {

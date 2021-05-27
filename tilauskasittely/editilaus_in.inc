@@ -512,6 +512,11 @@ while ($tietue = fgets($fd)) {
     }
     break;
 
+  case 'OSTOTIL.OT_NRO' :
+    //Aloitus
+    $oma_kurssi = false;
+    break;
+
   case 'OSTOTIL.OT_TILAUSTYYPPI' :
     //Tilaustyyppi
     $editilaus_tilaustyyppi = trim($tieto);
@@ -524,7 +529,25 @@ while ($tietue = fgets($fd)) {
     if (!empty($tieto)) {
       $edi_ulos .= t("Valuuttakoodi")." $tieto\n";
     }
+    break;
 
+  case 'OSTOTIL.OT_OMA_KURSSI':
+    // kurssi on jo laskettu ja hinta on asiakkaan valuutassa
+    if($tieto == "JOO") {
+      $oma_kurssi = true;
+    }
+    break;
+
+  case 'OSTOTIL.OT_OMA_ASIAKASVAL':
+    if($oma_kurssi) {
+      $editilaus_valuuttakoodi = $tieto;
+    }
+    break;
+
+  case 'OSTOTIL.OT_OMA_ASIAKASKUR':
+    if($oma_kurssi && $tieto != "") {
+      $editilaus_asiakaskurssi = $tieto;
+    }
     break;
 
   case 'OSTOTIL.VERKKOKAUPPA' :
@@ -1199,7 +1222,11 @@ while ($tietue = fgets($fd)) {
       $editilaus_kateinen_row = mysql_fetch_assoc($editilaus_kateinen_res);
 
       if (mysql_num_rows($editilaus_kateinen_res) == 1) {
-        $editilaus_maksuehto = $editilaus_kateinen_row["tunnus"];
+
+        // jos ei erikoistilaus kyseessä, josta luetaan kurssitiedot ja muut asiakkaan valuutatiedot - silloin maksuehto on myös asiakaan takana.
+        if(!$oma_kurssi) {
+          $editilaus_maksuehto = $editilaus_kateinen_row["tunnus"];
+        }
 
         $query = "SELECT tunnus
                   FROM kassalipas
@@ -1270,7 +1297,7 @@ while ($tietue = fgets($fd)) {
   case 'OSTOTIL.OT_SUMMA' :
     // Kun tullaan magentosta ja meillä on laskun loppusumma
     // Tallennetaan tämä laskun 'hinta'-kenttään niin jos se jää riittävän lähelle totuutta niin pupe pyöristää loppusumman tähän
-    if ($edi_tyyppi == "magento" and (isset($verkkokauppa_hinnatedifailista) and $verkkokauppa_hinnatedifailista == "JOO") and $tieto != '') {
+    if ($edi_tyyppi == "magento" and ((isset($verkkokauppa_hinnatedifailista) and $verkkokauppa_hinnatedifailista == "JOO") or $oma_kurssi) and $tieto != '') {
       $editilaus_loppuhinta = (float) trim($tieto);
     }
     break;
@@ -1778,7 +1805,7 @@ while ($tietue = fgets($fd)) {
 
       // Katsotaan verkkokauppatapauksessa tilauksen valuutta
       if ($edi_tyyppi == 'magento'
-        and isset($verkkokauppa_hinnatedifailista) and $verkkokauppa_hinnatedifailista == "JOO"
+        and ((isset($verkkokauppa_hinnatedifailista) and $verkkokauppa_hinnatedifailista == "JOO") or $oma_kurssi)
         and !empty($editilaus_valuuttakoodi)) {
         // escapetaan
         $valkoodi = mysql_real_escape_string($editilaus_valuuttakoodi);
@@ -1788,10 +1815,13 @@ while ($tietue = fgets($fd)) {
                   WHERE yhtio = '{$kukarow["yhtio"]}'
                   AND nimi    = '{$valkoodi}'";
         $valuu_result = pupe_query($query);
-
-        if (mysql_num_rows($valuu_result) != 1) {
-          $valkoodi = $yhtiorow['valkoodi'];
-          $valkurssi = 1;
+        if (mysql_num_rows($valuu_result) != 1 or $oma_kurssi) {
+          if(!$oma_kurssi) {
+            $valkoodi = $yhtiorow['valkoodi'];
+            $valkurssi = 1;
+          } else {
+            $valkurssi = 1;
+          }
         }
         else {
           $valrow = mysql_fetch_assoc($valuu_result);
@@ -2162,11 +2192,12 @@ while ($tietue = fgets($fd)) {
 
   case 'OSTOTILRIV.OTR_OSTOHINTA' :
 
-    $_hinnatedifailista = (isset($verkkokauppa_hinnatedifailista) and $verkkokauppa_hinnatedifailista == "JOO");
+    $_hinnatedifailista = ((isset($verkkokauppa_hinnatedifailista) and $verkkokauppa_hinnatedifailista == "JOO") or $oma_kurssi);
 
     // Kun tullaan magentosta ja meillä on rahtikulu, niin otetaan hinta talteeen
     // TAI kun tullaan magentosta ja me luotetaan verkkokaupan hintoihin.
     if ($edi_tyyppi == "magento" and ($_hinnatedifailista or strtolower($tuoteno) == strtolower($yhtiorow['rahti_tuotenumero'])) and $tieto != '') {
+      
       // Tämä hinta on aina veroton, joten lasketaan vero päälle jos myyntihinnat ovat verollisia
       $editilaus_hinta = (float) trim(str_replace( ",", ".", $tieto));
 
@@ -2179,6 +2210,7 @@ while ($tietue = fgets($fd)) {
       if ($yhtiorow["alv_kasittely"] != '' and isset($verkkokauppa_hinnatedifailistaverollisina) and !empty($verokanta)) {
         $editilaus_hinta = round($editilaus_hinta / (1 + $verokanta/100), 2);
       }
+      
     }
 
     // Jos tilaus tulee ennalta määritellyistä kaupoista
@@ -2364,7 +2396,7 @@ while ($tietue = fgets($fd)) {
           }
 
           // jos tullaan magentosta ja hinta on tiedossa ja kyseessä on rahtikulu, niin uskalletaan luottaa magenton antamaan hintaan
-          if ($edi_tyyppi == "magento" and ((isset($verkkokauppa_hinnatedifailista) and $verkkokauppa_hinnatedifailista == "JOO") or strtolower($tuoteno) == strtolower($yhtiorow['rahti_tuotenumero'])) and $editilaus_hinta > 0) {
+          if ($edi_tyyppi == "magento" and ((isset($verkkokauppa_hinnatedifailista) and $verkkokauppa_hinnatedifailista == "JOO") or $oma_kurssi or strtolower($tuoteno) == strtolower($yhtiorow['rahti_tuotenumero'])) and $editilaus_hinta > 0) {
             $hinta = $editilaus_hinta;
           }
           elseif (is_array($hyvityssaanto_hinta_array) and isset($hyvityssaanto_hinta_array[$hyvityssaanto_indeksi]) and isset($hyvityssaanto_hinta_array[$hyvityssaanto_indeksi][$tuoteno])) {
@@ -2691,7 +2723,6 @@ while ($tietue = fgets($fd)) {
             $valittu_kopio_tulostin = "asiakasemail$ltoim_email";
           }
         }
-
         // magentotilaus on laskutettu, jos meillä on kassalipas
         $laskutettu_magento_tilaus = ($edi_tyyppi == "magento" and $editilaus_kassalipas != "");
 

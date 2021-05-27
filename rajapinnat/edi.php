@@ -34,6 +34,14 @@ class Edi {
       die("EDI -hakemistoon ei voida kirjoittaa\n");
     }
 
+    if(isset($options['oma_kurssi']) && isset($options['asiakasvaluuta']) && isset($options['asiakaskurssi'])) {
+      $oma_kurssi = $options['oma_kurssi'];
+      $oma_asiakasvaluuta = $options['asiakasvaluuta'];
+      $oma_asiakaskurssi = $options['asiakaskurssi'];
+    } else {
+      $oma_kurssi = false;
+    }
+
     // Tilauksella k‰ytetyt lahjakortit ei saa vehent‰‰ myynti pupen puolella
     $giftcards = empty($order['webtex_giftcard']) ? null : json_decode($order['webtex_giftcard']);
 
@@ -173,6 +181,9 @@ class Edi {
     $edi_order .= "OSTOTIL.OT_TOIMITUSAIKA:{$toimaika}\n";
     $edi_order .= "OSTOTIL.OT_TOIMITUSTAPA:{$order['shipping_description']}\n";
     $edi_order .= "OSTOTIL.OT_TOIMITUSEHTO:\n";
+    if($oma_kurssi) { 
+      $edi_order .= "OSTOTIL.OT_OMA_KURSSI:{$oma_kurssi}\n"; 
+    }
     $edi_order .= "OSTOTIL.OT_MAKSETTU:{$order['status']}\n";
     $edi_order .= "OSTOTIL.OT_MAKSUEHTO:{$maksuehto}\n";
     $edi_order .= "OSTOTIL.OT_VIITTEEMME:\n";
@@ -181,6 +192,10 @@ class Edi {
     $edi_order .= "OSTOTIL.OT_VEROMAARA:{$order['tax_amount']}\n";
     $edi_order .= "OSTOTIL.OT_SUMMA:{$grand_total}\n";
     $edi_order .= "OSTOTIL.OT_VALUUTTAKOODI:{$order['order_currency_code']}\n";
+    if($oma_kurssi) { 
+      $edi_order .= "OSTOTIL.OT_OMA_ASIAKASVAL:{$oma_asiakasvaluuta}\n";
+      $edi_order .= "OSTOTIL.OT_OMA_ASIAKASKUR:{$oma_asiakaskurssi}\n";
+    }
     $edi_order .= "OSTOTIL.OT_KLAUSUULI1:\n";
     $edi_order .= "OSTOTIL.OT_KLAUSUULI2:\n";
     $edi_order .= "OSTOTIL.OT_KULJETUSOHJE:\n";

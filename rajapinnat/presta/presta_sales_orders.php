@@ -262,6 +262,15 @@ class PrestaSalesOrders extends PrestaClient {
     $order_message  = implode(' ', $order_messages);
     $order_message  = trim(preg_replace('/\s+/', ' ', $order_message));
 
+    // search for avainsana OT_TILAUSTYYPPI
+    $prestasta_tilaustyyppi = "";
+    $tilaustyyppi_avainsanat = t_avainsana("VERKAUPRESTATIL");
+    while ($tilaustyyppi_avainsana = mysql_fetch_assoc($tilaustyyppi_avainsanat)) {
+      if($tilaustyyppi_avainsana['selite'] == "K") {
+        $prestasta_tilaustyyppi = "K";
+      }
+    }
+
     // empty edi_order
     $this->edi_order = '';
     $this->add_row("*IS from:721111720-1 to:IKH,ORDERS*id:{$order['id']} version:AFP-1.0 *MS");
@@ -269,7 +278,7 @@ class PrestaSalesOrders extends PrestaClient {
     $this->add_row("*RS OSTOTIL");
     $this->add_row("NADSE:{$this->yhtiorow['ovttunnus']}");
     $this->add_row("OSTOTIL.OT_NRO:{$order['id']}");
-    $this->add_row("OSTOTIL.OT_TILAUSTYYPPI:");
+    $this->add_row("OSTOTIL.OT_TILAUSTYYPPI:{$prestasta_tilaustyyppi}");
     $this->add_row("OSTOTIL.VERKKOKAUPPA:");
     $this->add_row("OSTOTIL.OT_VERKKOKAUPPA_ASIAKASNRO:");
     $this->add_row("OSTOTIL.OT_VERKKOKAUPPA_TILAUSVIITE:{$order['invoice_number']}");

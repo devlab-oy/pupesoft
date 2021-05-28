@@ -268,8 +268,69 @@ class PrestaSalesOrders extends PrestaClient {
     while ($tilaustyyppi_avainsana = mysql_fetch_assoc($tilaustyyppi_avainsanat)) {
       if($tilaustyyppi_avainsana['selite'] == "K") {
         $prestasta_tilaustyyppi = "K";
+        break;
       }
     }
+
+    // search for avainsana OT_MAKSUEHTO
+    $prestasta_tilausmaksuehto = $order['payment'];
+    $tilausmaksuehto_avainsanat = t_avainsana("VERKAUPRESTAMAK");
+    while ($tilausmaksuehto_avainsana = mysql_fetch_assoc($tilausmaksuehto_avainsanat)) {
+      // normal search for a payment name
+      if($tilausmaksuehto_avainsana['selite'] == $order['payment']) {
+        $prestasta_tilausmaksuehto = $tilausmaksuehto_avainsana['selitetark'];
+        break;
+      }
+      // utf8 search for a payment name
+      $tilausmaksuehto_avainsana_selite = utf8_encode($tilausmaksuehto_avainsana['selite']);
+      $tilausmaksuehto_avainsana_selitetark = utf8_encode($tilausmaksuehto_avainsana['selitetark']);
+      if($tilausmaksuehto_avainsana_selite == $order['payment']) {
+        $prestasta_tilausmaksuehto = $tilausmaksuehto_avainsana_selitetark;
+        break;
+      }
+    }
+
+    // haetaan maksuehto, jos se on olemassa järjestelmässä.
+    $query = "SELECT teksti 
+                FROM maksuehto 
+                WHERE yhtio = '{$this->yhtiorow['yhtio']}' 
+                AND teksti = '{$prestasta_tilausmaksuehto}'
+              ";
+    $result = pupe_query($query);
+    if (mysql_num_rows($result)) {
+      $loydetty_maksuehto = true; 
+    } else {
+      $loydetty_maksuehto = false;
+    }
+
+    if(!$loydetty_maksuehto) {
+      // yritetään hakea oikea asiakas ja sen maksuehto
+      $loydetty_asiakas = false;
+      $query = "SELECT maksuehto 
+                  FROM asiakas 
+                  WHERE yhtio = '{$this->yhtiorow['yhtio']}' 
+                  AND asiakasnro = '{$pupesoft_customer_id}'
+                ";
+      $result = pupe_query($query);
+      if (mysql_num_rows($result)) {
+        $loydetty_asiakas = mysql_fetch_assoc($result);
+      }
+
+      // haetaan asiakkaan maksuehto
+      if(!empty($pupesoft_customer_id)) {
+        $query = "SELECT teksti 
+                    FROM maksuehto 
+                    WHERE yhtio = '{$this->yhtiorow['yhtio']}' 
+                    AND tunnus = '{$loydetty_asiakas['maksuehto']}'
+                  ";
+        $result = pupe_query($query);
+        if (mysql_num_rows($result)) {
+          $loydetty_asiakasmaksuehto = mysql_fetch_assoc($result);
+          $prestasta_tilausmaksuehto = $loydetty_asiakasmaksuehto['teksti'];
+        }
+      }
+    }
+
 
     // empty edi_order
     $this->edi_order = '';
@@ -292,7 +353,7 @@ class PrestaSalesOrders extends PrestaClient {
     $this->add_row("OSTOTIL.OT_RAHTIVAPAA:{$carrier['is_free']}");
     $this->add_row("OSTOTIL.OT_TOIMITUSEHTO:");
     $this->add_row("OSTOTIL.OT_MAKSETTU:"); // complete tarkoittaa, että on jo maksettu
-    $this->add_row("OSTOTIL.OT_MAKSUEHTO:{$order['payment']}");
+    $this->add_row("OSTOTIL.OT_MAKSUEHTO:{$prestasta_tilausmaksuehto}");
     $this->add_row("OSTOTIL.OT_VIITTEEMME:");
     $this->add_row("OSTOTIL.OT_VIITTEENNE:");
     $this->add_row("OSTOTIL.OT_VEROMAARA:");

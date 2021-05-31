@@ -1351,7 +1351,8 @@ if (!function_exists("verkkolasku_in")) {
                       AND koodi = '{$fitek_xml_cron_tiedot["kustannuspaikka"]}'";
           $result_fitek_cron = pupe_query($query);
           if (mysql_num_rows($result_fitek_cron) != 0) {
-            $kustp = mysql_fetch_assoc($result_fitek_cron)['tunnus'];
+            $kustp = mysql_fetch_assoc($result_fitek_cron);
+            $kustp = $kustp['tunnus'];
           }
           else {
             $kustp = $oletuskust;
@@ -1466,7 +1467,8 @@ if (!function_exists("verkkolasku_in")) {
                         AND koodi = '$tuotekohtainen_fitek_kpai'";
             $result_fitek_cron = pupe_query($query);
             if (mysql_num_rows($result_fitek_cron) != 0) {
-              $kustp = mysql_fetch_assoc($result_fitek_cron)['tunnus'];
+              $kustp = mysql_fetch_assoc($result_fitek_cron);
+              $kustp = $kustp['tunnus'];
             } 
             else {
               $kustp = $oletuskust;

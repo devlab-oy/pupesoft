@@ -509,7 +509,6 @@ while ($tietue = fgets($fd)) {
     if (!empty($tieto)) {
       $edi_ulos .= t("Valuuttakoodi")." $tieto\n";
     }
-
     break;
 
   case 'OSTOTIL.VERKKOKAUPPA' :
@@ -2123,7 +2122,7 @@ while ($tietue = fgets($fd)) {
   case 'OSTOTILRIV.OTR_RIVISUMMA' :
     $edi_oma_hinta = false;
     $edi_oma_hinta_test = (float) trim(str_replace( ",", ".", $tieto));
-    if(isset($kustomoidut_edi_rivit['OSTOTILRIV.OTR_RIVISUMMA']) and $edi_oma_hinta_test != "" and strlen($edi_oma_hinta_test > 0)) {
+    if(in_array($editilaus_valuuttakoodi, $edi_kustomoidutrivit_valuutat) and isset($kustomoidut_edi_rivit['OSTOTILRIV.OTR_RIVISUMMA']) and $edi_oma_hinta_test != "" and strlen($edi_oma_hinta_test > 0)) {
       $edi_oma_hinta = $edi_oma_hinta_test;
     }
     break;

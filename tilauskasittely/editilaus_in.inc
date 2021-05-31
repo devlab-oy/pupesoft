@@ -364,6 +364,23 @@ else {
 
 $edi_ulos .= "$edi_subj\n";
 
+// Haetaan kostomoidut rivit, mitk‰ voidaan lukea ja lis‰t‰‰n niit‰ (array) $kustomoidut_edi_rivit
+// Toimii jos annettu oletusyhtio josta haetaan avainsana(t) $edi_oletusyhtio_kustomoidutrivit
+if(isset($edi_oletusyhtio_kustomoidutrivit) and $edi_oletusyhtio_kustomoidutrivit) {
+  $kustomoidut_edi_rivit = array();
+  $kustomoidut_edi_rivit_query = "SELECT distinct selite
+            FROM avainsana 
+            where yhtio = '$edi_oletusyhtio_kustomoidutrivit' 
+            and laji  = 'VERKKOKAUEDIKUS' 
+            ";
+  $kustomoidut_edi_rivit_kysely = pupe_query($kustomoidut_edi_rivit_query);
+  if (mysql_num_rows($kustomoidut_edi_rivit_kysely) > 0) {
+    while ($kustomoidut_edi_rivi = mysql_fetch_assoc($kustomoidut_edi_rivit_kysely)) {
+      $kustomoidut_edi_rivit[$kustomoidut_edi_rivi['selite']] = 1;
+    }
+  }
+}
+
 while ($tietue = fgets($fd)) {
 
   // Tyhj‰t rivit skipataan
@@ -2089,7 +2106,6 @@ while ($tietue = fgets($fd)) {
         $tuoteerror = 0; // tuote ok
       }
     }
-
     break;
 
   case 'OLIN8__IF' :
@@ -2101,6 +2117,15 @@ while ($tietue = fgets($fd)) {
   case 'OSTOTILRIV.OTR_VEROKANTA':
     // magento-keisiss‰, tilausrivin veron m‰‰r‰
     $verokanta = (int) trim($tieto);
+    break;
+
+    // customoitu rivisumma, jos laitettu avainsanoihin
+  case 'OSTOTILRIV.OTR_RIVISUMMA' :
+    $edi_oma_hinta = false;
+    $edi_oma_hinta_test = (float) trim(str_replace( ",", ".", $tieto));
+    if(isset($kustomoidut_edi_rivit['OSTOTILRIV.OTR_RIVISUMMA']) and $edi_oma_hinta_test != "" and strlen($edi_oma_hinta_test > 0)) {
+      $edi_oma_hinta = $edi_oma_hinta_test;
+    }
     break;
 
   case 'OSTOTILRIV.OTR_OSTOHINTA' :
@@ -2136,8 +2161,9 @@ while ($tietue = fgets($fd)) {
     break;
 
   case 'OSTOTILRIV.OTR_ALENNUS' :
-    // Kun tullaan magentosta ja meill‰ on alennus, niin otetaan alennus talteen jos me luotetaan verkkokaupan hintoihin.
-    if ($edi_tyyppi == "magento" and (isset($verkkokauppa_hinnatedifailista) and $verkkokauppa_hinnatedifailista == "JOO") and $tieto != '') {
+    // Kun tullaan magentosta ja meill‰ on alennus, tai jos annettu oma hinta, niin otetaan alennus talteen jos me luotetaan verkkokaupan hintoihin.
+    if ((isset($edi_oma_hinta) and $edi_oma_hinta and $tieto != '') 
+    or ($edi_tyyppi == "magento" and (isset($verkkokauppa_hinnatedifailista) and $verkkokauppa_hinnatedifailista == "JOO") and $tieto != '')) {
       $editilaus_alennus = (float) trim($tieto);
     }
     break;
@@ -2287,8 +2313,14 @@ while ($tietue = fgets($fd)) {
             $hinta = $hyvityssaanto_hinta_array[$hyvityssaanto_indeksi][$tuoteno];
           }
 
-          // jos tullaan magentosta ja alennus on tiedossa
-          if ($edi_tyyppi == "magento" and (isset($verkkokauppa_hinnatedifailista) and $verkkokauppa_hinnatedifailista == "JOO") and $editilaus_alennus >= 0) {
+          // jos rivihinta on annettu edi tilauksessa
+          if(isset($edi_oma_hinta) and $edi_oma_hinta) {
+            $hinta = $edi_oma_hinta;
+          }
+
+          // jos tullaan magentosta ja alennus on tiedossa tai jos on oma hinta annettu tuotteelle
+          if ((isset($edi_oma_hinta) and $edi_oma_hinta and $editilaus_alennus >= 0) or 
+          ($edi_tyyppi == "magento" and (isset($verkkokauppa_hinnatedifailista) and $verkkokauppa_hinnatedifailista == "JOO") and $editilaus_alennus >= 0)) {
             $ale1 = $editilaus_alennus;
           }
           elseif (is_array($hyvityssaanto_ale_array) and isset($hyvityssaanto_ale_array[$hyvityssaanto_indeksi]) and isset($hyvityssaanto_ale_array[$hyvityssaanto_indeksi][$tuoteno])) {
@@ -2300,7 +2332,6 @@ while ($tietue = fgets($fd)) {
               ${'ale'.$alepostfix} = 0;
             }
           }
-
 
           // Magento-tilauksessa katsotaan onko tilattavalla tuotteella saldoa.
           // Jos tilattu kpl-m‰‰r‰ on suurempi kuin myyt‰viss‰ oleva kpl-m‰‰r‰, niin pakotetaan rivi hyv‰ksytyksi tai j‰lkk‰riksi

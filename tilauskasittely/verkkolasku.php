@@ -151,6 +151,10 @@ if ($php_cli) {
   $_yhtio   = pupesoft_cleanstring($argv[1]);
   $yhtiorow = hae_yhtion_parametrit($_yhtio);
 
+  if(isset($fitek_cron_xml) && $fitek_cron_xml) {
+    $yhtiorow["verkkolasku_lah"] == "fitek";
+  }
+
   // Kukarow setataan esim editilaus_in.inc:ssä
   if (!isset($kukarow)) {
     $kukarow = hae_kukarow('admin', $yhtiorow['yhtio']);

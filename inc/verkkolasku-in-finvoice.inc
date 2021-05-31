@@ -94,6 +94,11 @@ if ($yhtio == "") {
   $yhtio = xml_string($xml->BuyerPartyDetails->BuyerOrganisationTaxCode);
 }
 
+//FITEK XML CRON poikkeus laskun pvm
+if ($fitek_xml_cron_tiedot) {
+  $laskun_saapumisnumero = xml_string($xml->InvoiceDetails->OrderIdentifier);
+}
+
 // Onko tunnus IBAN-muodossa, jos ei niin varmistetaan, ettÃ¤ se on ovtmuodossa
 if (strlen($yhtio) != 18 or strtoupper(substr($yhtio, 0, 2)) != "FI") {
   // Varmistetaan, ettÃ¤ tunnus on ovtunnus muodossa
@@ -106,6 +111,10 @@ if (strlen($yhtio) != 18 or strtoupper(substr($yhtio, 0, 2)) != "FI") {
 
 if ($laskun_erapaiva == "") {
   $laskun_erapaiva = xml_string($xml->PaymentTermsDetails->InvoiceDueDate);
+}
+
+if ($laskun_erapaiva == "") {
+  $laskun_erapaiva = xml_string($xml->InvoiceDetails->PaymentTermsDetails->InvoiceDueDate);
 }
 
 if ($laskun_pankkiviite == "") {
@@ -144,6 +153,7 @@ $osto_rahti_alv = 0;
 $osto_rivi_kulu_alv = 0;
 $ei_oteta_kulua_pois = true;
 $rivien_summa_yhteensa = 0;
+$fitek_xml_loydetyt_kustannuspaikat = array();
 
 if (count($tuotetiedot) > 0) {
   foreach ($tuotetiedot as $tuotetieto) {
@@ -158,6 +168,23 @@ if (count($tuotetiedot) > 0) {
     $rtuoteno[$i]["tuoteno"] = current(array_filter($tuote_elementit));
 
     if ($rtuoteno[$i]["tuoteno"] != "") {
+
+      $rtuoteno[$i]["nimitys"] = xml_string($tuotetieto->ArticleName);
+
+      // fitek XML muutoksia lisätään array:iin, jota voidaan käyttää tulevaisuudessa
+      if ($fitek_xml_cron_tiedot) {
+        //Tutkitaan että ovatko kustannuspaikat erilaiset tuotteille, muuten Array'ssa on 1 key.
+        $fitek_xml_loydetyt_kustannuspaikat[xml_string($tuotetieto->Accounting->JournalEntry->CostObjective->Kaubaost)] = true;
+        $fitek_xml_cron_tiedot["kustannuspaikka"] = xml_string($tuotetieto->Accounting->JournalEntry->CostObjective->Kaubaost);
+        $rtuoteno[$i]["kirjanpito"]["alv"] = xml_string($tuotetieto->Accounting->JournalEntry->VatSum);
+        $rtuoteno[$i]["kirjanpito"]["alv_prosentti"] = xml_string($tuotetieto->Accounting->JournalEntry->VatRate);
+        $rtuoteno[$i]["kirjanpito"]["tili"] = xml_string($tuotetieto->Accounting->JournalEntry->GeneralLedger);
+        if($tuotetieto->Accounting->JournalEntry->CostObjective->Kaubaost) {
+          $kustannuspaikat_fitek = true;
+          $rtuoteno[$i]["kirjanpito"]["kustannuspaikka"] = xml_string($tuotetieto->Accounting->JournalEntry->CostObjective->Kaubaost);
+        }
+      }
+
       // maventa-case
       $rtuoteno[$i]['ostotilausnro'] = $laskun_asiakkaan_tilausnumero;
 
@@ -168,8 +195,7 @@ if (count($tuotetiedot) > 0) {
       else {
         $rtuoteno[$i]["kauttalaskutus"] = "";
       }
-
-      $rtuoteno[$i]["nimitys"] = xml_string($tuotetieto->ArticleName);
+      
       $rtuoteno[$i]["riviinfo"] = preg_replace("/ {2,}/", " " , xml_string($tuotetieto->ArticleName));
 
       $rtuoteno[$i]["rivihinta"] = round(xml_float($tuotetieto->RowVatExcludedAmount), 2);

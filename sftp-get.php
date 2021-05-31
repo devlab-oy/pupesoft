@@ -17,8 +17,9 @@ class SFTPConnection {
     $this->connection = ssh2_connect($host, $port);
 
     $this->ftpfilt = $filt;
-
+    
     if (!$this->connection) {
+      
       throw new Exception("Could not connect to remote host. ($host)");
     }
   }
@@ -48,7 +49,7 @@ class SFTPConnection {
     return $handle;
   }
 
-  public function getFilesFrom($path, $dest) {
+  public function getFilesFrom($path, $dest, $ftp_exclude_files=array()) {
     $sftp = $this->sftp;
     $dir = "ssh2.sftp://".intval($sftp).$path;
 
@@ -56,6 +57,7 @@ class SFTPConnection {
 
     while (false !== ($file = readdir($handle))) {
       if (in_array($file, array('.', '..'))) continue;
+      if (in_array($file, $ftp_exclude_files)) continue;
 
       if (isset($this->ftpfilt) and $this->ftpfilt != "") {
         // Skipataan ne tiedostot joissa ei ole määriteltyä stringiä nimessä
@@ -94,11 +96,19 @@ if (substr($ftpdest, -1) != "/") {
   $ftpdest .= "/";
 }
 
+if(!isset($ftp_exclude_files)) {
+  $ftp_exclude_files = array();
+}
+
 try {
+  
   $sftp = new SFTPConnection($ftphost, $ftpport, $ftpfilt);
+  
   $sftp->login($ftpuser, $ftppass);
-  $sftp->getFilesFrom($ftppath, $ftpdest);
+  
+  $sftp->getFilesFrom($ftppath, $ftpdest, $ftp_exclude_files);
 }
 catch(Exception $e) {
+  
   pupesoft_log("sftp_get", "Error: $e\n");
 }

@@ -2721,6 +2721,15 @@ if ($tila == "" and !isset($jatka)) {
     $vasen_sarake[$vasen] .= "</select></td>";
     $vasen++;
 
+    $vasen_sarake[$vasen] = "<td>".t("Noutopiste").":</td>";
+    if(isset($srow['noutopisteen_tunnus']) and $srow['noutopisteen_tunnus'] == '') {
+      $vasen_sarake[$vasen] .= '<td><input type="text" name="noutopisteen_tunnus" value="'.$srow['noutopisteen_tunnus'].'"></td>';
+    } else {
+      $vasen_sarake[$vasen] .= '<td><input type="text" name="noutopisteen_tunnus" value="'.$srow['noutopisteen_tunnus'].'"></td>';
+    }
+
+    $vasen++;
+
     $sel = array();
     $sel[$srow['laskutyyppi']] = "selected";
 
@@ -4954,6 +4963,12 @@ if (isset($jatka)) {
         $luontitapa_arraylisa = "luontitapa = '{$luontitapa}',";
       }
 
+      if(isset($noutopisteen_tunnus) and $noutopisteen_tunnus != "") {
+        $noutopisteen_tunnus_lisa = "noutopisteen_tunnus = '$noutopisteen_tunnus',";
+      } else {
+        $noutopisteen_tunnus_lisa = "";
+      }
+
       $query3 .= "laskun_lisatiedot SET
             yhtio            = '$kukarow[yhtio]',
             {$luontitapa_arraylisa}
@@ -4963,6 +4978,7 @@ if (isset($jatka)) {
             sopimus_alkupvm        = '$yllapito_alkuvv-$yllapito_alkukk-$yllapito_alkupp',
             sopimus_loppupvm      = '$yllapito_loppuvv-$yllapito_loppukk-$yllapito_loppupp',
             {$sopimus_info}
+            noutopisteen_tunnus = '$noutopisteen_tunnus',
             kolm_ovttunnus        = '$kolm_ovttunnus',
             kolm_nimi          = '$kolm_nimi',
             kolm_nimitark        = '$kolm_nimitark',

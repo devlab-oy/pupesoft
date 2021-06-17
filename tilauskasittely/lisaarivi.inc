@@ -3254,7 +3254,35 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
     }
 
     $query_insert_ale_lisa = $query_insert_hinta_alkuperainen_lisa = '';
+    if ($rivityyppi == 'L') {
+      $query = "SELECT tuotekerroin, ostohinta
+                FROM tuotteen_toimittajat
+                WHERE yhtio      = '{$kukarow['yhtio']}'
+                AND tuoteno      = '{$trow['tuoteno']}'
+                AND liitostunnus = '{$toimittajan_tunnus}'";
+      $tt_res = pupe_query($query);
+      $tt_row = mysql_fetch_assoc($tt_res);
 
+      if($tt_row['tuotekerroin'] > 0) {
+        $lis_hinta = $tt_row['ostohinta'] * $tt_row['tuotekerroin'];
+      } 
+      else {
+        $tuotemerkkihinta_avainsanat = t_avainsana("TUOTEMERKKI");
+        while ($tuotemerkkihinta_avainsana = mysql_fetch_assoc($tuotemerkkihinta_avainsanat)) {
+          if($tuotemerkkihinta_avainsana['selite'] == $trow['tuotemerkki']) {
+            $tuotemerkkihinta_avainsalla = (float) $tuotemerkkihinta_avainsana['selitetark_2'];
+            if($tuotemerkkihinta_avainsalla != "" and $tuotemerkkihinta_avainsalla > 0) {
+              $lis_hinta = $tt_row['ostohinta'] * $tuotemerkkihinta_avainsalla;
+            }
+            else {
+              $lis_hinta = $tt_row['ostohinta'] * 1;
+            }
+            break;
+          }
+        }
+      }
+    }
+    
     if ($rivityyppi == 'O') {
       for ($alepostfix = 1; $alepostfix <= $yhtiorow['oston_alekentat']; $alepostfix++) {
         $query_insert_ale_lisa .= " ale{$alepostfix} = '".$lis_ale_kaikki['ale'.$alepostfix]."',";

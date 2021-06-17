@@ -706,7 +706,7 @@ if (
               $selpaikka .= " $alkurow[era]";
             }
           }
-
+ 
           $paikat .= "<option value='$alkurow[hyllyalue]#!°!#$alkurow[hyllynro]#!°!#$alkurow[hyllyvali]#!°!#$alkurow[hyllytaso]";
 
           if ($trow["sarjanumeroseuranta"] == "E" or $trow["sarjanumeroseuranta"] == "F" or $trow["sarjanumeroseuranta"] == "G") {
@@ -730,7 +730,7 @@ if (
           if ($trow["sarjanumeroseuranta"] == "F") {
             $title .= " ".tv1dateconv($alkurow["parasta_ennen"]);
           }
-
+          $title = $title." | Saldo: ".$alkurow['varasto'];
           $paikat .= "' $sel title='$title'>$title</option>";
 
           // jos toimitetaan erikoisvarastosta, niin ilmoitetaan siit‰
@@ -860,12 +860,14 @@ if (
           if (!in_array($yhtiorow["tee_osto_myyntitilaukselta"], array('U', 'B')) and in_array($krow["suoratoimitus"], array('', 'X')) and $tmp_varastoon == 1) {
             // tallennetaan riville toimittajan tunnus
             $title = "$krow[nimi] --> ".t("tilaa")." ".t("varastoon");
+            $title = $title." | Saldo: X";
             $paikat .= "<option value='°°°$krow[liitostunnus]' title='$title' $sel1>$title</option>";
             $paikatlask++;
           }
 
           if (in_array($yhtiorow["tee_osto_myyntitilaukselta"], array('U', 'Y', 'W', 'J', 'B', 'C')) and in_array($krow["suoratoimitus"], array('', 'U')) and $tmp_asiakkaalle == 1) {
             $title = "$krow[nimi] --> ".t("tilaa")." ".t("asiakkaalle");
+            $title = $title." | Saldo: X";
             $paikat .= "<option value='!!!$krow[liitostunnus]' title='$title' $sel2>$title</option>";
             $paikatlask++;
           }
@@ -1021,7 +1023,6 @@ elseif (
             and tuote.tuoteno          = '$row[tuoteno]'
             ORDER BY tuotepaikat.oletus DESC, varastopaikat.nimitys, sorttauskentta";
   $omavarastores  = pupe_query($query);
-
   if (!isset($paikatlask)) $paikatlask = 0;
 
   // K‰yd‰‰n l‰pi oman varaston paikat

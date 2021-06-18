@@ -515,6 +515,20 @@ if (!function_exists('alku')) {
         pdf_substr($laskurow["viesti"], 270, $pdf_lasku, $norm),
         $page_lasku[$sivu], $norm);
     }
+    
+    if(!empty($laskurow["sisviesti3"])) {
+      $rivi_ind++;
+      $sisviesti3_words = explode(" ",$laskurow["sisviesti3"]);
+      $sisviesti3_rivi1 = implode(" ", array_slice($sisviesti3_words, 0, 10));
+      if(count($sisviesti3_words) > 18) {
+        $sisviesti3_rivi2 = implode(" ", array_slice($sisviesti3_words, 10, 7));
+        $sisviesti3_rivi2 .= "... ".t("(lue lisää alhaalla)");
+      } else {
+        $sisviesti3_rivi2 = implode(" ", array_slice($sisviesti3_words, 10, 9));
+      }
+      $pdf_lasku->draw_text(310, $arvo[$rivi_ind]+9, $sisviesti3_rivi1, $page_lasku[$sivu], $pieni);
+      $pdf_lasku->draw_text(310, $arvo[$rivi_ind]+1, $sisviesti3_rivi2, $page_lasku[$sivu], $pieni);
+    }
 
     $pdf_lasku->draw_text(310, 595, t("Mahdolliset huomautukset tehtävä 8 päivän kuluessa", $kieli), $page_lasku[$sivu], $pieni);
 
@@ -563,6 +577,14 @@ if (!function_exists('laskun_kommentit')) {
 
     if (trim($laskurow['sisviesti1']) != '') {
       $komm .= "\n".t("Kommentti", $kieli).":###".wordwrap(str_replace("\n", "\n###", $laskurow['sisviesti1']), 90, "\n###");
+    }
+
+    if (trim($laskurow['sisviesti3']) != '') {
+      if (trim($laskurow['sisviesti1']) != '') {
+        $komm .= "\n###".wordwrap(str_replace("\n", "\n###", $laskurow['sisviesti3']), 90, "\n###");
+      } else {
+        $komm .= "\n".t("Kommentti", $kieli).":###".wordwrap(str_replace("\n", "\n###", $laskurow['sisviesti3']), 90, "\n###");
+      }
     }
 
     // Lisätään kommenttiin sopimus_numero se on asetettu ja laiterekisteri käytössä
@@ -1400,7 +1422,6 @@ if (!function_exists('rivi_original')) {
       }
 
       foreach ($kommentit as $akey => $kommentti) {
-
         if ($laskutyyppi == 18 and ($kala >= $kuinka_alhaalla_kaytiin_tuoteno)) {
           $rpit1 = 200;
           $rpit2 = 190;
@@ -1437,7 +1458,7 @@ if (!function_exists('rivi_original')) {
           $kommentti = $lause;
         }
 
-        if (trim($kommentti) != "") {
+        if (trim($kommentti) != "" and trim($kommentti) != $laskurow["viesti"]) {
           $pdf_lasku->draw_text(35, $kala+$kalakorjaus, trim($kommentti), $thispage, $pieni);
           $kala = $kala - 10;
         }

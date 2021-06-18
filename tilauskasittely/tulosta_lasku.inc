@@ -1461,9 +1461,11 @@ if (!function_exists('rivi_original')) {
           $kommentti = $lause;
         }
 
-        if (trim($kommentti) != "" and ($laskutyyppi == 25 and trim($kommentti) != $laskurow["viesti"])) {
-          $pdf_lasku->draw_text(35, $kala+$kalakorjaus, trim($kommentti), $thispage, $pieni);
-          $kala = $kala - 10;
+        if (trim($kommentti) != "") {
+          if($laskutyyppi != 25 or ($laskutyyppi == 25 and trim($kommentti) != $laskurow["viesti"])) {
+            $pdf_lasku->draw_text(35, $kala+$kalakorjaus, trim($kommentti), $thispage, $pieni);
+            $kala = $kala - 10;
+          }
         }
       }
       $kala += 10;

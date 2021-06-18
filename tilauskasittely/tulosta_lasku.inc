@@ -515,19 +515,19 @@ if (!function_exists('alku')) {
         pdf_substr($laskurow["viesti"], 270, $pdf_lasku, $norm),
         $page_lasku[$sivu], $norm);
     }
-    if($laskutyyppi == 25) {
-      if(!empty($laskurow["sisviesti3"])) {
+    if($laskutyyppi == 25 and empty($toimehto)) {
+      if(!empty($laskurow["sisviesti1"])) {
         $rivi_ind++;
-        $sisviesti3_words = explode(" ",$laskurow["sisviesti3"]);
-        $sisviesti3_rivi1 = implode(" ", array_slice($sisviesti3_words, 0, 10));
-        if(count($sisviesti3_words) > 18) {
-          $sisviesti3_rivi2 = implode(" ", array_slice($sisviesti3_words, 10, 7));
-          $sisviesti3_rivi2 .= "... ".t("(lue lisää alhaalla)");
+        $sisviesti1_words = explode(" ",$laskurow["sisviesti1"]);
+        $sisviesti1_rivi1 = implode(" ", array_slice($sisviesti1_words, 0, 10));
+        if(count($sisviesti1_words) > 18) {
+          $sisviesti1_rivi2 = implode(" ", array_slice($sisviesti1_words, 10, 7));
+          $sisviesti1_rivi2 .= "... ".t("(lue lisää alhaalla)");
         } else {
-          $sisviesti3_rivi2 = implode(" ", array_slice($sisviesti3_words, 10, 9));
+          $sisviesti1_rivi2 = implode(" ", array_slice($sisviesti1_words, 10, 9));
         }
-        $pdf_lasku->draw_text(310, $arvo[$rivi_ind]+9, $sisviesti3_rivi1, $page_lasku[$sivu], $pieni);
-        $pdf_lasku->draw_text(310, $arvo[$rivi_ind]+1, $sisviesti3_rivi2, $page_lasku[$sivu], $pieni);
+        $pdf_lasku->draw_text(310, $arvo[$rivi_ind]+9, $sisviesti1_rivi1, $page_lasku[$sivu], $pieni);
+        $pdf_lasku->draw_text(310, $arvo[$rivi_ind]+1, $sisviesti1_rivi2, $page_lasku[$sivu], $pieni);
       }
     }
     
@@ -578,16 +578,6 @@ if (!function_exists('laskun_kommentit')) {
 
     if (trim($laskurow['sisviesti1']) != '') {
       $komm .= "\n".t("Kommentti", $kieli).":###".wordwrap(str_replace("\n", "\n###", $laskurow['sisviesti1']), 90, "\n###");
-    }
-
-    if($laskutyyppi == 25) {
-      if (trim($laskurow['sisviesti3']) != '') {
-        if (trim($laskurow['sisviesti1']) != '') {
-          $komm .= "\n###".wordwrap(str_replace("\n", "\n###", $laskurow['sisviesti3']), 90, "\n###");
-        } else {
-          $komm .= "\n".t("Kommentti", $kieli).":###".wordwrap(str_replace("\n", "\n###", $laskurow['sisviesti3']), 90, "\n###");
-        }
-      }
     }
 
     // Lisätään kommenttiin sopimus_numero se on asetettu ja laiterekisteri käytössä

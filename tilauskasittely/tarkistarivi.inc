@@ -868,14 +868,14 @@ if (
           if (!in_array($yhtiorow["tee_osto_myyntitilaukselta"], array('U', 'B')) and in_array($krow["suoratoimitus"], array('', 'X')) and $tmp_varastoon == 1) {
             // tallennetaan riville toimittajan tunnus
             $title = "$krow[nimi] --> ".t("tilaa")." ".t("varastoon");
-            $title = $title." | Tehdas saldo: ".$krow['tehdas_saldo']." | Ostohinta: ".round($krow['ostohinta'], 2);
+            $title = $title." | Tehtaan saldo: ".$krow['tehdas_saldo']." | Ostohinta: ".round($krow['ostohinta'], 2);
             $paikat .= "<option value='¡¡¡$krow[liitostunnus]' title='$title' $sel1>$title</option>";
             $paikatlask++;
           }
 
           if (in_array($yhtiorow["tee_osto_myyntitilaukselta"], array('U', 'Y', 'W', 'J', 'B', 'C')) and in_array($krow["suoratoimitus"], array('', 'U')) and $tmp_asiakkaalle == 1) {
             $title = "$krow[nimi] --> ".t("tilaa")." ".t("asiakkaalle");
-            $title = $title." | Tehdas saldo: ".$krow['tehdas_saldo']." | Ostohinta: ".round($krow['ostohinta'], 2);
+            $title = $title." | Tehtaan saldo: ".$krow['tehdas_saldo']." | Ostohinta: ".round($krow['ostohinta'], 2);
             $paikat .= "<option value='!!!$krow[liitostunnus]' title='$title' $sel2>$title</option>";
             $paikatlask++;
           }

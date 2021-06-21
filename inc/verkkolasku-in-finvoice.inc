@@ -48,7 +48,12 @@ $laskuttajan_nimi = xml_string($xml->SellerPartyDetails->SellerOrganisationName)
 $laskuttajan_vat = xml_string($xml->SellerPartyDetails->SellerOrganisationTaxCode);
 $laskuttajan_identifier = xml_string($xml->SellerPartyDetails->SellerPartyIdentifier);
 $laskuttajan_valkoodi = xml_string($xml->EpiDetails->EpiPaymentInstructionDetails->EpiInstructedAmount->attributes()->AmountCurrencyIdentifier);
-$laskun_pankkiviite = xml_string($xml->EpiDetails->EpiPaymentInstructionDetails->EpiRemittanceInfoIdentifier);
+if ($fitek_xml_cron_tiedot) {
+  $laskun_pankkiviite = xml_string($xml->InvoiceDetails->BuyerReferenceIdentifier);
+}
+else {
+  $laskun_pankkiviite = xml_string($xml->EpiDetails->EpiPaymentInstructionDetails->EpiRemittanceInfoIdentifier);
+}
 $laskun_asiakastunnus = xml_string($xml->BuyerPartyDetails->BuyerPartyIdentifier);
 $laskun_summa_eur = xml_float($xml->EpiDetails->EpiPaymentInstructionDetails->EpiInstructedAmount);
 $laskun_tilausviite = xml_string($xml->InvoiceDetails->AgreementIdentifier);

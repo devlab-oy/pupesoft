@@ -43,7 +43,6 @@ $impsaloh_polku_in     = $impsaloh_csv_cron_dirname;
 $impsaloh_polku_ok     = $impsaloh_csv_cron_dirname."/ok";
 $impsaloh_polku_orig   = $impsaloh_csv_cron_dirname."/orig";
 $impsaloh_polku_error  = $impsaloh_csv_cron_dirname."/error";
-$impsaloh_polku_reject = $impsaloh_csv_cron_dirname."/reject";
 
 $ftphost = $ftphost_impsaloh;
 $ftpuser = $ftpuser_impsaloh;
@@ -52,7 +51,29 @@ $ftpport = $ftpport_impsaloh;
 $ftppath = $ftppath_impsaloh;
 $ftpdest = $ftpdest_impsaloh;
 
-$ftp_exclude_files = array_diff(scandir($impsaloh_polku_orig), array('..', '.'));
+
+
+$ftp_exclude_files = array_diff(scandir($impsaloh_polku_orig), $huonot_tiedostonimet);
 
 //require 'sftp-get.php';
+
+$impsaloh_csv_files = scandir($impsaloh_polku_in);
+
+foreach($impsaloh_csv_files as $impsaloh_csv_file) {
+
+  $impsaloh_csv_file = $impsaloh_polku_in."/".$impsaloh_csv_file;
+  // skipataan kansiot, orig kansiossa olevat tiedostot sekä pisteet
+  if (is_dir($impsaloh_csv_file) or substr($impsaloh_csv_file, 0, 1) == '.' or in_array($impsaloh_csv_file, $ftp_exclude_files)) continue;
+
+  $impsaloh_csv = fopen($impsaloh_csv_file, 'r');
+  if (!$impsaloh_csv) die($php_errormsg);
+
+  while ($rivi = fgets($impsaloh_csv)) {
+
+    // luetaan rivi tiedostosta..
+    $rivi = explode("\t", pupesoft_cleanstring($rivi));
+    $count++;
+  }
+
+}
 

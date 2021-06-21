@@ -710,8 +710,8 @@ if (
               $selpaikka .= " $alkurow[era]";
             }
           }
- 
-          $paikat .= "<option value='$alkurow[hyllyalue]#!¡!#$alkurow[hyllynro]#!¡!#$alkurow[hyllyvali]#!¡!#$alkurow[hyllytaso]";
+
+          $hyllypaikka = "<option value='$alkurow[hyllyalue]#!¡!#$alkurow[hyllynro]#!¡!#$alkurow[hyllyvali]#!¡!#$alkurow[hyllytaso]";
 
           if ($trow["sarjanumeroseuranta"] == "E" or $trow["sarjanumeroseuranta"] == "F" or $trow["sarjanumeroseuranta"] == "G") {
             $paikat .= "#!¡!#$alkurow[era]";
@@ -736,7 +736,8 @@ if (
           }
 
           $title = $title." | Saldo: ".$alkurow['saldo'];
-          $paikat .= "' $sel title='$title'>$title</option>";
+          $hyllypaikka .= "' $sel title='$title'>$title</option>";
+          $paikat .= $hyllypaikka;
 
           // jos toimitetaan erikoisvarastosta, niin ilmoitetaan siitä
           if ($alkurow['varasto'] != $laskurow["varasto"] and $tm_toimitustaparow["nouto"] == "" and $sel != '' and !in_array($row["var2"], array("OK", "PK")) and $kukarow['kassamyyja'] == '' and $row['varattu'] > 0 and $alkurow['varastotyyppi'] == 'E' and $alkurow['erikoistoimitus_alarajasumma'] > 0 and (float) $row['myyntihinta'] >= (float) $alkurow['erikoistoimitus_alarajasumma']) {
@@ -866,16 +867,26 @@ if (
           if (!in_array($yhtiorow["tee_osto_myyntitilaukselta"], array('U', 'B')) and in_array($krow["suoratoimitus"], array('', 'X')) and $tmp_varastoon == 1) {
             // tallennetaan riville toimittajan tunnus
             $title = "$krow[nimi] --> ".t("tilaa")." ".t("varastoon");
-            $title = $title." | Saldo: ".$kokonaissaldo." | Hinta: ".$krow['ostohinta'];
+            $title = $title." | Saldo: ".$kokonaissaldo." | Hinta: ".round($krow['ostohinta'], 2);
             $paikat .= "<option value='¡¡¡$krow[liitostunnus]' title='$title' $sel1>$title</option>";
             $paikatlask++;
+            if(isset($hyllypaikka)) {
+              // poistetaan hyllypaikat koska järjestys on hinnalla
+              $paikat = str_replace($hyllypaikka, "", $paikat);
+              $hyllypaikkaviimeksi = true;
+            }
           }
 
           if (in_array($yhtiorow["tee_osto_myyntitilaukselta"], array('U', 'Y', 'W', 'J', 'B', 'C')) and in_array($krow["suoratoimitus"], array('', 'U')) and $tmp_asiakkaalle == 1) {
             $title = "$krow[nimi] --> ".t("tilaa")." ".t("asiakkaalle");
-            $title = $title." | Saldo: ".$kokonaissaldo." | Hinta: ".$krow['ostohinta'];
+            $title = $title." | Saldo: ".$kokonaissaldo." | Hinta: ".round($krow['ostohinta'], 2);
             $paikat .= "<option value='!!!$krow[liitostunnus]' title='$title' $sel2>$title</option>";
             $paikatlask++;
+            if(isset($hyllypaikka)) {
+              // poistetaan hyllypaikat koska järjestys on hinnalla
+              $paikat = str_replace($hyllypaikka, "", $paikat);
+              $hyllypaikkaviimeksi = true;
+            }
           }
         }
       }
@@ -884,6 +895,11 @@ if (
   elseif ($kotipaikatlask == 0 and $kpl_st > 0 and $laskurow["tila"] != 'V') {
     $paikat = "<option value=''>".t("Jätä puutteeksi")."</option>".$paikat;
     $paikatlask++;
+  }
+
+  if(isset($hyllypaikkaviimeksi) and $hyllypaikkaviimeksi) {
+    // laitetaan takaisin hyllypaikat viimeksi.
+    $paikat .= $hyllypaikka;
   }
 
   //  Tarkistetaan vielä voisimmeko kenties ehkä mahdollisesti valmistaa tätä asiakkaalle?

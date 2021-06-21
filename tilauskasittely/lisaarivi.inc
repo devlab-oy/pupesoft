@@ -2449,7 +2449,7 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
                   AND toimi.tunnus                 = tuotteen_toimittajat.liitostunnus)
                 WHERE tuotteen_toimittajat.yhtio   = '$kukarow[yhtio]'
                   AND tuotteen_toimittajat.tuoteno = '$tuoteno'
-                ORDER BY if (tuotteen_toimittajat.jarjestys = 0, 9999, tuotteen_toimittajat.jarjestys)
+                ORDER BY tuotteen_toimittajat.ostohinta ASC
                 LIMIT 1";
 
       $toimpaikres = pupe_query($query);
@@ -2683,7 +2683,7 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
                     {$yksi_suoratoimittaja_join})
                   WHERE tuotteen_toimittajat.yhtio = '$kukarow[yhtio]'
                   AND tuotteen_toimittajat.tuoteno = '$trow[tuoteno]'
-                  ORDER BY if (tuotteen_toimittajat.jarjestys = 0, 9999, tuotteen_toimittajat.jarjestys)
+                  ORDER BY tuotteen_toimittajat.ostohinta ASC
                   LIMIT 1";
         $toimpaikres = pupe_query($query);
         $krow = mysql_fetch_assoc($toimpaikres);
@@ -3255,7 +3255,7 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
 
     $query_insert_ale_lisa = $query_insert_hinta_alkuperainen_lisa = '';
     if ($rivityyppi == 'L') {
-      $query = "SELECT tuotekerroin, ostohinta
+      $query = "SELECT tuotekerroin, ostohinta, myyntihinta_kerroin
                 FROM tuotteen_toimittajat
                 WHERE yhtio      = '{$kukarow['yhtio']}'
                 AND tuoteno      = '{$trow['tuoteno']}'
@@ -3263,9 +3263,9 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
       $tt_res = pupe_query($query);
       $tt_row = mysql_fetch_assoc($tt_res);
 
-      if($tt_row['tuotekerroin'] > 0) {
-        $lis_hinta = $tt_row['ostohinta'] * $tt_row['tuotekerroin'];
-      } 
+      if(isset($tt_row['myyntihinta_kerroin']) and $tt_row['myyntihinta_kerroin'] != NULL and $tt_row['myyntihinta_kerroin'] > 0) {
+        $lis_hinta = $tt_row['ostohinta'] * $tt_row['myyntihinta_kerroin'];
+      }
       else {
         $tuotemerkkihinta_avainsanat = t_avainsana("TUOTEMERKKI");
         while ($tuotemerkkihinta_avainsana = mysql_fetch_assoc($tuotemerkkihinta_avainsanat)) {

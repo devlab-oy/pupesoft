@@ -515,21 +515,6 @@ if (!function_exists('alku')) {
         pdf_substr($laskurow["viesti"], 270, $pdf_lasku, $norm),
         $page_lasku[$sivu], $norm);
     }
-    if($laskutyyppi == 25 and empty($toimehto)) {
-      if(!empty($laskurow["sisviesti1"])) {
-        $rivi_ind++;
-        $sisviesti1_words = explode(" ",$laskurow["sisviesti1"]);
-        $sisviesti1_rivi1 = implode(" ", array_slice($sisviesti1_words, 0, 10));
-        if(count($sisviesti1_words) > 18) {
-          $sisviesti1_rivi2 = implode(" ", array_slice($sisviesti1_words, 10, 7));
-          $sisviesti1_rivi2 .= "... ".t("(lue lisää alhaalla)");
-        } else {
-          $sisviesti1_rivi2 = implode(" ", array_slice($sisviesti1_words, 10, 9));
-        }
-        $pdf_lasku->draw_text(310, $arvo[$rivi_ind]+9, $sisviesti1_rivi1, $page_lasku[$sivu], $pieni);
-        $pdf_lasku->draw_text(310, $arvo[$rivi_ind]+1, $sisviesti1_rivi2, $page_lasku[$sivu], $pieni);
-      }
-    }
     
     $pdf_lasku->draw_text(310, 595, t("Mahdolliset huomautukset tehtävä 8 päivän kuluessa", $kieli), $page_lasku[$sivu], $pieni);
 

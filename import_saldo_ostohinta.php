@@ -45,6 +45,13 @@ $impsaloh_polku_orig   = $impsaloh_csv_cron_dirname."/orig";
 $impsaloh_polku_error  = $impsaloh_csv_cron_dirname."/error";
 $impsaloh_polku_reject = $impsaloh_csv_cron_dirname."/reject";
 
+$ftphost = $ftphost_impsaloh;
+$ftpuser = $ftpuser_impsaloh;
+$ftppass = $ftppass_impsaloh;
+$ftpport = $ftpport_impsaloh;
+$ftppath = $ftppath_impsaloh;
+$ftpdest = $ftpdest_impsaloh;
+
 $ftp_exclude_files = array_diff(scandir($impsaloh_polku_orig), array('..', '.'));
 
 //require 'sftp-get.php';

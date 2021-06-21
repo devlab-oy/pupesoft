@@ -864,7 +864,7 @@ if (!function_exists('rivi_lasku')) {
       $row["kommentti"] = trim($row["laskuviesti"])."\n".$row["kommentti"];
     }
 
-    if ($row['tuoteno'] != $yhtiorow["kuljetusvakuutus_tuotenumero"] and $row['tuoteno'] != $yhtiorow["laskutuslisa_tuotenumero"] and trim($row['asiakkaan_tilausnumero']) != '' and strpos($row["kommentti"], "$row[asiakkaan_tilausnumero]") === FALSE and $laskutyyppi != 6) {
+    if ($row['tuoteno'] != $yhtiorow["kuljetusvakuutus_tuotenumero"] and $row['tuoteno'] != $yhtiorow["laskutuslisa_tuotenumero"] and trim($row['asiakkaan_tilausnumero']) != '' and strpos($row["kommentti"], "$row[asiakkaan_tilausnumero]") === FALSE and $laskutyyppi != 6 and $laskutyyppi != 25) {
       $row["kommentti"] = trim($row["asiakkaan_tilausnumero"])."\n".$row["kommentti"];
     }
 
@@ -1409,8 +1409,13 @@ if (!function_exists('rivi_original')) {
 
       $kommentit = explode("\n", trim($row["kommentti"]));
 
-      if ($laskutyyppi != 18 and $laskutyyppi != 6 and $laskutyyppi != 21 and $laskutyyppi != 22 and $row['tuoteno'] != $yhtiorow["kuljetusvakuutus_tuotenumero"] and $row['tuoteno'] != $yhtiorow["laskutuslisa_tuotenumero"] and !preg_match("/".t("Tilaus", $kieli).":? ".$row["otunnus"]."/", $row["kommentti"])) {
+      if (!in_array($laskutyyppi, array(18,25,6,21,22)) and $row['tuoteno'] != $yhtiorow["kuljetusvakuutus_tuotenumero"] and $row['tuoteno'] != $yhtiorow["laskutuslisa_tuotenumero"] and !preg_match("/".t("Tilaus", $kieli).":? ".$row["otunnus"]."/", $row["kommentti"])) {
         $pdf_lasku->draw_text(35, $kala+$kalakorjaus, t("Tilaus", $kieli).": ".$row["otunnus"], $thispage, $pieni);
+        $kala = $kala - 10;
+      }
+
+      // j‰tet‰‰n tyhj‰ rivi laskutyypille 
+      if(in_array($laskutyyppi, array(25))) {
         $kala = $kala - 10;
       }
 

@@ -51,29 +51,69 @@ $ftpport = $ftpport_impsaloh;
 $ftppath = $ftppath_impsaloh;
 $ftpdest = $ftpdest_impsaloh;
 
-
-
 $ftp_exclude_files = array_diff(scandir($impsaloh_polku_orig), $huonot_tiedostonimet);
 
 //require 'sftp-get.php';
 
 $impsaloh_csv_files = scandir($impsaloh_polku_in);
 
-foreach($impsaloh_csv_files as $impsaloh_csv_file) {
+// Otsikot etsitään tiedostossa
+$tuotekoodi_otsikot = array("Item No");
+foreach($impsaloh_csv_files as $impsaloh_csv_file_name) {
+  
+  $impsaloh_csv_file = $impsaloh_polku_in."/".$impsaloh_csv_file_name;
 
-  $impsaloh_csv_file = $impsaloh_polku_in."/".$impsaloh_csv_file;
   // skipataan kansiot, orig kansiossa olevat tiedostot sekä pisteet
-  if (is_dir($impsaloh_csv_file) or substr($impsaloh_csv_file, 0, 1) == '.' or in_array($impsaloh_csv_file, $ftp_exclude_files)) continue;
-
+  if (is_dir($impsaloh_csv_file) or substr($impsaloh_csv_file_name, 0, 1) == '.' or in_array($impsaloh_csv_file_name, $ftp_exclude_files)) continue;
   $impsaloh_csv = fopen($impsaloh_csv_file, 'r');
   if (!$impsaloh_csv) die($php_errormsg);
 
-  while ($rivi = fgets($impsaloh_csv)) {
-
-    // luetaan rivi tiedostosta..
-    $rivi = explode("\t", pupesoft_cleanstring($rivi));
-    $count++;
-  }
-
+  $impsaloh_rivit = kasittele_rivit($impsaloh_csv, $tuotekoodi_otsikot);
 }
 
+function kasittele_rivit($impsaloh_csv, $tuotekoodi_otsikot) {
+
+  $rivit = array();
+  
+  $yrita_csv_pilkku = fgetcsv($impsaloh_csv, 50, ","); rewind($impsaloh_csv);
+  $yrita_csv_pistepilkku = fgetcsv($impsaloh_csv, 50, ";"); rewind($impsaloh_csv);
+  
+  if(count($yrita_csv_pilkku) > 0) {
+    $csv_jakajaa = ",";
+  } else if(count($yrita_csv_pistepilkku) > 0) {
+    $csv_jakajaa = ";";
+  }
+  
+  while ($rivi = fgetcsv($impsaloh_csv, 100000, $csv_jakajaa)) {
+
+    // Skipataan tyhjät rivit
+    if($rivi[0] == "" and $rivi[1] == "" and $rivi[2] == "") {
+      continue;
+    }
+
+    $laskekolumnit = 0;
+    // Jos ensimmäinen rivi
+    if(!isset($rivit[0])) {
+      // Hae tuotekoodin kolumni
+      $tuotekoodin_kolumni = false;
+      $kolumninro = 0;
+      foreach($rivi as $hae_otsikko) {
+        $hae_otsikko = preg_replace("/[^A-Za-z0-9 ]/", '', $hae_otsikko);
+        if(in_array($hae_otsikko, $tuotekoodi_otsikot)) {
+          $tuotekoodin_kolumni = $kolumninro;
+        }
+      }
+    } else {
+      foreach($rivi as $rividata) {
+        $rivi[$laskekolumnit] = preg_replace("/[^A-Za-z0-9 ]/", '', $rividata);
+        $laskekolumnit++;
+      }
+    }
+    $tuotekoodi = $rivi[$tuotekoodin_kolumni];
+    $rivit[] = $rivi;
+  }
+  return array(
+    'rivit' => $rivit,
+    'otsikko' => $otsikko
+  );
+}

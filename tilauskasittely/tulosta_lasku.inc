@@ -1098,7 +1098,7 @@ if (!function_exists('rivi_otsikot')) {
       }
 
       //toka rivi
-      if ($laskutyyppi != 6 and $laskutyyppi != 21 and $laskutyyppi != 22) {
+      if ($laskutyyppi != 6 and $laskutyyppi != 21 and $laskutyyppi != 22 and $laskutyyppi != 25) {
         $pdf_lasku->draw_text(35, $kala-9, t("Tilausnumero", $kieli)."/".t("Lisätietoja", $kieli), $thispage, $pieni);
       }
 

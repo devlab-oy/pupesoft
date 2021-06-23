@@ -512,13 +512,9 @@ while ($tietue = fgets($fd)) {
     }
     break;
 
-  case 'OSTOTIL.OT_NRO' :
-    //Aloitus
-    $oma_kurssi = false;
-    break;
-
   case 'OSTOTIL.OT_TILAUSTYYPPI' :
     //Tilaustyyppi
+    $oma_kurssi = false;
     $editilaus_tilaustyyppi = trim($tieto);
     break;
 

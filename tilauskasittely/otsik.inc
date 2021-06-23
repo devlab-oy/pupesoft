@@ -2721,6 +2721,24 @@ if ($tila == "" and !isset($jatka)) {
     $vasen_sarake[$vasen] .= "</select></td>";
     $vasen++;
 
+    $vasen_sarake[$vasen] = "<td>".t("Noutopiste").":</td>";
+
+    if(isset($srow['noutopisteen_tunnus']) and $srow['noutopisteen_tunnus'] == '') {
+      $vasen_sarake[$vasen] .= '<td><input type="number" class="noutopiste" data="'.$asiarow['noutopiste'].'" name="noutopisteen_tunnus" value="'.$srow['noutopisteen_tunnus'].'">';
+    } else {
+      $vasen_sarake[$vasen] .= '<td><input type="number" class="noutopiste" data="'.$asiarow['noutopiste'].'" name="noutopisteen_tunnus" value="'.$srow['noutopisteen_tunnus'].'">';
+    }
+    $vasen_sarake[$vasen] .= '
+    <a style="cursor: pointer; padding: 5px; background-color: #ddd; border: 1px solid #ccc; color: #000" class="noutopiste_hae">Hae</a>
+    <script>
+      $(".noutopiste_hae").click(function() {
+      $(".noutopiste").val($(".noutopiste").attr("data"));
+    });
+    </script>
+    </td>';
+
+    $vasen++;
+
     $sel = array();
     $sel[$srow['laskutyyppi']] = "selected";
 
@@ -4954,6 +4972,26 @@ if (isset($jatka)) {
         $luontitapa_arraylisa = "luontitapa = '{$luontitapa}',";
       }
 
+      if(isset($noutopisteen_tunnus) and $noutopisteen_tunnus != "") {
+        $query_noutopiste = "SELECT noutopisteen_tunnus 
+                              FROM laskun_lisatiedot 
+                              {$postquery3}";
+        $nykyinen_noutopiste = pupe_query($query_noutopiste);
+        
+        if (mysql_num_rows($nykyinen_noutopiste) > 0) {
+          $nykyinen_noutopiste = mysql_fetch_assoc($nykyinen_noutopiste)['noutopisteen_tunnus'];
+          if($nykyinen_noutopiste != $noutopisteen_tunnus) {
+            $noutopisteen_tunnus_lisa = "noutopisteen_tunnus = '$noutopisteen_tunnus',";
+            $query_noutopiste_asiakas = "UPDATE asiakas 
+                                          SET noutopiste = '".$noutopisteen_tunnus."' 
+                                          WHERE tunnus = ".$asiakasid;
+            pupe_query($query_noutopiste_asiakas);
+          }
+        }
+      } else {
+        $noutopisteen_tunnus_lisa = "";
+      }
+
       $query3 .= "laskun_lisatiedot SET
             yhtio            = '$kukarow[yhtio]',
             {$luontitapa_arraylisa}
@@ -4963,6 +5001,7 @@ if (isset($jatka)) {
             sopimus_alkupvm        = '$yllapito_alkuvv-$yllapito_alkukk-$yllapito_alkupp',
             sopimus_loppupvm      = '$yllapito_loppuvv-$yllapito_loppukk-$yllapito_loppupp',
             {$sopimus_info}
+            {$noutopisteen_tunnus_lisa}
             kolm_ovttunnus        = '$kolm_ovttunnus',
             kolm_nimi          = '$kolm_nimi',
             kolm_nimitark        = '$kolm_nimitark',

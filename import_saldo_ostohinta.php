@@ -24,6 +24,7 @@ if (!$yhtiorow) {
 // Logitetaan ajo
 cron_log();
 
+
 /* 
   Main class 
 */
@@ -70,7 +71,11 @@ Class ImportSaldoHinta {
     $this->prices_tiedoston_kolumneja_max = 4;
   }
 
-
+  
+  /* 
+    Ensin haetaan tiedostot, sortataan niitä
+    Sitten käsitellään stocks kansiossa olevat tiedostot.
+  */
   public function aloita() {
 
     $this->hae_tiedostot();
@@ -84,7 +89,9 @@ Class ImportSaldoHinta {
         substr($impsaloh_csv_file_name, 0 ,7) == 'prices_' or 
         in_array($impsaloh_csv_file_name, $this->ftp_exclude_files)) 
       continue;
-      $this->kasittele_tiedosto($impsaloh_csv_file);
+
+      // Haetaan samalla prices tiedosto
+      $this->kasittele_tiedosto($impsaloh_csv_file, $this->impsaloh_polku_orig_prices."/prices_".$impsaloh_csv_file_name);
     }
   }
 
@@ -161,10 +168,27 @@ Class ImportSaldoHinta {
   /*
     Käsittelee tiedostot
   */
-  public function kasittele_tiedosto($impsaloh_csv_file) {
+  public function kasittele_tiedosto($impsaloh_csv_file, $impsaloh_csv_prices_file) {
+
+    // Avataan stocks ja prices tiedostot
     $impsaloh_csv = fopen($impsaloh_csv_file, 'r'); if (!$impsaloh_csv) die($php_errormsg);
+    $impsaloh_prices_csv = fopen($this->impsaloh_polku_orig_prices."/prices_".$impsaloh_csv_prices_file, 'r'); if (!$impsaloh_prices_csv) die($php_errormsg);
+    
     $csv_jakajaa = $this->csv_jakajaa_ja_kolumnit($impsaloh_csv, $impsaloh_csv_file);
-    $this->kasittele_rivit($csv_jakajaa['jakajaa'], $impsaloh_csv, $csv_jakajaa['riveja']);
+    $csv_jakajaa_prices = $this->csv_jakajaa_ja_kolumnit($impsaloh_prices_csv, $impsaloh_csv_file);
+
+    $this->kasittele_rivit(
+      array(
+        "jakajaa" => $csv_jakajaa['jakajaa'], 
+        "file" => $impsaloh_csv, 
+        "riveja" => $csv_jakajaa['riveja']
+      ),
+      array(
+        "jakajaa" => $csv_jakajaa_prices['jakajaa'], 
+        "file" => $impsaloh_prices_csv, 
+        "riveja" => $csv_jakajaa_prices['riveja']
+      )
+    );
   }
 
 
@@ -175,7 +199,18 @@ Class ImportSaldoHinta {
     toimittajax.csv -> siirtää sen stock kansioon ja etsii samassa kansiossa prices_toimittajatx.csv
     sen jälkeen siirtää sen prices kansioon jä käsittelee prices_toimittajax.csv tiedosto
   */
-  public function kasittele_rivit($csv_jakajaa, $impsaloh_csv, $impsaloh_csv_riveja) {
+  public function kasittele_rivit($stocks_file, $prices_file) {
+
+    // Stocks tiedoston tiedot
+    $csv_jakajaa = $stocks_file['jakajaa'];
+    $impsaloh_csv = $stocks_file['file'];
+    $impsaloh_csv_riveja = $stocks_file['riveja'];
+
+    // Price tiedoston tiedot
+    $csv_jakajaa_prices = $prices_file['jakajaa'];
+    $impsaloh_prices_csv = $prices_file['file'];
+    $csv_jakajaa_prices = $prices_file['riveja'];
+
     $yhtio = $this->yhtio['yhtio'];
     $tuotekoodi_otsikot = $this->tuotekoodi_otsikot;
     $eankoodi_otsikot = $this->eankoodi_otsikot;

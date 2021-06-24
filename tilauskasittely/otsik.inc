@@ -4972,21 +4972,27 @@ if (isset($jatka)) {
         $luontitapa_arraylisa = "luontitapa = '{$luontitapa}',";
       }
 
-      if(isset($noutopisteen_tunnus) and $noutopisteen_tunnus != "") {
-        $query_noutopiste = "SELECT noutopisteen_tunnus 
-                              FROM laskun_lisatiedot 
-                              {$postquery3}";
-        $nykyinen_noutopiste = pupe_query($query_noutopiste);
+      if (isset($noutopisteen_tunnus) and $noutopisteen_tunnus != "") {
+
+        if ($query3 != "UPDATE ") {
+          $nykyinen_noutopiste = "";
+        } else {
+          $query_noutopiste = "SELECT noutopisteen_tunnus 
+                                FROM laskun_lisatiedot 
+                                {$postquery3}";
+          $nykyinen_noutopiste = pupe_query($query_noutopiste);
         
-        if (mysql_num_rows($nykyinen_noutopiste) > 0) {
-          $nykyinen_noutopiste = mysql_fetch_assoc($nykyinen_noutopiste)['noutopisteen_tunnus'];
-          if($nykyinen_noutopiste != $noutopisteen_tunnus) {
-            $noutopisteen_tunnus_lisa = "noutopisteen_tunnus = '$noutopisteen_tunnus',";
-            $query_noutopiste_asiakas = "UPDATE asiakas 
+          if (mysql_num_rows($nykyinen_noutopiste) > 0) {
+            $nykyinen_noutopiste = mysql_fetch_assoc($nykyinen_noutopiste)['noutopisteen_tunnus'];
+          }
+        }
+
+        if ($nykyinen_noutopiste != $noutopisteen_tunnus) {
+          $noutopisteen_tunnus_lisa = "noutopisteen_tunnus = '$noutopisteen_tunnus',";
+          $query_noutopiste_asiakas = "UPDATE asiakas 
                                           SET noutopiste = '".$noutopisteen_tunnus."' 
                                           WHERE tunnus = ".$asiakasid;
-            pupe_query($query_noutopiste_asiakas);
-          }
+          pupe_query($query_noutopiste_asiakas);
         }
       } else {
         $noutopisteen_tunnus_lisa = "";
@@ -5029,6 +5035,7 @@ if (isset($jatka)) {
             asiakkaan_kohde        = '{$tkohde}',
             otunnus           = '$kukarow[kesken]'";
       $query3 .= $postquery3;
+      
       $result = pupe_query($query3);
     }
 

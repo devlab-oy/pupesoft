@@ -667,7 +667,7 @@ if ($lopetus == "") {
 
   $ks_sel[$kampanja_ja_samplerajaus] = "SELECTED";
   echo "<tr>";
-  echo "<th>".t('Kampanja rajaus')."</th>";
+  echo "<th>".t('Kampanja rajaus ja sample-tuoterajaus')."</th>";
   echo "<td colspan='3'>";
   echo "<select id='kampanja_ja_samplerajaus' name='kampanja_ja_samplerajaus'>";
   echo "<option value=''>".t('Ei rajausta')."</option>";

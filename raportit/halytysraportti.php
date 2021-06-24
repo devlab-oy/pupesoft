@@ -313,10 +313,15 @@ $sarakkeet["SARAKE71"] = t("kampanjatuotteet")." $kausi2\t";
 $sarakkeet["SARAKE72"] = t("kampanjatuotteet")." $kausi3\t";
 $sarakkeet["SARAKE73"] = t("kampanjatuotteet")." $kausi4\t";
 
-$sarakkeet["SARAKE74"] = t("sampletuotteet")." $kausi1\t";
-$sarakkeet["SARAKE75"] = t("sampletuotteet")." $kausi2\t";
-$sarakkeet["SARAKE76"] = t("sampletuotteet")." $kausi3\t";
-$sarakkeet["SARAKE77"] = t("sampletuotteet")." $kausi4\t";
+$sarakkeet["SARAKE74"] = t("kampanjalaskuissa olevat tuotteet")." $kausi1\t";
+$sarakkeet["SARAKE75"] = t("kampanjalaskuissa olevat tuotteet")." $kausi2\t";
+$sarakkeet["SARAKE76"] = t("kampanjalaskuissa olevat tuotteet")." $kausi3\t";
+$sarakkeet["SARAKE77"] = t("kampanjalaskuissa olevat tuotteet")." $kausi4\t";
+
+$sarakkeet["SARAKE78"] = t("sampletuotteet")." $kausi1\t";
+$sarakkeet["SARAKE79"] = t("sampletuotteet")." $kausi2\t";
+$sarakkeet["SARAKE80"] = t("sampletuotteet")." $kausi3\t";
+$sarakkeet["SARAKE81"] = t("sampletuotteet")." $kausi4\t";
 
 if (table_exists("yhteensopivuus_rekisteri")) {
   $query = "SELECT count(*) kpl
@@ -991,12 +996,17 @@ if ($tee == "RAPORTOI" and isset($RAPORTOI)) {
                 sum(if (tilausrivi.laskutettuaika >= '$vva2-$kka2-$ppa2' and tilausrivi.laskutettuaika <= '$vvl2-$kkl2-$ppl2' and tilausrivi.campaign_id IS NOT NULL ,tilausrivi.kpl,0)) kampanja2,
                 sum(if (tilausrivi.laskutettuaika >= '$vva3-$kka3-$ppa3' and tilausrivi.laskutettuaika <= '$vvl3-$kkl3-$ppl3' and tilausrivi.campaign_id IS NOT NULL ,tilausrivi.kpl,0)) kampanja3,
                 sum(if (tilausrivi.laskutettuaika >= '$vva4-$kka4-$ppa4' and tilausrivi.laskutettuaika <= '$vvl4-$kkl4-$ppl4' and tilausrivi.campaign_id IS NOT NULL ,tilausrivi.kpl,0)) kampanja4,
+                sum(if (tilausrivi.laskutettuaika >= '$vva1-$kka1-$ppa1' and tilausrivi.laskutettuaika <= '$vvl1-$kkl1-$ppl1' and lasku.campaign_id IS NOT NULL ,tilausrivi.kpl,0)) laskut_kampanja1,
+                sum(if (tilausrivi.laskutettuaika >= '$vva2-$kka2-$ppa2' and tilausrivi.laskutettuaika <= '$vvl2-$kkl2-$ppl2' and lasku.campaign_id IS NOT NULL ,tilausrivi.kpl,0)) laskut_kampanja2,
+                sum(if (tilausrivi.laskutettuaika >= '$vva3-$kka3-$ppa3' and tilausrivi.laskutettuaika <= '$vvl3-$kkl3-$ppl3' and lasku.campaign_id IS NOT NULL ,tilausrivi.kpl,0)) laskut_kampanja3,
+                sum(if (tilausrivi.laskutettuaika >= '$vva4-$kka4-$ppa4' and tilausrivi.laskutettuaika <= '$vvl4-$kkl4-$ppl4' and lasku.campaign_id IS NOT NULL ,tilausrivi.kpl,0)) laskut_kampanja4,
                 sum(if (tilausrivi.laskutettuaika >= '$vva1-$kka1-$ppa1' and tilausrivi.laskutettuaika <= '$vvl1-$kkl1-$ppl1' and tilausrivin_lisatiedot.korvamerkinta = 'Sample' ,tilausrivi.kpl,0)) sample1,
                 sum(if (tilausrivi.laskutettuaika >= '$vva2-$kka2-$ppa2' and tilausrivi.laskutettuaika <= '$vvl2-$kkl2-$ppl2' and tilausrivin_lisatiedot.korvamerkinta = 'Sample' ,tilausrivi.kpl,0)) sample2,
                 sum(if (tilausrivi.laskutettuaika >= '$vva3-$kka3-$ppa3' and tilausrivi.laskutettuaika <= '$vvl3-$kkl3-$ppl3' and tilausrivin_lisatiedot.korvamerkinta = 'Sample' ,tilausrivi.kpl,0)) sample3,
                 sum(if (tilausrivi.laskutettuaika >= '$vva4-$kka4-$ppa4' and tilausrivi.laskutettuaika <= '$vvl4-$kkl4-$ppl4' and tilausrivin_lisatiedot.korvamerkinta = 'Sample' ,tilausrivi.kpl,0)) sample4,
                 max(tilausrivi.laskutettuaika) myyntipvm
                 FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika)
+                JOIN lasku ON lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus 
                 JOIN tilausrivin_lisatiedot use index (tilausrivitunnus) ON tilausrivin_lisatiedot.yhtio=tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus=tilausrivi.tunnus 
                 WHERE tilausrivi.yhtio        = '$row[yhtio]'
                 {$varastowherelisa}
@@ -1980,27 +1990,55 @@ if ($tee == "RAPORTOI" and isset($RAPORTOI)) {
         }
 
         if ($valitut["SARAKE74"] != '') {
+          $rivi .= str_replace(".", ",", $laskurow['laskut_kampanja1'])."\t";
+          
+          $worksheet->writeNumber($excelrivi, $excelsarake, $laskurow['laskut_kampanja1']);
+          $excelsarake++;
+        }
+
+        if ($valitut["SARAKE75"] != '') {
+          $rivi .= str_replace(".", ",", $laskurow['laskut_kampanja2'])."\t";
+          
+          $worksheet->writeNumber($excelrivi, $excelsarake, $laskurow['laskut_kampanja2']);
+          $excelsarake++;
+        }
+
+        if ($valitut["SARAKE76"] != '') {
+          $rivi .= str_replace(".", ",", $laskurow['laskut_kampanja3'])."\t";
+          
+          $worksheet->writeNumber($excelrivi, $excelsarake, $laskurow['laskut_kampanja3']);
+          $excelsarake++;
+        }
+
+        if ($valitut["SARAKE77"] != '') {
+          $rivi .= str_replace(".", ",", $laskurow['laskut_kampanja4'])."\t";
+          
+          $worksheet->writeNumber($excelrivi, $excelsarake, $laskurow['laskut_kampanja4']);
+          $excelsarake++;
+        }
+
+        if ($valitut["SARAKE78"] != '') {
           $rivi .= str_replace(".", ",", $laskurow['sample1'])."\t";
           
           $worksheet->writeNumber($excelrivi, $excelsarake, $laskurow['sample1']);
           $excelsarake++;
         }
 
-        if ($valitut["SARAKE75"] != '') {
+        if ($valitut["SARAKE79"] != '') {
           $rivi .= str_replace(".", ",", $laskurow['sample2'])."\t";
           
           $worksheet->writeNumber($excelrivi, $excelsarake, $laskurow['sample2']);
           $excelsarake++;
         }
 
-        if ($valitut["SARAKE76"] != '') {
+        if ($valitut["SARAKE80"] != '') {
           $rivi .= str_replace(".", ",", $laskurow['sample3'])."\t";
           
           $worksheet->writeNumber($excelrivi, $excelsarake, $laskurow['sample3']);
           $excelsarake++;
         }
 
-        if ($valitut["SARAKE77"] != '') {
+        if ($valitut["SARAKE81"] != '') {
           $rivi .= str_replace(".", ",", $laskurow['sample4'])."\t";
           
           $worksheet->writeNumber($excelrivi, $excelsarake, $laskurow['sample4']);

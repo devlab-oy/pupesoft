@@ -4471,6 +4471,21 @@ if (isset($jatka)) {
     $campaign_id = 'NULL';
   }
 
+  // Päivitetään myös tilausrivien kampanjat, jos niissä ei ole mitään ja laskussa on valittu kampanja.
+  if(!empty($campaign_id) and $campaign_id != "" and is_numeric($campaign_id)) {
+    $campaign_id_avainsanat = t_avainsana("CAMPAIGN_FIX");
+    while ($campaign_id_avainsana = mysql_fetch_assoc($campaign_id_avainsanat)) {
+      if ($campaign_id_avainsana["selite"] and $campaign_id_avainsana["selite"] == 1) {
+        $query_campaign_id = "UPDATE tilausrivi SET
+                              campaign_id      = $campaign_id
+                              WHERE  yhtio = '$kukarow[yhtio]' 
+                              AND campaign_id IS NULL 
+                              AND otunnus='$tilausnumero'";
+        $query_campaign_id = pupe_query($query_campaign_id);
+      }
+    }
+  }
+
   $query .= "  lasku SET
         aktiivinen_kuljetus     = '',
         alatila                 = '$alatila',

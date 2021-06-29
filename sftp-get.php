@@ -50,13 +50,14 @@ class SFTPConnection {
   }
 
   public function getFilesFrom($path, $dest, $ftp_exclude_files=array()) {
+    
     $sftp = $this->sftp;
     $dir = "ssh2.sftp://".intval($sftp).$path;
 
     $handle = $this->scanDirectory($path);
 
     while (false !== ($file = readdir($handle))) {
-      if (in_array($file, array('.', '..'))) continue;
+      if (in_array($file, array('.', '..', ".DS_Store"))) continue;
       if (in_array($file, $ftp_exclude_files)) continue;
 
       if (isset($this->ftpfilt) and $this->ftpfilt != "") {
@@ -65,7 +66,7 @@ class SFTPConnection {
           continue;
         }
       }
-
+      
       $stream = fopen($dir.$file, 'r');
 
       if (!$stream) {

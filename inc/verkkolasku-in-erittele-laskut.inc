@@ -1,5 +1,5 @@
 <?php
-function erittele_laskut($file) {
+function erittele_laskut($file, $kasittele_pdf = false) {
 
   global $laskut, $origlaskut;
 
@@ -90,6 +90,10 @@ function erittele_laskut($file) {
         $path_parts["filename"] = preg_replace("/(\-gen[a-z0-9]{20,20})/", "", $path_parts["filename"]);
 
         $filenimi = "finvoice-{$path_parts["filename"]}-$ebid.xml";
+        if($kasittele_pdf) {
+          $filenimi_pdf = "finvoice-{$path_parts["filename"]}-$ebid.pdf";
+          rename($laskut."/pdf/".replace_extension($file, "pdf"), $laskut."/pdf_done/".$filenimi_pdf);
+        }
         $save = file_put_contents($laskut."/".$filenimi, $boob);
 
         if ($save !== FALSE) {

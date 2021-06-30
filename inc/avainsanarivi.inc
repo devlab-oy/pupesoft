@@ -231,6 +231,7 @@ if (mysql_field_name($result, $i) == "laji") {
   if ($lukitse_laji== "" or $lukitse_laji == "VEHT_RAHTI") $ulos .= "<option value='VEHT_RAHTI' {$avain_sel['VEHT_RAHTI']}>".t("Vaihtoehtoinen rahtituotenumero")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "FINV_TULPALVELU") $ulos .= "<option value='FINV_TULPALVELU' {$avain_sel['FINV_TULPALVELU']}>".t("Finvoice senderintermediator tulostuspalvelu")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "FACT_START") $ulos .= "<option value='FACT_START' {$avain_sel['FACT_START']}>".t("Factoring alkupiste")."</option>";
+  if ($lukitse_laji== "" or $lukitse_laji == "CAMPAIGN_FIX") $ulos .= "<option value='CAMPAIGN_FIX' {$avain_sel['CAMPAIGN_FIX']}>".t("Kun p‰ivitet‰‰n laskun kampanjaa, kaikki tilausrivit saavat samanlaisen kampanjan.")."</option>";
   if ($lukitse_laji== "") $ulos .= "</optgroup>";
 
   if ($lukitse_laji== "") $ulos .= "<optgroup label='".t("Varaston avainsanat")."'>";

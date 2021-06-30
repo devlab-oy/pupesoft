@@ -37,7 +37,7 @@ if (isset($tee) and $tee == "lataa_tiedosto") {
 echo "<script type='text/javascript'>
       $(function() {
         $('#kampanja_ja_samplerajaus').on('change', function() {
-          if ($('#kampanja_ja_samplerajaus').val() === 'nayta_kamp') {
+          if ($('#kampanja_ja_samplerajaus').val() === 'nayta_kamp' || $('#kampanja_ja_samplerajaus').val() === 'nayta_kamp_laskut') {
             $('#campaign_id_div').show();
           }
           else {
@@ -667,10 +667,11 @@ if ($lopetus == "") {
 
   $ks_sel[$kampanja_ja_samplerajaus] = "SELECTED";
   echo "<tr>";
-  echo "<th>".t('Kampanja ja sample-tuoterajaus')."</th>";
+  echo "<th>".t('Kampanja rajaus ja sample-tuoterajaus')."</th>";
   echo "<td colspan='3'>";
   echo "<select id='kampanja_ja_samplerajaus' name='kampanja_ja_samplerajaus'>";
   echo "<option value=''>".t('Ei rajausta')."</option>";
+  echo "<option value='nayta_kamp_laskut' {$ks_sel["nayta_kamp_laskut"]}>", t("Näytä vain kampanja-laskuja"), "</option>";
   echo "<option value='nayta_kamp' {$ks_sel["nayta_kamp"]}>", t("Näytä vain kampanja-tuotteita"), "</option>";
   echo "<option value='nayta_samp' {$ks_sel["nayta_samp"]}>", t("Näytä vain sample-tuotteita"), "</option>";
   echo "<option value='alanayta_kamp' {$ks_sel["alanayta_kamp"]}>", t("Älä näytä kampanja-tuotteita"), "</option>";
@@ -678,7 +679,9 @@ if ($lopetus == "") {
   echo "<option value='alanayta_kamp_samp' {$ks_sel["alanayta_kamp_samp"]}>", t("Älä näytä kampanja tai sample-tuotteita"), "</option>";
   echo "</select>";
 
-  $piilotettu_vai_ei = (isset($kampanja_ja_samplerajaus) and $kampanja_ja_samplerajaus == 'nayta_kamp') ? "" : "style='display:none;'";
+  $piilotettu_vai_ei = (
+  isset($kampanja_ja_samplerajaus) and 
+  ($kampanja_ja_samplerajaus == 'nayta_kamp' or $kampanja_ja_samplerajaus == 'nayta_kamp_laskut')) ? "" : "style='display:none;'";
   echo "<div id='campaign_id_div' class='campaign_id_div' $piilotettu_vai_ei>";
   $cquery = "SELECT campaigns.*
              FROM campaigns
@@ -1830,6 +1833,14 @@ if ((isset($aja_raportti) or isset($valitse_asiakas)) and count($_REQUEST) > 0) 
     $lisatiedot_join = '';
     if (isset($kampanja_ja_samplerajaus) and !empty($kampanja_ja_samplerajaus)) {
       switch ($kampanja_ja_samplerajaus) {
+        case "nayta_kamp_laskut" :
+          $campaign_value = "IS NOT NULL and lasku.campaign_id != 0";
+          if (!empty($campaign_id)) {
+            $campaign_value = "= {$campaign_id}";
+          }
+
+          $lisa .= " and lasku.campaign_id {$campaign_value} ";
+          break;
         case "nayta_kamp" :
           $campaign_value = "IS NOT NULL";
           if (!empty($campaign_id)) {

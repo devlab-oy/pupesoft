@@ -1834,7 +1834,7 @@ if ((isset($aja_raportti) or isset($valitse_asiakas)) and count($_REQUEST) > 0) 
     if (isset($kampanja_ja_samplerajaus) and !empty($kampanja_ja_samplerajaus)) {
       switch ($kampanja_ja_samplerajaus) {
         case "nayta_kamp_laskut" :
-          $campaign_value = "IS NOT NULL";
+          $campaign_value = "IS NOT NULL and lasku.campaign_id != 0";
           if (!empty($campaign_id)) {
             $campaign_value = "= {$campaign_id}";
           }

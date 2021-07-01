@@ -63,7 +63,7 @@ $ftppath = $ftppath_fitek_cron;
 $ftpdest = $ftpdest_fitek_cron;
 
 // jo olevia olemassa tiedostoja kansiossa orig ei saa käsitellä uudestaan
-$ftp_exclude_files = array_diff(scandir($verkkolaskut_orig), array('..', '.'));
+$ftp_exclude_files = array_diff(scandir($verkkolaskut_orig), array('..', '.', '.DS_Store'));
 require 'sftp-get.php';
 
 include_once("verkkolasku-in.php");

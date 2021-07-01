@@ -30,7 +30,20 @@ $laskun_ebid = "FINVOICEXML";
 if (strpos($file, "maventa") !== false) {
   $laskun_ebid = $ebid = "MAVENTAXML";
 }
-
+if ($fitek_xml_cron_tiedot) {
+  $fitek_yhtio = $fitek_xml_cron_tiedot['yhtio'];
+  $laskun_numero = xml_string($xml->InvoiceDetails->InvoiceNumber);
+  $query_tarkista_lasku = "SELECT laskunro 
+                            FROM lasku 
+                            WHERE yhtio = '{$fitek_yhtio}' 
+                            AND tila         IN ('H','M','P','Q','Y') 
+                            AND tapvm        >= date_sub(now(), INTERVAL 12 MONTH)
+                            AND laskunro = '{$laskun_numero}'";
+  $duplikaattilasku_check_fitek = pupe_query($query_tarkista_lasku);
+  if (mysql_num_rows($duplikaattilasku_check_fitek) > 0) {
+    return;
+  }
+}
 // parseroidaan xml
 $yhtio = xml_string($xml->BuyerOrganisationUnitNumber);
 $verkkotunnus_vas = xml_string($xml->BuyerPartyDetails->BuyerOrganisationTaxCode);
@@ -48,6 +61,7 @@ $laskuttajan_nimi = xml_string($xml->SellerPartyDetails->SellerOrganisationName)
 $laskuttajan_vat = xml_string($xml->SellerPartyDetails->SellerOrganisationTaxCode);
 $laskuttajan_identifier = xml_string($xml->SellerPartyDetails->SellerPartyIdentifier);
 $laskuttajan_valkoodi = xml_string($xml->EpiDetails->EpiPaymentInstructionDetails->EpiInstructedAmount->attributes()->AmountCurrencyIdentifier);
+
 if ($fitek_xml_cron_tiedot) {
   $laskun_pankkiviite = xml_string($xml->InvoiceDetails->BuyerReferenceIdentifier);
 }

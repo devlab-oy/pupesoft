@@ -41,6 +41,7 @@ if ($fitek_xml_cron_tiedot) {
                             AND laskunro = '{$laskun_numero}'";
   $duplikaattilasku_check_fitek = pupe_query($query_tarkista_lasku);
   if (mysql_num_rows($duplikaattilasku_check_fitek) > 0) {
+    $fitek_return_false = true;
     return;
   }
 }

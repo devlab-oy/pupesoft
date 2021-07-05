@@ -34,6 +34,9 @@ if (!function_exists("verkkolasku_in")) {
     // Katsotaan mitä aineistoa käpistellään
     if (strpos($file, "finvoice") !== false or strpos($file, "maventa") !== false or $fitek_xml_cron_tiedot) {
       require "inc/verkkolasku-in-finvoice.inc";
+      if($fitek_xml_cron_tiedot and isset($fitek_return_false) and $fitek_return_false) {
+        return;
+      }
     }
     elseif (strpos($file, "teccominvoice") !== false) {
       require "inc/verkkolasku-in-teccom.inc";

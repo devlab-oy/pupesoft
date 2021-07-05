@@ -31,6 +31,7 @@ cron_log();
 class ImportSaldoHinta
 {
 
+
   /*
     Laitetaan kaikki muuttujat kuntoon
   */
@@ -58,7 +59,6 @@ class ImportSaldoHinta
     
     $this->impsaloh_csv_files = scandir($this->impsaloh_polku_in);
     $this->ftp_exclude_files = array_diff(scandir($this->impsaloh_polku_orig), array('..', '.', '.DS_Store'));
-
 
     /*
       Otsikot etsitään tiedostossa.
@@ -140,8 +140,12 @@ class ImportSaldoHinta
       if ($csv_hae_kolumnit['kolumneja'] > $this->prices_tiedoston_kolumneja_max) {
         copy($impsaloh_csv_file, $this->impsaloh_polku_orig."/".$impsaloh_csv_file_name);
         copy($impsaloh_csv_file_prices, $this->impsaloh_polku_orig."/prices_".$impsaloh_csv_file_name);
-        rename($impsaloh_csv_file, $this->impsaloh_polku_orig_stocks."/".$csv_hae_kolumnit['kolumneja'].$csv_hae_kolumnit['riveja'].$impsaloh_csv_file_name);
-        rename($impsaloh_csv_file_prices, $this->impsaloh_polku_orig_prices."/prices_".$csv_hae_kolumnit['kolumneja'].$csv_hae_kolumnit['riveja'].$impsaloh_csv_file_name);
+
+        // Otetaan pois rename testauksessa.
+        //rename($impsaloh_csv_file, $this->impsaloh_polku_orig_stocks."/".$csv_hae_kolumnit['kolumneja'].$csv_hae_kolumnit['riveja'].$impsaloh_csv_file_name);
+        //rename($impsaloh_csv_file_prices, $this->impsaloh_polku_orig_prices."/prices_".$csv_hae_kolumnit['kolumneja'].$csv_hae_kolumnit['riveja'].$impsaloh_csv_file_name);
+        copy($impsaloh_csv_file, $this->impsaloh_polku_orig_stocks."/".$csv_hae_kolumnit['kolumneja'].$csv_hae_kolumnit['riveja'].$impsaloh_csv_file_name);
+        copy($impsaloh_csv_file_prices, $this->impsaloh_polku_orig_prices."/prices_".$csv_hae_kolumnit['kolumneja'].$csv_hae_kolumnit['riveja'].$impsaloh_csv_file_name);
       }
     }
   }
@@ -154,15 +158,17 @@ class ImportSaldoHinta
   public function csv_jakajaa_ja_kolumnit($impsaloh_csv, $impsaloh_csv_file)
   {
     $yrita_csv_pilkku = fgetcsv($impsaloh_csv, 1000, ",");
+    $count_yrita_csv_pilkku = count($yrita_csv_pilkku);
     rewind($impsaloh_csv);
     $yrita_csv_pistepilkku = fgetcsv($impsaloh_csv, 1000, ";");
+    $count_yrita_csv_pistepilkku = count($yrita_csv_pistepilkku);
     rewind($impsaloh_csv);
   
-    if (count($yrita_csv_pilkku) > 0) {
-      $kolumneja = count($yrita_csv_pilkku);
+    if ($count_yrita_csv_pilkku > 1) {
+      $kolumneja = $count_yrita_csv_pilkku;
       $csv_jakajaa = ",";
-    } elseif (count($yrita_csv_pistepilkku) > 0) {
-      $kolumneja = count($yrita_csv_pistepilkku);
+    } elseif ($count_yrita_csv_pistepilkku > 1) {
+      $kolumneja = $count_yrita_csv_pistepilkku;
       $csv_jakajaa = ";";
     }
 
@@ -193,18 +199,20 @@ class ImportSaldoHinta
     }
     
     $csv_jakajaa = $this->csv_jakajaa_ja_kolumnit($impsaloh_csv, $impsaloh_csv_file);
-    $csv_jakajaa_prices = $this->csv_jakajaa_ja_kolumnit($impsaloh_prices_csv, $impsaloh_csv_file);
-
+    $csv_jakajaa_prices = $this->csv_jakajaa_ja_kolumnit($impsaloh_prices_csv, $impsaloh_csv_prices_file);
+    
     $this->kasittele_rivit(
       array(
         "jakajaa" => $csv_jakajaa['jakajaa'],
         "file" => $impsaloh_csv,
-        "riveja" => $csv_jakajaa['riveja']
+        "riveja" => $csv_jakajaa['riveja'],
+        "filename" => $impsaloh_csv_file
       ),
       array(
         "jakajaa" => $csv_jakajaa_prices['jakajaa'],
         "file" => $impsaloh_prices_csv,
-        "riveja" => $csv_jakajaa_prices['riveja']
+        "riveja" => $csv_jakajaa_prices['riveja'],
+        "filename" => $impsaloh_csv_prices_file
       )
     );
   }
@@ -228,7 +236,7 @@ class ImportSaldoHinta
     // Price tiedoston tiedot
     $csv_jakajaa_prices = $prices_file['jakajaa'];
     $impsaloh_prices_csv = $prices_file['file'];
-    $csv_jakajaa_prices = $prices_file['riveja'];
+    $impsaloh_prices_riveja= $prices_file['riveja'];
 
     $yhtio = $this->yhtio['yhtio'];
     $tuotekoodi_otsikot = $this->tuotekoodi_otsikot;
@@ -237,22 +245,20 @@ class ImportSaldoHinta
     // Loopataan ja järjestetään prices tiedoston data
     $rivit_prices = array();
     $otsikkotiedot = false;
-    while ($rivi = fgetcsv($impsaloh_prices_csv, 100000, $csv_jakajaa)) {
+    while ($rivi = fgetcsv($impsaloh_prices_csv, 100000, $csv_jakajaa_prices)) {
       if (!isset($rivit[0])) {
 
         // Hae tuotekoodin kolumni
         $kolumninro = 0;
         foreach ($rivi as $hae_otsikko) {
           $hae_otsikko = preg_replace("/[^A-Za-z0-9 ]/", '', $hae_otsikko);
-          
+
           if (isset($tuotekoodi_otsikot[$hae_otsikko])) {
             $tuotekoodin_kolumni = (string) $kolumninro;
             $otsikkotiedot = $tuotekoodi_otsikot[$hae_otsikko];
-            break;
           }
           $kolumninro++;
         }
-
 
         // Jos löydetty tuotekoodin kolumni, etsitään hintakolumni ja skipataan koko otsikkorivi
         if (isset($tuotekoodin_kolumni)) {
@@ -280,8 +286,6 @@ class ImportSaldoHinta
       $rivi_saldo = $rivi[array_keys($rivi)[0]];
       unset($rivi[array_keys($rivi)[0]]);
 
-      // Nimeä uudelleen key niin että on hellpoa käyttää
-
       $rivit_prices[$rivi_tuoteno] = array(
         "hinta" => $rivi_hinta,
         "saldo" => $rivi_saldo
@@ -290,7 +294,8 @@ class ImportSaldoHinta
 
     // Käsitellään tiedostojen rivit ja etsitään / muokataan tuotteet pupeessa
     $rivit = array();
-    $loydetyt_tuotteet = 0;
+    $loydetyt_tuotteet = array();
+    $epaonnistuneet_tuotteet = array();
     $laskerivit = 0;
     while ($rivi = fgetcsv($impsaloh_csv, 100000, $csv_jakajaa)) {
     
@@ -330,12 +335,14 @@ class ImportSaldoHinta
       }
 
       $tuotekoodi_tarkista1 = $rivi[$tuotekoodin_kolumni];
+
       if (!isset($rivit_prices[$tuotekoodi_tarkista1])) {
+        $epaonnistuneet_tuotteet[] = $rivi;
         continue;
       }
       $tuotekoodi_tarkista2 = preg_replace("/[^A-Za-z0-9 ]/", '', $rivi[$tuotekoodin_kolumni]);
       $eankoodi_tarkista = $rivi[$eankoodin_kolumni];
-
+      
       // Haetaan hintatiedot ja saldo price array:ista
       $tuotehinta = $rivit_prices[$tuotekoodi_tarkista1]['hinta'];
       $tuotesaldo = $rivit_prices[$tuotekoodi_tarkista1]['saldo'];
@@ -355,10 +362,13 @@ class ImportSaldoHinta
                   ";
       }
       pupe_query($query);
+
+      $onnistunut_tuote = false;
       
       // onnistui
       if (mysql_insert_id()) {
-        $loydetyt_tuotteet++;
+        $loydetyt_tuotteet[] = $rivi;
+        $onnistunut_tuote = true;
 
       // ei onnistunut - yritetään etsiä tuote eri tavalla
       } else {
@@ -378,18 +388,41 @@ class ImportSaldoHinta
                       WHERE tuoteno = '".$tuoteno."'
                     ";
           pupe_query($query);
-          $loydetyt_tuotteet++;
+          $loydetyt_tuotteet[] = $rivi;
+          $onnistunut_tuote = true;
         }
       }
 
+      if(!$onnistunut_tuote) {
+        $epaonnistuneet_tuotteet[] = $rivi;
+      }
+      
       echo "...Valmis: ".round($laskerivit/$impsaloh_csv_riveja, 2)*100;
       echo "%";
-      echo "...Tuotteet OK: ".$loydetyt_tuotteet;
+      echo "...Tuotteet OK: ".count($loydetyt_tuotteet);
       echo "...\r";
     }
 
-    $ei_osunut = $impsaloh_csv_riveja-$loydetyt_tuotteet;
-    echo "\n...Ei osunut:".$ei_osunut."...";
+    $impsaloh_timestamp = $date = new DateTime();
+    $impsaloh_timestamp = $impsaloh_timestamp->getTimestamp();
+
+    if(count($loydetyt_tuotteet) > 0) {
+      $loydetyt_tuotteet_csv = fopen($this->impsaloh_polku_ok."/".$impsaloh_timestamp."_".basename($stocks_file['filename']), 'w');
+      foreach ($loydetyt_tuotteet as $loydetyt_tuotteet_fields) {
+        fputcsv($loydetyt_tuotteet_csv, $loydetyt_tuotteet_fields);
+      }
+      fclose($loydetyt_tuotteet_csv);
+    }
+
+    if(count($epaonnistuneet_tuotteet) > 0) {
+      $epaonnistuneet_tuotteet_csv = fopen($this->impsaloh_polku_error."/".$impsaloh_timestamp."_".basename($stocks_file['filename']), 'w');
+      foreach ($epaonnistuneet_tuotteet as $epaonnistuneet_tuotteet_fields) {
+        fputcsv($epaonnistuneet_tuotteet_csv, $epaonnistuneet_tuotteet_fields);
+      }
+      fclose($epaonnistuneet_tuotteet_csv);
+    }
+
+    echo "\n...Ei osunut:".count($epaonnistuneet_tuotteet)."...";
 
     unset($rivit[0]);
 

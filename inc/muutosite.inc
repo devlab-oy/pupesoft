@@ -1359,6 +1359,33 @@ if ($tila == 'nollaahyvak') {
   $tila = 'X';
 }
 
+if ($tila == 'vaihdasaapumisnumero') {
+  $uusi_saapumisnumero = preg_replace("/[^0-9]/", "", $uusi_saapumisnumero);
+
+  $query = "UPDATE lasku SET
+            saapumisnumero    = '$uusi_saapumisnumero'
+            WHERE yhtio = '$kukarow[yhtio]'
+            and tila    in ('H','Y','M','P','Q')
+            and tunnus  = '$tunnus'";
+  $result = pupe_query($query);
+
+  // haetaan laskun tiedot uudestaan
+  $query = "SELECT *
+            FROM lasku
+            WHERE yhtio = '$kukarow[yhtio]'
+            and tunnus  = '$tunnus'";
+  $result = pupe_query($query);
+
+  if (mysql_num_rows($result) != 1) {
+    echo t("Lasku")." $tunnus ".t("ei löytynytkään")."!";
+    exit;
+  }
+
+  $trow = mysql_fetch_assoc($result);
+  $tee = 'E';
+  $tila = 'X';
+}
+
 if ($tila == 'vaihdalaskunumero') {
 
   $uusi_laskunumero = preg_replace("/[^0-9]/", "", $uusi_laskunumero);
@@ -2209,6 +2236,19 @@ if ($tila == '') {
     }
     echo "</form>";
   }
+
+  echo "<form method='post'>";
+  echo "<input type = 'hidden' name='lopetus' value='{$lopetus}'>";
+  echo "<input type = 'hidden' name='tila' value='vaihdasaapumisnumero'>";
+  echo "<input type = 'hidden' name='tee' value='M'>";
+  echo "<input type = 'hidden' name='tunnus' value='{$tunnus}'>";
+
+  echo "<tr>";
+  echo "<th>".t("saapumisnumero")."</th>";
+  echo "<td><input type='text' name='uusi_saapumisnumero' value='$trow[saapumisnumero]'></td>";
+  echo "<td class='back'><input type='submit' value='".t("Päivitä")."'></td>";
+  echo "</tr>";
+  echo "</form>";
 
   if (($trow['tila'] == 'H' or $trow['tila'] == 'M' or $trow['tila'] == 'P' or $trow['tila'] == 'Q' or $trow['tila'] == 'Y') and ($kukarow['taso'] == 2 or $kukarow['taso'] == 3)) {
     echo "<form method='post'>";

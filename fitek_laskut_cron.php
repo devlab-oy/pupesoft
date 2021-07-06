@@ -54,16 +54,25 @@ $verkkolaskut_ok     = $fitek_xml_cron_dirname."/ok";
 $verkkolaskut_orig   = $fitek_xml_cron_dirname."/orig";
 $verkkolaskut_error  = $fitek_xml_cron_dirname."/error";
 $verkkolaskut_reject = $fitek_xml_cron_dirname."/reject";
+$verkkolaskut_pdf = $fitek_xml_cron_dirname."/pdf";
 
 $ftphost = $ftphost_fitek_cron;
 $ftpuser = $ftpuser_fitek_cron;
 $ftppass = $ftppass_fitek_cron;
 $ftpport = $ftpport_fitek_cron;
+
+$ftppath = $ftppath_fitek_cron_pdf;
+$ftpdest = $ftpdest_fitek_cron_pdf;
+// jo olevia olemassa tiedostoja kansiossa orig ei saa käsitellä uudestaan
+$ftp_exclude_files = array_diff(scandir($verkkolaskut_pdf), array('..', '.', '.DS_Store'));
+include_once 'sftp-get.php';
+
 $ftppath = $ftppath_fitek_cron;
 $ftpdest = $ftpdest_fitek_cron;
-
 // jo olevia olemassa tiedostoja kansiossa orig ei saa käsitellä uudestaan
 $ftp_exclude_files = array_diff(scandir($verkkolaskut_orig), array('..', '.', '.DS_Store'));
-require 'sftp-get.php';
+$ftp_exclude_files[] = 'pdf';
+
+$sftp->getFilesFrom($ftppath."/", $ftpdest."/", $ftp_exclude_files);
 
 include_once("verkkolasku-in.php");

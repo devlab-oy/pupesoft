@@ -1911,24 +1911,48 @@ if (!function_exists("verkkolasku_in")) {
           $kayttotarkoitus = 'INVOIC.D.96A';
         }
 
-        $query = "INSERT INTO liitetiedostot SET
-                  yhtio           = '$yhtio',
-                  liitos          = 'lasku',
-                  liitostunnus    = '$tunnus',
-                  data            = '$xmlstr',
-                  selite          = '$selite',
-                  kieli           = '$yhtiorow[kieli]',
-                  filename        = '$filename',
-                  filesize        = length(data),
-                  filetype        = 'text/xml',
-                  image_width     = '',
-                  image_height    = '',
-                  image_bits      = '',
-                  image_channels  = '',
-                  kayttotarkoitus = '$kayttotarkoitus',
-                  jarjestys       = '1',
-                  laatija         = '$kukarow[kuka]',
-                  luontiaika      = now()";
+        if($fitek_xml_cron_tiedot and 
+        file_exists($fitek_xml_cron_tiedot['pdf_tiedosto']) and 
+        $fitek_pdf_sisalto = file_get_contents($fitek_xml_cron_tiedot['pdf_tiedosto'])) {
+          $fitek_pdf_file = basename($fitek_xml_cron_tiedot['pdf_tiedosto']);
+          $query = "INSERT INTO liitetiedostot SET
+                    yhtio           = '$yhtio',
+                    liitos          = 'lasku',
+                    liitostunnus    = '$tunnus',
+                    data            = '$fitek_pdf_sisalto',
+                    selite          = '$selite',
+                    kieli           = '$yhtiorow[kieli]',
+                    filename        = '$fitek_pdf_file',
+                    filesize        = length(data),
+                    filetype        = 'application/pdf',
+                    image_width     = '',
+                    image_height    = '',
+                    image_bits      = '',
+                    image_channels  = '',
+                    kayttotarkoitus = '$kayttotarkoitus',
+                    jarjestys       = '1',
+                    laatija         = '$kukarow[kuka]',
+                    luontiaika      = now()";
+        } else {
+          $query = "INSERT INTO liitetiedostot SET
+                    yhtio           = '$yhtio',
+                    liitos          = 'lasku',
+                    liitostunnus    = '$tunnus',
+                    data            = '$xmlstr',
+                    selite          = '$selite',
+                    kieli           = '$yhtiorow[kieli]',
+                    filename        = '$filename',
+                    filesize        = length(data),
+                    filetype        = 'text/xml',
+                    image_width     = '',
+                    image_height    = '',
+                    image_bits      = '',
+                    image_channels  = '',
+                    kayttotarkoitus = '$kayttotarkoitus',
+                    jarjestys       = '1',
+                    laatija         = '$kukarow[kuka]',
+                    luontiaika      = now()";
+        }
         $Xresult = pupe_query($query);
 
         // Haetaan verkkolaskun visualisoitu versio

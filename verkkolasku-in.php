@@ -66,8 +66,18 @@ else {
   exit;
 }
 
+function replace_extension($filename, $new_extension) {
+  $info = pathinfo($filename);
+  return $info['filename'].'.'.$new_extension;
+}
+
 require "inc/verkkolasku-in.inc"; // täällä on itse koodi
 require "inc/verkkolasku-in-erittele-laskut.inc"; // täällä pilkotaan Finvoiceaineiston laskut omiksi tiedostoikseen
+
+//Kronille oletuslaskutiedot
+if (!isset($fitek_xml_cron_tiedot)) { 
+  $fitek_xml_cron_tiedot = false; 
+}
 
 // Käsitellään ensin kaikki Finvoicet
 if ($handle = opendir($laskut)) {
@@ -88,8 +98,12 @@ if ($handle = opendir($laskut)) {
       exec("recode -f $encoding..UTF8 '$nimi'");
     }
 
-    $luotiinlaskuja = erittele_laskut($nimi);
-
+    if($fitek_xml_cron_tiedot) {
+      $luotiinlaskuja = erittele_laskut($nimi, true);
+    } else {
+      $luotiinlaskuja = erittele_laskut($nimi);
+    }
+    
     // Jos tiedostosta luotiin laskuja siirretään se tieltä pois
     if ($luotiinlaskuja > 0) {
 
@@ -113,9 +127,9 @@ if ($handle = opendir($laskut)) {
 
     $nimi = $laskut."/".$file;
 
-    //Kronille oletuslaskutiedot
-    if (!isset($fitek_xml_cron_tiedot)) { 
-      $fitek_xml_cron_tiedot = false; 
+    if($fitek_xml_cron_tiedot) {
+      $pdf_tiedosto_uusi = replace_extension($file, "pdf");
+      $fitek_xml_cron_tiedot["pdf_tiedosto"] = $laskut."/pdf_done/".$pdf_tiedosto_uusi;
     }
 
     $laskuvirhe = verkkolasku_in($nimi, TRUE, $fitek_xml_cron_tiedot);

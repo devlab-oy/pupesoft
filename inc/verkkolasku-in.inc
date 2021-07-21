@@ -1913,7 +1913,7 @@ if (!function_exists("verkkolasku_in")) {
 
         if($fitek_xml_cron_tiedot and 
         file_exists($fitek_xml_cron_tiedot['pdf_tiedosto']) and 
-        $fitek_pdf_sisalto = file_get_contents($fitek_xml_cron_tiedot['pdf_tiedosto'])) {
+        $fitek_pdf_sisalto = mysql_real_escape_string(file_get_contents($fitek_xml_cron_tiedot['pdf_tiedosto']))) {
           $fitek_pdf_file = basename($fitek_xml_cron_tiedot['pdf_tiedosto']);
           $query = "INSERT INTO liitetiedostot SET
                     yhtio           = '$yhtio',

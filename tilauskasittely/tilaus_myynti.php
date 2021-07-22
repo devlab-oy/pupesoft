@@ -5101,7 +5101,7 @@ if ($tee == '') {
         $var        = '';
         $hinta        = '';
         $netto        = '';
-        $paikka        = '';
+        $paikka        = $formijspaikkapaikka;
         $alv        = '';
         $perheid      = 0;
         $perheid2      = 0;

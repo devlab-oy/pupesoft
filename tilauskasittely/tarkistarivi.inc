@@ -1392,8 +1392,56 @@ if ($toim != "VALMISTAVARASTOON" and $row['tuoteno'] != '' and ($yhtiorow['vasta
 
               $_tilattu = (int) $row['tilkpl'];
               $_tuote['toim_tuoteno'] = $tehdas_saldo_row['toim_tuoteno'];
-
-              $vastaavat_table .= "<td>{$tehdas_saldo_row['toimittajan_nimi']}</td>";
+              
+              $tehdas_toimittajat = array();
+              if($_tuote['suoratoimitus'] != "") 
+              {
+                $query2 = "SELECT tt.tehdas_saldo,
+                          tt.liitostunnus,
+                          tt.toim_tuoteno,
+                          tt.tunnus AS tt_tunnus,
+                          toimi.nimi AS toimittajan_nimi,
+                          avainsana.selitetark_2,
+                          avainsana.selitetark_3,
+                          avainsana.selitetark_4,
+                          avainsana.selitetark_5
+                          FROM tuotteen_toimittajat AS tt
+                          JOIN toimi ON (toimi.yhtio = tt.yhtio AND toimi.tunnus = tt.liitostunnus)
+                          LEFT JOIN avainsana ON (toimi.yhtio = avainsana.yhtio AND avainsana.laji = 'SAHKTILTUN' AND avainsana.selite = '{$laskurow['yhtio_toimipaikka']}' AND toimi.tunnus = avainsana.selitetark)
+                          WHERE tt.yhtio = '{$kukarow['yhtio']}' 
+                          AND tt.tehdas_saldo IS NOT NULL 
+                          AND tt.tehdas_saldo > 0 
+                          AND tt.tuoteno = '{$_tuote['tuoteno']}'
+                          ORDER BY tt.ostohinta
+                          ";
+                $tehdas_saldo_res2 = pupe_query($query2);
+                if (mysql_num_rows($tehdas_saldo_res2) > 1) {
+                  
+                  while($tehdas_saldo_row2 = mysql_fetch_assoc($tehdas_saldo_res2)) {
+                    $tehdas_toimittajat[] = $tehdas_saldo_row2;
+                  }
+                }
+              }
+              if(empty($tehdas_toimittajat)) {
+                $vastaavat_table .= "<td>{$tehdas_saldo_row['toimittajan_nimi']}</td>";
+              } else {
+                $vastaavat_table .= "<td><select id='jspaikka' name='paikat'><option value=\"\">-".t("Toimittaja")."-</option>";
+                  foreach($tehdas_toimittajat as $tehdas_toimittaja) {
+                    $vastaavat_table .= '<option value="'.$tehdas_toimittaja["liitostunnus"].'">'.$tehdas_toimittaja["toimittajan_nimi"].' | '.$tehdas_toimittaja["tehdas_saldo"].'</option>';
+                  }
+                $vastaavat_table .= "</select>
+                <script>
+                $('#jspaikka').change(function() {
+                  var formi = $(this).parent().parent().find('form[name=\"jalkitoimita\"]');
+                  if(formi.find('.formijspaikka').length) {
+                    formi.find('.formijspaikka').val('¡¡¡'+$(this).val());
+                  } else {
+                    formi.prepend('<input value=\"¡¡¡'+$(this).val()+'\" class=\"formijspaikka\" type=\"hidden\" name=\"formijspaikkapaikka\"></input>');
+                  }
+                });
+                </script>
+                </td>";
+              }
 
               $vastaavat_table .= "<td align='right'>";
 

@@ -71,6 +71,10 @@ class ImportSaldoHinta
           "hinta" => "Mercantile Price"
         )
     );
+    $this->toimittajat_tiedostot = array(
+      "kavoparts.csv" => "1474"
+    );
+
     $this->eankoodi_otsikot = array("GTIN");
 
     // Montako kolumneja on stocks tiedostoissa - näin ohejlma tunnistaa sen.
@@ -122,7 +126,7 @@ class ImportSaldoHinta
     foreach ($this->impsaloh_csv_files as $impsaloh_csv_file_name) {
       $impsaloh_csv_file = $this->impsaloh_polku_in."/".$impsaloh_csv_file_name;
       $impsaloh_csv_file_prices = $this->impsaloh_polku_in."/prices_".$impsaloh_csv_file_name;
-      
+
       // skipataan kansiot, orig kansiossa olevat tiedostot sekä pisteet
       if (is_dir($impsaloh_csv_file) or
         substr($impsaloh_csv_file_name, 0, 1) == '.' or
@@ -141,11 +145,18 @@ class ImportSaldoHinta
         copy($impsaloh_csv_file, $this->impsaloh_polku_orig."/".$impsaloh_csv_file_name);
         copy($impsaloh_csv_file_prices, $this->impsaloh_polku_orig."/prices_".$impsaloh_csv_file_name);
 
+        if(isset($this->toimittajat_tiedostot[$impsaloh_csv_file_name])) {
+          $toimittaja_id = $this->toimittajat_tiedostot[$impsaloh_csv_file_name];
+        } else {
+          echo $toimittaja_id." toimittaja ei löydy!";
+          continue;
+        }
+
         // Otetaan pois rename testauksessa.
-        //rename($impsaloh_csv_file, $this->impsaloh_polku_orig_stocks."/".$csv_hae_kolumnit['kolumneja'].$csv_hae_kolumnit['riveja'].$impsaloh_csv_file_name);
-        //rename($impsaloh_csv_file_prices, $this->impsaloh_polku_orig_prices."/prices_".$csv_hae_kolumnit['kolumneja'].$csv_hae_kolumnit['riveja'].$impsaloh_csv_file_name);
-        copy($impsaloh_csv_file, $this->impsaloh_polku_orig_stocks."/".$csv_hae_kolumnit['kolumneja'].$csv_hae_kolumnit['riveja'].$impsaloh_csv_file_name);
-        copy($impsaloh_csv_file_prices, $this->impsaloh_polku_orig_prices."/prices_".$csv_hae_kolumnit['kolumneja'].$csv_hae_kolumnit['riveja'].$impsaloh_csv_file_name);
+        //rename($impsaloh_csv_file, $this->impsaloh_polku_orig_stocks."/".$toimittaja_id."___".$csv_hae_kolumnit['kolumneja'].$csv_hae_kolumnit['riveja'].$impsaloh_csv_file_name);
+        //rename($impsaloh_csv_file_prices, $this->impsaloh_polku_orig_prices."/prices_".$toimittaja_id."___".$csv_hae_kolumnit['kolumneja'].$csv_hae_kolumnit['riveja'].$impsaloh_csv_file_name);
+        copy($impsaloh_csv_file, $this->impsaloh_polku_orig_stocks."/".$toimittaja_id."___".$csv_hae_kolumnit['kolumneja'].$csv_hae_kolumnit['riveja'].$impsaloh_csv_file_name);
+        copy($impsaloh_csv_file_prices, $this->impsaloh_polku_orig_prices."/prices_".$toimittaja_id."___".$csv_hae_kolumnit['kolumneja'].$csv_hae_kolumnit['riveja'].$impsaloh_csv_file_name);
       }
     }
   }
@@ -200,13 +211,25 @@ class ImportSaldoHinta
     
     $csv_jakajaa = $this->csv_jakajaa_ja_kolumnit($impsaloh_csv, $impsaloh_csv_file);
     $csv_jakajaa_prices = $this->csv_jakajaa_ja_kolumnit($impsaloh_prices_csv, $impsaloh_csv_prices_file);
+
+    $toimittaja_id = explode("___",basename($impsaloh_csv_file))[0];
+    $query = "SELECT * FROM toimi 
+                    WHERE tunnus = {$toimittaja_id}";
+    $loydetty_toimittaja = pupe_query($query);
+    if (mysql_num_rows($loydetty_toimittaja) > 0) {
+      $toimittaja = mysql_fetch_assoc($loydetty_toimittaja);
+    } else {
+      echo "Toimittaja {$toimittaja_id} ei löydy ! Oliko se poistettu?";
+      return;
+    }
     
     $this->kasittele_rivit(
       array(
         "jakajaa" => $csv_jakajaa['jakajaa'],
         "file" => $impsaloh_csv,
         "riveja" => $csv_jakajaa['riveja'],
-        "filename" => $impsaloh_csv_file
+        "filename" => $impsaloh_csv_file,
+        'toimittaja' => $toimittaja
       ),
       array(
         "jakajaa" => $csv_jakajaa_prices['jakajaa'],
@@ -232,6 +255,8 @@ class ImportSaldoHinta
     $csv_jakajaa = $stocks_file['jakajaa'];
     $impsaloh_csv = $stocks_file['file'];
     $impsaloh_csv_riveja = $stocks_file['riveja'];
+    $toimittaja_id = (int) $stocks_file['toimittaja']['tunnus'];
+    $toimittaja_myyntikerroin = (float) $stocks_file['toimittaja']['myyntihinta_kerroin'];
 
     // Price tiedoston tiedot
     $csv_jakajaa_prices = $prices_file['jakajaa'];
@@ -346,18 +371,32 @@ class ImportSaldoHinta
       // Haetaan hintatiedot ja saldo price array:ista
       $tuotehinta = $rivit_prices[$tuotekoodi_tarkista1]['hinta'];
       $tuotesaldo = $rivit_prices[$tuotekoodi_tarkista1]['saldo'];
-      
+
       // yritetään päivittää suoraan tuotenumerolla
       if (empty($tuotesaldo)) {
         $query = "UPDATE tuotteen_toimittajat 
-                    SET ostohinta = ".$tuotehinta." 
+                    SET ostohinta = ".$tuotehinta.", 
+                    myyntihinta_kerroin = 
+                      CASE WHEN myyntihinta_kerroin > 0 THEN myyntihinta_kerroin 
+                        ELSE ".$toimittaja_myyntikerroin."
+                      END 
                     WHERE tuoteno = '".$tuotekoodi_tarkista2."' 
+                    AND liitostunnus = '".$toimittaja_id."' 
                     AND(last_insert_id(tunnus))
                   ";
       } else {
         $query = "UPDATE tuotteen_toimittajat 
-                    SET ostohinta = ".$tuotehinta.", tehdas_saldo = ".$tuotesaldo." 
+                    SET ostohinta = ".$tuotehinta.", tehdas_saldo = ".$tuotesaldo.", 
+                    tehdas_saldo_paivitetty = 
+                      CASE WHEN tehdas_saldo = ".$tuotesaldo." THEN tehdas_saldo_paivitetty 
+                        ELSE NOW()
+                      END,
+                    myyntihinta_kerroin = 
+                      CASE WHEN myyntihinta_kerroin > 0 THEN myyntihinta_kerroin 
+                        ELSE ".$toimittaja_myyntikerroin."
+                      END 
                     WHERE tuoteno = '".$tuotekoodi_tarkista2."' 
+                    AND liitostunnus = '".$toimittaja_id."' 
                     AND(last_insert_id(tunnus))
                   ";
       }
@@ -384,8 +423,17 @@ class ImportSaldoHinta
         if (mysql_num_rows($loydetty_tuote) > 0) {
           $tuoteno = mysql_fetch_assoc($loydetty_tuote)["tuoteno"];
           $query = "UPDATE tuotteen_toimittajat 
-                      SET ostohinta = ".$tuotehinta.", tehdas_saldo = ".$tuotesaldo." 
-                      WHERE tuoteno = '".$tuoteno."'
+                      SET ostohinta = ".$tuotehinta.", tehdas_saldo = ".$tuotesaldo.", 
+                      tehdas_saldo_paivitetty = 
+                        CASE WHEN tehdas_saldo = ".$tuotesaldo." THEN tehdas_saldo_paivitetty 
+                          ELSE NOW()
+                        END,
+                      myyntihinta_kerroin = 
+                        CASE WHEN myyntihinta_kerroin > 0 THEN myyntihinta_kerroin 
+                          ELSE ".$toimittaja_myyntikerroin."
+                        END 
+                      WHERE tuoteno = '".$tuoteno."' 
+                      AND liitostunnus = '".$toimittaja_id."'
                     ";
           pupe_query($query);
           $loydetyt_tuotteet[] = $rivi;

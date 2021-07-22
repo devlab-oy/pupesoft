@@ -2897,8 +2897,38 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
             $varattu   = $kpl;
             $jt     = 0;
           }
-
-          $var  = "J";
+          if($trow['suoratoimitus'] != '') {
+            $query2 = "SELECT tt.tehdas_saldo,
+            tt.liitostunnus,
+            tt.toim_tuoteno,
+            tt.tunnus AS tt_tunnus,
+            toimi.nimi AS toimittajan_nimi,
+            avainsana.selitetark_2,
+            avainsana.selitetark_3,
+            avainsana.selitetark_4,
+            avainsana.selitetark_5
+              FROM tuotteen_toimittajat AS tt
+              JOIN toimi ON (toimi.yhtio = tt.yhtio AND toimi.tunnus = tt.liitostunnus)
+              LEFT JOIN avainsana ON (toimi.yhtio = avainsana.yhtio AND avainsana.laji = 'SAHKTILTUN' AND avainsana.selite = '{$laskurow['yhtio_toimipaikka']}' AND toimi.tunnus = avainsana.selitetark)
+            WHERE tt.yhtio = '{$kukarow['yhtio']}' 
+            AND tt.tehdas_saldo IS NOT NULL 
+            AND tt.tehdas_saldo > 0 
+            AND tt.tuoteno = '{$trow['tuoteno']}'
+            ORDER BY tt.ostohinta ASC
+            ";
+            $tehdas_saldo_res2 = pupe_query($query2);
+            $tarkista_tuotteen_tehttaan_saldot = 0;
+            if (mysql_num_rows($tehdas_saldo_res2) > 0) {
+              while($tehdas_saldo_row2 = mysql_fetch_assoc($tehdas_saldo_res2)) {
+                $tarkista_tuotteen_tehttaan_saldot = $tarkista_tuotteen_tehttaan_saldot + $tehdas_saldo_row2["tehdas_saldo"];
+              }
+            }
+            if($tarkista_tuotteen_tehttaan_saldot < 1) {
+              $var  = "J";
+            }
+          } else {
+            $var  = "J";
+          }
         }
         // Terminaalitoimitukset tai ostoskorit; var tyhjää ja varattu normisti
         elseif ($rivityyppi == 'Z' or $rivityyppi == 'B' or $rivityyppi == 'E' or $rivityyppi == 'F') {
@@ -3370,6 +3400,7 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
       $tehdas_saldo_res2 = pupe_query($query2);
       if (mysql_num_rows($tehdas_saldo_res2) > 0) {
         while($tehdas_saldo_row2 = mysql_fetch_assoc($tehdas_saldo_res2)) {
+          
           unset($p_hyllyalue);
           unset($p_hyllynro);
           unset($p_hyllyvali);

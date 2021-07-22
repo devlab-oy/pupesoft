@@ -1415,8 +1415,7 @@ if ($toim != "VALMISTAVARASTOON" and $row['tuoteno'] != '' and ($yhtiorow['vasta
                           ORDER BY tt.ostohinta
                           ";
                 $tehdas_saldo_res2 = pupe_query($query2);
-                if (mysql_num_rows($tehdas_saldo_res2) > 1) {
-                  
+                if (mysql_num_rows($tehdas_saldo_res2) > 0) {
                   while($tehdas_saldo_row2 = mysql_fetch_assoc($tehdas_saldo_res2)) {
                     $tehdas_toimittajat[] = $tehdas_saldo_row2;
                   }
@@ -1424,7 +1423,7 @@ if ($toim != "VALMISTAVARASTOON" and $row['tuoteno'] != '' and ($yhtiorow['vasta
               }
               if(empty($tehdas_toimittajat)) {
                 $vastaavat_table .= "<td>{$tehdas_saldo_row['toimittajan_nimi']}</td>";
-              } else {
+              } else if(count($tehdas_toimittajat) > 1) {
                 $vastaavat_table .= "<td><select id='jspaikka' name='paikat'><option value=\"\">-".t("Toimittaja")."-</option>";
                   foreach($tehdas_toimittajat as $tehdas_toimittaja) {
                     $vastaavat_table .= '<option value="'.$tehdas_toimittaja["liitostunnus"].'">'.$tehdas_toimittaja["toimittajan_nimi"].' | '.$tehdas_toimittaja["tehdas_saldo"].'</option>';
@@ -1441,6 +1440,9 @@ if ($toim != "VALMISTAVARASTOON" and $row['tuoteno'] != '' and ($yhtiorow['vasta
                 });
                 </script>
                 </td>";
+              } else {
+                $tehtaansaldoyksi = "<td><small>(".t("Tehtaan saldo: ").$tehdas_saldo_row['tehdas_saldo'].")</small> ";
+                $vastaavat_table .= "{$tehtaansaldoyksi} <br>{$tehdas_saldo_row['toimittajan_nimi']}</td>";
               }
 
               $vastaavat_table .= "<td align='right'>";

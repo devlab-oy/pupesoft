@@ -529,7 +529,7 @@ if (
   }
 
   if (($kukarow["extranet"] == "" or $yhtiorow['tuoteperhe_suoratoimitus'] == 'E') and ($toim == "TARJOUS" or ($yhtiorow["tee_osto_myyntitilaukselta"] != '' and ($toim == 'RIVISYOTTO' or $toim == 'PIKATILAUS'))) and $row["var"] != 'V') {
-    $query = "SELECT tyyppi_tieto, liitostunnus, toimi.nimi, toimi.suoratoimitus, tuotteen_toimittajat.tehdas_saldo, toimi.tehdas_saldo_tarkistus, tuotteen_toimittajat.ostohinta
+    $query = "SELECT tyyppi_tieto, liitostunnus, toimi.nimi, toimi.suoratoimitus, tuotteen_toimittajat.tehdas_saldo, toimi.tehdas_saldo_tarkistus, tuotteen_toimittajat.ostohinta, tuotteen_toimittajat.myyntihinta_kerroin
               FROM tuotteen_toimittajat use index (yhtio_tuoteno)
               JOIN toimi ON (toimi.yhtio = tuotteen_toimittajat.yhtio and toimi.tunnus = tuotteen_toimittajat.liitostunnus)
               WHERE tuotteen_toimittajat.yhtio = '$kukarow[yhtio]'
@@ -868,14 +868,14 @@ if (
           if (!in_array($yhtiorow["tee_osto_myyntitilaukselta"], array('U', 'B')) and in_array($krow["suoratoimitus"], array('', 'X')) and $tmp_varastoon == 1) {
             // tallennetaan riville toimittajan tunnus
             $title = "$krow[nimi] --> ".t("tilaa")." ".t("varastoon");
-            $title = $title." | Tehtaan saldo: ".$krow['tehdas_saldo']." | Ostohinta: ".round($krow['ostohinta'], 2);
+            $title = $title." | ".t("Tehtaan saldo").": ".$krow['tehdas_saldo']." | ".t("Ostohinta").": ".round($krow['ostohinta'], 2). " | ".t("Annettu kerroin").": ".round($krow['myyntihinta_kerroin'],2);
             $paikat .= "<option value='¡¡¡$krow[liitostunnus]' title='$title' $sel1>$title</option>";
             $paikatlask++;
           }
 
           if (in_array($yhtiorow["tee_osto_myyntitilaukselta"], array('U', 'Y', 'W', 'J', 'B', 'C')) and in_array($krow["suoratoimitus"], array('', 'U')) and $tmp_asiakkaalle == 1) {
             $title = "$krow[nimi] --> ".t("tilaa")." ".t("asiakkaalle");
-            $title = $title." | Tehtaan saldo: ".$krow['tehdas_saldo']." | Ostohinta: ".round($krow['ostohinta'], 2);
+            $title = $title." | ".t("Tehtaan saldo").": ".$krow['tehdas_saldo']." | ".t("Ostohinta").": ".round($krow['ostohinta'], 2). " | ".t("Annettu kerroin").": ".round($krow['myyntihinta_kerroin'],2);
             $paikat .= "<option value='!!!$krow[liitostunnus]' title='$title' $sel2>$title</option>";
             $paikatlask++;
           }
@@ -1424,24 +1424,32 @@ if ($toim != "VALMISTAVARASTOON" and $row['tuoteno'] != '' and ($yhtiorow['vasta
               if(empty($tehdas_toimittajat)) {
                 $vastaavat_table .= "<td>{$tehdas_saldo_row['toimittajan_nimi']}</td>";
               } else if(count($tehdas_toimittajat) > 1) {
-                $vastaavat_table .= "<td><select id='jspaikka' name='paikat'><option value=\"\">-".t("Toimittaja")."-</option>";
+                if(strtoupper($_tuote['tuoteno']) != strtoupper($row["tuoteno"])) {
+                  $vastaavat_table .= "<td><select id='jspaikka' name='paikat'><option value=\"\">-".t("Toimittaja")."-</option>";
                   foreach($tehdas_toimittajat as $tehdas_toimittaja) {
                     $vastaavat_table .= '<option value="'.$tehdas_toimittaja["liitostunnus"].'">'.$tehdas_toimittaja["toimittajan_nimi"].' | '.$tehdas_toimittaja["tehdas_saldo"].'</option>';
                   }
-                $vastaavat_table .= "</select>
-                <script>
-                $('#jspaikka').change(function() {
-                  var formi = $(this).parent().parent().find('form[name=\"jalkitoimita\"]');
-                  if(formi.find('.formijspaikka').length) {
-                    formi.find('.formijspaikka').val('¡¡¡'+$(this).val());
-                  } else {
-                    formi.prepend('<input value=\"¡¡¡'+$(this).val()+'\" class=\"formijspaikka\" type=\"hidden\" name=\"formijspaikkapaikka\"></input>');
+                  $vastaavat_table .= "</select>
+                  <script>
+                  $('#jspaikka').change(function() {
+                    var formi = $(this).parent().parent().find('form[name=\"jalkitoimita\"]');
+                    if(formi.find('.formijspaikka').length) {
+                      formi.find('.formijspaikka').val('¡¡¡'+$(this).val());
+                    } else {
+                      formi.prepend('<input value=\"¡¡¡'+$(this).val()+'\" class=\"formijspaikka\" type=\"hidden\" name=\"formijspaikkapaikka\"></input>');
+                    }
+                  });
+                  </script>
+                  </td>";
+                } else {
+                  $vastaavat_table .= "<td>";
+                  foreach($tehdas_toimittajat as $tehdas_toimittaja) {
+                    $vastaavat_table .= "<small style='font-size: 80%;'>".$tehdas_toimittaja["toimittajan_nimi"]."</small> <br> ".t("Tehtaan saldo: ").$tehdas_toimittaja["tehdas_saldo"]."<hr>";
                   }
-                });
-                </script>
-                </td>";
+                  $vastaavat_table .= "</td>";
+                }
               } else {
-                $tehtaansaldoyksi = "<td><small>(".t("Tehtaan saldo: ").$tehdas_saldo_row['tehdas_saldo'].")</small> ";
+                $tehtaansaldoyksi = "<td><small style='font-size: 80%;'>(".t("Tehtaan saldo: ").$tehdas_saldo_row['tehdas_saldo'].")</small> ";
                 $vastaavat_table .= "{$tehtaansaldoyksi} <br>{$tehdas_saldo_row['toimittajan_nimi']}</td>";
               }
 

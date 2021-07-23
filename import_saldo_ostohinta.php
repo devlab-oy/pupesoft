@@ -475,7 +475,7 @@ class ImportSaldoHinta
       fclose($epaonnistuneet_tuotteet_csv);
     }
 
-    echo "\n...Ei osunut:".count($epaonnistuneet_tuotteet)."...";
+    echo "\n...Ei osunut:".count($epaonnistuneet_tuotteet)."...\n";
 
     unset($rivit[0]);
 

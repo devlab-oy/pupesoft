@@ -24,6 +24,8 @@ if (!$yhtiorow) {
 // Logitetaan ajo
 cron_log();
 
+error_reporting(E_ALL);
+ini_set('display_errors', '1');
 
 /*
   Main class
@@ -46,7 +48,7 @@ class ImportSaldoHinta
 
     $this->impsaloh_csv_cron_tiedot = array(
       "yhtiorow" => $yhtiorow,
-      "kukarow" => $kukarow,
+      "kukarow" => $this->kukarow,
       "yhtio" => $yhtiorow['yhtio']
     );
 
@@ -266,7 +268,7 @@ class ImportSaldoHinta
     $impsaloh_prices_csv = $prices_file['file'];
     $impsaloh_prices_riveja= $prices_file['riveja'];
 
-    $yhtio = $this->yhtio['yhtio'];
+    $yhtio = $this->yhtio;
     $tuotekoodi_otsikot = $this->tuotekoodi_otsikot;
     $eankoodi_otsikot = $this->eankoodi_otsikot;
 
@@ -476,7 +478,7 @@ class ImportSaldoHinta
     echo "\n...Ei osunut:".count($epaonnistuneet_tuotteet)."...";
 
     unset($rivit[0]);
-    
+
   }
 }
 

@@ -2898,7 +2898,6 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
             $jt     = 0;
           }
           if($trow['suoratoimitus'] != '') {
-            echo "dfafsafas";
             $query2 = "SELECT tt.tehdas_saldo,
             tt.liitostunnus,
             tt.toim_tuoteno,

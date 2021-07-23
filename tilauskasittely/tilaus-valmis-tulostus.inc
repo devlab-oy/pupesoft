@@ -314,7 +314,7 @@ if ((int) $chk_row["ok"] == (int) $chk_row["kaikki"] and (int) $chk_row["ok"] !=
     $query = "SELECT tilausrivi.*,
               lasku.tila AS lasku_tila,
               lasku.alatila AS lasku_alatila,
-              tuote.sarjanumeroseuranta,
+              tuote.sarjanumeroseuranta, tuote.suoratoimitus, 
               kerayserat.kpl as tilkpl,
               kerayserat.kpl as varattu,
               kerayserat.tunnus as ker_tunnus,
@@ -334,6 +334,7 @@ if ((int) $chk_row["ok"] == (int) $chk_row["kaikki"] and (int) $chk_row["ok"] !=
     $query = "SELECT tilausrivi.*,
               lasku.tila AS lasku_tila,
               lasku.alatila AS lasku_alatila,
+              tuote.suoratoimitus, 
               $select_lisa
               $sorttauskentta,
               if (tuote.tuotetyyppi='K','2 Työt','1 Muut') tuotetyyppi,
@@ -356,25 +357,25 @@ if ((int) $chk_row["ok"] == (int) $chk_row["kaikki"] and (int) $chk_row["ok"] !=
   $rivinumerot = array();
 
   $kal = 1;
-
   
-
   while ($row = mysql_fetch_assoc($riresult)) {
 
-    if($row['hyllyalue'] == "" and $row['hyllynro'] == "" and $row['hyllyvali'] == "" and $row['hyllytaso'] == "")
+    if($row['suoratoimitus'] != "" and $row['hyllyalue'] == "" and $row['hyllynro'] == "" and $row['hyllyvali'] == "" and $row['hyllytaso'] == "")
     {
-      $query = "SELECT toimittajan_tunnus 
-      FROM tilausrivin_lisatiedot 
-      WHERE tilausrivin_lisatiedot.tilausrivitunnus = {$row['tunnus']}";
+      $query = "SELECT * 
+                  FROM tilausrivin_lisatiedot 
+                  WHERE tilausrivin_lisatiedot.tilausrivitunnus = {$row['tunnus']}
+                ";
       $tilausrivin_toimittajan_tunnus = pupe_query($query);
       if (mysql_num_rows($tilausrivin_toimittajan_tunnus) > 0) {
         $tilausrivin_toimittajan_tunnus = mysql_fetch_array($tilausrivin_toimittajan_tunnus);
         $tehtaan_saldo_paivita = "UPDATE tuotteen_toimittajat 
-        SET tehdas_saldo = tehdas_saldo-1 
-        WHERE liitostunnus = {$tilausrivin_toimittajan_tunnus['toimittajan_tunnus']}
-        AND tehdas_saldo > 1
-        ";
-        pupe_query($query);
+                                    SET tehdas_saldo = tehdas_saldo-{$row['tilkpl']}  
+                                    WHERE liitostunnus = {$tilausrivin_toimittajan_tunnus['toimittajan_tunnus']}
+                                    AND myyntihinta_kerroin > 0 
+                                    AND tuoteno = '{$row['tuoteno']}'
+                                  ";
+        pupe_query($tehtaan_saldo_paivita);
       }
     }
 

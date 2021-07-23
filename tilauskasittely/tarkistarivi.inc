@@ -1444,12 +1444,12 @@ if ($toim != "VALMISTAVARASTOON" and $row['tuoteno'] != '' and ($yhtiorow['vasta
                 } else {
                   $vastaavat_table .= "<td>";
                   foreach($tehdas_toimittajat as $tehdas_toimittaja) {
-                    $vastaavat_table .= "<small style='font-size: 80%;'>".$tehdas_toimittaja["toimittajan_nimi"]."</small> <br> ".t("Tehtaan saldo: ").$tehdas_toimittaja["tehdas_saldo"]."<hr>";
+                    $vastaavat_table .= "<small style='font-size: 80%;'>".$tehdas_toimittaja["toimittajan_nimi"]."</small> <br> ".t("saldo: ").$tehdas_toimittaja["tehdas_saldo"]."<hr>";
                   }
                   $vastaavat_table .= "</td>";
                 }
               } else {
-                $tehtaansaldoyksi = "<td><small style='font-size: 80%;'>(".t("Tehtaan saldo: ").$tehdas_saldo_row['tehdas_saldo'].")</small> ";
+                $tehtaansaldoyksi = "<td><small style='font-size: 80%;'>(".t("saldo: ").$tehdas_saldo_row['tehdas_saldo'].")</small> ";
                 $vastaavat_table .= "{$tehtaansaldoyksi} <br>{$tehdas_saldo_row['toimittajan_nimi']}</td>";
               }
 

@@ -357,7 +357,27 @@ if ((int) $chk_row["ok"] == (int) $chk_row["kaikki"] and (int) $chk_row["ok"] !=
 
   $kal = 1;
 
+  
+
   while ($row = mysql_fetch_assoc($riresult)) {
+
+    if($row['hyllyalue'] == "" and $row['hyllynro'] == "" and $row['hyllyvali'] == "" and $row['hyllytaso'] == "")
+    {
+      $query = "SELECT toimittajan_tunnus 
+      FROM tilausrivin_lisatiedot 
+      WHERE tilausrivin_lisatiedot.tilausrivitunnus = {$row['tunnus']}";
+      $tilausrivin_toimittajan_tunnus = pupe_query($query);
+      if (mysql_num_rows($tilausrivin_toimittajan_tunnus) > 0) {
+        $tilausrivin_toimittajan_tunnus = mysql_fetch_array($tilausrivin_toimittajan_tunnus);
+        $tehtaan_saldo_paivita = "UPDATE tuotteen_toimittajat 
+        SET tehdas_saldo = tehdas_saldo-1 
+        WHERE liitostunnus = {$tilausrivin_toimittajan_tunnus['toimittajan_tunnus']}
+        AND tehdas_saldo > 1
+        ";
+        pupe_query($query);
+      }
+    }
+
     if ($row['lasku_tila'] == 'G' and $row['lasku_alatila'] == 'A') {
       if ($row['varattu'] == 0 and $row['tilkpl'] == 9999.99) {
         //siirret‰‰n kaikki mit‰ paikalla on

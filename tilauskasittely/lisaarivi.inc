@@ -2898,6 +2898,7 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
             $jt     = 0;
           }
           if($trow['suoratoimitus'] != '') {
+            echo "dfafsafas";
             $query2 = "SELECT tt.tehdas_saldo,
             tt.liitostunnus,
             tt.toim_tuoteno,
@@ -2924,8 +2925,9 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
               }
             }
             if($tarkista_tuotteen_tehttaan_saldot < 1) {
-              $var  = "J";
+              
             }
+            $var  = "J";
           } else {
             $var  = "J";
           }
@@ -3378,7 +3380,7 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
       $kampanjatunnus = $GLOBALS['kampanjahinnoitteluntunnus'];
     }
 
-    if($trow['suoratoimitus'] != '' and !$toimittajan_tunnus) {
+    if($trow['suoratoimitus'] != '' and !$toimittajan_tunnus and $saldo <= 0) {
       $query2 = "SELECT tt.tehdas_saldo,
                   tt.liitostunnus,
                   tt.toim_tuoteno,
@@ -3400,7 +3402,6 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
       $tehdas_saldo_res2 = pupe_query($query2);
       if (mysql_num_rows($tehdas_saldo_res2) > 0) {
         while($tehdas_saldo_row2 = mysql_fetch_assoc($tehdas_saldo_res2)) {
-          
           unset($p_hyllyalue);
           unset($p_hyllynro);
           unset($p_hyllyvali);

@@ -50,6 +50,8 @@ class ImportSaldoHinta
       "yhtio" => $yhtiorow['yhtio']
     );
 
+    $this->yhtio = $yhtiorow['yhtio'];
+
     $this->impsaloh_polku_in     = $impsaloh_csv_cron_dirname;
     $this->impsaloh_polku_ok     = $impsaloh_csv_cron_dirname."/ok";
     $this->impsaloh_polku_orig   = $impsaloh_csv_cron_dirname."/orig";
@@ -114,14 +116,15 @@ class ImportSaldoHinta
   */
   public function hae_tiedostot()
   {
+    /*
     $ftphost = $ftphost_impsaloh;
     $ftpuser = $ftpuser_impsaloh;
     $ftppass = $ftppass_impsaloh;
     $ftpport = $ftpport_impsaloh;
     $ftppath = $ftppath_impsaloh;
     $ftpdest = $ftpdest_impsaloh;
-
-    //require 'sftp-get.php';
+    require 'sftp-get.php';
+    */
     
     foreach ($this->impsaloh_csv_files as $impsaloh_csv_file_name) {
       $impsaloh_csv_file = $this->impsaloh_polku_in."/".$impsaloh_csv_file_name;
@@ -473,11 +476,7 @@ class ImportSaldoHinta
     echo "\n...Ei osunut:".count($epaonnistuneet_tuotteet)."...";
 
     unset($rivit[0]);
-
-    return array(
-      'rivit' => $rivit,
-      'otsikko' => $otsikko
-    );
+    
   }
 }
 

@@ -428,7 +428,8 @@ class ImportSaldoHinta
         $loydetty_tuote = pupe_query($query);
 
         if (mysql_num_rows($loydetty_tuote) > 0) {
-          $tuoteno = mysql_fetch_assoc($loydetty_tuote)["tuoteno"];
+          $tuoteno = mysql_fetch_assoc($loydetty_tuote);
+          $tuoteno = $tuoteno["tuoteno"];
           $query = "UPDATE tuotteen_toimittajat 
                       SET ostohinta = ".$tuotehinta.", tehdas_saldo = ".$tuotesaldo.", 
                       tehdas_saldo_paivitetty = 

@@ -217,7 +217,8 @@ class ImportSaldoHinta
     $csv_jakajaa = $this->csv_jakajaa_ja_kolumnit($impsaloh_csv, $impsaloh_csv_file);
     $csv_jakajaa_prices = $this->csv_jakajaa_ja_kolumnit($impsaloh_prices_csv, $impsaloh_csv_prices_file);
 
-    $toimittaja_id = explode("___",basename($impsaloh_csv_file))[0];
+    $toimittaja_id = explode("___",basename($impsaloh_csv_file));
+    $toimittaja_id = $toimittaja_id[0];
     $query = "SELECT * FROM toimi 
                     WHERE tunnus = {$toimittaja_id}";
     $loydetty_toimittaja = pupe_query($query);

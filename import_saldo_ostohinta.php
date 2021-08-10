@@ -316,7 +316,7 @@ class ImportSaldoHinta
       unset($rivi[$tuotekoodin_kolumni]);
       $rivi_saldo_arraykeys = array_keys($rivi);
       $rivi_saldo = $rivi[$rivi_saldo_array[0]];
-      unset($rivi[array_keys($rivi)[0]]);
+      unset($rivi[$rivi_saldo_arraykeys[0]]);
 
       $rivit_prices[$rivi_tuoteno] = array(
         "hinta" => $rivi_hinta,

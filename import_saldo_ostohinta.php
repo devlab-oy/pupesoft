@@ -75,14 +75,60 @@ class ImportSaldoHinta
           "hinta" => "Mercantile Price"
         )
     );
-    $this->toimittajat_tiedostot = array(
-      "kavoparts.csv" => "1474"
-    );
 
     $this->eankoodi_otsikot = array("GTIN");
 
+    $this->toimittajat_tiedostot = array(
+      "kavoparts.csv" => "1474",
+      "60046_ce.csv" => "1474"
+    );
+
+    $this->yksittaiset_tiedostot = array(
+      "60046_ce.csv" => array(
+        array(0,4,3),
+        array(0,9)
+      )
+    );
+
     // Montako kolumneja on stocks tiedostoissa - näin ohejlma tunnistaa sen.
-    $this->prices_tiedoston_kolumneja_max = 4;
+    $this->prices_tiedoston_kolumneja_max = array(
+      "kavoparts.csv" => "4",
+      "60046_ce.csv" => "1"
+    );
+  }
+
+  public function jakaa_yksittaiset_tiedostot() {
+    foreach ($this->yksittaiset_tiedostot as $tiedostonimi => $tiedostokolumnit) {
+      $input = $this->impsaloh_polku_in."/".$tiedostonimi;
+      $output = $this->impsaloh_polku_in."/"."prices_".$tiedostonimi;
+      if(file_exists($output)) {
+        continue;
+      }
+      $output2 = $this->impsaloh_polku_in."/uusi_".$tiedostonimi;
+      if (false !== ($ih = fopen($input, 'r'))) {
+        $oh = fopen($output, 'w');
+        $oh2 = fopen($output2, 'w');
+        $i=0;
+        while (false !== ($data = fgetcsv($ih, 0, ";"))) {
+          if($data[$tiedostokolumnit[0][2]] == "-" or $data[$tiedostokolumnit[0][2]] == "") { continue; }
+          if ($i==0) {
+            $outputData = array('Product code', 'Mercantile Price', '');
+            fputcsv($oh, $outputData);
+            $outputData2 = array('Item No', 'GTIN');
+            fputcsv($oh2, $outputData2);
+          }
+          $outputData = array($data[$tiedostokolumnit[0][0]], $data[$tiedostokolumnit[0][1]], preg_replace("/[^0-9 ]/", '', $data[$tiedostokolumnit[0][2]]));
+          fputcsv($oh, $outputData);
+          $outputData2 = array($data[$tiedostokolumnit[1][0]], $data[$tiedostokolumnit[1][1]]);
+          fputcsv($oh2, $outputData2);
+          $i++;
+        }
+      }
+      fclose($ih);
+      fclose($oh);
+      fclose($oh2);
+      rename($output2, $input);
+    }
   }
 
   
@@ -92,8 +138,9 @@ class ImportSaldoHinta
   */
   public function aloita()
   {
+    $this->jakaa_yksittaiset_tiedostot();
     $this->hae_tiedostot();
-
+    
     foreach (scandir($this->impsaloh_polku_orig_stocks) as $impsaloh_csv_file_name) {
       $impsaloh_csv_file = $this->impsaloh_polku_orig_stocks."/".$impsaloh_csv_file_name;
 
@@ -146,7 +193,7 @@ class ImportSaldoHinta
       fclose($impsaloh_csv_tarkista);
 
       // Siirettään ja kopioidaan tiedostot oikeaan kansioon
-      if ($csv_hae_kolumnit['kolumneja'] > $this->prices_tiedoston_kolumneja_max) {
+      if ($csv_hae_kolumnit['kolumneja'] > $this->prices_tiedoston_kolumneja_max[$impsaloh_csv_file_name]) {
         copy($impsaloh_csv_file, $this->impsaloh_polku_orig."/".$impsaloh_csv_file_name);
         copy($impsaloh_csv_file_prices, $this->impsaloh_polku_orig."/prices_".$impsaloh_csv_file_name);
 
@@ -374,6 +421,7 @@ class ImportSaldoHinta
         continue;
       }
       $tuotekoodi_tarkista2 = preg_replace("/[^A-Za-z0-9 ]/", '', $rivi[$tuotekoodin_kolumni]);
+
       $eankoodi_tarkista = $rivi[$eankoodin_kolumni];
       
       // Haetaan hintatiedot ja saldo price array:ista
@@ -388,8 +436,9 @@ class ImportSaldoHinta
                       CASE WHEN myyntihinta_kerroin > 0 THEN myyntihinta_kerroin 
                         ELSE ".$toimittaja_myyntikerroin."
                       END 
-                    WHERE tuoteno = '".$tuotekoodi_tarkista2."' 
+                    WHERE yhtio = 'mergr' 
                     AND liitostunnus = '".$toimittaja_id."' 
+                    AND tuoteno = '".$tuotekoodi_tarkista2."' 
                     AND(last_insert_id(tunnus))
                   ";
       } else {
@@ -403,11 +452,13 @@ class ImportSaldoHinta
                       CASE WHEN myyntihinta_kerroin > 0 THEN myyntihinta_kerroin 
                         ELSE ".$toimittaja_myyntikerroin."
                       END 
-                    WHERE tuoteno = '".$tuotekoodi_tarkista2."' 
+                    WHERE yhtio = 'mergr' 
                     AND liitostunnus = '".$toimittaja_id."' 
+                    AND tuoteno = '".$tuotekoodi_tarkista2."' 
                     AND(last_insert_id(tunnus))
                   ";
       }
+
       pupe_query($query);
 
       $onnistunut_tuote = false;
@@ -418,11 +469,10 @@ class ImportSaldoHinta
         $onnistunut_tuote = true;
 
       // ei onnistunut - yritetään etsiä tuote eri tavalla
-      } else {
+      } else if($eankoodi_tarkista != "") {
         $query = "SELECT tuoteno 
                     FROM tuote 
                     WHERE tuoteno = '".$tuotekoodi_tarkista1."'
-                    OR tuoteno = '".$tuotekoodi_tarkista2."'
                     OR eankoodi = '".$eankoodi_tarkista."'
                   ";
 
@@ -441,8 +491,9 @@ class ImportSaldoHinta
                         CASE WHEN myyntihinta_kerroin > 0 THEN myyntihinta_kerroin 
                           ELSE ".$toimittaja_myyntikerroin."
                         END 
-                      WHERE tuoteno = '".$tuoteno."' 
+                      WHERE yhtio = 'mergr'
                       AND liitostunnus = '".$toimittaja_id."'
+                      AND tuoteno = '".$tuoteno."' 
                     ";
           pupe_query($query);
           $loydetyt_tuotteet[] = $rivi;

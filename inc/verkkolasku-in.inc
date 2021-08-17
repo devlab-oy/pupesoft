@@ -1915,6 +1915,49 @@ if (!function_exists("verkkolasku_in")) {
         file_exists($fitek_xml_cron_tiedot['pdf_tiedosto']) and 
         $fitek_pdf_sisalto = mysql_real_escape_string(file_get_contents($fitek_xml_cron_tiedot['pdf_tiedosto']))) {
           $fitek_pdf_file = basename($fitek_xml_cron_tiedot['pdf_tiedosto']);
+
+          $saapumisnumero = $kuvalaskurow['saapumisnumero'];
+
+          $query = "SELECT nimi, laskunro, liitostunnus, ytunnus, tunnus
+                    FROM lasku
+                    WHERE yhtio = '{$kukarow['yhtio']}'
+                    AND laskunro = '{$saapumisnumero}'";
+          $saapres = pupe_query($query);
+          $saaprow = mysql_fetch_assoc($saapres);
+
+          $saapumisnro = $saaprow['tunnus'];
+
+          // Kohdistetaan rivit valmiiksi
+          $kohdistus_q = "UPDATE tilausrivi SET
+                          uusiotunnus = '{$saapumisnro}'
+                          WHERE yhtio = '{$kukarow['yhtio']}'
+                          AND otunnus = '{$kuvalaskurow['tunnus']}'
+                          AND tyyppi = 'O'
+                          AND uusiotunnus = 0";
+          pupe_query($kohdistus_q);
+
+          $onkologmaster = in_array($yhtiorow['ulkoinen_jarjestelma'], array('','S'));
+          $ulkoinen_varasto = false;
+
+          // L‰hetet‰‰n sanoma vain, jos valitulla varastolla on ulkoinen jarjestelma
+          if ($kuvalaskurow['varasto'] > 0) {
+            $v_query = "SELECT *
+                        FROM varastopaikat
+                        WHERE yhtio = '{$kukarow['yhtio']}'
+                        AND tunnus = '{$kuvalaskurow['varasto']}'
+                        AND ulkoinen_jarjestelma IN ('L','P')";
+            $v_result = pupe_query($v_query);
+
+            if (mysql_num_rows($v_result) == 1) {
+              $ulkoinen_varasto = true;
+            }
+          }
+
+          if ($onkologmaster and $ulkoinen_varasto) {
+            // L‰hetet‰‰n ulkoiseen j‰rjestelm‰‰n
+            require "rajapinnat/logmaster/inbound_delivery.php";
+          }
+
           $query = "INSERT INTO liitetiedostot SET
                     yhtio           = '$yhtio',
                     liitos          = 'lasku',

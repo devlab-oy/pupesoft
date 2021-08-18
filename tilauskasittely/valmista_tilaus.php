@@ -374,6 +374,28 @@ if ($tee == 'TEEVALMISTUS' and count($valmkpllat) == 0 and count($tilkpllat) == 
 
 if ($tee == 'TEEVALMISTUS') {
 
+  // Laiteaan rivit järjestykseen, ensin pitää valmistaa toisten raaka-aineeksi tarvittavat tuotteet
+  $normivalmisteet = array();
+  $rekuvalmisteet = array();
+
+  foreach (array_reverse($valmkpllat, true) as $rivitunnus => $valmkpl) {
+    $query = "SELECT tyyppi
+              FROM tilausrivi
+              WHERE yhtio = '$kukarow[yhtio]'
+              and tunnus  = '$rivitunnus'";
+    $roxresult = pupe_query($query);
+    $roxrow = mysql_fetch_assoc($roxresult);
+
+    if ($roxrow['tyyppi'] == 'M') {
+      $rekuvalmisteet[$rivitunnus] = $valmkpl;
+    }
+    else {
+      $normivalmisteet[$rivitunnus] = $valmkpl;
+    }
+  }
+
+  $valmkpllat = array_replace($rekuvalmisteet, $normivalmisteet);
+
   //tarkistetaan, ettei usean valmisteen reseptissä valmisteta samaa tuotetta monta kertaa (tätä ei osata)
   $valmduplistek = array();
 
@@ -797,6 +819,10 @@ if ($tee == 'TEEVALMISTUS') {
 
       $peruttiinko = FALSE;
 
+      // Laiteaan rivi järjestykseen, ensin pitää valmistaa toisten raaka-aineeksi tarvittavat tuotteet
+
+
+
       foreach ($valmkpllat as $rivitunnus => $valmkpl) {
 
         $valmkpl = str_replace(',', '.', $valmkpl);
@@ -813,8 +839,8 @@ if ($tee == 'TEEVALMISTUS') {
         if (mysql_num_rows($roxresult) == 1) {
           $tilrivirow = mysql_fetch_assoc($roxresult);
 
-          $tuoteno     = $tilrivirow["tuoteno"];
-          $tee      = "UV";
+          $tuoteno = $tilrivirow["tuoteno"];
+          $tee     = "UV";
 
           // Perheid sen takia, että perutaan myös useat valmisteet perutaan
           if (isset($perutamakorj[$tilrivirow["perheid"]]) and $perutamakorj[$tilrivirow["perheid"]] != "") {

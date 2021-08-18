@@ -80,7 +80,7 @@ class ImportSaldoHinta
 
     $this->toimittajat_tiedostot = array(
       "kavoparts.csv" => "1474",
-      "60046_ce.csv" => "1474"
+      "60046_ce.csv" => "1432"
     );
 
     $this->yksittaiset_tiedostot = array(
@@ -428,36 +428,28 @@ class ImportSaldoHinta
       $tuotehinta = $rivit_prices[$tuotekoodi_tarkista1]['hinta'];
       $tuotesaldo = $rivit_prices[$tuotekoodi_tarkista1]['saldo'];
 
-      // yritetään päivittää suoraan tuotenumerolla
+      
       if (empty($tuotesaldo)) {
-        $query = "UPDATE tuotteen_toimittajat 
-                    SET ostohinta = ".$tuotehinta.", 
-                    myyntihinta_kerroin = 
-                      CASE WHEN myyntihinta_kerroin > 0 THEN myyntihinta_kerroin 
-                        ELSE ".$toimittaja_myyntikerroin."
-                      END 
-                    WHERE yhtio = 'mergr' 
-                    AND liitostunnus = '".$toimittaja_id."' 
-                    AND tuoteno = '".$tuotekoodi_tarkista2."' 
-                    AND(last_insert_id(tunnus))
-                  ";
-      } else {
-        $query = "UPDATE tuotteen_toimittajat 
-                    SET ostohinta = ".$tuotehinta.", tehdas_saldo = ".$tuotesaldo.", 
-                    tehdas_saldo_paivitetty = 
-                      CASE WHEN tehdas_saldo = ".$tuotesaldo." THEN tehdas_saldo_paivitetty 
-                        ELSE NOW()
-                      END,
-                    myyntihinta_kerroin = 
-                      CASE WHEN myyntihinta_kerroin > 0 THEN myyntihinta_kerroin 
-                        ELSE ".$toimittaja_myyntikerroin."
-                      END 
-                    WHERE yhtio = 'mergr' 
-                    AND liitostunnus = '".$toimittaja_id."' 
-                    AND tuoteno = '".$tuotekoodi_tarkista2."' 
-                    AND(last_insert_id(tunnus))
-                  ";
+        continue;
       }
+
+      // yritetään päivittää suoraan tuotenumerolla
+      $query = "UPDATE tuotteen_toimittajat
+                  SET tuotteen_toimittajat.ostohinta = ".$tuotehinta.", tuotteen_toimittajat.tehdas_saldo = ".$tuotesaldo.", 
+                  tuotteen_toimittajat.tehdas_saldo_paivitetty = 
+                    CASE WHEN tuotteen_toimittajat.tehdas_saldo = ".$tuotesaldo." THEN tuotteen_toimittajat.tehdas_saldo_paivitetty 
+                      ELSE NOW()
+                    END,
+                    tuotteen_toimittajat.myyntihinta_kerroin = 
+                    CASE WHEN tuotteen_toimittajat.myyntihinta_kerroin > 0 THEN tuotteen_toimittajat.myyntihinta_kerroin 
+                      ELSE ".$toimittaja_myyntikerroin."
+                    END 
+                  WHERE yhtio = 'mergr'
+                  AND tuotteen_toimittajat.osto_era != '0.00' 
+                  AND tuotteen_toimittajat.liitostunnus = '".$toimittaja_id."' 
+                  AND tuotteen_toimittajat.tuoteno in('".$tuotekoodi_tarkista1."',  '".$tuotekoodi_tarkista2."')
+                  AND(last_insert_id(tuotteen_toimittajat.tunnus))
+                ";
 
       pupe_query($query);
 
@@ -472,8 +464,10 @@ class ImportSaldoHinta
       } else if($eankoodi_tarkista != "") {
         $query = "SELECT tuoteno 
                     FROM tuote 
-                    WHERE tuoteno = '".$tuotekoodi_tarkista1."'
-                    OR eankoodi = '".$eankoodi_tarkista."'
+                    WHERE yhtio = 'mergr' 
+                    AND tuotemerkki != '' 
+        			      AND tuote.status != 'P' 
+                    AND eankoodi = '".$eankoodi_tarkista."'
                   ";
 
         $loydetty_tuote = pupe_query($query);

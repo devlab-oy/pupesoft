@@ -467,7 +467,7 @@ class ImportSaldoHinta
                     FROM tuote 
                     WHERE yhtio = 'mergr' 
                     AND tuotemerkki != '' 
-        	          AND tuote.status != 'P' 
+        			      AND tuote.status != 'P' 
                     AND eankoodi = '".$eankoodi_tarkista."'
                   ";
 
@@ -489,13 +489,10 @@ class ImportSaldoHinta
                       WHERE yhtio = 'mergr'
                       AND liitostunnus = '".$toimittaja_id."'
                       AND tuoteno = '".$tuoteno."' 
-                      AND(last_insert_id(tuotteen_toimittajat.tunnus))
                     ";
           pupe_query($query);
-          if (mysql_insert_id()) {
-            $loydetyt_tuotteet[] = $rivi;
-            $onnistunut_tuote = true;
-          }
+          $loydetyt_tuotteet[] = $rivi;
+          $onnistunut_tuote = true;
         }
       }
 

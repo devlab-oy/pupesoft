@@ -454,14 +454,14 @@ class ImportSaldoHinta
       pupe_query($query);
 
       $onnistunut_tuote = false;
-
+      
       // onnistui
       if (mysql_insert_id()) {
         $loydetyt_tuotteet[] = $rivi;
         $onnistunut_tuote = true;
 
       // ei onnistunut - yritet‰‰n etsi‰ tuote eri tavalla
-      } else if($eankoodi_tarkista == "not_exist") {
+      } else if($eankoodi_tarkista != "") {
         $query = "SELECT tuoteno 
                     FROM tuote 
                     WHERE yhtio = 'mergr' 

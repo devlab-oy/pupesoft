@@ -421,7 +421,7 @@ class ImportSaldoHinta
         $epaonnistuneet_tuotteet[] = $rivi;
         continue;
       }
-      $tuotekoodi_tarkista2 = preg_replace("/[^A-Za-z0-9 ]/", '', $rivi[$tuotekoodin_kolumni]);
+      //$tuotekoodi_tarkista2 = preg_replace("/[^A-Za-z0-9 ]/", '', $rivi[$tuotekoodin_kolumni]);
 
       $eankoodi_tarkista = $rivi[$eankoodin_kolumni];
       
@@ -429,7 +429,6 @@ class ImportSaldoHinta
       $tuotehinta = $rivit_prices[$tuotekoodi_tarkista1]['hinta'];
       $tuotesaldo = $rivit_prices[$tuotekoodi_tarkista1]['saldo'];
 
-      
       if (empty($tuotesaldo)) {
         continue;
       }
@@ -448,7 +447,7 @@ class ImportSaldoHinta
                   WHERE yhtio = 'mergr'
                   AND tuotteen_toimittajat.osto_era != '0.00' 
                   AND tuotteen_toimittajat.liitostunnus = '".$toimittaja_id."' 
-                  AND tuotteen_toimittajat.tuoteno in('".$tuotekoodi_tarkista1."',  '".$tuotekoodi_tarkista2."')
+                  AND tuotteen_toimittajat.tuoteno in('".$tuotekoodi_tarkista1."') 
                   AND(last_insert_id(tuotteen_toimittajat.tunnus))
                 ";
 

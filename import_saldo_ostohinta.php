@@ -461,7 +461,7 @@ class ImportSaldoHinta
         $onnistunut_tuote = true;
 
       // ei onnistunut - yritet‰‰n etsi‰ tuote eri tavalla
-      } else if($eankoodi_tarkista != "") {
+      } else if($eankoodi_tarkista == ".|no") {
         $query = "SELECT tuoteno 
                     FROM tuote 
                     WHERE yhtio = 'mergr' 

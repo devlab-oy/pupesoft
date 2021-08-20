@@ -447,7 +447,7 @@ class ImportSaldoHinta
                   WHERE yhtio = 'mergr'
                   AND tuotteen_toimittajat.osto_era != '0.00' 
                   AND tuotteen_toimittajat.liitostunnus = '".$toimittaja_id."' 
-                  AND tuotteen_toimittajat.tuoteno in('".$tuotekoodi_tarkista1."') 
+                  AND tuotteen_toimittajat.tuoteno in('".mysql_real_escape_string($tuotekoodi_tarkista1)."') 
                   AND(last_insert_id(tuotteen_toimittajat.tunnus))
                 ";
 

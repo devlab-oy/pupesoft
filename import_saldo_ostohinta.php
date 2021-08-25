@@ -484,7 +484,7 @@ class ImportSaldoHinta
                     CASE WHEN tuotteen_toimittajat.myyntihinta_kerroin > 0 THEN tuotteen_toimittajat.myyntihinta_kerroin 
                       ELSE ".$toimittaja_myyntikerroin."
                     END 
-                  WHERE yhtio = 'mergr'
+                  WHERE yhtio = '".$this->yhtio."'
                   AND tuotteen_toimittajat.osto_era != '0.00' 
                   AND tuotteen_toimittajat.liitostunnus = '".$toimittaja_id."' 
                   AND tuotteen_toimittajat.tuoteno in('".mysql_real_escape_string($tuotekoodi_tarkista1)."') 

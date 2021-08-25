@@ -28,6 +28,15 @@ error_reporting(E_ALL);
 ini_set('display_errors', '1');
 ini_set('memory_limit', '4000M');
 
+$ftptiedot = array(
+  "host" => $ftphost_impsaloh,
+  "user" => $ftpuser_impsaloh,
+  "pass" => $ftppass_impsaloh,
+  "port" => $ftpport_impsaloh,
+  "path" => $ftppath_impsaloh,
+  "dest" => $ftpdest_impsaloh
+);
+
 /*
   Main class
 */
@@ -38,8 +47,16 @@ class ImportSaldoHinta
   /*
     Laitetaan kaikki muuttujat kuntoon
   */
-  public function __construct($yhtiorow)
+  public function __construct($yhtiorow, $ftptiedot)
   {
+
+    $this->ftphost = $ftptiedot['host'];
+    $this->ftpuser = $ftptiedot['user'];
+    $this->ftppass = $ftptiedot['pass'];
+    $this->ftpport = $ftptiedot['port'];
+    $this->ftppath = $ftptiedot['path'];
+    $this->ftpdest = $ftptiedot['dest'];
+
     $php_cli = true;
     $impsaloh_csv_cron = true;
     $impsaloh_csv_cron_dirname = realpath('datain/saldo_ostohinta_import');
@@ -62,26 +79,39 @@ class ImportSaldoHinta
     $this->impsaloh_polku_orig_prices   = $impsaloh_csv_cron_dirname."/orig/prices";
     $this->impsaloh_polku_error  = $impsaloh_csv_cron_dirname."/error";
     
-    $this->impsaloh_csv_files = scandir($this->impsaloh_polku_in);
     $this->ftp_exclude_files = array_diff(scandir($this->impsaloh_polku_orig), array('..', '.', '.DS_Store'));
+
+    $this->eankoodi_otsikot = array("GTIN");
+
+    $this->toimittajat_tiedostot = array(
+      "kavoparts.csv" => "1474",
+      "60046_ce.csv" => "1432",
+      "meatdoria.csv" => "1525"
+    );
 
     /*
       Otsikot etsitään tiedostossa.
       $tuotekoodi_otsikot rakenne on: stocks prices tiedoston otsikko => stocks tiedoston otsikko / prices hinta
     */
     $this->tuotekoodi_otsikot = array(
-      "Product code" =>
+      1474 => array("Product code" =>
         array(
           "tuotekoodi" => "Item No",
           "hinta" => "Mercantile Price"
         )
-    );
-
-    $this->eankoodi_otsikot = array("GTIN");
-
-    $this->toimittajat_tiedostot = array(
-      "kavoparts.csv" => "1474",
-      "60046_ce.csv" => "1432"
+      ),
+      1525 => array("Product code" =>
+        array(
+          "tuotekoodi" => "code",
+          "hinta" => "Mercantile price"
+        )
+      ),
+      1432 => array("Product code" =>
+        array(
+          "tuotekoodi" => "Item No",
+          "hinta" => "Mercantile Price"
+        )
+      )
     );
 
     $this->yksittaiset_tiedostot = array(
@@ -94,11 +124,13 @@ class ImportSaldoHinta
     // Montako kolumneja on stocks tiedostoissa - näin ohejlma tunnistaa sen.
     $this->prices_tiedoston_kolumneja_max = array(
       "kavoparts.csv" => "4",
-      "60046_ce.csv" => "1"
+      "60046_ce.csv" => "1",
+      "meatdoria.csv" => "1"
     );
   }
 
   public function jakaa_yksittaiset_tiedostot() {
+    $laske_tiedostot = 0;
     foreach ($this->yksittaiset_tiedostot as $tiedostonimi => $tiedostokolumnit) {
       $input = $this->impsaloh_polku_in."/".$tiedostonimi;
       $output = $this->impsaloh_polku_in."/"."prices_".$tiedostonimi;
@@ -124,6 +156,7 @@ class ImportSaldoHinta
           fputcsv($oh2, $outputData2);
           $i++;
         }
+        $laske_tiedostot++;
       }
       fclose($ih);
       fclose($oh);
@@ -139,9 +172,22 @@ class ImportSaldoHinta
   */
   public function aloita()
   {
+
+    $argv[1] = 'external_partners';
+    $ftpget_host['external_partners'] = $this->ftphost;
+    $ftpget_user['external_partners'] = $this->ftpuser;
+    $ftpget_pass['external_partners'] = $this->ftppass;
+    $ftpget_path['external_partners'] = $this->ftppath;
+    $ftpget_dest['external_partners'] = $this->ftpdest;
+
+    require 'ftp-get.php';
+
+    exec('gunzip -fd '.$this->impsaloh_polku_in.'/*.gz');
+    exec('mv '.$this->impsaloh_polku_in.'/60046_ce '.$this->impsaloh_polku_in.'/60046_ce.csv');
+
     $this->jakaa_yksittaiset_tiedostot();
     $this->hae_tiedostot();
-    
+
     foreach (scandir($this->impsaloh_polku_orig_stocks) as $impsaloh_csv_file_name) {
       $impsaloh_csv_file = $this->impsaloh_polku_orig_stocks."/".$impsaloh_csv_file_name;
 
@@ -166,17 +212,8 @@ class ImportSaldoHinta
   */
   public function hae_tiedostot()
   {
-    /*
-    $ftphost = $ftphost_impsaloh;
-    $ftpuser = $ftpuser_impsaloh;
-    $ftppass = $ftppass_impsaloh;
-    $ftpport = $ftpport_impsaloh;
-    $ftppath = $ftppath_impsaloh;
-    $ftpdest = $ftpdest_impsaloh;
-    require 'sftp-get.php';
-    */
     
-    foreach ($this->impsaloh_csv_files as $impsaloh_csv_file_name) {
+    foreach (scandir($this->impsaloh_polku_in) as $impsaloh_csv_file_name) {
       $impsaloh_csv_file = $this->impsaloh_polku_in."/".$impsaloh_csv_file_name;
       $impsaloh_csv_file_prices = $this->impsaloh_polku_in."/prices_".$impsaloh_csv_file_name;
 
@@ -187,7 +224,7 @@ class ImportSaldoHinta
         in_array($impsaloh_csv_file_name, $this->ftp_exclude_files)) {
         continue;
       }
-
+      
       // Selvitetään mikä tyyppinen tiedosto on - prices tai stocks
       $impsaloh_csv_tarkista = fopen($impsaloh_csv_file, 'r');
       $csv_hae_kolumnit = $this->csv_jakajaa_ja_kolumnit($impsaloh_csv_tarkista, $impsaloh_csv_file);
@@ -318,7 +355,8 @@ class ImportSaldoHinta
     $impsaloh_prices_riveja= $prices_file['riveja'];
 
     $yhtio = $this->yhtio;
-    $tuotekoodi_otsikot = $this->tuotekoodi_otsikot;
+    $tuotekoodi_otsikot = $this->tuotekoodi_otsikot[$toimittaja_id];
+
     $eankoodi_otsikot = $this->eankoodi_otsikot;
 
     // Loopataan ja järjestetään prices tiedoston data
@@ -326,12 +364,10 @@ class ImportSaldoHinta
     $otsikkotiedot = false;
     while ($rivi = fgetcsv($impsaloh_prices_csv, 100000, $csv_jakajaa_prices)) {
       if (!isset($rivit[0])) {
-
         // Hae tuotekoodin kolumni
         $kolumninro = 0;
         foreach ($rivi as $hae_otsikko) {
           $hae_otsikko = preg_replace("/[^A-Za-z0-9 ]/", '', $hae_otsikko);
-
           if (isset($tuotekoodi_otsikot[$hae_otsikko])) {
             $tuotekoodin_kolumni = (string) $kolumninro;
             $otsikkotiedot = $tuotekoodi_otsikot[$hae_otsikko];
@@ -345,7 +381,7 @@ class ImportSaldoHinta
           $kolumninro = 0;
           foreach ($rivi as $hae_otsikko) {
             $hae_otsikko = preg_replace("/[^A-Za-z0-9 ]/", '', $hae_otsikko);
-        
+  
             if ($otsikkotiedot['hinta'] == $hae_otsikko) {
               $hinta_kolumni = $kolumninro;
               break;
@@ -358,14 +394,18 @@ class ImportSaldoHinta
         }
       }
 
-      $rivi_hinta = $rivi[$hinta_kolumni];
+      if(isset($rivi[2])) {
+        $rivi_hinta = $rivi[$hinta_kolumni];
+        $rivi_saldo = $rivi[$hinta_kolumni+1];
+      } else {
+        $rivi_hinta_exlode = explode(",", $rivi[$hinta_kolumni]);
+        $rivi_hinta = $rivi_hinta_exlode[0];
+        $rivi_saldo = $rivi_hinta_exlode[1];
+      }
+
       $rivi_tuoteno = $rivi[$tuotekoodin_kolumni];
       unset($rivi[$hinta_kolumni]);
       unset($rivi[$tuotekoodin_kolumni]);
-
-      $array_keys_rivi = array_keys($rivi);
-      $rivi_saldo = $rivi[$array_keys_rivi[0]];
-      unset($rivi[$array_keys_rivi[0]]);
 
       $rivit_prices[$rivi_tuoteno] = array(
         "hinta" => $rivi_hinta,
@@ -394,7 +434,7 @@ class ImportSaldoHinta
         $kolumninro = 0;
         foreach ($rivi as $hae_otsikko) {
           $hae_otsikko = preg_replace("/[^A-Za-z0-9 ]/", '', $hae_otsikko);
-          if (isset($tuotekoodi_otsikot[$hae_otsikko])) {
+          if ($tuotekoodi_otsikot["Product code"]['tuotekoodi'] == $hae_otsikko) {
             $tuotekoodin_kolumni = $kolumninro;
           }
           if (in_array($hae_otsikko, $eankoodi_otsikot)) {
@@ -534,5 +574,8 @@ class ImportSaldoHinta
   }
 }
 
-$execute = new ImportSaldoHinta($yhtiorow);
+$execute = new ImportSaldoHinta(
+  $yhtiorow,
+  $ftptiedot
+);
 $execute->aloita();

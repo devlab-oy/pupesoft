@@ -28,6 +28,7 @@ if ($php_cli) {
   // itella, servinet, yms
   // pit‰‰ olla m‰‰ritettyn‰ salasanat.inc:iss‰ tai sitten t‰m‰ menee puihin.
   $operaattori = $argv[1];
+
 }
 
 // Sallitaan vain yksi instanssi t‰st‰ skriptist‰ kerrallaan
@@ -78,7 +79,11 @@ if ($ftpget_host[$operaattori] != '' and $ftpget_user[$operaattori] != '' and $f
 
         $temp_filename = tempnam("/tmp", "ftp");
 
-        $fileget = ftp_get($conn_id, $temp_filename, $file, FTP_ASCII);
+        if ($operaattori != "external_partners") {
+          $fileget = ftp_get($conn_id, $temp_filename, $file, FTP_ASCII);
+        } else {
+          $fileget = ftp_get($conn_id, $temp_filename, $file, FTP_BINARY);
+        }
 
         if (filesize($temp_filename) == 0) {
           // echo "VIRHE: Ladattava tiedosto on tyhj‰!\n";
@@ -86,7 +91,9 @@ if ($ftpget_host[$operaattori] != '' and $ftpget_user[$operaattori] != '' and $f
         }
         elseif ($fileget) {
           rename($temp_filename, $ftpget_dest[$operaattori]."/".$file);
-          ftp_delete($conn_id, $file);
+          if($operaattori != "external_partners") {
+            ftp_delete($conn_id, $file);
+          }
         }
         else {
           echo "VIRHE: Tiedoston $file lataus epaonnistui!\n";

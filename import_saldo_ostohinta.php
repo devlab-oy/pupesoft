@@ -485,7 +485,6 @@ class ImportSaldoHinta
                       ELSE ".$toimittaja_myyntikerroin."
                     END 
                   WHERE yhtio = '".$this->yhtio."'
-                  AND tuotteen_toimittajat.osto_era != '0.00' 
                   AND tuotteen_toimittajat.liitostunnus = '".$toimittaja_id."' 
                   AND tuotteen_toimittajat.toim_tuoteno = '".mysql_real_escape_string($tuotekoodi_tarkista1)."'  
                   AND(last_insert_id(tuotteen_toimittajat.tunnus))

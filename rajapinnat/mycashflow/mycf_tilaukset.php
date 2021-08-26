@@ -213,9 +213,13 @@ class MyCashflowTilaukset {
 
       // Kaupan tiedot
       $kauppaversio = (int) $order->OrderVersionID;
-
+      
       if (!empty($this->mycf_kaupat[$kauppaversio])) {
-        $options['asiakasnro'] = $this->mycf_kaupat[$kauppaversio];
+        if(is_array($this->mycf_kaupat[$kauppaversio])) {
+          $options['asiakasnro'] = $this->mycf_kaupat[$kauppaversio][(string) $order->CustomerInformation->Country];
+        } else {
+          $options['asiakasnro'] = $this->mycf_kaupat[$kauppaversio];
+        }
       }
       else {
         $options['asiakasnro'] = $this->verkkokauppa_asiakasnro;

@@ -475,12 +475,13 @@ class ImportSaldoHinta
 
       // yritetään päivittää suoraan tuotenumerolla
       $query = "UPDATE tuotteen_toimittajat
-                  SET tuotteen_toimittajat.ostohinta = ".$tuotehinta.", tuotteen_toimittajat.tehdas_saldo = ".$tuotesaldo.", 
+                  SET tuotteen_toimittajat.ostohinta = ".$tuotehinta.", 
                   tuotteen_toimittajat.tehdas_saldo_paivitetty = 
                     CASE WHEN tuotteen_toimittajat.tehdas_saldo = ".$tuotesaldo." THEN tuotteen_toimittajat.tehdas_saldo_paivitetty 
                       ELSE NOW()
                     END,
-                    tuotteen_toimittajat.myyntihinta_kerroin = 
+                  tuotteen_toimittajat.tehdas_saldo = ".$tuotesaldo.", 
+                  tuotteen_toimittajat.myyntihinta_kerroin = 
                     CASE WHEN tuotteen_toimittajat.myyntihinta_kerroin > 0 THEN tuotteen_toimittajat.myyntihinta_kerroin 
                       ELSE ".$toimittaja_myyntikerroin."
                     END 

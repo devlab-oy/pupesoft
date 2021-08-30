@@ -877,6 +877,8 @@ if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
                 tuote.ei_saldoa,
                 tuote.yksikko,
                 tuote.tunnus,
+                tuote.suoratoimitus,
+                tuote.tuotemerkki,
                 tuote.epakurantti25pvm,
                 tuote.epakurantti50pvm,
                 tuote.epakurantti75pvm,
@@ -921,6 +923,8 @@ if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
                   tuote.ei_saldoa,
                   tuote.yksikko,
                   tuote.tunnus,
+                  tuote.suoratoimitus,
+                  tuote.tuotemerkki,
                   tuote.epakurantti25pvm,
                   tuote.epakurantti50pvm,
                   tuote.epakurantti75pvm,
@@ -970,6 +974,8 @@ if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
             tuote.ei_saldoa,
             tuote.yksikko,
             tuote.tunnus,
+            tuote.suoratoimitus,
+            tuote.tuotemerkki,
             tuote.epakurantti25pvm,
             tuote.epakurantti50pvm,
             tuote.epakurantti75pvm,
@@ -1680,14 +1686,34 @@ if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
         echo "<td valign='top' class='$vari' $classmidl>$row[osasto]<br>$row[try]</td>";
       }
 
+      $suoratoimits_ominaisuus = false;
+      if ($row["suoratoimitus"] != "") {
+        $_tehdas_saldot = "";
+        $tarkista_tehdas_saldot_query = "SELECT tehdas_saldo, myyntihinta_kerroin, ostohinta, tehdas_saldo_toimaika, toim_nimitys 
+                                          FROM tuotteen_toimittajat
+                                          WHERE yhtio = '$kukarow[yhtio]'
+                                          AND toim_tuoteno = '".$row['toim_tuoteno']."';";
+        $tarkista_tehdas_saldot = pupe_query($tarkista_tehdas_saldot_query);
+        while ($_tarkista_tehdas = mysql_fetch_assoc($tarkista_tehdas_saldot)) {
+          if($_tarkista_tehdas['tehdas_saldo'] <= 0) {
+            continue;
+          }
+          if (!$suoratoimits_ominaisuus) {
+            $suoratoimits_ominaisuus = array();
+          }
+          $suoratoimits_ominaisuus[$_tarkista_tehdas['ostohinta']] = $_tarkista_tehdas;
+        }
+        ksort($suoratoimits_ominaisuus);
+      }
+
       piirra_hinta($row, $oleasrow, $valuurow, $vari, $classmidl, $hinta_rajaus, $poistetut,
-        $lisatiedot, $asiakashinnat, $laskurow);
+        $lisatiedot, $asiakashinnat, $laskurow, $suoratoimits_ominaisuus);
 
       if ($lisatiedot != "" and $kukarow["extranet"] == "") {
         echo "<td valign='top' class='$vari' $classmidl>$row[aleryhma]<br>$row[status]</td>";
       }
 
-      hae_ja_piirra_saldo($row, $yhtiot, $oleasrow);
+      hae_ja_piirra_saldo($row, $yhtiot, $oleasrow, $suoratoimits_ominaisuus);
 
       piirra_ostoskoriin_lisays($row);
 
@@ -2148,13 +2174,14 @@ function tarkista_tilausrivi() {
   pupemaster_stop();
 }
 
-function hae_ja_piirra_saldo($row, $yhtiot, $oleasrow) {
+function hae_ja_piirra_saldo($row, $yhtiot, $oleasrow, $suoratoimits_ominaisuus = false) {
   global $toim_kutsu, $verkkokauppa, $kukarow, $verkkokauppa_saldotsk, $laskurow,
   $saldoaikalisa, $yhtiorow, $rivin_yksikko, $vari, $classrigh, $hinta_rajaus, $ostoskori,
   $yht_i, $lisatiedot, $hae_ja_selaa_row;
 
   if ($toim_kutsu != "EXTENNAKKO" and ($verkkokauppa == "" or ($verkkokauppa != "" and $kukarow["kuka"] != "www" and $verkkokauppa_saldotsk))) {
     // Tuoteperheen isät, mutta ei sarjanumerollisisa isiä (Normi, Extranet ja Verkkokauppa)
+
     if ($row["tuoteperhe"] == $row["tuoteno"] and $row["sarjanumeroseuranta"] != "S") {
       // Extranet ja verkkokauppa
       if ($kukarow["extranet"] != "" or $verkkokauppa != "") {
@@ -2309,6 +2336,20 @@ function hae_ja_piirra_saldo($row, $yhtiot, $oleasrow) {
       $classrighx = substr($classrigh, 0, -2) . " padding: 0px;' ";
 
       echo "<td valign='top' class='$vari' $classrighx>";
+
+      if($suoratoimits_ominaisuus) {
+        echo '<table style="width: 100%;">';
+        echo '<tr><td colspan="2"><font color="orange">'.t("Tehdas saldo(t)")."</font></td></tr>";
+
+        foreach($suoratoimits_ominaisuus as $suoratoimits_ominaisuus_toim) {
+          echo "<tr>";
+          echo "<td>".$suoratoimits_ominaisuus_toim['toim_nimitys']."</td>";
+          echo "<td>".$suoratoimits_ominaisuus_toim['tehdas_saldo']."</td>";
+          echo "</tr>";
+        }
+
+        echo "</table>";
+      }
       echo "<table style='width:100%;'>";
 
       $loytyko = false;
@@ -2323,7 +2364,6 @@ function hae_ja_piirra_saldo($row, $yhtiot, $oleasrow) {
         $orvot *= -1;
 
         while ($saldorow = mysql_fetch_assoc($varresult)) {
-
           if (!isset($saldorow["era"]))
             $saldorow["era"] = "";
 
@@ -2475,8 +2515,32 @@ function piirra_nayta_variaatiot_nappula($parametri_variaatio) {
 }
 
 function piirra_hinta($row, $oleasrow, $valuurow, $vari, $classmidl, $hinta_rajaus, $poistetut,
-  $lisatiedot, $asiakashinnat, $laskurow) {
+  $lisatiedot, $asiakashinnat, $laskurow, $suoratoimits_ominaisuus_toimi = false) {
   global $kukarow, $yhtiorow, $verkkokauppa;
+
+  if($suoratoimits_ominaisuus_toimi) {
+    foreach($suoratoimits_ominaisuus_toimi as $suoratoimits_ominaisuus)
+    {
+      if(isset($suoratoimits_ominaisuus['myyntihinta_kerroin']) and $suoratoimits_ominaisuus['myyntihinta_kerroin'] != NULL and $suoratoimits_ominaisuus['myyntihinta_kerroin'] > 0) {
+        $row["myyntihinta"] = $suoratoimits_ominaisuus['ostohinta'] * $suoratoimits_ominaisuus['myyntihinta_kerroin'];
+      }
+      else {
+        $tuotemerkkihinta_avainsanat = t_avainsana("TUOTEMERKKI");
+        while ($tuotemerkkihinta_avainsana = mysql_fetch_assoc($tuotemerkkihinta_avainsanat)) {
+          if($tuotemerkkihinta_avainsana['selite'] == $row['tuotemerkki']) {
+            $tuotemerkkihinta_avainsalla = (float) $tuotemerkkihinta_avainsana['selitetark_2'];
+            if($tuotemerkkihinta_avainsalla != "" and $tuotemerkkihinta_avainsalla > 0) {
+              $row["myyntihinta"] = $suoratoimits_ominaisuus['ostohinta'] * $tuotemerkkihinta_avainsalla;
+            }
+            else {
+              $row["myyntihinta"] = (float) $suoratoimits_ominaisuus['ostohinta'] * 1;
+            }
+            break 2;
+          }
+        }
+      }
+    }
+  }
 
   if ($kukarow['hinnat'] >= 0 and ($verkkokauppa == "" or $kukarow["kuka"] != "www")) {
     $myyntihinta = hintapyoristys($row["myyntihinta"]) . " $yhtiorow[valkoodi]";
@@ -2653,7 +2717,9 @@ function piirra_hinta($row, $oleasrow, $valuurow, $vari, $classmidl, $hinta_raja
     if ($lisatiedot != "" and $kukarow["extranet"] == "") {
       echo "<br>" . hintapyoristys($row["nettohinta"]) . " $yhtiorow[valkoodi]";
     }
-
+    if($suoratoimits_ominaisuus_toimi) {
+      echo "<br>(".$suoratoimits_ominaisuus['toim_nimitys'].")";
+    }
     echo "</td>";
   }
 }

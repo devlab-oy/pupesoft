@@ -2357,7 +2357,7 @@ function hae_ja_piirra_saldo($row, $yhtiot, $oleasrow, $suoratoimits_ominaisuus 
           echo "</tr>";
         }
 
-        echo "</table>";
+        echo "</table><br>";
       }
       echo "<table style='width:100%;'>";
 
@@ -2527,6 +2527,7 @@ function piirra_hinta($row, $oleasrow, $valuurow, $vari, $classmidl, $hinta_raja
   $lisatiedot, $asiakashinnat, $laskurow, $suoratoimits_ominaisuus_toimi = false) {
   global $kukarow, $yhtiorow, $verkkokauppa;
 
+  $suoratoimits_ominaisuus_toimi = false;
   if($suoratoimits_ominaisuus_toimi) {
     foreach($suoratoimits_ominaisuus_toimi as $suoratoimits_ominaisuus)
     {

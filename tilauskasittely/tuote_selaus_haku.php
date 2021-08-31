@@ -1706,7 +1706,7 @@ if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
              AND tunnus = '$_tarkista_tehdas[liitostunnus]';";
           $hae_toim_nimi = pupe_query($hae_toim_nimi);
           $hae_toim_nimi = mysql_fetch_assoc($hae_toim_nimi);
-          $_tarkista_tehdas['toim_nimitys'] = $hae_toim_nimi[];
+          $_tarkista_tehdas['toim_nimitys'] = $hae_toim_nimi['nimi'];
           if (!$suoratoimits_ominaisuus) {
             $suoratoimits_ominaisuus = array();
           }

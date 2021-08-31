@@ -2924,9 +2924,12 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
               }
             }
             if($tarkista_tuotteen_tehttaan_saldot < 1) {
-              
+              $var  = "J";
+            } else {
+              $var = "U";
+              $varattu = $kpl;
             }
-            $var  = "J";
+            
           } else {
             $var  = "J";
           }

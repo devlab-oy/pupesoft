@@ -1689,12 +1689,21 @@ if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
       $suoratoimits_ominaisuus = false;
       if ($row["suoratoimitus"] != "") {
         $_tehdas_saldot = "";
-        $tarkista_tehdas_saldot_query = "SELECT tehdas_saldo, myyntihinta_kerroin, ostohinta, tehdas_saldo_toimaika, toim_nimitys 
+        $vertaile_tuoteno = explode("<br>", $row['toim_tuoteno']);
+        $vertaile_tuoteno = implode("','", $vertaile_tuoteno);
+        $tarkista_tehdas_saldot_query = "SELECT *  
                                           FROM tuotteen_toimittajat
                                           WHERE yhtio = '$kukarow[yhtio]'
-                                          AND toim_tuoteno = '".$row['toim_tuoteno']."';";
+                                          AND toim_tuoteno in ('".$vertaile_tuoteno."');";
         $tarkista_tehdas_saldot = pupe_query($tarkista_tehdas_saldot_query);
         while ($_tarkista_tehdas = mysql_fetch_assoc($tarkista_tehdas_saldot)) {
+          $hae_toim_nimi = "SELECT nimi  
+            FROM toimi
+            WHERE yhtio = '$kukarow[yhtio]'
+             AND tunnus = '$_tarkista_tehdas[liitostunnus]';";
+          $hae_toim_nimi = pupe_query($hae_toim_nimi);
+          $hae_toim_nimi = mysql_fetch_assoc($hae_toim_nimi);
+          $_tarkista_tehdas['toim_nimitys'] = $hae_toim_nimi['nimi'];
           if($_tarkista_tehdas['tehdas_saldo'] <= 0) {
             continue;
           }

@@ -1712,7 +1712,9 @@ if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
           }
           $suoratoimits_ominaisuus[$_tarkista_tehdas['ostohinta']] = $_tarkista_tehdas;
         }
-        ksort($suoratoimits_ominaisuus);
+        if($suoratoimits_ominaisuus) {
+          ksort($suoratoimits_ominaisuus);
+        }
       }
 
       piirra_hinta($row, $oleasrow, $valuurow, $vari, $classmidl, $hinta_rajaus, $poistetut,

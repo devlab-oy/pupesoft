@@ -1916,6 +1916,7 @@ if (!function_exists("verkkolasku_in")) {
         $fitek_pdf_sisalto = mysql_real_escape_string(file_get_contents($fitek_xml_cron_tiedot['pdf_tiedosto']))) {
           $fitek_pdf_file = basename($fitek_xml_cron_tiedot['pdf_tiedosto']);
 
+          /*
           $saapumisnumero = $kuvalaskurow['saapumisnumero'];
 
           $query = "SELECT nimi, laskunro, liitostunnus, ytunnus, tunnus
@@ -1957,6 +1958,8 @@ if (!function_exists("verkkolasku_in")) {
             // L‰hetet‰‰n ulkoiseen j‰rjestelm‰‰n
             require "rajapinnat/logmaster/inbound_delivery.php";
           }
+
+          */
 
           $query = "INSERT INTO liitetiedostot SET
                     yhtio           = '$yhtio',

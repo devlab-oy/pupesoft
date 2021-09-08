@@ -9,6 +9,11 @@ if (!isset($argv[1]) || !$argv[1]) {
   exit; 
 }
 
+if (!isset($argv[2]) || !$argv[2]) { 
+  echo "Anna kayttaja!"; 
+  exit; 
+}
+
 date_default_timezone_set('Europe/Helsinki');
 
 require "inc/connect.inc";

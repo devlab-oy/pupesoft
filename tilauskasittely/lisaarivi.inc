@@ -1695,7 +1695,7 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
         }
       }
     }
-
+    
     foreach ($myy_tuoteno as $i => $tuoteno) {
       //T‰ss‰ loopataan vain is‰/normaleja tuotteita
       if ($lisaarivi_debug==1) echo "Loopataan $tuoteno, {$myy_tyyppi[$i]}, $toimittamatta<br>";
@@ -2449,7 +2449,7 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
                   AND toimi.tunnus                 = tuotteen_toimittajat.liitostunnus)
                 WHERE tuotteen_toimittajat.yhtio   = '$kukarow[yhtio]'
                   AND tuotteen_toimittajat.tuoteno = '$tuoteno'
-                ORDER BY if (tuotteen_toimittajat.jarjestys = 0, 9999, tuotteen_toimittajat.jarjestys)
+                ORDER BY tuotteen_toimittajat.ostohinta ASC
                 LIMIT 1";
 
       $toimpaikres = pupe_query($query);
@@ -2683,7 +2683,7 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
                     {$yksi_suoratoimittaja_join})
                   WHERE tuotteen_toimittajat.yhtio = '$kukarow[yhtio]'
                   AND tuotteen_toimittajat.tuoteno = '$trow[tuoteno]'
-                  ORDER BY if (tuotteen_toimittajat.jarjestys = 0, 9999, tuotteen_toimittajat.jarjestys)
+                  ORDER BY tuotteen_toimittajat.ostohinta ASC
                   LIMIT 1";
         $toimpaikres = pupe_query($query);
         $krow = mysql_fetch_assoc($toimpaikres);
@@ -2897,8 +2897,42 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
             $varattu   = $kpl;
             $jt     = 0;
           }
-
-          $var  = "J";
+          if($trow['suoratoimitus'] != '') {
+            $query2 = "SELECT tt.tehdas_saldo,
+            tt.liitostunnus,
+            tt.toim_tuoteno,
+            tt.tunnus AS tt_tunnus,
+            toimi.nimi AS toimittajan_nimi,
+            avainsana.selitetark_2,
+            avainsana.selitetark_3,
+            avainsana.selitetark_4,
+            avainsana.selitetark_5
+              FROM tuotteen_toimittajat AS tt
+              JOIN toimi ON (toimi.yhtio = tt.yhtio AND toimi.tunnus = tt.liitostunnus)
+              LEFT JOIN avainsana ON (toimi.yhtio = avainsana.yhtio AND avainsana.laji = 'SAHKTILTUN' AND avainsana.selite = '{$laskurow['yhtio_toimipaikka']}' AND toimi.tunnus = avainsana.selitetark)
+            WHERE tt.yhtio = '{$kukarow['yhtio']}' 
+            AND tt.tehdas_saldo IS NOT NULL 
+            AND tt.tehdas_saldo > 0 
+            AND tt.tuoteno = '{$trow['tuoteno']}'
+            ORDER BY tt.ostohinta ASC
+            ";
+            $tehdas_saldo_res2 = pupe_query($query2);
+            $tarkista_tuotteen_tehttaan_saldot = 0;
+            if (mysql_num_rows($tehdas_saldo_res2) > 0) {
+              while($tehdas_saldo_row2 = mysql_fetch_assoc($tehdas_saldo_res2)) {
+                $tarkista_tuotteen_tehttaan_saldot = $tarkista_tuotteen_tehttaan_saldot + $tehdas_saldo_row2["tehdas_saldo"];
+              }
+            }
+            if($tarkista_tuotteen_tehttaan_saldot < 1) {
+              $var  = "J";
+            } else {
+              $var = "U";
+              $varattu = $kpl;
+            }
+            
+          } else {
+            $var  = "J";
+          }
         }
         // Terminaalitoimitukset tai ostoskorit; var tyhj‰‰ ja varattu normisti
         elseif ($rivityyppi == 'Z' or $rivityyppi == 'B' or $rivityyppi == 'E' or $rivityyppi == 'F') {
@@ -2972,6 +3006,7 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
       $p_hyllytaso = $paikat[3];
     }
     else {
+      
       // haetaan viel‰ tuotteen oletuspaikka puuteriville, jotta seuranta ois helpompaa
       //jos laskurow[varasto] on setattu niin yritet‰‰n lˆyt‰‰ paikka siit‰ varastosta
       $query = "SELECT tuotepaikat.*, tuotepaikat.varasto varastotunnus
@@ -3255,6 +3290,36 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
 
     $query_insert_ale_lisa = $query_insert_hinta_alkuperainen_lisa = '';
 
+    if ($rivityyppi == 'L') {
+      $myyntikerroin_laskenta = true;
+      $query = "SELECT tuotekerroin, ostohinta, myyntihinta_kerroin
+                FROM tuotteen_toimittajat
+                WHERE yhtio      = '{$kukarow['yhtio']}'
+                AND tuoteno      = '{$trow['tuoteno']}'
+                AND liitostunnus = '{$toimittajan_tunnus}'";
+      $tt_res = pupe_query($query);
+      $tt_row = mysql_fetch_assoc($tt_res);
+
+      if(isset($tt_row['myyntihinta_kerroin']) and $tt_row['myyntihinta_kerroin'] != NULL and $tt_row['myyntihinta_kerroin'] > 0) {
+        $lis_hinta = $tt_row['ostohinta'] * $tt_row['myyntihinta_kerroin'];
+      }
+      else {
+        $tuotemerkkihinta_avainsanat = t_avainsana("TUOTEMERKKI");
+        while ($tuotemerkkihinta_avainsana = mysql_fetch_assoc($tuotemerkkihinta_avainsanat)) {
+          if($tuotemerkkihinta_avainsana['selite'] == $trow['tuotemerkki']) {
+            $tuotemerkkihinta_avainsalla = (float) $tuotemerkkihinta_avainsana['selitetark_2'];
+            if($tuotemerkkihinta_avainsalla != "" and $tuotemerkkihinta_avainsalla > 0) {
+              $lis_hinta = $tt_row['ostohinta'] * $tuotemerkkihinta_avainsalla;
+            }
+            else {
+              $lis_hinta = $tt_row['ostohinta'] * 1;
+            }
+            break;
+          }
+        }
+      }
+    }
+    
     if ($rivityyppi == 'O') {
       for ($alepostfix = 1; $alepostfix <= $yhtiorow['oston_alekentat']; $alepostfix++) {
         $query_insert_ale_lisa .= " ale{$alepostfix} = '".$lis_ale_kaikki['ale'.$alepostfix]."',";
@@ -3287,7 +3352,7 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
         $query_insert_hinta_alkuperainen_lisa = " hinta_alkuperainen = '{$ohinta}',";
       }
     }
-    else {
+    else if(!isset($myyntikerroin_laskenta)) {
       for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
         $query_insert_ale_lisa .= " ale{$alepostfix} = '".$lis_ale_kaikki['ale'.$alepostfix]."',";
       }
@@ -3315,6 +3380,65 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
     $kampanjatunnus = 'NULL';
     if (isset($GLOBALS['kampanjahinnoitteluntunnus'])) {
       $kampanjatunnus = $GLOBALS['kampanjahinnoitteluntunnus'];
+    }
+
+    if($trow['suoratoimitus'] != '' and !$toimittajan_tunnus and $saldo <= 0) {
+      $query2 = "SELECT tt.tehdas_saldo,
+                  tt.liitostunnus,
+                  tt.toim_tuoteno,
+                  tt.tunnus AS tt_tunnus,
+                  toimi.nimi AS toimittajan_nimi,
+                  avainsana.selitetark_2,
+                  avainsana.selitetark_3,
+                  avainsana.selitetark_4,
+                  avainsana.selitetark_5
+                    FROM tuotteen_toimittajat AS tt
+                    JOIN toimi ON (toimi.yhtio = tt.yhtio AND toimi.tunnus = tt.liitostunnus)
+                    LEFT JOIN avainsana ON (toimi.yhtio = avainsana.yhtio AND avainsana.laji = 'SAHKTILTUN' AND avainsana.selite = '{$laskurow['yhtio_toimipaikka']}' AND toimi.tunnus = avainsana.selitetark)
+                  WHERE tt.yhtio = '{$kukarow['yhtio']}' 
+                  AND tt.tehdas_saldo IS NOT NULL 
+                  AND tt.tehdas_saldo > 0 
+                  AND tt.tuoteno = '{$trow['tuoteno']}'
+                  ORDER BY tt.ostohinta ASC
+                  ";
+      $tehdas_saldo_res2 = pupe_query($query2);
+      if (mysql_num_rows($tehdas_saldo_res2) > 0) {
+        while($tehdas_saldo_row2 = mysql_fetch_assoc($tehdas_saldo_res2)) {
+          unset($p_hyllyalue);
+          unset($p_hyllynro);
+          unset($p_hyllyvali);
+          unset($p_hyllytaso);
+          $toimittajan_tunnus = $tehdas_saldo_row2['liitostunnus'];
+
+          $query = "SELECT tuotekerroin, ostohinta, myyntihinta_kerroin
+                    FROM tuotteen_toimittajat
+                    WHERE yhtio      = '{$kukarow['yhtio']}'
+                    AND tuoteno      = '{$trow['tuoteno']}'
+                    AND liitostunnus = '{$toimittajan_tunnus}'";
+          $tt_res = pupe_query($query);
+          $tt_row = mysql_fetch_assoc($tt_res);
+    
+          if(isset($tt_row['myyntihinta_kerroin']) and $tt_row['myyntihinta_kerroin'] != NULL and $tt_row['myyntihinta_kerroin'] > 0) {
+            $lis_hinta = $tt_row['ostohinta'] * $tt_row['myyntihinta_kerroin'];
+          }
+          else {
+            $tuotemerkkihinta_avainsanat = t_avainsana("TUOTEMERKKI");
+            while ($tuotemerkkihinta_avainsana = mysql_fetch_assoc($tuotemerkkihinta_avainsanat)) {
+              if($tuotemerkkihinta_avainsana['selite'] == $trow['tuotemerkki']) {
+                $tuotemerkkihinta_avainsalla = (float) $tuotemerkkihinta_avainsana['selitetark_2'];
+                if($tuotemerkkihinta_avainsalla != "" and $tuotemerkkihinta_avainsalla > 0) {
+                  $lis_hinta = $tt_row['ostohinta'] * $tuotemerkkihinta_avainsalla;
+                }
+                else {
+                  $lis_hinta = $tt_row['ostohinta'] * 1;
+                }
+                break;
+              }
+            }
+          }
+          break;
+        }
+      }
     }
 
     // lis‰t‰‰n puuterivi

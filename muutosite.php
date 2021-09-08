@@ -1350,6 +1350,8 @@ if ($tee == 'E' or $tee == 'F') {
         }
       }
 
+      if ($trow['saapumisnumero'] != NULL and $trow['saapumisnumero'] != 0) echo "<tr><th nowrap>", t("Saapumisnro"), "</th><td align='right'>$trow[saapumisnumero]</td></tr>";
+
       if ($trow['laskunro'] != 0) echo "<tr><th nowrap>", t("Laskunro"), "</th><td align='right'>$trow[laskunro]</td></tr>";
 
       echo "</table>";

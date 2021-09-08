@@ -2046,6 +2046,33 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
   }
   // Myyntitilaus valmis
   else {
+    if($orig_tila == "L" and $orig_alatila == "A") {
+      $haetilausrivit = "SELECT tunnus, tuoteno, tilkpl
+                          FROM tilausrivi 
+                          WHERE otunnus = {$laskurow["tunnus"]}
+                        ";
+      $haetilausrivit = pupe_query($haetilausrivit);
+      if (mysql_num_rows($haetilausrivit) > 0) {
+        while($haetilausrivi = mysql_fetch_array($haetilausrivit)) {
+          $query = "SELECT * 
+                      FROM tilausrivin_lisatiedot 
+                      WHERE tilausrivin_lisatiedot.tilausrivitunnus = {$haetilausrivi['tunnus']}
+                    ";
+          $tilausrivin_toimittajan_tunnus = pupe_query($query);
+          if (mysql_num_rows($tilausrivin_toimittajan_tunnus) > 0) {
+            $tilausrivin_toimittajan_tunnus = mysql_fetch_array($tilausrivin_toimittajan_tunnus);
+            $tehtaan_saldo_paivita = "UPDATE tuotteen_toimittajat 
+                                        SET tehdas_saldo = tehdas_saldo+{$haetilausrivi['tilkpl']}  
+                                        WHERE liitostunnus = {$tilausrivin_toimittajan_tunnus['toimittajan_tunnus']}
+                                        AND myyntihinta_kerroin > 0 
+                                        AND tuoteno = '{$haetilausrivi['tuoteno']}'
+                                      ";
+            pupe_query($tehtaan_saldo_paivita);
+          }
+        }
+      }
+    }
+    
     //Jos käyttäjä on myymässä tuotteita ulkomaan varastoista, niin laitetaan tilaus holdiin
     if ($toimitetaan_ulkomaailta == "YES" and $kukarow["tilaus_valmis"] == "3") {
       $kukarow["tilaus_valmis"] = "2";
@@ -5101,7 +5128,7 @@ if ($tee == '') {
         $var        = '';
         $hinta        = '';
         $netto        = '';
-        $paikka        = '';
+        $paikka        = $formijspaikkapaikka;
         $alv        = '';
         $perheid      = 0;
         $perheid2      = 0;

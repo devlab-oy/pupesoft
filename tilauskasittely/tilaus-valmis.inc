@@ -461,6 +461,7 @@ elseif ($kukarow["extranet"] == "" and $toim == "REKLAMAATIO" and $tee == "ODOTT
   }
 }
 else {
+
   // Tässä on normaalit tilaukset
 
   // Luodaan valituista riveistä suoraan normaali ostotilaus

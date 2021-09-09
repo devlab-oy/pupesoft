@@ -3384,7 +3384,7 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
       $kampanjatunnus = $GLOBALS['kampanjahinnoitteluntunnus'];
     }
 
-    if($trow['suoratoimitus'] != '' and !$toimittajan_tunnus and $saldo <= 0) {
+    if($trow['suoratoimitus'] != '' and !$toimittajan_tunnus and $saldo <= 0 and $rivityyppi == 'L') {
       $query2 = "SELECT tt.tehdas_saldo,
                   tt.liitostunnus,
                   tt.toim_tuoteno,

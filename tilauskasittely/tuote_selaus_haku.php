@@ -1688,13 +1688,14 @@ if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
 
       $suoratoimits_ominaisuus = false;
       if ($row["suoratoimitus"] != "") {
+
         $_tehdas_saldot = "";
-        $vertaile_tuoteno = explode("<br>", $row['toim_tuoteno']);
-        $vertaile_tuoteno = implode("','", $vertaile_tuoteno);
+
         $tarkista_tehdas_saldot_query = "SELECT *  
                                           FROM tuotteen_toimittajat
                                           WHERE yhtio = '$kukarow[yhtio]'
-                                          AND toim_tuoteno in ('".$vertaile_tuoteno."');";
+                                          AND tuoteno in ('".$row['tuoteno']."');";
+        
         $tarkista_tehdas_saldot = pupe_query($tarkista_tehdas_saldot_query);
         while ($_tarkista_tehdas = mysql_fetch_assoc($tarkista_tehdas_saldot)) {
           if($_tarkista_tehdas['tehdas_saldo'] <= 0) {

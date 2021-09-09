@@ -3290,9 +3290,9 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
 
     $query_insert_ale_lisa = $query_insert_hinta_alkuperainen_lisa = '';
 
-    if ($rivityyppi == 'L') {
+    if ($rivityyppi == 'L' and $trow['suoratoimitus'] != '') {
       $myyntikerroin_laskenta = true;
-      $query = "SELECT tuotekerroin, ostohinta, myyntihinta_kerroin
+      $query = "SELECT tuotekerroin, ostohinta, myyntihinta_kerroin, tehdas_saldo
                 FROM tuotteen_toimittajat
                 WHERE yhtio      = '{$kukarow['yhtio']}'
                 AND tuoteno      = '{$trow['tuoteno']}'
@@ -3300,21 +3300,23 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
       $tt_res = pupe_query($query);
       $tt_row = mysql_fetch_assoc($tt_res);
 
-      if(isset($tt_row['myyntihinta_kerroin']) and $tt_row['myyntihinta_kerroin'] != NULL and $tt_row['myyntihinta_kerroin'] > 0) {
-        $lis_hinta = $tt_row['ostohinta'] * $tt_row['myyntihinta_kerroin'];
-      }
-      else {
-        $tuotemerkkihinta_avainsanat = t_avainsana("TUOTEMERKKI");
-        while ($tuotemerkkihinta_avainsana = mysql_fetch_assoc($tuotemerkkihinta_avainsanat)) {
-          if($tuotemerkkihinta_avainsana['selite'] == $trow['tuotemerkki']) {
-            $tuotemerkkihinta_avainsalla = (float) $tuotemerkkihinta_avainsana['selitetark_2'];
-            if($tuotemerkkihinta_avainsalla != "" and $tuotemerkkihinta_avainsalla > 0) {
-              $lis_hinta = $tt_row['ostohinta'] * $tuotemerkkihinta_avainsalla;
+      if($tt_row['tehdas_saldo'] and $tt_row['tehdas_saldo'] != "" and $tt_row['tehdas_saldo'] > 0){
+        if(isset($tt_row['myyntihinta_kerroin']) and $tt_row['myyntihinta_kerroin'] != NULL and $tt_row['myyntihinta_kerroin'] > 0) {
+          $lis_hinta = $tt_row['ostohinta'] * $tt_row['myyntihinta_kerroin'];
+        }
+        else {
+          $tuotemerkkihinta_avainsanat = t_avainsana("TUOTEMERKKI");
+          while ($tuotemerkkihinta_avainsana = mysql_fetch_assoc($tuotemerkkihinta_avainsanat)) {
+            if($tuotemerkkihinta_avainsana['selite'] == $trow['tuotemerkki']) {
+              $tuotemerkkihinta_avainsalla = (float) $tuotemerkkihinta_avainsana['selitetark_2'];
+              if($tuotemerkkihinta_avainsalla != "" and $tuotemerkkihinta_avainsalla > 0) {
+                $lis_hinta = $tt_row['ostohinta'] * $tuotemerkkihinta_avainsalla;
+              }
+              else {
+                $lis_hinta = $tt_row['ostohinta'] * 1;
+              }
+              break;
             }
-            else {
-              $lis_hinta = $tt_row['ostohinta'] * 1;
-            }
-            break;
           }
         }
       }

@@ -108,6 +108,7 @@ class MyCashflowTilaukset {
         // saadaan kerroin
         $kurssi_kerroin = floatval(str_replace(",", ".", $kurssi['selitetark']));
         $kurssi_kerroin = round($kurssi_kerroin, 9);
+        $asiakaskurssi = round(1/$kurssi_kerroin, 9);
         break;
       }
     }
@@ -130,7 +131,6 @@ class MyCashflowTilaukset {
         return;
       }
     }
-    */
 
     // haetaan asiakkaan maksuehto
     $asiakasmaksuehto = false;

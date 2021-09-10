@@ -2860,7 +2860,7 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
       if ($rivityyppi == 'L' and $trow['suoratoimitus'] != '') {
         if($myyntikerroin_laskenta = tehdas_saldo_hinnat($kukarow, $trow, $toimittajan_tunnus)) {
           $_lis_hinta_chk = $myyntikerroin_laskenta;
-        } else if($tapa == "VAIHDA") {
+        } else {
           $hinta = 0;
         }
       }

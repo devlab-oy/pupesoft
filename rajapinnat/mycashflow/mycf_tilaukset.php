@@ -82,7 +82,7 @@ class MyCashflowTilaukset {
   public function get_asiakastiedot($kauppaversio, $etsi_asiakas) {
 
     // vain version 6 asiakkaan tiedot haetaan
-    if(!in_array($kauppaversio, array(6))) {
+    if(!in_array($kauppaversio, array(6,4))) {
       return;
     }
     
@@ -114,6 +114,8 @@ class MyCashflowTilaukset {
     }
 
     // jos kurssi ei löydy - haetaan pupeesta kurssi.
+    // sammutetaan toistaiseksi, koska kurrsit eivät ollut oikeat.
+    /*
     if(!$asiakaskurssi) {
       $query = "SELECT kurssi
                   FROM valuu
@@ -129,6 +131,7 @@ class MyCashflowTilaukset {
         return;
       }
     }
+    */
 
     // haetaan asiakkaan maksuehto
     $asiakasmaksuehto = false;

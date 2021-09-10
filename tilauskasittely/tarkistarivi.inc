@@ -736,8 +736,7 @@ if (
           if ($trow["sarjanumeroseuranta"] == "F") {
             $title .= " ".tv1dateconv($alkurow["parasta_ennen"]);
           }
-
-          $title = $title." | Saldo: ".$alkurow['saldo'];
+          
           $hyllypaikat .= "' $sel title='$title'>$title</option>";
 
           // jos toimitetaan erikoisvarastosta, niin ilmoitetaan siitä

@@ -131,6 +131,7 @@ class MyCashflowTilaukset {
         return;
       }
     }
+    */
 
     // haetaan asiakkaan maksuehto
     $asiakasmaksuehto = false;

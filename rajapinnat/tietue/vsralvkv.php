@@ -1,5 +1,7 @@
 <?php
 
+date_default_timezone_set("Europe/Helsinki");
+
 $aikaleima = new DateTime();
 $aikaleima = $aikaleima->format("dmYHms");
 

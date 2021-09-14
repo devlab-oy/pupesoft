@@ -53,5 +53,5 @@ $file = base64_encode($file);
 }
 </style>
 
-<a class="linkbutton" href="../../rajapinnat/tietue/lataa.php?tietuedataname=<?php echo 'VSRALVKV_'.$aikaleima.'_'.$kk.$vv.'.txt'; ?>&tietuedata=<?php echo $file; ?>" target="_blank">
+<a class="linkbutton" href="../rajapinnat/tietue/lataa.php?tietuedataname=<?php echo 'VSRALVKV_'.$aikaleima.'_'.$kk.$vv.'.txt'; ?>&tietuedata=<?php echo $file; ?>" target="_blank">
 <?php echo t('Tallenna'); ?> VSRALVKV ></a><br><br>

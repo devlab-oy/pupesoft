@@ -1209,7 +1209,7 @@ function alvlaskelma($kk, $vv) {
     }
   }
 
-  if($tee = 'VSRALVKK_UUSI') {
+  if($kk and $vv) {
     include_once('rajapinnat/tietue/vsralvkv.php');
   }
 

@@ -33,10 +33,6 @@ for ($fx = 1; $fx <= 20; $fx++) {
 $file .= "042:".$yhtiorow['puhelin']."\n";
 $file .= "999:1\n";
 
-echo "<pre>";
-echo $file;
-echo "</pre>";
-
 $file = base64_encode($file);
 ?>
 

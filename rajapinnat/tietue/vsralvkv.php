@@ -5,14 +5,17 @@ date_default_timezone_set("Europe/Helsinki");
 $aikaleima = new DateTime();
 $aikaleima = $aikaleima->format("dmYHms");
 
+$kk_vsralvkv = (int) $kk;
+$vv_vsralvkv = (int) $vv;
+
 $file  = "000:VSRALVKV\n";
 $file .= "198:$aikaleima\n";
 $file .= "048:Pupesoft\n";
-$file .= "014:".$uytunnus."_pupe\n";
+$file .= "014:".$uytunnus."_pu\n";
 $file .= "010:$uytunnus\n";
 $file .= "050:K\n";
-$file .= "052:$kk\n";
-$file .= "053:$vv\n";
+$file .= "052:$kk_vsralvkv\n";
+$file .= "053:$vv_vsralvkv\n";
 
 for ($fx = 1; $fx <= 20; $fx++) {
     $fx_num = $fx + 300;
@@ -21,6 +24,7 @@ for ($fx = 1; $fx <= 20; $fx++) {
     if ($fi_3 == "-0") {
       $fi_3 = str_replace("-0", "0.00", $fi_3);
     }
+    $fi_3 = number_format($fi_3, 2, ',', '');
     if ($fi_3 != "") {
       $file .= "$fx_num:$fi_3\n";
     }
@@ -28,6 +32,10 @@ for ($fx = 1; $fx <= 20; $fx++) {
 
 $file .= "042:".$yhtiorow['puhelin']."\n";
 $file .= "999:1\n";
+
+echo "<pre>";
+echo $file;
+echo "</pre>";
 
 $file = base64_encode($file);
 ?>

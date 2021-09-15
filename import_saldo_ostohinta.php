@@ -470,7 +470,7 @@ class ImportSaldoHinta
       $tuotesaldo = $rivit_prices[$tuotekoodi_tarkista1]['saldo'];
 
       if (empty($tuotesaldo)) {
-        continue;
+        $tuotesaldo = 0;
       }
 
       // yritet‰‰n p‰ivitt‰‰ suoraan tuotenumerolla

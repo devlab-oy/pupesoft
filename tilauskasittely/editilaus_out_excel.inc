@@ -1,7 +1,4 @@
 <?php
-                    "SBTLFISY",
-                    "DAECX",
-                    "DADOX",
 // Formaatti on:
 // toimittajanumero
 // tilausnumero

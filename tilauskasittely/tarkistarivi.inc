@@ -635,6 +635,8 @@ if (
       $sarjarow = mysql_fetch_assoc($sarjares);
     }
 
+    $hyllypaikat = "";
+
     while ($alkurow = mysql_fetch_assoc($omavarastores)) {
 
       // or ($alkurow["hyllyalue"] == $row["hyllyalue"] and $alkurow["hyllynro"] == $row["hyllynro"] and $alkurow["hyllyvali"] == $row["hyllyvali"] and $alkurow["hyllytaso"] == $row["hyllytaso"] and $row['var'] != 'S')

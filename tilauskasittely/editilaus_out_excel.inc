@@ -4,9 +4,6 @@
 // tilausnumero
 // tuotekoodi
 // määrä
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
 $query_ale_lisa = generoi_alekentta("O");
 
 $tulosta_ostohinnalla_hae = t_avainsana("EDI_OSTOHINTA");
@@ -85,7 +82,7 @@ else {
   $thispage->writeString($excelrivi, 5, "Price", $boldi);
   if($tulosta_ostohinnalla) { 
     $thispage->writeString($excelrivi, 5, "Price", $boldi);
-    $thispage->writeString($excelrivi, 5, "Row price", $boldi);
+    $thispage->writeString($excelrivi, 6, "Row price", $boldi);
   }
   $excelrivi++;
 
@@ -99,7 +96,7 @@ else {
     $thispage->writeNumber($excelrivi, 4, $tilausrivirow['varattu']);
     if($tulosta_ostohinnalla) {
       $thispage->writeNumber($excelrivi, 5, $tilausrivirow['hinta']);
-      $thispage->writeNumber($excelrivi, 5, $tilausrivirow['rivihinta']);
+      $thispage->writeNumber($excelrivi, 6, $tilausrivirow['rivihinta']);
     } else {
       $thispage->writeNumber($excelrivi, 5, $tilausrivirow['nettohinta']);
     }

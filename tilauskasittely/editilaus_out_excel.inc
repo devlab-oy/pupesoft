@@ -5,16 +5,38 @@
 // tilausnumero
 // tuotekoodi
 // määrä
-
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 $query_ale_lisa = generoi_alekentta("O");
+
+$tulosta_ostohinnalla_hae = t_avainsana("EDI_OSTOHINTA");
+$tulosta_ostohinnalla = false;
+while ($tulosta_ostohinnalla_tark = mysql_fetch_assoc($tulosta_ostohinnalla_hae)) {
+  if($tulosta_ostohinnalla_tark['selite'] == 1) {
+    $tulosta_ostohinnalla = true;
+    break;
+  }
+}
+
+if($tulosta_ostohinnalla) {
+  $hinta_query = "
+    ROUND(tilausrivi.hinta,2) hinta,
+    ROUND(tilausrivi.hinta_alkuperainen,2) rivihinta,
+  ";
+} else {
+  $hinta_query = "
+    ROUND(tilausrivi.hinta * IF(tuotteen_toimittajat.tuotekerroin = 0 OR tuotteen_toimittajat.tuotekerroin IS NULL, 1, tuotteen_toimittajat.tuotekerroin) * {$query_ale_lisa}, '$yhtiorow[hintapyoristys]') nettohinta,
+  ";
+}
 
 $query = "SELECT tilausrivi.tunnus,
           tilausrivi.otunnus,
           ROUND(tilausrivi.varattu * IF(tuotteen_toimittajat.tuotekerroin = 0, 1, tuotteen_toimittajat.tuotekerroin), 2) AS varattu,
-          tilausrivi.yksikko,
           tilausrivi.tuoteno,
           IFNULL(tuotteen_toimittajat.toim_tuoteno, tilausrivi.tuoteno) toim_tuoteno,
-          ROUND(tilausrivi.hinta * IF(tuotteen_toimittajat.tuotekerroin = 0 OR tuotteen_toimittajat.tuotekerroin IS NULL, 1, tuotteen_toimittajat.tuotekerroin) * {$query_ale_lisa}, '$yhtiorow[hintapyoristys]') nettohinta
+          $hinta_query
+          tilausrivi.yksikko
           FROM tilausrivi
           JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = tilausrivi.yhtio AND tuotteen_toimittajat.tuoteno = tilausrivi.tuoteno AND tuotteen_toimittajat.liitostunnus = '{$laskurow['liitostunnus']}')
           LEFT JOIN tuotteen_avainsanat AS ta ON (ta.yhtio = tilausrivi.yhtio AND ta.tuoteno = tilausrivi.tuoteno AND ta.laji = 'ei_edi_ostotilaukseen')
@@ -62,6 +84,9 @@ else {
   $thispage->writeString($excelrivi, 2, "Our product code", $boldi);
   $thispage->writeString($excelrivi, 4, "Quantity", $boldi);
   $thispage->writeString($excelrivi, 5, "Price", $boldi);
+  if($tulosta_ostohinnalla) { 
+    $thispage->writeString($excelrivi, 5, "Row price", $boldi);
+  }
   $excelrivi++;
 
   $lask = 1;
@@ -72,7 +97,13 @@ else {
     $thispage->writeString($excelrivi, 1, $tilausrivirow['toim_tuoteno']);
     $thispage->writeString($excelrivi, 2, $tilausrivirow['tuoteno']);
     $thispage->writeNumber($excelrivi, 4, $tilausrivirow['varattu']);
-    $thispage->writeNumber($excelrivi, 5, $tilausrivirow['nettohinta']);
+    if($tulosta_ostohinnalla) {
+      $thispage->writeNumber($excelrivi, 5, $tilausrivirow['hinta']);
+      $thispage->writeNumber($excelrivi, 5, $tilausrivirow['rivihinta']);
+    } else {
+      $thispage->writeNumber($excelrivi, 5, $tilausrivirow['nettohinta']);
+    }
+
     $excelrivi++;
 
     $lask++;

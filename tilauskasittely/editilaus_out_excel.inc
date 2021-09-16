@@ -1,5 +1,7 @@
 <?php
-
+                    "SBTLFISY",
+                    "DAECX",
+                    "DADOX",
 // Formaatti on:
 // toimittajanumero
 // tilausnumero
@@ -85,6 +87,7 @@ else {
   $thispage->writeString($excelrivi, 4, "Quantity", $boldi);
   $thispage->writeString($excelrivi, 5, "Price", $boldi);
   if($tulosta_ostohinnalla) { 
+    $thispage->writeString($excelrivi, 5, "Price", $boldi);
     $thispage->writeString($excelrivi, 5, "Row price", $boldi);
   }
   $excelrivi++;

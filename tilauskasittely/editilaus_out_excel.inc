@@ -17,6 +17,8 @@ while ($tulosta_ostohinnalla_tark = mysql_fetch_assoc($tulosta_ostohinnalla_hae)
 
 if($tulosta_ostohinnalla) {
   $hinta_query = "
+    tilausrivi.kommentti kommentti,
+    tilausrivi.nimitys nimitys,
     ROUND(tilausrivi.hinta,2) hinta,
     ROUND(tilausrivi.hinta_alkuperainen,2) rivihinta,
   ";
@@ -65,7 +67,7 @@ else {
   $thispage->setColumn(1, 2, 25);
 
   $excelrivi = 1;
-  $thispage->writeString($excelrivi++,   1, trim($laskurow["toim_nimi"]." ".$laskurow["toim_nimitark"]), $boldi);
+  $thispage->writeString($excelrivi++, 1, trim($laskurow["toim_nimi"]." ".$laskurow["toim_nimitark"]), $boldi);
   $thispage->writeString($excelrivi++, 1, $laskurow["toim_osoite"], $boldi);
   $thispage->writeString($excelrivi++, 1, $laskurow["toim_maa"]."-".$laskurow["toim_postino"]." ".$laskurow["toim_postitp"], $boldi);
 
@@ -75,29 +77,44 @@ else {
   $thispage->writeString($excelrivi++, 2, date("Y-m-d"));
 
   $excelrivi++;
-  $thispage->writeString($excelrivi, 0, "Line", $boldi);
-  $thispage->writeString($excelrivi, 1, "Your product code", $boldi);
-  $thispage->writeString($excelrivi, 2, "Our product code", $boldi);
-  $thispage->writeString($excelrivi, 4, "Quantity", $boldi);
-  $thispage->writeString($excelrivi, 5, "Price", $boldi);
+
   if($tulosta_ostohinnalla) { 
+    $thispage->writeString($excelrivi, 0, "Line", $boldi);
+    $thispage->writeString($excelrivi, 1, "Your product code", $boldi);
+    $thispage->writeString($excelrivi, 2, "Our product code", $boldi);
+    $thispage->writeString($excelrivi, 4, "Stock code", $boldi);
+    $thispage->writeString($excelrivi, 5, "Name", $boldi);
+    $thispage->writeString($excelrivi, 6, "Quantity", $boldi);
+    $thispage->writeString($excelrivi, 7, "Price", $boldi);
+    $thispage->writeString($excelrivi, 8, "Row price", $boldi);
+  } else {
+    $thispage->writeString($excelrivi, 0, "Line", $boldi);
+    $thispage->writeString($excelrivi, 1, "Your product code", $boldi);
+    $thispage->writeString($excelrivi, 2, "Our product code", $boldi);
+    $thispage->writeString($excelrivi, 4, "Quantity", $boldi);
     $thispage->writeString($excelrivi, 5, "Price", $boldi);
-    $thispage->writeString($excelrivi, 6, "Row price", $boldi);
   }
+
   $excelrivi++;
 
   $lask = 1;
 
   while ($tilausrivirow = mysql_fetch_assoc($result)) {
 
-    $thispage->writeString($excelrivi, 0, $lask);
-    $thispage->writeString($excelrivi, 1, $tilausrivirow['toim_tuoteno']);
-    $thispage->writeString($excelrivi, 2, $tilausrivirow['tuoteno']);
-    $thispage->writeNumber($excelrivi, 4, $tilausrivirow['varattu']);
     if($tulosta_ostohinnalla) {
-      $thispage->writeNumber($excelrivi, 5, $tilausrivirow['hinta']);
-      $thispage->writeNumber($excelrivi, 6, $tilausrivirow['rivihinta']);
+      $thispage->writeString($excelrivi, 0, $lask);
+      $thispage->writeString($excelrivi, 1, $tilausrivirow['toim_tuoteno']);
+      $thispage->writeString($excelrivi, 2, $tilausrivirow['tuoteno']);
+      $thispage->writeNumber($excelrivi, 4, $tilausrivirow['kommentti']);
+      $thispage->writeNumber($excelrivi, 5, $tilausrivirow['nimitys']);
+      $thispage->writeNumber($excelrivi, 6, $tilausrivirow['varattu']);
+      $thispage->writeNumber($excelrivi, 7, $tilausrivirow['hinta']);
+      $thispage->writeNumber($excelrivi, 8, $tilausrivirow['rivihinta']);
     } else {
+      $thispage->writeString($excelrivi, 0, $lask);
+      $thispage->writeString($excelrivi, 1, $tilausrivirow['toim_tuoteno']);
+      $thispage->writeString($excelrivi, 2, $tilausrivirow['tuoteno']);
+      $thispage->writeNumber($excelrivi, 4, $tilausrivirow['varattu']);
       $thispage->writeNumber($excelrivi, 5, $tilausrivirow['nettohinta']);
     }
 

@@ -290,6 +290,14 @@ if ($lopetus != "") {
 }
 
 if ((int) $kukarow['kesken'] == 0 or $tee == "MUUOTAOSTIKKOA") {
+  // Hateaan tilauksen tiedot
+  $_tuotepaikat_query = "SELECT *
+            FROM lasku
+            WHERE tunnus = '$kukarow[kesken]'
+            and yhtio    = '$kukarow[yhtio]'
+            and tila     = 'O'";
+  $aresult_tuotepaikat = pupe_query($_tuotepaikat_query);
+  $laskurow_tuotepaikat = mysql_fetch_assoc($aresult_tuotepaikat);
   require "otsik_ostotilaus.inc";
 }
 

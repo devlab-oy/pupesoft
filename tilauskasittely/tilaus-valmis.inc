@@ -470,7 +470,7 @@ else {
 
     // Jos halutaan tehd‰ tilauksesta ostotilauksia, niin tehd‰‰n kaikista ostotilaus
     if ($tee_osto != "") {
-      $tilauksesta_ostotilaus = tilauksesta_ostotilaus($kukarow["kesken"], 'KAIKKI');
+      $tilauksesta_ostotilaus = tilauksesta_ostotilaus($kukarow["kesken"], 'KAIKKI', $palvelin2);
 
       // P‰ivitet‰‰n tilaukselle, ett‰ sit‰ ei osatoimiteta jos koko tilauksesta tehtiin ostotilaus
       $query  = "UPDATE lasku set
@@ -480,8 +480,8 @@ else {
       $result = pupe_query($query);
     }
     else {
-      $tilauksesta_ostotilaus  = tilauksesta_ostotilaus($kukarow["kesken"], 'T');
-      $tilauksesta_ostotilaus .= tilauksesta_ostotilaus($kukarow["kesken"], 'U');
+      $tilauksesta_ostotilaus  = tilauksesta_ostotilaus($kukarow["kesken"], 'T', $palvelin2);
+      $tilauksesta_ostotilaus .= tilauksesta_ostotilaus($kukarow["kesken"], 'U', $palvelin2);
     }
 
     if ($tilauksesta_ostotilaus != '') echo "$tilauksesta_ostotilaus<br><br>";

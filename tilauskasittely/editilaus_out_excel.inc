@@ -105,8 +105,8 @@ else {
       $thispage->writeString($excelrivi, 0, $lask);
       $thispage->writeString($excelrivi, 1, $tilausrivirow['toim_tuoteno']);
       $thispage->writeString($excelrivi, 2, $tilausrivirow['tuoteno']);
-      $thispage->writeNumber($excelrivi, 4, $tilausrivirow['kommentti']);
-      $thispage->writeNumber($excelrivi, 5, $tilausrivirow['nimitys']);
+      $thispage->writeString($excelrivi, 4, $tilausrivirow['kommentti']);
+      $thispage->writeString($excelrivi, 5, $tilausrivirow['nimitys']);
       $thispage->writeNumber($excelrivi, 6, $tilausrivirow['varattu']);
       $thispage->writeNumber($excelrivi, 7, $tilausrivirow['hinta']);
       $thispage->writeNumber($excelrivi, 8, $tilausrivirow['rivihinta']);

@@ -603,6 +603,123 @@ if (isset($jatka)) {
       $tpostitp  = $varow["postitp"];
       $tmaa       = $varow["maa"];
 
+      $vresult_query = "SELECT tuoteno
+                          FROM tilausrivi
+                          WHERE yhtio     = '{$kukarow['yhtio']}'
+                        AND otunnus     = '{$tilausnumero}'";
+      
+      $vresult = pupe_query($vresult_query);
+
+      while ($vresult_query = mysql_fetch_assoc($vresult)) {
+        // haetaan vielä tuotteen oletuspaikka puuteriville, jotta seuranta ois helpompaa
+        //jos laskurow_tuotepaikat[varasto] on setattu niin yritetään löytää paikka siitä varastosta
+        $query_tuotepaikat = "SELECT tuotepaikat.*, tuotepaikat.varasto varastotunnus
+                                FROM tuotepaikat
+                                where tuotepaikat.yhtio    = '$kukarow[yhtio]'
+                                and tuotepaikat.tuoteno    = '$vresult_query[tuoteno]'
+                                AND tuotepaikat.hyllyalue != '!!M'
+                              ORDER BY tuotepaikat.oletus DESC";
+        $result_tuotepaikat = pupe_query($query_tuotepaikat);
+
+        if (mysql_num_rows($result_tuotepaikat) > 0) {
+
+          // Yritetään löytää paras varastopaikka
+          $loydetytpaikat = FALSE;
+
+          // löytyykö syötetty $varasto (muttujassa tulee myös $laskurow_tuotepaikat[varasto] tai $kukarow["varasto"] jos $varastoa ei olla eksplisiittisesti syötetty)?
+          if (isset($varasto)) {
+
+            while ($olerow = mysql_fetch_assoc($result_tuotepaikat)) {
+              if ($varasto == $olerow["varastotunnus"]) {
+                $p_hyllyalue  = $olerow["hyllyalue"];
+                $p_hyllynro    = $olerow["hyllynro"];
+                $p_hyllyvali  = $olerow["hyllyvali"];
+                $p_hyllytaso  = $olerow["hyllytaso"];
+
+                $loydetytpaikat = TRUE;
+                break;
+              }
+            }
+
+            // Jos paikkaa ei vieläkään löytynyt, luodaan tilauksen varastoon tuotepaikka ja käytetään sitä (ostossa toisin)
+            if (!$loydetytpaikat and $rivityyppi != 'O') {
+
+              if ($laskurow_tuotepaikat['varasto'] != 0) {
+                $_varasto = $laskurow_tuotepaikat['varasto'];
+              }
+              else {
+                $_varasto = $varasto;
+              }
+
+              $query_tuotepaikat = "SELECT alkuhyllyalue, alkuhyllynro
+                                      FROM varastopaikat
+                                      WHERE yhtio = '{$kukarow['yhtio']}'
+                                      AND tunnus  = '{$_varasto}'";
+              $oletus_tuotepaikka_res = pupe_query($query_tuotepaikat);
+              $oletus_tuotepaikka_row = mysql_fetch_assoc($oletus_tuotepaikka_res);
+
+              lisaa_tuotepaikka($vresult_query['tuoteno'], $oletus_tuotepaikka_row['alkuhyllyalue'], $oletus_tuotepaikka_row['alkuhyllynro'], 0, 0, "Tuotetta lisättäessä", "", 0, 0, 0);
+
+              $p_hyllyalue  = $oletus_tuotepaikka_row["alkuhyllyalue"];
+              $p_hyllynro    = $oletus_tuotepaikka_row["alkuhyllynro"];
+              $p_hyllyvali  = '0';
+              $p_hyllytaso  = '0';
+
+              $loydetytpaikat = TRUE;
+            }
+          }
+
+          // ostotilaus
+          // jos otsikolle on setattu $varasto ja tuotepaikkaa ei löydy kyseisestä varastosta
+          // ostetaan tyhjältä paikalta, koska ostotilauksen valmiiksi laittaminen perustaa kyseiseen varastoon uuden tuotepaikan
+
+          // keissit:
+          // jos $rivityyppi = 'O' ja setattu $varasto ja is_array($varasto)
+          if (!$loydetytpaikat and $rivityyppi == 'O' and isset($varasto)) {
+            $p_hyllyalue  = "";
+            $p_hyllynro    = "";
+            $p_hyllyvali  = "";
+            $p_hyllytaso  = "";
+          }
+          else {
+            // löytyykö $kukarow["oletus_varasto"]?
+            if (!$loydetytpaikat and $kukarow["oletus_varasto"] > 0) {
+              mysql_data_seek($result_tuotepaikat, 0);
+
+              while ($olerow = mysql_fetch_assoc($result_tuotepaikat)) {
+                if ($olerow["varastotunnus"] == $kukarow["oletus_varasto"]) {
+                  $p_hyllyalue  = $olerow["hyllyalue"];
+                  $p_hyllynro    = $olerow["hyllynro"];
+                  $p_hyllyvali  = $olerow["hyllyvali"];
+                  $p_hyllytaso  = $olerow["hyllytaso"];
+
+                  $loydetytpaikat = TRUE;
+                  break;
+                }
+              }
+            }
+
+            //Jos ei löytynyt niin myydään oletuspaikalta
+            if (!$loydetytpaikat) {
+              mysql_data_seek($result_tuotepaikat, 0);
+              $olerow = mysql_fetch_assoc($result_tuotepaikat);
+
+              $p_hyllyalue  = $olerow["hyllyalue"];
+              $p_hyllynro   = $olerow["hyllynro"];
+              $p_hyllyvali  = $olerow["hyllyvali"];
+              $p_hyllytaso  = $olerow["hyllytaso"];
+            }
+          }
+          $paivita_hylly = "UPDATE tilausrivi 
+                              SET hyllyalue='$p_hyllyalue', hyllynro='$p_hyllynro', hyllyvali='$p_hyllyvali', hyllytaso='$p_hyllytaso' 
+                              where yhtio='$kukarow[yhtio]' 
+                              and otunnus=$tilausnumero 
+                            and tuoteno='$vresult_query[tuoteno]' 
+                            ";
+          pupe_query($paivita_hylly);
+        }
+      }
+
       echo "<font class='message'>", t("Toimitusosoitteen tiedot haettiin varaston %s takaa", "", $varow["nimitys"]), ".</font><br /><br />";
     }
   }

@@ -16,11 +16,18 @@ while ($tulosta_ostohinnalla_tark = mysql_fetch_assoc($tulosta_ostohinnalla_hae)
 }
 
 if($tulosta_ostohinnalla) {
+  $query_ale_lisa_tulosta_ostohinnalla = generoi_alekentta("O", '', 'ei_erikoisale');
   $hinta_query = "
     tilausrivi.kommentti kommentti,
     tilausrivi.nimitys nimitys,
     ROUND(tilausrivi.hinta,2) hinta,
-    ROUND(tilausrivi.hinta_alkuperainen,2) rivihinta,
+    round((tilausrivi.varattu + tilausrivi.jt)
+    * tilausrivi.hinta
+    * if (tuotteen_toimittajat.tuotekerroin = 0
+      OR tuotteen_toimittajat.tuotekerroin IS NULL,
+        1,
+        tuotteen_toimittajat.tuotekerroin)
+    * {$query_ale_lisa_tulosta_ostohinnalla}, '$yhtiorow[hintapyoristys]') rivihinta,
   ";
 } else {
   $hinta_query = "

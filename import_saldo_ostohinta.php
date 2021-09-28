@@ -97,13 +97,15 @@ class ImportSaldoHinta
       1474 => array("Product code" =>
         array(
           "tuotekoodi" => "Item No",
-          "hinta" => "Mercantile Price"
+          "hinta" => "Mercantile Price",
+          "saldo" => " Inventory QTY "
         )
       ),
       1525 => array("Product code" =>
         array(
           "tuotekoodi" => "code",
-          "hinta" => "Mercantile price"
+          "hinta" => "Mercantile price",
+          "saldo" => "level"
         )
       ),
       1432 => array("Product code" =>
@@ -126,6 +128,12 @@ class ImportSaldoHinta
       "kavoparts.csv" => "4",
       "60046_ce.csv" => "1",
       "meatdoria.csv" => "1"
+    );
+
+    $this->saldo_levels = array (
+      "0" => 0,
+      "1" => 2,
+      "2" => 5
     );
   }
 
@@ -241,12 +249,12 @@ class ImportSaldoHinta
           echo $toimittaja_id." toimittaja ei lˆydy!";
           continue;
         }
-
-        // Otetaan pois rename testauksessa.
-        //rename($impsaloh_csv_file, $this->impsaloh_polku_orig_stocks."/".$toimittaja_id."___".$csv_hae_kolumnit['kolumneja'].$csv_hae_kolumnit['riveja'].$impsaloh_csv_file_name);
-        //rename($impsaloh_csv_file_prices, $this->impsaloh_polku_orig_prices."/prices_".$toimittaja_id."___".$csv_hae_kolumnit['kolumneja'].$csv_hae_kolumnit['riveja'].$impsaloh_csv_file_name);
-        copy($impsaloh_csv_file, $this->impsaloh_polku_orig_stocks."/".$toimittaja_id."___".$csv_hae_kolumnit['kolumneja'].$csv_hae_kolumnit['riveja'].$impsaloh_csv_file_name);
-        copy($impsaloh_csv_file_prices, $this->impsaloh_polku_orig_prices."/prices_".$toimittaja_id."___".$csv_hae_kolumnit['kolumneja'].$csv_hae_kolumnit['riveja'].$impsaloh_csv_file_name);
+        
+        rename($impsaloh_csv_file, $this->impsaloh_polku_orig_stocks."/".$toimittaja_id."___".$csv_hae_kolumnit['kolumneja'].$csv_hae_kolumnit['riveja'].$impsaloh_csv_file_name);
+        rename($impsaloh_csv_file_prices, $this->impsaloh_polku_orig_prices."/prices_".$toimittaja_id."___".$csv_hae_kolumnit['kolumneja'].$csv_hae_kolumnit['riveja'].$impsaloh_csv_file_name);
+        // Vain testauksessa.
+        //copy($impsaloh_csv_file, $this->impsaloh_polku_orig_stocks."/".$toimittaja_id."___".$csv_hae_kolumnit['kolumneja'].$csv_hae_kolumnit['riveja'].$impsaloh_csv_file_name);
+        //copy($impsaloh_csv_file_prices, $this->impsaloh_polku_orig_prices."/prices_".$toimittaja_id."___".$csv_hae_kolumnit['kolumneja'].$csv_hae_kolumnit['riveja'].$impsaloh_csv_file_name);
       }
     }
   }
@@ -394,23 +402,30 @@ class ImportSaldoHinta
         }
       }
 
+      $rivi_saldo = false;
+
       if(isset($rivi[2])) {
         $rivi_hinta = $rivi[$hinta_kolumni];
         $rivi_saldo = $rivi[$hinta_kolumni+1];
-      } else {
-        $rivi_hinta_exlode = explode(",", $rivi[$hinta_kolumni]);
-        $rivi_hinta = $rivi_hinta_exlode[0];
-        $rivi_saldo = $rivi_hinta_exlode[1];
       }
+      
+      $rivi_hinta = $rivi[$hinta_kolumni];
 
       $rivi_tuoteno = $rivi[$tuotekoodin_kolumni];
       unset($rivi[$hinta_kolumni]);
       unset($rivi[$tuotekoodin_kolumni]);
 
-      $rivit_prices[$rivi_tuoteno] = array(
-        "hinta" => $rivi_hinta,
-        "saldo" => $rivi_saldo
-      );
+      if($rivi_saldo) {
+        $rivit_prices[$rivi_tuoteno] = array(
+          "hinta" => $rivi_hinta,
+          "saldo" => $rivi_saldo
+        );
+      } else {
+        $rivit_prices[$rivi_tuoteno] = array(
+          "hinta" => $rivi_hinta
+        );
+      }
+
     }
 
     // K‰sitell‰‰n tiedostojen rivit ja etsit‰‰n / muokataan tuotteet pupeessa
@@ -437,12 +452,17 @@ class ImportSaldoHinta
           if ($tuotekoodi_otsikot["Product code"]['tuotekoodi'] == $hae_otsikko) {
             $tuotekoodin_kolumni = $kolumninro;
           }
+          if (isset($tuotekoodi_otsikot["Product code"]['saldo']) and $tuotekoodi_otsikot["Product code"]['saldo'] == $hae_otsikko) {
+            $saldo_kolumni = $kolumninro;
+            $saldo_kolumin_nimi = $hae_otsikko;
+          }
           if (in_array($hae_otsikko, $eankoodi_otsikot)) {
             $eankoodin_kolumni = $kolumninro;
           }
+
           $kolumninro++;
         }
-      
+
         if (isset($tuotekoodin_kolumni) or isset($eankoodin_kolumni)) {
           $rivit[0] = false;
           continue;
@@ -464,10 +484,18 @@ class ImportSaldoHinta
       //$tuotekoodi_tarkista2 = preg_replace("/[^A-Za-z0-9 ]/", '', $rivi[$tuotekoodin_kolumni]);
 
       $eankoodi_tarkista = $rivi[$eankoodin_kolumni];
-      
+
+      if(isset($rivit_prices[$tuotekoodi_tarkista1]['saldo'])) {
+        $tuotesaldo = $rivit_prices[$tuotekoodi_tarkista1]['saldo'];
+      } else if(isset($saldo_kolumni)) {
+        $tuotesaldo = $rivi[$saldo_kolumni];
+        if($saldo_kolumin_nimi == "level") {
+          $tuotesaldo = $this->saldo_levels[$tuotesaldo];
+        }
+      }
+ 
       // Haetaan hintatiedot ja saldo price array:ista
       $tuotehinta = $rivit_prices[$tuotekoodi_tarkista1]['hinta'];
-      $tuotesaldo = $rivit_prices[$tuotekoodi_tarkista1]['saldo'];
 
       if (empty($tuotesaldo)) {
         $tuotesaldo = 0;
@@ -475,7 +503,7 @@ class ImportSaldoHinta
 
       // yritet‰‰n p‰ivitt‰‰ suoraan tuotenumerolla
       $query = "UPDATE tuotteen_toimittajat
-                  SET tuotteen_toimittajat.ostohinta = ".$tuotehinta.", 
+                  SET tuotteen_toimittajat.ostohinta = '".str_replace(",", ".", $tuotehinta)."', 
                   tehdas_saldo_paivitetty = NOW(), 
                   tuotteen_toimittajat.tehdas_saldo = ".$tuotesaldo.", 
                   tuotteen_toimittajat.myyntihinta_kerroin = 

@@ -252,9 +252,6 @@ class ImportSaldoHinta
         
         rename($impsaloh_csv_file, $this->impsaloh_polku_orig_stocks."/".$toimittaja_id."___".$csv_hae_kolumnit['kolumneja'].$csv_hae_kolumnit['riveja'].$impsaloh_csv_file_name);
         rename($impsaloh_csv_file_prices, $this->impsaloh_polku_orig_prices."/prices_".$toimittaja_id."___".$csv_hae_kolumnit['kolumneja'].$csv_hae_kolumnit['riveja'].$impsaloh_csv_file_name);
-        // Vain testauksessa.
-        //copy($impsaloh_csv_file, $this->impsaloh_polku_orig_stocks."/".$toimittaja_id."___".$csv_hae_kolumnit['kolumneja'].$csv_hae_kolumnit['riveja'].$impsaloh_csv_file_name);
-        //copy($impsaloh_csv_file_prices, $this->impsaloh_polku_orig_prices."/prices_".$toimittaja_id."___".$csv_hae_kolumnit['kolumneja'].$csv_hae_kolumnit['riveja'].$impsaloh_csv_file_name);
       }
     }
   }
@@ -493,7 +490,7 @@ class ImportSaldoHinta
           $tuotesaldo = $this->saldo_levels[$tuotesaldo];
         }
       }
- 
+
       // Haetaan hintatiedot ja saldo price array:ista
       $tuotehinta = $rivit_prices[$tuotekoodi_tarkista1]['hinta'];
 

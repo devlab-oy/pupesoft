@@ -98,7 +98,7 @@ class ImportSaldoHinta
         array(
           "tuotekoodi" => "Item No",
           "hinta" => "Mercantile Price",
-          "saldo" => " Inventory QTY "
+          "saldo" => "Inventory QTY"
         )
       ),
       1525 => array("Product code" =>
@@ -449,10 +449,12 @@ class ImportSaldoHinta
           if ($tuotekoodi_otsikot["Product code"]['tuotekoodi'] == $hae_otsikko) {
             $tuotekoodin_kolumni = $kolumninro;
           }
-          if (isset($tuotekoodi_otsikot["Product code"]['saldo']) and $tuotekoodi_otsikot["Product code"]['saldo'] == $hae_otsikko) {
+          $etsi_saldo = $etsi_saldo = strpos($hae_otsikko, $tuotekoodi_otsikot["Product code"]['saldo']);
+          if (isset($tuotekoodi_otsikot["Product code"]['saldo']) and $etsi_saldo !== false) {
             $saldo_kolumni = $kolumninro;
             $saldo_kolumin_nimi = $hae_otsikko;
           }
+
           if (in_array($hae_otsikko, $eankoodi_otsikot)) {
             $eankoodin_kolumni = $kolumninro;
           }

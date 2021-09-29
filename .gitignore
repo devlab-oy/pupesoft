@@ -1,6 +1,8 @@
 inc/salasanat.php
 datain/lue-data*
 datain/magento-order*
+datain/fitek_import*
+datain/saldo_ostohinta_import*
 datain/presta-order*
 dataout/*
 pupenext

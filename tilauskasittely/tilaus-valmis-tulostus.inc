@@ -313,6 +313,7 @@ if ((int) $chk_row["ok"] == (int) $chk_row["kaikki"] and (int) $chk_row["ok"] !=
 
     $query = "SELECT tilausrivi.*,
               lasku.tila AS lasku_tila,
+              lasku.maksutyyppi AS lasku_maksutyyppi, 
               lasku.alatila AS lasku_alatila,
               tuote.sarjanumeroseuranta, tuote.suoratoimitus, 
               kerayserat.kpl as tilkpl,
@@ -333,6 +334,7 @@ if ((int) $chk_row["ok"] == (int) $chk_row["kaikki"] and (int) $chk_row["ok"] !=
   else {
     $query = "SELECT tilausrivi.*,
               lasku.tila AS lasku_tila,
+              lasku.maksutyyppi AS lasku_maksutyyppi, 
               lasku.alatila AS lasku_alatila,
               tuote.suoratoimitus, 
               $select_lisa
@@ -360,7 +362,9 @@ if ((int) $chk_row["ok"] == (int) $chk_row["kaikki"] and (int) $chk_row["ok"] !=
   
   while ($row = mysql_fetch_assoc($riresult)) {
 
-    if($row['suoratoimitus'] != "" and $row['hyllyalue'] == "" and $row['hyllynro'] == "" and $row['hyllyvali'] == "" and $row['hyllytaso'] == "")
+    if($row['suoratoimitus'] != "" and 
+    ($row['lasku_maksutyyppi'] == 'S' or $row['lasku_maksutyyppi'] == '') 
+    and $row['hyllyalue'] == "" and $row['hyllynro'] == "" and $row['hyllytaso'] == "")
     {
       $query = "SELECT * 
                   FROM tilausrivin_lisatiedot 
@@ -371,11 +375,18 @@ if ((int) $chk_row["ok"] == (int) $chk_row["kaikki"] and (int) $chk_row["ok"] !=
         $tilausrivin_toimittajan_tunnus = mysql_fetch_array($tilausrivin_toimittajan_tunnus);
         $tehtaan_saldo_paivita = "UPDATE tuotteen_toimittajat 
                                     SET tehdas_saldo = tehdas_saldo-{$row['tilkpl']}  
-                                    WHERE liitostunnus = {$tilausrivin_toimittajan_tunnus['toimittajan_tunnus']}
+                                    WHERE liitostunnus = {$tilausrivin_toimittajan_tunnus['toimittajan_tunnus']} 
+                                    AND tehdas_saldo >= 0 
                                     AND myyntihinta_kerroin > 0 
                                     AND tuoteno = '{$row['tuoteno']}'
                                   ";
         pupe_query($tehtaan_saldo_paivita);
+        $_query_paivita_maksutyyppi = "UPDATE lasku
+                                        SET maksutyyppi = '' 
+                                        where yhtio     = '$kukarow[yhtio]' 
+                                        and tunnus      = '$laskurow[tunnus]' 
+                                        and tunnusnippu = 0";
+        pupe_query($_query_paivita_maksutyyppi);
       }
     }
 

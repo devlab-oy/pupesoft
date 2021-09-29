@@ -602,7 +602,7 @@ if (($kukarow["extranet"] != '' and $toim != 'EXTRANET' and $toim != 'EXTRANET_R
   exit;
 }
 
-if ($orig_tila == "L" and $orig_alatila == "A") {
+if ($laske_tehdas_saldo and $orig_tila == "L" and $orig_alatila == "A") {
   $kesklas_query = "SELECT *
               FROM lasku
               WHERE yhtio = '{$kukarow['yhtio']}'
@@ -5066,7 +5066,7 @@ if ($tee == '') {
       }
 
       if($tapa == "MUOKKAA" or $tapa == "POISTA") {
-        if($orig_tila == "L" and $orig_alatila == "A") {
+        if($laske_tehdas_saldo and $orig_tila == "L" and $orig_alatila == "A") {
           if ($tilausrivi['hyllyalue'] == "" and $tilausrivi['hyllynro'] == "" and $tilausrivi['hyllytaso'] == "") {
             $query_hae_suoratoimitus = "SELECT suoratoimitus 
                                           FROM tuote 

@@ -362,7 +362,7 @@ if ((int) $chk_row["ok"] == (int) $chk_row["kaikki"] and (int) $chk_row["ok"] !=
   
   while ($row = mysql_fetch_assoc($riresult)) {
 
-    if($row['suoratoimitus'] != "" and 
+    if($laske_tehdas_saldo and $row['suoratoimitus'] != "" and 
     ($row['lasku_maksutyyppi'] == 'S' or $row['lasku_maksutyyppi'] == '') 
     and $row['hyllyalue'] == "" and $row['hyllynro'] == "" and $row['hyllytaso'] == "")
     {

@@ -1428,7 +1428,7 @@ if ($toim != "VALMISTAVARASTOON" and $row['tuoteno'] != '' and ($yhtiorow['vasta
                 $vastaavat_table .= "<td>{$tehdas_saldo_row['toimittajan_nimi']}</td>";
               } else if(count($tehdas_toimittajat) > 0) {
                 if(strtoupper($_tuote['tuoteno']) != strtoupper($row["tuoteno"])) {
-                  $vastaavat_table .= "<td><select id='jspaikka' name='paikat'><option value=\"\">-".t("Toimittaja")."-</option>";
+                  $vastaavat_table .= "<td>".$tehdas_saldo_row['toimittajan_nimi']."<hr>".t("Suoratoimitus:")."</br><select id='jspaikka' name='paikat'><option value=\"\">-".t("Toimittaja")."-</option>";
                   foreach($tehdas_toimittajat as $tehdas_toimittaja) {
                     $vastaavat_table .= '<option value="'.$tehdas_toimittaja["liitostunnus"].'">'.$tehdas_toimittaja["toimittajan_nimi"].' | '.$tehdas_toimittaja["tehdas_saldo"].'</option>';
                   }
@@ -1445,7 +1445,7 @@ if ($toim != "VALMISTAVARASTOON" and $row['tuoteno'] != '' and ($yhtiorow['vasta
                   </script>
                   </td>";
                 } else {
-                  $vastaavat_table .= "<td>";
+                  $vastaavat_table .= "<td>".$tehdas_saldo_row['toimittajan_nimi']."<hr>".t("Suoratoimitus:")."</br>";
                   foreach($tehdas_toimittajat as $tehdas_toimittaja) {
                     $vastaavat_table .= "<small style='font-size: 80%;'>".$tehdas_toimittaja["toimittajan_nimi"]."</small> <br> ".t("saldo: ").$tehdas_toimittaja["tehdas_saldo"]."<hr>";
                   }

@@ -1853,6 +1853,15 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
                 $ale_kaikki_array['ale'.$alepostfix] = ${'ale'.$alepostfix};
               }
 
+              $myyntikerroin_laskenta = false;
+              if ($rivityyppi == 'L' and $trow['suoratoimitus'] != '') {
+                if($myyntikerroin_laskenta = tehdas_saldo_hinnat($kukarow, $trow, $toimittajan_tunnus)) {
+                  $_lis_hinta_chk = $myyntikerroin_laskenta;
+                } else if($tapa == "VAIHDA") {
+                  $hinta = 0;
+                }
+              }
+
               list($lis_hinta, $lis_netto, $lis_ale_kaikki, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $trow, $myy_kpl[$indeksi], $netto, $hinta, $ale_kaikki_array, '', '', ($myy_tyyppi[$indeksi] == 'LAPSITUOTE' ? 'X' : ''));
 
               # Jos kokonaiskappalem‰‰r‰ on suurempi kuin myyt‰viss‰
@@ -1867,6 +1876,10 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
               }
 
               list($lis_hinta, $lis_alv) = alv($laskurow, $trow, $lis_hinta, $alv, $alehinta_alv);
+
+              if($myyntikerroin_laskenta) {
+                $lis_hinta = $_lis_hinta_chk;
+              }
 
               // jos ollaan laittamassa muuta tuotetta kun mit‰ tilattiin, lis‰t‰‰n rivikommentti
               if (strtoupper($myy_tuoteno[$indeksi]) != strtoupper($alkupera_trow["tuoteno"]) and $myy_tyyppi[$indeksi] == "NORMAALI") {

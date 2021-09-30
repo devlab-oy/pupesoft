@@ -1400,6 +1400,7 @@ if ($toim != "VALMISTAVARASTOON" and $row['tuoteno'] != '' and ($yhtiorow['vasta
                 $query2 = "SELECT tt.tehdas_saldo,
                           tt.liitostunnus,
                           tt.toim_tuoteno,
+                          tt.tuoteno,
                           tt.tunnus AS tt_tunnus,
                           toimi.nimi AS toimittajan_nimi,
                           avainsana.selitetark_2,
@@ -1415,6 +1416,7 @@ if ($toim != "VALMISTAVARASTOON" and $row['tuoteno'] != '' and ($yhtiorow['vasta
                           AND tt.tuoteno = '{$_tuote['tuoteno']}'
                           ORDER BY tt.ostohinta
                           ";
+                
                 $tehdas_saldo_res2 = pupe_query($query2);
                 if (mysql_num_rows($tehdas_saldo_res2) > 0) {
                   while($tehdas_saldo_row2 = mysql_fetch_assoc($tehdas_saldo_res2)) {
@@ -1424,9 +1426,9 @@ if ($toim != "VALMISTAVARASTOON" and $row['tuoteno'] != '' and ($yhtiorow['vasta
               }
               if(empty($tehdas_toimittajat)) {
                 $vastaavat_table .= "<td>{$tehdas_saldo_row['toimittajan_nimi']}</td>";
-              } else if(count($tehdas_toimittajat) > 1) {
+              } else if(count($tehdas_toimittajat) > 0) {
                 if(strtoupper($_tuote['tuoteno']) != strtoupper($row["tuoteno"])) {
-                  $vastaavat_table .= "<td><select id='jspaikka' name='paikat'><option value=\"\">-".t("Toimittaja")."-</option>";
+                  $vastaavat_table .= "<td>".$tehdas_saldo_row['toimittajan_nimi']."<hr>".t("Suoratoimitus:")."</br><select id='jspaikka' name='paikat'><option value=\"\">-".t("Toimittaja")."-</option>";
                   foreach($tehdas_toimittajat as $tehdas_toimittaja) {
                     $vastaavat_table .= '<option value="'.$tehdas_toimittaja["liitostunnus"].'">'.$tehdas_toimittaja["toimittajan_nimi"].' | '.$tehdas_toimittaja["tehdas_saldo"].'</option>';
                   }
@@ -1443,7 +1445,7 @@ if ($toim != "VALMISTAVARASTOON" and $row['tuoteno'] != '' and ($yhtiorow['vasta
                   </script>
                   </td>";
                 } else {
-                  $vastaavat_table .= "<td>";
+                  $vastaavat_table .= "<td>".$tehdas_saldo_row['toimittajan_nimi']."<hr>".t("Suoratoimitus:")."</br>";
                   foreach($tehdas_toimittajat as $tehdas_toimittaja) {
                     $vastaavat_table .= "<small style='font-size: 80%;'>".$tehdas_toimittaja["toimittajan_nimi"]."</small> <br> ".t("saldo: ").$tehdas_toimittaja["tehdas_saldo"]."<hr>";
                   }

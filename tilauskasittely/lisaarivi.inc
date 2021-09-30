@@ -3376,7 +3376,7 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
         $query_insert_hinta_alkuperainen_lisa = " hinta_alkuperainen = '{$ohinta}',";
       }
     }
-    else if(!isset($myyntikerroin_laskenta)) {
+    else if(!$myyntikerroin_laskenta) {
       for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
         $query_insert_ale_lisa .= " ale{$alepostfix} = '".$lis_ale_kaikki['ale'.$alepostfix]."',";
       }

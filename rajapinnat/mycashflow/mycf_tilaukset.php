@@ -81,8 +81,8 @@ class MyCashflowTilaukset {
 
   public function get_asiakastiedot($kauppaversio, $etsi_asiakas) {
 
-    // vain version 6 asiakkaan tiedot haetaan
-    if(!in_array($kauppaversio, array(6,4))) {
+    // versioiden rajoitus
+    if(!in_array($kauppaversio, $mycf_kaupat_jossa_kaytetaan_asiakastiedot)) {
       return;
     }
     
@@ -135,8 +135,9 @@ class MyCashflowTilaukset {
 
     // haetaan asiakkaan maksuehto
     $asiakasmaksuehto = false;
+    $omaeditilaustyyppi = false;
     if(!empty($loydetty_asiakas['maksuehto'])) {
-      $query = "SELECT teksti 
+      $query = "SELECT teksti, relpvm, kateinen  
                   FROM maksuehto 
                   WHERE yhtio = '{$GLOBALS["yhtiorow"]['yhtio']}' 
                   AND tunnus = '{$loydetty_asiakas['maksuehto']}'
@@ -145,6 +146,12 @@ class MyCashflowTilaukset {
       if (mysql_num_rows($result)) {
         $loydetty_asiakasmaksuehto = mysql_fetch_assoc($result);
         $asiakasmaksuehto = $loydetty_asiakasmaksuehto['teksti'];
+        // Edi tilaus muuttuu versioon 9, jos on maksuaika > 0 ja tilaus ei ole käteinen 
+        if($mycf_tilaustyyppi_9_laskuille) {
+          if($loydetty_asiakasmaksuehto['relpvm'] > 0 and $loydetty_asiakasmaksuehto['kateinen'] != "") {
+            $omaeditilaustyyppi = 9;
+          }
+        }
       }
     }
 
@@ -153,7 +160,8 @@ class MyCashflowTilaukset {
       'kurssi_kerroin' => $kurssi_kerroin,
       'asiakasvaluuta' => $loydetty_asiakas['valkoodi'],
       'maksuehto' => $asiakasmaksuehto,
-      'asiakaskurssi' => $asiakaskurssi
+      'asiakaskurssi' => $asiakaskurssi,
+      'tilaustyyppi' => $omaeditilaustyyppi
     );
   }
 
@@ -180,7 +188,7 @@ class MyCashflowTilaukset {
       'verkkokauppa_verollisen_hinnan_kentta' => '',
     );
 
-    $url = "{$this->apiurl}/webhooks/changes?ts={$datetime_checkpoint}&key={$this->whkey}";
+    $url = "https://beautypopup.mycashflow.fi/webhooks/get?order=18297&key=0b6a99d07956ec93996377e1781aa1";
 
     // Webhooks-call
     $ch = curl_init($url);
@@ -198,6 +206,8 @@ class MyCashflowTilaukset {
     $tilaus = array();
 
     foreach ($xml->Order as $order) {
+      
+      $order->OrderNumber = rand(0, 99999);
       
       // Ohitetaan duplikaatit
       $query = "SELECT asiakkaan_tilausnumero
@@ -308,6 +318,9 @@ class MyCashflowTilaukset {
         $options['oma_kurssi'] = "JOO";
         $options['asiakasvaluuta'] = $asiakastiedot['asiakasvaluuta'];
         $options['asiakaskurssi'] = $asiakastiedot['asiakaskurssi'];
+        if($asiakastiedot['tilaustyyppi']) {
+          $options['tilaustyyppi'] = $asiakastiedot['tilaustyyppi'];
+        }
       }
 
       foreach ($order->Products->Product as $product) {

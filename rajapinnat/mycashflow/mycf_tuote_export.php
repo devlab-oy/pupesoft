@@ -20,7 +20,7 @@ require_once 'rajapinnat/logger.php';
 
 require "rajapinnat/mycashflow/mycf_functions.php";
 require "rajapinnat/mycashflow/mycf_saldot.php";
-require "rajapinnat/mycashflow/mycf_tilaukset.php";
+require "rajapinnat/mycashflow/mycf_tilaukset_export.php";
 
 if (empty($argv[1])) {
   die("ERROR! Aja näin:\nmycf_tuote_export.php yhtiö [laji,laji,...] [ajentaanko_kaikki]\n");

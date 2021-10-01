@@ -222,16 +222,7 @@ if (!function_exists('desadv_header')) {
       }
     }
     else {
-      if(isset($_erikois_desadv_message) and $_erikois_desadv_message and $desadv_laskurow['toim_nimi'] != '' and $desadv_laskurow['asiakastoim_ovttunnus'] != '') {
-        $desadv_message .= "NAD+CN+{$desadv_laskurow['asiakastoim_ovttunnus']}::92++"
-          .substr($desadv_laskurow["toim_nimi"], 0, 35).":"
-          .substr($desadv_laskurow["toim_nimitark"], 0, 35)."+"
-          .substr($desadv_laskurow["toim_osoite"], 0, 35)."+"
-          .substr($desadv_laskurow["toim_postitp"], 0, 35)."++"
-          .substr($desadv_laskurow["toim_postino"], 0, 17)."+"
-          .substr($desadv_laskurow["toim_maa"], 0, 3)."'";
-      }
-      elseif ($toitarow['toim_nimi'] != '' and $toitarow['toim_ovttunnus'] != '') {
+      if ($toitarow['toim_nimi'] != '' and $toitarow['toim_ovttunnus'] != '') {
         //toimitustavan terminaalin-toimitusosoite
         $desadv_message .= "NAD+CN+{$toitarow['toim_ovttunnus']}::92++"
           .substr($toitarow["toim_nimi"], 0, 35).":"

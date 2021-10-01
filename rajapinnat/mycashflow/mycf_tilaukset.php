@@ -21,6 +21,12 @@ class MyCashflowTilaukset {
   // Mikä on EDI-tilauksen tilaustyyppi
   private $pupesoft_tilaustyyppi = '';
 
+  // Mitkä ovat kauppaversiot joissa käytetään asiakastiedot (valuuta, jne.)
+  private $kaupat_kaytetaan_asiakastiedot = array();
+
+  // Saako käyttää edi tilauksen tyyppi 9 laskuille
+  private $mycf_tilaustyyppi_9_laskuille = false;
+
   // Mikä on EDI-tilauksella asiakasnumero, jolle tilaus tehdään
   private $verkkokauppa_asiakasnro = null;
 
@@ -41,7 +47,7 @@ class MyCashflowTilaukset {
 
   public function set_edi_polku($value) {
     if (!is_writable($value)) {
-      throw new Exception("EDI -hakemistoon ei voida kirjoittaa");
+      throw new Exception($value."EDI -hakemistoon ei voida kirjoittaa");
     }
 
     $this->edi_polku = $value;
@@ -63,6 +69,14 @@ class MyCashflowTilaukset {
     $this->pupesoft_tilaustyyppi = $value;
   }
 
+  public function set_kaupat_kaytetaan_asiakastiedot($value) {
+    $this->kaupat_kaytetaan_asiakastiedot = $value;
+  }
+
+  public function set_mycf_tilaustyyppi_9_laskuille($value) {
+    $this->mycf_tilaustyyppi_9_laskuille = $value;
+  }
+
   public function set_verkkokauppa_asiakasnro($value) {
     $this->verkkokauppa_asiakasnro = $value;
   }
@@ -82,7 +96,7 @@ class MyCashflowTilaukset {
   public function get_asiakastiedot($kauppaversio, $etsi_asiakas) {
 
     // versioiden rajoitus
-    if(!in_array($kauppaversio, $mycf_kaupat_jossa_kaytetaan_asiakastiedot)) {
+    if(!in_array($kauppaversio, $this->kaupat_kaytetaan_asiakastiedot)) {
       return;
     }
     
@@ -137,7 +151,7 @@ class MyCashflowTilaukset {
     $asiakasmaksuehto = false;
     $omaeditilaustyyppi = false;
     if(!empty($loydetty_asiakas['maksuehto'])) {
-      $query = "SELECT teksti, relpvm, kateinen  
+      $query = "SELECT teksti, rel_pvm, kateinen  
                   FROM maksuehto 
                   WHERE yhtio = '{$GLOBALS["yhtiorow"]['yhtio']}' 
                   AND tunnus = '{$loydetty_asiakas['maksuehto']}'
@@ -146,9 +160,10 @@ class MyCashflowTilaukset {
       if (mysql_num_rows($result)) {
         $loydetty_asiakasmaksuehto = mysql_fetch_assoc($result);
         $asiakasmaksuehto = $loydetty_asiakasmaksuehto['teksti'];
+        $asiakasmaksuehto = mb_convert_encoding($asiakasmaksuehto, "UTF-8", "Windows-1252");
         // Edi tilaus muuttuu versioon 9, jos on maksuaika > 0 ja tilaus ei ole käteinen 
-        if($mycf_tilaustyyppi_9_laskuille) {
-          if($loydetty_asiakasmaksuehto['relpvm'] > 0 and $loydetty_asiakasmaksuehto['kateinen'] != "") {
+        if($this->mycf_tilaustyyppi_9_laskuille) {
+          if($loydetty_asiakasmaksuehto['rel_pvm'] > 0 and $loydetty_asiakasmaksuehto['kateinen'] == "") {
             $omaeditilaustyyppi = 9;
           }
         }

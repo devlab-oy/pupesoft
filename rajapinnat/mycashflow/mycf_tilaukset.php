@@ -21,6 +21,12 @@ class MyCashflowTilaukset {
   // Mikä on EDI-tilauksen tilaustyyppi
   private $pupesoft_tilaustyyppi = '';
 
+  // Mitkä ovat kauppaversiot joissa käytetään asiakastiedot (valuuta, jne.)
+  private $kaupat_kaytetaan_asiakastiedot = array();
+
+  // Saako käyttää edi tilauksen tyyppi 9 laskuille
+  private $mycf_tilaustyyppi_9_laskuille = false;
+
   // Mikä on EDI-tilauksella asiakasnumero, jolle tilaus tehdään
   private $verkkokauppa_asiakasnro = null;
 
@@ -63,6 +69,14 @@ class MyCashflowTilaukset {
     $this->pupesoft_tilaustyyppi = $value;
   }
 
+  public function set_kaupat_kaytetaan_asiakastiedot($value) {
+    $this->kaupat_kaytetaan_asiakastiedot = $value;
+  }
+
+  public function set_mycf_tilaustyyppi_9_laskuille($value) {
+    $this->mycf_tilaustyyppi_9_laskuille = $value;
+  }
+
   public function set_verkkokauppa_asiakasnro($value) {
     $this->verkkokauppa_asiakasnro = $value;
   }
@@ -81,8 +95,8 @@ class MyCashflowTilaukset {
 
   public function get_asiakastiedot($kauppaversio, $etsi_asiakas) {
 
-    // vain version 6 asiakkaan tiedot haetaan
-    if(!in_array($kauppaversio, array(6,4))) {
+    // versioiden rajoitus
+    if(!in_array($kauppaversio, $this->kaupat_kaytetaan_asiakastiedot)) {
       return;
     }
     
@@ -135,8 +149,9 @@ class MyCashflowTilaukset {
 
     // haetaan asiakkaan maksuehto
     $asiakasmaksuehto = false;
+    $omaeditilaustyyppi = false;
     if(!empty($loydetty_asiakas['maksuehto'])) {
-      $query = "SELECT teksti 
+      $query = "SELECT teksti, rel_pvm, kateinen  
                   FROM maksuehto 
                   WHERE yhtio = '{$GLOBALS["yhtiorow"]['yhtio']}' 
                   AND tunnus = '{$loydetty_asiakas['maksuehto']}'
@@ -145,6 +160,12 @@ class MyCashflowTilaukset {
       if (mysql_num_rows($result)) {
         $loydetty_asiakasmaksuehto = mysql_fetch_assoc($result);
         $asiakasmaksuehto = $loydetty_asiakasmaksuehto['teksti'];
+        // Edi tilaus muuttuu versioon 9, jos on maksuaika > 0 ja tilaus ei ole käteinen 
+        if($this->mycf_tilaustyyppi_9_laskuille) {
+          if($loydetty_asiakasmaksuehto['rel_pvm'] > 0 and $loydetty_asiakasmaksuehto['kateinen'] == "") {
+            $omaeditilaustyyppi = 9;
+          }
+        }
       }
     }
 
@@ -153,7 +174,8 @@ class MyCashflowTilaukset {
       'kurssi_kerroin' => $kurssi_kerroin,
       'asiakasvaluuta' => $loydetty_asiakas['valkoodi'],
       'maksuehto' => $asiakasmaksuehto,
-      'asiakaskurssi' => $asiakaskurssi
+      'asiakaskurssi' => $asiakaskurssi,
+      'tilaustyyppi' => $omaeditilaustyyppi
     );
   }
 
@@ -308,6 +330,9 @@ class MyCashflowTilaukset {
         $options['oma_kurssi'] = "JOO";
         $options['asiakasvaluuta'] = $asiakastiedot['asiakasvaluuta'];
         $options['asiakaskurssi'] = $asiakastiedot['asiakaskurssi'];
+        if($asiakastiedot['tilaustyyppi']) {
+          $options['tilaustyyppi'] = $asiakastiedot['tilaustyyppi'];
+        }
       }
 
       foreach ($order->Products->Product as $product) {

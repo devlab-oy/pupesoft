@@ -151,7 +151,7 @@ class ImportSaldoHinta
         $oh2 = fopen($output2, 'w');
         $i=0;
         while (false !== ($data = fgetcsv($ih, 0, ";"))) {
-          if($data[$tiedostokolumnit[0][2]] == "-" or $data[$tiedostokolumnit[0][2]] == "") { $data[$tiedostokolumnit[0][2]] = 1; }
+          if($data[$tiedostokolumnit[0][2]] == "-" or $data[$tiedostokolumnit[0][2]] == "") { $data[$tiedostokolumnit[0][2]] = 0; }
           if ($i==0) {
             $outputData = array('Product code', 'Mercantile Price', '');
             fputcsv($oh, $outputData);

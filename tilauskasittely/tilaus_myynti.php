@@ -602,23 +602,6 @@ if (($kukarow["extranet"] != '' and $toim != 'EXTRANET' and $toim != 'EXTRANET_R
   exit;
 }
 
-if ($laske_tehdas_saldo and $orig_tila == "L" and $orig_alatila == "A") {
-  $kesklas_query = "SELECT *
-              FROM lasku
-              WHERE yhtio = '{$kukarow['yhtio']}'
-              AND tunnus  = $tilausnumero";
-  $kesklas_query  = pupe_query($kesklas_query);
-  $kesklas = mysql_fetch_assoc($kesklas_query);
-  if($kesklas['maksutyyppi'] == "") {
-    $query_paivita_maksutyyppi = "UPDATE lasku
-                                  SET maksutyyppi = 'N' 
-                                  where yhtio     = '$kukarow[yhtio]' 
-                                  and tunnus      = '$kesklas[tunnus]' 
-                                  and tunnusnippu = 0";
-    pupe_query($query_paivita_maksutyyppi);
-  }
-}
-
 if ($tee == 'TARKISTA') {
   $uquery = "UPDATE lasku
              SET tilaustyyppi = 'L'
@@ -1374,6 +1357,40 @@ if ($tee == 'POISTA' and $muokkauslukko == "" and $kukarow["mitatoi_tilauksia"] 
       $jt_rivi_res = pupe_query($query);
 
       echo "<font class='message'>", t("Jälkitoimitus palautettiin tilaukselle"), " $jt_rivien_muisti_row[vanha_otunnus], ", t("ota yhteys asiakaspalveluun"), ".</font><br><br>";
+    }
+  }
+
+  $query_poistettavat_rivit = "SELECT tunnus, tilkpl, tuoteno
+                                FROM tilausrivi
+                                WHERE yhtio  = '{$kukarow['yhtio']}'
+                                AND tyyppi  != 'D'
+                                AND otunnus  = '{$kukarow['kesken']}'";
+  $poistettavat_rivit = pupe_query($query_poistettavat_rivit);
+  while ($poistettava_rivi = mysql_fetch_assoc($poistettavat_rivit)) {
+    if ($poistettava_rivi['hyllyalue'] == "" and $poistettava_rivi['hyllynro'] == "" and $poistettava_rivi['hyllytaso'] == "") {
+      $query_hae_suoratoimitus = "SELECT suoratoimitus 
+                                    FROM tuote 
+                                    WHERE yhtio = '{$kukarow["yhtio"]}'
+                                    AND tuoteno = '{$poistettava_rivi['tuoteno']}'";
+      $query_hae_suoratoimitus = pupe_query($query_hae_suoratoimitus);
+      $query_hae_suoratoimitus = mysql_fetch_array($query_hae_suoratoimitus);
+      if ($query_hae_suoratoimitus['suoratoimitus'] != "") {
+        $query_hae_tilausrivi = "SELECT * 
+                                    FROM tilausrivin_lisatiedot 
+                                    WHERE yhtio = '{$kukarow["yhtio"]}' 
+                                    AND tilausrivin_lisatiedot.tilausrivitunnus = {$poistettava_rivi['tunnus']}";
+        $tilausrivin_toimittajan_tunnus = pupe_query($query_hae_tilausrivi);
+        if (mysql_num_rows($tilausrivin_toimittajan_tunnus) > 0) {
+          $tilausrivin_toimittajan_tunnus = mysql_fetch_array($tilausrivin_toimittajan_tunnus);
+          $tehtaan_saldo_paivita = "UPDATE tuotteen_toimittajat 
+                                      SET tehdas_saldo = tehdas_saldo+{$poistettava_rivi['tilkpl']} 
+                                      WHERE yhtio = '{$kukarow['yhtio']}' 
+                                      AND liitostunnus = {$tilausrivin_toimittajan_tunnus['toimittajan_tunnus']}
+                                      AND myyntihinta_kerroin > 0 
+                                      AND tuoteno = '{$poistettava_rivi['tuoteno']}'";
+          pupe_query($tehtaan_saldo_paivita);
+        }
+      }
     }
   }
 
@@ -5065,8 +5082,8 @@ if ($tee == '') {
         $paikka .= "#!¡!#".$m_eranro["sarjanumero"];
       }
 
-      if($tapa == "MUOKKAA" or $tapa == "POISTA") {
-        if($laske_tehdas_saldo and $orig_tila == "L" and $orig_alatila == "A") {
+      if($tapa == "MUOKKAA" or $tapa == "POISTA" or $tyhjenna) {
+        if($laske_tehdas_saldo) {
           if ($tilausrivi['hyllyalue'] == "" and $tilausrivi['hyllynro'] == "" and $tilausrivi['hyllytaso'] == "") {
             $query_hae_suoratoimitus = "SELECT suoratoimitus 
                                           FROM tuote 
@@ -5089,11 +5106,6 @@ if ($tee == '') {
                                             AND myyntihinta_kerroin > 0 
                                             AND tuoteno = '{$tilausrivi['tuoteno']}'";
                 pupe_query($tehtaan_saldo_paivita);
-                $query_hae_laskutila = "UPDATE lasku 
-                                          SET maksutyyppi = 'S' 
-                                          WHERE yhtio = '{$kukarow["yhtio"]}'
-                                          AND tunnus = '{$laskurow['tunnus']}'";
-                $query_hae_laskutila = pupe_query($query_hae_laskutila);
               }
             }
           }
@@ -8079,6 +8091,7 @@ if ($tee == '') {
             }
 
             echo "<form method='post' name='paikat' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php'>
+                    <input type='hidden' name='nyk_paikka' value = '$row[toimittajan_tunnus]'>
                     <input type='hidden' name='toim'       value = '$toim'>
                     <input type='hidden' name='lopetus'     value = '$lopetus'>
                     <input type='hidden' name='ruutulimit'     value = '$ruutulimit'>

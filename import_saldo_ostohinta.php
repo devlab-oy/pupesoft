@@ -484,6 +484,8 @@ class ImportSaldoHinta
 
       $eankoodi_tarkista = $rivi[$eankoodin_kolumni];
 
+      $tuotesaldo = 0;
+
       if(isset($rivit_prices[$tuotekoodi_tarkista1]['saldo'])) {
         $tuotesaldo = $rivit_prices[$tuotekoodi_tarkista1]['saldo'];
       } else if(isset($saldo_kolumni)) {
@@ -495,10 +497,6 @@ class ImportSaldoHinta
 
       // Haetaan hintatiedot ja saldo price array:ista
       $tuotehinta = $rivit_prices[$tuotekoodi_tarkista1]['hinta'];
-
-      if (empty($tuotesaldo)) {
-        $tuotesaldo = 0;
-      }
 
       // yritet‰‰n p‰ivitt‰‰ suoraan tuotenumerolla
       $query = "UPDATE tuotteen_toimittajat

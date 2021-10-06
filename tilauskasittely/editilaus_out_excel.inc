@@ -20,7 +20,7 @@ if($tulosta_ostohinnalla) {
   $hinta_query = "
     tilausrivi.kommentti kommentti,
     tilausrivi.nimitys nimitys,
-    ROUND(tilausrivi.hinta,2) hinta,
+    ROUND(tilausrivi.hinta,3) hinta,
     round((tilausrivi.varattu + tilausrivi.jt)
     * tilausrivi.hinta
     * if (tuotteen_toimittajat.tuotekerroin = 0

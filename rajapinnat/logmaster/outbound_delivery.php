@@ -81,6 +81,8 @@ $query = "SELECT DISTINCT lasku.tunnus
               lasku.tila = 'G' AND
               lasku.alatila = 'J' AND
               lasku.toimitustavan_lahto = 0
+            ) OR(
+              lasku.laatija='magento' and lasku.tila = 'L' AND lasku.alatila = 'X'  
             )
           )
           AND NOW() >= DATE_ADD(lasku.h1time, INTERVAL (if(varastopaikat.ulkoinen_jarjestelma='L', 1, 15)) MINUTE)

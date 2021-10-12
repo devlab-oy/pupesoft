@@ -112,7 +112,12 @@ while (false !== ($file = readdir($handle))) {
             WHERE yhtio = '{$kukarow['yhtio']}'
             AND tunnus  = '{$otunnus}'
             AND tila    IN ('L', 'V', 'G', 'S')
-            AND alatila IN ('A', 'E', 'J')";
+            AND (alatila IN ('A', 'E', 'J') OR (
+              alatila = 'X' 
+              AND laatija = 'magento' 
+              AND maksuteksti not in('VerkkokaupanLuottokortti','','Verkkokauppamaksu')
+              AND laskunro != 0)
+            )";
   $laskures = pupe_query($query);
 
   $tuotteiden_paino = 0;

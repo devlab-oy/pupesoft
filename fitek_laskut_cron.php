@@ -69,13 +69,13 @@ $ftpport = $ftpport_fitek_cron;
 $ftppath = $ftppath_fitek_cron_pdf;
 $ftpdest = $ftpdest_fitek_cron_pdf;
 // jo olevia olemassa tiedostoja kansiossa orig ei saa käsitellä uudestaan
-$ftp_exclude_files = array_diff(scandir($verkkolaskut_pdf), array('..', '.', '.DS_Store'));
+$ftp_exclude_files = array_diff(scandir($verkkolaskut_pdf), array('..', '.', '.DS_Store','.keep'));
 include_once 'sftp-get.php';
 
 $ftppath = $ftppath_fitek_cron;
 $ftpdest = $ftpdest_fitek_cron;
 // jo olevia olemassa tiedostoja kansiossa orig ei saa käsitellä uudestaan
-$ftp_exclude_files = array_diff(scandir($verkkolaskut_orig), array('..', '.', '.DS_Store'));
+$ftp_exclude_files = array_diff(scandir($verkkolaskut_orig), array('..', '.', '.DS_Store','.keep'));
 $ftp_exclude_files[] = 'pdf';
 
 $sftp->getFilesFrom($ftppath."/", $ftpdest."/", $ftp_exclude_files);

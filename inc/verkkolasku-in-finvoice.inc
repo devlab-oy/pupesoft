@@ -45,6 +45,7 @@ if ($fitek_xml_cron_tiedot) {
     return;
   }
 }
+
 // parseroidaan xml
 $yhtio = xml_string($xml->BuyerOrganisationUnitNumber);
 $verkkotunnus_vas = xml_string($xml->BuyerPartyDetails->BuyerOrganisationTaxCode);
@@ -52,6 +53,9 @@ $verkkotunnus_vas_inv = xml_string($xml->InvoiceRecipientPartyDetails->InvoiceRe
 $laskun_tyyppi = xml_string($xml->InvoiceDetails->InvoiceTypeCode);
 $laskun_tyyppi_teksti = xml_string($xml->InvoiceDetails->InvoiceTypeText);
 $laskun_numero = xml_string($xml->InvoiceDetails->InvoiceNumber);
+if ($fitek_xml_cron_tiedot) {
+  $laskun_numero = preg_replace('/\D/', '', $laskun_numero);
+}
 $laskun_tapvm = xml_string($xml->InvoiceDetails->InvoiceDate);
 $laskun_lapvm = xml_string($xml->InvoiceDetails->InvoiceDate);
 $laskun_erapaiva = xml_string($xml->EpiDetails->EpiPaymentInstructionDetails->EpiDateOptionDate);
@@ -145,6 +149,15 @@ if ($laskun_pankkiviite == "") {
   $laskun_pankkiviite = xml_string($xml->InvoiceDetails->SellerReferenceIdentifier);
 }
 
+if(
+  $fitek_xml_cron_tiedot and 
+  $laskun_pankkiviite == "" and 
+  isset($fitek_xml_cron_tiedot['_fitek_cron_invoicenumber_copy']) and 
+  $laskuttajan_identifier == $fitek_xml_cron_tiedot['_fitek_cron_invoicenumber_copy']
+  ) {
+  $laskun_pankkiviite = 0;
+}
+
 if ($laskun_summa_eur == 0) {
   $laskun_summa_eur = xml_float($xml->InvoiceDetails->InvoiceTotalVatIncludedAmount);
 }
@@ -197,7 +210,6 @@ if (count($tuotetiedot) > 0) {
         $fitek_xml_loydetyt_kustannuspaikat[xml_string($tuotetieto->Accounting->JournalEntry->CostObjective->Kaubaost)] = true;
         $fitek_xml_cron_tiedot["kustannuspaikka"] = xml_string($tuotetieto->Accounting->JournalEntry->CostObjective->Kaubaost);
         $rtuoteno[$i]["kirjanpito"]["alv"] = xml_string($tuotetieto->Accounting->JournalEntry->VatRate);
-        $rtuoteno[$i]["kirjanpito"]["alv_prosentti"] = xml_string($tuotetieto->Accounting->JournalEntry->VatRate);
         $rtuoteno[$i]["kirjanpito"]["tili"] = xml_string($tuotetieto->Accounting->JournalEntry->GeneralLedger);
         if($tuotetieto->Accounting->JournalEntry->CostObjective->Kaubaost) {
           $kustannuspaikat_fitek = true;

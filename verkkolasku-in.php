@@ -130,6 +130,9 @@ if ($handle = opendir($laskut)) {
     if($fitek_xml_cron_tiedot) {
       $pdf_tiedosto_uusi = replace_extension($file, "pdf");
       $fitek_xml_cron_tiedot["pdf_tiedosto"] = $laskut."/pdf_done/".$pdf_tiedosto_uusi;
+      if(isset($_fitek_cron_invoicenumber_copy)) {
+        $fitek_xml_cron_tiedot['_fitek_cron_invoicenumber_copy'] = $_fitek_cron_invoicenumber_copy;
+      }
     }
 
     $laskuvirhe = verkkolasku_in($nimi, TRUE, $fitek_xml_cron_tiedot);

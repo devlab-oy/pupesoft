@@ -81,13 +81,6 @@ $query = "SELECT DISTINCT lasku.tunnus
               lasku.tila = 'G' AND
               lasku.alatila = 'J' AND
               lasku.toimitustavan_lahto = 0
-            ) OR (
-              lasku.laatija='magento' AND 
-              lasku.tila = 'L' AND 
-              lasku.alatila = 'X' AND 
-              lasku.maksuteksti NOT IN('VerkkokaupanLuottokortti','','Verkkokauppamaksu') AND 
-              lasku.laskunro != 0 AND 
-              lasku.toimitustavan_lahto = 0
             )
           )
           AND NOW() >= DATE_ADD(lasku.h1time, INTERVAL (if(varastopaikat.ulkoinen_jarjestelma='L', 1, 15)) MINUTE)

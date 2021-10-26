@@ -1139,7 +1139,9 @@ else {
     }
 
     // Jos on kassamyyntiä ja se on käteistä niin tulostetaan lasku heti ilman lähetettä
-    if (($kateinen == 'X' and $kateisohitus == "" and ($kukarow["kassamyyja"] != '' or $kertakassa != "") and $laskurow["vienti"] == '') or $laskurow["clearing"] == "KORKOLASKU") {
+    if (($kateinen == 'X' and $kateisohitus == "" and ($kukarow["kassamyyja"] != '' or $kertakassa != "") and $laskurow["vienti"] == '') 
+    or $laskurow["clearing"] == "KORKOLASKU" 
+    or $custom_netto_lasku) {
 
       $query  = "UPDATE tilausrivi
                  SET kerattyaika = now(), keratty = '$kukarow[kuka]'

@@ -1312,6 +1312,12 @@ if (!function_exists("verkkolasku_in")) {
         if ($ealvi[0] != "") $vero = (float) $ealvi[0];
         else $vero = (float) $oletusalvi;
 
+        // FITEK kirjanpito tiedot
+        if (isset($rtuoteno[0]["kirjanpito"])) {
+          $vero = $rtuoteno[0]["kirjanpito"]["alv"];
+          $tili = $rtuoteno[0]["kirjanpito"]["tili"];
+        }
+
         $kirjattava_summa       = $omasumma;
         $summa_varasto         = round($omasumma / (1 + ($vero / 100)), 2);
         $summa_varasto_valuutassa = round($omasumma / (1 + ($vero / 100)) / $vrow['kurssi'], 2);

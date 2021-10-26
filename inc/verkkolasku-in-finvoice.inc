@@ -45,6 +45,7 @@ if ($fitek_xml_cron_tiedot) {
     return;
   }
 }
+
 // parseroidaan xml
 $yhtio = xml_string($xml->BuyerOrganisationUnitNumber);
 $verkkotunnus_vas = xml_string($xml->BuyerPartyDetails->BuyerOrganisationTaxCode);
@@ -148,7 +149,12 @@ if ($laskun_pankkiviite == "") {
   $laskun_pankkiviite = xml_string($xml->InvoiceDetails->SellerReferenceIdentifier);
 }
 
-if($fitek_xml_cron_tiedot and $laskun_pankkiviite == "") {
+if(
+  $fitek_xml_cron_tiedot and 
+  $laskun_pankkiviite == "" and 
+  isset($fitek_xml_cron_tiedot['_fitek_cron_invoicenumber_copy']) and 
+  $laskuttajan_identifier == $fitek_xml_cron_tiedot['_fitek_cron_invoicenumber_copy']
+  ) {
   $laskun_pankkiviite = 0;
 }
 
@@ -204,7 +210,6 @@ if (count($tuotetiedot) > 0) {
         $fitek_xml_loydetyt_kustannuspaikat[xml_string($tuotetieto->Accounting->JournalEntry->CostObjective->Kaubaost)] = true;
         $fitek_xml_cron_tiedot["kustannuspaikka"] = xml_string($tuotetieto->Accounting->JournalEntry->CostObjective->Kaubaost);
         $rtuoteno[$i]["kirjanpito"]["alv"] = xml_string($tuotetieto->Accounting->JournalEntry->VatRate);
-        $rtuoteno[$i]["kirjanpito"]["alv_prosentti"] = xml_string($tuotetieto->Accounting->JournalEntry->VatRate);
         $rtuoteno[$i]["kirjanpito"]["tili"] = xml_string($tuotetieto->Accounting->JournalEntry->GeneralLedger);
         if($tuotetieto->Accounting->JournalEntry->CostObjective->Kaubaost) {
           $kustannuspaikat_fitek = true;

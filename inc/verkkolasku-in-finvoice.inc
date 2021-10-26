@@ -52,6 +52,9 @@ $verkkotunnus_vas_inv = xml_string($xml->InvoiceRecipientPartyDetails->InvoiceRe
 $laskun_tyyppi = xml_string($xml->InvoiceDetails->InvoiceTypeCode);
 $laskun_tyyppi_teksti = xml_string($xml->InvoiceDetails->InvoiceTypeText);
 $laskun_numero = xml_string($xml->InvoiceDetails->InvoiceNumber);
+if ($fitek_xml_cron_tiedot) {
+  $laskun_numero = preg_replace('/\D/', '', $laskun_numero);
+}
 $laskun_tapvm = xml_string($xml->InvoiceDetails->InvoiceDate);
 $laskun_lapvm = xml_string($xml->InvoiceDetails->InvoiceDate);
 $laskun_erapaiva = xml_string($xml->EpiDetails->EpiPaymentInstructionDetails->EpiDateOptionDate);
@@ -143,6 +146,10 @@ if ($laskun_pankkiviite == "") {
 
 if ($laskun_pankkiviite == "") {
   $laskun_pankkiviite = xml_string($xml->InvoiceDetails->SellerReferenceIdentifier);
+}
+
+if($fitek_xml_cron_tiedot and $laskun_pankkiviite == "") {
+  $laskun_pankkiviite = 0;
 }
 
 if ($laskun_summa_eur == 0) {

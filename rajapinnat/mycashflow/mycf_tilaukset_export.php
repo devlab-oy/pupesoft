@@ -163,7 +163,7 @@ class MyCashflowTilaukset {
         // Edi tilaus muuttuu versioon 9, jos on maksuaika > 0 ja tilaus ei ole käteinen 
         if($this->mycf_tilaustyyppi_9_laskuille) {
           if($loydetty_asiakasmaksuehto['rel_pvm'] > 0 and $loydetty_asiakasmaksuehto['kateinen'] == "") {
-            $omaeditilaustyyppi = 9;
+            $omaeditilaustyyppi = 2;
           }
         }
       }
@@ -220,7 +220,7 @@ class MyCashflowTilaukset {
     $tilaus = array();
 
     foreach ($xml->Order as $order) {
-      
+
       // Ohitetaan duplikaatit
       $query = "SELECT asiakkaan_tilausnumero
                 FROM lasku
@@ -332,6 +332,7 @@ class MyCashflowTilaukset {
         $options['asiakaskurssi'] = $asiakastiedot['asiakaskurssi'];
         if($asiakastiedot['tilaustyyppi']) {
           $options['tilaustyyppi'] = $asiakastiedot['tilaustyyppi'];
+          $options['custom_netto_lasku'] = '1';
         }
       }
 

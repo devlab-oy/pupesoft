@@ -33,6 +33,7 @@ if (strpos($file, "maventa") !== false) {
 if ($fitek_xml_cron_tiedot) {
   $fitek_yhtio = $fitek_xml_cron_tiedot['yhtio'];
   $laskun_numero = xml_string($xml->InvoiceDetails->InvoiceNumber);
+  $laskun_numero = preg_replace('/\D/', '', $laskun_numero);
   $query_tarkista_lasku = "SELECT laskunro 
                             FROM lasku 
                             WHERE yhtio = '{$fitek_yhtio}' 

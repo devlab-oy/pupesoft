@@ -224,7 +224,12 @@ if (in_array($row["var"], array('S', 'U', 'T', 'R', 'J')) and $row["tyyppi"] != 
   }
 }
 
-if (in_array($row['var'], array('U', 'T', 'S')) and $meapurow['kateinen'] != '') {
+if (
+  in_array($row['var'], array('U', 'T', 'S')) 
+  and $meapurow['kateinen'] != '' 
+  and ($trow['suoratoimitus'] != 'X' and $laske_tehdas_saldo and 
+  $row['hyllyalue'] != "" and $row['hyllynro'] != "" and $row['hyllytaso'] != "")
+  ) {
 
   if ($row['var'] == 'U') {
     $varaosavirhe .= t("VIRHE: Et voi tilata toimittajalta asiakkaalle, koska maksuehto on käteinen!")."<br>";

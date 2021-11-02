@@ -24,8 +24,6 @@ if (!$yhtiorow) {
 // Logitetaan ajo
 cron_log();
 
-error_reporting(E_ALL);
-ini_set('display_errors', '1');
 ini_set('memory_limit', '4000M');
 
 $ftptiedot = array(
@@ -430,6 +428,7 @@ class ImportSaldoHinta
     $loydetyt_tuotteet = array();
     $epaonnistuneet_tuotteet = array();
     $laskerivit = 0;
+    pupeslave_start();
     while ($rivi = fgetcsv($impsaloh_csv, 100000, $csv_jakajaa)) {
     
       // Skipataan tyhjät rivit
@@ -565,6 +564,7 @@ class ImportSaldoHinta
       echo "...Tuotteet OK: ".count($loydetyt_tuotteet);
       echo "...\r";
     }
+    pupeslave_stop();
 
     $impsaloh_timestamp = $date = new DateTime();
     $impsaloh_timestamp = $impsaloh_timestamp->getTimestamp();

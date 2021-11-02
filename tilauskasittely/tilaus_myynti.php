@@ -425,6 +425,7 @@ if (!isset($yksi_suoratoimittaja)) $yksi_suoratoimittaja = "";
 if (!isset($ylatila)) $ylatila = "";
 if (!isset($luottorajavirhe_ylivito_valmis)) $luottorajavirhe_ylivito_valmis = true;
 if (!isset($laskutuskielto_ruksi)) $laskutuskielto_ruksi = "";
+if (!isset($suoraan_laskutukseen_ruksi)) $suoraan_laskutukseen_ruksi = "";
 if (!isset($rahtivapaa)) $rahtivapaa = "";
 if (!isset($osatoimitus)) $osatoimitus = "";
 if (!isset($muokataan_otsikoita)) $muokataan_otsikoita = "";
@@ -2897,7 +2898,8 @@ if ($tee == '') {
       ($laajennettu_pikaotsikko and isset($maksuehto) and $maksuehto != $laskurow["maksuehto"] and $muokataan_otsikoita != "") or
       ($laajennettu_pikaotsikko and isset($myy_varastosta) and $myy_varastosta != $laskurow["varasto"] and $muokataan_otsikoita != "") or
       ($laajennettu_pikaotsikko and isset($hyvaksynnanmuutos) and $hyvaksynnanmuutos != $laskurow["hyvaksynnanmuutos"] and $muokataan_otsikoita != "") or
-      ($laajennettu_pikaotsikko and isset($laskutuskielto_ruksi) and $muokataan_otsikoita != "") or
+      ($laajennettu_pikaotsikko and isset($laskutuskielto_ruksi) and $muokataan_otsikoita != "") or 
+      ($laajennettu_pikaotsikko and isset($suoraan_laskutukseen_ruksi) and $suoraan_laskutukseen_ruksi != "") or 
       ($laajennettu_pikaotsikko and isset($rahtivapaa) and $rahtivapaa != $laskurow["rahtivapaa"] and $muokataan_otsikoita != "") or
       (!$laajennettu_pikaotsikko and isset($tilausvahvistus) and $tilausvahvistus != $laskurow["tilausvahvistus"]) or
       (isset($myyjanro) and $myyjanro > 0 and $myyjanro != $v_myyjanro) or
@@ -2957,6 +2959,14 @@ if ($tee == '') {
         }
 
         $laskutuskielto_lisa = ($chn != $laskurow['chn']) ? "chn = '{$chn}'," : "";
+      }
+
+      if ($muokataan_otsikoita != "" and isset($suoraan_laskutukseen_ruksi)) {
+        $eilahetetta = '';
+        if ($suoraan_laskutukseen_ruksi != '') {
+          $eilahetetta = 'o';
+        }
+        $suoraan_laskutukseen_lisa = ($eilahetetta != $laskurow['eilahetetta']) ? "eilahetetta = '{$eilahetetta}'," : "";
       }
 
       if ($hyvaksynnanmuutos_lisa != "") {
@@ -3083,6 +3093,7 @@ if ($tee == '') {
                $hyvaksynnanmuutos_lisa
                $rahtivapaa_lisa
                $laskutuskielto_lisa
+               $suoraan_laskutukseen_lisa
                $osatoimitus_lisa
                kassalipas      = '$kassalipas',
                maksuehto       = '$laskurow[maksuehto]'
@@ -4262,11 +4273,7 @@ if ($tee == '') {
         echo "<th>" . t("Tilausta ei osatoimiteta") . ":</th><td><input type='checkbox' name='osatoimitus' value = 'o' onchange='submit();' $osath></td>";
         echo "<th>".t("Suoraan laskutukseen")."</th>";
         echo "<td>";
-        if($laskurow['eilahetetta'] == "") {
-          echo t("Ei");
-        } else {
-          echo t("Kyllä");
-        }
+        echo "<input type='checkbox' name='suoraan_laskutukseen_ruksi' value='o' onchange='submit();'" . ($laskurow['eilahetetta'] == 'o' ? " CHECKED" : "") . ">";
         echo "</td>";
         echo "</tr>";
       }

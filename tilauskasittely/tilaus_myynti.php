@@ -4259,7 +4259,15 @@ if ($tee == '') {
 
       if ($laajennettu_pikaotsikko) {
         echo "<tr>";
-        echo "<th>" . t("Tilausta ei osatoimiteta") . ":</th><td><input type='checkbox' name='osatoimitus' value = 'o' onchange='submit();' $osath></td><th>&nbsp;</th><td>&nbsp;</td>";
+        echo "<th>" . t("Tilausta ei osatoimiteta") . ":</th><td><input type='checkbox' name='osatoimitus' value = 'o' onchange='submit();' $osath></td>";
+        echo "<th>".t("Suoraan laskutukseen")."</th>";
+        echo "<td>";
+        if($laskurow['eilahetetta'] == "") {
+          echo t("Ei");
+        } else {
+          echo t("Kyllä");
+        }
+        echo "</td>";
         echo "</tr>";
       }
 

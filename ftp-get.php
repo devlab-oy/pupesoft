@@ -76,7 +76,11 @@ if ($ftpget_host[$operaattori] != '' and $ftpget_user[$operaattori] != '' and $f
             continue;
           }
         }
-
+        if ($operaattori == "external_partners") {
+          if(in_array(basename($file), $ohita_tiedostot)) {
+            continue;
+          }
+        }
         $temp_filename = tempnam("/tmp", "ftp");
 
         if ($operaattori != "external_partners") {

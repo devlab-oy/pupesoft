@@ -100,8 +100,8 @@ class ImportSaldoHinta
       1432 => array("Product code" =>
         array(
           "tuotekoodi" => "Item No",
-          "hinta" => "Mercantile Price",
-          "saldo" => ""
+          "hinta" => "hinta",
+          "saldo" => "saldo"
         )
       ),
       1048 => array("Product code" =>
@@ -490,6 +490,7 @@ class ImportSaldoHinta
     $rivit_prices = array();
     $otsikkotiedot = false;
     while ($rivi = fgetcsv($impsaloh_prices_csv, 100000, $csv_jakajaa_prices)) {
+
       if (!isset($rivit[0])) {
         // Hae tuotekoodin kolumni
         $kolumninro = 0;
@@ -514,8 +515,9 @@ class ImportSaldoHinta
           $kolumninro = 0;
           foreach ($rivi as $hae_otsikko) {
             $hae_otsikko = preg_replace("/[^A-Za-z0-9 ]/", '', $hae_otsikko);
-  
+
             if ($otsikkotiedot['hinta'] == $hae_otsikko) {
+
               break;
             }
             $kolumninro++;

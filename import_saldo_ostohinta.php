@@ -299,7 +299,6 @@ class ImportSaldoHinta
         require 'ftp-get.php';
         exec('gunzip -fd '.$this->impsaloh_polku_in.'/*.gz');
         exec('mv '.$this->impsaloh_polku_in.'/60046_ce '.$this->impsaloh_polku_in.'/60046_ce.csv');
-        $this->jakaa_yksittaiset_tiedostot();
       }
       
       if ($ftp_tiedot_nimi == 'autopartner') {
@@ -311,10 +310,10 @@ class ImportSaldoHinta
       if ($ftp_tiedot_nimi == 'triscan') {
         // Triscan
         require 'ftp-get.php';
-        $this->jakaa_yksittaiset_tiedostot();
       }
     }
     
+    $this->jakaa_yksittaiset_tiedostot();
     $this->hae_tiedostot();
 
     foreach (scandir($this->impsaloh_polku_orig_stocks) as $impsaloh_csv_file_name) {

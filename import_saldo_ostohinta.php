@@ -306,7 +306,6 @@ class ImportSaldoHinta
         require 'ftp-get.php';
         $this->korjaa_csvt('STANY.csv');
       }
-
       if ($ftp_tiedot_nimi == 'triscan') {
         // Triscan
         require 'ftp-get.php';
@@ -652,9 +651,9 @@ class ImportSaldoHinta
         $varasto_nro = intval($rivi[$varasto]);
         if (!isset($varastot[$tuotekoodi_tarkista1])) {
           $varastot = array();
-          $varastot[$tuotekoodi_tarkista1][$varasto_nro] = $tuotesaldo;
+          $varastot[$tuotekoodi_tarkista1][$varasto_nro] = intval($tuotesaldo);
         } else {
-          $varastot[$tuotekoodi_tarkista1][$varasto_nro] = $tuotesaldo;
+          $varastot[$tuotekoodi_tarkista1][$varasto_nro] = intval($tuotesaldo);
         }
         $varastot_serialized = json_encode($varastot[$tuotekoodi_tarkista1]);
         $tehdas_saldo_varastot_lisa = "tuotteen_toimittajat.tehdas_saldo_varastot = '".$varastot_serialized."',";

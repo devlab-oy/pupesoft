@@ -27,12 +27,7 @@ cron_log();
 ini_set('memory_limit', '4000M');
 
 $ftptiedot = array(
-  "host" => $ftphost_impsaloh,
-  "user" => $ftpuser_impsaloh,
-  "pass" => $ftppass_impsaloh,
-  "port" => $ftpport_impsaloh,
-  "path" => $ftppath_impsaloh,
-  "dest" => $ftpdest_impsaloh
+  "hosts" => $ftphosts_impsaloh
 );
 
 /*
@@ -47,13 +42,7 @@ class ImportSaldoHinta
   */
   public function __construct($yhtiorow, $ftptiedot)
   {
-
-    $this->ftphost = $ftptiedot['host'];
-    $this->ftpuser = $ftptiedot['user'];
-    $this->ftppass = $ftptiedot['pass'];
-    $this->ftpport = $ftptiedot['port'];
-    $this->ftppath = $ftptiedot['path'];
-    $this->ftpdest = $ftptiedot['dest'];
+    $this->ftptiedot = $ftptiedot;
 
     $php_cli = true;
     $impsaloh_csv_cron = true;
@@ -84,7 +73,9 @@ class ImportSaldoHinta
     $this->toimittajat_tiedostot = array(
       "kavoparts.csv" => "1474",
       "60046_ce.csv" => "1432",
-      "meatdoria.csv" => "1525"
+      "meatdoria.csv" => "1525",
+      "STANY.csv" => "1048",
+      "ItemsInStock.txt" => "101"
     );
 
     /*
@@ -109,57 +100,172 @@ class ImportSaldoHinta
       1432 => array("Product code" =>
         array(
           "tuotekoodi" => "Item No",
-          "hinta" => "Mercantile Price"
+          "hinta" => "hinta",
+          "saldo" => "saldo"
+        )
+      ),
+      1048 => array("Product code" =>
+        array(
+          "tuotekoodi" => "code",
+          "hinta" => "Mercantile price",
+          "saldo" => "saldo"
+        )
+      ),
+      101 => array("Product code" =>
+        array(
+          "tuotekoodi" => "Item No",
+          "warehouse1" => "warehouse1",
+          "warehouse2" => "warehouse2"
         )
       )
+    );
+
+    $this->erikois_price_nimet = array(
+      "STANY.csv" => "2945497.csv",
+    );
+
+    $this->lisaa_otsikot = array(
+      "STANY.csv" => array(
+        'stocks' => array(
+          'columns' => array(0,1,2),
+          'titles' => array('code','saldo','warehouse')
+        ),
+        'prices' => array(
+          'columns' => array(0,5),
+          'titles' => array('Product code','Mercantile price')
+        )
+      ),
+    );
+
+    $this->ohita_hinnat = array(
+      "ItemsInStock.txt" => true
+    );
+
+    $this->ohita_tiedostot = array(
+      "2945497_KAUCJE.csv",
+      "INDEKS_PARAMETR.csv"
     );
 
     $this->yksittaiset_tiedostot = array(
       "60046_ce.csv" => array(
         array(0,4,3),
-        array(0,9)
+        array(0)
+      ),
+      "ItemsInStock.txt" => array(
+        array(1,2,4),
+        array(1)
       )
     );
 
-    // Montako kolumneja on stocks tiedostoissa - näin ohejlma tunnistaa sen.
-    $this->prices_tiedoston_kolumneja_max = array(
-      "kavoparts.csv" => "4",
-      "60046_ce.csv" => "1",
-      "meatdoria.csv" => "1"
-    );
-
-    $this->saldo_levels = array (
+    $this->saldo_levels = array(
       "0" => 0,
       "1" => 2,
       "2" => 5
     );
   }
 
-  public function jakaa_yksittaiset_tiedostot() {
+  public function korjaa_csvt($tiedostonimi)
+  {
+    $input = $this->impsaloh_polku_in."/".$tiedostonimi;
+    $input2 = $this->impsaloh_polku_in."/prices_".$tiedostonimi;
+
+    if (isset($this->erikois_price_nimet[$tiedostonimi])) {
+      rename($this->impsaloh_polku_in."/".$this->erikois_price_nimet[$tiedostonimi], $input2);
+    }
+
+    $output = $this->impsaloh_polku_in."/"."uusi_".$tiedostonimi;
+    $output2 = $this->impsaloh_polku_in."/"."uusi_prices_".$tiedostonimi;
+
+    $stocks_titles = $this->lisaa_otsikot[$tiedostonimi]['stocks'];
+    $prices_titles = $this->lisaa_otsikot[$tiedostonimi]['prices'];
+
+    $oh = fopen($output, "w+");
+    $ih = fopen($input, "r");
+    $i=0;
+    while (false !== ($data = fgetcsv($ih, 0, ";"))) {
+      if ($i==0) {
+        $outputData = $stocks_titles['titles'];
+        fputcsv($oh, $outputData, ";");
+      }
+      $outputData = array(
+        (string) $data[$stocks_titles['columns'][0]],
+        $data[$stocks_titles['columns'][1]], preg_replace(
+          "/[^0-9 ]/",
+          '',
+          $data[$stocks_titles['columns'][2]]
+        )
+      );
+      fputcsv($oh, $outputData, ";");
+      $i++;
+    }
+    fclose($ih);
+    fclose($oh);
+    rename($output, $input);
+
+    $oh2 = fopen($output2, "w+");
+    $ih2 = fopen($input2, "r");
+    $i=0;
+    while (false !== ($data2 = fgetcsv($ih2, 0, ";"))) {
+      if ($i==0) {
+        $outputData2 = $prices_titles['titles'];
+        fputcsv($oh2, $outputData2, ";");
+      }
+      $outputData2 = array(
+        (string) $data2[$prices_titles['columns'][0]],
+        $data2[$prices_titles['columns'][1]]
+      );
+      fputcsv($oh2, $outputData2, ";");
+      $i++;
+    }
+    fclose($ih2);
+    fclose($oh2);
+    rename($output2, $input2);
+  }
+
+  public function jakaa_yksittaiset_tiedostot()
+  {
     $laske_tiedostot = 0;
+
     foreach ($this->yksittaiset_tiedostot as $tiedostonimi => $tiedostokolumnit) {
       $input = $this->impsaloh_polku_in."/".$tiedostonimi;
       $output = $this->impsaloh_polku_in."/"."prices_".$tiedostonimi;
-      if(file_exists($output)) {
+
+      if (!file_exists($input)) {
         continue;
       }
+
+      if (isset($this->toimittajat_tiedostot[$tiedostonimi])) {
+        $toimittaja_id = $this->toimittajat_tiedostot[$tiedostonimi];
+      } else {
+        echo $toimittaja_id." toimittaja ei löydy!";
+        continue;
+      }
+
       $output2 = $this->impsaloh_polku_in."/uusi_".$tiedostonimi;
       if (false !== ($ih = fopen($input, 'r'))) {
         $oh = fopen($output, 'w');
         $oh2 = fopen($output2, 'w');
         $i=0;
+
+        $product_code_header = array_keys($this->tuotekoodi_otsikot[$toimittaja_id]); $product_code_header = $product_code_header[0];
+        $product_data = $this->tuotekoodi_otsikot[$toimittaja_id][$product_code_header];
+        
+        $product_data_headers = array_keys($product_data);
+        $outputData = array($product_code_header, $product_data_headers[1], $product_data_headers[2]);
+        $outputData2 = array($product_data['tuotekoodi']);
+
         while (false !== ($data = fgetcsv($ih, 0, ";"))) {
-          if($data[$tiedostokolumnit[0][2]] == "-" or $data[$tiedostokolumnit[0][2]] == "") { $data[$tiedostokolumnit[0][2]] = 0; }
+          if ($data[$tiedostokolumnit[0][2]] == "-" or $data[$tiedostokolumnit[0][2]] == "") {
+            $data[$tiedostokolumnit[0][2]] = 0;
+          }
           if ($i==0) {
-            $outputData = array('Product code', 'Mercantile Price', '');
-            fputcsv($oh, $outputData);
-            $outputData2 = array('Item No', 'GTIN');
-            fputcsv($oh2, $outputData2);
+            fputcsv($oh, $outputData, ";");
+            fputcsv($oh2, $outputData2, ";");
           }
           $outputData = array($data[$tiedostokolumnit[0][0]], $data[$tiedostokolumnit[0][1]], preg_replace("/[^0-9 ]/", '', $data[$tiedostokolumnit[0][2]]));
-          fputcsv($oh, $outputData);
-          $outputData2 = array($data[$tiedostokolumnit[1][0]], $data[$tiedostokolumnit[1][1]]);
-          fputcsv($oh2, $outputData2);
+          fputcsv($oh, $outputData, ";");
+          $outputData2 = array($data[$tiedostokolumnit[1][0]]);
+          fputcsv($oh2, $outputData2, ";");
           $i++;
         }
         $laske_tiedostot++;
@@ -170,7 +276,6 @@ class ImportSaldoHinta
       rename($output2, $input);
     }
   }
-
   
   /*
     Ensin haetaan tiedostot, sortataan niitä
@@ -178,19 +283,36 @@ class ImportSaldoHinta
   */
   public function aloita()
   {
-
     $argv[1] = 'external_partners';
-    $ftpget_host['external_partners'] = $this->ftphost;
-    $ftpget_user['external_partners'] = $this->ftpuser;
-    $ftpget_pass['external_partners'] = $this->ftppass;
-    $ftpget_path['external_partners'] = $this->ftppath;
-    $ftpget_dest['external_partners'] = $this->ftpdest;
 
-    require 'ftp-get.php';
+    $ohita_tiedostot = $this->ohita_tiedostot;
+    
+    foreach ($this->ftptiedot['hosts'] as $ftp_tiedot_nimi => $ftp_tiedot) {
+      $ftpget_host['external_partners'] = $ftp_tiedot['ftphost'];
+      $ftpget_user['external_partners'] = $ftp_tiedot['ftpuser'];
+      $ftpget_pass['external_partners'] = $ftp_tiedot['ftppass'];
+      $ftpget_path['external_partners'] = $ftp_tiedot['ftppath'];
+      $ftpget_dest['external_partners'] = $ftp_tiedot['ftpdest'];
+      
+      if ($ftp_tiedot_nimi == 'oletus') {
+        // InterParts
+        require 'ftp-get.php';
+        exec('gunzip -fd '.$this->impsaloh_polku_in.'/*.gz');
+        exec('mv '.$this->impsaloh_polku_in.'/60046_ce '.$this->impsaloh_polku_in.'/60046_ce.csv');
+      }
+      
+      if ($ftp_tiedot_nimi == 'autopartner') {
+        // AutoPartner
+        require 'ftp-get.php';
+        $this->korjaa_csvt('STANY.csv');
+      }
 
-    exec('gunzip -fd '.$this->impsaloh_polku_in.'/*.gz');
-    exec('mv '.$this->impsaloh_polku_in.'/60046_ce '.$this->impsaloh_polku_in.'/60046_ce.csv');
-
+      if ($ftp_tiedot_nimi == 'triscan') {
+        // Triscan
+        require 'ftp-get.php';
+      }
+    }
+    
     $this->jakaa_yksittaiset_tiedostot();
     $this->hae_tiedostot();
 
@@ -218,7 +340,6 @@ class ImportSaldoHinta
   */
   public function hae_tiedostot()
   {
-    
     foreach (scandir($this->impsaloh_polku_in) as $impsaloh_csv_file_name) {
       $impsaloh_csv_file = $this->impsaloh_polku_in."/".$impsaloh_csv_file_name;
       $impsaloh_csv_file_prices = $this->impsaloh_polku_in."/prices_".$impsaloh_csv_file_name;
@@ -237,20 +358,19 @@ class ImportSaldoHinta
       fclose($impsaloh_csv_tarkista);
 
       // Siirettään ja kopioidaan tiedostot oikeaan kansioon
-      if ($csv_hae_kolumnit['kolumneja'] > $this->prices_tiedoston_kolumneja_max[$impsaloh_csv_file_name]) {
-        copy($impsaloh_csv_file, $this->impsaloh_polku_orig."/".$impsaloh_csv_file_name);
-        copy($impsaloh_csv_file_prices, $this->impsaloh_polku_orig."/prices_".$impsaloh_csv_file_name);
 
-        if(isset($this->toimittajat_tiedostot[$impsaloh_csv_file_name])) {
-          $toimittaja_id = $this->toimittajat_tiedostot[$impsaloh_csv_file_name];
-        } else {
-          echo $toimittaja_id." toimittaja ei löydy!";
-          continue;
-        }
-        
-        rename($impsaloh_csv_file, $this->impsaloh_polku_orig_stocks."/".$toimittaja_id."___".$csv_hae_kolumnit['kolumneja'].$csv_hae_kolumnit['riveja'].$impsaloh_csv_file_name);
-        rename($impsaloh_csv_file_prices, $this->impsaloh_polku_orig_prices."/prices_".$toimittaja_id."___".$csv_hae_kolumnit['kolumneja'].$csv_hae_kolumnit['riveja'].$impsaloh_csv_file_name);
+      copy($impsaloh_csv_file, $this->impsaloh_polku_orig."/".$impsaloh_csv_file_name);
+      copy($impsaloh_csv_file_prices, $this->impsaloh_polku_orig."/prices_".$impsaloh_csv_file_name);
+
+      if (isset($this->toimittajat_tiedostot[$impsaloh_csv_file_name])) {
+        $toimittaja_id = $this->toimittajat_tiedostot[$impsaloh_csv_file_name];
+      } else {
+        echo $toimittaja_id." toimittaja ei löydy!";
+        continue;
       }
+        
+      copy($impsaloh_csv_file, $this->impsaloh_polku_orig_stocks."/".$toimittaja_id."___".$csv_hae_kolumnit['kolumneja'].$csv_hae_kolumnit['riveja'].$impsaloh_csv_file_name);
+      copy($impsaloh_csv_file_prices, $this->impsaloh_polku_orig_prices."/prices_".$toimittaja_id."___".$csv_hae_kolumnit['kolumneja'].$csv_hae_kolumnit['riveja'].$impsaloh_csv_file_name);
     }
   }
 
@@ -267,12 +387,15 @@ class ImportSaldoHinta
     $yrita_csv_pistepilkku = fgetcsv($impsaloh_csv, 1000, ";");
     $count_yrita_csv_pistepilkku = count($yrita_csv_pistepilkku);
     rewind($impsaloh_csv);
-  
+
     if ($count_yrita_csv_pilkku > 1) {
       $kolumneja = $count_yrita_csv_pilkku;
       $csv_jakajaa = ",";
     } elseif ($count_yrita_csv_pistepilkku > 1) {
       $kolumneja = $count_yrita_csv_pistepilkku;
+      $csv_jakajaa = ";";
+    } elseif($count_yrita_csv_pilkku == 1 or $count_yrita_csv_pistepilkku == 1) {
+      $kolumneja = 1;
       $csv_jakajaa = ";";
     }
 
@@ -303,9 +426,10 @@ class ImportSaldoHinta
     }
     
     $csv_jakajaa = $this->csv_jakajaa_ja_kolumnit($impsaloh_csv, $impsaloh_csv_file);
+
     $csv_jakajaa_prices = $this->csv_jakajaa_ja_kolumnit($impsaloh_prices_csv, $impsaloh_csv_prices_file);
 
-    $toimittaja_id = explode("___",basename($impsaloh_csv_file));
+    $toimittaja_id = explode("___", basename($impsaloh_csv_file));
     $toimittaja_id = $toimittaja_id[0];
     $query = "SELECT * FROM toimi 
                     WHERE tunnus = {$toimittaja_id}";
@@ -366,6 +490,7 @@ class ImportSaldoHinta
     $rivit_prices = array();
     $otsikkotiedot = false;
     while ($rivi = fgetcsv($impsaloh_prices_csv, 100000, $csv_jakajaa_prices)) {
+
       if (!isset($rivit[0])) {
         // Hae tuotekoodin kolumni
         $kolumninro = 0;
@@ -374,6 +499,12 @@ class ImportSaldoHinta
           if (isset($tuotekoodi_otsikot[$hae_otsikko])) {
             $tuotekoodin_kolumni = (string) $kolumninro;
             $otsikkotiedot = $tuotekoodi_otsikot[$hae_otsikko];
+          }
+          if ($hae_otsikko == 'warehouse1') {
+            $warehouse_1_kolumni = $kolumninro;
+          }
+          if ($hae_otsikko == 'warehouse2') {
+            $warehouse_2_kolumni = $kolumninro;
           }
           $kolumninro++;
         }
@@ -384,9 +515,9 @@ class ImportSaldoHinta
           $kolumninro = 0;
           foreach ($rivi as $hae_otsikko) {
             $hae_otsikko = preg_replace("/[^A-Za-z0-9 ]/", '', $hae_otsikko);
-  
+
             if ($otsikkotiedot['hinta'] == $hae_otsikko) {
-              $hinta_kolumni = $kolumninro;
+
               break;
             }
             $kolumninro++;
@@ -396,31 +527,44 @@ class ImportSaldoHinta
           continue;
         }
       }
+      $hinta_kolumni = $kolumninro;
 
       $rivi_saldo = false;
 
-      if(isset($rivi[2])) {
+      if (isset($rivi[2])) {
         $rivi_hinta = $rivi[$hinta_kolumni];
         $rivi_saldo = $rivi[$hinta_kolumni+1];
       }
-      
+
+      if(isset($warehouse_1_kolumni)) {
+        $warehouse_1 = $rivi[$warehouse_1_kolumni];
+      }
+      if(isset($warehouse_2_kolumni)) {
+        $warehouse_2 = $rivi[$warehouse_2_kolumni];
+      }
+
       $rivi_hinta = $rivi[$hinta_kolumni];
 
       $rivi_tuoteno = $rivi[$tuotekoodin_kolumni];
+
       unset($rivi[$hinta_kolumni]);
       unset($rivi[$tuotekoodin_kolumni]);
 
-      if($rivi_saldo) {
+      if ($rivi_saldo) {
         $rivit_prices[$rivi_tuoteno] = array(
           "hinta" => $rivi_hinta,
           "saldo" => $rivi_saldo
         );
-      } else {
+      } else if($rivi_hinta) {
         $rivit_prices[$rivi_tuoteno] = array(
           "hinta" => $rivi_hinta
         );
+      } else if(isset($warehouse_1_kolumni) and isset($warehouse_2_kolumni)) {
+        $rivit_prices[$rivi_tuoteno] = array(
+          'warehouse_1' => $warehouse_1,
+          'warehouse_2' => $warehouse_2
+        );
       }
-
     }
 
     // Käsitellään tiedostojen rivit ja etsitään / muokataan tuotteet pupeessa
@@ -429,8 +573,10 @@ class ImportSaldoHinta
     $epaonnistuneet_tuotteet = array();
     $laskerivit = 0;
     pupeslave_start();
+    $varasto = false;
+
     while ($rivi = fgetcsv($impsaloh_csv, 100000, $csv_jakajaa)) {
-    
+
       // Skipataan tyhjät rivit
       if ($rivi[0] == "" and $rivi[1] == "" and $rivi[2] == "") {
         continue;
@@ -445,10 +591,17 @@ class ImportSaldoHinta
         $kolumninro = 0;
         foreach ($rivi as $hae_otsikko) {
           $hae_otsikko = preg_replace("/[^A-Za-z0-9 ]/", '', $hae_otsikko);
+
+          if ($hae_otsikko == 'warehouse') {
+            $varasto = $kolumninro;
+          }
+
           if ($tuotekoodi_otsikot["Product code"]['tuotekoodi'] == $hae_otsikko) {
             $tuotekoodin_kolumni = $kolumninro;
           }
-          $etsi_saldo = $etsi_saldo = strpos($hae_otsikko, $tuotekoodi_otsikot["Product code"]['saldo']);
+
+          $etsi_saldo = strpos($hae_otsikko, $tuotekoodi_otsikot["Product code"]['saldo']);
+
           if (isset($tuotekoodi_otsikot["Product code"]['saldo']) and $etsi_saldo !== false) {
             $saldo_kolumni = $kolumninro;
             $saldo_kolumin_nimi = $hae_otsikko;
@@ -479,29 +632,64 @@ class ImportSaldoHinta
         $epaonnistuneet_tuotteet[] = $rivi;
         continue;
       }
+
       //$tuotekoodi_tarkista2 = preg_replace("/[^A-Za-z0-9 ]/", '', $rivi[$tuotekoodin_kolumni]);
 
       $eankoodi_tarkista = $rivi[$eankoodin_kolumni];
 
       $tuotesaldo = 0;
 
-      if(isset($rivit_prices[$tuotekoodi_tarkista1]['saldo'])) {
+      if (isset($rivit_prices[$tuotekoodi_tarkista1]['saldo'])) {
         $tuotesaldo = $rivit_prices[$tuotekoodi_tarkista1]['saldo'];
-      } else if(isset($saldo_kolumni)) {
+      } elseif (isset($saldo_kolumni)) {
         $tuotesaldo = $rivi[$saldo_kolumni];
-        if($saldo_kolumin_nimi == "level") {
+        if ($saldo_kolumin_nimi == "level") {
           $tuotesaldo = $this->saldo_levels[$tuotesaldo];
         }
       }
 
+      if ($varasto) {
+        $varasto_nro = intval($rivi[$varasto]);
+        if (!isset($varastot[$tuotekoodi_tarkista1])) {
+          $varastot = array();
+          $varastot[$tuotekoodi_tarkista1][$varasto_nro] = $tuotesaldo;
+        } else {
+          $varastot[$tuotekoodi_tarkista1][$varasto_nro] = $tuotesaldo;
+        }
+        $varastot_serialized = json_encode($varastot[$tuotekoodi_tarkista1]);
+        $tehdas_saldo_varastot_lisa = "tuotteen_toimittajat.tehdas_saldo_varastot = '".$varastot_serialized."',";
+      }
+
+      if(
+        !$varasto and 
+        isset($rivit_prices[$tuotekoodi_tarkista1]['warehouse_1']) and 
+        isset($rivit_prices[$tuotekoodi_tarkista1]['warehouse_2'])
+      ) {
+        if($tuotesaldo == 0 and $rivit_prices[$tuotekoodi_tarkista1]['warehouse_1'] > 0) {
+          $tuotesaldo = $rivit_prices[$tuotekoodi_tarkista1]['warehouse_1'];
+        }
+        $varastot_serialized = json_encode(
+          array(
+            $rivit_prices[$tuotekoodi_tarkista1]['warehouse_1'],
+            $rivit_prices[$tuotekoodi_tarkista1]['warehouse_2']
+          )
+        );
+        $tehdas_saldo_varastot_lisa = "tuotteen_toimittajat.tehdas_saldo_varastot = '".$varastot_serialized."',";
+      }
+
       // Haetaan hintatiedot ja saldo price array:ista
-      $tuotehinta = $rivit_prices[$tuotekoodi_tarkista1]['hinta'];
+      if(isset($rivit_prices[$tuotekoodi_tarkista1]['hinta'])) {
+        $tuotehinta = $rivit_prices[$tuotekoodi_tarkista1]['hinta'];
+        $tuotehinta_lisa = "tuotteen_toimittajat.ostohinta = '".str_replace(",", ".", $tuotehinta)."',";
+      }
 
       // yritetään päivittää suoraan tuotenumerolla
       $query = "UPDATE tuotteen_toimittajat
-                  SET tuotteen_toimittajat.ostohinta = '".str_replace(",", ".", $tuotehinta)."', 
+                  SET 
+                  $tuotehinta_lisa 
                   tehdas_saldo_paivitetty = NOW(), 
                   tuotteen_toimittajat.tehdas_saldo = ".$tuotesaldo.", 
+                  $tehdas_saldo_varastot_lisa
                   tuotteen_toimittajat.myyntihinta_kerroin = 
                     CASE WHEN tuotteen_toimittajat.myyntihinta_kerroin > 0 THEN tuotteen_toimittajat.myyntihinta_kerroin 
                       ELSE ".$toimittaja_myyntikerroin."
@@ -521,7 +709,7 @@ class ImportSaldoHinta
         $onnistunut_tuote = true;
 
       // ei onnistunut - yritetään etsiä tuote eri tavalla
-      } else if($eankoodi_tarkista == ".|no") {
+      } elseif ($eankoodi_tarkista == ".|no") {
         $query = "SELECT tuoteno 
                     FROM tuote 
                     WHERE yhtio = 'mergr' 
@@ -555,7 +743,7 @@ class ImportSaldoHinta
         }
       }
 
-      if(!$onnistunut_tuote) {
+      if (!$onnistunut_tuote) {
         $epaonnistuneet_tuotteet[] = $rivi;
       }
       
@@ -569,18 +757,18 @@ class ImportSaldoHinta
     $impsaloh_timestamp = $date = new DateTime();
     $impsaloh_timestamp = $impsaloh_timestamp->getTimestamp();
 
-    if(count($loydetyt_tuotteet) > 0) {
+    if (count($loydetyt_tuotteet) > 0) {
       $loydetyt_tuotteet_csv = fopen($this->impsaloh_polku_ok."/".$impsaloh_timestamp."_".basename($stocks_file['filename']), 'w');
       foreach ($loydetyt_tuotteet as $loydetyt_tuotteet_fields) {
-        fputcsv($loydetyt_tuotteet_csv, $loydetyt_tuotteet_fields);
+        fputcsv($loydetyt_tuotteet_csv, $loydetyt_tuotteet_fields, ";");
       }
       fclose($loydetyt_tuotteet_csv);
     }
 
-    if(count($epaonnistuneet_tuotteet) > 0) {
+    if (count($epaonnistuneet_tuotteet) > 0) {
       $epaonnistuneet_tuotteet_csv = fopen($this->impsaloh_polku_error."/".$impsaloh_timestamp."_".basename($stocks_file['filename']), 'w');
       foreach ($epaonnistuneet_tuotteet as $epaonnistuneet_tuotteet_fields) {
-        fputcsv($epaonnistuneet_tuotteet_csv, $epaonnistuneet_tuotteet_fields);
+        fputcsv($epaonnistuneet_tuotteet_csv, $epaonnistuneet_tuotteet_fields, ";");
       }
       fclose($epaonnistuneet_tuotteet_csv);
     }
@@ -588,7 +776,6 @@ class ImportSaldoHinta
     echo "\n...Ei osunut:".count($epaonnistuneet_tuotteet)."...\n";
 
     unset($rivit[0]);
-
   }
 }
 

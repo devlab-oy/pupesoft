@@ -756,8 +756,9 @@ if (!function_exists("lopetus")) {
     }
 
     if ($meta != "") {
-      echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=$lopetus'>";
-
+      if($meta != "NOREFRESH") {
+        echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=$lopetus'>";
+      }
       require "inc/footer.inc";
       exit;
     }

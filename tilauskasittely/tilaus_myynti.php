@@ -2323,7 +2323,7 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
   }
 
   if ($kukarow["extranet"] == "" and $lopetus != '' and $luottorajavirhe_ylivito_valmis) {
-    lopetus($lopetus, "META");
+    lopetus($lopetus, "NOREFRESH");
   }
 }
 

@@ -956,6 +956,11 @@ if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
     }
   }
 
+  if(substr($lisa, 0, -2) != "')") {
+    $lisa = substr($lisa, 0, -1);
+    $lisa = $lisa."')";
+  }
+
   $query = "SELECT
             if (tuote.tuoteno = '$tuotenumero', 1, if(left(tuote.tuoteno, length('$tuotenumero')) = '$tuotenumero', 2, 3)) jarjestys,
             ifnull((SELECT isatuoteno FROM tuoteperhe use index (yhtio_tyyppi_isatuoteno) where tuoteperhe.yhtio=tuote.yhtio and tuoteperhe.tyyppi = 'P' and tuoteperhe.isatuoteno=tuote.tuoteno LIMIT 1), '') tuoteperhe,

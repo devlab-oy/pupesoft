@@ -683,7 +683,7 @@ class ImportSaldoHinta
       }
 
       // yritetään päivittää suoraan tuotenumerolla
-      $query = "UPDATE tuotteen_toimittajat
+      $query = "UPDATE LOW_PRIORITY tuotteen_toimittajat
                   SET 
                   $tuotehinta_lisa 
                   tehdas_saldo_paivitetty = NOW(), 
@@ -706,40 +706,6 @@ class ImportSaldoHinta
       if (mysql_insert_id()) {
         $loydetyt_tuotteet[] = $rivi;
         $onnistunut_tuote = true;
-
-      // ei onnistunut - yritetään etsiä tuote eri tavalla
-      } elseif ($eankoodi_tarkista == ".|no") {
-        $query = "SELECT tuoteno 
-                    FROM tuote 
-                    WHERE yhtio = 'mergr' 
-                    AND tuotemerkki != '' 
-        	          AND tuote.status != 'P' 
-                    AND eankoodi = '".$eankoodi_tarkista."'
-                  ";
-
-        $loydetty_tuote = pupe_query($query);
-
-        if (mysql_num_rows($loydetty_tuote) > 0) {
-          $tuoteno = mysql_fetch_assoc($loydetty_tuote);
-          $tuoteno = $tuoteno["tuoteno"];
-          $query = "UPDATE tuotteen_toimittajat 
-                      SET ostohinta = ".$tuotehinta.", tehdas_saldo = ".$tuotesaldo.", 
-                      tehdas_saldo_paivitetty = NOW(),
-                      myyntihinta_kerroin = 
-                        CASE WHEN myyntihinta_kerroin > 0 THEN myyntihinta_kerroin 
-                          ELSE ".$toimittaja_myyntikerroin."
-                        END 
-                      WHERE yhtio = 'mergr'
-                      AND liitostunnus = '".$toimittaja_id."'
-                      AND tuoteno = '".$tuoteno."' 
-                      AND(last_insert_id(tuotteen_toimittajat.tunnus))
-                    ";
-          pupe_query($query);
-          if (mysql_insert_id()) {
-            $loydetyt_tuotteet[] = $rivi;
-            $onnistunut_tuote = true;
-          }
-        }
       }
 
       if (!$onnistunut_tuote) {

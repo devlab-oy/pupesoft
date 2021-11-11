@@ -2643,11 +2643,11 @@ if (($toim == 'EXTTARJOUS' or $toim == "EXTENNAKKO") and ((isset($tarjous_tee) a
 
 //lis‰t‰‰n rivej‰ tiedostosta
 if ($tee == 'mikrotila' or $tee == 'file') {
-
   if ($kukarow["extranet"] == "" and $toim == "SIIRTOLISTA" or $toim == "SIIRTOTYOMAARAYS") {
     require 'mikrotilaus_siirtolista.inc';
   }
   else {
+    $tiedostosta_rivitykset = true;
     require 'mikrotilaus.inc';
   }
 
@@ -8111,6 +8111,7 @@ if ($tee == '') {
 
             echo "<form method='post' name='paikat' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php'>
                     <input type='hidden' name='nyk_paikka' value = '$row[toimittajan_tunnus]'>
+                    <input type='hidden' name='vahvistettu_kommentti' value = '$row[vahvistettu_kommentti]'>
                     <input type='hidden' name='toim'       value = '$toim'>
                     <input type='hidden' name='lopetus'     value = '$lopetus'>
                     <input type='hidden' name='ruutulimit'     value = '$ruutulimit'>
@@ -8733,6 +8734,7 @@ if ($tee == '') {
 
               echo "<form method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php' name='muokkaa' class='muokkaa_form'>
                   <input type='hidden' name='toim'         value = '$toim'>
+                  <input type='hidden' name='vahvistettu_kommentti' value = '$row[vahvistettu_kommentti]'>
                   <input type='hidden' name='lopetus'      value = '$lopetus'>
                   <input type='hidden' name='ruutulimit'   value = '$ruutulimit'>
                   <input type='hidden' name='projektilla'  value = '$projektilla'>

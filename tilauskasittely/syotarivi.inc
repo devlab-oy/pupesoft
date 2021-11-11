@@ -267,6 +267,7 @@ if (!$variaaritorivi and $kukarow["extranet"] == '' and $toim == "PIKATILAUS") {
     echo "<input type='hidden' name='rivilaadittu' value='$rivilaadittu'>";
     echo "<input type='hidden' name='menutila' value='$menutila'>";
     echo "<input type='hidden' name='rivinumero' value='$rivinumero'>";
+    echo "<input type='hidden' name='vahvistettu_kommentti' value='$vahvistettu_kommentti'>";
     echo "<input type='hidden' name='myy_sarjatunnus' value='$myy_sarjatunnus'>";
     echo "<input type='hidden' name='jaksotettu' value='$jaksotettu'>";
     echo "<input type='hidden' name='paikka' value='$paikka'>";
@@ -657,6 +658,7 @@ elseif (!$variaaritorivi and $kukarow["extranet"] == '' and ($toim == "RIVISYOTT
     echo "<input type='hidden' name='ale_peruste' value='$ale_peruste'>";
     echo "<input type='hidden' name='rivilaadittu' value='$rivilaadittu'>";
     echo "<input type='hidden' name='menutila' value='$menutila'>";
+    echo "<input type='hidden' name='vahvistettu_kommentti' value='$vahvistettu_kommentti'>";
     echo "<input type='hidden' name='myy_sarjatunnus' value='$myy_sarjatunnus'>";
     echo "<input type='hidden' name='jaksotettu' value='$jaksotettu'>";
     echo "<input type='hidden' name='rivinumero' value='$rivinumero'>";
@@ -860,6 +862,7 @@ elseif (!$variaaritorivi and $kukarow["extranet"] == '' and ($toim == "SIIRTOLIS
     echo "<input type='hidden' name='ale_peruste' value='$ale_peruste'>";
     echo "<input type='hidden' name='rivilaadittu' value='$rivilaadittu'>";
     echo "<input type='hidden' name='menutila' value='$menutila'>";
+    echo "<input type='hidden' name='vahvistettu_kommentti' value='$vahvistettu_kommentti'>";
     echo "<input type='hidden' name='myy_sarjatunnus' value='$myy_sarjatunnus'>";
     echo "<input type='hidden' name='jaksotettu' value='$jaksotettu'>";
     echo "<input type='hidden' name='rivinumero' value='$rivinumero'>";

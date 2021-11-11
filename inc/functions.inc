@@ -26155,6 +26155,7 @@ if (!function_exists("lisaa_rivi")) {
     $tuotenimitys       = (!empty($parametrit['tuotenimitys']))       ? $parametrit['tuotenimitys'] : '';        // tuotteen nimitys jos nimityksen syötö on yhtiöllä sallittu
     $tuotenimitys_force = (!empty($parametrit['tuotenimitys_force'])) ? $parametrit['tuotenimitys_force'] : '';  // tuotteen nimitys muutetaan systemitasolla
     $kommentti          = (!empty($parametrit['kommentti']))          ? $parametrit['kommentti'] : '';           // rivikommentti
+    $vahvistettu_kommentti = (!empty($parametrit['vahvistettu_kommentti'])) ? $parametrit['vahvistettu_kommentti'] : '';           // rivikommentti
     $valmistuslinja     = (!empty($parametrit['valmistuslinja']))     ? $parametrit['valmistuslinja'] : '';      // valmistuslinja
     $alv                = (!empty($parametrit['alv']))                ? $parametrit['alv'] : '';                 // rivi alv
     $toim               = (!empty($parametrit['toim']))               ? $parametrit['toim'] : '';                // toim

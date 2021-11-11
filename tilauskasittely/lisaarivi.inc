@@ -162,6 +162,10 @@ if (!isset($jo_syotetty_rekisterinumero)) {
   $jo_syotetty_rekisterinumero = "";
 }
 
+if(!isset($vahvistettu_kommentti)) {
+  $vahvistettu_kommentti = false;
+}
+
 // Haetaan asiakkaan kieli erilaisten systeemikommenttien kääntämistä varten
 $query = "SELECT kieli
           FROM asiakas
@@ -209,7 +213,7 @@ if ($toim == 'EXTENNAKKO' or (isset($toim_kutsu) and $toim_kutsu == 'EXTENNAKKO'
 }
 
 if (!function_exists("tehdas_saldo_hinnat")) {
-  function tehdas_saldo_hinnat($kukarow, $trow, $toimittajan_tunnus) {
+  function tehdas_saldo_hinnat($kukarow, $trow, $toimittajan_tunnus, $tiedostosta_rivitykset, $lis_hinta) {
     $query = "SELECT tuotekerroin, ostohinta, myyntihinta_kerroin, tehdas_saldo
               FROM tuotteen_toimittajat
               WHERE yhtio      = '{$kukarow['yhtio']}'
@@ -218,11 +222,11 @@ if (!function_exists("tehdas_saldo_hinnat")) {
     $tt_res = pupe_query($query);
     $tt_row = mysql_fetch_assoc($tt_res);
 
-    $lis_hinta = false;
+    $lis_hinta_laskettu = false;
 
     if($tt_row['tehdas_saldo'] and $tt_row['tehdas_saldo'] != "") {
       if(isset($tt_row['myyntihinta_kerroin']) and $tt_row['myyntihinta_kerroin'] != NULL and $tt_row['myyntihinta_kerroin'] > 0) {
-        $lis_hinta = $tt_row['ostohinta'] * $tt_row['myyntihinta_kerroin'];
+        $lis_hinta_laskettu = $tt_row['ostohinta'] * $tt_row['myyntihinta_kerroin'];
       }
       else {
         $tuotemerkkihinta_avainsanat = t_avainsana("TUOTEMERKKI");
@@ -230,15 +234,20 @@ if (!function_exists("tehdas_saldo_hinnat")) {
           if($tuotemerkkihinta_avainsana['selite'] == $trow['tuotemerkki']) {
             $tuotemerkkihinta_avainsalla = (float) $tuotemerkkihinta_avainsana['selitetark_2'];
             if($tuotemerkkihinta_avainsalla != "" and $tuotemerkkihinta_avainsalla > 0) {
-              $lis_hinta = $tt_row['ostohinta'] * $tuotemerkkihinta_avainsalla;
+              $lis_hinta_laskettu = $tt_row['ostohinta'] * $tuotemerkkihinta_avainsalla;
             }
             else {
-              $lis_hinta = $tt_row['ostohinta'] * 1;
+              $lis_hinta_laskettu = $tt_row['ostohinta'] * 1;
             }
             break;
           }
         }
       }
+    }
+    if ($tiedostosta_rivitykset and $lis_hinta_laskettu and 'F' == $tiedostosta_rivitykset) {
+      return $lis_hinta;
+    } else {
+      return $lis_hinta_laskettu;
     }
     return $lis_hinta;
   }
@@ -1855,7 +1864,7 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
 
               $myyntikerroin_laskenta = false;
               if ($rivityyppi == 'L' and $trow['suoratoimitus'] != '') {
-                if($myyntikerroin_laskenta = tehdas_saldo_hinnat($kukarow, $trow, $toimittajan_tunnus)) {
+                if($myyntikerroin_laskenta = tehdas_saldo_hinnat($kukarow, $trow, $toimittajan_tunnus, $vahvistettu_kommentti, $lis_hinta)) {
                   $_lis_hinta_chk = $myyntikerroin_laskenta;
                 } else if($tapa == "VAIHDA") {
                   $hinta = 0;
@@ -2060,6 +2069,7 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
                         tyyppi          = '$rivityyppi',
                         toimaika        = '$toimaika',
                         kommentti       = '$kommentti',
+                        vahvistettu_kommentti = '$vahvistettu_kommentti',
                         ale_peruste     = '{$GLOBALS['ale_peruste']}',
                         campaign_id     = {$kampanjatunnus},
                         var             = '',
@@ -2871,7 +2881,7 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
 
       $myyntikerroin_laskenta = false;
       if ($rivityyppi == 'L' and $trow['suoratoimitus'] != '') {
-        if($myyntikerroin_laskenta = tehdas_saldo_hinnat($kukarow, $trow, $toimittajan_tunnus)) {
+        if($myyntikerroin_laskenta = tehdas_saldo_hinnat($kukarow, $trow, $toimittajan_tunnus, $vahvistettu_kommentti, $lis_hinta)) {
           $_lis_hinta_chk = $myyntikerroin_laskenta;
         } else if($tapa == "VAIHDA") {
           $hinta = 0;
@@ -3442,7 +3452,7 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
       if (mysql_num_rows($tehdas_saldo_res2) > 0) {
         while($tehdas_saldo_row2 = mysql_fetch_assoc($tehdas_saldo_res2)) {
           $toimittajan_tunnus = $tehdas_saldo_row2['liitostunnus'];
-          if($_tehdas_saldo_hinta = tehdas_saldo_hinnat($kukarow, $trow, $toimittajan_tunnus)) {
+          if($_tehdas_saldo_hinta = tehdas_saldo_hinnat($kukarow, $trow, $toimittajan_tunnus, $vahvistettu_kommentti, $lis_hinta)) {
             $lis_hinta = $_tehdas_saldo_hinta;
           }
           break;
@@ -3479,6 +3489,7 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
               tyyppi          = '$rivityyppi',
               toimaika        = '$toimaika',
               kommentti       = '$kommentti',
+              vahvistettu_kommentti = '$vahvistettu_kommentti',
               ale_peruste     = '{$GLOBALS['ale_peruste']}',
               campaign_id     = {$kampanjatunnus},
               var             = '$var',

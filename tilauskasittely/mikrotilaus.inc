@@ -442,6 +442,7 @@ if ($tee == "file") {
                         'toimaika'      => $toimaika,
                         'kerayspvm'      => $kerayspvm,
                         'toim'        => "{$toim}",
+                        'vahvistettu_kommentti' => 'F'
                       );
 
                       lisaa_rivi($params);
@@ -451,7 +452,7 @@ if ($tee == "file") {
                     unset($tuoteno_array, $kpl_array, $kommentti_array, $lapsenlap_array);
                   }
                   else {
-
+                    $vahvistettu_kommentti = 'F';
                     if ($yhtiorow["reklamaation_hinnoittelu"] == "K" and ($toim == "REKLAMAATIO" or $toim == "EXTRANET_REKLAMAATIO") and $var != "H") {
 
                       $palautus = hae_hyvityshinta($laskurow["liitostunnus"], $tuoteno, $kpl);
@@ -866,6 +867,7 @@ if ($tee == "file") {
                       'toimaika'        => $toimaika,
                       'kerayspvm'       => $kerayspvm,
                       'toim'            => "{$toim}",
+                      'vahvistettu_kommentti' => 'F'
                     );
 
                     lisaa_rivi($params);
@@ -875,7 +877,7 @@ if ($tee == "file") {
                   unset($tuoteno_array, $kpl_array, $kommentti_array, $lapsenlap_array);
                 }
                 else {
-
+                  $vahvistettu_kommentti = 'F';
                   if ($yhtiorow["reklamaation_hinnoittelu"] == "K" and ($toim == "REKLAMAATIO" or $toim == "EXTRANET_REKLAMAATIO") and $var != "H") {
 
                     $palautus = hae_hyvityshinta($laskurow["liitostunnus"], $tuoteno, $kpl);

@@ -2323,7 +2323,11 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
   }
 
   if ($kukarow["extranet"] == "" and $lopetus != '' and $luottorajavirhe_ylivito_valmis) {
-    lopetus($lopetus, "NOREFRESH");
+    if(isset($tilauksesta_ostotilaus) and $tilauksesta_ostotilaus) {
+      lopetus($lopetus, "NOREFRESH");
+    } else {
+      lopetus($lopetus, "META");
+    }
   }
 }
 

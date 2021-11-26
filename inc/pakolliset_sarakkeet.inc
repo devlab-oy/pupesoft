@@ -343,6 +343,12 @@ if (!function_exists("pakolliset_sarakkeet")) {
       $kielletyt    = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
       $saakopoistaa = TRUE;
       break;
+    case "dynaaminen_puu" :
+      $pakolliset   = array("TUNNUS");
+      $wherelliset  = array("KOODI", "NIMI", "LFT", "RGT", "LAJI");
+      $kielletyt    = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
+      $saakopoistaa = TRUE;
+      break;
     case "dynaaminen_puu_avainsanat" :
       $pakolliset   = array("LIITOSTUNNUS", "LAJI", "AVAINSANA", "TARKENNE");
       $wherelliset  = array("LIITOSTUNNUS", "LAJI", "AVAINSANA", "TARKENNE");

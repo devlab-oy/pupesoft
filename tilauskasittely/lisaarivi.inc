@@ -1866,7 +1866,7 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
               if ($rivityyppi == 'L' and $trow['suoratoimitus'] != '') {
                 if($myyntikerroin_laskenta = tehdas_saldo_hinnat($kukarow, $trow, $toimittajan_tunnus, $vahvistettu_kommentti, $lis_hinta)) {
                   $_lis_hinta_chk = $myyntikerroin_laskenta;
-                } else if($tapa == "VAIHDA") {
+                } else if($tapa == "VAIHDA" and $nyk_paikka != 0) {
                   $hinta = 0;
                 }
               }
@@ -2883,7 +2883,7 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
       if ($rivityyppi == 'L' and $trow['suoratoimitus'] != '') {
         if($myyntikerroin_laskenta = tehdas_saldo_hinnat($kukarow, $trow, $toimittajan_tunnus, $vahvistettu_kommentti, $lis_hinta)) {
           $_lis_hinta_chk = $myyntikerroin_laskenta;
-        } else if($tapa == "VAIHDA") {
+        } else if($tapa == "VAIHDA" and $nyk_paikka != 0) {
           $hinta = 0;
         }
       }

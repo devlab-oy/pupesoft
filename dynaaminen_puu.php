@@ -268,7 +268,7 @@ if (isset($_REQUEST["ajax"]) and $_REQUEST["ajax"] == "OK") {
 
     echo "<p>";
     if ($own_items > 0) {
-      echo "<font class='message'>".t("Liitoksia").":</font> <a href='yllapito.php?toim=puun_alkio&laji={$toim}&haku[4]={$nodeid}'>".$own_items."</a><br />";
+      echo "<font class='message'>".t("Liitoksia").":</font> <a href='yllapito.php?toim=puun_alkio&laji={$toim}&haku[5]={$nodeid}'>".$own_items."</a><br />";
     }
     if ($child_items > 0) echo "<font class='message'>".t("Liitoksia lapsitasoilla").":</font>".$child_items;
     echo "</p>";

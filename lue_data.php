@@ -760,7 +760,10 @@ if ($kasitellaan_tiedosto) {
             }
 
             // yhtio ja tunnus kenttiä ei saa koskaan muokata...
-            if ($column == 'YHTIO' or $column == 'TUNNUS') {
+            if ($column == 'YHTIO' or 
+            (
+              $column == 'TUNNUS' and (!in_array("TUNNUS", $pakolliset) or count($pakolliset) > 1))
+            ) {
               lue_data_echo("<font class='error'>".t("Yhtiö- ja tunnussaraketta ei saa muuttaa")." $table_mysql-".t("taulussa")."!</font><br>");
               $vikaa++;
             }
@@ -1001,6 +1004,13 @@ if ($kasitellaan_tiedosto) {
           $tuoteno = $taulunrivit[$taulu][$eriviindex][$j];
 
           $valinta .= " and TUOTENO='$tuoteno'";
+        }
+        elseif ($table_mysql == 'dynaaminen_puu') {
+
+          if ($taulunotsikot[$taulu][$j] == "TUNNUS") {
+            $valinta = " yhtio = '$kukarow[yhtio]' and tunnus = '{$taulunrivit[$taulu][$eriviindex][$j]}' ";
+            $apu_sarakkeet = array("TUNNUS");
+          }
         }
         elseif ($table_mysql == 'autoid_lisatieto' and $lue_data_autoid and ($taulunrivit[$taulu][$eriviindex][$postoiminto] == "POISTA" or $taulunrivit[$taulu][$eriviindex][$postoiminto] == "MUUTA") and !in_array($eriviindex, $lisatyt_indeksit)) {
           $tee = "pre_rivi_loop";
@@ -2568,60 +2578,61 @@ lue_data_echo("<br>".$lue_data_output_text, true);
 if (!$cli and !isset($api_kentat)) {
   // Taulut, jota voidaan käsitellä
   $taulut = array(
-    'abc_parametrit'                  => 'ABC-parametrit',
-    'asiakas'                         => 'Asiakas',
-    'asiakasalennus'                  => 'Asiakasalennukset',
-    'asiakashinta'                    => 'Asiakashinnat',
-    'asiakaskommentti'                => 'Asiakaskommentit',
-    'asiakkaan_avainsanat'            => 'Asiakkaan avainsanat',
-    'avainsana'                       => 'Avainsanat',
-    'budjetti'                        => 'Budjetti',
-    'customers_users'                 => 'Extranet käyttäjien multiasiakkuus',
-    'dynaaminen_puu_avainsanat'      => 'Dynaamisen puun avainsanat',
-    'etaisyydet'                      => 'Etäisyydet varastosta',
-    'extranet_kayttajan_lisatiedot'   => 'Extranet-käyttäjän lisätietoja',
-    'hinnasto'                        => 'Hinnasto',
-    'kalenteri'                       => 'Kalenteritietoja',
-    'kuka'                            => 'Käyttäjätietoja',
-    'kustannuspaikka'                 => 'Kustannuspaikat',
-    'lahdot'                    => 'Lähdöt',
-    'laite'                           => 'Laiterekisteri',
-    'laitteen_sopimukset'             => 'Laitteen sopimukset',
-    'liitetiedostot'                  => 'Liitetiedostot',
-    'maksuehto'                       => 'Maksuehto',
-    'pakkaus'                         => 'Pakkaustiedot',
-    'perusalennus'                    => 'Perusalennukset',
-    'puun_alkio_asiakas'              => 'Asiakas-segmenttiliitokset',
-    'puun_alkio_tuote'                => 'Tuote-segmenttiliitokset',
-    'rahtikirjanumero'          => 'LOGY-rahtikirjanumerot',
-    'rahtimaksut'                     => 'Rahtimaksut',
-    'rahtisopimukset'                 => 'Rahtisopimukset',
-    'rekisteritiedot'                 => 'Rekisteritiedot',
-    'sanakirja'                       => 'Sanakirja',
-    'sarjanumeron_lisatiedot'         => 'Sarjanumeron lisätiedot',
-    'taso'                            => 'Tilikartan rakenne',
-    'tili'                            => 'Tilikartta',
-    'todo'                            => 'Todo-lista',
-    'toimi'                           => 'Toimittaja',
-    'toimittajaalennus'               => 'Toimittajan alennukset',
-    'toimittajahinta'                 => 'Toimittajan hinnat',
-    'toimitustapa'                    => 'Toimitustavat',
-    'toimitustavan_lahdot'            => 'Toimitustavan lähdöt',
-    'tullinimike'                     => 'Tullinimikkeet',
-    'tuote'                           => 'Tuote',
-    'tuotepaikat'                     => 'Tuotepaikat',
-    'tuoteperhe'                      => 'Tuoteperheet',
-    'tuotteen_alv'                    => 'Tuotteiden ulkomaan ALV',
-    'tuotteen_avainsanat'             => 'Tuotteen avainsanat',
-    'tuotteen_orginaalit'             => 'Tuotteiden originaalit',
-    'tuotteen_toimittajat'            => 'Tuotteen toimittajat',
-    'tuotteen_toimittajat_pakkauskoot' => 'Tuotteen toimittajan pakkauskoot',
+    'abc_parametrit'                    => 'ABC-parametrit',
+    'asiakas'                           => 'Asiakas',
+    'asiakasalennus'                    => 'Asiakasalennukset',
+    'asiakashinta'                      => 'Asiakashinnat',
+    'asiakaskommentti'                  => 'Asiakaskommentit',
+    'asiakkaan_avainsanat'              => 'Asiakkaan avainsanat',
+    'avainsana'                         => 'Avainsanat',
+    'budjetti'                          => 'Budjetti',
+    'customers_users'                   => 'Extranet käyttäjien multiasiakkuus',
+    'dynaaminen_puu'                    => 'Dynaaminen puu',
+    'dynaaminen_puu_avainsanat'         => 'Dynaamisen puun avainsanat',
+    'etaisyydet'                        => 'Etäisyydet varastosta',
+    'extranet_kayttajan_lisatiedot'     => 'Extranet-käyttäjän lisätietoja',
+    'hinnasto'                          => 'Hinnasto',
+    'kalenteri'                         => 'Kalenteritietoja',
+    'kuka'                              => 'Käyttäjätietoja',
+    'kustannuspaikka'                   => 'Kustannuspaikat',
+    'lahdot'                            => 'Lähdöt',
+    'laite'                             => 'Laiterekisteri',
+    'laitteen_sopimukset'               => 'Laitteen sopimukset',
+    'liitetiedostot'                    => 'Liitetiedostot',
+    'maksuehto'                         => 'Maksuehto',
+    'pakkaus'                           => 'Pakkaustiedot',
+    'perusalennus'                      => 'Perusalennukset',
+    'puun_alkio_asiakas'                => 'Asiakas-segmenttiliitokset',
+    'puun_alkio_tuote'                  => 'Tuote-segmenttiliitokset',
+    'rahtikirjanumero'                  => 'LOGY-rahtikirjanumerot',
+    'rahtimaksut'                       => 'Rahtimaksut',
+    'rahtisopimukset'                   => 'Rahtisopimukset',
+    'rekisteritiedot'                   => 'Rekisteritiedot',
+    'sanakirja'                         => 'Sanakirja',
+    'sarjanumeron_lisatiedot'           => 'Sarjanumeron lisätiedot',
+    'taso'                              => 'Tilikartan rakenne',
+    'tili'                              => 'Tilikartta',
+    'todo'                              => 'Todo-lista',
+    'toimi'                             => 'Toimittaja',
+    'toimittajaalennus'                 => 'Toimittajan alennukset',
+    'toimittajahinta'                   => 'Toimittajan hinnat',
+    'toimitustapa'                      => 'Toimitustavat',
+    'toimitustavan_lahdot'              => 'Toimitustavan lähdöt',
+    'tullinimike'                       => 'Tullinimikkeet',
+    'tuote'                             => 'Tuote',
+    'tuotepaikat'                       => 'Tuotepaikat',
+    'tuoteperhe'                        => 'Tuoteperheet',
+    'tuotteen_alv'                      => 'Tuotteiden ulkomaan ALV',
+    'tuotteen_avainsanat'               => 'Tuotteen avainsanat',
+    'tuotteen_orginaalit'               => 'Tuotteiden originaalit',
+    'tuotteen_toimittajat'              => 'Tuotteen toimittajat',
+    'tuotteen_toimittajat_pakkauskoot'  => 'Tuotteen toimittajan pakkauskoot',
     'tuotteen_toimittajat_tuotenumerot' => 'Tuotteen toimittajan vaihtoehtoiset tuotenumerot',
-    'vak'                             => 'VAK/ADR-tietoja',
-    'vak_imdg'                        => 'VAK/IMDG-tietoja',
-    'varaston_hyllypaikat'            => 'Varaston hyllypaikat',
-    'yhteyshenkilo'                   => 'Yhteyshenkilöt',
-    'yhtion_toimipaikat'              => 'Toimipaikka',
+    'vak'                               => 'VAK/ADR-tietoja',
+    'vak_imdg'                          => 'VAK/IMDG-tietoja',
+    'varaston_hyllypaikat'              => 'Varaston hyllypaikat',
+    'yhteyshenkilo'                     => 'Yhteyshenkilöt',
+    'yhtion_toimipaikat'                => 'Toimipaikka',
   );
 
   // Yhtiökohtaisia

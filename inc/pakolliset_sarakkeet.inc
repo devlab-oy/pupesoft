@@ -19,6 +19,7 @@ if (!function_exists("pakolliset_sarakkeet")) {
     $saakopoistaa   = FALSE;
     $oletukset      = array();
     $eisaaollatyhja = array();
+    $viesti = false;
 
     switch ($table) {
     case "tuote" :
@@ -344,8 +345,9 @@ if (!function_exists("pakolliset_sarakkeet")) {
       $saakopoistaa = TRUE;
       break;
     case "dynaaminen_puu" :
-      $pakolliset   = array("TUNNUS");
-      $wherelliset  = array("KOODI", "NIMI", "LFT", "RGT", "LAJI");
+      $viesti = t("Huom: jos CHILDREN_COUNT on 0, se laske niitä automaattisesti.<br><br>");
+      $pakolliset   = array("TUNNUS", "LAJI");
+      $wherelliset  = array("KOODI", "NIMI", "LFT", "RGT", "CHILDREN_COUNT");
       $kielletyt    = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
       $saakopoistaa = TRUE;
       break;
@@ -475,6 +477,6 @@ if (!function_exists("pakolliset_sarakkeet")) {
       }
     }
 
-    return array($pakolliset, $kielletyt, $wherelliset, $eiyhtiota, $joinattavat, $saakopoistaa, $oletukset, $eisaaollatyhja);
+    return array($pakolliset, $kielletyt, $wherelliset, $eiyhtiota, $joinattavat, $saakopoistaa, $oletukset, $eisaaollatyhja, $viesti);
   }
 }

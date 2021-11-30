@@ -290,7 +290,7 @@ if ($kasitellaan_tiedosto) {
       $table_tarkenne = substr($taulu, 11);
     }
 
-    list($pakolliset, $kielletyt, $wherelliset, $eiyhtiota, $joinattava, $saakopoistaa, $oletukset, $eisaaollatyhja) = pakolliset_sarakkeet($taulu);
+    list($pakolliset, $kielletyt, $wherelliset, $eiyhtiota, $joinattava, $saakopoistaa, $oletukset, $eisaaollatyhja, $viesti) = pakolliset_sarakkeet($taulu);
 
     // Laitetaan aina kaikkiin tauluihin
     $joinattava["TOIMINTO"] = $table;
@@ -742,7 +742,7 @@ if ($kasitellaan_tiedosto) {
       }
 
       // Otetaan pakolliset, kielletyt, wherelliset ja eiyhtiota tiedot
-      list($pakolliset, $kielletyt, $wherelliset, $eiyhtiota, $joinattavat, $saakopoistaa, $oletukset, $eisaaollatyhja) = pakolliset_sarakkeet($table_mysql, $taulunotsikot[$taulu]);
+      list($pakolliset, $kielletyt, $wherelliset, $eiyhtiota, $joinattavat, $saakopoistaa, $oletukset, $eisaaollatyhja, $viesti) = pakolliset_sarakkeet($table_mysql, $taulunotsikot[$taulu]);
 
       // $trows sisältää kaikki taulun sarakkeet ja tyypit tietokannasta
       // $taulunotsikot[$taulu] sisältää kaikki sarakkeet saadusta tiedostosta
@@ -762,7 +762,7 @@ if ($kasitellaan_tiedosto) {
             // yhtio ja tunnus kenttiä ei saa koskaan muokata...
             if ($column == 'YHTIO' or 
             (
-              $column == 'TUNNUS' and (!in_array("TUNNUS", $pakolliset) or count($pakolliset) > 1))
+              $column == 'TUNNUS' and !in_array("TUNNUS", $pakolliset))
             ) {
               lue_data_echo("<font class='error'>".t("Yhtiö- ja tunnussaraketta ei saa muuttaa")." $table_mysql-".t("taulussa")."!</font><br>");
               $vikaa++;
@@ -1008,9 +1008,35 @@ if ($kasitellaan_tiedosto) {
         elseif ($table_mysql == 'dynaaminen_puu') {
 
           if ($taulunotsikot[$taulu][$j] == "TUNNUS") {
+            $dynaaminen_puu_tunnus = $taulunrivit[$taulu][$eriviindex][$j];
             $valinta = " yhtio = '$kukarow[yhtio]' and tunnus = '{$taulunrivit[$taulu][$eriviindex][$j]}' ";
             $apu_sarakkeet = array("TUNNUS");
           }
+          if ($taulunotsikot[$taulu][$j] == "LAJI") {
+            $dynaaminen_puu_laji = $taulunrivit[$taulu][$eriviindex][$j];
+            $valinta .= " and laji = '{$taulunrivit[$taulu][$eriviindex][$j]}' ";
+          }
+          
+          if ($taulunotsikot[$taulu][$j] == "CHILDREN_COUNT") {
+            $qu = "SELECT count(*) lkm
+                    FROM puun_alkio
+                    WHERE yhtio     = '{$kukarow['yhtio']}'
+                    AND laji        = '{$dynaaminen_puu_laji}'
+                    AND puun_tunnus = '{$dynaaminen_puu_tunnus}'";
+            $re = pupe_query($qu);
+            $row = mysql_fetch_assoc($re);
+            $own_items = $row['lkm'];
+            if($taulunrivit[$taulu][$eriviindex][$postoiminto] == "POISTA" and $own_items > 0) {
+              lue_data_echo(t("Virhe rivillä").": $rivilaskuri <font class='error'>".t("Rivin poisto ei sallittu, koska se sisältää liitokset!")."</font> $valinta<br>");
+              $tila = 'ohita';
+            } else {
+              if ($taulunrivit[$taulu][$eriviindex][$j] == 0) {
+                $taulunrivit[$taulu][$eriviindex][$j] = $own_items;
+                lue_data_echo(t("CHILDREN_COUNT laskettu automaattisesti").": $rivilaskuri<br>");
+              }
+            }
+          }
+
         }
         elseif ($table_mysql == 'autoid_lisatieto' and $lue_data_autoid and ($taulunrivit[$taulu][$eriviindex][$postoiminto] == "POISTA" or $taulunrivit[$taulu][$eriviindex][$postoiminto] == "MUUTA") and !in_array($eriviindex, $lisatyt_indeksit)) {
           $tee = "pre_rivi_loop";
@@ -2725,8 +2751,10 @@ if (!$cli and !isset($api_kentat)) {
     $_taulu_query = $_taulu;
   }
 
-  list($pakolliset, $kielletyt, $wherelliset, $eiyhtiota, $joinattavat, $saakopoistaa, $oletukset, $eisaaollatyhja) = pakolliset_sarakkeet($_taulu_query);
-
+  list($pakolliset, $kielletyt, $wherelliset, $eiyhtiota, $joinattavat, $saakopoistaa, $oletukset, $eisaaollatyhja, $viesti) = pakolliset_sarakkeet($_taulu_query);
+  if($viesti) {
+    echo '<font class="error">'.$viesti.'</font>';
+  }
   $wherelliset = array_merge($wherelliset, $eisaaollatyhja);
   $wherelliset = array_unique($wherelliset);
 

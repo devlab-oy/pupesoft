@@ -135,7 +135,7 @@ while (false !== ($file = readdir($handle))) {
       'kilotyht' => $kilotrow['kilotyht']
     );
 
-    paivita_rahtikirjat_tulostetuksi_ja_toimitetuksi($params);
+    paivita_rahtikirjat_tulostetuksi_ja_toimitetuksi($params, true);
 
     pupesoft_log('logmaster_tracking_code', "Tilauksen {$tilausnumero} seurantakoodisanoma käsitelty");
 

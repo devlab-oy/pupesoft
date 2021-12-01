@@ -27668,7 +27668,7 @@ if (!function_exists('laske_siirrettava_maara')) {
 }
 
 if (!function_exists('paivita_rahtikirjat_tulostetuksi_ja_toimitetuksi')) {
-  function paivita_rahtikirjat_tulostetuksi_ja_toimitetuksi(array $params) {
+  function paivita_rahtikirjat_tulostetuksi_ja_toimitetuksi(array $params, $from_tracking_code=false) {
     global $kukarow, $pupe_root_polku;
 
     $otunnukset = isset($params['otunnukset']) ? $params['otunnukset'] : '';
@@ -27716,6 +27716,81 @@ if (!function_exists('paivita_rahtikirjat_tulostetuksi_ja_toimitetuksi')) {
               AND kuljetusmuoto           != ''
               AND alatila                 != 'X'";
     $ures  = pupe_query($query);
+
+    if($from_tracking_code) {
+
+      // Tarkistetaan, ett‰ onko lasku luotu, jos ei ole, niin luodaan.
+      $query_tark = "SELECT tunnus FROM lasku 
+                WHERE alatila      != 'X' 
+                AND yhtio  = '{$kukarow['yhtio']}'
+                AND tunnus   = '$otunnukset' 
+                AND mapvm   != '0000-00-00'
+                AND laskunro = 0 
+                AND chn      = '999'";
+      $ures_tark  = pupe_query($query_tark);
+      if (mysql_num_rows($ures_tark) > 0) {
+
+        $query_tark = "UPDATE lasku SET
+                       chn      = '' 
+                       WHERE yhtio  = '{$kukarow['yhtio']}'
+                       AND tunnus   = '$otunnukset' 
+                       AND mapvm   != '0000-00-00' 
+                       AND laskunro = 0 
+                       AND chn      = '999'";
+        $ures_tark  = pupe_query($query_tark);
+
+        $query  = "UPDATE tilausrivi
+                   SET kerattyaika = now(), keratty = '$kukarow[kuka]'
+                   WHERE otunnus   = '$otunnukset'
+                   and yhtio       = '$kukarow[yhtio]'
+                   and var         not in ('P','J','O','S')
+                   and keratty     = ''
+                   and toimitettu  = ''
+                   and tyyppi     != 'D'";
+        $result = pupe_query($query);
+
+        $query = "UPDATE tilausrivi
+                  SET toimitettu = '$kukarow[kuka]', toimitettuaika = now()
+                  WHERE otunnus   = '$otunnukset'
+                  and var         not in ('P','J','O','S')
+                  and yhtio       = '$kukarow[yhtio]'
+                  and keratty    != ''
+                  and toimitettu  = ''
+                  and tyyppi     != 'D'";
+        $result = pupe_query($query);
+
+        $query = "UPDATE lasku
+                  SET tila = 'L', alatila = 'D'
+                  WHERE tunnus = '$otunnukset'
+                  and yhtio    = '$kukarow[yhtio]'";
+        $result = pupe_query($query);
+
+        $argv[1] = $kukarow['yhtio'];
+        $otunnukset_cache = $otunnukset;
+        $laskutettavat = $otunnukset;
+        $tee = "TARKISTA";
+        $laskutakaikki = "KYLLA";
+        $silent = "VIENTI";
+        $valittu_tulostin = "";
+        require "tilauskasittely/verkkolasku.php";
+        require_once "tilauskasittely/tulosta_asiakkaan_kuitti.inc";
+
+        $kuitin_parametrit = array("kateinen" => 0);
+        tulosta_asiakkaan_kuitti($otunnukset_cache, $kukarow["kuittitulostin"],
+          $kuitin_parametrit);
+
+        unset($valittu_tulostin);
+        
+        // Laitetaan takaisin laskutuskielto 999
+        $query_tark = "UPDATE lasku SET
+                       chn      = '999' 
+                       WHERE yhtio  = '{$kukarow['yhtio']}'
+                       AND tunnus   IN ({$otunnukset_cache})
+                       AND mapvm   != '0000-00-00' 
+                       AND chn      = ''";
+        $ures_tark  = pupe_query($query_tark);
+      }
+    }
 
     // Etuk‰teen maksetut tilaukset pit‰‰ muuttaa takaisin "maksettu"-tilaan
     $query = "UPDATE lasku SET

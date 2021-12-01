@@ -27682,7 +27682,8 @@ if (!function_exists('luo_lasku_poikkeus_tilaukset')) {
       $ures_tark  = pupe_query($query_tark);
       if (mysql_num_rows($ures_tark) > 0) {
 
-        $query_tark = "UPDATE lasku SET
+        $query_tark = "UPDATE lasku SET 
+                       alatila = 'V', 
                        chn      = '' 
                        WHERE yhtio  = '{$kukarow['yhtio']}'
                        AND tunnus   = '$otunnukset' 

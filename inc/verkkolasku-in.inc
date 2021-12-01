@@ -120,6 +120,10 @@ if (!function_exists("verkkolasku_in")) {
     $laskuvirhe = "";
     $viesti    = "";
 
+    if(isset($fitek_comment)) {
+      $komm = "(fitek@" . date('Y-m-d') .") ".$fitek_comment."<br>\n" . $komm;
+    }
+
     // $yhtio:ssa on nyt laskun VASTAANOTTAJAN ovt-tunnus ja $verkkotunnus_vas:ssa on VASTAANOTTAJAN verkkolaskutunnus
     $verkkotunnus_vas   = trim($verkkotunnus_vas);
     $yhtio         = trim($yhtio);

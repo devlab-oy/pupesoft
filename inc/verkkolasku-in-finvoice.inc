@@ -56,6 +56,9 @@ $laskun_tyyppi_teksti = xml_string($xml->InvoiceDetails->InvoiceTypeText);
 $laskun_numero = xml_string($xml->InvoiceDetails->InvoiceNumber);
 if ($fitek_xml_cron_tiedot) {
   $laskun_numero = preg_replace('/\D/', '', $laskun_numero);
+  if(xml_string($xml->InvoiceDetails->InvoiceFreeText) and xml_string($xml->InvoiceDetails->InvoiceFreeText) != "") {
+    $fitek_comment = xml_string($xml->InvoiceDetails->InvoiceFreeText);
+  }
 }
 $laskun_tapvm = xml_string($xml->InvoiceDetails->InvoiceDate);
 $laskun_lapvm = xml_string($xml->InvoiceDetails->InvoiceDate);

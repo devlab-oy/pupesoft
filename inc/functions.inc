@@ -27669,7 +27669,7 @@ if (!function_exists('laske_siirrettava_maara')) {
 
 if (!function_exists('luo_lasku_poikkeus_tilaukset')) {
   function luo_lasku_poikkeus_tilaukset($otunnukset) {
-    global $kukarow;
+    global $kukarow, $pupe_root_polku;
     if(is_numeric($otunnukset)) {
 
       // Tarkistetaan, että onko lasku luotu, jos ei ole, niin luodaan.

@@ -13,7 +13,7 @@
 // Passataan $desadv_version, mikäli se on "una", niin tulostetaan uudet headerit
 
 if (!function_exists('desadv_header')) {
-  function desadv_header($params) {
+  function desadv_header($params, $desadv_asiakastoim_ovttunnus = false) {
     global $kukarow, $yhtiorow;
 
     // Luodaan muuttujat
@@ -40,8 +40,13 @@ if (!function_exists('desadv_header')) {
     }
 
     if ($desadv_version == 'ean005') {
+      if($desadv_asiakastoim_ovttunnus) {
+        $_desadv_asiakastoim_ovttunnus = $desadv_asiakastoim_ovttunnus;
+      } else {
+        $_desadv_asiakastoim_ovttunnus = $desadv_laskurow["asiakastoim_ovttunnus"];
+      }
       $desadv_message = "UNA:+.? '";
-      $desadv_message .= "UNB+UNOC:3+{$desadv_laskurow["yhtio_ovttunnus"]}:14+{$desadv_laskurow["asiakastoim_ovttunnus"]}:14+{$valpvm}:{$valaika}+{$lahtunniste}++++++'";
+      $desadv_message .= "UNB+UNOC:3+{$desadv_laskurow["yhtio_ovttunnus"]}:14+{$_desadv_asiakastoim_ovttunnus}:14+{$valpvm}:{$valaika}+{$lahtunniste}++++++'";
       $desadv_message .= "UNH+{$desadv_laskurow['laskutunnus']}+DESADV:D:96A:UN:EAN005";
     }
     else {
@@ -764,7 +769,11 @@ if ($desadv_host != '' and $desadv_user != '' and $desadv_pass != '' and $desadv
       'lahtunniste'       => $lahtunniste,
     );
 
-    list($desadv_message, $error, $x, $lahtunniste) = desadv_header($params);
+    if(!isset($desadv_asiakastoim_ovttunnus)) {
+      $desadv_asiakastoim_ovttunnus = false;
+    }
+
+    list($desadv_message, $error, $x, $lahtunniste) = desadv_header($params, $desadv_asiakastoim_ovttunnus);
 
     $params = array(
       'desadv_laskurow'  => $desadv_laskurow,

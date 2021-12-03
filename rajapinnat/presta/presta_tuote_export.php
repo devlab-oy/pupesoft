@@ -235,11 +235,18 @@ if (!isset($presta_tilauksen_liitetiedostojen_nouto)) {
 }
 if (!isset($presta_siirrettavat_hinnat)) {
   // Mitä hintoja siirretään Prestan Specific Prices hinnoiksi
-  $presta_siirrettavat_hinnat = array(
-    'asiakasalennukset',
-    'asiakashinnat',
-    'hinnastohinnat',
-  );
+  if(isset($presta_yhtion_siirrettavat_hinnat) and 
+  is_array($presta_yhtion_siirrettavat_hinnat) and 
+  !empty($presta_yhtion_siirrettavat_hinnat))
+  {
+    $presta_siirrettavat_hinnat = $presta_yhtion_siirrettavat_hinnat;
+  } else {
+    $presta_siirrettavat_hinnat = array(
+      'asiakasalennukset',
+      'asiakashinnat',
+      'hinnastohinnat',
+    );
+  }
 }
 
 presta_echo("Aloitetaan Prestashop päivitys.");

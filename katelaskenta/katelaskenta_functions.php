@@ -32,6 +32,7 @@ function valmistele_hakutulokset($tuotteet) {
       $tuotteet[$haku_funktio_key][$avain]["myymalahinta"] = hintapyoristys($arvo["myymalahinta"], 2);
       $tuotteet[$haku_funktio_key][$avain]["nettohinta"] = hintapyoristys($arvo["nettohinta"], 2);
       $tuotteet[$haku_funktio_key][$avain]["kehahin"] = hintapyoristys($arvo["kehahin"], 2);
+      $tuotteet[$haku_funktio_key][$avain]["asiakashinta_hinta"] = hintapyoristys($arvo["asiakashinta_hinta"], 2);
     }
   }
 

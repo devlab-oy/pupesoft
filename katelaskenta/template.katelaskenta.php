@@ -34,7 +34,7 @@
             <tr>
                 <td><input type="checkbox" checked="checked" name="valitutrivit[]" value="" /></td>
                 <?php if($mul_asiakasryhma or $mul_asiakaspiiri or $mul_asiakashinnasto_asiakas) {
-                    ?><td colspan="7">&nbsp;</td><?php
+                    ?><td colspan="4">&nbsp;</td><?php
                 } else {
                     ?><td colspan="4">&nbsp;</td>
                 <?php } ?>
@@ -44,6 +44,12 @@
                 <td><input type="text" name="myymalakate['']" value="" size=4 /></td>
                 <td>&nbsp;</td>
                 <td><input type="text" name="nettokate['']" value="" size=4 /></td>
+                <?php if($mul_asiakasryhma or $mul_asiakaspiiri or $mul_asiakashinnasto_asiakas) {
+                    ?>
+                    <td colspan="2">&nbsp;</td>
+                    <td><input type="text" name="asiakashintakate['']" value="" size=4 /></td>
+                    <?php
+                } ?>
                 <td><a href="#">Laske kaikki</a></td>
             </tr>
         </tfoot>
@@ -79,7 +85,7 @@
 
             <tr class="aktiivi"
                 id="rivi_<?php echo trim($tuote["tuoteno"]); ?>"
-                data-kehahinta="<?php echo $tuote["kehahin"]; ?>">
+                data-kehahinta="<?php echo $tuote["kehahin"]; ?>" data-asiakashinta="<?php echo $tuote["asiakashinta_hinta"]; ?>">
                 <td style="display: none;"><input type="hidden"
                         value="<?php echo $tuote["kehahin"]; ?>"
                         name="valitutkeskihankintahinnat['<?php echo $tuotetunnus; ?>']" />
@@ -123,13 +129,13 @@
                 }?>
                 <?php if($mul_asiakasryhma or $mul_asiakaspiiri or $mul_asiakashinnasto_asiakas) {
                 ?>
+                <td class="tumma"><span class="hinta" style="vertical-align: baseline;"><?php echo $tuote["asiakashinta_hinta"]; ?></span>
+                        <?php echo $template["yhtio"]["valkoodi"]; ?>
+                </td>
                 <td class="tumma"><input type="text"
                         name="asiakashintakate['<?php echo $tuotetunnus; ?>']"
                         value="<?php echo $tuote["myyntikate"]; ?>"
                         size=4 /></td>
-                <td class="tumma"><span class="asiakashin" style="vertical-align: baseline;"><?php echo number_format($tuote["asiakashinta_hinta"], 2); ?></span>
-                        <?php echo $template["yhtio"]["valkoodi"]; ?>
-                </td>
                 <?php
                 }?>
                 <td><a href="#">Laske</a></td>

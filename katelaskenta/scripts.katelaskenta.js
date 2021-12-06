@@ -20,20 +20,20 @@ $(document).ready(function () {
     // Kaikki sarake-päätteiset muuttujat ovat jqueryn
     // selectoreita kertomaan, missä oikea sarake on
     // mikäli käyttöliittymää mennään muuttamaan.
-    var footerKateAsiakashintaSarake;
     var footerKateMyyntihintaSarake;
     var footerKateMyymalahintaSarake;
     var footerKateNettohintaSarake;
+    var footerKateAsiakashintaSarake;
     var tuoteriviCheckboxSarake;
     var tuoteriviLaskeNappiSarake;
-    var kateAsiakashintaSarake;
     var kateMyyntihintaSarake;
     var kateMyymalahintaSarake;
     var kateNettohintaSarake;
+    var kateAsiakashintaSarake;
     var myyntihintaSarake;
     var myymalahintaSarake;
     var nettohintaSarake;
-
+    var asiakashintaSarake;
 
     // Esitellään funktiot.
     // Toteutukset löytyvät alapuolelta.
@@ -58,12 +58,15 @@ $(document).ready(function () {
         footerKateMyyntihintaSarake = "td:nth-child(4) input";
         footerKateMyymalahintaSarake = "td:nth-child(6) input";
         footerKateNettohintaSarake = "td:nth-child(8) input";
+        footerKateAsiakashintaSarake = "td:nth-child(10) input";
         kateMyyntihintaSarake = "td:nth-child(8) input";
         kateMyymalahintaSarake = "td:nth-child(10) input";
         kateNettohintaSarake = "td:nth-child(12) input";
+        kateAsiakashintaSarake = "td:nth-child(15) input";
         myyntihintaSarake = "td:nth-child(7) span.hinta";
         myymalahintaSarake = "td:nth-child(9) span.hinta";
         nettohintaSarake = "td:nth-child(11) span.hinta";
+        asiakashintaSarake = "td:nth-child(14) span.hinta";
         tuoteriviCheckboxSarake = "td:nth-child(2) input[type=checkbox]";
         tuoteriviLaskeNappiSarake = "td:last-child a";
     }
@@ -150,6 +153,7 @@ $(document).ready(function () {
     // Laske painike laskee annetun kateprosentin mukaan uuden hinnan.
     $.each(tuoterivit, function () {
         var keskihankintahinta = $(this).data("kehahinta");
+        var keskiasiakashinta = $(this).data("asiakashinta");
 
         var myyntikate = $(this).find(kateMyyntihintaSarake);
         var myyntihintaElementti = $(this).find(myyntihintaSarake);
@@ -160,11 +164,15 @@ $(document).ready(function () {
         var nettokate = $(this).find(kateNettohintaSarake);
         var nettohintaElementti = $(this).find(nettohintaSarake);
 
+        var asiakaskate = $(this).find(kateAsiakashintaSarake);
+        var asiakashintaElementti = $(this).find(asiakashintaSarake);
+
         $(this).find(tuoteriviLaskeNappiSarake).on("click", function (event) {
             event.preventDefault();
             var uusiMyyntihinta = lisaaHintaanKate(keskihankintahinta, myyntikate.val());
             var uusiMyymalahinta = lisaaHintaanKate(keskihankintahinta, myymalakate.val());
             var uusiNettohinta = lisaaHintaanKate(keskihankintahinta, nettokate.val());
+            var uusiAsiakashinta = lisaaHintaanKate(keskiasiakashinta, asiakaskate.val());
 
             if(uusiMyyntihinta !== false && myyntikate.val() > 0) {
                 asetaUusiHinta(uusiMyyntihinta, myyntihintaElementti);
@@ -176,6 +184,10 @@ $(document).ready(function () {
 
             if(uusiNettohinta !== false && nettokate.val() > 0) {
                 asetaUusiHinta(uusiNettohinta, nettohintaElementti);
+            }
+
+            if(uusiAsiakashinta !== false && asiakaskate.val() > 0) {
+                asetaUusiHinta(uusiAsiakashinta, asiakashintaElementti);
             }
         });
     });
@@ -204,6 +216,7 @@ $(document).ready(function () {
         var myyntikate = tuoterivitTaulukko.find("tfoot tr").find(footerKateMyyntihintaSarake).val();
         var myymalakate = tuoterivitTaulukko.find("tfoot tr").find(footerKateMyymalahintaSarake).val();
         var nettokate = tuoterivitTaulukko.find("tfoot tr").find(footerKateNettohintaSarake).val();
+        var asiakaskate = tuoterivitTaulukko.find("tfoot tr").find(footerKateAsiakashintaSarake).val();
 
         if (!onkoTyhja(myyntikate)) {
             if(!onkoVirheellinenMyyntikate(myyntikate)) {
@@ -226,6 +239,13 @@ $(document).ready(function () {
             }
         }
 
+        if (!onkoTyhja(asiakaskate) && undefined !== undefined) {
+            if(!onkoVirheellinenMyyntikate(asiakaskate)) {
+                alert("Virheellinen kate. Asiakaskatekenttä ei voi olla tyhjä ja katteen pitää olla 0-100 välillä.");
+                return true;
+            }
+        }
+
         // Käydään jokainen rivi läpi ja asetetaan uusi hinta, jos hinta
         // ei ole virheellinen.
         $.each(tuoterivit, function () {
@@ -233,6 +253,7 @@ $(document).ready(function () {
 
             if (valintaElementti.attr("checked") === "checked") {
                 var keskihankintahinta = $(this).data("kehahinta");
+                var keskiasiakashinta = $(this).data("asiakashinta");
 
                 if (!onkoTyhja(myyntikate)) {
                     var myyntihintaElementti = $(this).find(myyntihintaSarake);
@@ -259,6 +280,15 @@ $(document).ready(function () {
                         asetaUusiHinta(uusiNettohinta, nettohintaElementti);
                     }
                     $(this).find(kateNettohintaSarake).val(nettokate);
+                }
+
+                if (!onkoTyhja(asiakaskate)) {
+                    var asiakashintaElementti = $(this).find(asiakashintaSarake);
+                    var uusiAsiakashinta = lisaaHintaanKate(keskiasiakashinta, asiakaskate);
+                    if(uusiAsiakashinta !== false && asiakaskate > 0) {
+                        asetaUusiHinta(uusiAsiakashinta, asiakashintaElementti);
+                    }
+                    $(this).find(kateAsiakashintaSarake).val(asiakaskate);
                 }
             }
         });

@@ -21,16 +21,18 @@
 
 
 function valmistele_hakutulokset($tuotteet) {
-  foreach ($tuotteet as $avain => $arvo) { // $rows muuttuja tulee templaten ulkopuolelta
-    // Merkit‰‰n nimitykseen "poistuva"
-    if (strtoupper($arvo["status"]) == "P") {
-      $tuotteet[$avain]["nimitys"] .= "<br> * " . t("Poistuva tuote");
-    }
+  foreach ($tuotteet as $haku_funktio_key => $template_tuote) {
+    foreach ($template_tuote as $avain => $arvo) { // $rows muuttuja tulee templaten ulkopuolelta
+      // Merkit‰‰n nimitykseen "poistuva"
+      if (strtoupper($arvo["status"]) == "P") {
+        $tuotteet[$haku_funktio_key][$avain]["nimitys"] .= "<br> * " . t("Poistuva tuote");
+      }
 
-    $tuotteet[$avain]["myyntihinta"] = hintapyoristys($arvo["myyntihinta"], 2);
-    $tuotteet[$avain]["myymalahinta"] = hintapyoristys($arvo["myymalahinta"], 2);
-    $tuotteet[$avain]["nettohinta"] = hintapyoristys($arvo["nettohinta"], 2);
-    $tuotteet[$avain]["kehahin"] = hintapyoristys($arvo["kehahin"], 2);
+      $tuotteet[$haku_funktio_key][$avain]["myyntihinta"] = hintapyoristys($arvo["myyntihinta"], 2);
+      $tuotteet[$haku_funktio_key][$avain]["myymalahinta"] = hintapyoristys($arvo["myymalahinta"], 2);
+      $tuotteet[$haku_funktio_key][$avain]["nettohinta"] = hintapyoristys($arvo["nettohinta"], 2);
+      $tuotteet[$haku_funktio_key][$avain]["kehahin"] = hintapyoristys($arvo["kehahin"], 2);
+    }
   }
 
   return $tuotteet;

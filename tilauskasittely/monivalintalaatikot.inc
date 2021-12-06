@@ -580,10 +580,20 @@ if (count($mul_asiakasryhma) > 0) {
   $asiakasryhmat = substr($asiakasryhmat, 0, -1);
 
   if (trim($asiakasryhmat) != '') {
-    $lisa_haku_asiakasryhma = " and asiakas.ryhma in ($asiakasryhmat) ";
-
-    if ($mulselprefix == "abc_aputaulu") $lisa .= " and abc_aputaulu.try in ($asiakasryhmat) ";
-    else $lisa .= " and asiakas.ryhma in ($asiakasryhmat) ";
+    if ($asiakasryhmavalinta == "asiakashinta") {
+      $lisa_haku_asiakasryhma = " and asiakashinta.asiakas_ryhma in ($asiakasryhmat) ";
+    } else {
+      $lisa_haku_asiakasryhma = " and asiakas.ryhma in ($asiakasryhmat) ";
+    }
+    if ($mulselprefix == "abc_aputaulu") {
+      $lisa .= " and abc_aputaulu.try in ($asiakasryhmat) ";
+    }
+    else if($asiakasryhmavalinta == "asiakashinta") {
+      $lisa .= " and asiakashinta.asiakas_ryhma in ($asiakasryhmat) ";
+    }
+    else {
+      $lisa .= " and asiakas.ryhma in ($asiakasryhmat) ";
+    }
   }
 }
 
@@ -605,6 +615,10 @@ if (count($mul_asiakaspiiri) > 0) {
     if (isset($piirivalinta) and $piirivalinta == "lasku") {
       $lisa_haku_asiakaspiiri = " and lasku.piiri in ($asiakaspiirit) ";
       $lisa .= " and lasku.piiri in ($asiakaspiirit) ";
+    }
+    else if (isset($piirivalinta) and $piirivalinta == "asiakashinta") {
+      $lisa_haku_asiakaspiiri = " and asiakashinta.piiri in ($asiakaspiirit) ";
+      $lisa .= " and asiakashinta.piiri in ($asiakaspiirit) ";
     }
     else {
       $lisa_haku_asiakaspiiri = " and asiakas.piiri in ($asiakaspiirit) ";
@@ -2003,7 +2017,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
   }
 
   if ($monivalintalaatikko == "asiakasryhma") {
-    echo "<div class='monivalintadiv'><table valign='top'>";
+    echo "<div class='monivalintadiv asiakasryhmamonivalintadiv'><table valign='top'>";
 
     if ($piirra_otsikot) {
       echo "<tr><th>", t("Asiakasryhmä"), "</th></tr>";
@@ -2047,7 +2061,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
   }
 
   if ($monivalintalaatikko == "asiakaspiiri") {
-    echo "<div class='monivalintadiv'><table valign='top'>";
+    echo "<div class='monivalintadiv asiakaspiirimonivalintadiv'><table valign='top'>";
 
     if ($piirra_otsikot) {
       echo "<tr><th>", t("Asiakaspiiri"), "</th></tr>";

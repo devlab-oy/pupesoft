@@ -20,11 +20,13 @@ $(document).ready(function () {
     // Kaikki sarake-p‰‰tteiset muuttujat ovat jqueryn
     // selectoreita kertomaan, miss‰ oikea sarake on
     // mik‰li k‰yttˆliittym‰‰ menn‰‰n muuttamaan.
+    var footerKateAsiakashintaSarake;
     var footerKateMyyntihintaSarake;
     var footerKateMyymalahintaSarake;
     var footerKateNettohintaSarake;
     var tuoteriviCheckboxSarake;
     var tuoteriviLaskeNappiSarake;
+    var kateAsiakashintaSarake;
     var kateMyyntihintaSarake;
     var kateMyymalahintaSarake;
     var kateNettohintaSarake;
@@ -53,7 +55,6 @@ $(document).ready(function () {
         footerRivi = tuoterivitTaulukko.find("tfoot tr");
         footerCheckbox = tuoterivitTaulukko.find("tfoot tr td:first-child input[type=checkbox]");
         footerLaskeKaikki = tuoterivitTaulukko.find("tfoot tr td:last-child a");
-
         footerKateMyyntihintaSarake = "td:nth-child(4) input";
         footerKateMyymalahintaSarake = "td:nth-child(6) input";
         footerKateNettohintaSarake = "td:nth-child(8) input";

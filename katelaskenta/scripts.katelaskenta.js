@@ -46,8 +46,9 @@ $(document).ready(function () {
     $("#katelaskenta-hakutulokset td input").on("change, keyup", function() {
         var nimike = $(this).attr("name");
         var haesamanlaiset = $('#katelaskenta-hakutulokset td input[name|="'+nimike+'"]');
-        console.log(haesamanlaiset.length);
-        $('#katelaskenta-hakutulokset td input[name|="'+nimike+'"]').val($(this).val());
+        if(haesamanlaiset.length > 1) {
+            $('#katelaskenta-hakutulokset td input[name|="'+nimike+'"]').val($(this).val());
+        }
     });
 
     /**

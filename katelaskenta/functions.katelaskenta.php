@@ -198,9 +198,10 @@ function tallenna_valitut_katemuutokset($data) {
   if($valitut_tuoterivit_asiakaskate) {
     global $kukarow;
     foreach($valitut_tuoterivit_asiakaskate as $asiakashinta_k => $_asiakashinta_kate) {
-      if($_asiakashinta_kate == '') {
+      if($asiakashinta_k == "''") {
         continue;
       }
+
       $_asiakashinta_tiedot = explode("!!!", str_replace("'", "", $asiakashinta_k));
       $_asiakashinta_tunnus = $_asiakashinta_tiedot[0];
       $_asiakashinta_tuote = $_asiakashinta_tiedot[1];
@@ -208,10 +209,10 @@ function tallenna_valitut_katemuutokset($data) {
       $_asiakashinta_hinta = lisaa_hintaan_kate($_asiakashinta_hinta, $_asiakashinta_kate);
       $_asiakashinta_hinta = hintapyoristys($_asiakashinta_hinta, 2);
       $paivita_asiakashinnat_q = "UPDATE asiakashinta 
-                                  SET hinta = '{$_asiakashinta_hinta}',
-                                  myyntikate = '{$_asiakashinta_kate}' 
-                                  WHERE yhtio = '{$kukarow['yhtio']}' 
-                                  AND tunnus = $_asiakashinta_tunnus";
+                                    SET hinta = '{$_asiakashinta_hinta}',
+                                    myyntikate = '{$_asiakashinta_kate}' 
+                                    WHERE yhtio = '{$kukarow['yhtio']}' 
+                                    AND tunnus = $_asiakashinta_tunnus";
       pupe_query($paivita_asiakashinnat_q);
     }
   }

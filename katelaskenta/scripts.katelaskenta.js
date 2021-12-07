@@ -43,6 +43,13 @@ $(document).ready(function () {
     var lisaaHintaanKate;
     var asetaUusiHinta;
 
+    $("#katelaskenta-hakutulokset td input").on("change, keyup", function() {
+        var nimike = $(this).attr("name");
+        var haesamanlaiset = $('#katelaskenta-hakutulokset td input[name|="'+nimike+'"]');
+        console.log(haesamanlaiset.length);
+        $('#katelaskenta-hakutulokset td input[name|="'+nimike+'"]').val($(this).val());
+    });
+
     /**
      * Funtion toiminto on vain alustaa tavittavat muuttujat, joita
      * eri toiminnallisuuksissa k‰ytet‰‰n. N‰in elementtien hakuja

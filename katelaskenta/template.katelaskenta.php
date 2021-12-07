@@ -86,9 +86,15 @@
             <tr class="aktiivi"
                 id="rivi_<?php echo trim($tuote["tuoteno"]); ?>"
                 data-kehahinta="<?php echo $tuote["kehahin"]; ?>" data-asiakashinta="<?php echo $tuote["asiakashinta_hinta"]; ?>">
-                <td style="display: none;"><input type="hidden"
+                <td style="display: none;">
+                        <input type="hidden"
                         value="<?php echo $tuote["kehahin"]; ?>"
                         name="valitutkeskihankintahinnat['<?php echo $tuotetunnus; ?>']" />
+                        <?php if($mul_asiakasryhma or $mul_asiakaspiiri or $mul_asiakashinnasto_asiakas) { ?>
+                        <input type="hidden"
+                        value="<?php echo $tuote["asiakashinta_hinta"]; ?>"
+                        name="valitutasiakashinnat['<?php echo $tuote["asiakashinta_asiakas_tunnus"]."!!!".$tuotetunnus; ?>']" />
+                        <?php } ?>
                 </td>
                 <td><input type="checkbox" checked="checked"
                         name="valitutrivit['<?php echo $tuotetunnus; ?>']"
@@ -133,8 +139,8 @@
                         <?php echo $template["yhtio"]["valkoodi"]; ?>
                 </td>
                 <td class="tumma"><input type="text"
-                        name="asiakashintakate['<?php echo $tuotetunnus; ?>']"
-                        value="<?php echo $tuote["myyntikate"]; ?>"
+                        name="asiakashintakate['<?php echo $tuote["asiakashinta_asiakas_tunnus"]."!!!".$tuotetunnus; ?>']"
+                        value="<?php echo $tuote["asiakashinta_asiakas_myyntikate"]; ?>"
                         size=4 /></td>
                 <?php
                 }?>

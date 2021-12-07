@@ -51,6 +51,7 @@ $submit_katelaskenta = (isset($_POST["submit-katelaskenta"]) ? $_POST["submit-ka
 if (strlen($submit_katelaskenta) > 0) {
   // Tallennetaan post-tiedot omaan muuttujaan
   $post_array = $_POST;
+
   // Tallennetaan katemuutokset.
   $virheelliset_rivit = tallenna_valitut_katemuutokset($post_array);
 
@@ -269,7 +270,7 @@ $asiakasryhmavalinta = "asiakashinta";
 require "../tilauskasittely/monivalintalaatikot.inc";
 
 echo "<input type='submit' name='submit_button' id='submit_button' class='hae_btn' value = '" . t("Etsi") . "'></form>";
-echo "&nbsp;<form action = '' method = 'post'>
+echo "&nbsp;<form action = '".basename(__FILE__)."' method = 'post'>
   <input type='submit' name='submit_button2' id='submit_button2' value = '" . t("Tyhjennä") . "'>
   </form>";
 
@@ -298,6 +299,8 @@ if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
     asiakashinta.piiri as asiakashinta_piiri,
     asiakashinta.asiakas as asiakashinta_asiakas,
     asiakashinta.asiakas_ryhma as asiakashinta_asiakas_ryhma, 
+    asiakashinta.tunnus as asiakashinta_asiakas_tunnus, 
+    asiakashinta.myyntikate as asiakashinta_asiakas_myyntikate, 
     ";
   } else {
     $asiakashinta_lisays = "";

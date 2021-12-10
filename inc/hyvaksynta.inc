@@ -24,6 +24,7 @@ if ($tee == '') {
             and alatila       != 'M'
             GROUP BY 1,2
             ORDER BY nimi";
+            echo $query;
   $result = pupe_query($query);
 
   echo "<table>";
@@ -132,7 +133,8 @@ if ($tee == 'T') {
             FROM lasku
             WHERE hyvaksyja_nyt='$kuka'
             and yhtio = '$kukarow[yhtio]'
-            and tila  in ('H','Y','M','P','Q')
+            and tila  in ('H','Y','M','P','Q') 
+            and ebid != 'FINVOICEXML' 
             ORDER BY erpcm";
   $result = pupe_query($query);
 

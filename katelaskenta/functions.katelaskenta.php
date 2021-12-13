@@ -210,7 +210,9 @@ function tallenna_valitut_katemuutokset($data) {
       $_asiakashinta_hinta = hintapyoristys($_asiakashinta_hinta, 2);
       $paivita_asiakashinnat_q = "UPDATE asiakashinta 
                                     SET hinta = '{$_asiakashinta_hinta}',
-                                    myyntikate = '{$_asiakashinta_kate}' 
+                                    myyntikate = '{$_asiakashinta_kate}' ,
+                                    muutospvm = now(), 
+                                    muuttaja = '{$kukarow['kuka']}' 
                                     WHERE yhtio = '{$kukarow['yhtio']}' 
                                     AND tunnus = $_asiakashinta_tunnus";
       pupe_query($paivita_asiakashinnat_q);

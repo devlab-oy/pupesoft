@@ -241,7 +241,8 @@ if ((int) $tunnus != 0) {
 if ($tee == 'M' or ($onko_eka_hyvaksyja === TRUE and $tee != 'H' and $tee != 'D' and $tee != 'Z' and ($kukarow['taso'] == '2' or $kukarow["taso"] == '3'))) {
   $query = "SELECT *
             FROM lasku
-            WHERE hyvaksyja_nyt = '$kukarow[kuka]'
+            WHERE hyvaksyja_nyt = '$kukarow[kuka]' 
+            and ebid != 'FINVOICEXML' 
             and yhtio           = '$kukarow[yhtio]'
             and tunnus          = '$tunnus'";
   $result = pupe_query($query);
@@ -272,6 +273,7 @@ if ($tee == 'D' and $oikeurow['paivitys'] == '1') {
   $query = "SELECT *
             FROM lasku
             WHERE hyvaksyja_nyt = '$kukarow[kuka]' and
+            ebid != 'FINVOICEXML' and 
             yhtio               = '$kukarow[yhtio]' and
             tunnus              = '$tunnus'";
   $result = pupe_query($query);
@@ -340,7 +342,8 @@ if ($tee == "palauta") {
 
   $query = "SELECT *
             FROM lasku
-            WHERE hyvaksyja_nyt = '$kukarow[kuka]'
+            WHERE hyvaksyja_nyt = '$kukarow[kuka]' 
+            and ebid != 'FINVOICEXML' 
             AND yhtio           = '$kukarow[yhtio]'
             AND tunnus          = '$tunnus'";
   $result = pupe_query($query);
@@ -467,7 +470,8 @@ if ($tee == 'V' and $komm == '') {
 if ($tee == 'Z') {
   $query = "SELECT tunnus, tapvm, erpcm 'eräpvm', ytunnus, nimi, postitp, round(summa * vienti_kurssi, 2) 'kotisumma', summa, valkoodi, comments
             FROM lasku
-            WHERE hyvaksyja_nyt = '$kukarow[kuka]' and
+            WHERE hyvaksyja_nyt = '$kukarow[kuka]' and 
+            ebid != 'FINVOICEXML' and 
             yhtio               = '$kukarow[yhtio]' and
             tunnus              = '$tunnus'";
   $result = pupe_query($query);
@@ -521,7 +525,8 @@ if ($tee == 'Z') {
 if ($tee == 'W') {
   $query = "SELECT *
             FROM lasku
-            WHERE hyvaksyja_nyt = '$kukarow[kuka]' and
+            WHERE hyvaksyja_nyt = '$kukarow[kuka]' and 
+            ebid != 'FINVOICEXML' and 
             yhtio               = '$kukarow[yhtio]' and
             tunnus              = '$tunnus'";
   $result = pupe_query($query);
@@ -548,7 +553,8 @@ if ($tee == 'W') {
 if ($tee == 'V') {
   $query = "SELECT *
             FROM lasku
-            WHERE hyvaksyja_nyt = '$kukarow[kuka]'
+            WHERE hyvaksyja_nyt = '$kukarow[kuka]' 
+            and ebid != 'FINVOICEXML' 
             and yhtio           = '$kukarow[yhtio]'
             and tunnus          = '$tunnus'";
   $result = pupe_query($query);
@@ -576,7 +582,8 @@ if ($tee == 'L') {
             FROM lasku
             WHERE tunnus      = '$tunnus'
             AND yhtio         = '$kukarow[yhtio]'
-            AND hyvaksyja_nyt = '$kukarow[kuka]'";
+            AND hyvaksyja_nyt = '$kukarow[kuka]' 
+            and ebid != 'FINVOICEXML'";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) != 1) {
@@ -633,7 +640,8 @@ if ($tee == "H") {
             FROM lasku
             WHERE yhtio       = '{$kukarow["yhtio"]}'
             AND tunnus        = '{$tunnus}'
-            AND hyvaksyja_nyt = '{$kukarow["kuka"]}'";
+            AND hyvaksyja_nyt = '{$kukarow["kuka"]}' 
+            and ebid != 'FINVOICEXML'";
 
   $result = pupe_query($query);
 
@@ -1565,7 +1573,8 @@ elseif ($kutsuja == "") {
                WHERE hyvaksyja_nyt  = '$kukarow[kuka]'
               and yhtio             = '$kukarow[yhtio]'
               and alatila           = 'H'
-              and tila             != 'D'
+              and tila             != 'D' 
+              and ebid != 'FINVOICEXML' 
                 ORDER BY erpcm";
     $result = pupe_query($query);
     $trow = mysql_fetch_assoc($result);
@@ -1583,7 +1592,8 @@ elseif ($kutsuja == "") {
             FROM lasku
              WHERE hyvaksyja_nyt  = '$kukarow[kuka]'
             and yhtio             = '$kukarow[yhtio]'
-            and tila             != 'D'
+            and tila             != 'D' 
+            and ebid != 'FINVOICEXML' 
             and alatila          != 'M'
             $nayta
              ORDER BY if (kapvm!='0000-00-00',kapvm,erpcm)";

@@ -42,7 +42,8 @@ if (!isset($tee) or $tee == '') {
 
     $query = "SELECT count(*)
               FROM lasku
-              WHERE hyvaksyja_nyt = '$kukarow[kuka]' and yhtio = '$kukrow[yhtio]' and alatila = 'H' and tila!='D'
+              WHERE hyvaksyja_nyt = '$kukarow[kuka]' and yhtio = '$kukrow[yhtio]' and alatila = 'H' and tila!='D' 
+              and ebid != 'FINVOICEXML' 
               ORDER BY erpcm";
     $result = pupe_query($query);
     $piilorow = mysql_fetch_array($result);

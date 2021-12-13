@@ -137,8 +137,6 @@ if ($tee == 'T') {
             and ebid != 'FINVOICEXML' 
             ORDER BY erpcm";
   $result = pupe_query($query);
-  echo $query;
-  
 
   pupe_DataTables(array(array($pupe_DataTables[0], 11, 11)));
 

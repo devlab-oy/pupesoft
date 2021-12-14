@@ -659,7 +659,7 @@ if ($tee == "tulosta") {
 
     // tehdään tarkistukset  vai jos EI OLE käyttäjän valitsemaa maata
     if ($kayttajan_valinta_maa == "") {
-      //require "inc/intrastat_tarkistukset.inc";
+      require "inc/intrastat_tarkistukset.inc";
     }
 
     if ($row["perheid2set"] != "0" and $lisavar == "S") {

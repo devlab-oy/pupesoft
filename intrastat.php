@@ -20,19 +20,52 @@ if (isset($tee) and $tee == "lataa_tiedosto") {
   exit;
 }
 
-if (!isset($tapa))          $tapa = "";
-if (!isset($tee))          $tee = "";
-if (!isset($outputti))        $outputti = "";
-if (!isset($lahetys))        $lahetys = "";
-if (!isset($lisavar))        $lisavar = "";
-if (!isset($tapahtumalaji))      $tapahtumalaji = "";
-if (!isset($excel))          $excel = "";
-if (!isset($maalisa))        $maalisa = "";
-if (!isset($bruttopaino))      $bruttopaino = "";
-if (!isset($kayttajan_valinta_maa))  $kayttajan_valinta_maa = "";
-if (!isset($totkpl))        $totkpl = "";
-if (!isset($totsumma))        $totsumma = "";
-if (!isset($vaintullinimike))    $vaintullinimike = "";
+if (!isset($tapa))                    $tapa = "";
+if (!isset($tee))                     $tee = "";
+if (!isset($outputti))                $outputti = "";
+if (!isset($lahetys))                 $lahetys = "";
+if (!isset($lisavar))                 $lisavar = "";
+if (!isset($tapahtumalaji))           $tapahtumalaji = "";
+if (!isset($excel))                   $excel = "";
+if (!isset($maalisa))                 $maalisa = "";
+if (!isset($bruttopaino))             $bruttopaino = "";
+if (!isset($kayttajan_valinta_maa))   $kayttajan_valinta_maa = "";
+if (!isset($totkpl))                  $totkpl = "";
+if (!isset($totsumma))                $totsumma = "";
+if (!isset($vaintullinimike))         $vaintullinimike = "";
+
+$_vuosi_2021_erikois_csv = false;
+function kasittele_kentta($row, $vv=false) {
+  if($row['kolmikantakauppa'] != '') {
+    $_maa = $row['maalahetys'];
+  } else {
+    $_maa = $row['maamaara'];
+    // poikkeukset
+    if($_maa == "GR") {
+      $_maa = "EL";
+    }
+  }
+
+  $oma_ytunnus = false;
+  if($row['ytunnus'] != 0 and !preg_match("/[a-z]/i", substr($row['ytunnus'], 0,2))){    
+    $oma_ytunnus = true;
+  } else if(is_numeric(substr($row['ytunnus'],2,6))) {
+    $oma_ytunnus = true;
+    $row['ytunnus'] = substr($row['ytunnus'], 2);
+  }
+  if($row['asiakaslaji'] != '' and $row['asiakaslaji'] == 'H') {
+    $oma_ytunnus = true;
+    $row['ytunnus'] = "QN999999999999";
+  }
+  
+  if($oma_ytunnus) {
+    $row['ytunnus'] = $_maa.$row['ytunnus'];
+  } else if($vv == 2021) {
+    $row['ytunnus'] = 'QV999999999999';
+  }
+
+  return $row['ytunnus'];
+}
 
 if ($kayttajan_valinta_maa != "") {
   $maa = $kayttajan_valinta_maa;
@@ -160,7 +193,7 @@ if ($tee == "tulosta") {
                    round(sum(tilausrivi.rivihinta / (1 + (lasku.rahti / 100)) / valuu.intrastat_kurssi),0)), 1) as rivihinta_laskutusarvo,
                group_concat(lasku.tunnus) as kaikkitunnukset,
                group_concat(distinct tilausrivi.perheid2) as perheid2set,
-               group_concat(concat(tuote.tunnus,'!¡!', tuote.tuoteno)) as kaikkituotteet";
+               group_concat(concat(tuote.tunnus,'!¡!', tuote.tuoteno)) as kaikkituotteet, asiakas.laji as asiakaslaji, lasku.ytunnus as ytunnus, lasku.kolmikantakauppa as kolmikantakauppa";
 
     if ($yhtiorow['intrastat_pvm'] == '') {
       $query .= "  FROM lasku use index (yhtio_tila_mapvm)
@@ -170,7 +203,8 @@ if ($tee == "tulosta") {
             LEFT JOIN tullinimike ON (tuote.tullinimike1=tullinimike.cn and tullinimike.kieli = '$yhtiorow[kieli]' and tullinimike.cn != '')
             LEFT JOIN varastopaikat ON (varastopaikat.yhtio = tilausrivi.yhtio
               AND varastopaikat.tunnus = tilausrivi.varasto)
-            LEFT JOIN valuu ON (lasku.yhtio=valuu.yhtio and lasku.valkoodi=valuu.nimi)
+            LEFT JOIN valuu ON (lasku.yhtio=valuu.yhtio and lasku.valkoodi=valuu.nimi) 
+            LEFT JOIN asiakas on (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus)
             WHERE lasku.kohdistettu = 'X'
             and lasku.tila = 'K'
             and lasku.vanhatunnus = 0
@@ -185,9 +219,10 @@ if ($tee == "tulosta") {
             JOIN toimi ON (lasku.yhtio=toimi.yhtio and lasku.liitostunnus=toimi.tunnus)
             JOIN tuote use index (tuoteno_index) ON (tuote.yhtio=lasku.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.ei_saldoa = '')
             LEFT JOIN tullinimike ON (tuote.tullinimike1=tullinimike.cn and tullinimike.kieli = '$yhtiorow[kieli]' and tullinimike.cn != '')
-            LEFT JOIN varastopaikat ON (varastopaikat.yhtio = tilausrivi.yhtio
+            LEFT JOIN varastopaikat ON (varastopaikat.yhtio = tilausrivi.yhtio 
               AND varastopaikat.tunnus = tilausrivi.varasto)
-            LEFT JOIN valuu ON (lasku.yhtio=valuu.yhtio and lasku.valkoodi=valuu.nimi)
+            LEFT JOIN valuu ON (lasku.yhtio=valuu.yhtio and lasku.valkoodi=valuu.nimi) 
+            LEFT JOIN asiakas on (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus)
             WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
             and tilausrivi.tyyppi = 'O'
             and tilausrivi.laskutettuaika >= '$vva-$kka-$ppa'
@@ -225,7 +260,7 @@ if ($tee == "tulosta") {
           if (round(sum(tilausrivi.rivihinta),0) > 0.50,round(sum(tilausrivi.rivihinta),0), 1) rivihinta_laskutusarvo,
           group_concat(lasku.tunnus) as kaikkitunnukset,
           group_concat(distinct tilausrivi.perheid2) as perheid2set,
-          group_concat(concat(tuote.tunnus,'!¡!', tuote.tuoteno)) as kaikkituotteet
+          group_concat(concat(tuote.tunnus,'!¡!', tuote.tuoteno)) as kaikkituotteet, asiakas.laji as asiakaslaji, lasku.ytunnus as ytunnus, lasku.kolmikantakauppa as kolmikantakauppa
           FROM lasku use index (yhtio_tila_tapvm)
           JOIN tilausrivi use index (yhtio_otunnus) ON (tilausrivi.otunnus=lasku.tunnus and tilausrivi.yhtio=lasku.yhtio and tilausrivi.kpl > 0)
           JOIN tuote use index (tuoteno_index) ON (tuote.yhtio=lasku.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.ei_saldoa = '')
@@ -270,12 +305,13 @@ if ($tee == "tulosta") {
           if (round(sum(tilausrivi.rivihinta),0) > 0.50,round(sum(tilausrivi.rivihinta),0), 1) rivihinta_laskutusarvo,
           group_concat(lasku.tunnus) as kaikkitunnukset,
           group_concat(distinct tilausrivi.perheid2) as perheid2set,
-          group_concat(concat(tuote.tunnus,'!¡!', tuote.tuoteno)) as kaikkituotteet
+          group_concat(concat(tuote.tunnus,'!¡!', tuote.tuoteno)) as kaikkituotteet, asiakas.laji as asiakaslaji, lasku.ytunnus as ytunnus, lasku.kolmikantakauppa as kolmikantakauppa
           FROM lasku use index (yhtio_tila_tapvm)
           JOIN tilausrivi use index (yhtio_otunnus) ON (tilausrivi.otunnus=lasku.tunnus and tilausrivi.yhtio=lasku.yhtio and tilausrivi.kpl > 0)
           JOIN tuote use index (tuoteno_index) ON (tuote.yhtio=lasku.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.ei_saldoa = '')
           LEFT JOIN tullinimike ON (tuote.tullinimike1=tullinimike.cn and tullinimike.kieli = '$yhtiorow[kieli]' and tullinimike.cn != '')
-          LEFT JOIN varastopaikat ON (varastopaikat.yhtio=lasku.yhtio and varastopaikat.tunnus=lasku.varasto)
+          LEFT JOIN varastopaikat ON (varastopaikat.yhtio=lasku.yhtio and varastopaikat.tunnus=lasku.varasto) 
+          LEFT JOIN asiakas on (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus)
           WHERE lasku.tila = 'G'
           and lasku.alatila = 'V'
           and lasku.kauppatapahtuman_luonne != '999'
@@ -314,12 +350,13 @@ if ($tee == "tulosta") {
             tyomaarays.tulliarvo AS rivihinta,
             tyomaarays.tulliarvo AS rivihinta_laskutusarvo,
             group_concat(lasku.tunnus) as kaikkitunnukset,
-            '' AS kaikkituotteet,
+            '' AS kaikkituotteet, asiakas.laji as asiakaslaji, lasku.ytunnus as ytunnus, lasku.kolmikantakauppa as kolmikantakauppa,
             '' AS perheid2set
             FROM lasku use index (yhtio_tila_tapvm)
             JOIN tyomaarays ON (tyomaarays.yhtio = lasku.yhtio AND tyomaarays.otunnus = lasku.tunnus)
             LEFT JOIN tullinimike ON (tyomaarays.tullikoodi=tullinimike.cn and tullinimike.kieli = '{$yhtiorow['kieli']}' and tullinimike.cn != '')
-            LEFT JOIN varastopaikat ON (varastopaikat.yhtio=lasku.yhtio and varastopaikat.tunnus=lasku.varasto)
+            LEFT JOIN varastopaikat ON (varastopaikat.yhtio=lasku.yhtio and varastopaikat.tunnus=lasku.varasto) 
+            LEFT JOIN asiakas on (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus)
             WHERE lasku.tila = 'L'
             and lasku.alatila = 'X'
             and lasku.kauppatapahtuman_luonne != '999'
@@ -350,7 +387,9 @@ if ($tee == "tulosta") {
             if (round(sum(tilausrivi.rivihinta),0) > 0.50,round(sum(tilausrivi.rivihinta),0), 1) rivihinta_laskutusarvo,
             group_concat(lasku.tunnus) as kaikkitunnukset,
             group_concat(distinct tilausrivi.perheid2) as perheid2set,
-            group_concat(concat(tuote.tunnus,'!¡!', tuote.tuoteno)) as kaikkituotteet
+            group_concat(concat(tuote.tunnus,'!¡!', tuote.tuoteno)) as kaikkituotteet,
+            asiakas.laji as asiakaslaji, 
+            lasku.ytunnus as ytunnus, lasku.kolmikantakauppa as kolmikantakauppa
             FROM lasku use index (yhtio_tila_tapvm)
             JOIN tilausrivi use index (yhtio_otunnus) ON (tilausrivi.otunnus=lasku.tunnus and tilausrivi.yhtio=lasku.yhtio and tilausrivi.kpl > 0)
             JOIN tuote use index (tuoteno_index) ON (tuote.yhtio=lasku.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.ei_saldoa = '')
@@ -373,12 +412,25 @@ if ($tee == "tulosta") {
   }
 
   $query .= "  ORDER BY $ee_yhdistettyorder tullinimike1, maalahetys, alkuperamaa, maamaara, kuljetusmuoto, kauppatapahtuman_luonne, laskunro, tuoteno_nimitys";
+  
   $result = pupe_query($query);
 
   $nim     = "";
   $lask    = 1;
   $arvoyht = 0;
   $virhe   = 0;
+
+  // erikoisvienti CSV vuodelle 2021
+  if($vv >= 2021 and $tapa == "vienti"){
+    $_vuosi_2021_erikois_csv = array(
+
+      0 => array(
+        "otsikko" => "Kauppakumppani",
+        "kentta" => "ytunnus"
+      )
+
+    );
+  }
 
   $lopetus_intra1 = "{$palvelin2}intrastat.php////tee=tulosta//kk=$kk//vv=$vv//tapa=$tapa//outputti=$outputti//lahetys=nope//kayttajan_valinta_maa=$kayttajan_valinta_maa//tapahtumalaji=$tapahtumalaji";
   $lopetus_intra2 = "";
@@ -484,6 +536,11 @@ if ($tee == "tulosta") {
     $ulos .= "<th>".t("Tuoteno")."</th>";
     $ulos .= "<th>".t("Nimitys")."</th>";
     $ulos .= "<th>".t("Tullinimike")."</th>";
+    if($_vuosi_2021_erikois_csv) {
+      foreach($_vuosi_2021_erikois_csv as $_vuosi_2011_erikois_data) {
+        $ulos .= "<th>".t($_vuosi_2011_erikois_data["otsikko"])."</th>";
+      }
+    }
     $ulos .= "<th>".t("KT")."</th>";
     $ulos .= "<th>".t("AM")."</th>";
     $ulos .= "<th>".t("LM")."</th>";
@@ -561,6 +618,14 @@ if ($tee == "tulosta") {
   $csvrivit .= "Jakso;";
   $csvrivit .= "Suunta;";
   $csvrivit .= "Asiamies;";
+
+  // tulostetaan uodelle 2011 erikoisotsikot
+  if($_vuosi_2021_erikois_csv) {
+    foreach($_vuosi_2021_erikois_csv as $_vuosi_2011_erikois_data) {
+      $csvrivit .= $_vuosi_2011_erikois_data["otsikko"].";";
+    }
+  }
+
   $csvrivit .= "CN8;";
   $csvrivit .= "Kauppa;";
   $csvrivit .= "Jäsenmaa;";
@@ -587,13 +652,14 @@ if ($tee == "tulosta") {
   $ekarivi = True;
 
   while ($row = mysql_fetch_array($result)) {
+
     list($row["tuoteno"], $row["nimitys"]) = explode("!¡!", $row["tuoteno_nimitys"]);
 
     if ($row["paino"] < 1) $row["paino"] = 1;
 
     // tehdään tarkistukset  vai jos EI OLE käyttäjän valitsemaa maata
     if ($kayttajan_valinta_maa == "") {
-      require "inc/intrastat_tarkistukset.inc";
+      //require "inc/intrastat_tarkistukset.inc";
     }
 
     if ($row["perheid2set"] != "0" and $lisavar == "S") {
@@ -681,6 +747,14 @@ if ($tee == "tulosta") {
 
     $ekarivi = False;
 
+    // tulostetaan uodelle 2011 erikoisotsikot
+    if($_vuosi_2021_erikois_csv) {
+      $row['ytunnus'] = kasittele_kentta($row, $vv);
+      foreach($_vuosi_2021_erikois_csv as $_vuosi_2011_erikois_data) {
+        $csvrivit .= $row[$_vuosi_2011_erikois_data["kentta"]].";";
+      }
+    }
+    
     $csvrivit .= "{$row["tullinimike1"]};";
     $csvrivit .= "{$row["kauppatapahtuman_luonne"]};";
 
@@ -864,6 +938,11 @@ if ($tee == "tulosta") {
       $ulos .= "<td valign='top'>".$row["tuoteno"]."</td>";
       $ulos .= "<td valign='top'>".t_tuotteen_avainsanat($row, 'nimitys')."</td>";
       $ulos .= "<td valign='top'><a href='intrastat.php?tee=tulosta&tapa=$tapa&kk=$kk&vv=$vv&outputti=$outputti&lahetys=nope&lisavar=$lisavar&kayttajan_valinta_maa=$kayttajan_valinta_maa&tapahtumalaji=$tapahtumalaji&vaintullinimike={$row['tullinimike1']}&vainmaalahetys={$row['maalahetys']}&vainalkuperamaa={$row['alkuperamaa']}&vainmaamaara={$row['maamaara']}&vainkuljetusmuoto={$row['kuljetusmuoto']}&vainkauppatapahtuman_luonne={$row['kauppatapahtuman_luonne']}&vainsu={$row['su']}&lopetus=$lopetus_intra1'>$row[tullinimike1]</></td>";  //Tullinimike CN
+      if($_vuosi_2021_erikois_csv) {
+        foreach($_vuosi_2021_erikois_csv as $_vuosi_2011_erikois_data) {
+          $ulos .= "<td valign='top'>".$row[$_vuosi_2011_erikois_data["kentta"]]."</td>";
+        }
+      }
       $ulos .= "<td valign='top'>".$row["kauppatapahtuman_luonne"]."</td>";
       $ulos .= "<td valign='top'>".$row["alkuperamaa"]."</td>";
       $ulos .= "<td valign='top'>".$row["maalahetys"]."</td>";

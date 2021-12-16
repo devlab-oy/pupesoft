@@ -510,7 +510,7 @@ if ($tee == "file") {
                 }
                 else {
                   if($mikrotila_toimittaja) {
-                    echo "<font class='message'>".t("Tuotenumeroa tai valittu tuotteen toimittaja (".$mikrotila_toimittaja.") numerolla")." $tuoteno ".t("ei löydy")."!</font><br>";
+                    echo "<font class='message'>".t("Tuotenumeroa")." $tuoteno tai tuotteen toimittajaa (".$mikrotila_toimittaja.") ".t("ei löydy")."!</font><br>";
                   } else {
                     echo "<font class='message'>".t("Tuotenumeroa")." $tuoteno ".t("ei löydy")."!</font><br>";
                   }
@@ -519,7 +519,7 @@ if ($tee == "file") {
               }
               else {
                 if($mikrotila_toimittaja) {
-                  echo "<font class='message'>".t("Tuotenumeroa tai valittu tuotteen toimittaja (".$mikrotila_toimittaja.") numerolla")." $tuoteno ".t("ei löydy")."!</font><br>";
+                  echo "<font class='message'>".t("Tuotenumeroa")." $tuoteno tai tuotteen toimittajaa (".$mikrotila_toimittaja.") ".t("ei löydy")."!</font><br>";
                 } else {
                   echo "<font class='message'>".t("Tuotenumeroa")." $tuoteno ".t("ei löydy")."!</font><br>";
                 }
@@ -970,7 +970,7 @@ if ($tee == "file") {
               }
               else {
                 if($mikrotila_toimittaja) {
-                  echo "<font class='message'>".t("Tuotenumeroa tai valittu tuotteen toimittaja (".$mikrotila_toimittaja.") numerolla")." $tuoteno ".t("ei löydy")."!</font><br>";
+                  echo "<font class='message'>".t("Tuotenumeroa")." $tuoteno tai tuotteen toimittajaa (".$mikrotila_toimittaja.") ".t("ei löydy")."!</font><br>";
                 } else {
                   echo "<font class='message'>".t("Tuotenumeroa")." $tuoteno ".t("ei löydy")."!</font><br>";
                 }
@@ -979,7 +979,7 @@ if ($tee == "file") {
             }
             else {
               if($mikrotila_toimittaja) {
-                echo "<font class='message'>".t("Tuotenumeroa tai valittu tuotteen toimittaja (".$mikrotila_toimittaja.") numerolla")." $tuoteno ".t("ei löydy")."!</font><br>";
+                echo "<font class='message'>".t("Tuotenumeroa")." $tuoteno tai tuotteen toimittajaa (".$mikrotila_toimittaja.") ".t("ei löydy")."!</font><br>";
               } else {
                 echo "<font class='message'>".t("Tuotenumeroa")." $tuoteno ".t("ei löydy")."!</font><br>";
               }
@@ -1139,7 +1139,7 @@ if ($tee == 'mikrotila') {
               AND tuote.suoratoimitus = 'X' 
             GROUP BY tuotteen_toimittajat.liitostunnus ORDER by toimi.nimi ASC";
   $_tuotteen_toimittajat_result = pupe_query($_tuotteen_toimittajat_query);
-  echo "<option>--".t("Ei valittu")."--</option>";
+  echo "<option value=''>--".t("Ei valittu")."--</option>";
   while($_tuotteen_toimittajat_row = mysql_fetch_assoc($_tuotteen_toimittajat_result)) {
     echo "<option value='".$_tuotteen_toimittajat_row['liitostunnus']."'>".$_tuotteen_toimittajat_row['nimi']." / ".$_tuotteen_toimittajat_row['liitostunnus']."</option>";
   }

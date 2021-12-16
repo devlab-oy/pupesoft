@@ -1143,7 +1143,7 @@ if ($tee == 'mikrotila') {
   $_tuotteen_toimittajat_result = pupe_query($_tuotteen_toimittajat_query);
   echo "<option value=''>--".t("Ei valittu")."--</option>";
   while($_tuotteen_toimittajat_row = mysql_fetch_assoc($_tuotteen_toimittajat_result)) {
-    echo "<option value='".$_tuotteen_toimittajat_row['liitostunnus']."'>".$_tuotteen_toimittajat_row['nimi']." / ".$_tuotteen_toimittajat_row['liitostunnus']."</option>";
+    echo "<option value='".$_tuotteen_toimittajat_row['liitostunnus']."'>".$_tuotteen_toimittajat_row['nimi']."</option>";
   }
   echo "</select>";
   echo "</td>";

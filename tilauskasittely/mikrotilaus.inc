@@ -351,7 +351,7 @@ if ($tee == "file") {
             if ($tuoteno != '' and $kpl != 0) {
 
               // Tuotehaku ei toimi extranetin puolella
-              if (file_exists("../inc/tuotehaku.inc")) {
+              if ($mikrotila_tuotenumero != "toim_koodilla" and file_exists("../inc/tuotehaku.inc")) {
                 require "../inc/tuotehaku.inc";
               }
 
@@ -374,7 +374,7 @@ if ($tee == "file") {
                           FROM tuote 
                           JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = tuote.yhtio AND tuotteen_toimittajat.tuoteno = tuote.tuoteno)
                           WHERE tuote.yhtio='$kukarow[yhtio]' 
-                          AND tuotteen_toimittajat.tuoteno='$tuoteno' 
+                          AND tuotteen_toimittajat.toim_tuoteno='$tuoteno' 
                           $toimittaja_lisa
                           GROUP BY tuotteen_toimittajat.tuoteno";
               }
@@ -744,6 +744,7 @@ if ($tee == "file") {
           }
 
           $tuoteno = trim($rivi[$ind_Tuoteno]);
+
           $kpl   = str_replace(",", ".", $rivi[$ind_Maara]);
 
           $toimaika      = "";
@@ -809,9 +810,9 @@ if ($tee == "file") {
           }
 
           if ($tuoteno != '' and $kpl != 0) {
-
+            
             // Tuotehaku ei toimi extranetin puolella
-            if (file_exists("../inc/tuotehaku.inc")) {
+            if ($mikrotila_tuotenumero != "toim_koodilla" and file_exists("../inc/tuotehaku.inc")) {
               require "../inc/tuotehaku.inc";
             }
 
@@ -834,7 +835,7 @@ if ($tee == "file") {
                         FROM tuote 
                         JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = tuote.yhtio AND tuotteen_toimittajat.tuoteno = tuote.tuoteno)
                         WHERE tuote.yhtio='$kukarow[yhtio]' 
-                        AND tuotteen_toimittajat.tuoteno='$tuoteno' 
+                        AND tuotteen_toimittajat.toim_tuoteno='$tuoteno' 
                         $toimittaja_lisa
                         GROUP BY tuotteen_toimittajat.tuoteno";
             }

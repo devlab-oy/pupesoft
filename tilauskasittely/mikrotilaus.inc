@@ -494,7 +494,7 @@ if ($tee == "file") {
                         $hyvityssaannon_palautuskielto = $palautus[$inx]["palautuskielto"];
                         if ($mikrotila_toimittaja) {
                           $paikka = '¡¡¡'.$mikrotila_toimittaja;
-                        }
+                        } 
                         require "lisaarivi.inc";
                       }
 

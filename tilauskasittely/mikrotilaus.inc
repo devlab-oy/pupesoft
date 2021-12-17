@@ -867,6 +867,7 @@ if ($tee == "file") {
                         FROM tuote 
                         JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = tuote.yhtio AND tuotteen_toimittajat.tuoteno = tuote.tuoteno)
                         WHERE tuote.yhtio='$kukarow[yhtio]' 
+                        AND tuote.status in ('A', 'T', 'E') 
                         AND tuotteen_toimittajat.toim_tuoteno='$tuoteno' 
                         $toimittaja_lisa
                         GROUP BY tuotteen_toimittajat.tuoteno";

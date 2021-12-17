@@ -29,12 +29,10 @@ th {
   font-weight: bold;
   vertical-align: middle;
   padding: 8px 8px 8px 8px;
-  text-transform: revert !important;
 }
 
 th a {
   font-size: 11pt;
-  text-transform: revert !important;
   font-weight: bold;
   vertical-align: middle;
   text-align: left;
@@ -249,6 +247,6 @@ table.responsive td input[type=text] {
 button, input[type=submit], input[type=button] {
   text-transform: uppercase;
 }
-th {
+th, th a {
   text-transform: revert !important;
 }

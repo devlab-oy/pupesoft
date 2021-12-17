@@ -29,11 +29,12 @@ th {
   font-weight: bold;
   vertical-align: middle;
   padding: 8px 8px 8px 8px;
+  text-transform: revert !important;
 }
 
 th a {
   font-size: 11pt;
-  text-transform: capitalize;
+  text-transform: revert !important;
   font-weight: bold;
   vertical-align: middle;
   text-align: left;
@@ -110,6 +111,7 @@ button, input[type=submit], input[type=button] {
   margin: 2px 4px 2px 0px;
   padding: 8px 10px 8px 10px;
   min-width: 100px;
+  text-transform: uppercase;
 }
 
 input[type=submit].lisaa_btn {
@@ -236,4 +238,17 @@ table.responsive td input[type=text] {
 
 .nowrap {
   white-space: nowrap;
+}
+.message.warning {
+  padding: 5px 15px;
+  margin: 5px 5px 5px 0px;
+  background-color: red;
+  display: inline-block;
+  color: #fff;
+}
+button, input[type=submit], input[type=button] {
+  text-transform: uppercase;
+}
+th {
+  text-transform: revert !important;
 }

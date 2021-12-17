@@ -350,6 +350,8 @@ if ($tee == "file") {
 
             if ($tuoteno != '' and $kpl != 0) {
 
+              $vanha_tuoteno = $tuoteno;
+
               // Tuotehaku ei toimi extranetin puolella
               if ($mikrotila_tuotenumero != "toim_koodilla" and file_exists("../inc/tuotehaku.inc")) {
                 require "../inc/tuotehaku.inc";
@@ -390,10 +392,31 @@ if ($tee == "file") {
 
               $rarresult = pupe_query($query);
 
-              if (mysql_num_rows($rarresult) == 1) {
+              if (!$tuoteno and mysql_num_rows($rarresult) != 1) {
+                $tuoteno = $vanha_tuoteno;
+              }
 
-                $trow = mysql_fetch_array($rarresult);
-
+              $_testatarivit = false;
+              $viesti_lisa = false;
+              if (mysql_num_rows($rarresult) > 1) {
+                $_testatarivit = array();
+                $trow_ensimmainen = mysql_fetch_array($rarresult);
+                while($_testatarivi = mysql_fetch_array($rarresult))
+                {
+                  $_testatarivit[$_testatarivi['tuoteno']] = $_testatarivi;
+                }
+                $_loytyi_imp = implode(",", array_keys($_testatarivit));
+                $viesti_lisa = t("Numerolla '$tuoteno' löydy yli 1 kpl: $trow_ensimmainen[tuoteno],$_loytyi_imp. Valittu $trow_ensimmainen[tuoteno]");
+              }
+  
+              if (mysql_num_rows($rarresult) == 1 or $_testatarivit) {
+  
+                if($_testatarivit) {
+                  $trow = $trow_ensimmainen;
+                } else {
+                  $trow = mysql_fetch_array($rarresult);
+                }
+                
                 $ohitus = 0;
 
                 if ($kukarow["extranet"] != "") {
@@ -494,7 +517,9 @@ if ($tee == "file") {
                         $hyvityssaannon_palautuskielto = $palautus[$inx]["palautuskielto"];
                         if ($mikrotila_toimittaja) {
                           $paikka = '¡¡¡'.$mikrotila_toimittaja;
-                        } 
+                          
+                        }
+ 
                         require "lisaarivi.inc";
                       }
 
@@ -503,26 +528,30 @@ if ($tee == "file") {
                     else {
                       if ($mikrotila_toimittaja) {
                         $paikka = '¡¡¡'.$mikrotila_toimittaja;
+                        
                       }
+ 
                       require "lisaarivi.inc";
                     }
                   }
                 }
                 else {
                   if($mikrotila_toimittaja) {
-                    echo "<font class='message'>".t("Tuotenumeroa")." $tuoteno tai tuotteen toimittajaa (".$mikrotila_toimittaja.") ".t("ei löydy")."!</font><br>";
+                    echo "<font class='warning message'>".$tuoteno."- ".t("tuotenumeroa tai sen toimittajaa ei löydy!")."</font><br>";
                   } else {
-                    echo "<font class='message'>".t("Tuotenumeroa")." $tuoteno ".t("ei löydy")."!</font><br>";
+                    echo "<font class='warning message'>".t("Tuotenumeroa")." $tuoteno ".t("ei löydy")."!</font><br>";
                   }
                 }
-
               }
               else {
                 if($mikrotila_toimittaja) {
-                  echo "<font class='message'>".t("Tuotenumeroa")." $tuoteno tai tuotteen toimittajaa (".$mikrotila_toimittaja.") ".t("ei löydy")."!</font><br>";
+                  echo "<font class='warning message'>".$tuoteno."- ".t("tuotenumeroa tai sen toimittajaa ei löydy!")."</font><br>";
                 } else {
-                  echo "<font class='message'>".t("Tuotenumeroa")." $tuoteno ".t("ei löydy")."!</font><br>";
+                  echo "<font class='warning message'>".t("Tuotenumeroa")." $tuoteno ".t("ei löydy")."!</font><br>";
                 }
+              }
+              if($viesti_lisa) {
+                echo "<font class='warning message'>".$viesti_lisa."!</font><br>";
               }
             }
           }
@@ -810,6 +839,8 @@ if ($tee == "file") {
           }
 
           if ($tuoteno != '' and $kpl != 0) {
+
+            $vanha_tuoteno = $tuoteno;
             
             // Tuotehaku ei toimi extranetin puolella
             if ($mikrotila_tuotenumero != "toim_koodilla" and file_exists("../inc/tuotehaku.inc")) {
@@ -851,10 +882,31 @@ if ($tee == "file") {
 
             $rarresult = pupe_query($query);
 
-            if (mysql_num_rows($rarresult) == 1) {
+            if (!$tuoteno and mysql_num_rows($rarresult) != 1) {
+              $tuoteno = $vanha_tuoteno;
+            }
 
-              $trow = mysql_fetch_array($rarresult);
+            $_testatarivit = false;
+            $viesti_lisa = false;
+            if (mysql_num_rows($rarresult) > 1) {
+              $_testatarivit = array();
+              $trow_ensimmainen = mysql_fetch_array($rarresult);
+              while($_testatarivi = mysql_fetch_array($rarresult))
+              {
+                $_testatarivit[$_testatarivi['tuoteno']] = $_testatarivi;
+              }
+              $_loytyi_imp = implode(",", array_keys($_testatarivit));
+              $viesti_lisa = t("Numerolla '$tuoteno' löydy yli 1 kpl: $trow_ensimmainen[tuoteno],$_loytyi_imp. Valittu $trow_ensimmainen[tuoteno]");
+            }
 
+            if (mysql_num_rows($rarresult) == 1 or $_testatarivit) {
+
+              if($_testatarivit) {
+                $trow = $trow_ensimmainen;
+              } else {
+                $trow = mysql_fetch_array($rarresult);
+              }
+              
               $ohitus = 0;
 
               if ($kukarow["extranet"] != "") {
@@ -955,6 +1007,7 @@ if ($tee == "file") {
                       $hyvityssaannon_palautuskielto = $palautus[$inx]["palautuskielto"];
                       if ($mikrotila_toimittaja) {
                         $paikka = '¡¡¡'.$mikrotila_toimittaja;
+                        
                       }
                       require "lisaarivi.inc";
                     }
@@ -964,6 +1017,7 @@ if ($tee == "file") {
                   else {
                     if ($mikrotila_toimittaja) {
                       $paikka = '¡¡¡'.$mikrotila_toimittaja;
+                      
                     }
                     require "lisaarivi.inc";
                   }
@@ -971,19 +1025,21 @@ if ($tee == "file") {
               }
               else {
                 if($mikrotila_toimittaja) {
-                  echo "<font class='message'>".t("Tuotenumeroa")." $tuoteno tai tuotteen toimittajaa (".$mikrotila_toimittaja.") ".t("ei löydy")."!</font><br>";
+                  echo "<font class='warning message'>".$tuoteno."- ".t("tuotenumeroa tai sen toimittajaa ei löydy!")."</font><br>";
                 } else {
-                  echo "<font class='message'>".t("Tuotenumeroa")." $tuoteno ".t("ei löydy")."!</font><br>";
+                  echo "<font class='warning message'>".t("Tuotenumeroa")." $tuoteno ".t("ei löydy")."!</font><br>";
                 }
               }
-
             }
             else {
               if($mikrotila_toimittaja) {
-                echo "<font class='message'>".t("Tuotenumeroa")." $tuoteno tai tuotteen toimittajaa (".$mikrotila_toimittaja.") ".t("ei löydy")."!</font><br>";
+                echo "<font class='warning message'>".$tuoteno."- ".t("tuotenumeroa tai sen toimittajaa ei löydy!")."</font><br>";
               } else {
-                echo "<font class='message'>".t("Tuotenumeroa")." $tuoteno ".t("ei löydy")."!</font><br>";
+                echo "<font class='warning message'>".t("Tuotenumeroa")." $tuoteno ".t("ei löydy")."!</font><br>";
               }
+            }
+            if($viesti_lisa) {
+              echo "<font class='warning message'>".$viesti_lisa."!</font><br>";
             }
           }
         }

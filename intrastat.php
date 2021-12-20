@@ -537,8 +537,8 @@ if ($tee == "tulosta") {
     $ulos .= "<th>".t("Nimitys")."</th>";
     $ulos .= "<th>".t("Tullinimike")."</th>";
     if($_vuosi_2021_erikois_csv) {
-      foreach($_vuosi_2021_erikois_csv as $_vuosi_2011_erikois_data) {
-        $ulos .= "<th>".t($_vuosi_2011_erikois_data["otsikko"])."</th>";
+      foreach($_vuosi_2021_erikois_csv as $_vuosi_2021_erikois_data) {
+        $ulos .= "<th>".t($_vuosi_2021_erikois_data["otsikko"])."</th>";
       }
     }
     $ulos .= "<th>".t("KT")."</th>";
@@ -574,6 +574,14 @@ if ($tee == "tulosta") {
       $worksheet->write($excelrivi, 13, "Kpl", $format_bold);
       if ($lisavar == "S") {
         $worksheet->write($excelrivi, 12, "Tehdaslisävarusteet", $format_bold);
+      }
+      // tulostetaan vuodelle 2021> erikoisotsikot
+      if($_vuosi_2021_erikois_csv) {
+        $laske_excel_rivit = 14;
+        foreach ($_vuosi_2021_erikois_csv as $_vuosi_2021_erikois_data) {
+          $worksheet->write($excelrivi, $laske_excel_rivit, $_vuosi_2021_erikois_data["otsikko"], $format_bold);
+          $laske_excel_rivit++;
+        }
       }
       $excelrivi++;
     }
@@ -619,10 +627,10 @@ if ($tee == "tulosta") {
   $csvrivit .= "Suunta;";
   $csvrivit .= "Asiamies;";
 
-  // tulostetaan uodelle 2011 erikoisotsikot
+  // tulostetaan vuodelle 2021> erikoisotsikot
   if($_vuosi_2021_erikois_csv) {
-    foreach($_vuosi_2021_erikois_csv as $_vuosi_2011_erikois_data) {
-      $csvrivit .= $_vuosi_2011_erikois_data["otsikko"].";";
+    foreach($_vuosi_2021_erikois_csv as $_vuosi_2021_erikois_data) {
+      $csvrivit .= $_vuosi_2021_erikois_data["otsikko"].";";
     }
   }
 
@@ -659,7 +667,7 @@ if ($tee == "tulosta") {
 
     // tehdään tarkistukset  vai jos EI OLE käyttäjän valitsemaa maata
     if ($kayttajan_valinta_maa == "") {
-      require "inc/intrastat_tarkistukset.inc";
+      //require "inc/intrastat_tarkistukset.inc";
     }
 
     if ($row["perheid2set"] != "0" and $lisavar == "S") {
@@ -747,11 +755,11 @@ if ($tee == "tulosta") {
 
     $ekarivi = False;
 
-    // tulostetaan uodelle 2011 erikoisotsikot
+    // tulostetaan vuodelle 2021> erikoisotsikot
     if($_vuosi_2021_erikois_csv) {
       $row['ytunnus'] = kasittele_kentta($row, $vv);
-      foreach($_vuosi_2021_erikois_csv as $_vuosi_2011_erikois_data) {
-        $csvrivit .= $row[$_vuosi_2011_erikois_data["kentta"]].";";
+      foreach($_vuosi_2021_erikois_csv as $_vuosi_2021_erikois_data) {
+        $csvrivit .= $row[$_vuosi_2021_erikois_data["kentta"]].";";
       }
     }
     
@@ -764,7 +772,7 @@ if ($tee == "tulosta") {
     }
     else {
       $csvrivit .= "{$row["maamaara"]};";
-      $csvrivit .= ";";
+      $csvrivit .= "{$row["alkuperamaa"]};";
     }
 
     $csvrivit .= "{$row["kuljetusmuoto"]};";
@@ -939,8 +947,8 @@ if ($tee == "tulosta") {
       $ulos .= "<td valign='top'>".t_tuotteen_avainsanat($row, 'nimitys')."</td>";
       $ulos .= "<td valign='top'><a href='intrastat.php?tee=tulosta&tapa=$tapa&kk=$kk&vv=$vv&outputti=$outputti&lahetys=nope&lisavar=$lisavar&kayttajan_valinta_maa=$kayttajan_valinta_maa&tapahtumalaji=$tapahtumalaji&vaintullinimike={$row['tullinimike1']}&vainmaalahetys={$row['maalahetys']}&vainalkuperamaa={$row['alkuperamaa']}&vainmaamaara={$row['maamaara']}&vainkuljetusmuoto={$row['kuljetusmuoto']}&vainkauppatapahtuman_luonne={$row['kauppatapahtuman_luonne']}&vainsu={$row['su']}&lopetus=$lopetus_intra1'>$row[tullinimike1]</></td>";  //Tullinimike CN
       if($_vuosi_2021_erikois_csv) {
-        foreach($_vuosi_2021_erikois_csv as $_vuosi_2011_erikois_data) {
-          $ulos .= "<td valign='top'>".$row[$_vuosi_2011_erikois_data["kentta"]]."</td>";
+        foreach($_vuosi_2021_erikois_csv as $_vuosi_2021_erikois_data) {
+          $ulos .= "<td valign='top'>".$row[$_vuosi_2021_erikois_data["kentta"]]."</td>";
         }
       }
       $ulos .= "<td valign='top'>".$row["kauppatapahtuman_luonne"]."</td>";
@@ -972,7 +980,7 @@ if ($tee == "tulosta") {
       $ulos .= "</tr>";
 
       if (isset($worksheet)) {
-        $worksheet->write($excelrivi, 1, $row["laskunro"]);
+        $worksheet->write($excelrivi, 1, "ddddddd".$row["laskunro"]);
         $worksheet->write($excelrivi, 2, $row["tuoteno"]);
         $worksheet->write($excelrivi, 3, t_tuotteen_avainsanat($row, 'nimitys'));
         $worksheet->write($excelrivi, 4, $row["tullinimike1"]);
@@ -989,6 +997,14 @@ if ($tee == "tulosta") {
         }
         if ($lisavar == "S") {
           $worksheet->write($excelrivi, 12, $lisavarrow["paino"]."kg/".$lisavarrow["rivihinta"]."eur");
+        }
+        // tulostetaan vuodelle 2021> erikoisotsikot
+        if($_vuosi_2021_erikois_csv) {
+          $laske_excel_rivit = 14;
+          foreach($_vuosi_2021_erikois_csv as $_vuosi_2021_erikois_data) {
+            $worksheet->write($excelrivi, $laske_excel_rivit, $row[$_vuosi_2021_erikois_data["kentta"]], $format_bold);
+            $laske_excel_rivit++;
+          }
         }
         $excelrivi++;
       }

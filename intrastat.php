@@ -667,7 +667,7 @@ if ($tee == "tulosta") {
 
     // tehd‰‰n tarkistukset  vai jos EI OLE k‰ytt‰j‰n valitsemaa maata
     if ($kayttajan_valinta_maa == "") {
-      //require "inc/intrastat_tarkistukset.inc";
+      require "inc/intrastat_tarkistukset.inc";
     }
 
     if ($row["perheid2set"] != "0" and $lisavar == "S") {
@@ -980,7 +980,7 @@ if ($tee == "tulosta") {
       $ulos .= "</tr>";
 
       if (isset($worksheet)) {
-        $worksheet->write($excelrivi, 1, "ddddddd".$row["laskunro"]);
+        $worksheet->write($excelrivi, 1, $row["laskunro"]);
         $worksheet->write($excelrivi, 2, $row["tuoteno"]);
         $worksheet->write($excelrivi, 3, t_tuotteen_avainsanat($row, 'nimitys'));
         $worksheet->write($excelrivi, 4, $row["tullinimike1"]);

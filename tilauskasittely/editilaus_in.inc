@@ -527,6 +527,12 @@ while ($tietue = fgets($fd)) {
     }
     break;
 
+  case 'OSTOTIL.OT_CUS_LASKU':
+    if($tieto != "") {
+      $custom_netto_lasku = $tieto;
+    }
+    break;
+
   case 'OSTOTIL.OT_OMA_KURSSI':
     // kurssi on jo laskettu ja hinta on asiakkaan valuutassa
     if($tieto == "JOO") {

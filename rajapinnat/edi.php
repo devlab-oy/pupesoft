@@ -42,6 +42,12 @@ class Edi {
       $oma_kurssi = false;
     }
 
+    if(isset($options['custom_netto_lasku']) and isset($options['custom_netto_lasku'])) {
+      $custom_netto_lasku = $options['custom_netto_lasku'];
+    } else {
+      $custom_netto_lasku = false;
+    }
+
     // Tilauksella k‰ytetyt lahjakortit ei saa vehent‰‰ myynti pupen puolella
     $giftcards = empty($order['webtex_giftcard']) ? null : json_decode($order['webtex_giftcard']);
 
@@ -181,6 +187,9 @@ class Edi {
     $edi_order .= "OSTOTIL.OT_TOIMITUSAIKA:{$toimaika}\n";
     $edi_order .= "OSTOTIL.OT_TOIMITUSTAPA:{$order['shipping_description']}\n";
     $edi_order .= "OSTOTIL.OT_TOIMITUSEHTO:\n";
+    if($custom_netto_lasku) { 
+      $edi_order .= "OSTOTIL.OT_CUS_LASKU:{$custom_netto_lasku}\n";
+    }
     if($oma_kurssi) { 
       $edi_order .= "OSTOTIL.OT_OMA_KURSSI:{$oma_kurssi}\n"; 
     }

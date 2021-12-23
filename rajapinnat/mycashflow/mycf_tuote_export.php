@@ -20,7 +20,7 @@ require_once 'rajapinnat/logger.php';
 
 require "rajapinnat/mycashflow/mycf_functions.php";
 require "rajapinnat/mycashflow/mycf_saldot.php";
-require "rajapinnat/mycashflow/mycf_tilaukset.php";
+require "rajapinnat/mycashflow/mycf_tilaukset_export.php";
 
 if (empty($argv[1])) {
   die("ERROR! Aja näin:\nmycf_tuote_export.php yhtiö [laji,laji,...] [ajentaanko_kaikki]\n");
@@ -121,6 +121,9 @@ if (mycf_ajetaanko_sykronointi('tilaukset', $synkronoi)) {
   $mycf_orders->set_verkkokauppa_asiakasnro($mycf_asiakasnro);
   $mycf_orders->set_mycf_maksuehto_ohjaus(array());
   $mycf_orders->set_mycf_erikoiskasittely(array());
+  $mycf_orders->set_kaupat_kaytetaan_asiakastiedot($kaupat_kaytetaan_asiakastiedot);
+  $mycf_orders->set_mycf_tilaustyyppi_9_laskuille($mycf_tilaustyyppi_9_laskuille);
+  
   $mycf_orders->set_mycf_kaupat($mycf_kaupat);
 
   $mycf_orders->fetch_orders();

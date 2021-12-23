@@ -1209,6 +1209,10 @@ function alvlaskelma($kk, $vv) {
     }
   }
 
+  if($kk and $vv) {
+    include_once('rajapinnat/tietue/vsralvkv.php');
+  }
+
   // tehdään käyttöliittymä, näytetään aina
   echo "<form method='post' action='{$palvelin2}raportit/alv_laskelma_uusi.php'><input type='hidden' name='tee' value ='VSRALVKK_UUSI'>";
   echo "<table>";

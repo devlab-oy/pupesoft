@@ -871,6 +871,12 @@ if (isset($tilausrivilinkki) and $tilausrivilinkki > 0) {
   $tlisatied_lisa = " , tilausrivilinkki = '".mysql_real_escape_string($tilausrivilinkki)."' ";
 }
 
+if(isset($edi_tyyppi) and $edi_tyyppi == "magento" and 
+isset($presta_siirta_varastoon1) and isset($presta_siirta_varastoon2) 
+and $presta_siirta_varastoon1 and $presta_siirta_varastoon2) {
+  $var = "";
+}
+
 if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
 
   // Katsotaan onko maksuehto j‰lkivaatimus, koska silloin ei toimiteta erikoisvarastoista vaikka erikoistoimitus_alarajasumma ylittyisi
@@ -1503,12 +1509,40 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
 
       // yhdistet‰‰n arrayt
       $zzrow = array_merge($oma_maa, $muu_maa);
-
+      
       if (count($zzrow) > 0) {
+
+        if(isset($edi_tyyppi) and $edi_tyyppi == "magento" and 
+        isset($presta_siirta_varastoon1) and isset($presta_siirta_varastoon2) 
+        and $presta_siirta_varastoon1 and $presta_siirta_varastoon2) {
+          $presta_siirta_varastoon1 = str_replace(",", "#!°!#", $presta_siirta_varastoon1);
+          $presta_siirta_varastoon2 = str_replace(",", "#!°!#", $presta_siirta_varastoon2);
+          $array_etsi_hylly_oletus_eisaldoa = false;
+          
+          $array_etsi_hylly_saldot = array();
+          foreach ($zzrow as $zrow_etsi) {
+            $prestavarastotiedot = $zrow_etsi['hyllyalue']."#!°!#".$zrow_etsi['hyllynro']."#!°!#".$zrow_etsi['hyllyvali']."#!°!#".$zrow_etsi['hyllytaso'];
+            if ($zrow_etsi['oletus'] != "" and $zrow_etsi['myytavissa'] < $kpl) {
+              $array_etsi_hylly_oletus_eisaldoa = true;
+            } else if($zrow_etsi['myytavissa'] >= $kpl) {
+              $array_etsi_hylly_saldot[$prestavarastotiedot] = $zrow_etsi['myytavissa'];
+            }
+          }
+
+          if($array_etsi_hylly_oletus_eisaldoa) {
+            if(isset($array_etsi_hylly_saldot[$presta_siirta_varastoon1])) {
+              $paikka = $presta_siirta_varastoon1;
+            } else if(isset($array_etsi_hylly_saldot[$presta_siirta_varastoon2])) {
+              $paikka = $presta_siirta_varastoon2;
+            } else {
+              
+            }
+          }
+        }
 
         // Jos tuotteella on tuotepaikkoja
         foreach ($zzrow as $zrow) {
-
+          
           if ($lisaarivi_debug == 1) {
             echo "<pre>
                   ({$yhtiorow["puute_jt_oletus"]} == O
@@ -1944,6 +1978,7 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
               }
 
               if ((isset($kutsuja) and $kutsuja == "EDITILAUS") or $lisaarivi_debug == 1) {
+
                 $edi_ulos .= " --> ".t("Myyd‰‰n")." $myy_tuoteno[$indeksi] ".t("paikalta")." $myy_hyllyalue[$indeksi]-$myy_hyllynro[$indeksi]-$myy_hyllyvali[$indeksi]-$myy_hyllytaso[$indeksi]: $myy_kpl[$indeksi] ".t_avainsana("Y", "", "and avainsana.selite='$trow[yksikko]'", "", "", "selite")." ";
 
                 for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {

@@ -246,5 +246,9 @@ table.responsive td input[type=text] {
 }
 
 th, th a {
-  text-transform: revert !important;
+  text-transform:revert!important;
+}
+
+th:first-letter, th a:first-letter {
+    text-transform: uppercase;
 }

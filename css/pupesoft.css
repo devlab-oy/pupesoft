@@ -252,3 +252,7 @@ th, th a {
 th:first-letter, th a:first-letter {
     text-transform: uppercase;
 }
+
+th a:hover {
+  color: unset;
+}

@@ -33,7 +33,6 @@ th {
 
 th a {
   font-size: 11pt;
-  text-transform: capitalize;
   font-weight: bold;
   vertical-align: middle;
   text-align: left;
@@ -236,4 +235,24 @@ table.responsive td input[type=text] {
 
 .nowrap {
   white-space: nowrap;
+}
+
+.message.warning {
+  padding: 5px 15px;
+  margin: 5px 5px 5px 0px;
+  background-color: red;
+  display: inline-block;
+  color: #fff;
+}
+
+th, th a {
+  text-transform:revert!important;
+}
+
+th:first-letter, th a:first-letter {
+    text-transform: uppercase;
+}
+
+th a:hover {
+  color: unset;
 }

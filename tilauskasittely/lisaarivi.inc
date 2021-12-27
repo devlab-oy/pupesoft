@@ -213,7 +213,7 @@ if ($toim == 'EXTENNAKKO' or (isset($toim_kutsu) and $toim_kutsu == 'EXTENNAKKO'
 }
 
 if (!function_exists("tehdas_saldo_hinnat")) {
-  function tehdas_saldo_hinnat($kukarow, $trow, $toimittajan_tunnus, $tiedostosta_rivitykset, $lis_hinta) {
+  function tehdas_saldo_hinnat($kukarow, $trow, $toimittajan_tunnus, $tiedostosta_rivitykset, $lis_hinta, $hinta=false) {
     $query = "SELECT tuotekerroin, ostohinta, myyntihinta_kerroin, tehdas_saldo
               FROM tuotteen_toimittajat
               WHERE yhtio      = '{$kukarow['yhtio']}'
@@ -244,8 +244,12 @@ if (!function_exists("tehdas_saldo_hinnat")) {
         }
       }
     }
+
     if ($tiedostosta_rivitykset and $lis_hinta_laskettu and 'F' == $tiedostosta_rivitykset) {
-      return $lis_hinta;
+      if(!$hinta) {
+        return $lis_hinta_laskettu;
+      }
+      return $hinta;
     } else {
       return $lis_hinta_laskettu;
     }
@@ -1864,7 +1868,7 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
 
               $myyntikerroin_laskenta = false;
               if ($rivityyppi == 'L' and $trow['suoratoimitus'] != '') {
-                if($myyntikerroin_laskenta = tehdas_saldo_hinnat($kukarow, $trow, $toimittajan_tunnus, $vahvistettu_kommentti, $lis_hinta)) {
+                if($myyntikerroin_laskenta = tehdas_saldo_hinnat($kukarow, $trow, $toimittajan_tunnus, $vahvistettu_kommentti, $lis_hinta, $hinta)) {
                   $_lis_hinta_chk = $myyntikerroin_laskenta;
                 } else if($tapa == "VAIHDA" and $nyk_paikka != 0) {
                   $hinta = 0;
@@ -2881,7 +2885,7 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
 
       $myyntikerroin_laskenta = false;
       if ($rivityyppi == 'L' and $trow['suoratoimitus'] != '') {
-        if($myyntikerroin_laskenta = tehdas_saldo_hinnat($kukarow, $trow, $toimittajan_tunnus, $vahvistettu_kommentti, $lis_hinta)) {
+        if($myyntikerroin_laskenta = tehdas_saldo_hinnat($kukarow, $trow, $toimittajan_tunnus, $vahvistettu_kommentti, $lis_hinta, $hinta)) {
           $_lis_hinta_chk = $myyntikerroin_laskenta;
         } else if($tapa == "VAIHDA" and $nyk_paikka != 0) {
           $hinta = 0;
@@ -3452,7 +3456,7 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
       if (mysql_num_rows($tehdas_saldo_res2) > 0) {
         while($tehdas_saldo_row2 = mysql_fetch_assoc($tehdas_saldo_res2)) {
           $toimittajan_tunnus = $tehdas_saldo_row2['liitostunnus'];
-          if($_tehdas_saldo_hinta = tehdas_saldo_hinnat($kukarow, $trow, $toimittajan_tunnus, $vahvistettu_kommentti, $lis_hinta)) {
+          if($_tehdas_saldo_hinta = tehdas_saldo_hinnat($kukarow, $trow, $toimittajan_tunnus, $vahvistettu_kommentti, $lis_hinta, $hinta)) {
             $lis_hinta = $_tehdas_saldo_hinta;
           }
           break;

@@ -350,28 +350,74 @@ if ($tee == "file") {
 
             if ($tuoteno != '' and $kpl != 0) {
 
+              $vanha_tuoteno = $tuoteno;
+
               // Tuotehaku ei toimi extranetin puolella
-              if (file_exists("../inc/tuotehaku.inc")) {
+              if ($mikrotila_tuotenumero != "toim_koodilla" and file_exists("../inc/tuotehaku.inc")) {
                 require "../inc/tuotehaku.inc";
               }
 
+              if($mikrotila_toimittaja and is_numeric($mikrotila_toimittaja)) {
+                $toimittaja_join = "JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = tuote.yhtio AND tuotteen_toimittajat.tuoteno = tuote.tuoteno)";
+                $toimittaja_lisa = "AND tuotteen_toimittajat.liitostunnus = '".mysql_real_escape_string($mikrotila_toimittaja)."'";
+              }
+
               if ($mikrotila_tuotenumero == "koodilla") {
-                $query = "SELECT *
-                          FROM tuote
-                          WHERE eankoodi='$tuoteno' and yhtio='$kukarow[yhtio]'";
+                $query = "SELECT * 
+                          FROM tuote 
+                          $toimittaja_join 
+                          WHERE tuote.yhtio='$kukarow[yhtio]' 
+                          AND tuote.eankoodi='$tuoteno'
+                          $toimittaja_lisa
+                          ";
+              }
+              elseif ($mikrotila_tuotenumero == "toim_koodilla") {
+                $query = "SELECT * 
+                          FROM tuote 
+                          JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = tuote.yhtio AND tuotteen_toimittajat.tuoteno = tuote.tuoteno)
+                          WHERE tuote.yhtio='$kukarow[yhtio]' 
+                          AND tuote.status in ('A', 'T', 'E') 
+                          AND tuotteen_toimittajat.toim_tuoteno='$tuoteno' 
+                          $toimittaja_lisa
+                          GROUP BY tuotteen_toimittajat.tuoteno";
               }
               else {
-                $query = "SELECT *
-                          FROM tuote
-                          WHERE tuoteno='$tuoteno' and yhtio='$kukarow[yhtio]'";
+                $query = "SELECT * 
+                          FROM tuote 
+                          $toimittaja_join 
+                          WHERE tuote.yhtio='$kukarow[yhtio]' 
+                          AND tuote.tuoteno='$tuoteno'
+                          $toimittaja_lisa
+                          ";
               }
 
               $rarresult = pupe_query($query);
 
-              if (mysql_num_rows($rarresult) == 1) {
+              if (!$tuoteno and mysql_num_rows($rarresult) != 1) {
+                $tuoteno = $vanha_tuoteno;
+              }
 
-                $trow = mysql_fetch_array($rarresult);
-
+              $_testatarivit = false;
+              $viesti_lisa = false;
+              if (mysql_num_rows($rarresult) > 1) {
+                $_testatarivit = array();
+                $trow_ensimmainen = mysql_fetch_array($rarresult);
+                while($_testatarivi = mysql_fetch_array($rarresult))
+                {
+                  $_testatarivit[$_testatarivi['tuoteno']] = $_testatarivi;
+                }
+                $_loytyi_imp = implode(",", array_keys($_testatarivit));
+                $viesti_lisa = t("Numerolla '$tuoteno' löydy yli 1 kpl: $trow_ensimmainen[tuoteno],$_loytyi_imp. Valittu $trow_ensimmainen[tuoteno]");
+              }
+  
+              if (mysql_num_rows($rarresult) == 1 or $_testatarivit) {
+  
+                if($_testatarivit) {
+                  $trow = $trow_ensimmainen;
+                } else {
+                  $trow = mysql_fetch_array($rarresult);
+                }
+                
                 $ohitus = 0;
 
                 if ($kukarow["extranet"] != "") {
@@ -470,24 +516,43 @@ if ($tee == "file") {
                         $kpl = $palautus[$inx]["kpl"] * -1;
                         if (stripos($kommentti, $palautus[$inx]["kommentti"]) === FALSE) $kommentti = $palautus[$inx]["kommentti"];
                         $hyvityssaannon_palautuskielto = $palautus[$inx]["palautuskielto"];
-
+                        if ($mikrotila_toimittaja) {
+                          $paikka = '¡¡¡'.$mikrotila_toimittaja;
+                          
+                        }
+ 
                         require "lisaarivi.inc";
                       }
 
                       unset($hyvityssaannon_palautuskielto);
                     }
                     else {
+                      if ($mikrotila_toimittaja) {
+                        $paikka = '¡¡¡'.$mikrotila_toimittaja;
+                        
+                      }
+ 
                       require "lisaarivi.inc";
                     }
                   }
                 }
                 else {
-                  echo "<font class='message'>".t("Tuotenumeroa")." $tuoteno ".t("ei löydy")."!</font><br>";
+                  if($mikrotila_toimittaja) {
+                    echo "<font class='warning message'>".$tuoteno."- ".t("tuotenumeroa tai sen toimittajaa ei löydy!")."</font><br>";
+                  } else {
+                    echo "<font class='warning message'>".t("Tuotenumeroa")." $tuoteno ".t("ei löydy")."!</font><br>";
+                  }
                 }
-
               }
               else {
-                echo "<font class='message'>".t("Tuotenumeroa")." $tuoteno ".t("ei löydy")."!</font><br>";
+                if($mikrotila_toimittaja) {
+                  echo "<font class='warning message'>".$tuoteno."- ".t("tuotenumeroa tai sen toimittajaa ei löydy!")."</font><br>";
+                } else {
+                  echo "<font class='warning message'>".t("Tuotenumeroa")." $tuoteno ".t("ei löydy")."!</font><br>";
+                }
+              }
+              if($viesti_lisa) {
+                echo "<font class='warning message'>".$viesti_lisa."!</font><br>";
               }
             }
           }
@@ -709,6 +774,7 @@ if ($tee == "file") {
           }
 
           $tuoteno = trim($rivi[$ind_Tuoteno]);
+
           $kpl   = str_replace(",", ".", $rivi[$ind_Maara]);
 
           $toimaika      = "";
@@ -775,28 +841,74 @@ if ($tee == "file") {
 
           if ($tuoteno != '' and $kpl != 0) {
 
+            $vanha_tuoteno = $tuoteno;
+            
             // Tuotehaku ei toimi extranetin puolella
-            if (file_exists("../inc/tuotehaku.inc")) {
+            if ($mikrotila_tuotenumero != "toim_koodilla" and file_exists("../inc/tuotehaku.inc")) {
               require "../inc/tuotehaku.inc";
             }
 
+            if($mikrotila_toimittaja and is_numeric($mikrotila_toimittaja)) {
+              $toimittaja_join = "JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = tuote.yhtio AND tuotteen_toimittajat.tuoteno = tuote.tuoteno)";
+              $toimittaja_lisa = "AND tuotteen_toimittajat.liitostunnus = '".mysql_real_escape_string($mikrotila_toimittaja)."'";
+            }
+
             if ($mikrotila_tuotenumero == "koodilla") {
-              $query = "SELECT *
-                        FROM tuote
-                        WHERE eankoodi='$tuoteno' and yhtio='$kukarow[yhtio]'";
+              $query = "SELECT * 
+                        FROM tuote 
+                        $toimittaja_join 
+                        WHERE tuote.yhtio='$kukarow[yhtio]' 
+                        AND tuote.eankoodi='$tuoteno'
+                        $toimittaja_lisa
+                        ";
+            }
+            elseif ($mikrotila_tuotenumero == "toim_koodilla") {
+              $query = "SELECT * 
+                        FROM tuote 
+                        JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = tuote.yhtio AND tuotteen_toimittajat.tuoteno = tuote.tuoteno)
+                        WHERE tuote.yhtio='$kukarow[yhtio]' 
+                        AND tuote.status in ('A', 'T', 'E') 
+                        AND tuotteen_toimittajat.toim_tuoteno='$tuoteno' 
+                        $toimittaja_lisa
+                        GROUP BY tuotteen_toimittajat.tuoteno";
             }
             else {
-              $query = "SELECT *
-                        FROM tuote
-                        WHERE tuoteno='$tuoteno' and yhtio='$kukarow[yhtio]'";
+              $query = "SELECT * 
+                        FROM tuote 
+                        $toimittaja_join 
+                        WHERE tuote.yhtio='$kukarow[yhtio]' 
+                        AND tuote.tuoteno='$tuoteno'
+                        $toimittaja_lisa
+                        ";
             }
 
             $rarresult = pupe_query($query);
 
-            if (mysql_num_rows($rarresult) == 1) {
+            if (!$tuoteno and mysql_num_rows($rarresult) != 1) {
+              $tuoteno = $vanha_tuoteno;
+            }
 
-              $trow = mysql_fetch_array($rarresult);
+            $_testatarivit = false;
+            $viesti_lisa = false;
+            if (mysql_num_rows($rarresult) > 1) {
+              $_testatarivit = array();
+              $trow_ensimmainen = mysql_fetch_array($rarresult);
+              while($_testatarivi = mysql_fetch_array($rarresult))
+              {
+                $_testatarivit[$_testatarivi['tuoteno']] = $_testatarivi;
+              }
+              $_loytyi_imp = implode(",", array_keys($_testatarivit));
+              $viesti_lisa = t("Numerolla '$tuoteno' löydy yli 1 kpl: $trow_ensimmainen[tuoteno],$_loytyi_imp. Valittu $trow_ensimmainen[tuoteno]");
+            }
 
+            if (mysql_num_rows($rarresult) == 1 or $_testatarivit) {
+
+              if($_testatarivit) {
+                $trow = $trow_ensimmainen;
+              } else {
+                $trow = mysql_fetch_array($rarresult);
+              }
+              
               $ohitus = 0;
 
               if ($kukarow["extranet"] != "") {
@@ -895,24 +1007,41 @@ if ($tee == "file") {
                       $kpl = $palautus[$inx]["kpl"] * -1;
                       if (stripos($kommentti, $palautus[$inx]["kommentti"]) === FALSE) $kommentti = $palautus[$inx]["kommentti"];
                       $hyvityssaannon_palautuskielto = $palautus[$inx]["palautuskielto"];
-
+                      if ($mikrotila_toimittaja) {
+                        $paikka = '¡¡¡'.$mikrotila_toimittaja;
+                        
+                      }
                       require "lisaarivi.inc";
                     }
 
                     unset($hyvityssaannon_palautuskielto);
                   }
                   else {
+                    if ($mikrotila_toimittaja) {
+                      $paikka = '¡¡¡'.$mikrotila_toimittaja;
+                      
+                    }
                     require "lisaarivi.inc";
                   }
                 }
               }
               else {
-                echo "<font class='message'>".t("Tuotenumeroa")." $tuoteno ".t("ei löydy")."!</font><br>";
+                if($mikrotila_toimittaja) {
+                  echo "<font class='warning message'>".$tuoteno."- ".t("tuotenumeroa tai sen toimittajaa ei löydy!")."</font><br>";
+                } else {
+                  echo "<font class='warning message'>".t("Tuotenumeroa")." $tuoteno ".t("ei löydy")."!</font><br>";
+                }
               }
-
             }
             else {
-              echo "<font class='message'>".t("Tuotenumeroa")." $tuoteno ".t("ei löydy")."!</font><br>";
+              if($mikrotila_toimittaja) {
+                echo "<font class='warning message'>".$tuoteno."- ".t("tuotenumeroa tai sen toimittajaa ei löydy!")."</font><br>";
+              } else {
+                echo "<font class='warning message'>".t("Tuotenumeroa")." $tuoteno ".t("ei löydy")."!</font><br>";
+              }
+            }
+            if($viesti_lisa) {
+              echo "<font class='warning message'>".$viesti_lisa."!</font><br>";
             }
           }
         }
@@ -1043,7 +1172,37 @@ if ($tee == 'mikrotila') {
   echo "<td>";
   echo "<select name='mikrotila_tuotenumero'>";
   echo "<option value='tuote'>".t("Tuotenumerolla")."</option>";
+  echo "<option value='toim_koodilla'>".t("Toimittajan tuotenumerolla")."</option>";
   echo "<option value='koodilla'>".t("EAN-Koodilla")."</option>";
+  echo "</select>";
+  echo "</td>";
+  echo "</tr>";
+
+  echo "<tr>";
+  echo "<th>".t("Valitse toimittaja").":
+  <br><small style='font-size: 80%;'>".t("Huom.: varmista, että tuotteissa on valittu toimittaja!")."</smal></th>";
+  echo "<td>";
+  echo "<select name='mikrotila_toimittaja'>";
+  $_tuotteen_toimittajat_query = "SELECT 
+              tuotteen_toimittajat.liitostunnus,
+              tuotteen_toimittajat.myyntihinta_kerroin, 
+              tuotteen_toimittajat.tehdas_saldo, 
+              tuotteen_toimittajat.tehdas_saldo_varastot,
+              tuotteen_toimittajat.yhtio,
+              toimi.nimi,
+              toimi.suoratoimitus
+            FROM tuotteen_toimittajat 
+            JOIN toimi on (tuotteen_toimittajat.yhtio = toimi.yhtio AND tuotteen_toimittajat.liitostunnus = toimi.tunnus) 
+            JOIN tuote on (tuotteen_toimittajat.yhtio = tuote.yhtio AND tuotteen_toimittajat.tuoteno = tuote.tuoteno) 
+              WHERE tuotteen_toimittajat.yhtio = '{$kukarow["yhtio"]}' 
+              AND toimi.suoratoimitus = 'X' 
+            GROUP BY tuotteen_toimittajat.liitostunnus ORDER by toimi.nimi ASC";
+            echo $_tuotteen_toimittajat_query;
+  $_tuotteen_toimittajat_result = pupe_query($_tuotteen_toimittajat_query);
+  echo "<option value=''>--".t("Ei valittu")."--</option>";
+  while($_tuotteen_toimittajat_row = mysql_fetch_assoc($_tuotteen_toimittajat_result)) {
+    echo "<option value='".$_tuotteen_toimittajat_row['liitostunnus']."'>".$_tuotteen_toimittajat_row['nimi']."</option>";
+  }
   echo "</select>";
   echo "</td>";
   echo "</tr>";

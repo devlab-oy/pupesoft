@@ -237,6 +237,7 @@ table.responsive td input[type=text] {
 .nowrap {
   white-space: nowrap;
 }
+
 .message.warning {
   padding: 5px 15px;
   margin: 5px 5px 5px 0px;
@@ -244,9 +245,7 @@ table.responsive td input[type=text] {
   display: inline-block;
   color: #fff;
 }
-button, input[type=submit], input[type=button] {
-  text-transform: uppercase;
-}
+
 th, th a {
   text-transform: revert !important;
 }

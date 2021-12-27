@@ -488,15 +488,22 @@ if (!function_exists("tilauksesta_ostotilaus")) {
                       and tilausrivitunnus = '$tilrivirow[rivitunnus]'";
             pupe_query($query);
 
-            $tilauspainike= '
-            <form style="display: inline-block; margin: 0; margin-left: 2px; margin-right: 2px; padding: 0;" method="post" action="'.$palvelin2.'tilauskasittely/tilaus_osto.php">
-              <input type="hidden" name="aktivoinnista" value="true">
-              <input type="hidden" name="tee" value="AKTIVOI">
-              <input type="hidden" name="tilausnumero" value="'.$tunnus.'">
-              <input type="submit" value="'.$tunnus.'">
-            </form>';
+            if(!isset($tilauspainike)) {
+              $tilauspainike = array();
+            }
 
-            $tilauksesta_ostotilaus .= "<font class='message'>Tuote: $tilrivirow[tuoteno] $tilrivirow[kpl] kpl lisätty ostotilaukselle: $tilauspainike</font><br>";
+            if(!isset($tilauspainike[$tunnus])) {
+              $tilauspainike[$tunnus]= '
+              <form style="display: inline-block; margin: 0; margin-left: 2px; margin-right: 2px; padding: 0;" method="post" action="'.$palvelin2.'tilauskasittely/tilaus_osto.php">
+                <input type="hidden" name="aktivoinnista" value="true">
+                <input type="hidden" name="tee" value="AKTIVOI">
+                <input type="hidden" name="tilausnumero" value="'.$tunnus.'">
+                <input type="submit" value="'.$tunnus.'">
+              </form>';
+              $tilauksesta_ostotilaus .= "<font class='message'>Tuote: $tilrivirow[tuoteno] $tilrivirow[kpl] kpl lisätty ostotilaukselle: $tilauspainike[$tunnus]</font><br>";
+            } else {
+              $tilauksesta_ostotilaus .= "<font class='message'>Tuote: $tilrivirow[tuoteno] $tilrivirow[kpl] kpl lisätty ostotilaukselle.</font><br>";
+            }
 
             // Lisävarusteperheen isä
             if ($tilrivirow["rivitunnus"] == $tilrivirow["perheid2"] and mysql_num_rows($tilrivires) > 1) {

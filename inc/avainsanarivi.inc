@@ -307,6 +307,10 @@ if (mysql_field_name($result, $i) == "laji") {
   if ($lukitse_laji== "" or $lukitse_laji == "CRM_TARJOUSPOIS") $ulos .= "<option value='CRM_TARJOUSPOIS' {$avain_sel['CRM_TARJOUSPOIS']}>".t("CRM viesti tarjouksen hylkäyksestä")."</option>";
   if ($lukitse_laji== "") $ulos .= "</optgroup>";
 
+  if ($lukitse_laji == "") $ulos .= "<optgroup label='" . t("Raporttien avainsanat") . "'>";
+  if ($lukitse_laji == "" or $lukitse_laji == "LAAJEN_KATELAS") $ulos .= "<option value='LAAJEN_KATELAS' $avain_sel[LAAJEN_KATELAS]>" . t("Laajennettu tuotteiden myyntikate raportti") . "</option>";
+  if ($lukitse_laji == "") $ulos .= "</optgroup>";
+
   if ($lukitse_laji== "") $ulos .= "<optgroup label='".t("Verkkokaupan avainsanat")."'>";
   if ($lukitse_laji== "" or $lukitse_laji == "VERKKOKAULINKKI") $ulos .= "<option value='VERKKOKAULINKKI' $avain_sel[VERKKOKAULINKKI]>".t("Verkkokauppalinkki")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "VERKKOKAUKURSSI") $ulos .= "<option value='VERKKOKAUKURSSI' $avain_sel[VERKKOKAUKURSSI]>".t("Oma valuuttakurssi")."</option>";

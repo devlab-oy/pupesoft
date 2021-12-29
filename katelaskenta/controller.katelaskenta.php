@@ -48,6 +48,14 @@ $template = array();
 // ilmenee tiedoissa, virheelliset rivit palautetaan taulukkona.
 $submit_katelaskenta = (isset($_POST["submit-katelaskenta"]) ? $_POST["submit-katelaskenta"] : "");
 
+// Jos laajennettu näkymä
+$_laajennettu = false;
+if($kayta_laajennettu_ver = t_avainsana("LAAJEN_KATELAS")) {
+  if(mysql_num_rows($kayta_laajennettu_ver) > 0 and mysql_fetch_assoc($kayta_laajennettu_ver)['selite'] == 1) {
+    $_laajennettu = true;
+  }
+}
+
 if (strlen($submit_katelaskenta) > 0) {
   // Tallennetaan post-tiedot omaan muuttujaan
   $post_array = $_POST;
@@ -219,8 +227,10 @@ echo "<table style='display:inline-table; padding-right:4px; padding-top:4px;' v
 echo "<tr><th>" . t("Tuotenumero") . "</th><td><input type='text' size='25' name='tuotenumero' id='tuotenumero' value = '$tuotenumero'></td></tr>";
 echo "<tr><th>" . t("Toim tuoteno") . "</th><td><input type='text' size='25' name = 'toim_tuoteno' id='toim_tuoteno' value = '$toim_tuoteno'></td></tr>";
 echo "<tr><th>" . t("Nimitys") . "</th><td><input type='text' size='25' name='nimitys' id='nimitys' value = '$nimitys'></td></tr>";
-echo "<tr class=\"tumma\"><th class=\"tumma\">" . t("Asiakashinnan asiakasnro") . "
+if ($_laajennettu) {
+  echo "<tr class=\"tumma\"><th class=\"tumma\">" . t("Asiakashinnan asiakasnro") . "
 <br><small style=\"font-size: 80%;text-transform: none;\">" . t("Jos täytetty:<br> valinnat \"asiakasryhmä\" ja \"asiakaspiiri\" eivät ole saatavilla.") . "</small></th><td><input type='text' size='25' name='mul_asiakashinnasto_asiakas' id='mul_asiakashinnasto_asiakas' value = '$mul_asiakashinnasto_asiakas'></td></tr>";
+}
 echo "<tr><th>" . t("Poistetut") . "</th>";
 echo "<td><input type='checkbox' name='poistetut' id='poistetut' $poischeck></td></tr>";
 echo "<tr><th>" . t("Lisätiedot") . "</th><td><input type='checkbox' name='lisatiedot' id='lisatiedot' $lisacheck></td></tr>";
@@ -231,17 +241,28 @@ echo "</tr>";
 echo "</table><br/>";
 echo "<br/>";
 
-// Oletus
-$monivalintalaatikot = array(
-  "OSASTO", 
-  "TRY", 
-  "TUOTEMERKKI", 
-  "MALLI", 
-  "MALLI/MALLITARK", 
-  "<br>ASIAKASRYHMA",
-  "ASIAKASPIIRI",
-  "<br>DYNAAMINEN_TUOTE"
-);
+if ($_laajennettu) {
+  $monivalintalaatikot = array(
+    "OSASTO", 
+    "TRY", 
+    "TUOTEMERKKI", 
+    "MALLI", 
+    "MALLI/MALLITARK", 
+    "<br>ASIAKASRYHMA",
+    "ASIAKASPIIRI",
+    "<br>DYNAAMINEN_TUOTE"
+  );
+} else {
+  $monivalintalaatikot = array(
+    "OSASTO", 
+    "TRY", 
+    "TUOTEMERKKI", 
+    "MALLI", 
+    "MALLI/MALLITARK", 
+    "<br>DYNAAMINEN_TUOTE"
+  );
+}
+
 $monivalintalaatikot_normaali = array();
 
 // asiakashinnat valinnat

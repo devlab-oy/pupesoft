@@ -185,23 +185,54 @@ function tallenna_valitut_katemuutokset($data) {
   $valitut_tuoterivit_myymalakate = array_intersect_key($data["myymalakate"], $valitut_tuoterivit);
   $valitut_tuoterivit_nettokate = array_intersect_key($data["nettokate"], $valitut_tuoterivit);
 
+  if (isset($data["asiakashintakate"])) {
+    $valitut_tuoterivit_asiakaskate = $data["asiakashintakate"];
+  } else {
+    $valitut_tuoterivit_asiakaskate = false;
+  }
+
   // Siivotaan valitut keskihankintahinnat valittujen tuoterivien
   // perusteella. Jäljelle jää vain valitut tuotteet taulukosta.
   $valitut_tuoterivit_keskihankintahinnat = array_intersect_key($data["valitutkeskihankintahinnat"], $valitut_tuoterivit);
 
+  if($valitut_tuoterivit_asiakaskate) {
+    global $kukarow;
+    foreach($valitut_tuoterivit_asiakaskate as $asiakashinta_k => $_asiakashinta_kate) {
+      if($asiakashinta_k == "''") {
+        continue;
+      }
+
+      $_asiakashinta_tiedot = explode("!!!", str_replace("'", "", $asiakashinta_k));
+      $_asiakashinta_tunnus = $_asiakashinta_tiedot[0];
+      $_asiakashinta_tuote = $_asiakashinta_tiedot[1];
+      $_asiakashinta_hinta = $data["valitutasiakashinnat"][$asiakashinta_k];
+      $_asiakashinta_hinta = lisaa_hintaan_kate($_asiakashinta_hinta, $_asiakashinta_kate);
+      $_asiakashinta_hinta = hintapyoristys($_asiakashinta_hinta, 2);
+      $paivita_asiakashinnat_q = "UPDATE asiakashinta 
+                                    SET hinta = '{$_asiakashinta_hinta}',
+                                    myyntikate = '{$_asiakashinta_kate}' ,
+                                    muutospvm = now(), 
+                                    muuttaja = '{$kukarow['kuka']}' 
+                                    WHERE yhtio = '{$kukarow['yhtio']}' 
+                                    AND tunnus = $_asiakashinta_tunnus";
+      pupe_query($paivita_asiakashinnat_q);
+    }
+  }
 
   // Array_merge_recursive -funktiolla taulut yhdistetään yhdeksi kokonaisuudeksi.
   // Funktio käyttää taulukon avaimia, joilla tiedot koostetaan yksinkertaisemmaksi
   // taulukoksi.
   //
   // Tulevan taulun rakenne on seuraava:
-  // [avain] => [tunnus, myyntikate, myymalakate, nettokate, keskihankintahinta]
-  $yhdistetyt_tuoterivit["kunnossa"] = array_merge_recursive($valitut_tuoterivit,
+  // [avain] => [tunnus, myyntikate, myymalakate, nettokate, asiakaskate, keskihankintahinta]
+
+  $yhdistetyt_tuoterivit["kunnossa"] = array_merge_recursive(
+    $valitut_tuoterivit,
     $valitut_tuoterivit_myyntikate,
     $valitut_tuoterivit_myymalakate,
     $valitut_tuoterivit_nettokate,
-    $valitut_tuoterivit_keskihankintahinnat);
-
+    $valitut_tuoterivit_keskihankintahinnat
+  );
 
   // Tarkistetaan syötteet ja funktio palauttaa taulukon, jossa
   // on eritelty kunnossa olleet rivit virheellisistä.
@@ -211,6 +242,7 @@ function tallenna_valitut_katemuutokset($data) {
   // Komennot luodaan erillisessä funktiossa, jonne annetaan parametrina
   // jo tarkistetut tiedot. Virheellisille riveille ei tehdä mitään.
   $update_komennot = array();
+
   $update_komennot = luo_katelaskenta_update_komennot($yhdistetyt_tuoterivit["kunnossa"]);
 
 

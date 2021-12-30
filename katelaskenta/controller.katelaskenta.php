@@ -48,9 +48,18 @@ $template = array();
 // ilmenee tiedoissa, virheelliset rivit palautetaan taulukkona.
 $submit_katelaskenta = (isset($_POST["submit-katelaskenta"]) ? $_POST["submit-katelaskenta"] : "");
 
+// Jos laajennettu näkymä
+$_laajennettu = false;
+if($kayta_laajennettu_ver = t_avainsana("LAAJEN_KATELAS")) {
+  if(mysql_num_rows($kayta_laajennettu_ver) > 0 and mysql_fetch_assoc($kayta_laajennettu_ver)['selite'] == 1) {
+    $_laajennettu = true;
+  }
+}
+
 if (strlen($submit_katelaskenta) > 0) {
   // Tallennetaan post-tiedot omaan muuttujaan
   $post_array = $_POST;
+
   // Tallennetaan katemuutokset.
   $virheelliset_rivit = tallenna_valitut_katemuutokset($post_array);
 
@@ -106,6 +115,10 @@ $ulisa = "";
 $toimtuotteet = "";
 $poislisa_mulsel = "";
 $lisa_parametri = "";
+if (!$mul_asiakashinnasto_asiakas and is_numeric($mul_asiakashinnasto_asiakas)) { $mul_asiakashinnasto_asiakas = ""; }
+if ($mul_asiakashinnasto_asiakas) { $mul_asiakasryhma = $mul_asiakaspiiri = ''; }
+if ($mul_asiakasryhma) { $mul_asiakaspiiri = ''; }
+if ($mul_asiakaspiiri) { $mul_asiakasryhma = ''; }
 
 /**
  * Seuraavat kaksi if-lausetta liittyvät "Näytä vain saldolliset tuotteet"
@@ -214,6 +227,10 @@ echo "<table style='display:inline-table; padding-right:4px; padding-top:4px;' v
 echo "<tr><th>" . t("Tuotenumero") . "</th><td><input type='text' size='25' name='tuotenumero' id='tuotenumero' value = '$tuotenumero'></td></tr>";
 echo "<tr><th>" . t("Toim tuoteno") . "</th><td><input type='text' size='25' name = 'toim_tuoteno' id='toim_tuoteno' value = '$toim_tuoteno'></td></tr>";
 echo "<tr><th>" . t("Nimitys") . "</th><td><input type='text' size='25' name='nimitys' id='nimitys' value = '$nimitys'></td></tr>";
+if ($_laajennettu) {
+  echo "<tr class=\"tumma\"><th class=\"tumma\">" . t("Asiakashinnan asiakasnro") . "
+<br><small style=\"font-size: 80%;text-transform: none;\">" . t("Jos täytetty:<br> valinnat \"asiakasryhmä\" ja \"asiakaspiiri\" eivät ole saatavilla.") . "</small></th><td><input type='text' size='25' name='mul_asiakashinnasto_asiakas' id='mul_asiakashinnasto_asiakas' value = '$mul_asiakashinnasto_asiakas'></td></tr>";
+}
 echo "<tr><th>" . t("Poistetut") . "</th>";
 echo "<td><input type='checkbox' name='poistetut' id='poistetut' $poischeck></td></tr>";
 echo "<tr><th>" . t("Lisätiedot") . "</th><td><input type='checkbox' name='lisatiedot' id='lisatiedot' $lisacheck></td></tr>";
@@ -224,9 +241,47 @@ echo "</tr>";
 echo "</table><br/>";
 echo "<br/>";
 
-// Oletus
-$monivalintalaatikot = array("OSASTO", "TRY", "TUOTEMERKKI", "MALLI", "MALLI/MALLITARK", "<br>DYNAAMINEN_TUOTE");
+if ($_laajennettu) {
+  $monivalintalaatikot = array(
+    "OSASTO", 
+    "TRY", 
+    "TUOTEMERKKI", 
+    "MALLI", 
+    "MALLI/MALLITARK", 
+    "<br>ASIAKASRYHMA",
+    "ASIAKASPIIRI",
+    "<br>DYNAAMINEN_TUOTE"
+  );
+} else {
+  $monivalintalaatikot = array(
+    "OSASTO", 
+    "TRY", 
+    "TUOTEMERKKI", 
+    "MALLI", 
+    "MALLI/MALLITARK", 
+    "<br>DYNAAMINEN_TUOTE"
+  );
+}
+
 $monivalintalaatikot_normaali = array();
+
+// asiakashinnat valinnat
+$piirivalinta = "asiakashinta";
+$asiakasryhmavalinta = "asiakashinta";
+?>
+<style>
+.asiakaspiirimonivalintadiv:before {
+  content: "<?php echo t("tai"); ?>";
+  float: left;
+  margin: 5px 5px 0px 0px;
+}
+</style>
+<script>
+  $(document).ready(function () {
+    $(".asiakasryhmamonivalintadiv td select, .asiakasryhmamonivalintadiv th, .asiakaspiirimonivalintadiv td select, .asiakaspiirimonivalintadiv th").addClass("tumma");
+  });
+</script>
+<?php
 
 /**
  * REFACTOR: Include tiedosto joudutaan hakemaan toisesta kansiosta.
@@ -236,7 +291,7 @@ $monivalintalaatikot_normaali = array();
 require "../tilauskasittely/monivalintalaatikot.inc";
 
 echo "<input type='submit' name='submit_button' id='submit_button' class='hae_btn' value = '" . t("Etsi") . "'></form>";
-echo "&nbsp;<form action = '' method = 'post'>
+echo "&nbsp;<form action = '".basename(__FILE__)."' method = 'post'>
   <input type='submit' name='submit_button2' id='submit_button2' value = '" . t("Tyhjennä") . "'>
   </form>";
 
@@ -257,6 +312,23 @@ if (!isset($submit_button)) {
   $submit_button = '';
 }
 if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
+
+  if($mul_asiakasryhma or $mul_asiakaspiiri or $mul_asiakashinnasto_asiakas) {
+    $lisa_parametri .= "JOIN asiakashinta on (tuote.yhtio=asiakashinta.yhtio and tuote.tuoteno=asiakashinta.tuoteno) ";
+    $asiakashinta_lisays = "
+    asiakashinta.hinta as asiakashinta_hinta,
+    asiakashinta.piiri as asiakashinta_piiri,
+    asiakashinta.asiakas as asiakashinta_asiakas,
+    asiakashinta.asiakas_ryhma as asiakashinta_asiakas_ryhma, 
+    asiakashinta.tunnus as asiakashinta_asiakas_tunnus, 
+    asiakashinta.myyntikate as asiakashinta_asiakas_myyntikate, 
+    ";
+  } else {
+    $asiakashinta_lisays = "";
+  }
+  if($mul_asiakashinnasto_asiakas) {
+    $lisa .= " and asiakashinta.asiakas = '{$mul_asiakashinnasto_asiakas}'";
+  }
 
   // Hakukysely tuotehakuun.
   $query = "SELECT
@@ -281,6 +353,7 @@ if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
             tuote.myyntikate,
             tuote.myymalakate,
             tuote.nettokate,
+            $asiakashinta_lisays
             (SELECT group_concat(distinct tuotteen_toimittajat.toim_tuoteno order by tuotteen_toimittajat.tunnus separator '<br>') FROM tuotteen_toimittajat use index (yhtio_tuoteno) WHERE tuote.yhtio = tuotteen_toimittajat.yhtio and tuote.tuoteno = tuotteen_toimittajat.tuoteno) toim_tuoteno,
             tuote.sarjanumeroseuranta,
             tuote.status
@@ -320,12 +393,27 @@ if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
   if (!array_key_exists("ilmoitus", $template)) {
     $rows = array();
 
-    while ($mrow = mysql_fetch_assoc($result)) {
-      $rows[$mrow["tuoteno"]] = $mrow;
+    if($mul_asiakasryhma) {
+      while ($mrow = mysql_fetch_assoc($result)) {
+        $rows[$mrow['asiakashinta_asiakas_ryhma']][$mrow["tuoteno"]] = $mrow;
+      }
+    } else if($mul_asiakaspiiri) {
+      while ($mrow = mysql_fetch_assoc($result)) {
+        $rows[$mrow['asiakashinta_piiri']][$mrow["tuoteno"]] = $mrow;
+      }
+    } else if($mul_asiakashinnasto_asiakas) {
+      while ($mrow = mysql_fetch_assoc($result)) {
+        $rows[$mrow['asiakashinta_asiakas']][$mrow["tuoteno"]] = $mrow;
+      }
+    } else {
+      while ($mrow = mysql_fetch_assoc($result)) {
+        $rows[0][$mrow["tuoteno"]] = $mrow;
+      }
     }
 
     // Valmistelee hakutulokset templatea varten.
     $template["tuotteet"] = valmistele_hakutulokset($rows);
+    
     $template["yhtio"] = $yhtiorow;
 
   }

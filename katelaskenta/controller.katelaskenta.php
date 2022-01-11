@@ -51,7 +51,8 @@ $submit_katelaskenta = (isset($_POST["submit-katelaskenta"]) ? $_POST["submit-ka
 // Jos laajennettu näkymä
 $_laajennettu = false;
 if($kayta_laajennettu_ver = t_avainsana("LAAJEN_KATELAS")) {
-  if(mysql_num_rows($kayta_laajennettu_ver) > 0 and mysql_fetch_assoc($kayta_laajennettu_ver)['selite'] == 1) {
+  $kayt_laaj_ver = mysql_fetch_assoc($kayta_laajennettu_ver);
+  if(mysql_num_rows($kayta_laajennettu_ver) > 0 and $kayt_laaj_ver['selite'] == 1) {
     $_laajennettu = true;
   }
 }

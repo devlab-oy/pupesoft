@@ -59,7 +59,7 @@ $verkkolaskut_ok     = $fitek_xml_cron_dirname."/ok";
 $verkkolaskut_orig   = $fitek_xml_cron_dirname."/orig";
 $verkkolaskut_error  = $fitek_xml_cron_dirname."/error";
 $verkkolaskut_reject = $fitek_xml_cron_dirname."/reject";
-$verkkolaskut_pdf = $fitek_xml_cron_dirname."/pdf";
+$verkkolaskut_pdf    = $fitek_xml_cron_dirname."/pdf";
 
 $ftphost = $ftphost_fitek_cron;
 $ftpuser = $ftpuser_fitek_cron;

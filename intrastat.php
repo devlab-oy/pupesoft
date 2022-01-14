@@ -625,7 +625,6 @@ if ($tee == "tulosta") {
   $csvrivit = "Tiedonantaja;";
   $csvrivit .= "Jakso;";
   $csvrivit .= "Suunta;";
-  $csvrivit .= "Asiamies;";
 
   // tulostetaan vuodelle 2021> erikoisotsikot
   if($_vuosi_2021_erikois_csv) {
@@ -655,8 +654,7 @@ if ($tee == "tulosta") {
   else {
     $csvrivit .= "2;";
   }
-
-  $csvrivit .= ";";
+  
   $ekarivi = True;
 
   while ($row = mysql_fetch_array($result)) {
@@ -750,7 +748,7 @@ if ($tee == "tulosta") {
     $nim .= "\r\n";
 
     if (!$ekarivi) {
-      $csvrivit .= ";;;;";
+      $csvrivit .= ";;;";
     }
 
     $ekarivi = False;
@@ -1049,7 +1047,13 @@ if ($tee == "tulosta") {
   else {
     // tehd‰‰n kaunista ruutukamaa
     $ulos .= "<tr>";
-    $ulos .= "<th colspan='9'>".t("Yhteens‰").":</th>";
+    $kolumneja = 9;
+    if($_vuosi_2021_erikois_csv) {
+      foreach($_vuosi_2021_erikois_csv as $_vuosi_2021_erikois_data) {
+        $kolumneja++;
+      }
+    }
+    $ulos .= "<th colspan='".$kolumneja."'>".t("Yhteens‰").":</th>";
     $ulos .= "<th>$totsumma</th>";
     $ulos .= "<th>$bruttopaino</th>";
     $ulos .= "<th></th>";

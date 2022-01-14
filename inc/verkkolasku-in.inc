@@ -34,9 +34,6 @@ if (!function_exists("verkkolasku_in")) {
     // Katsotaan mitä aineistoa käpistellään
     if (strpos($file, "finvoice") !== false or strpos($file, "maventa") !== false or $fitek_xml_cron_tiedot) {
       require "inc/verkkolasku-in-finvoice.inc";
-      if($fitek_xml_cron_tiedot and isset($fitek_return_false) and $fitek_return_false) {
-        return;
-      }
     }
     elseif (strpos($file, "teccominvoice") !== false) {
       require "inc/verkkolasku-in-teccom.inc";
@@ -121,7 +118,11 @@ if (!function_exists("verkkolasku_in")) {
     $viesti    = "";
 
     if(isset($fitek_comment)) {
-      $komm = "(fitek@" . date('Y-m-d') .") ".$fitek_comment."<br>\n" . $komm;
+      $fitek_comments = explode("|", $fitek_comment);
+      foreach($fitek_comments as $fitek_comment) {
+        $fitek_comment_sisalto = explode(";", $fitek_comment);
+        $komm = "(".$fitek_comment_sisalto[0]."@" . date('Y-m-d') .") ".$fitek_comment_sisalto[1]."<br>\n" . $komm;
+      }
     }
 
     // $yhtio:ssa on nyt laskun VASTAANOTTAJAN ovt-tunnus ja $verkkotunnus_vas:ssa on VASTAANOTTAJAN verkkolaskutunnus
@@ -528,6 +529,23 @@ if (!function_exists("verkkolasku_in")) {
             break;
           }
         }
+      }
+    }
+
+    if ($fitek_xml_cron_tiedot) {
+      $fitek_yhtio = $fitek_xml_cron_tiedot['yhtio'];
+      $query_tarkista_lasku = "SELECT laskunro 
+                                FROM lasku 
+                                WHERE yhtio = '{$fitek_yhtio}' 
+                                AND tila         IN ('H','M','P','Q','Y') 
+                                AND tapvm        >= date_sub(now(), INTERVAL 12 MONTH)
+                                AND laskunro = '{$laskun_numero}' 
+                                AND liitostunnus = '{$trow['tunnus']}'";
+      $duplikaattilasku_check_fitek = pupe_query($query_tarkista_lasku);
+      echo $query_tarkista_lasku;
+      if (mysql_num_rows($duplikaattilasku_check_fitek) > 0) {
+        $fitek_return_false = true;
+        return;
       }
     }
 

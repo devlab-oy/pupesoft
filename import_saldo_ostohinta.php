@@ -164,7 +164,7 @@ class ImportSaldoHinta
     );
   }
 
-  public function korjaa_csvt($tiedostonimi)
+  public function korjaa_csvt($tiedostonimi,$reset_tuotenimet=false)
   {
     $input = $this->impsaloh_polku_in."/".$tiedostonimi;
     $input2 = $this->impsaloh_polku_in."/prices_".$tiedostonimi;
@@ -182,7 +182,18 @@ class ImportSaldoHinta
     $oh = fopen($output, "w+");
     $ih = fopen($input, "r");
     $i=0;
-    while (false !== ($data = fgetcsv($ih, 0, ";"))) {
+
+    $tuotenumerot_saldo = array();
+    $error_occured = false;
+    while (false !== ($data = fgetcsv($ih, 100000, ";"))) {
+      if(empty($data) or !isset($data[$stocks_titles['columns'][0]])) {
+        if (!$error_occured) {
+          $error_occured = true;
+          continue;
+        } else {
+          break;
+        }
+      }
       if ($i==0) {
         $outputData = $stocks_titles['titles'];
         fputcsv($oh, $outputData, ";");
@@ -195,17 +206,25 @@ class ImportSaldoHinta
           $data[$stocks_titles['columns'][2]]
         )
       );
+      $tuotenumerot_saldo[$outputData[0]] = '';
       fputcsv($oh, $outputData, ";");
       $i++;
     }
-    fclose($ih);
-    fclose($oh);
-    rename($output, $input);
 
     $oh2 = fopen($output2, "w+");
     $ih2 = fopen($input2, "r");
     $i=0;
-    while (false !== ($data2 = fgetcsv($ih2, 0, ";"))) {
+    $error_occured = false;
+
+    while (false !== ($data2 = fgetcsv($ih2, 100000, ";"))) {
+      if(empty($data2) or !isset($data2[$stocks_titles['columns'][0]])) {
+        if (!$error_occured) {
+          $error_occured = true;
+          continue;
+        } else {
+          break;
+        }
+      }
       if ($i==0) {
         $outputData2 = $prices_titles['titles'];
         fputcsv($oh2, $outputData2, ";");
@@ -214,9 +233,16 @@ class ImportSaldoHinta
         (string) $data2[$prices_titles['columns'][0]],
         $data2[$prices_titles['columns'][1]]
       );
+      if($reset_tuotenimet and !isset($tuotenumerot_saldo[$outputData2[0]])) {
+        fputcsv($oh, array($outputData2[0], 0, 1), ";");
+        fputcsv($oh, array($outputData2[0], 0, 72), ";");
+      }
       fputcsv($oh2, $outputData2, ";");
       $i++;
     }
+    fclose($ih);
+    fclose($oh);
+    rename($output, $input);
     fclose($ih2);
     fclose($oh2);
     rename($output2, $input2);
@@ -304,14 +330,14 @@ class ImportSaldoHinta
       if ($ftp_tiedot_nimi == 'autopartner') {
         // AutoPartner
         require 'ftp-get.php';
-        $this->korjaa_csvt('STANY.csv');
+        $this->korjaa_csvt('STANY.csv',true);
       }
       if ($ftp_tiedot_nimi == 'triscan') {
         // Triscan
         require 'ftp-get.php';
       }
     }
-    
+
     $this->jakaa_yksittaiset_tiedostot();
     $this->hae_tiedostot();
 

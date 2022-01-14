@@ -13,14 +13,14 @@ if (!function_exists("xml_float")) {
 }
 
 if (!function_exists("xml_string")) {
-  function xml_string($value) {
+  function xml_string($value,$exclude=array()) {
     $value = (string) $value;
 
     if (!PUPE_UNICODE and mb_detect_encoding($value, 'UTF-8', true) !== FALSE) {
       $value = utf8_decode($value);
     }
 
-    return pupesoft_cleanstring($value);
+    return pupesoft_cleanstring($value,$exclude);
   }
 }
 
@@ -29,22 +29,6 @@ $laskun_ebid = "FINVOICEXML";
 
 if (strpos($file, "maventa") !== false) {
   $laskun_ebid = $ebid = "MAVENTAXML";
-}
-if ($fitek_xml_cron_tiedot) {
-  $fitek_yhtio = $fitek_xml_cron_tiedot['yhtio'];
-  $laskun_numero = xml_string($xml->InvoiceDetails->InvoiceNumber);
-  $laskun_numero = preg_replace('/\D/', '', $laskun_numero);
-  $query_tarkista_lasku = "SELECT laskunro 
-                            FROM lasku 
-                            WHERE yhtio = '{$fitek_yhtio}' 
-                            AND tila         IN ('H','M','P','Q','Y') 
-                            AND tapvm        >= date_sub(now(), INTERVAL 12 MONTH)
-                            AND laskunro = '{$laskun_numero}'";
-  $duplikaattilasku_check_fitek = pupe_query($query_tarkista_lasku);
-  if (mysql_num_rows($duplikaattilasku_check_fitek) > 0) {
-    $fitek_return_false = true;
-    return;
-  }
 }
 
 // parseroidaan xml
@@ -57,7 +41,7 @@ $laskun_numero = xml_string($xml->InvoiceDetails->InvoiceNumber);
 if ($fitek_xml_cron_tiedot) {
   $laskun_numero = preg_replace('/\D/', '', $laskun_numero);
   if(xml_string($xml->InvoiceDetails->InvoiceFreeText) and xml_string($xml->InvoiceDetails->InvoiceFreeText) != "") {
-    $fitek_comment = xml_string($xml->InvoiceDetails->InvoiceFreeText);
+    $fitek_comment = xml_string($xml->InvoiceDetails->InvoiceFreeText, array(";"));
   }
 }
 $laskun_tapvm = xml_string($xml->InvoiceDetails->InvoiceDate);

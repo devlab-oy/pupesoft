@@ -319,19 +319,20 @@ class ImportSaldoHinta
       $ftpget_pass['external_partners'] = $ftp_tiedot['ftppass'];
       $ftpget_path['external_partners'] = $ftp_tiedot['ftppath'];
       $ftpget_dest['external_partners'] = $ftp_tiedot['ftpdest'];
-      
+
+      if ($ftp_tiedot_nimi == 'autopartner') {
+        // AutoPartner
+        require 'ftp-get.php';
+        $this->korjaa_csvt('STANY.csv',true);
+      }
+
       if ($ftp_tiedot_nimi == 'oletus') {
         // InterParts
         require 'ftp-get.php';
         exec('gunzip -fd '.$this->impsaloh_polku_in.'/*.gz');
         exec('mv '.$this->impsaloh_polku_in.'/60046_ce '.$this->impsaloh_polku_in.'/60046_ce.csv');
       }
-      
-      if ($ftp_tiedot_nimi == 'autopartner') {
-        // AutoPartner
-        require 'ftp-get.php';
-        $this->korjaa_csvt('STANY.csv',true);
-      }
+    
       if ($ftp_tiedot_nimi == 'triscan') {
         // Triscan
         require 'ftp-get.php';
@@ -690,8 +691,13 @@ class ImportSaldoHinta
         isset($rivit_prices[$tuotekoodi_tarkista1]['warehouse_1']) and 
         isset($rivit_prices[$tuotekoodi_tarkista1]['warehouse_2'])
       ) {
-        if($tuotesaldo == 0 and $rivit_prices[$tuotekoodi_tarkista1]['warehouse_1'] > 0) {
-          $tuotesaldo = $rivit_prices[$tuotekoodi_tarkista1]['warehouse_1'];
+        if($tuotesaldo == 0 and 
+        ($rivit_prices[$tuotekoodi_tarkista1]['warehouse_1'] > 0 or $rivit_prices[$tuotekoodi_tarkista1]['warehouse_2'] > 0)) {
+          if($rivit_prices[$tuotekoodi_tarkista1]['warehouse_2'] > 0) {
+            $tuotesaldo = $rivit_prices[$tuotekoodi_tarkista1]['warehouse_2'];
+          } else {
+            $tuotesaldo = $rivit_prices[$tuotekoodi_tarkista1]['warehouse_1'];
+          }
         }
         $varastot_serialized = json_encode(
           array(

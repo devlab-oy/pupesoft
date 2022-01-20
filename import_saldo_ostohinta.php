@@ -40,9 +40,13 @@ class ImportSaldoHinta
   /*
     Laitetaan kaikki muuttujat kuntoon
   */
-  public function __construct($yhtiorow, $ftptiedot)
+  public function __construct($yhtiorow, $ftptiedot, $suosittu_toimittajan_varasto)
   {
     $this->ftptiedot = $ftptiedot;
+    if($this->suosittu_toimittajan_varasto = $suosittu_toimittajan_varasto) {
+    } else {
+      $this->suosittu_toimittajan_varasto = false;
+    }
 
     $php_cli = true;
     $impsaloh_csv_cron = true;
@@ -676,12 +680,20 @@ class ImportSaldoHinta
 
       if ($varasto) {
         $varasto_nro = intval($rivi[$varasto]);
+
         if (!isset($varastot[$tuotekoodi_tarkista1])) {
           $varastot = array();
           $varastot[$tuotekoodi_tarkista1][$varasto_nro] = intval($tuotesaldo);
         } else {
           $varastot[$tuotekoodi_tarkista1][$varasto_nro] = intval($tuotesaldo);
         }
+
+        if($this->suosittu_toimittajan_varasto and isset($this->suosittu_toimittajan_varasto[$toimittaja_id]) and isset(
+          $varastot[$tuotekoodi_tarkista1][$this->suosittu_toimittajan_varasto[$toimittaja_id]]
+        )) {
+          $tuotesaldo = $varastot[$tuotekoodi_tarkista1][$this->suosittu_toimittajan_varasto[$toimittaja_id]];
+        }
+        
         $varastot_serialized = json_encode($varastot[$tuotekoodi_tarkista1]);
         $tehdas_saldo_varastot_lisa = "tuotteen_toimittajat.tehdas_saldo_varastot = '".$varastot_serialized."',";
       }
@@ -693,10 +705,10 @@ class ImportSaldoHinta
       ) {
         if($tuotesaldo == 0 and 
         ($rivit_prices[$tuotekoodi_tarkista1]['warehouse_1'] > 0 or $rivit_prices[$tuotekoodi_tarkista1]['warehouse_2'] > 0)) {
-          if($rivit_prices[$tuotekoodi_tarkista1]['warehouse_2'] > 0) {
-            $tuotesaldo = $rivit_prices[$tuotekoodi_tarkista1]['warehouse_2'];
-          } else {
+          if($rivit_prices[$tuotekoodi_tarkista1]['warehouse_1'] > 0) {
             $tuotesaldo = $rivit_prices[$tuotekoodi_tarkista1]['warehouse_1'];
+          } else {
+            $tuotesaldo = $rivit_prices[$tuotekoodi_tarkista1]['warehouse_2'];
           }
         }
         $varastot_serialized = json_encode(
@@ -778,6 +790,7 @@ class ImportSaldoHinta
 
 $execute = new ImportSaldoHinta(
   $yhtiorow,
-  $ftptiedot
+  $ftptiedot,
+  $suosittu_toimittajan_varasto
 );
 $execute->aloita();

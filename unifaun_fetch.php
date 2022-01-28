@@ -90,7 +90,7 @@ if (!is_dir($ftpget_dest[$operaattori])) {
 // Setataan t‰m‰, niin ftp-get.php toimii niin kuin pit‰isikin
 $argv[1] = $operaattori;
 
-require 'ftp-get.php';
+//require 'ftp-get.php';
 
 if ($handle = opendir($ftpget_dest[$operaattori])) {
   while (($file = readdir($handle)) !== FALSE) {
@@ -363,7 +363,7 @@ if ($handle = opendir($ftpget_dest[$operaattori])) {
 
         if ($laskurow['toimitusvahvistus'] != '' and !$_desadv) {
           // L‰hetet‰‰n toimitusvahvistus
-          pupesoft_toimitusvahvistus($otunnukset, $tunnukset);
+          pupesoft_toimitusvahvistus($otunnukset, $tunnukset, 0, true, true);
         }
 
         // Merkaatan woo-commerce tilaukset toimitetuiksi kauppaan

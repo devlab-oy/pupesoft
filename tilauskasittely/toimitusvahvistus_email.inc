@@ -90,9 +90,11 @@ if ($toimitusvahvistus_email_lahetys) {
     // Email lähtee vain asiakkaalle
     $kenelle_emailataan[] = $rakir_row['asiakas_email'];
   }
-
-  $body = t("Hei", $kieli).",\n\n".t("Seuraavat tilaamanne tuotteet ovat toimituksessa", $kieli).":\n\n\n".t("Tuotenumero", $kieli)." ".t("Määrä", $kieli)." ".t("Nimitys", $kieli).$_hinta."\n\n";
-
+  if (!isset($_unifaun) or !$_unifaun) {
+    $body = t("Hei", $kieli).",\n\n".t("Seuraavat tilaamanne tuotteet ovat toimituksessa", $kieli).":\n\n\n".t("Tuotenumero", $kieli)." ".t("Määrä", $kieli)." ".t("Nimitys", $kieli).$_hinta."\n\n";
+  } else {
+    $body = t("Hei! Kiitos tilauksesta!");
+  }
   $query_ale_lisa = generoi_alekentta('M');
 
   $query = "SELECT tilausrivi.tuoteno,
@@ -169,17 +171,25 @@ if ($toimitusvahvistus_email_lahetys) {
     else {
       $_hinta = "{$rivi_loop_row['hinta']} {$rivi_loop_row['valkoodi']}";
     }
-
-    $body .= "{$rivi_loop_row['tuoteno']} {$rivi_loop_row['maara']} {$rivi_loop_row['nimitys']} $_hinta\n\n";
+    if(!isset($_unifaun) or !$_unifaun) {
+      $body .= "{$rivi_loop_row['tuoteno']} {$rivi_loop_row['maara']} {$rivi_loop_row['nimitys']} $_hinta\n\n";
+    }
   }
 
   $body .= "\n";
-  $body .= t("Seurantakoodit", $kieli).":\n\n";
+  if (!isset($_unifaun) or !$_unifaun) {
+    $body .= t("Seurantakoodit", $kieli).":\n\n";
+  } else {
+    $body .= t("Voit sen seurata tästä linkistä:", $kieli).": ";
+  }
 
   $_tilausnumerot = explode(',', $otunnukset);
   $linkit = tilauksen_seurantalinkit($_tilausnumerot);
 
   foreach ($linkit as $seurantalinkki) {
+    if($_unifaun and $link == $seurantalinkki['link']) {
+      continue;
+    }
     $link = $seurantalinkki['link'];
     $nro  = $seurantalinkki['id'];
 
@@ -202,7 +212,11 @@ if ($toimitusvahvistus_email_lahetys) {
   $body .= "{$laskurow['toim_postino']} {$laskurow['toim_postitp']}\n";
   $body .= "{$maan_tiedot['nimi']}\n";
 
+  if($_testi) {
+    $kenelle_emailataan = array('devlab@devlab.fi');
+  }
   foreach ($kenelle_emailataan as $key => $email_kuka) {
+
     // Sähköpostin lähetykseen parametrit
     $parametri = array(
       "to"      => $email_kuka,

@@ -35149,7 +35149,6 @@ if (!function_exists("tilauksen_seurantalinkit")) {
     $result = pupe_query($query);
 
     while ($row = mysql_fetch_assoc($result)) {
-
       $kieli             = strtolower($kukarow['kieli']);
       $kollit            = $row['kollit'];
       $rahtikirja        = strtolower($row['rahtikirja']);

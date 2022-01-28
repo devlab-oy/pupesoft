@@ -33728,7 +33728,7 @@ if (!function_exists('pupesoft_toimitusvahvistus')) {
   // Tarvitaan $tunnukset jossa on rahtikirjojen tunnukset
   // Tarvitaan $rahtikirjanro jossa on rahtikirjan rahtikirjanro (desadvia varten)
 
-  function pupesoft_toimitusvahvistus($otunnukset, $tunnukset = 0, $rahtikirjanro = 0) {
+  function pupesoft_toimitusvahvistus($otunnukset, $tunnukset = 0, $rahtikirjanro = 0, $_testi = false, $_unifaun = false) {
     global $kukarow, $yhtiorow, $toim, $desadv_host, $desadv_user, $desadv_pass, $desadv_path, $pupe_root_polku;
 
     if (empty($otunnukset)) {

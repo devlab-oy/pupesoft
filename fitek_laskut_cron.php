@@ -19,9 +19,6 @@ date_default_timezone_set('Europe/Helsinki');
 require "inc/connect.inc";
 require "inc/functions.inc";
 
-// Logitetaan ajo
-cron_log();
-
 $php_cli = true;
 $fitek_xml_cron = true;
 $fitek_xml_cron_dirname = realpath('datain/fitek_import');
@@ -78,6 +75,6 @@ $ftpdest = $ftpdest_fitek_cron;
 $ftp_exclude_files = array_diff(scandir($verkkolaskut_orig), array('..', '.', '.DS_Store','.keep'));
 $ftp_exclude_files[] = 'pdf';
 
-$sftp->getFilesFrom($ftppath."/", $ftpdest."/", $ftp_exclude_files);
+$sftp->getFilesFrom($ftppath."/", $ftpdest."/", $ftp_exclude_files, $fitek_xml_cron);
 
 include_once("verkkolasku-in.php");

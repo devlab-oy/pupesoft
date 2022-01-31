@@ -49,7 +49,7 @@ class SFTPConnection {
     return $handle;
   }
 
-  public function getFilesFrom($path, $dest, $ftp_exclude_files=array()) {
+  public function getFilesFrom($path, $dest, $ftp_exclude_files=array(), $fitek_xml_cron = false) {
     
     $sftp = $this->sftp;
     $dir = "ssh2.sftp://".intval($sftp).$path;
@@ -84,6 +84,10 @@ class SFTPConnection {
       }
 
       ssh2_sftp_rename($sftp, $path.$file, $path."done/".$file);
+      if($fitek_xml_cron) {
+        cron_log("../fitek.log", "\n\n".date("d.m.Y H:i:s").":\n".file_get_contents($dest.$file));
+        //ssh2_sftp_unlink($sftp, $path.$file);
+      }
     }
   }
 }
@@ -101,13 +105,17 @@ if(!isset($ftp_exclude_files)) {
   $ftp_exclude_files = array();
 }
 
+if(!isset($fitek_xml_cron)) {
+  $fitek_xml_cron = false;
+}
+
 try {
   
   $sftp = new SFTPConnection($ftphost, $ftpport, $ftpfilt);
   
   $sftp->login($ftpuser, $ftppass);
   
-  $sftp->getFilesFrom($ftppath, $ftpdest, $ftp_exclude_files);
+  $sftp->getFilesFrom($ftppath, $ftpdest, $ftp_exclude_files, $fitek_xml_cron);
 }
 catch(Exception $e) {
   

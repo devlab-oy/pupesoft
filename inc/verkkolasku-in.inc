@@ -542,7 +542,6 @@ if (!function_exists("verkkolasku_in")) {
                                 AND laskunro = '{$laskun_numero}' 
                                 AND liitostunnus = '{$trow['tunnus']}'";
       $duplikaattilasku_check_fitek = pupe_query($query_tarkista_lasku);
-      echo $query_tarkista_lasku;
       if (mysql_num_rows($duplikaattilasku_check_fitek) > 0) {
         $fitek_return_false = true;
         return;

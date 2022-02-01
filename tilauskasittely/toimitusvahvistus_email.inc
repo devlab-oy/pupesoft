@@ -93,7 +93,7 @@ if ($toimitusvahvistus_email_lahetys) {
   if (!isset($_unifaun) or !$_unifaun) {
     $body = t("Hei", $kieli).",\n\n".t("Seuraavat tilaamanne tuotteet ovat toimituksessa", $kieli).":\n\n\n".t("Tuotenumero", $kieli)." ".t("M‰‰r‰", $kieli)." ".t("Nimitys", $kieli).$_hinta."\n\n";
   } else {
-    $body = t("Hei! Kiitos tilauksesta!");
+    $body = t("Hei,", $kieli)."\n";
   }
   $query_ale_lisa = generoi_alekentta('M');
 
@@ -177,14 +177,15 @@ if ($toimitusvahvistus_email_lahetys) {
   }
 
   $body .= "\n";
-  if (!isset($_unifaun) or !$_unifaun) {
-    $body .= t("Seurantakoodit", $kieli).":\n\n";
-  } else {
-    $body .= t("Voit sen seurata t‰st‰ linkist‰:", $kieli).": ";
-  }
 
   $_tilausnumerot = explode(',', $otunnukset);
   $linkit = tilauksen_seurantalinkit($_tilausnumerot);
+
+  if (!isset($_unifaun) or !$_unifaun) {
+    $body .= t("Seurantakoodit", $kieli).":\n\n";
+  } else {
+    $body .= t("Tilauksesi ", $kieli).$_tilausnumerot[0].t(" on nyt l‰hetetty.", $kieli)."\n\n".t("Seuraa tilauksesi tilaa", $kieli).": ";
+  }
 
   foreach ($linkit as $seurantalinkki) {
     if($_unifaun and $link == $seurantalinkki['link']) {
@@ -211,7 +212,9 @@ if ($toimitusvahvistus_email_lahetys) {
   $body .= "{$laskurow['toim_osoite']}\n";
   $body .= "{$laskurow['toim_postino']} {$laskurow['toim_postitp']}\n";
   $body .= "{$maan_tiedot['nimi']}\n";
-
+echo "<pre>";
+print_r($body);
+echo "</pre>";
   if($_testi) {
     $kenelle_emailataan = array('devlab@devlab.fi');
   }

@@ -138,7 +138,8 @@ if ($handle = opendir($ftpget_dest[$operaattori])) {
           $laskurow = mysql_fetch_assoc(pupe_query($query));
         }
 
-        if($laskurow['toimitusvahvistus'] == '') {
+        $_desadv_check = (mb_strpos($laskurow['toimitusvahvistus'], 'desadv') !== false);
+        if($laskurow['toimitusvahvistus'] == '' or $_desadv_check) {
           continue 2;
         }
 

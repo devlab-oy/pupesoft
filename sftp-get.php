@@ -105,17 +105,13 @@ if(!isset($ftp_exclude_files)) {
   $ftp_exclude_files = array();
 }
 
-if(!isset($fitek_xml_cron)) {
-  $fitek_xml_cron = false;
-}
-
 try {
   
   $sftp = new SFTPConnection($ftphost, $ftpport, $ftpfilt);
   
   $sftp->login($ftpuser, $ftppass);
   
-  $sftp->getFilesFrom($ftppath, $ftpdest, $ftp_exclude_files, $fitek_xml_cron);
+  $sftp->getFilesFrom($ftppath, $ftpdest, $ftp_exclude_files);
 }
 catch(Exception $e) {
   

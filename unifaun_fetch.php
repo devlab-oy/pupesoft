@@ -90,7 +90,7 @@ if (!is_dir($ftpget_dest[$operaattori])) {
 // Setataan tämä, niin ftp-get.php toimii niin kuin pitäisikin
 $argv[1] = $operaattori;
 
-//require 'ftp-get.php';
+require 'ftp-get.php';
 
 if ($handle = opendir($ftpget_dest[$operaattori])) {
   while (($file = readdir($handle)) !== FALSE) {
@@ -136,6 +136,10 @@ if ($handle = opendir($ftpget_dest[$operaattori])) {
                     WHERE lasku.yhtio          = '{$kukarow['yhtio']}'
                     AND lasku.tunnus           = '{$eranumero_sscc}'";
           $laskurow = mysql_fetch_assoc(pupe_query($query));
+        }
+
+        if($laskurow['toimitusvahvistus'] == '') {
+          continue 2;
         }
 
         $sscc_ulkoinen = (is_int($sscc_ulkoinen) and $sscc_ulkoinen == 1) ? '' : trim($sscc_ulkoinen);

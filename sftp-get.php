@@ -86,7 +86,7 @@ class SFTPConnection {
       ssh2_sftp_rename($sftp, $path.$file, $path."done/".$file);
       if($fitek_xml_cron) {
         cron_log("../fitek.log", "\n\n".date("d.m.Y H:i:s").":\n".file_get_contents($dest.$file));
-        //ssh2_sftp_unlink($sftp, $path.$file);
+        ssh2_sftp_unlink($sftp, $path.$file);
       }
     }
   }

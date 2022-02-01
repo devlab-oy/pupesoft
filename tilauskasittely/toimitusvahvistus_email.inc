@@ -212,9 +212,7 @@ if ($toimitusvahvistus_email_lahetys) {
   $body .= "{$laskurow['toim_osoite']}\n";
   $body .= "{$laskurow['toim_postino']} {$laskurow['toim_postitp']}\n";
   $body .= "{$maan_tiedot['nimi']}\n";
-echo "<pre>";
-print_r($body);
-echo "</pre>";
+
   if($_testi) {
     $kenelle_emailataan = array('devlab@devlab.fi');
   }

@@ -238,6 +238,10 @@ echo "<tr>";
 echo "<th>" . t("Näytä vain saldolliset tuotteet") . "</th>";
 echo "<td><input type='checkbox' name='saldotonrajaus' $saldotoncheck></td>";
 echo "</tr>";
+echo "<tr>";
+echo "<th>" . t("Laske kate") . "</th>";
+echo "<td><input type='checkbox' name='laskekate' $laskekate></td>";
+echo "</tr>";
 echo "</table><br/>";
 echo "<br/>";
 

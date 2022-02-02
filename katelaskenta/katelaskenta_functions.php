@@ -19,6 +19,18 @@
  * @param type    $tuotteet
  */
 
+function katelaskuri($hinta, $keha) {
+  return number_format(100*((float) $hinta-(float) $keha) / (float) $hinta, 2);
+}
+
+function laske_kate($tuote) {
+  $tuote['myyntikate'] = katelaskuri($tuote['myyntihinta'], $tuote['kehahin']);
+  $tuote['myymalakate'] = katelaskuri($tuote['myymalahinta'], $tuote['kehahin']);
+  echo $tuote['myymalahinta'];
+  $tuote['nettokate'] = katelaskuri($tuote['nettohinta'], $tuote['kehahin']);
+  $tuote['asiakashinta_asiakas_myyntikate'] = katelaskuri($tuote['asiakashinta_hinta'], $tuote['kehahin']);
+  return $tuote;
+}
 
 function valmistele_hakutulokset($tuotteet) {
   foreach ($tuotteet as $haku_funktio_key => $template_tuote) {

@@ -140,6 +140,7 @@ if ($handle = opendir($ftpget_dest[$operaattori])) {
 
         $_desadv_check = (mb_strpos($laskurow['toimitusvahvistus'], 'desadv') !== false);
         if($laskurow['toimitusvahvistus'] == '' or $_desadv_check) {
+          rename($ftpget_dest[$operaattori]."/".$file, $ftpget_dest[$operaattori]."/error/".$file);
           continue 2;
         }
 

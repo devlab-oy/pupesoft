@@ -147,7 +147,7 @@ if ($fieldname == "virallinen_selite") {
   $ulos .= "</optgroup>";
 
   $ulos .= "<optgroup label='Unifaun / DB Schenker'>";
-  $ulos .= "<option value='KLGRP' {$sel["SBTLFIRREX"]}>DB SCHENKER Noutopistepaketti</option>";
+  $ulos .= "<option value='SBTLFIRREX' {$sel["SBTLFIRREX"]}>DB SCHENKER Noutopistepaketti</option>";
   $ulos .= "<option value='KLGRP' {$sel["KLGRP"]}>DB SCHENKER kotimaankuljetukset</option>";
   $ulos .= "<option value='SBTLFISY' {$sel["SBTLFISY"]}>DB SCHENKER Vientikuljetukset</option>";
   $ulos .= "<option value='BBU' {$sel["BBU"]}>DB SCHENKERbudget</option>";

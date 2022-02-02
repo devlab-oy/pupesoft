@@ -27674,12 +27674,12 @@ if (!function_exists('luo_lasku_poikkeus_tilaukset')) {
 
       // Tarkistetaan, että onko lasku luotu, jos ei ole, niin luodaan.
       $query_tark = "SELECT tunnus FROM lasku 
-                WHERE yhtio  = '{$kukarow['yhtio']}'
-                AND tunnus   = '$otunnukset' 
-                AND mapvm   != '0000-00-00'
-                AND laskunro = 0 
-                AND chn      = '999'";
+                     WHERE yhtio  = '{$kukarow['yhtio']}'
+                     AND tunnus   = '$otunnukset' 
+                     AND laskunro = 0 
+                     AND chn      = '999'";
       $ures_tark  = pupe_query($query_tark);
+
       if (mysql_num_rows($ures_tark) > 0) {
 
         $query_tark = "UPDATE lasku SET 
@@ -27687,7 +27687,6 @@ if (!function_exists('luo_lasku_poikkeus_tilaukset')) {
                        chn      = '' 
                        WHERE yhtio  = '{$kukarow['yhtio']}'
                        AND tunnus   = '$otunnukset' 
-                       AND mapvm   != '0000-00-00' 
                        AND laskunro = 0 
                        AND chn      = '999'";
         $ures_tark  = pupe_query($query_tark);
@@ -27738,7 +27737,6 @@ if (!function_exists('luo_lasku_poikkeus_tilaukset')) {
                        chn      = '999' 
                        WHERE yhtio  = '{$kukarow['yhtio']}'
                        AND tunnus   IN ({$otunnukset_cache})
-                       AND mapvm   != '0000-00-00' 
                        AND chn      = ''";
         $ures_tark  = pupe_query($query_tark);
       }
@@ -27797,23 +27795,21 @@ if (!function_exists('paivita_rahtikirjat_tulostetuksi_ja_toimitetuksi')) {
     $ures  = pupe_query($query);
 
     if($from_tracking_code) {
-
-      // Tarkistetaan, että onko lasku luotu, jos ei ole, niin luodaan.
+      // Tarkistetaan, että onko magento lasku luotu, jos ei ole, niin luodaan.
       $query_tark = "SELECT tunnus FROM lasku 
-                WHERE alatila      != 'X' 
-                AND yhtio  = '{$kukarow['yhtio']}'
-                AND tunnus   = '$otunnukset' 
-                AND mapvm   != '0000-00-00'
-                AND laskunro = 0 
-                AND chn      = '999'";
+                     WHERE yhtio  = '{$kukarow['yhtio']}' 
+                     AND tunnus   = '$otunnukset' 
+                     AND laskunro = 0 
+                     AND chn      = '999' 
+                     AND ohjelma_moduli          = 'MAGENTO' 
+                     AND asiakkaan_tilausnumero  != '' 
+                     AND laatija                 = 'Magento'";
       $ures_tark  = pupe_query($query_tark);
       if (mysql_num_rows($ures_tark) > 0) {
-
         $query_tark = "UPDATE lasku SET
                        chn      = '' 
                        WHERE yhtio  = '{$kukarow['yhtio']}'
                        AND tunnus   = '$otunnukset' 
-                       AND mapvm   != '0000-00-00' 
                        AND laskunro = 0 
                        AND chn      = '999'";
         $ures_tark  = pupe_query($query_tark);
@@ -27865,7 +27861,6 @@ if (!function_exists('paivita_rahtikirjat_tulostetuksi_ja_toimitetuksi')) {
                        chn      = '999' 
                        WHERE yhtio  = '{$kukarow['yhtio']}'
                        AND tunnus   IN ({$otunnukset_cache})
-                       AND mapvm   != '0000-00-00' 
                        AND chn      = ''";
         $ures_tark  = pupe_query($query_tark);
       }

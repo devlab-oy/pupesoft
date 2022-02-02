@@ -26,7 +26,6 @@ function katelaskuri($hinta, $keha) {
 function laske_kate($tuote) {
   $tuote['myyntikate'] = katelaskuri($tuote['myyntihinta'], $tuote['kehahin']);
   $tuote['myymalakate'] = katelaskuri($tuote['myymalahinta'], $tuote['kehahin']);
-  echo $tuote['myymalahinta'];
   $tuote['nettokate'] = katelaskuri($tuote['nettohinta'], $tuote['kehahin']);
   $tuote['asiakashinta_asiakas_myyntikate'] = katelaskuri($tuote['asiakashinta_hinta'], $tuote['kehahin']);
   return $tuote;

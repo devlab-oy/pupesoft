@@ -161,7 +161,7 @@ $(document).ready(function () {
     // Laske painike laskee annetun kateprosentin mukaan uuden hinnan.
     $.each(tuoterivit, function () {
         var keskihankintahinta = $(this).data("kehahinta");
-        var keskiasiakashinta = $(this).data("asiakashinta");
+        var keskiasiakashinta = $(this).data("kehahinta");
 
         var myyntikate = $(this).find(kateMyyntihintaSarake);
         var myyntihintaElementti = $(this).find(myyntihintaSarake);
@@ -261,7 +261,7 @@ $(document).ready(function () {
 
             if (valintaElementti.attr("checked") === "checked") {
                 var keskihankintahinta = $(this).data("kehahinta");
-                var keskiasiakashinta = $(this).data("asiakashinta");
+                var keskiasiakashinta = $(this).data("kehahinta");
 
                 if (!onkoTyhja(myyntikate)) {
                     var myyntihintaElementti = $(this).find(myyntihintaSarake);

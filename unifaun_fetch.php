@@ -369,7 +369,7 @@ if ($handle = opendir($ftpget_dest[$operaattori])) {
 
         if ($laskurow['toimitusvahvistus'] != '' and !$_desadv) {
           // Lähetetään toimitusvahvistus
-          pupesoft_toimitusvahvistus($otunnukset, $tunnukset, 0, true, true);
+          pupesoft_toimitusvahvistus($otunnukset, $tunnukset, 0, false, true);
         }
 
         // Merkaatan woo-commerce tilaukset toimitetuiksi kauppaan

@@ -90,7 +90,7 @@ if (!is_dir($ftpget_dest[$operaattori])) {
 // Setataan t‰m‰, niin ftp-get.php toimii niin kuin pit‰isikin
 $argv[1] = $operaattori;
 
-//require 'ftp-get.php';
+require 'ftp-get.php';
 
 if ($handle = opendir($ftpget_dest[$operaattori])) {
   while (($file = readdir($handle)) !== FALSE) {
@@ -136,6 +136,12 @@ if ($handle = opendir($ftpget_dest[$operaattori])) {
                     WHERE lasku.yhtio          = '{$kukarow['yhtio']}'
                     AND lasku.tunnus           = '{$eranumero_sscc}'";
           $laskurow = mysql_fetch_assoc(pupe_query($query));
+        }
+
+        $_desadv_check = (mb_strpos($laskurow['toimitusvahvistus'], 'desadv') !== false);
+        if($laskurow['toimitusvahvistus'] == '' or $_desadv_check) {
+          rename($ftpget_dest[$operaattori]."/".$file, $ftpget_dest[$operaattori]."/error/".$file);
+          continue 2;
         }
 
         $sscc_ulkoinen = (is_int($sscc_ulkoinen) and $sscc_ulkoinen == 1) ? '' : trim($sscc_ulkoinen);
@@ -363,7 +369,7 @@ if ($handle = opendir($ftpget_dest[$operaattori])) {
 
         if ($laskurow['toimitusvahvistus'] != '' and !$_desadv) {
           // L‰hetet‰‰n toimitusvahvistus
-          pupesoft_toimitusvahvistus($otunnukset, $tunnukset, 0, true, true);
+          pupesoft_toimitusvahvistus($otunnukset, $tunnukset, 0, false, true);
         }
 
         // Merkaatan woo-commerce tilaukset toimitetuiksi kauppaan

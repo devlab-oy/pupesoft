@@ -109,6 +109,12 @@
                     <?php echo $template["yhtio"]["valkoodi"]; ?>
                 </td>
 
+                <?php 
+                if($laskekate) {
+                    $tuote = laske_kate($tuote);
+                }
+                ?>
+
                 <td><span class="hinta" style="vertical-align: baseline;"><?php echo $tuote["myyntihinta"]; ?></span>
                     <?php echo $template["yhtio"]["valkoodi"]; ?>
                 </td>

@@ -152,6 +152,21 @@ else {
 }
 
 /**
+ * Seuraavat kaksi if-lausetta liittyvät "Laske Kate"
+ * -valintaan tuotehaussa.
+ */
+if (!isset($laskekate)) {
+  $laskekate = '';
+}
+if ($laskekate != "") {
+  $laskekatecheck = "CHECKED";
+  $ulisa .= "&laskekate=checked";
+}
+else {
+  $laskekatecheck = "";
+}
+
+/**
  * Seuraavat kaksi if-lausetta liittyvät "Nimitys"-hakuehtoon.
  */
 if (!isset($nimitys)) {
@@ -179,6 +194,18 @@ if (trim($tuotenumero) != '') {
     $lisa .= " and tuote.tuoteno like '%$tuotenumero%' ";
   }
   $ulisa .= "&tuotenumero=$tuotenumero";
+}
+
+/**
+ * Seuraavat liittyy "Asiakashinnan asiakas"-hakuehtoon.
+ */
+if (!isset($mul_asiakashinnasto_asiakas)) {
+  $mul_asiakashinnasto_asiakas = '';
+}
+if (trim($mul_asiakashinnasto_asiakas) != '') {
+  if($mul_asiakashinnasto_asiakas) {
+    $lisa .= " and asiakashinta.asiakas = '{$mul_asiakashinnasto_asiakas}'";
+  }
 }
 
 /**
@@ -238,6 +265,10 @@ echo "<tr><th>" . t("Lisätiedot") . "</th><td><input type='checkbox' name='lisat
 echo "<tr>";
 echo "<th>" . t("Näytä vain saldolliset tuotteet") . "</th>";
 echo "<td><input type='checkbox' name='saldotonrajaus' $saldotoncheck></td>";
+echo "</tr>";
+echo "<tr>";
+echo "<th>" . t("Laske kate") . "</th>";
+echo "<td><input type='checkbox' name='laskekate' $laskekatecheck></td>";
 echo "</tr>";
 echo "</table><br/>";
 echo "<br/>";
@@ -312,6 +343,7 @@ echo "&nbsp;<form action = '".basename(__FILE__)."' method = 'post'>
 if (!isset($submit_button)) {
   $submit_button = '';
 }
+
 if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
 
   if($mul_asiakasryhma or $mul_asiakaspiiri or $mul_asiakashinnasto_asiakas) {
@@ -326,9 +358,6 @@ if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
     ";
   } else {
     $asiakashinta_lisays = "";
-  }
-  if($mul_asiakashinnasto_asiakas) {
-    $lisa .= " and asiakashinta.asiakas = '{$mul_asiakashinnasto_asiakas}'";
   }
 
   // Hakukysely tuotehakuun.

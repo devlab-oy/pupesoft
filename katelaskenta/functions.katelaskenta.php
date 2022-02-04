@@ -205,7 +205,7 @@ function tallenna_valitut_katemuutokset($data) {
       $_asiakashinta_tiedot = explode("!!!", str_replace("'", "", $asiakashinta_k));
       $_asiakashinta_tunnus = $_asiakashinta_tiedot[0];
       $_asiakashinta_tuote = $_asiakashinta_tiedot[1];
-      $_asiakashinta_hinta = $data["valitutasiakashinnat"][$asiakashinta_k];
+      $_asiakashinta_hinta = $data["valitutkeskihankintahinnat"]["'".$_asiakashinta_tuote."'"];
       $_asiakashinta_hinta = lisaa_hintaan_kate($_asiakashinta_hinta, $_asiakashinta_kate);
       $_asiakashinta_hinta = hintapyoristys($_asiakashinta_hinta, 2);
       $paivita_asiakashinnat_q = "UPDATE asiakashinta 

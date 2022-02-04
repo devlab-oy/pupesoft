@@ -191,12 +191,8 @@ class ImportSaldoHinta
     $error_occured = false;
     while (false !== ($data = fgetcsv($ih, 100000, ";"))) {
       if(empty($data) or !isset($data[$stocks_titles['columns'][0]])) {
-        if (!$error_occured) {
-          $error_occured = true;
-          continue;
-        } else {
-          break;
-        }
+        $error_occured = true;
+        break;
       }
       if ($i==0) {
         $outputData = $stocks_titles['titles'];
@@ -218,16 +214,12 @@ class ImportSaldoHinta
     $oh2 = fopen($output2, "w+");
     $ih2 = fopen($input2, "r");
     $i=0;
-    $error_occured = false;
+    $error_occured2 = false;
 
     while (false !== ($data2 = fgetcsv($ih2, 100000, ";"))) {
       if(empty($data2) or !isset($data2[$stocks_titles['columns'][0]])) {
-        if (!$error_occured) {
-          $error_occured = true;
-          continue;
-        } else {
-          break;
-        }
+        $error_occured2 = true;
+        break;
       }
       if ($i==0) {
         $outputData2 = $prices_titles['titles'];
@@ -246,10 +238,17 @@ class ImportSaldoHinta
     }
     fclose($ih);
     fclose($oh);
-    rename($output, $input);
+    if(!$error_occured) {
+      rename($output, $input);
+    }
     fclose($ih2);
     fclose($oh2);
-    rename($output2, $input2);
+    if(!$error_occured2) {
+      rename($output2, $input2);
+    }
+    if($error_occured or $error_occured2) {
+      return false;
+    }
   }
 
   public function jakaa_yksittaiset_tiedostot()
@@ -327,7 +326,9 @@ class ImportSaldoHinta
       if ($ftp_tiedot_nimi == 'autopartner') {
         // AutoPartner
         require 'ftp-get.php';
-        $this->korjaa_csvt('STANY.csv',true);
+        if(!$this->korjaa_csvt('STANY.csv',true)) {
+          $this->korjaa_csvt('STANY.csv', true);
+        }
       }
 
       if ($ftp_tiedot_nimi == 'oletus') {

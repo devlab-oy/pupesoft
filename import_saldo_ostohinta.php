@@ -14,7 +14,7 @@ date_default_timezone_set('Europe/Helsinki');
 require "inc/connect.inc";
 require "inc/functions.inc";
 
-// ytiorow. Jos ei l?ydy, lopeta cron¨
+// ytiorow. Jos ei löydy, lopeta cron
 $yhtiorow = hae_yhtion_parametrit(pupesoft_cleanstring($argv[1]));
 if (!$yhtiorow) {
   echo "Vaara yhtio";
@@ -145,6 +145,10 @@ class ImportSaldoHinta
       "ItemsInStock.txt" => true
     );
 
+    $this->resetoittavat = array(
+      "1048" => true
+    );
+
     $this->ohita_tiedostot = array(
       "2945497_KAUCJE.csv",
       "INDEKS_PARAMETR.csv"
@@ -188,12 +192,7 @@ class ImportSaldoHinta
     $i=0;
 
     $tuotenumerot_saldo = array();
-    $error_occured = false;
     while (false !== ($data = fgetcsv($ih, 100000, ";"))) {
-      if(empty($data) or !isset($data[$stocks_titles['columns'][0]])) {
-        $error_occured = true;
-        break;
-      }
       if ($i==0) {
         $outputData = $stocks_titles['titles'];
         fputcsv($oh, $outputData, ";");
@@ -214,13 +213,8 @@ class ImportSaldoHinta
     $oh2 = fopen($output2, "w+");
     $ih2 = fopen($input2, "r");
     $i=0;
-    $error_occured2 = false;
 
     while (false !== ($data2 = fgetcsv($ih2, 100000, ";"))) {
-      if(empty($data2) or !isset($data2[$stocks_titles['columns'][0]])) {
-        $error_occured2 = true;
-        break;
-      }
       if ($i==0) {
         $outputData2 = $prices_titles['titles'];
         fputcsv($oh2, $outputData2, ";");
@@ -238,17 +232,12 @@ class ImportSaldoHinta
     }
     fclose($ih);
     fclose($oh);
-    if(!$error_occured) {
-      rename($output, $input);
-    }
+    
     fclose($ih2);
     fclose($oh2);
-    if(!$error_occured2) {
-      rename($output2, $input2);
-    }
-    if($error_occured or $error_occured2) {
-      return false;
-    }
+
+    rename($output, $input);
+    rename($output2, $input2);
   }
 
   public function jakaa_yksittaiset_tiedostot()
@@ -323,21 +312,21 @@ class ImportSaldoHinta
       $ftpget_path['external_partners'] = $ftp_tiedot['ftppath'];
       $ftpget_dest['external_partners'] = $ftp_tiedot['ftpdest'];
 
+      sleep(1);
       if ($ftp_tiedot_nimi == 'autopartner') {
         // AutoPartner
         require 'ftp-get.php';
-        if(!$this->korjaa_csvt('STANY.csv',true)) {
-          $this->korjaa_csvt('STANY.csv', true);
-        }
+        sleep(5);
+        $this->korjaa_csvt('STANY.csv', true);
       }
-
+      sleep(1);
       if ($ftp_tiedot_nimi == 'oletus') {
         // InterParts
         require 'ftp-get.php';
         exec('gunzip -fd '.$this->impsaloh_polku_in.'/*.gz');
         exec('mv '.$this->impsaloh_polku_in.'/60046_ce '.$this->impsaloh_polku_in.'/60046_ce.csv');
       }
-    
+      sleep(1);
       if ($ftp_tiedot_nimi == 'triscan') {
         // Triscan
         require 'ftp-get.php';
@@ -363,9 +352,38 @@ class ImportSaldoHinta
     }
   }
 
+  public function resetoi_saldot($toimittaja_id, $kasitelty_tuotteet) {
+
+    if(isset($this->resetoittavat[$toimittaja_id])) {
+      $query = "SELECT tunnus, toim_tuoteno 
+                FROM tuotteen_toimittajat 
+                WHERE yhtio = '".$this->yhtio."' 
+                  AND liitostunnus = '".$toimittaja_id."' 
+                  AND tehdas_saldo_varastot != '' 
+                  AND tehdas_saldo != '' AND tehdas_saldo > 0 
+                ";
+      $resetoittavat = pupe_query($query);
+
+      if (mysql_num_rows($resetoittavat) > 0) {
+        while($resetoittava = mysql_fetch_assoc($resetoittavat)) {
+          if(!isset($kasitelty_tuotteet[$resetoittava['toim_tuoteno']])) {
+            $query = "UPDATE LOW_PRIORITY tuotteen_toimittajat
+                      SET tehdas_saldo_paivitetty = NOW(), 
+                        tehdas_saldo = 0, 
+                        tehdas_saldo_varastot = '' 
+                      WHERE yhtio = '".$this->yhtio."' 
+                        AND tunnus = ".$resetoittava['tunnus']." 
+                      ";
+            pupe_query($query);
+          }
+        }
+      }
+      pupe_query($query);
+    }
+  }
 
   /*
-    Tunnistaa mmikä tiedosto on kyseessä
+    Tunnistaa mikä tiedosto on kyseessä
     Jos tiedostossa on vähän revejä, se on stock tiedosto
     Siirtää tiedostot oikeaan kansioon.
   */
@@ -602,8 +620,8 @@ class ImportSaldoHinta
     $rivit = array();
     $loydetyt_tuotteet = array();
     $epaonnistuneet_tuotteet = array();
+    $kasitelty_tuotteet = array();
     $laskerivit = 0;
-    pupeslave_start();
     $varasto = false;
 
     while ($rivi = fgetcsv($impsaloh_csv, 100000, $csv_jakajaa)) {
@@ -657,16 +675,16 @@ class ImportSaldoHinta
         $laskerivit++;
       }
 
+      
       $tuotekoodi_tarkista1 = $rivi[$tuotekoodin_kolumni];
+      
+      $kasitelty_tuotteet[$tuotekoodi_tarkista1] = 1;
 
       if (!isset($rivit_prices[$tuotekoodi_tarkista1])) {
+
         $epaonnistuneet_tuotteet[] = $rivi;
         continue;
       }
-
-      //$tuotekoodi_tarkista2 = preg_replace("/[^A-Za-z0-9 ]/", '', $rivi[$tuotekoodin_kolumni]);
-
-      $eankoodi_tarkista = $rivi[$eankoodin_kolumni];
 
       $tuotesaldo = 0;
 
@@ -762,7 +780,6 @@ class ImportSaldoHinta
       echo "...Tuotteet OK: ".count($loydetyt_tuotteet);
       echo "...\r";
     }
-    pupeslave_stop();
 
     $impsaloh_timestamp = $date = new DateTime();
     $impsaloh_timestamp = $impsaloh_timestamp->getTimestamp();
@@ -784,6 +801,8 @@ class ImportSaldoHinta
     }
 
     echo "\n...Ei osunut:".count($epaonnistuneet_tuotteet)."...\n";
+
+    $this->resetoi_saldot($toimittaja_id, $kasitelty_tuotteet);
 
     unset($rivit[0]);
   }

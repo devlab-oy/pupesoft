@@ -236,6 +236,8 @@ class ImportSaldoHinta
     fclose($ih2);
     fclose($oh2);
 
+    copy($output, $this->impsaloh_polku_in."/../debug.csv");
+
     rename($output, $input);
     rename($output2, $input2);
   }

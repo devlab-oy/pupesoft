@@ -105,7 +105,7 @@ if (!isset($tee) or $tee == '') {
       echo "</table><br><br>";
     }
 
-    $query = "SELECT tunnus, nimi, luontiaika
+    $query = "SELECT tunnus, nimi, luontiaika, alatila, tila 
               FROM lasku use index (tila_index)
               WHERE yhtio  = '$kukrow[yhtio]'
               and myyja    = '$kukarow[tunnus]'
@@ -131,6 +131,17 @@ if (!isset($tee) or $tee == '') {
       echo "</tr>";
 
       while ($trow = mysql_fetch_array($result)) {
+
+        // jos kyseess‰ on "odottaa JT tuotteita rivi"
+        if ($trow["tila"] == "N" and $trow["alatila"] == "T") {
+          $query = "SELECT tunnus from tilausrivi where yhtio='$kukarow[yhtio]' and tyyppi='L' and otunnus='$trow[tunnus]'";
+          $countres = pupe_query($query);
+          // ja sill‰ ei ole yht‰‰n rivi‰
+          if (mysql_num_rows($countres) == 0) {
+            continue;
+          }
+        }
+
         echo "<tr>";
         echo "<td><a href='muokkaatilaus.php?toim=LASKUTUSKIELTO&etsi=$trow[tunnus]'>$trow[tunnus]</a></td>";
         echo "<td>$trow[nimi]</td>";

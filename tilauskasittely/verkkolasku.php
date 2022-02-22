@@ -376,6 +376,7 @@ else {
               avainsana as avainsana_kieli READ,
               avainsana as b READ,
               avainsana READ,
+              asiakkaan_avainsanat READ,
               directdebit READ,
               dynaaminen_puu AS node READ,
               dynaaminen_puu AS parent READ,

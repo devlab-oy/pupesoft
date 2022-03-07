@@ -20,19 +20,55 @@ if (isset($tee) and $tee == "lataa_tiedosto") {
   exit;
 }
 
-if (!isset($tapa))          $tapa = "";
-if (!isset($tee))          $tee = "";
-if (!isset($outputti))        $outputti = "";
-if (!isset($lahetys))        $lahetys = "";
-if (!isset($lisavar))        $lisavar = "";
-if (!isset($tapahtumalaji))      $tapahtumalaji = "";
-if (!isset($excel))          $excel = "";
-if (!isset($maalisa))        $maalisa = "";
-if (!isset($bruttopaino))      $bruttopaino = "";
-if (!isset($kayttajan_valinta_maa))  $kayttajan_valinta_maa = "";
-if (!isset($totkpl))        $totkpl = "";
-if (!isset($totsumma))        $totsumma = "";
-if (!isset($vaintullinimike))    $vaintullinimike = "";
+if (!isset($tapa))                    $tapa = "";
+if (!isset($tee))                     $tee = "";
+if (!isset($outputti))                $outputti = "";
+if (!isset($lahetys))                 $lahetys = "";
+if (!isset($lisavar))                 $lisavar = "";
+if (!isset($tapahtumalaji))           $tapahtumalaji = "";
+if (!isset($excel))                   $excel = "";
+if (!isset($maalisa))                 $maalisa = "";
+if (!isset($bruttopaino))             $bruttopaino = "";
+if (!isset($kayttajan_valinta_maa))   $kayttajan_valinta_maa = "";
+if (!isset($totkpl))                  $totkpl = "";
+if (!isset($totsumma))                $totsumma = "";
+if (!isset($vaintullinimike))         $vaintullinimike = "";
+
+$_vuosi_2021_erikois_csv = false;
+function kasittele_kentta($row, $vv=false) {
+  if($row['kolmikantakauppa'] != '') {
+    $_maa = $row['maalahetys'];
+  } else {
+    $_maa = $row['maamaara'];
+    // poikkeukset
+    if($_maa == "GR") {
+      $_maa = "EL";
+    }
+  }
+
+  $oma_ytunnus = false;
+  $yksityishenki = false;
+  if($row['ytunnus'] != 0 and !preg_match("/[a-z]/i", substr($row['ytunnus'], 0,2))){    
+    $oma_ytunnus = true;
+  } else if(is_numeric(substr($row['ytunnus'],2,6))) {
+    $oma_ytunnus = true;
+    $row['ytunnus'] = substr($row['ytunnus'], 2);
+  }
+  if($row['asiakaslaji'] != '' and $row['asiakaslaji'] == 'H') {
+    $oma_ytunnus = true;
+    $yksityishenki = true;
+    $row['ytunnus'] = $_maa."QV999999999999";
+  }
+  
+  if($oma_ytunnus and !$yksityishenki) {
+    $row['ytunnus'] = $_maa.$row['ytunnus'];
+  } else if($vv == 2021) {
+    $row['ytunnus'] = $_maa.'QV999999999999';
+  }
+  
+
+  return $row['ytunnus'];
+}
 
 if ($kayttajan_valinta_maa != "") {
   $maa = $kayttajan_valinta_maa;
@@ -59,7 +95,7 @@ if ($tee == "tulosta") {
     include 'inc/pupeExcel.inc';
 
     $worksheet    = new pupeExcel();
-    $format_bold = array("bold" => TRUE);
+    $format_bold  = array("bold" => TRUE);
     $excelrivi    = 0;
   }
 
@@ -141,7 +177,7 @@ if ($tee == "tulosta") {
     $query = "(SELECT
                tuote.tullinimike1,
                if (lasku.maa_lahetys='', toimi.maa, lasku.maa_lahetys) maalahetys,
-               ifnull((SELECT alkuperamaa FROM tuotteen_toimittajat WHERE tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.alkuperamaa not in ('$yhtiorow[maa]','') LIMIT 1), if (lasku.maa_lahetys='', toimi.maa, lasku.maa_lahetys)) alkuperamaa,
+               ifnull((SELECT alkuperamaa FROM tuotteen_toimittajat WHERE tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.liitostunnus=toimi.tunnus and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.alkuperamaa not in ('$yhtiorow[maa]','') LIMIT 1), if (lasku.maa_lahetys='', toimi.maa, lasku.maa_lahetys)) alkuperamaa,
                if (lasku.maa_maara='', if (lasku.toim_maa='', if(varastopaikat.maa is null or varastopaikat.maa='', '$yhtiorow[maa]', varastopaikat.maa), lasku.toim_maa), lasku.maa_maara) maamaara,
                lasku.kuljetusmuoto,
                lasku.kauppatapahtuman_luonne,
@@ -160,7 +196,7 @@ if ($tee == "tulosta") {
                    round(sum(tilausrivi.rivihinta / (1 + (lasku.rahti / 100)) / valuu.intrastat_kurssi),0)), 1) as rivihinta_laskutusarvo,
                group_concat(lasku.tunnus) as kaikkitunnukset,
                group_concat(distinct tilausrivi.perheid2) as perheid2set,
-               group_concat(concat(tuote.tunnus,'!°!', tuote.tuoteno)) as kaikkituotteet";
+               group_concat(concat(tuote.tunnus,'!°!', tuote.tuoteno)) as kaikkituotteet, asiakas.laji as asiakaslaji, lasku.ytunnus as ytunnus, lasku.kolmikantakauppa as kolmikantakauppa";
 
     if ($yhtiorow['intrastat_pvm'] == '') {
       $query .= "  FROM lasku use index (yhtio_tila_mapvm)
@@ -170,7 +206,8 @@ if ($tee == "tulosta") {
             LEFT JOIN tullinimike ON (tuote.tullinimike1=tullinimike.cn and tullinimike.kieli = '$yhtiorow[kieli]' and tullinimike.cn != '')
             LEFT JOIN varastopaikat ON (varastopaikat.yhtio = tilausrivi.yhtio
               AND varastopaikat.tunnus = tilausrivi.varasto)
-            LEFT JOIN valuu ON (lasku.yhtio=valuu.yhtio and lasku.valkoodi=valuu.nimi)
+            LEFT JOIN valuu ON (lasku.yhtio=valuu.yhtio and lasku.valkoodi=valuu.nimi) 
+            LEFT JOIN asiakas on (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus)
             WHERE lasku.kohdistettu = 'X'
             and lasku.tila = 'K'
             and lasku.vanhatunnus = 0
@@ -185,9 +222,10 @@ if ($tee == "tulosta") {
             JOIN toimi ON (lasku.yhtio=toimi.yhtio and lasku.liitostunnus=toimi.tunnus)
             JOIN tuote use index (tuoteno_index) ON (tuote.yhtio=lasku.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.ei_saldoa = '')
             LEFT JOIN tullinimike ON (tuote.tullinimike1=tullinimike.cn and tullinimike.kieli = '$yhtiorow[kieli]' and tullinimike.cn != '')
-            LEFT JOIN varastopaikat ON (varastopaikat.yhtio = tilausrivi.yhtio
+            LEFT JOIN varastopaikat ON (varastopaikat.yhtio = tilausrivi.yhtio 
               AND varastopaikat.tunnus = tilausrivi.varasto)
-            LEFT JOIN valuu ON (lasku.yhtio=valuu.yhtio and lasku.valkoodi=valuu.nimi)
+            LEFT JOIN valuu ON (lasku.yhtio=valuu.yhtio and lasku.valkoodi=valuu.nimi) 
+            LEFT JOIN asiakas on (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus)
             WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
             and tilausrivi.tyyppi = 'O'
             and tilausrivi.laskutettuaika >= '$vva-$kka-$ppa'
@@ -225,16 +263,18 @@ if ($tee == "tulosta") {
           if (round(sum(tilausrivi.rivihinta),0) > 0.50,round(sum(tilausrivi.rivihinta),0), 1) rivihinta_laskutusarvo,
           group_concat(lasku.tunnus) as kaikkitunnukset,
           group_concat(distinct tilausrivi.perheid2) as perheid2set,
-          group_concat(concat(tuote.tunnus,'!°!', tuote.tuoteno)) as kaikkituotteet
+          group_concat(concat(tuote.tunnus,'!°!', tuote.tuoteno)) as kaikkituotteet, asiakas.laji as asiakaslaji, lasku.ytunnus as ytunnus, lasku.kolmikantakauppa as kolmikantakauppa
           FROM lasku use index (yhtio_tila_tapvm)
           JOIN tilausrivi use index (yhtio_otunnus) ON (tilausrivi.otunnus=lasku.tunnus and tilausrivi.yhtio=lasku.yhtio and tilausrivi.kpl > 0)
           JOIN tuote use index (tuoteno_index) ON (tuote.yhtio=lasku.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.ei_saldoa = '')
           LEFT JOIN tullinimike ON (tuote.tullinimike1=tullinimike.cn and tullinimike.kieli = '$yhtiorow[kieli]' and tullinimike.cn != '')
           LEFT JOIN varastopaikat ON (varastopaikat.yhtio=lasku.yhtio and varastopaikat.tunnus=lasku.varasto)
+          LEFT JOIN asiakas on (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus)
           WHERE lasku.tila = 'L'
           and lasku.alatila = 'X'
           and lasku.tilaustyyppi != 'A'
           and lasku.kauppatapahtuman_luonne != '999'
+          and not (lasku.vienti = '' and asiakas.laji = 'H')
           and lasku.yhtio = '$kukarow[yhtio]'
           and lasku.tapvm >= '$vva-$kka-$ppa'
           and lasku.tapvm <= '$vvl-$kkl-$ppl'
@@ -268,12 +308,13 @@ if ($tee == "tulosta") {
           if (round(sum(tilausrivi.rivihinta),0) > 0.50,round(sum(tilausrivi.rivihinta),0), 1) rivihinta_laskutusarvo,
           group_concat(lasku.tunnus) as kaikkitunnukset,
           group_concat(distinct tilausrivi.perheid2) as perheid2set,
-          group_concat(concat(tuote.tunnus,'!°!', tuote.tuoteno)) as kaikkituotteet
+          group_concat(concat(tuote.tunnus,'!°!', tuote.tuoteno)) as kaikkituotteet, asiakas.laji as asiakaslaji, lasku.ytunnus as ytunnus, lasku.kolmikantakauppa as kolmikantakauppa
           FROM lasku use index (yhtio_tila_tapvm)
           JOIN tilausrivi use index (yhtio_otunnus) ON (tilausrivi.otunnus=lasku.tunnus and tilausrivi.yhtio=lasku.yhtio and tilausrivi.kpl > 0)
           JOIN tuote use index (tuoteno_index) ON (tuote.yhtio=lasku.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.ei_saldoa = '')
           LEFT JOIN tullinimike ON (tuote.tullinimike1=tullinimike.cn and tullinimike.kieli = '$yhtiorow[kieli]' and tullinimike.cn != '')
-          LEFT JOIN varastopaikat ON (varastopaikat.yhtio=lasku.yhtio and varastopaikat.tunnus=lasku.varasto)
+          LEFT JOIN varastopaikat ON (varastopaikat.yhtio=lasku.yhtio and varastopaikat.tunnus=lasku.varasto) 
+          LEFT JOIN asiakas on (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus)
           WHERE lasku.tila = 'G'
           and lasku.alatila = 'V'
           and lasku.kauppatapahtuman_luonne != '999'
@@ -312,12 +353,13 @@ if ($tee == "tulosta") {
             tyomaarays.tulliarvo AS rivihinta,
             tyomaarays.tulliarvo AS rivihinta_laskutusarvo,
             group_concat(lasku.tunnus) as kaikkitunnukset,
-            '' AS kaikkituotteet,
+            '' AS kaikkituotteet, asiakas.laji as asiakaslaji, lasku.ytunnus as ytunnus, lasku.kolmikantakauppa as kolmikantakauppa,
             '' AS perheid2set
             FROM lasku use index (yhtio_tila_tapvm)
             JOIN tyomaarays ON (tyomaarays.yhtio = lasku.yhtio AND tyomaarays.otunnus = lasku.tunnus)
             LEFT JOIN tullinimike ON (tyomaarays.tullikoodi=tullinimike.cn and tullinimike.kieli = '{$yhtiorow['kieli']}' and tullinimike.cn != '')
-            LEFT JOIN varastopaikat ON (varastopaikat.yhtio=lasku.yhtio and varastopaikat.tunnus=lasku.varasto)
+            LEFT JOIN varastopaikat ON (varastopaikat.yhtio=lasku.yhtio and varastopaikat.tunnus=lasku.varasto) 
+            LEFT JOIN asiakas on (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus)
             WHERE lasku.tila = 'L'
             and lasku.alatila = 'X'
             and lasku.kauppatapahtuman_luonne != '999'
@@ -348,16 +390,20 @@ if ($tee == "tulosta") {
             if (round(sum(tilausrivi.rivihinta),0) > 0.50,round(sum(tilausrivi.rivihinta),0), 1) rivihinta_laskutusarvo,
             group_concat(lasku.tunnus) as kaikkitunnukset,
             group_concat(distinct tilausrivi.perheid2) as perheid2set,
-            group_concat(concat(tuote.tunnus,'!°!', tuote.tuoteno)) as kaikkituotteet
+            group_concat(concat(tuote.tunnus,'!°!', tuote.tuoteno)) as kaikkituotteet,
+            asiakas.laji as asiakaslaji, 
+            lasku.ytunnus as ytunnus, lasku.kolmikantakauppa as kolmikantakauppa
             FROM lasku use index (yhtio_tila_tapvm)
             JOIN tilausrivi use index (yhtio_otunnus) ON (tilausrivi.otunnus=lasku.tunnus and tilausrivi.yhtio=lasku.yhtio and tilausrivi.kpl > 0)
             JOIN tuote use index (tuoteno_index) ON (tuote.yhtio=lasku.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.ei_saldoa = '')
             LEFT JOIN tullinimike ON (tuote.tullinimike1=tullinimike.cn and tullinimike.kieli = '{$yhtiorow['kieli']}' and tullinimike.cn != '')
             LEFT JOIN varastopaikat ON (varastopaikat.yhtio=lasku.yhtio and varastopaikat.tunnus=lasku.varasto)
+            LEFT JOIN asiakas on (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus)
             WHERE lasku.tila = 'L'
             and lasku.alatila = 'X'
             and lasku.tilaustyyppi = 'A'
             and lasku.kauppatapahtuman_luonne != '999'
+            and not (lasku.vienti = '' and asiakas.laji = 'H')
             and lasku.yhtio = '{$kukarow['yhtio']}'
             and lasku.tapvm >= '{$vva}-{$kka}-{$ppa}'
             and lasku.tapvm <= '{$vvl}-{$kkl}-{$ppl}'
@@ -369,12 +415,25 @@ if ($tee == "tulosta") {
   }
 
   $query .= "  ORDER BY $ee_yhdistettyorder tullinimike1, maalahetys, alkuperamaa, maamaara, kuljetusmuoto, kauppatapahtuman_luonne, laskunro, tuoteno_nimitys";
+  
   $result = pupe_query($query);
 
   $nim     = "";
   $lask    = 1;
   $arvoyht = 0;
   $virhe   = 0;
+
+  // erikoisvienti CSV vuodelle 2021
+  if($vv >= 2021 and ($tapa == "vienti" or $tapa == "yhdistetty")) {
+    $_vuosi_2021_erikois_csv = array(
+
+      0 => array(
+        "otsikko" => "Kauppakumppani",
+        "kentta" => "ytunnus"
+      )
+
+    );
+  }
 
   $lopetus_intra1 = "{$palvelin2}intrastat.php////tee=tulosta//kk=$kk//vv=$vv//tapa=$tapa//outputti=$outputti//lahetys=nope//kayttajan_valinta_maa=$kayttajan_valinta_maa//tapahtumalaji=$tapahtumalaji";
   $lopetus_intra2 = "";
@@ -387,13 +446,20 @@ if ($tee == "tulosta") {
     // tehd‰‰n tilastoarvot listausta
     $tilastoarvot = "<table><tr>";
 
+    $_tilastoarvot_lisaa = '';
+    if($_vuosi_2021_erikois_csv) {
+      foreach($_vuosi_2021_erikois_csv as $_vuosi_2021_erikois_data) {
+        $_tilastoarvot_lisaa .= "<th>".t($_vuosi_2021_erikois_data["otsikko"])."</th>";
+      }
+    }
+
     if ($maa == "EE") {
       $tilastoarvot .= "
           <th>".t("Luontipvm")."</th>
-          <th>".t("Vuosi")."</th>
           <th>".t("Kuukausi")."</th>
           <th>".t("Tuonti tai vienti")."</th>
           <th>".t("Ytunnus")."</th>
+          $_tilastoarvot_lisaa
           <th>".t("Rivinro")."</th>
           <th>".t("Toimitusehto")."</th>
           <th>".t("Saapumisen l‰hetysmaa")."</th>
@@ -417,6 +483,7 @@ if ($tee == "tulosta") {
       $tilastoarvot .= "
           <th>#</th>
           <th>".t("Tullinimike")."</th>
+          $_tilastoarvot_lisaa
           <th>".t("Alkuper‰maa")."</th>
           <th>".t("L‰hetysmaa")."</th>
           <th>".t("M‰‰r‰maa")."</th>
@@ -433,45 +500,59 @@ if ($tee == "tulosta") {
     if (isset($worksheet)) {
       if ($maa == "EE") {
         $worksheet->write($excelrivi, 1, t("Luontipvm"), $format_bold);
-        $worksheet->write($excelrivi, 2, t("Vuosi"), $format_bold);
-        $worksheet->write($excelrivi, 3, t("Kuukausi"), $format_bold);
-        $worksheet->write($excelrivi, 4, t("Tuonti tai vienti"), $format_bold);
-        $worksheet->write($excelrivi, 5, t("Ytunnus"), $format_bold);
-        $worksheet->write($excelrivi, 6, t("Rivinro"), $format_bold);
-        $worksheet->write($excelrivi, 7, t("Toimitusehto"), $format_bold);
-        $worksheet->write($excelrivi, 8, t("Saapumisen l‰hetysmaa"), $format_bold);
-        $worksheet->write($excelrivi, 9, t("Kuljetusmuoto"), $format_bold);
-        $worksheet->write($excelrivi, 10, t("L‰hetysmaa"), $format_bold);
-        $worksheet->write($excelrivi, 11, t("Kauppatapahtuman luonne"), $format_bold);
-        $worksheet->write($excelrivi, 12, t("Alkuper‰maa"), $format_bold);
-        $worksheet->write($excelrivi, 13, t("M‰‰r‰maa"), $format_bold);
-        $worksheet->write($excelrivi, 14, t("Tullinimike"), $format_bold);
-        $worksheet->write($excelrivi, 15, t("Paino"), $format_bold);
-        $worksheet->write($excelrivi, 16, t("Kpl"), $format_bold);
-        $worksheet->write($excelrivi, 17, t("2. paljous"), $format_bold);
-        $worksheet->write($excelrivi, 18, t("Laskutusarvo"), $format_bold);
-        $worksheet->write($excelrivi, 19, t("Ostolaskun valuutta"), $format_bold);
-        $worksheet->write($excelrivi, 20, t("Tilastoarvo"), $format_bold);
-        $worksheet->write($excelrivi, 21, t("Yhtiˆn valuutta"), $format_bold);
-        $worksheet->write($excelrivi, 22, t("Tullinimikkeen nimitys"), $format_bold);
+        $worksheet->write($excelrivi, 2, t("Kuukausi"), $format_bold);
+        $worksheet->write($excelrivi, 3, t("Tuonti tai vienti"), $format_bold);
+        $worksheet->write($excelrivi, 4, t("Ytunnus"), $format_bold);
+        $laske_excel_rivit = 5;
+        if($_vuosi_2021_erikois_csv) {
+          foreach ($_vuosi_2021_erikois_csv as $_vuosi_2021_erikois_data) {
+            $worksheet->write($excelrivi, $laske_excel_rivit, $_vuosi_2021_erikois_data["otsikko"], $format_bold);
+            $laske_excel_rivit++;
+          }
+        }
+        $worksheet->write($excelrivi, $laske_excel_rivit, t("Rivinro"), $format_bold);
+        $worksheet->write($excelrivi, $laske_excel_rivit+1, t("Toimitusehto"), $format_bold);
+        $worksheet->write($excelrivi, $laske_excel_rivit+2, t("Saapumisen l‰hetysmaa"), $format_bold);
+        $worksheet->write($excelrivi, $laske_excel_rivit+3, t("Kuljetusmuoto"), $format_bold);
+        $worksheet->write($excelrivi, $laske_excel_rivit+4, t("L‰hetysmaa"), $format_bold);
+        $worksheet->write($excelrivi, $laske_excel_rivit+5, t("Kauppatapahtuman luonne"), $format_bold);
+        $worksheet->write($excelrivi, $laske_excel_rivit+6, t("Alkuper‰maa"), $format_bold);
+        $worksheet->write($excelrivi, $laske_excel_rivit+7, t("M‰‰r‰maa"), $format_bold);
+        $worksheet->write($excelrivi, $laske_excel_rivit+8, t("Tullinimike"), $format_bold);
+        $worksheet->write($excelrivi, $laske_excel_rivit+9, t("Paino"), $format_bold);
+        $worksheet->write($excelrivi, $laske_excel_rivit+10, t("Kpl"), $format_bold);
+        $worksheet->write($excelrivi, $laske_excel_rivit+11, t("2. paljous"), $format_bold);
+        $worksheet->write($excelrivi, $laske_excel_rivit+12, t("Laskutusarvo"), $format_bold);
+        $worksheet->write($excelrivi, $laske_excel_rivit+13, t("Ostolaskun valuutta"), $format_bold);
+        $worksheet->write($excelrivi, $laske_excel_rivit+14, t("Tilastoarvo"), $format_bold);
+        $worksheet->write($excelrivi, $laske_excel_rivit+15, t("Yhtiˆn valuutta"), $format_bold);
+        $worksheet->write($excelrivi, $laske_excel_rivit+16, t("Tullinimikkeen nimitys"), $format_bold);
+
       }
       else {
         $worksheet->write($excelrivi, 1, "Tullinimike", $format_bold);
-        $worksheet->write($excelrivi, 2, "Alkuper‰maa", $format_bold);
-        $worksheet->write($excelrivi, 3, "L‰hetysmaa", $format_bold);
-        $worksheet->write($excelrivi, 4, "M‰‰r‰maa", $format_bold);
-        $worksheet->write($excelrivi, 5, "Kuljetusmuoto", $format_bold);
-        $worksheet->write($excelrivi, 6, "Kauppat. luonne", $format_bold);
-        $worksheet->write($excelrivi, 7, "Tilastoarvo", $format_bold);
-        $worksheet->write($excelrivi, 8, "Paino", $format_bold);
-        $worksheet->write($excelrivi, 9, "KM", $format_bold);
-        $worksheet->write($excelrivi, 10, "2-paljous", $format_bold);
-        $worksheet->write($excelrivi, 11, "2-paljous m‰‰r‰", $format_bold);
-        $worksheet->write($excelrivi, 12, "Laskutusarvo", $format_bold);
+        $laske_excel_rivit = 2;
+        if($_vuosi_2021_erikois_csv) {
+          foreach ($_vuosi_2021_erikois_csv as $_vuosi_2021_erikois_data) {
+            $worksheet->write($excelrivi, $laske_excel_rivit, $_vuosi_2021_erikois_data["otsikko"], $format_bold);
+            $laske_excel_rivit++;
+          }
+        }
+        $worksheet->write($excelrivi, $laske_excel_rivit, "Alkuper‰maa", $format_bold);
+        $worksheet->write($excelrivi, $laske_excel_rivit+1, "L‰hetysmaa", $format_bold);
+        $worksheet->write($excelrivi, $laske_excel_rivit+2, "M‰‰r‰maa", $format_bold);
+        $worksheet->write($excelrivi, $laske_excel_rivit+3, "Kuljetusmuoto", $format_bold);
+        $worksheet->write($excelrivi, $laske_excel_rivit+4, "Kauppat. luonne", $format_bold);
+        $worksheet->write($excelrivi, $laske_excel_rivit+5, "Tilastoarvo", $format_bold);
+        $worksheet->write($excelrivi, $laske_excel_rivit+6, "Paino", $format_bold);
+        $worksheet->write($excelrivi, $laske_excel_rivit+7, "KM", $format_bold);
+        $worksheet->write($excelrivi, $laske_excel_rivit+8, "2-paljous", $format_bold);
+        $worksheet->write($excelrivi, $laske_excel_rivit+9, "2-paljous m‰‰r‰", $format_bold);
+        $worksheet->write($excelrivi, $laske_excel_rivit+10, "Laskutusarvo", $format_bold);
+
       }
       $excelrivi++;
     }
-
   }
   else {
     // tehd‰‰n kaunista ruutukamaa
@@ -481,6 +562,11 @@ if ($tee == "tulosta") {
     $ulos .= "<th>".t("Tuoteno")."</th>";
     $ulos .= "<th>".t("Nimitys")."</th>";
     $ulos .= "<th>".t("Tullinimike")."</th>";
+    if($_vuosi_2021_erikois_csv) {
+      foreach($_vuosi_2021_erikois_csv as $_vuosi_2021_erikois_data) {
+        $ulos .= "<th>".t($_vuosi_2021_erikois_data["otsikko"])."</th>";
+      }
+    }
     $ulos .= "<th>".t("KT")."</th>";
     $ulos .= "<th>".t("AM")."</th>";
     $ulos .= "<th>".t("LM")."</th>";
@@ -503,17 +589,24 @@ if ($tee == "tulosta") {
       $worksheet->write($excelrivi, 2, "Tuoteno", $format_bold);
       $worksheet->write($excelrivi, 3, "Nimitys", $format_bold);
       $worksheet->write($excelrivi, 4, "Tullinimike", $format_bold);
-      $worksheet->write($excelrivi, 5, "KT", $format_bold);
-      $worksheet->write($excelrivi, 6, "AM", $format_bold);
-      $worksheet->write($excelrivi, 7, "LM", $format_bold);
-      $worksheet->write($excelrivi, 8, "MM", $format_bold);
-      $worksheet->write($excelrivi, 9, "KM", $format_bold);
-      $worksheet->write($excelrivi, 10, "Rivihinta", $format_bold);
-      $worksheet->write($excelrivi, 11, "Paino", $format_bold);
-      $worksheet->write($excelrivi, 12, "2. paljous", $format_bold);
-      $worksheet->write($excelrivi, 13, "Kpl", $format_bold);
+      $laske_excel_rivit = 5;
+      if($_vuosi_2021_erikois_csv) {
+        foreach ($_vuosi_2021_erikois_csv as $_vuosi_2021_erikois_data) {
+          $worksheet->write($excelrivi, $laske_excel_rivit, $_vuosi_2021_erikois_data["otsikko"], $format_bold);
+          $laske_excel_rivit++;
+        }
+      }
+      $worksheet->write($excelrivi, $laske_excel_rivit, "KT", $format_bold);
+      $worksheet->write($excelrivi, $laske_excel_rivit+1, "AM", $format_bold);
+      $worksheet->write($excelrivi, $laske_excel_rivit+2, "LM", $format_bold);
+      $worksheet->write($excelrivi, $laske_excel_rivit+3, "MM", $format_bold);
+      $worksheet->write($excelrivi, $laske_excel_rivit+4, "KM", $format_bold);
+      $worksheet->write($excelrivi, $laske_excel_rivit+5, "Rivihinta", $format_bold);
+      $worksheet->write($excelrivi, $laske_excel_rivit+6, "Paino", $format_bold);
+      $worksheet->write($excelrivi, $laske_excel_rivit+7, "2. paljous", $format_bold);
+      $worksheet->write($excelrivi, $laske_excel_rivit+8, "Kpl", $format_bold);
       if ($lisavar == "S") {
-        $worksheet->write($excelrivi, 12, "Tehdaslis‰varusteet", $format_bold);
+        $worksheet->write($excelrivi, $laske_excel_rivit+7, "Tehdaslis‰varusteet", $format_bold);
       }
       $excelrivi++;
     }
@@ -552,6 +645,41 @@ if ($tee == "tulosta") {
   $ots .= sprintf('%-17.17s',   $yhtiorow["tilastotullikamari"]);                                    //tilastotullikamari
   $ots .= sprintf('%-3.3s',     $yhtiorow["valkoodi"]);                                          //valuutta
   $ots .= "\r\n";
+
+  // Tehd‰‰n CSV
+  $csvrivit = "Tiedonantaja;";
+  $csvrivit .= "Jakso;";
+  $csvrivit .= "Suunta;";
+  
+  if($_vuosi_2021_erikois_csv) {
+    foreach($_vuosi_2021_erikois_csv as $_vuosi_2021_erikois_data) {
+      $csvrivit .= $_vuosi_2021_erikois_data["otsikko"].";";
+    }
+  }
+
+  $csvrivit .= "CN8;";
+  $csvrivit .= "Kauppa;";
+  $csvrivit .= "J‰senmaa;";
+  $csvrivit .= "Alkuper‰maa;";
+  $csvrivit .= "Kuljetusmuoto;";
+  $csvrivit .= "Nettopaino;";
+  $csvrivit .= "Lis‰yksikˆt;";
+  $csvrivit .= "Laskutusarvo euroissa;";
+  $csvrivit .= "Tilastoarvo euroissa;";
+  $csvrivit .= "Viite\n";
+
+  $csvrivit .= "FI{$ytunnus}{$ylisatunnus};";
+  $csvrivit .= "{$vv}{$kuuka};";
+
+  // tuonti vai vienti
+  if ($tapa == "tuonti") {
+    $csvrivit .= "1;";
+  }
+  else {
+    $csvrivit .= "2;";
+  }
+  
+  $ekarivi = True;
 
   while ($row = mysql_fetch_array($result)) {
 
@@ -636,32 +764,82 @@ if ($tee == "tulosta") {
     }
 
     if ($tapa == "yhdistetty" and $outputti == 'tilasto') {
-      $nim .= sprintf('%010d',     $row["rivihinta_laskutusarvo"]);                                          //nimikkeen laskutusarvo
+      $nim .= sprintf('%010d',     $row["rivihinta_laskutusarvo"]);                  //nimikkeen laskutusarvo
     }
     else {
-      $nim .= sprintf('%010d',     $row["rivihinta"]);                                          //nimikkeen laskutusarvo
+      $nim .= sprintf('%010d',     $row["rivihinta"]);                               //nimikkeen laskutusarvo
     }
     $nim .= "\r\n";
+
+    if (!$ekarivi) {
+      $csvrivit .= ";;;";
+    }
+
+    $ekarivi = False;
+    
+    if($_vuosi_2021_erikois_csv) {
+      $row['ytunnus'] = kasittele_kentta($row, $vv);
+      foreach($_vuosi_2021_erikois_csv as $_vuosi_2021_erikois_data) {
+        $csvrivit .= $row[$_vuosi_2021_erikois_data["kentta"]].";";
+      }
+    }
+    
+    $csvrivit .= "{$row["tullinimike1"]};";
+    $csvrivit .= "{$row["kauppatapahtuman_luonne"]};";
+
+    if ($tapa == "tuonti") {
+      $csvrivit .= "{$row["maalahetys"]};";
+      $csvrivit .= "{$row["alkuperamaa"]};";
+    }
+    else {
+      $csvrivit .= "{$row["maamaara"]};";
+      $csvrivit .= "{$row["alkuperamaa"]};";
+    }
+
+    $csvrivit .= "{$row["kuljetusmuoto"]};";
+    $csvrivit .= round($row["paino"]).";";
+
+    if ($row["su"] != '') {
+      $csvrivit .= round($row["kpl"]).";";
+    }
+    else {
+      $csvrivit .= ";";
+    }
+
+    if ($tapa == "yhdistetty" and $outputti == 'tilasto') {
+      $csvrivit .= round($row["rivihinta_laskutusarvo"]).";";
+    }
+    else {
+      $csvrivit .= round($row["rivihinta"]).";";
+    }
+
+    $csvrivit .= ";";
+    $csvrivit .= "\n";
 
     if ($outputti == "tilasto") {
       // tehd‰‰n tilastoarvolistausta
       $tilastoarvot .= "<tr>";
       if ($maa == "EE") {
         $ee_pvm = date("d.m.Y");
-        $ee_ilmoitus = ((($row["maamaara"] == $maa or $row["maamaara"] == '') and $row["maalahetys"] != $maa) ? 'S' : 'L');
+        $ee_ilmoitus = ((($row["maamaara"] == $maa or $row["maamaara"] == '') and $row["maalahetys"] != $maa) ? '1204' : '1203');
         $ee_rivi = sprintf('%05d', $lask);
         $ee_maatxt = t_maanimi($row["maalahetys"], 'ee');
 
+        $tilastoarvot_lisaa = '';
+        if($_vuosi_2021_erikois_csv) {
+          foreach($_vuosi_2021_erikois_csv as $_vuosi_2021_erikois_data) {
+            $tilastoarvot_lisaa .= "<td>".$row[$_vuosi_2021_erikois_data["kentta"]]."</td>";
+          }
+        }
         $tilastoarvot .= "
           <td>$ee_pvm</td>
-          <td>$vv</td>
-          <td>$kuuka</td>
+          <td>$vv-$kuuka</td>
           <td>$ee_ilmoitus</td>
           <td>{$yhtiorow["ytunnus"]}</td>
+          $tilastoarvot_lisaa
           <td>$ee_rivi</td>
           <td>{$row["toim_ehto"]}</td>
           <td>{$ee_maatxt}</td>
-
           <td>{$row["kuljetusmuoto"]}</td>
           <td>{$row["maalahetys"]}</td>
           <td>{$row["kauppatapahtuman_luonne"]}</td>
@@ -703,6 +881,11 @@ if ($tee == "tulosta") {
         }
 
         $tilastoarvot .= "<td>$row[kuljetusmuoto]</td>";                                          //kuljetusmuoto
+        if($_vuosi_2021_erikois_csv) {
+          foreach($_vuosi_2021_erikois_csv as $_vuosi_2021_erikois_data) {
+            $tilastoarvot .= "<td>".$row[$_vuosi_2021_erikois_data["kentta"]]."</td>";
+          }
+        }
         $tilastoarvot .= "<td>$row[kauppatapahtuman_luonne]</td>";                                      //kauppatapahtuman luonne
         $tilastoarvot .= "<td>$row[rivihinta]</td>";                                            //tilastoarvo
         $tilastoarvot .= "<td>$row[paino] | $row[paino2]</td>";                                              //nettopaino
@@ -723,58 +906,71 @@ if ($tee == "tulosta") {
       if (isset($worksheet)) {
         if ($maa == "EE") {
           $worksheet->write($excelrivi, 1, $ee_pvm);
-          $worksheet->write($excelrivi, 2, $vv);
-          $worksheet->write($excelrivi, 3, $kuuka);
-          $worksheet->write($excelrivi, 4, $ee_ilmoitus);
-          $worksheet->write($excelrivi, 5, $yhtiorow["ytunnus"]);
-          $worksheet->write($excelrivi, 6, "{$ee_rivi}");
-          $worksheet->write($excelrivi, 7, $row["toim_ehto"]);
-          $worksheet->write($excelrivi, 8, $row["maalahetys"]);
-          $worksheet->write($excelrivi, 9, $row["kuljetusmuoto"]);
-          $worksheet->write($excelrivi, 10, $ee_maatxt);
-          $worksheet->write($excelrivi, 11, $row["kauppatapahtuman_luonne"]);
-          $worksheet->write($excelrivi, 12, $row["alkuperamaa"]);
-          $worksheet->write($excelrivi, 13, $row["maamaara"]);
-          $worksheet->write($excelrivi, 14, $row["tullinimike1"]);
-          $worksheet->write($excelrivi, 15, $row["paino"]);
-          $worksheet->write($excelrivi, 16, $row["kpl"]);
-          $worksheet->write($excelrivi, 17, $row["su"]);
+          $worksheet->write($excelrivi, 2, $vv."-".$kuuka);
+          $worksheet->write($excelrivi, 3, $ee_ilmoitus);
+          $worksheet->write($excelrivi, 4, $yhtiorow["ytunnus"]);
+          $laske_excel_rivit = 5;
+          if($_vuosi_2021_erikois_csv) {
+            foreach($_vuosi_2021_erikois_csv as $_vuosi_2021_erikois_data) {
+              $worksheet->write($excelrivi, $laske_excel_rivit, $row[$_vuosi_2021_erikois_data["kentta"]], $format_bold);
+              $laske_excel_rivit++;
+            }
+          }
+          $worksheet->write($excelrivi, $laske_excel_rivit, "{$ee_rivi}");
+          $worksheet->write($excelrivi, $laske_excel_rivit+1, $row["toim_ehto"]);
+          $worksheet->write($excelrivi, $laske_excel_rivit+2, $row["maalahetys"]);
+          $worksheet->write($excelrivi, $laske_excel_rivit+3, $row["kuljetusmuoto"]);
+          $worksheet->write($excelrivi, $laske_excel_rivit+4, $ee_maatxt);
+          $worksheet->write($excelrivi, $laske_excel_rivit+5, $row["kauppatapahtuman_luonne"]);
+          $worksheet->write($excelrivi, $laske_excel_rivit+6, $row["alkuperamaa"]);
+          $worksheet->write($excelrivi, $laske_excel_rivit+7, $row["maamaara"]);
+          $worksheet->write($excelrivi, $laske_excel_rivit+8, $row["tullinimike1"]);
+          $worksheet->write($excelrivi, $laske_excel_rivit+9, $row["paino"]);
+          $worksheet->write($excelrivi, $laske_excel_rivit+10, $row["kpl"]);
+          $worksheet->write($excelrivi, $laske_excel_rivit+11, $row["su"]);
 
           if ($tapa == "yhdistetty" and $outputti == 'tilasto') {
-            $worksheet->write($excelrivi, 18, $row["rivihinta_laskutusarvo"]);
+            $worksheet->write($excelrivi, $laske_excel_rivit+12, $row["rivihinta_laskutusarvo"]);
           }
           else {
-            $worksheet->write($excelrivi, 18, $row["rivihinta"]);
+            $worksheet->write($excelrivi, $laske_excel_rivit+12, $row["rivihinta"]);
           }
 
-          $worksheet->write($excelrivi, 19, $row["valkoodi"]);
-          $worksheet->write($excelrivi, 20, $row["rivihinta"]);
-          $worksheet->write($excelrivi, 21, $yhtiorow["valkoodi"]);
-          $worksheet->write($excelrivi, 22, $row["dm"]);
+          $worksheet->write($excelrivi, $laske_excel_rivit+13, $row["valkoodi"]);
+          $worksheet->write($excelrivi, $laske_excel_rivit+14, $row["rivihinta"]);
+          $worksheet->write($excelrivi, $laske_excel_rivit+15, $yhtiorow["valkoodi"]);
+          $worksheet->write($excelrivi, $laske_excel_rivit+16, $row["dm"]);
         }
         else {
           $worksheet->write($excelrivi, 1, $lask);
           $worksheet->write($excelrivi, 2, $row["tullinimike1"]);
 
-          if ($tapa == "tuonti") {
-            $worksheet->write($excelrivi, 3, $row["alkuperamaa"]);
-            $worksheet->write($excelrivi, 4, $row["maalahetys"]);
+          $laske_excel_rivit = 3;
+          if($_vuosi_2021_erikois_csv) {
+            foreach($_vuosi_2021_erikois_csv as $_vuosi_2021_erikois_data) {
+              $worksheet->write($excelrivi, $laske_excel_rivit, $row[$_vuosi_2021_erikois_data["kentta"]]);
+              $laske_excel_rivit++;
+            }
+          }
 
+          if ($tapa == "tuonti") {
+            $worksheet->write($excelrivi, $laske_excel_rivit, $row["alkuperamaa"]);
+            $worksheet->write($excelrivi, $laske_excel_rivit+1, $row["maalahetys"]);
           }
           else {
-            $worksheet->write($excelrivi, 5, $row["maamaara"]);
-
+            $worksheet->write($excelrivi, $laske_excel_rivit+2, $row["maamaara"]);
           }
 
-          $worksheet->write($excelrivi, 6, $row["kuljetusmuoto"]);
-          $worksheet->write($excelrivi, 7, $row["kauppatapahtuman_luonne"]);
-          $worksheet->write($excelrivi, 8, $row["rivihinta"]);
-          $worksheet->write($excelrivi, 9, $row["paino"]);
+          $worksheet->write($excelrivi, $laske_excel_rivit+3, $row["kuljetusmuoto"]);
+          $worksheet->write($excelrivi, $laske_excel_rivit+4, $row["kauppatapahtuman_luonne"]);
+          $worksheet->write($excelrivi, $laske_excel_rivit+5, $row["rivihinta"]);
+          $worksheet->write($excelrivi, $laske_excel_rivit+6, $row["paino"]);
           if ($row["su"] != '') {
-            $worksheet->write($excelrivi, 10, $row["su"]);
-            $worksheet->write($excelrivi, 11, $row["kpl"]);
+            $worksheet->write($excelrivi, $laske_excel_rivit+7, $row["su"]);
+            $worksheet->write($excelrivi, $laske_excel_rivit+8, $row["kpl"]);
           }
-          $worksheet->write($excelrivi, 12, $row["rivihinta"]);
+          $worksheet->write($excelrivi, $laske_excel_rivit+9, $row["rivihinta"]);
+        
         }
         $excelrivi++;
       }
@@ -794,6 +990,11 @@ if ($tee == "tulosta") {
       $ulos .= "<td valign='top'>".$row["tuoteno"]."</td>";
       $ulos .= "<td valign='top'>".t_tuotteen_avainsanat($row, 'nimitys')."</td>";
       $ulos .= "<td valign='top'><a href='intrastat.php?tee=tulosta&tapa=$tapa&kk=$kk&vv=$vv&outputti=$outputti&lahetys=nope&lisavar=$lisavar&kayttajan_valinta_maa=$kayttajan_valinta_maa&tapahtumalaji=$tapahtumalaji&vaintullinimike={$row['tullinimike1']}&vainmaalahetys={$row['maalahetys']}&vainalkuperamaa={$row['alkuperamaa']}&vainmaamaara={$row['maamaara']}&vainkuljetusmuoto={$row['kuljetusmuoto']}&vainkauppatapahtuman_luonne={$row['kauppatapahtuman_luonne']}&vainsu={$row['su']}&lopetus=$lopetus_intra1'>$row[tullinimike1]</></td>";  //Tullinimike CN
+      if($_vuosi_2021_erikois_csv) {
+        foreach($_vuosi_2021_erikois_csv as $_vuosi_2021_erikois_data) {
+          $ulos .= "<td valign='top'>".$row[$_vuosi_2021_erikois_data["kentta"]]."</td>";
+        }
+      }
       $ulos .= "<td valign='top'>".$row["kauppatapahtuman_luonne"]."</td>";
       $ulos .= "<td valign='top'>".$row["alkuperamaa"]."</td>";
       $ulos .= "<td valign='top'>".$row["maalahetys"]."</td>";
@@ -827,20 +1028,28 @@ if ($tee == "tulosta") {
         $worksheet->write($excelrivi, 2, $row["tuoteno"]);
         $worksheet->write($excelrivi, 3, t_tuotteen_avainsanat($row, 'nimitys'));
         $worksheet->write($excelrivi, 4, $row["tullinimike1"]);
-        $worksheet->write($excelrivi, 5, $row["kauppatapahtuman_luonne"]);
-        $worksheet->write($excelrivi, 6, $row["alkuperamaa"]);
-        $worksheet->write($excelrivi, 7, $row["maalahetys"]);
-        $worksheet->write($excelrivi, 8, $row["maamaara"]);
-        $worksheet->write($excelrivi, 9, $row["kuljetusmuoto"]);
-        $worksheet->write($excelrivi, 10, $row["rivihinta"]);
-        $worksheet->write($excelrivi, 11, $row["paino"]);
+        $laske_excel_rivit = 5;
+        if($_vuosi_2021_erikois_csv) {
+          foreach($_vuosi_2021_erikois_csv as $_vuosi_2021_erikois_data) {
+            $worksheet->write($excelrivi, $laske_excel_rivit, $row[$_vuosi_2021_erikois_data["kentta"]]);
+            $laske_excel_rivit++;
+          }
+        }
+        $worksheet->write($excelrivi, $laske_excel_rivit, $row["kauppatapahtuman_luonne"]);
+        $worksheet->write($excelrivi, $laske_excel_rivit+1, $row["alkuperamaa"]);
+        $worksheet->write($excelrivi, $laske_excel_rivit+2, $row["maalahetys"]);
+        $worksheet->write($excelrivi, $laske_excel_rivit+3, $row["maamaara"]);
+        $worksheet->write($excelrivi, $laske_excel_rivit+4, $row["kuljetusmuoto"]);
+        $worksheet->write($excelrivi, $laske_excel_rivit+5, $row["rivihinta"]);
+        $worksheet->write($excelrivi, $laske_excel_rivit+6, $row["paino"]);
         if ($row["su"] != '') {
-          $worksheet->write($excelrivi, 12, $row["su"]);
-          $worksheet->write($excelrivi, 13, $row["kpl"]);
+          $worksheet->write($excelrivi, $laske_excel_rivit+7, $row["su"]);
+          $worksheet->write($excelrivi, $laske_excel_rivit+8, $row["kpl"]);
         }
         if ($lisavar == "S") {
-          $worksheet->write($excelrivi, 12, $lisavarrow["paino"]."kg/".$lisavarrow["rivihinta"]."eur");
+          $worksheet->write($excelrivi, $laske_excel_rivit+7, $lisavarrow["paino"]."kg/".$lisavarrow["rivihinta"]."eur");
         }
+        
         $excelrivi++;
       }
     }
@@ -865,7 +1074,12 @@ if ($tee == "tulosta") {
   if ($outputti == "tilasto") {
     // tehd‰‰n tilaustoarvolistausta
     $tilastoarvot .= "<tr>";
-    $span = ($maa == "EE" ? 19 : 7);
+    $span = ($maa == "EE" ? 18 : 7);
+    if($_vuosi_2021_erikois_csv) {
+      foreach($_vuosi_2021_erikois_csv as $_vuosi_2021_erikois_data) {
+        $span++;
+      }
+    }
     $tilastoarvot .= "<th colspan='$span'>".t("Yhteens‰").":</td>";
     $tilastoarvot .= "<th>$arvoyht</th>";
     $tilastoarvot .= "<th colspan='4'></th>";
@@ -874,17 +1088,23 @@ if ($tee == "tulosta") {
 
     if (isset($worksheet)) {
       if ($maa == "EE") {
-        $worksheet->write($excelrivi, 20, $arvoyht, $format_bold);
+        $worksheet->write($excelrivi, $span+1, $arvoyht, $format_bold);
       }
       else {
-        $worksheet->write($excelrivi, 8, $arvoyht, $format_bold);
+        $worksheet->write($excelrivi, $span+1, $arvoyht, $format_bold);
       }
     }
   }
   else {
     // tehd‰‰n kaunista ruutukamaa
     $ulos .= "<tr>";
-    $ulos .= "<th colspan='9'>".t("Yhteens‰").":</th>";
+    $kolumneja = 9;
+    if($_vuosi_2021_erikois_csv) {
+      foreach($_vuosi_2021_erikois_csv as $_vuosi_2021_erikois_data) {
+        $kolumneja++;
+      }
+    }
+    $ulos .= "<th colspan='".$kolumneja."'>".t("Yhteens‰").":</th>";
     $ulos .= "<th>$totsumma</th>";
     $ulos .= "<th>$bruttopaino</th>";
     $ulos .= "<th></th>";
@@ -899,9 +1119,9 @@ if ($tee == "tulosta") {
     $ulos .= "</table>";
 
     if (isset($worksheet)) {
-      $worksheet->write($excelrivi, 10, $totsumma, $format_bold);
-      $worksheet->write($excelrivi, 11, $bruttopaino, $format_bold);
-      $worksheet->write($excelrivi, 13, $totkpl, $format_bold);
+      $worksheet->write($excelrivi, $kolumneja+1, $totsumma, $format_bold);
+      $worksheet->write($excelrivi, $kolumneja+2, $bruttopaino, $format_bold);
+      $worksheet->write($excelrivi, $kolumneja+4, $totkpl, $format_bold);
     }
   }
 
@@ -1039,12 +1259,28 @@ if ($tee == "tulosta") {
     echo "$ulos";
   }
 
+  if ($virhe == 0) {
+    // Tallennetaan rivit tiedostoon
+    $filepath = "Intrastat_{$yhtio}_".date("Y-m-d").".csv";
+    file_put_contents("/tmp/".$filepath, $csvrivit);
+
+    echo "<form method='post' class='multisubmit'>";
+    echo "<br><table>";
+    echo "<tr><th>".t("Tallenna tullille ladattava CSV-tiedosto").":</th>";
+    echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
+    echo "<input type='hidden' name='kaunisnimi' value='Intrastat_{$yhtio}_".date("Y-m-d").".csv'>";
+    echo "<input type='hidden' name='tmpfilenimi' value='{$filepath}'>";
+    echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr>";
+    echo "</table>";
+    echo "</form>";
+  }
+
   if (isset($worksheet) and $virhe == 0) {
     // We need to explicitly close the worksheet
     $excelnimi = $worksheet->close();
 
     echo "<br><table>";
-    echo "<tr><th>".t("Tallenna tulos").":</th>";
+    echo "<tr><th>".t("Tallenna Excel").":</th>";
     echo "<form method='post' class='multisubmit'>";
     echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
     echo "<input type='hidden' name='kaunisnimi' value='Intrastat.xlsx'>";

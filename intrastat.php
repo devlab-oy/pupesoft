@@ -36,7 +36,7 @@ if (!isset($vaintullinimike))         $vaintullinimike = "";
 
 $_vuosi_2021_erikois_csv = false;
 function kasittele_kentta($row, $vv=false) {
-  if($row['kolmikantakauppa'] != '') {
+  if($row['kolmikantakauppa'] != '' and 1==2) {
     $_maa = $row['maalahetys'];
   } else {
     $_maa = $row['maamaara'];

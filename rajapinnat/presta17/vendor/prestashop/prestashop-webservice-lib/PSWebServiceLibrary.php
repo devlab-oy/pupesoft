@@ -114,7 +114,7 @@ class PrestaShopWebservice
                 throw new PrestaShopWebserviceException(sprintf($error_label, $status_code, 'Method Not Allowed'));
                 break;
             case 500:
-                throw new PrestaShopWebserviceException(sprintf($error_label, $status_code, 'Internal Server Error'));
+                //throw new PrestaShopWebserviceException(sprintf($error_label, $status_code, 'Internal Server Error'));
                 break;
             default:
                 throw new PrestaShopWebserviceException(
@@ -293,7 +293,7 @@ class PrestaShopWebservice
                 $url .= '&id_group_shop=' . $options['id_group_shop'];
             }
         } else {
-            throw new PrestaShopWebserviceException('Bad parameters given');
+            throw new PrestaShopWebserviceException($options['postXml']);
         }
         $request = $this->executeRequest($url, array(CURLOPT_CUSTOMREQUEST => 'POST', CURLOPT_POSTFIELDS => $xml));
 

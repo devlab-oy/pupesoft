@@ -1,8 +1,8 @@
 <?php
 
-// Kutsutaanko CLI:stä
+// Kutsutaanko CLI:stï¿½
 if (php_sapi_name() != 'cli') {
-  die("Tätä scriptiä voi ajaa vain komentoriviltä!");
+  die("Tï¿½tï¿½ scriptiï¿½ voi ajaa vain komentoriviltï¿½!");
 }
 
 $pupe_root_polku = dirname(dirname(dirname(__FILE__)));
@@ -24,11 +24,11 @@ if (!isset($argv[1]) || !$argv[1]) {
   exit;
 }
 if (!isset($argv[2]) || !$argv[2]) {
-  echo t("Mitä ajetaan?");
+  echo t("Mitï¿½ ajetaan?");
   exit;
 }
 
-// ytiorow. Jos ei l?ydy, lopeta cron¨
+// ytiorow. Jos ei l?ydy, lopeta cronï¿½
 $yhtiorow = hae_yhtion_parametrit(pupesoft_cleanstring($argv[1]));
 if (!$yhtiorow) {
   echo "Vaara yhtio";
@@ -46,6 +46,7 @@ cron_log();
 class Presta17RestApi
 {
 
+
   /*
     Default variables and values in the class
   */
@@ -58,10 +59,13 @@ class Presta17RestApi
     $this->url = $url;
   }
 
+
   public function getPupesoftProducts()
   {
     $yhtio = $this->yhtiorow['yhtio'];
-    $query = "SELECT * from tuote where yhtio='$yhtio' and muutospvm between date_sub(now(),INTERVAL 2 DAY) and now()";
+    $query = "SELECT * from tuote 
+              JOIN puun_alkio on (tuote.yhtio =  puun_alkio.yhtio and tuote.tuoteno = puun_alkio.liitos) 
+              where tuote.yhtio='$yhtio' and tuote.muutospvm between date_sub(now(),INTERVAL 2 DAY) and now()";
     $products = pupe_query($query);
     $results = array();
 
@@ -89,33 +93,46 @@ class Presta17RestApi
       );
   }
 
+
   public function getPrestashopProducts($pupesoft_products)
   {
     $pupesoft_products_ids = $pupesoft_products['ids'];
-    $pupesoft_products_ids_chunks = array_chunk($pupesoft_products_ids, 500);
     $prestashop_products = array();
-    foreach ($pupesoft_products_ids_chunks as $pupesoft_products_ids_chunk) {
+    $missing_products = array();
+
+    foreach ($pupesoft_products_ids as $pupesoft_products_id) {
       $presta_products_opt = [
         'resource' => 'products',
-        'filter[reference]'  => '['.implode("|", $pupesoft_products_ids_chunk).']'
+        'filter[reference]'  => '['.$pupesoft_products_id.']'
       ];
-      $prestashop_products_chunk = $this->rest->get($presta_products_opt);
-      $prestashop_products_chunk = json_encode($prestashop_products_chunk);
-      $prestashop_products_chunk = json_decode($prestashop_products_chunk, true);
 
-      foreach ($prestashop_products_chunk['products']['product'] as $found_product) {
-        $prestashop_products[] = $found_product['@attributes']['id'];
+      $prestashop_products_chunk = $this->rest->get($presta_products_opt);
+      if ($prestashop_products_chunk->products->children()) {
+
+        $prestashop_products_chunk = json_encode($prestashop_products_chunk);
+        $prestashop_products_chunk = json_decode($prestashop_products_chunk, true);
+        foreach ($prestashop_products_chunk['products']['product'] as $found_product) {
+          $prestashop_products[] = $found_product['id'];
+        }
+      } else {
+        $missing_products[$pupesoft_products_id] = $pupesoft_products['products'][$pupesoft_products_id];
       }
     }
-    return $prestashop_products;
+
+    return array(
+      "found" => $prestashop_products,
+      "missing" => $missing_products
+    );
   }
+
 
   public function setPrestashopManufacturer($manufacturer)
   {
-    $blankXml = $this->rest->get(['url' => $this->url.'api/manufacturers?schema=blank']);
+    $blankXml = $this->rest->get(['url' => $this->url.'api/manufacturers?schema=synopsis']);
     $manufacturerFields = $blankXml->manufacturer->children();
     $manufacturerFields->name = (string) $manufacturer;
     $manufacturerFields->active = 1;
+    unset($manufacturerFields->link_rewrite);
     $manufacturers = [
       'resource' => 'manufacturers',
       'postXml' => $blankXml->asXML(),
@@ -125,24 +142,66 @@ class Presta17RestApi
     return $newManufacturerFields->id;
   }
 
-  public function setPrestashopCategory($category, $id=false)
+  public static function slugify($text, $divider = '-')
   {
+    $text = preg_replace('~[^\pL\d]+~u', $divider, $text);
+    $text = iconv('utf-8', 'us-ascii//TRANSLIT', $text);
+    $text = preg_replace('~[^-\w]+~', '', $text);
+    $text = trim($text, $divider);
+    $text = preg_replace('~-+~', $divider, $text);
+    $text = strtolower($text);
+    if (empty($text)) {
+      return 'n-a';
+    }
+    return $text;
+  }
+
+
+  public function setPrestashopCategory($cat_data, $id=false, $parent=false, $position=false)
+  {
+    $category_name = $cat_data->nimi;
+    $category_id = $cat_data->node_tunnus;
     if ($id) {
       $xml = $this->rest->get([
         'resource' => 'categories',
         'id' => $id,
       ]);
       if ($categoryFields = $xml->category->children()) {
+        $categoryFields->name->language[0][0] = $category_name;
+        $categoryFields->name->link_rewrite[0][0] = $this->slugify($category_name);
+        $categoryFields->id_parent = $parent;
+        $categoryFields->position = $position;
+        unset($categoryFields->level_depth);
+        unset($categoryFields->nb_products_recursive);
+        $updatedXml = $this->rest->edit([
+          'resource' => 'categories',
+          'id' => (int) $categoryFields->id,
+          'putXml' => $xml->asXML(),
+        ]);
+        return $categoryFields->id;
       }
+    } else {
+      $blankXml = $this->rest->get(['url' => $this->url.'api/categories?schema=synopsis']);
     }
 
-    die();
-
-
-    $blankXml = $this->rest->get(['url' => $this->url.'api/categories?schema=blank']);
     $categoryFields = $blankXml->category->children();
-    $categoryFields->name = (string) $category;
+
+    $categoryFields->name->language[0][0] = $category_name;
+    $categoryFields->name->link_rewrite[0][0] = $this->slugify($category_name);
+    $categoryFields->pupesoft_id->language[0][0] = $category_id;
+
+    if($parent and $position) {
+      $categoryFields->id_parent = $parent;
+      $categoryFields->position = $position;
+    } else {
+      $categoryFields->id_parent = 2;
+    }
+    unset($categoryFields->level_depth);
+    unset($categoryFields->nb_products_recursive);
+    unset($categoryFields->id);
+
     $categoryFields->active = 1;
+    
     $categories = [
       'resource' => 'categories',
       'postXml' => $blankXml->asXML(),
@@ -151,6 +210,7 @@ class Presta17RestApi
     $newCategoryFields = $createdXml->category->children();
     return $newCategoryFields->id;
   }
+
 
   public function getPrestashopManufacturer($manufacturer)
   {
@@ -172,164 +232,91 @@ class Presta17RestApi
     return $manufacturer_id;
   }
 
-  public function getPupesoftCategories()
+
+  public function categoryTreeBuild()
   {
     $yhtio = $this->yhtiorow['yhtio'];
 
-    $query = "SELECT max(syvyys) as depth 
-              FROM dynaaminen_puu 
-              WHERE yhtio = '{$yhtio}' 
-              AND laji = 'tuote'
-              LIMIT 1";
+    $query = "SELECT 
+                node.nimi as nimi, 
+                node.tunnus as tunnus, 
+                node.parent_id as parent_tunnus, 
+                node.lft as lft, 
+                node.rgt as rgt, 
+                node.parent_id as parent_id, 
+                parent.nimi as parent_nimi,
+                node.syvyys as syvyys
+              FROM dynaaminen_puu AS node
+              JOIN dynaaminen_puu AS parent ON node.yhtio=parent.yhtio and node.laji=parent.laji AND (node.parent_id=parent.tunnus OR parent.tunnus=NULL)
+              WHERE node.yhtio = '{$yhtio}' 
+              AND node.laji    = 'TUOTE'
+              ORDER BY lft ASC";
+
     $result = pupe_query($query);
-    $max_depth = mysql_fetch_assoc($result);
-    $max_depth = $max_depth['depth'];
-    $categories = array();
-    for ($i = 0; $i <= $max_depth; $i++) {
-      $query = "SELECT node.nimi,
-                node.koodi, node.syvyys, node.lft, 
-                node.tunnus AS node_tunnus,
-                (SELECT parent.tunnus
-                FROM dynaaminen_puu AS parent
-                  WHERE parent.yhtio = node.yhtio
-                  AND parent.laji    = node.laji
-                  AND parent.lft     < node.lft
-                  AND parent.rgt     > node.rgt
-                  ORDER by parent.lft DESC
-                  LIMIT 1) as parent_tunnus
-                  FROM dynaaminen_puu AS node
-                  WHERE node.yhtio    = '{$yhtio}' 
-                  AND syvyys = $i 
-                  AND node.laji       = 'tuote'
-                  ORDER BY node.lft ASC";
-      $result = pupe_query($query);
-
-      while ($category = mysql_fetch_assoc($result)) {
-        $add_category = array(
-          "koodi"         => $category['koodi'],
-          "nimi"          => $category['nimi'],
-          "node_tunnus"   => $category['node_tunnus'],
-          "parent_tunnus" => $category['parent_tunnus'],
-          "syvyys"        => $category['syvyys'],
-          "sijainti"      => $category['lft'],
-        );
-
-
-        if ($i <= 1) {
-          $categories[$category['node_tunnus']] = $add_category;
-        }
-        if ($i == 2) {
-          $categories[$category['parent_tunnus']]['children'][$category['node_tunnus']] = $add_category;
-        }
-        if ($i >= 3) {
-          $cur_id = $category['parent_tunnus'];
-          $query_child = "SELECT node.nimi,
-                    node.koodi, node.syvyys, node.lft, 
-                    node.tunnus AS node_tunnus,
-                    (SELECT parent.tunnus
-                    FROM dynaaminen_puu AS parent
-                      WHERE parent.yhtio = node.yhtio
-                      AND parent.laji    = node.laji
-                      AND parent.lft     < node.lft
-                      AND parent.rgt     > node.rgt
-                      ORDER by parent.lft DESC
-                      LIMIT 1) as parent_tunnus
-                      FROM dynaaminen_puu AS node
-                      WHERE node.yhtio    = '{$yhtio}' 
-                      AND node.laji       = 'tuote'
-                      AND node.tunnus = '{$cur_id}' 
-                      ORDER BY node.lft ASC";
-          $result_child = pupe_query($query_child);
-
-          while ($category_child = mysql_fetch_assoc($result_child)) {
-            if ($i == 3) {
-              $categories[$category_child['parent_tunnus']]['children'][$category['parent_tunnus']]['children'][$category['node_tunnus']] = $add_category;
-            } else {
-              $cur_id_child = $category['node_tunnus'];
-              $query_child_2 = "SELECT node.nimi,
-                          node.koodi, node.syvyys, node.lft, 
-                          node.tunnus AS node_tunnus,
-                          node.parent_id AS parent_tunnus 
-                            FROM dynaaminen_puu AS node
-                            WHERE node.yhtio    = '{$yhtio}' 
-                            AND syvyys = $i
-                            AND node.laji       = 'tuote'
-                            AND node.tunnus = '{$cur_id_child}' 
-                            ORDER BY node.lft ASC";
-              $result_child_2 = pupe_query($query_child_2);
-  
-              while ($category_child_2 = mysql_fetch_assoc($result_child_2)) {
-
-                $categories[$category_child['parent_tunnus']]['children'][$category['node_tunnus']]['children'][$category_child['node_tunnus']]['children'][$category_child_2['node_tunnus']] = $add_category;
-                echo "<pre>";
-                print_r($categories[$category_child['parent_tunnus']]['children'][$category['node_tunnus']]);
-                echo "</pre>";
-                die();
-                $cur_id_child_2 = $category_child_2['parent_tunnus'];
-                $query_child_3 = "SELECT node.nimi,
-                                node.koodi, node.syvyys, node.lft, 
-                                node.tunnus AS node_tunnus,
-                                (SELECT parent.tunnus
-                                FROM dynaaminen_puu AS parent
-                                  WHERE parent.yhtio = node.yhtio
-                                  AND parent.laji    = node.laji
-                                  AND parent.lft     < node.lft
-                                  AND parent.rgt     > node.rgt
-                                  ORDER by parent.lft DESC
-                                  LIMIT 1) as parent_tunnus
-                                  FROM dynaaminen_puu AS node
-                                  WHERE node.yhtio    = '{$yhtio}' 
-                                  AND syvyys = $i-1 
-                                  AND node.laji       = 'tuote'
-                                  AND node.tunnus = '{$cur_id_child_2}' 
-                                  ORDER BY node.lft ASC";
-                $result_child_3 = pupe_query($query_child_3);
-
-                while ($category_child_3 = mysql_fetch_assoc($result_child_3)) {
-                  $categories[$category_child['parent_tunnus']][$category['parent_tunnus']]['children'][$category['node_tunnus']]['children'][$category_child_2['node_tunnus']]['children'][$result_child_3['node_tunnus']] = $add_category;
-                }
-              }
-            }
-          }
-        }
-
-        //getPrestashopCategory($category, 0);
+    $this->categories = array();
+    $counter = 0;
+    while ($row = mysql_fetch_assoc($result)) {
+      if($counter == 0) {
+        $root_cat = $row['parent_tunnus'];
       }
 
-      //$this->setPrestashopCategory($category['nimi'], 2);
-    }
-    echo "<pre>";
-    print_r($categories);
-    echo "</pre>";
-    die();    
-    
-    return $categories;
-  }
+      $this->categories[$row['tunnus']] = (object) array(
+        "parent_nimi"   => utf8_encode($row['parent_nimi']),
+        "nimi"          => utf8_encode($row['nimi']),
+        "node_tunnus"   => $row['tunnus'],
+        "parent_tunnus" => $row['parent_tunnus'],
+        "syvyys"        => $row['syvyys'],
+        "sijainti"      => $row['lft'],
+      );
 
-  public function getPrestashopCategoriesByDepth($depth, $parent_id)
-  {
-    $category_name = $category;
-    $categories = [
-      'resource' => 'categories',
-      'filter[level_depth]'  => '['.$depth.']'
-    ];
-    $category = $this->rest->get($categories);
-    if (empty($category->categories->children())) {
-      $category_id = $this->setPrestashopCategory($category_name);
-    } else {
-      $category_id = $category->categories->category;
-      $category_id = json_encode($category_id);
-      $category_id = json_decode($category_id, true);
-      $category_id = $category_id['@attributes']['id'];
+      $counter++;
     }
 
-    return $category_id;
+    foreach ($this->categories as &$i) {
+      $this->nodes[] = array('data' => &$i, 'childs' => array() , 'parent' => null);
+    }
+
+    $this->cat_tree = array('data' => null, 'childs' => array() , 'parent' => null);
+    foreach ($this->nodes as &$i) {
+      if ($i['data']->parent_tunnus == $root_cat) {
+        $this->cat_tree['childs'][$i['data']->node_tunnus] = &$i;
+        //$i['parent'] = &$this->cat_tree;
+        $i['childs'] = $this->categoryTreeBuildRecursive($i);
+      }
+    }
+
+    $this->cat_tree = $this->cat_tree['childs'];
+    return $this->cat_tree;
   }
 
-  public function getPrestashopCategory($category, $id=false)
+
+  public function categoryTreeBuildRecursive(&$parent)
   {
-    $category_name = $category;
-    if ($id) {
+    $childs = array();
+    foreach ($this->nodes as &$i) {
+      if ($i['data']->parent_tunnus == $parent['data']->node_tunnus) {
+        $childs[$i['data']->node_tunnus] = &$i;
+        $i['parent'] = &$parent;
+        $i['childs'] = $this->categoryTreeBuildRecursive($i);
+      }
+    }
+    return $childs;
+  }
+
+
+  public function getPrestashopCategory($cat_data, $id=false, $parent=false, $position=false)
+  {
+    $category_name = $cat_data->nimi;
+    $category_tunnus = $cat_data->node_tunnus;
+    if ($id and $parent and $position) {
+      $categories = [
+        'resource' => 'categories',
+        'filter[id]'  => '['.$id.']',
+        'filter[pupesoft_id]'  => '['.$category_tunnus.']',
+        'filter[position]'  => '['.$position.']',
+        'filter[id_parent]' => '['.$parent.']'
+      ];
+    } else if ($id and !$parent and !$position) {
       $categories = [
         'resource' => 'categories',
         'filter[id]'  => '['.$id.']'
@@ -337,13 +324,16 @@ class Presta17RestApi
     } else {
       $categories = [
         'resource' => 'categories',
-        'filter[name]'  => '['.$category.']'
+        'filter[pupesoft_id]'  => '['.$category_tunnus.']'
       ];
     }
 
     $category = $this->rest->get($categories);
-    if (empty($category->categories->children())) {
-      $category_id = $this->setPrestashopCategory($category_name);
+    if(empty($category->categories->children()) and $position and $parent) {
+      $category_id = $this->setPrestashopCategory($cat_data, $id, $parent, $position);
+    }
+    else if (empty($category->categories->children())) {
+      $category_id = $this->setPrestashopCategory($cat_data);
     } else {
       $category_id = $category->categories->category;
       $category_id = json_encode($category_id);
@@ -353,6 +343,43 @@ class Presta17RestApi
 
     return $category_id;
   }
+
+  
+  public function updatePrestashopCategory($cat)
+  {
+    $cat_data = $cat['data'];
+
+    $parent_data = (object) array(
+      "nimi" => $cat['data']->parent_nimi,
+      "node_tunnus" => $cat['data']->parent_tunnus
+    );
+
+    if($cat_data->syvyys == 1) { 
+      $parent_root = 2;
+      $presta_parent_id = $this->getPrestashopCategory($parent_data, $parent_root, false, false, 1);
+    }
+
+    $presta_id = $this->getPrestashopCategory($cat_data, false, false, false);
+    $cat_id = $this->getPrestashopCategory($cat_data, $presta_id, $presta_parent_id, $cat_data->sijainti);
+  }
+
+
+  public function updatePrestashopCategories($pupesoft_categories)
+  {
+    foreach ($pupesoft_categories as $cat1) {
+      $this->updatePrestashopCategory($cat1);
+      foreach ($cat1['childs'] as $cat2) {
+        $this->updatePrestashopCategory($cat2);
+        foreach ($cat2['childs'] as $cat3) {
+          $this->updatePrestashopCategory($cat3);
+          foreach ($cat3['childs'] as $cat4) {
+            $this->updatePrestashopCategory($cat4);
+          }
+        }
+      }
+    }
+  }
+
 
   public function compareData($pupe, $presta)
   {
@@ -376,13 +403,15 @@ class Presta17RestApi
     return;
   }
 
+
   public function updatePrestashopProducts($prestashop_products, $pupesoft_products)
   {
-    foreach ($prestashop_products as $prestashop_product) {
-      // call to retrieve customer with ID 2
+
+    foreach ($prestashop_products['found'] as $prestashop_product) {
+
       $xml = $this->rest->get([
         'resource' => 'products',
-        'id' => $prestashop_product, // Here we use hard coded value but of course you could get this ID from a request parameter or anywhere else
+        'id' => $prestashop_product,
       ]);
 
       $skip_product = false;
@@ -393,12 +422,15 @@ class Presta17RestApi
           $skip_product = true;
         }
       } else {
-        $skip_product = true;
+        $skip_product = false;
       }
 
       if ($skip_product) {
         continue;
       }
+
+      $pupesoft_product['try_nimike'] = utf8_encode($pupesoft_product['try_nimike']);
+      $pupesoft_product['tuotemerkki'] = utf8_encode($pupesoft_product['tuotemerkki']);
 
       if (isset($pupesoft_product['tuotemerkki'])
       and $pupesoft_product['tuotemerkki']
@@ -409,28 +441,30 @@ class Presta17RestApi
         $productFields->id_manufacturer = "";
       }
 
-      if (isset($pupesoft_product['try_nimike'])
-      and $pupesoft_product['try_nimike']
-      and $pupesoft_product['try_nimike'] != ""
-      and $pupesoft_product['try_nimike'] != null) {
-        $productFields->associations->categories->category->id = $this->getPrestashopCategory($pupesoft_product['try_nimike']);
-        $productFields->id_category_default = $this->getPrestashopCategory($pupesoft_product['try_nimike']);
-      } else {
-        $productFields->associations->categories->category->id = "";
-        $productFields->id_category_default = "";
-      }
+      $cat_data = (object) array(
+        "nimi" => '',
+        "node_tunnus" => $pupesoft_product['puun_tunnus']
+      );
+      $productFields->associations->categories->category->id = $this->getPrestashopCategory($cat_data);
+      $productFields->id_category_default = $this->getPrestashopCategory($cat_data);
 
       $productFields->price = $pupesoft_product['myyntihinta'];
-      $productFields->name = $productFields->meta_title = utf8_encode($pupesoft_product['nimitys']);
-      $productFields->description_short = $productFields->meta_description = utf8_encode($pupesoft_product['lyhytkuvaus']);
-      $productFields->description = utf8_encode($pupesoft_product['kuvaus']);
+      $productFields->name->language[0] = utf8_encode($pupesoft_product['nimitys']);
+      $productFields->meta_title->language[0] = utf8_encode($pupesoft_product['nimitys']);
+      $productFields->description_short->language[0] = mb_strimwidth(utf8_encode($pupesoft_product['lyhytkuvaus']), 0, 400, '...');
+      $productFields->meta_description->language[0] = mb_strimwidth(utf8_encode($pupesoft_product['lyhytkuvaus']), 0, 200, '...');
+
+      $productFields->description->language[0] = utf8_encode($pupesoft_product['kuvaus']);
       $productFields->minimal_quantity = (int) $pupesoft_product['myynti_era'];
       $productFields->ean13 = $pupesoft_product['eankoodi'];
+      $productFields->state = 1;
       
       if ($pupesoft_product['status'] != 'A') {
         $productFields->active = 0;
+        $productFields->available_for_order = 0;
       } else {
         $productFields->active = 1;
+        $productFields->available_for_order = 1;
       }
 
       $productFields->height = (float) $pupesoft_product['tuotekorkeus'];
@@ -456,19 +490,97 @@ class Presta17RestApi
         'putXml' => $xml->asXML(),
       ]);
     }
+
+    unset($productFields);
+    unset($updatedXml);
+    unset($xml);
+    unset($pupesoft_product);
+    unset($cat_data);
+    unset($skip_product);
+
+    foreach ($prestashop_products['missing'] as $pupesoft_product) {
+
+      $blankXml = $this->rest->get(['url' => $this->url.'api/products?schema=synopsis']);
+      $productFields = $blankXml->product->children();
+
+      $pupesoft_product['tuotemerkki'] = utf8_encode($pupesoft_product['tuotemerkki']);
+
+      if (isset($pupesoft_product['tuotemerkki'])
+      and $pupesoft_product['tuotemerkki']
+      and $pupesoft_product['tuotemerkki'] != ""
+      and $pupesoft_product['tuotemerkki'] != null) {
+        $productFields->id_manufacturer = $this->getPrestashopManufacturer($pupesoft_product['tuotemerkki']);
+      } else {
+        $productFields->id_manufacturer = "";
+      }
+
+      $cat_data = (object) array(
+        "nimi" => '',
+        "node_tunnus" => $pupesoft_product['puun_tunnus']
+      );
+      $productFields->associations->categories->category->id = $this->getPrestashopCategory($cat_data);
+      $productFields->id_category_default = $this->getPrestashopCategory($cat_data);
+
+      $productFields->price = $pupesoft_product['myyntihinta'];
+
+      $productFields->name->language[0] = utf8_encode($pupesoft_product['nimitys']);
+      $productFields->meta_title->language[0] = utf8_encode($pupesoft_product['nimitys']);
+      $productFields->description_short->language[0] = mb_strimwidth(utf8_encode($pupesoft_product['lyhytkuvaus']), 0, 400, '...');
+      $productFields->meta_description->language[0] = mb_strimwidth(utf8_encode($pupesoft_product['lyhytkuvaus']), 0, 200, '...');
+      $productFields->description->language[0] = utf8_encode($pupesoft_product['kuvaus']);
+
+      $productFields->minimal_quantity = (int) $pupesoft_product['myynti_era'];
+      $productFields->ean13 = $pupesoft_product['eankoodi'];
+      $productFields->state = 1;
+      $productFields->reference = $pupesoft_product['tuoteno'];
+      
+      if ($pupesoft_product['status'] != 'A') {
+        $productFields->active = 0;
+        $productFields->available_for_order = 0;
+      } else {
+        $productFields->active = 1;
+        $productFields->available_for_order = 1;
+      }
+
+      $productFields->height = (float) $pupesoft_product['tuotekorkeus'];
+      $productFields->width = (float) $pupesoft_product['tuoteleveys'];
+      $productFields->depth = (float) $pupesoft_product['tuotesyvyys'];
+      $productFields->weight = (float) $pupesoft_product['tuotemassa'];
+
+      unset($productFields->id);
+      unset($productFields->manufacturer_name);
+      unset($productFields->quantity);
+      unset($productFields->id_shop_default);
+      unset($productFields->id_default_image);
+
+      unset($productFields->id_default_combination);
+      unset($productFields->position_in_category);
+      unset($productFields->type);
+      unset($productFields->pack_stock_type);
+      unset($productFields->date_add);
+      unset($productFields->date_upd);
+      
+      $updatedXml = $this->rest->add([
+        'resource' => 'products',
+        'postXml' => $blankXml->asXML(),
+      ]);
+
+    }
   }
+
 
   public function begin($resource)
   {
-    echo "<pre>";
-    print_r($this->getPupesoftCategories());
-    echo "</pre>";
-    die();
+
+    //$this->pupesoft_categories = $this->categoryTreeBuild();
+    //$this->updatePrestashopCategories($this->pupesoft_categories);
     $this->pupesoft_products = $this->getPupesoftProducts();
     $this->prestashop_products = $this->getPrestashopProducts($this->pupesoft_products);
+
     $this->updatePrestashopProducts($this->prestashop_products, $this->pupesoft_products['products']);
   }
 }
+
 
 $webService = new PrestaShopWebservice($presta17_api_url, $presta17_api_pass, $presta17_api_debug);
 $execute = new Presta17RestApi(
@@ -476,4 +588,5 @@ $execute = new Presta17RestApi(
   $webService,
   $presta17_api_url
 );
+
 $execute->begin($resource);

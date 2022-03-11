@@ -1,7 +1,7 @@
 <?php
 
 ///* Tämä skripti käyttää slave-tietokantapalvelinta *///
-$useslave = 1;
+$useslave = 3;
 
 if (@include "../inc/parametrit.inc");
 elseif (@include "parametrit.inc");
@@ -1696,17 +1696,17 @@ if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
 
         $_tehdas_saldot = "";
 
-        $tarkista_tehdas_saldot_query = "SELECT *  
+        $tarkista_tehdas_saldot_query = "SELECT *
                                           FROM tuotteen_toimittajat
                                           WHERE yhtio = '$kukarow[yhtio]'
                                           AND tuoteno in ('".$row['tuoteno']."');";
-        
+
         $tarkista_tehdas_saldot = pupe_query($tarkista_tehdas_saldot_query);
         while ($_tarkista_tehdas = mysql_fetch_assoc($tarkista_tehdas_saldot)) {
           if($_tarkista_tehdas['tehdas_saldo'] <= 0) {
             continue;
           }
-          $hae_toim_nimi = "SELECT nimi  
+          $hae_toim_nimi = "SELECT nimi
             FROM toimi
             WHERE yhtio = '$kukarow[yhtio]'
              AND tunnus = '$_tarkista_tehdas[liitostunnus]';";

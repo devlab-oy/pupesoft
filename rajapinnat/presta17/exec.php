@@ -67,10 +67,15 @@ class Presta17RestApi
     $yhtio = $this->yhtiorow['yhtio'];
     $query = "SELECT * from tuote 
               JOIN puun_alkio on (tuote.yhtio =  puun_alkio.yhtio and tuote.tuoteno = puun_alkio.liitos) 
-              where tuote.yhtio='$yhtio'";
+              JOIN dynaaminen_puu on (puun_alkio.yhtio = dynaaminen_puu.yhtio and puun_alkio.puun_tunnus = dynaaminen_puu.tunnus) 
+              where tuote.yhtio='$yhtio' and 
+              (tuote.muutospvm between date_sub(now(),INTERVAL '$days' DAY) and now()) 
+              or 
+              (puun_alkio.muutospvm between date_sub(now(),INTERVAL '$days' DAY) and now()) 
+              ";
     $products = pupe_query($query);
     $results = array();
-//where tuote.yhtio='$yhtio' and tuote.muutospvm between date_sub(now(),INTERVAL '$days' DAY) and now()";
+
     while ($product = mysql_fetch_assoc($products)) {
       $osastores = t_avainsana("OSASTO", "", "and avainsana.selite ='$product[osasto]'", "'$yhtio'");
       $osastorow = mysql_fetch_assoc($osastores);
@@ -105,7 +110,7 @@ class Presta17RestApi
     foreach ($pupesoft_products_ids as $pupesoft_products_id) {
       $presta_products_opt = [
         'resource' => 'products',
-        'filter[reference]'  => '['.$pupesoft_products_id.']'
+        'filter[reference]'  => '['.utf8_encode($pupesoft_products_id).']'
       ];
 
       $prestashop_products_chunk = $this->rest->get($presta_products_opt);
@@ -161,6 +166,9 @@ class Presta17RestApi
 
   public function setPrestashopCategory($cat_data, $id=false, $parent=false, $position=false)
   {
+    if(!$cat_data->nimi or $cat_data->nimi == '') {
+      return;
+    }
     $category_name = $cat_data->nimi;
 
     $category_id = $cat_data->node_tunnus;
@@ -186,16 +194,11 @@ class Presta17RestApi
     } else {
       $blankXml = $this->rest->get(['url' => $this->url.'api/categories?schema=synopsis']);
     }
-    if(!$category_name or $category_name == "") {
-      $categoryFields->name->language[0][0] = $category_id;
-      $categoryFields->name->link_rewrite[0][0] = $this->slugify($category_id);
-      $categoryFields->name->active = 0;
-    } else {
-      $categoryFields->name->language[0][0] = $category_name;
-      $categoryFields->name->link_rewrite[0][0] = $this->slugify($category_name);
-    }
+
     $categoryFields = $blankXml->category->children();
 
+    $categoryFields->name->language[0][0] = $category_name;
+    $categoryFields->name->link_rewrite[0][0] = $this->slugify($category_name);
 
     $categoryFields->pupesoft_id->language[0][0] = $category_id;
 
@@ -369,12 +372,13 @@ class Presta17RestApi
       }
       
       $cur_id = $cat->pupesoft_id->language->__toString();
-      
+
 
       $cur_level = $cur_level-1;
-      if (!$cur_id) {
+      if (!$cur_id or 1==1) {
         $cur_presta_id = $cat->id->__toString();
-        $cur_name = $cat->name->language->__toString();
+
+        $cur_name = utf8_decode($cat->name->language->__toString());
         $query = "SELECT tunnus
                   FROM dynaaminen_puu
                     WHERE yhtio = '{$yhtio}' 
@@ -382,24 +386,31 @@ class Presta17RestApi
                     AND nimi = '{$cur_name}'
                   LIMIT 1";
         $result = pupe_query($query);
+
         $result = mysql_fetch_assoc($result);
+
+        $xml = $this->rest->get([
+          'resource' => 'categories',
+          'id' => $cur_presta_id
+        ]);
+
+        $categoryFields = $xml->category->children();
+
         if($result) {
-          $xml = $this->rest->get([
-            'resource' => 'categories',
-            'id' => $cur_presta_id
-          ]);
-          $categoryFields = $xml->category->children();
-
           $categoryFields->pupesoft_id->language[0] = $result['tunnus'];
-
-          unset($categoryFields->level_depth);
-          unset($categoryFields->nb_products_recursive);
-          $updatedXml = $this->rest->edit([
-            'resource' => 'categories',
-            'id' => (int) $categoryFields->id,
-            'putXml' => $xml->asXML(),
-          ]);
+          $categoryFields->active = 1;
+        } else {
+          $categoryFields->active = 0;
         }
+
+        unset($categoryFields->level_depth);
+        unset($categoryFields->nb_products_recursive);
+
+        $updatedXml = $this->rest->edit([
+          'resource' => 'categories',
+          'id' => (int) $categoryFields->id,
+          'putXml' => $xml->asXML(),
+        ]);
       }
     }
   }
@@ -487,9 +498,9 @@ class Presta17RestApi
       $productFields->description_short->language[0] = mb_strimwidth(utf8_encode($pupesoft_product['lyhytkuvaus']), 0, 400, '...', 'utf-8');
       $productFields->meta_description->language[0] = mb_strimwidth(utf8_encode(str_replace("=", "-", $pupesoft_product['lyhytkuvaus'])), 0, 200, '...'); 
       $productFields->description->language[0] = utf8_encode($pupesoft_product['kuvaus']);
-
+      
       $productFields->minimal_quantity = (int) $pupesoft_product['myynti_era'];
-      $productFields->ean13 = mb_strimwidth($pupesoft_product['eankoodi'], 0, 13, '', 'utf-8');
+      $productFields->ean13 = mb_strimwidth(preg_replace('/\s+/', '', $pupesoft_product['eankoodi']), 0, 13, '', 'utf-8');
       $productFields->state = 1;
       
       if ($pupesoft_product['status'] != 'A') {
@@ -570,9 +581,9 @@ class Presta17RestApi
       $productFields->description->language[0] = utf8_encode($pupesoft_product['kuvaus']);
 
       $productFields->minimal_quantity = (int) $pupesoft_product['myynti_era'];
-      $productFields->ean13 = mb_strimwidth($pupesoft_product['eankoodi'], 0, 13, '', 'utf-8');
+      $productFields->ean13 = mb_strimwidth(preg_replace('/\s+/', '', $pupesoft_product['eankoodi']), 0, 13, '', 'utf-8');
       $productFields->state = 1;
-      $productFields->reference = $pupesoft_product['tuoteno'];
+      $productFields->reference = utf8_encode($pupesoft_product['tuoteno']);
       
       if ($pupesoft_product['status'] != 'A') {
         $productFields->active = 0;

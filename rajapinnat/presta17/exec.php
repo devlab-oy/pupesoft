@@ -61,18 +61,19 @@ class Presta17RestApi
     $this->url = $url;
   }
 
-
   public function getPupesoftProducts($days)
   {
     $yhtio = $this->yhtiorow['yhtio'];
     $query = "SELECT * from tuote 
               JOIN puun_alkio on (tuote.yhtio =  puun_alkio.yhtio and tuote.tuoteno = puun_alkio.liitos) 
               JOIN dynaaminen_puu on (puun_alkio.yhtio = dynaaminen_puu.yhtio and puun_alkio.puun_tunnus = dynaaminen_puu.tunnus) 
-              where tuote.yhtio='$yhtio' and 
+              where tuote.yhtio='$yhtio' and (
               (tuote.muutospvm between date_sub(now(),INTERVAL '$days' DAY) and now()) 
               or 
-              (puun_alkio.muutospvm between date_sub(now(),INTERVAL '$days' DAY) and now()) 
+              (puun_alkio.muutospvm between date_sub(now(),INTERVAL '$days' DAY) and now())
+              )
               ";
+
     $products = pupe_query($query);
     $results = array();
 
@@ -91,8 +92,9 @@ class Presta17RestApi
         $product['try_nimike'] = $tryrow['selitetark'];
       }
 
-      $results[$product['tuoteno']] = $product;
+      $results[$product['tuoteno']][] = $product;
     }
+
     return
       array(
         'products' => $results,
@@ -110,12 +112,11 @@ class Presta17RestApi
     foreach ($pupesoft_products_ids as $pupesoft_products_id) {
       $presta_products_opt = [
         'resource' => 'products',
-        'filter[reference]'  => '['.utf8_encode($pupesoft_products_id).']'
+        'filter[reference]'  => '['.$pupesoft_products_id.']'
       ];
 
       $prestashop_products_chunk = $this->rest->get($presta_products_opt);
       if ($prestashop_products_chunk->products->children()) {
-
         $prestashop_products_chunk = json_encode($prestashop_products_chunk);
         $prestashop_products_chunk = json_decode($prestashop_products_chunk, true);
         foreach ($prestashop_products_chunk['products']['product'] as $found_product) {
@@ -164,9 +165,44 @@ class Presta17RestApi
   }
 
 
+  public function getPrestashopProductFeature($product_feature)
+  {
+    $product_feature_name = $product_feature;
+    $product_features = [
+      'resource' => 'product_features',
+      'filter[name]'  => '['.$product_feature.']'
+    ];
+    $product_feature = $this->rest->get($product_features);
+    $checker = $product_feature->product_features->children();
+    if (empty($checker)) {
+      $product_feature_id = $this->setPrestashopProductFeature($product_feature_name);
+    } else {
+      $product_feature_id = $product_feature->product_features->product_feature;
+      $product_feature_id = json_encode($product_feature_id);
+      $product_feature_id = json_decode($product_feature_id, true);
+      $product_feature_id = $product_feature_id['@attributes']['id'];
+    }
+
+    return $product_feature_id;
+  }
+
+  public function setPrestashopProductFeature($product_feature)
+  {
+    $blankXml = $this->rest->get(['url' => $this->url.'api/product_features?schema=synopsis']);
+    $product_featureFields = $blankXml->product_feature->children();
+    $product_featureFields->name = (string) $product_feature;
+    $product_features = [
+      'resource' => 'product_features',
+      'postXml' => $blankXml->asXML(),
+    ];
+    $createdXml = $this->rest->add($product_features);
+    $newProductFeatureFields = $createdXml->product_feature->children();
+    return $newProductFeatureFields->id;
+  }
+
   public function setPrestashopCategory($cat_data, $id=false, $parent=false, $position=false)
   {
-    if(!$cat_data->nimi or $cat_data->nimi == '') {
+    if (!$cat_data->nimi or $cat_data->nimi == '') {
       return;
     }
     $category_name = $cat_data->nimi;
@@ -202,7 +238,7 @@ class Presta17RestApi
 
     $categoryFields->pupesoft_id->language[0][0] = $category_id;
 
-    if($parent and $position) {
+    if ($parent and $position) {
       $categoryFields->id_parent = $parent;
       $categoryFields->position = $position;
     } else {
@@ -232,7 +268,8 @@ class Presta17RestApi
       'filter[name]'  => '['.$manufacturer.']'
     ];
     $manufacturer = $this->rest->get($manufacturers);
-    if (empty($manufacturer->manufacturers->children())) {
+    $checker = $manufacturer->manufacturers->children();
+    if (empty($checker)) {
       $manufacturer_id = $this->setPrestashopManufacturer($manufacturer_name);
     } else {
       $manufacturer_id = $manufacturer->manufacturers->manufacturer;
@@ -243,6 +280,8 @@ class Presta17RestApi
 
     return $manufacturer_id;
   }
+
+  
 
 
   public function categoryTreeBuild()
@@ -268,13 +307,13 @@ class Presta17RestApi
     $this->categories = array();
     $counter = 0;
     while ($row = mysql_fetch_assoc($result)) {
-      if($counter == 0) {
+      if ($counter == 0) {
         $root_cat = $row['parent_tunnus'];
       }
 
       $this->categories[$row['tunnus']] = (object) array(
-        "parent_nimi"   => utf8_encode($row['parent_nimi']),
-        "nimi"          => utf8_encode($row['nimi']),
+        "parent_nimi"   => $row['parent_nimi'],
+        "nimi"          => $row['nimi'],
         "node_tunnus"   => $row['tunnus'],
         "parent_tunnus" => $row['parent_tunnus'],
         "syvyys"        => $row['syvyys'],
@@ -328,7 +367,7 @@ class Presta17RestApi
         'filter[position]'  => '['.$position.']',
         'filter[id_parent]' => '['.$parent.']'
       ];
-    } else if ($id and !$parent and !$position) {
+    } elseif ($id and !$parent and !$position) {
       $categories = [
         'resource' => 'categories',
         'filter[id]'  => '['.$id.']'
@@ -341,10 +380,10 @@ class Presta17RestApi
     }
 
     $category = $this->rest->get($categories);
-    if(empty($category->categories->children()) and $position and $parent) {
+    $checker = $category->categories->children();
+    if (empty($checker) and $position and $parent) {
       $category_id = $this->setPrestashopCategory($cat_data, $id, $parent, $position);
-    }
-    else if (empty($category->categories->children())) {
+    } elseif (empty($checker)) {
       $category_id = $this->setPrestashopCategory($cat_data);
     } else {
       $category_id = $category->categories->category;
@@ -365,9 +404,9 @@ class Presta17RestApi
     ];
 
     $categories = $this->rest->get($categories);
-    foreach($categories->categories->category as $cat) {
+    foreach ($categories->categories->category as $cat) {
       $cur_level = $cat->level_depth->__toString();
-      if($cur_level < 2) {
+      if ($cur_level < 2) {
         continue;
       }
       
@@ -378,7 +417,7 @@ class Presta17RestApi
       if (!$cur_id or 1==1) {
         $cur_presta_id = $cat->id->__toString();
 
-        $cur_name = utf8_decode($cat->name->language->__toString());
+        $cur_name = $cat->name->language->__toString();
         $query = "SELECT tunnus
                   FROM dynaaminen_puu
                     WHERE yhtio = '{$yhtio}' 
@@ -396,11 +435,12 @@ class Presta17RestApi
 
         $categoryFields = $xml->category->children();
 
-        if($result) {
+        if ($result) {
           $categoryFields->pupesoft_id->language[0] = $result['tunnus'];
           $categoryFields->active = 1;
         } else {
           $categoryFields->active = 0;
+          $categoryFields->pupesoft_id->language[0] = '';
         }
 
         unset($categoryFields->level_depth);
@@ -454,50 +494,110 @@ class Presta17RestApi
   }
 
 
+  public function getPrestashopProductFeatureValues($product_feature, $product_feature_id)
+  {
+    $product_feature_name = $product_feature;
+    $product_feature_values = [
+      'resource' => 'product_feature_values',
+      'filter[value]'  => '['.$product_feature.']',
+      'filter[id_feature]' => '['.$product_feature_id.']'
+    ];
+    $product_feature_value = $this->rest->get($product_feature_values);
+
+    $checker = $product_feature_value->product_feature_values->children();
+    if (empty($checker)) {
+      $product_feature_value_id = $this->setPrestashopProductFeatureValues($product_feature_name, $product_feature_id);
+    } else {
+      $product_feature_value_id = $product_feature_value->product_feature_values->product_feature_value;
+      $product_feature_value_id = json_encode($product_feature_value_id);
+      $product_feature_value_id = json_decode($product_feature_value_id, true);
+      $product_feature_value_id = $product_feature_value_id['@attributes']['id'];
+    }
+
+    return $product_feature_value_id;
+  }
+
+  public function setPrestashopProductFeatureValues($product_feature_value, $product_feature_id)
+  {
+    $blankXml = $this->rest->get(['url' => $this->url.'api/product_feature_values?schema=synopsis']);
+    $product_feature_valueFields = $blankXml->product_feature_value->children();
+    $product_feature_valueFields->value = (string) $product_feature_value;
+    $product_feature_valueFields->id_feature = $product_feature_id;
+    $product_feature_values = [
+      'resource' => 'product_feature_values',
+      'postXml' => $blankXml->asXML(),
+    ];
+    $createdXml = $this->rest->add($product_feature_values);
+    $newProductFeatureValuesFields = $createdXml->product_feature_value->children();
+    return $newProductFeatureValuesFields->id;
+  }
+
+
   public function updatePrestashopProducts($prestashop_products, $pupesoft_products)
   {
-
     foreach ($prestashop_products['found'] as $prestashop_product) {
-
       $xml = $this->rest->get([
         'resource' => 'products',
         'id' => $prestashop_product,
       ]);
 
       if ($productFields = $xml->product->children()) {
-        $pupesoft_product = $pupesoft_products[(string) $productFields->reference];
+        $pupesoft_products_arr = $pupesoft_products[(string) $productFields->reference];
+      } else {
+        $pupesoft_products_arr = array();
       }
 
-      $old_fields = $productFields;
+      foreach ($pupesoft_products_arr as $pupesoft_product) {
+        $cat_data[] = (object) array(
+          "nimi" => '',
+          "node_tunnus" => $pupesoft_product['puun_tunnus']
+        );
+      }
 
-      $pupesoft_product['try_nimike'] = utf8_encode($pupesoft_product['try_nimike']);
-      $pupesoft_product['tuotemerkki'] = utf8_encode($pupesoft_product['tuotemerkki']);
+      $pupesoft_product = $pupesoft_products_arr[0];
+
+      $pupesoft_product['try_nimike'] = $pupesoft_product['try_nimike'];
+      $pupesoft_product['tuotemerkki'] = $pupesoft_product['tuotemerkki'];
 
       if (isset($pupesoft_product['tuotemerkki'])
-      and $pupesoft_product['tuotemerkki']
-      and $pupesoft_product['tuotemerkki'] != ""
-      and $pupesoft_product['tuotemerkki'] != null) {
+          and $pupesoft_product['tuotemerkki']
+          and $pupesoft_product['tuotemerkki'] != ""
+          and $pupesoft_product['tuotemerkki'] != null) {
         $productFields->id_manufacturer = $this->getPrestashopManufacturer($pupesoft_product['tuotemerkki']);
       } else {
         $productFields->id_manufacturer = "";
       }
 
-      $cat_data = (object) array(
-        "nimi" => '',
-        "node_tunnus" => $pupesoft_product['puun_tunnus']
-      );
-      $productFields->associations->categories->category->id = $this->getPrestashopCategory($cat_data);
-      $productFields->id_category_default = $this->getPrestashopCategory($cat_data);
+      unset($productFields->associations->product_features->product_feature);
+
+      //Yksikkö
+      $new_feat=$productFields->associations->product_features->addChild('product_feature');
+      $new_feat->addChild('id', $this->getPrestashopProductFeature('Yksikkö'));
+      $product_val = $this->getPrestashopProductFeatureValues($pupesoft_product['yksikko'], $this->getPrestashopProductFeature('Yksikkö'));
+      $new_feat->addChild('id_feature_value', $product_val);
+
+      //Myyntierä 
+      $new_feat=$productFields->associations->product_features->addChild('product_feature');
+      $new_feat->addChild('id', $this->getPrestashopProductFeature('Myyntierä'));
+      $product_val = $this->getPrestashopProductFeatureValues($pupesoft_product['myynti_era'], $this->getPrestashopProductFeature('Myyntierä'));
+      $new_feat->addChild('id_feature_value', $product_val);
+
+      unset($productFields->associations->categories->category->id);
+      foreach ($cat_data as $cat_data_single) {
+        $productFields->associations->categories->category->addChild('id', $this->getPrestashopCategory($cat_data_single));
+      }
+
+      $productFields->id_category_default = $this->getPrestashopCategory($cat_data[0]);
 
       $productFields->price = $pupesoft_product['myyntihinta'];
-      $productFields->name->language[0] = utf8_encode($pupesoft_product['nimitys']);
-      $productFields->link_rewrite->language[0] = $this->slugify(utf8_encode($pupesoft_product['nimitys']));
-      $productFields->meta_title->language[0] = utf8_encode($pupesoft_product['nimitys']);
+      $productFields->name->language[0] = $pupesoft_product['nimitys'];
+      $productFields->link_rewrite->language[0] = $this->slugify($pupesoft_product['nimitys']);
+      $productFields->meta_title->language[0] = $pupesoft_product['nimitys'];
 
-      $productFields->meta_keywords->language[0] = utf8_encode($pupesoft_product['try_nimike']);
-      $productFields->description_short->language[0] = mb_strimwidth(utf8_encode($pupesoft_product['lyhytkuvaus']), 0, 400, '...', 'utf-8');
-      $productFields->meta_description->language[0] = mb_strimwidth(utf8_encode(str_replace("=", "-", $pupesoft_product['lyhytkuvaus'])), 0, 200, '...'); 
-      $productFields->description->language[0] = utf8_encode($pupesoft_product['kuvaus']);
+      $productFields->meta_keywords->language[0] = $pupesoft_product['try_nimike'];
+      $productFields->description_short->language[0] = mb_strimwidth($pupesoft_product['lyhytkuvaus'], 0, 400, '...', 'utf-8');
+      $productFields->meta_description->language[0] = mb_strimwidth(str_replace("=", "-", $pupesoft_product['lyhytkuvaus']), 0, 200, '...');
+      $productFields->description->language[0] = $pupesoft_product['kuvaus'];
       
       $productFields->minimal_quantity = (int) $pupesoft_product['myynti_era'];
       $productFields->ean13 = mb_strimwidth(preg_replace('/\s+/', '', $pupesoft_product['eankoodi']), 0, 13, '', 'utf-8');
@@ -516,15 +616,10 @@ class Presta17RestApi
       $productFields->depth = (float) $pupesoft_product['tuotesyvyys'];
       $productFields->weight = (float) $pupesoft_product['tuotemassa'];
 
-      if($old_fields == $productFields) {
-        continue;
-      }
-
       unset($productFields->manufacturer_name);
       unset($productFields->quantity);
       unset($productFields->id_shop_default);
       unset($productFields->id_default_image);
-      unset($productFields->associations);
 
       unset($productFields->id_default_combination);
       unset($productFields->position_in_category);
@@ -534,10 +629,10 @@ class Presta17RestApi
       unset($productFields->date_upd);
       
       $updatedXml = $this->rest->edit([
-        'resource' => 'products',
-        'id' => (int) $productFields->id,
-        'putXml' => $xml->asXML(),
-      ]);
+          'resource' => 'products',
+          'id' => (int) $productFields->id,
+          'putXml' => $xml->asXML(),
+        ]);
     }
 
     unset($productFields);
@@ -547,12 +642,16 @@ class Presta17RestApi
     unset($cat_data);
     unset($skip_product);
 
-    foreach ($prestashop_products['missing'] as $pupesoft_product) {
-
+    foreach ($prestashop_products['missing'] as $pupesoft_products_arr) {
+      foreach ($pupesoft_products_arr as $pupesoft_product) {
+        $cat_data[] = (object) array(
+          "nimi" => '',
+          "node_tunnus" => $pupesoft_product['puun_tunnus']
+        );
+      }
+      $pupesoft_product = $pupesoft_products_arr[0];
       $blankXml = $this->rest->get(['url' => $this->url.'api/products?schema=synopsis']);
       $productFields = $blankXml->product->children();
-
-      $pupesoft_product['tuotemerkki'] = utf8_encode($pupesoft_product['tuotemerkki']);
 
       if (isset($pupesoft_product['tuotemerkki'])
       and $pupesoft_product['tuotemerkki']
@@ -563,27 +662,26 @@ class Presta17RestApi
         $productFields->id_manufacturer = "";
       }
 
-      $cat_data = (object) array(
-        "nimi" => '',
-        "node_tunnus" => $pupesoft_product['puun_tunnus']
-      );
-      $productFields->associations->categories->category->id = $this->getPrestashopCategory($cat_data);
-      $productFields->id_category_default = $this->getPrestashopCategory($cat_data);
+      foreach ($cat_data as $cat_data_single) {
+        $productFields->associations->categories->category->addChild('id', $this->getPrestashopCategory($cat_data_single));
+      }
+
+      $productFields->id_category_default = $this->getPrestashopCategory($cat_data[0]);
 
       $productFields->price = $pupesoft_product['myyntihinta'];
 
-      $productFields->name->language[0] = utf8_encode($pupesoft_product['nimitys']);
-      $productFields->meta_title->language[0] = utf8_encode($pupesoft_product['nimitys']);
-      $productFields->link_rewrite->language[0] = $this->slugify(utf8_encode($pupesoft_product['nimitys']));
+      $productFields->name->language[0] = $pupesoft_product['nimitys'];
+      $productFields->meta_title->language[0] = $pupesoft_product['nimitys'];
+      $productFields->link_rewrite->language[0] = $this->slugify($pupesoft_product['nimitys']);
       
-      $productFields->description_short->language[0] = mb_strimwidth(utf8_encode($pupesoft_product['lyhytkuvaus']), 0, 400, '...', 'utf-8');
-      $productFields->meta_description->language[0] = mb_strimwidth(utf8_encode(str_replace("=", "-", $pupesoft_product['lyhytkuvaus'])), 0, 200, '...'); 
-      $productFields->description->language[0] = utf8_encode($pupesoft_product['kuvaus']);
+      $productFields->description_short->language[0] = mb_strimwidth($pupesoft_product['lyhytkuvaus'], 0, 400, '...', 'utf-8');
+      $productFields->meta_description->language[0] = mb_strimwidth(str_replace("=", "-", $pupesoft_product['lyhytkuvaus']), 0, 200, '...');
+      $productFields->description->language[0] = $pupesoft_product['kuvaus'];
 
       $productFields->minimal_quantity = (int) $pupesoft_product['myynti_era'];
       $productFields->ean13 = mb_strimwidth(preg_replace('/\s+/', '', $pupesoft_product['eankoodi']), 0, 13, '', 'utf-8');
       $productFields->state = 1;
-      $productFields->reference = utf8_encode($pupesoft_product['tuoteno']);
+      $productFields->reference = $pupesoft_product['tuoteno'];
       
       if ($pupesoft_product['status'] != 'A') {
         $productFields->active = 0;
@@ -615,22 +713,23 @@ class Presta17RestApi
         'resource' => 'products',
         'postXml' => $blankXml->asXML(),
       ]);
-
     }
   }
 
 
-  public function begin($resource, $days=10)
+  public function begin($resource, $days=7)
   {
-    if($resource == 'prepare') {
+    if ($resource == 'prepare' or $resource == 'all') {
       $this->setCategoryPupesoftIds();
     }
-    if ($resource == 'categories') {
+    if ($resource == 'categories' or $resource == 'all') {
       $this->pupesoft_categories = $this->categoryTreeBuild();
+
       $this->updatePrestashopCategories($this->pupesoft_categories);
     }
-    if ($resource == 'products') {
+    if ($resource == 'products' or $resource == 'all') {
       $this->pupesoft_products = $this->getPupesoftProducts($days);
+
       $this->prestashop_products = $this->getPrestashopProducts($this->pupesoft_products);
       $this->updatePrestashopProducts($this->prestashop_products, $this->pupesoft_products['products']);
     }

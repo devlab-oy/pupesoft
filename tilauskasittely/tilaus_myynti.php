@@ -4837,8 +4837,15 @@ if ($tee == '') {
         if ($yhtiorow["raaka_aineet_valmistusmyynti"] == "M" and $tapa == "MUOKKAAKOKORESEPTI") {
           $tapa = "MUOKKAA";
         }
-        elseif ($yhtiorow["raaka_aineet_valmistusmyynti"] == "M" and $tapa == "MUOKKAA") {
-          $perheid = $rivitunnus;
+        elseif ($yhtiorow["raaka_aineet_valmistusmyynti"] == "M" and $tapa == "MUOKKAA" and $tilausrivi['tyyppi'] != 'L') {
+
+          if ($tilausrivi['tyyppi'] == 'M') {
+            $perheid = $rivitunnus * -1;
+          }
+          else {
+            $perheid = $rivitunnus;
+          }
+
           $aladellaaperhetta = TRUE;
         }
 
@@ -8815,7 +8822,7 @@ if ($tee == '') {
                 </form>";
           }
 
-          if ((($row["tunnus"] == $row["perheid"] and $row["perheid"] != 0) or $row["perheid"] == 0) and ($toim == 'VALMISTAVARASTOON' or $toim == 'VALMISTAASIAKKAALLE') and $kukarow['extranet'] == '') {
+          if ((($row["tunnus"] == $row["perheid"] and $row["perheid"] != 0) or $row["perheid"] == 0) and ($toim == 'VALMISTAVARASTOON' or $toim == 'VALMISTAASIAKKAALLE') and $kukarow['extranet'] == '' and $row["tyyppi"] != "L") {
             if ($yhtiorow["raaka_aineet_valmistusmyynti"] == "M" and empty($muokkauslukko_rivi)) {
               echo "<form method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php' name='muokkaa' class='muokkaa_form'>
                   <input type='hidden' name='toim'         value = '$toim'>

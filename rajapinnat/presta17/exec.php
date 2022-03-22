@@ -72,7 +72,7 @@ class Presta17RestApi
               ";
 
     $products = pupe_query($query);
-    $results = [];
+    $results = array();
 
     while ($product = mysql_fetch_assoc($products)) {
       $osastores = t_avainsana('OSASTO', '', "and avainsana.selite ='$product[osasto]'", "'$yhtio'");
@@ -102,8 +102,8 @@ class Presta17RestApi
   public function getPrestashopProducts($pupesoft_products)
   {
     $pupesoft_products_ids = $pupesoft_products['ids'];
-    $prestashop_products = [];
-    $missing_products = [];
+    $prestashop_products = array();
+    $missing_products = array();
 
     foreach ($pupesoft_products_ids as $pupesoft_products_id) {
       $presta_products_opt = [
@@ -300,7 +300,7 @@ class Presta17RestApi
               ORDER BY lft ASC";
 
     $result = pupe_query($query);
-    $this->categories = [];
+    $this->categories = array();
     $counter = 0;
     while ($row = mysql_fetch_assoc($result)) {
       if ($counter == 0) {
@@ -339,7 +339,7 @@ class Presta17RestApi
 
   public function categoryTreeBuildRecursive(&$parent)
   {
-    $childs = [];
+    $childs = array();
     foreach ($this->nodes as &$i) {
       if ($i['data']->parent_tunnus == $parent['data']->node_tunnus) {
         $childs[$i['data']->node_tunnus] = &$i;
@@ -539,10 +539,9 @@ class Presta17RestApi
       } else {
         $prestashop_products['missing'][] = $prestashop_product;
         continue;
-        $pupesoft_products_arr = [];
       }
 
-      $cat_data = [];
+      $cat_data = array();
 
       foreach ($pupesoft_products_arr as $pupesoft_product) {
         $cat_data[] = (object) [
@@ -585,7 +584,7 @@ class Presta17RestApi
 
       unset($productFields->associations->categories->category->id);
       foreach ($cat_data as $cat_data_single) {
-        if(isset($this->foundCategories[$cat_data_single->node_tunnus])) {
+        if (isset($this->foundCategories[$cat_data_single->node_tunnus])) {
           $productFields->associations->categories->category->addChild('id', $this->foundCategories[$cat_data_single->node_tunnus]);
         } else {
           $productFields->associations->categories->category->addChild('id', $this->getPrestashopCategory($cat_data_single));
@@ -641,6 +640,9 @@ class Presta17RestApi
     unset($productFields, $updatedXml, $xml, $pupesoft_product, $cat_data, $skip_product);
 
     foreach ($prestashop_products['missing'] as $pupesoft_products_arr) {
+
+      $cat_data = array();
+      
       foreach ($pupesoft_products_arr as $pupesoft_product) {
         $cat_data[] = (object) [
           'nimi' => '',
@@ -661,7 +663,7 @@ class Presta17RestApi
       }
 
       foreach ($cat_data as $cat_data_single) {
-        if(isset($this->foundCategories[$cat_data_single->node_tunnus])) {
+        if (isset($this->foundCategories[$cat_data_single->node_tunnus])) {
           $productFields->associations->categories->category->addChild('id', $this->foundCategories[$cat_data_single->node_tunnus]);
         } else {
           $productFields->associations->categories->category->addChild('id', $this->getPrestashopCategory($cat_data_single));
@@ -715,7 +717,7 @@ class Presta17RestApi
         $productFields->available_for_order = 1;
       }
 
-      $productFields->show_price = 1; 
+      $productFields->show_price = 1;
  
       $productFields->height = (float) $pupesoft_product['tuotekorkeus'];
       $productFields->width = (float) $pupesoft_product['tuoteleveys'];
@@ -742,7 +744,7 @@ class Presta17RestApi
               AND laji              = 'ASIAKASRYHMA' ORDER by jarjestys";
     $result = pupe_query($query);
 
-    $groups_result = [];
+    $groups_result = array();
 
     while ($group = mysql_fetch_assoc($result)) {
       if (!$group['presta_customergroup_id'] or $group['presta_customergroup_id'] == '') {
@@ -838,7 +840,7 @@ class Presta17RestApi
         'putXml' => $xml->asXML(),
       ]);
 
-    return $group_id;
+      return $group_id;
       return $groupFields->id;
     }
   }
@@ -884,7 +886,7 @@ class Presta17RestApi
     }
 
     if ($customer_id and $customerFields->email == 'development@devlab.fi') {
-      $customerFields->email = rand(0,999999)."development@devlab.fi";
+      $customerFields->email = rand(0, 999999)."development@devlab.fi";
     }
 
     $customerFields->firstname = '-';
@@ -998,7 +1000,7 @@ class Presta17RestApi
   {
     $yhtio = $this->yhtiorow['yhtio'];
 
-    $customers = [];
+    $customers = array();
 
     $query = "SELECT
             asiakas.kuljetusohje,
@@ -1047,9 +1049,9 @@ class Presta17RestApi
             ";
 
     $result = pupe_query($query);
-
+    $addresses = array();
     while ($customer = mysql_fetch_assoc($result)) {
-      $addresses = [];
+      
       $addresses[] = [
         'asiakas_id' => $customer['asiakas_tunnus'],
         'asiakas_nimi' => $customer['asiakas_nimi'],
@@ -1111,7 +1113,7 @@ class Presta17RestApi
                 AND asiakashinta.hinta > 0 
                 GROUP by group_name";
     $price_targets_q = pupe_query($query);
-    $prices_targets = [];
+    $prices_targets = array();
     while ($price_targets = mysql_fetch_assoc($price_targets_q)) {
       $prices_targets[] = $price_targets;
     }
@@ -1138,7 +1140,7 @@ class Presta17RestApi
                 AND if(asiakashinta.loppupvm = '0000-00-00', '9999-12-31', asiakashinta.loppupvm) >= current_date
                 AND asiakashinta.hinta           > 0";
     $price_groups_q = pupe_query($query);
-    $prices_groups = [];
+    $prices_groups = array();
     while ($price_groups = mysql_fetch_assoc($price_groups_q)) {
       $prices_groups[] = $price_groups;
     }
@@ -1180,9 +1182,84 @@ class Presta17RestApi
     }
   }
 
+  public function setPrestashopPrice($group_id, $_group_price, $_presta_product, $alkupvm, $loppupvm)
+  {
+    $existing_price_ok = [
+      'resource' => 'specific_prices',
+      'filter[id_group]' => '[' . $group_id . ']',
+      'filter[id_product]' => '[' . $_presta_product . ']'
+    ];
+
+    $found = false;
+
+    if ($existing_price_checker = $this->rest->get($existing_price_ok)) {
+      $existing_price_check = $existing_price_checker->specific_prices;
+      if ($existing_price_check->specific_price) {
+        $id = $existing_price_check->specific_price->attributes()->id->__toString();
+        $found = true;
+        $xml = $this->rest->get([
+          'resource' => 'specific_prices',
+          'id' => $id,
+        ]);
+        $specific_pricesFields = $xml->specific_price->children();
+        unset($specific_pricesFields->date_upd);
+      }
+    }
+
+    if (!$found) {
+      $xml = $this->rest->get(['url' => $this->url . 'api/specific_prices?schema=synopsis']);
+      $specific_pricesFields = $xml->specific_price->children();
+    }
+
+    $specific_pricesFields->id_shop = 0;
+    $specific_pricesFields->id_cart = 0;
+    $specific_pricesFields->id_product = $_presta_product;
+    $specific_pricesFields->id_currency = 1;
+    $specific_pricesFields->id_country = 0;
+    $specific_pricesFields->id_group = $group_id;
+    $specific_pricesFields->price = $_group_price;
+    $specific_pricesFields->id_customer = 0;
+    $specific_pricesFields->from_quantity  = 1;
+    $specific_pricesFields->reduction = "0.000000";
+    $specific_pricesFields->reduction_tax = 0;
+    $specific_pricesFields->reduction_type = 'amount';
+    $specific_pricesFields->from = $alkupvm;
+    $specific_pricesFields->to = $loppupvm;
+    
+    if (!$found) {
+      unset($specific_pricesFields->id);
+      $specific_prices = [
+        'resource' => 'specific_prices',
+        'postXml' => $xml->asXML(),
+      ];
+
+      if ($createdXml = $this->rest->add($specific_prices)) {
+        if ($this->errors_found($group_id, $createdXml)) {
+          return;
+        }
+      }
+    } else {
+      $updatedXml = $this->rest->edit([
+        'resource' => 'specific_prices',
+        'id' => $id,
+        'putXml' => $xml->asXML(),
+      ]);
+    }
+  }
+
   public function setPrestashopPrices($specific_prices, $pupesoft_customers, $prestashop_products)
   {
+    if (!empty($specific_prices['ryhmat'])) {
+      $data = $specific_prices['ryhmat'];
 
+      foreach ($data as $info_k => $info) {
+        echo "<pre>";
+        print_r($data);
+        echo "</pre>";
+        die();
+      }
+    }
+    die();
     if (!empty($specific_prices['piirit'])) {
       $data = $specific_prices['piirit'];
 
@@ -1207,7 +1284,6 @@ class Presta17RestApi
         } else {
           $group_id = $this->setPupesoftCustomerGroup(['selite' => $info['group_name']]);
         }
-
         $all_groups[$data[$info_k]['group_name']] = $group_id;
       }
  
@@ -1219,76 +1295,15 @@ class Presta17RestApi
         $_presta_product = $prestashop_products['found'][$_group_tuoteno];
 
         foreach ($_group_customers as $_group_customer) {
-          if (!isset($pupesoft_customers[$_group_customer])) { 
+          if (!isset($pupesoft_customers[$_group_customer])) {
             continue;
           }
           foreach ($pupesoft_customers[$_group_customer] as $cus) {
             $this->setPupesoftCustomer($cus, $_group_customer, $group_id);
           }
-          
         }
         
-        $existing_price_ok = [
-          'resource' => 'specific_prices',
-          'filter[id_group]' => '[' . $group_id . ']',
-          'filter[price]' => '[' . $_group_price . ']',
-          'filter[id_product]' => '[' . $_presta_product . ']'
-        ];
-
-        $found = false;
-
-        if ($existing_price_checker = $this->rest->get($existing_price_ok)) {
-          $existing_price_check = $existing_price_checker->specific_prices;
-          if ($existing_price_check->specific_price) {
-            $id = $existing_price_check->specific_price->attributes()->id->__toString();
-            $found = true;
-            $xml = $this->rest->get([
-              'resource' => 'specific_prices',
-              'id' => $id,
-            ]);
-            $specific_pricesFields = $xml->specific_price->children();
-            unset($specific_pricesFields->date_upd);
-          }
-        }
-        if (!$found) {
-          $xml = $this->rest->get(['url' => $this->url . 'api/specific_prices?schema=synopsis']);
-          $specific_pricesFields = $xml->specific_price->children();
-        }
-
-        $specific_pricesFields->id_shop = 0;
-        $specific_pricesFields->id_cart = 0;
-        $specific_pricesFields->id_product = $_presta_product;
-        $specific_pricesFields->id_currency = 1;
-        $specific_pricesFields->id_country = 0;
-        $specific_pricesFields->id_group = $group_id;
-        $specific_pricesFields->price = $_group_price;
-        $specific_pricesFields->id_customer = 0;
-        $specific_pricesFields->from_quantity  = 1;
-        $specific_pricesFields->reduction = "0.000000";
-        $specific_pricesFields->reduction_tax = 0;
-        $specific_pricesFields->reduction_type = 'amount';
-        $specific_pricesFields->from = $info['alkupvm'];
-        $specific_pricesFields->to = $info['loppupvm'];
-        
-        if (!$found) {
-          unset($specific_pricesFields->id);
-          $specific_prices = [
-            'resource' => 'specific_prices',
-            'postXml' => $xml->asXML(),
-          ];
-
-          if ($createdXml = $this->rest->add($specific_prices)) {
-            if ($this->errors_found($info, $createdXml)) {
-              return;
-            }
-          }
-        } else {
-          $updatedXml = $this->rest->edit([
-            'resource' => 'specific_prices',
-            'id' => $id,
-            'putXml' => $xml->asXML(),
-          ]);
-        }
+        $this->setPrestashopPrice($group_id, $_group_price, $_presta_product, $info['alkupvm'], $info['loppupvm']);
       }
     }
   }

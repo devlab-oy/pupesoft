@@ -219,6 +219,11 @@ echo "<br><br>
         <option value='td_pc'>td_pc</option>
         <option value='td_pc_add'>td_pc_add</option>
         <option value='td_pc_eng'>td_pc_eng</option>
+        <option value='td_cv'>td_cv</option>
+        <option value='td_cv_drivecab'>td_cv_drivecab</option>
+        <option value='td_cv_drivecab_alloc'>td_cv_drivecab_alloc</option>
+        <option value='td_cv_eng'>td_cv_eng</option>
+        <option value='td_cv_susp'>td_cv_susp</option>
       </select></td>
     </tr>
 

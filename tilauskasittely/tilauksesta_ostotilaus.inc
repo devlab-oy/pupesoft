@@ -374,7 +374,7 @@ if (!function_exists("tilauksesta_ostotilaus")) {
 
             if ($oletusostovarasto != 0) {
               $oletuspaikka_lisa = "AND tuotepaikat.varasto = '{$oletusostovarasto}'";
-            }
+            } 
             else if($tilrivirow['var'] == "T") {
               $oletuspaikka_lisa = "AND tuotepaikat.hyllytaso = 'A'";
             } 

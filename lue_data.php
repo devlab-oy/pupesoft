@@ -1484,7 +1484,7 @@ if ($kasitellaan_tiedosto) {
             // Lis‰t‰‰n ehtoon
             $valinta .= " and liitostunnus='$tpttrow[tunnus]' ";
           }
-        }
+        } 
         elseif ($table_mysql == "tuotteen_avainsanat") {
           if (in_array("SELITE", $taulunotsikot[$taulu])) {
             if (preg_match('/\.\d{3,}/', $taulunrivit[$taulu][$eriviindex][array_search("SELITE", $taulunotsikot[$taulu])])) {

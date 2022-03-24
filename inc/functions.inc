@@ -4081,7 +4081,7 @@ if (!function_exists("alehinta")) {
     $hintaan_osunut_kampanja = null;
     $kampanjarajaus = '';
 
-    // Onko kyseessŠ kampanja, jos on niin kampanjamatch yliajaa pŠivŠmŠŠrŠrajauksen
+    // Onko kyseessÿ kampanja, jos on niin kampanjamatch yliajaa pÿivÿmÿÿrÿrajauksen
     if (isset($laskurow['campaign_id'])) {
       $kampanjarajaus = " or campaign_id = {$laskurow['campaign_id']} ";
     }
@@ -9274,7 +9274,7 @@ if (!function_exists("palauta_intrastat_tiedot")) {
     }
 
     return $laskurow;
-  }
+  } 
 }
 
 if (!function_exists("livesearch_asiakkaantilausnumero")) {
@@ -12655,10 +12655,10 @@ if (!function_exists("pupesoft_csvstring")) {
 if (!function_exists("pupesoft_invoicestring")) {
   function pupesoft_invoicestring($string, $extrachars="") {
     // Muutetaan X -merkiksi kaikki non-printable characterit
-    // Sallitaan merkit ja numerot: a-z A-Z 0-9 ja ÖöÄäÅåÜüÕõ
+    // Sallitaan merkit ja numerot: a-z A-Z 0-9 ja ÖöÄäÅåÿÿÕõ
     // Sallitaan välilyönti sekä merkit: !#$%()*+,-./:;=?@_|§
 
-    return preg_replace("/[^A-Za-z0-9ÖöÄäÅåÜüÕõ ".preg_quote("!#$%()*+,-./:;=?@_|§", "/")."{$extrachars}]/", " ", $string);
+    return preg_replace("/[^A-Za-z0-9ÖöÄäÅåÿÿÕõ ".preg_quote("!#$%()*+,-./:;=?@_|§", "/")."{$extrachars}]/", " ", $string);
   }
 }
 
@@ -31792,12 +31792,12 @@ if (!function_exists("poista_osakeyhtio_lyhenne")) {
   function poista_osakeyhtio_lyhenne($nimi) {
 
     // strtolower ei osaa pienentää tämmöisiä erikoismerkkejä
-    $old = array("Ü", "", "Ä", "Ö", "Å");
-    $new = array("ü", "", "ä", "ö", "å");
+    $old = array("ÿ", "ÿ", "Ä", "Ö", "Å");
+    $new = array("ÿ", "ÿ", "ä", "ö", "å");
     $nimi = str_replace($old, $new, $nimi);
     $nimi = strtolower($nimi);
 
-    $replace = "oy|ab|as|oü|ou|mtü|tü|ttü";
+    $replace = "oy|ab|as|oÿ|ou|mtÿ|tÿ|ttÿ";
 
     // Nimen edestä
     $nimi = preg_replace("/^($replace) /", "", $nimi);
@@ -31822,11 +31822,11 @@ if (!function_exists("poista_osakeyhtio_lyhenne_mysql")) {
                             REPLACE(LOWER({$kentta}), 'oy', ''),
                           'ab', ''),
                         'as', ''),
-                      'oü', ''),
+                      'oÿ', ''),
                     'ou', ''),
-                  'mtü', ''),
-                'tü', ''),
-              'ttü', ''))";
+                  'mtÿ', ''),
+                'tÿ', ''),
+              'ttÿ', ''))";
   }
 }
 

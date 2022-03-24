@@ -9329,9 +9329,19 @@ if (!function_exists("livesearch_asiakkaantilausnumero")) {
       $haku_array = explode(" ", $haku);
       $haku_query = "";
 
+      if ($hakukentta == 'viesti') {
+        $_erikoishaku = true;
+      } else {
+        $_erikoishaku = false;
+      }
+
       foreach ($haku_array as $haku) {
         $haku = mysql_real_escape_string($haku);
-        $haku_query .= "and {$hakukentta} like ('%$haku%') ";
+        if($_erikoishaku) {
+          $haku_query .= "and {$hakukentta} != '' ";
+        } else {
+          $haku_query .= "and {$hakukentta} like ('%$haku%') ";
+        }
       }
 
       if ($hakukentta != "asiakkaan_tilausnumero") {
@@ -9347,12 +9357,21 @@ if (!function_exists("livesearch_asiakkaantilausnumero")) {
                 and DATEDIFF(luontiaika,NOW()) <= 365
                 $haku_query
                 and $logistiikka_yhtiolisa";
+
       $result = pupe_query($query);
 
       $limit = 0;
 
       if (mysql_num_rows($result) > 0) {
         while ($row = mysql_fetch_assoc($result)) {
+
+          if ($_erikoishaku) {
+            $pos = strpos($row[$hakukentta], $haku);
+            if ($pos === false) {
+              continue;
+            }
+          }   
+          
           echo "  <div id='asiakastilausnumero_valinta_$hakuid$row[tunnus]'
                 name='selectOptions$hakuid'
                 onmouseover=\"this.className='liveSearchSelectedItem';
@@ -9387,8 +9406,11 @@ if (!function_exists("livesearch_asiakkaantilausnumero")) {
             break;
           }
         }
-
-        echo "<div style='padding-left:2px;padding-bottom:5px;padding-top:5px;'><font class='info'>".t("Haulla löytyi")." ".mysql_num_rows($result). " ", t("tilausta"), " ".t("näytetään")." 50 ".t("tarkinta osumaa").".</font></div>";
+        if($_erikoishaku) {
+          echo "<div style='padding-left:2px;padding-bottom:5px;padding-top:5px;'><font class='info'>".t("Haulla löytyi")." ".$limit. " ", t("tilausta"), " ".t("näytetään")." 50 ".t("tarkinta osumaa").".</font></div>";
+        } else {
+          echo "<div style='padding-left:2px;padding-bottom:5px;padding-top:5px;'><font class='info'>".t("Haulla löytyi")." ".mysql_num_rows($result). " ", t("tilausta"), " ".t("näytetään")." 50 ".t("tarkinta osumaa").".</font></div>";
+        }
       }
       else {
         echo "<div style='padding:2px'><font class='message'>".t("Ei tilauksia.")."</font></div>";

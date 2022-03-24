@@ -603,7 +603,7 @@ if (isset($jatka)) {
       $tpostitp  = $varow["postitp"];
       $tmaa       = $varow["maa"];
 
-      $vresult_query = "SELECT tuoteno
+      $vresult_query = "SELECT *  
                           FROM tilausrivi
                           WHERE yhtio     = '{$kukarow['yhtio']}'
                         AND otunnus     = '{$tilausnumero}'";
@@ -613,12 +613,20 @@ if (isset($jatka)) {
       while ($vresult_query = mysql_fetch_assoc($vresult)) {
         // haetaan vielä tuotteen oletuspaikka puuteriville, jotta seuranta ois helpompaa
         //jos laskurow_tuotepaikat[varasto] on setattu niin yritetään löytää paikka siitä varastosta
+
+        if($vresult_query['var'] == 'T') {
+          $oletuspaikka_lisa = "ORDER BY prio ASC";
+        } else {
+          $oletuspaikka_lisa = "ORDER BY tuotepaikat.oletus DESC";
+        }
         $query_tuotepaikat = "SELECT tuotepaikat.*, tuotepaikat.varasto varastotunnus
                                 FROM tuotepaikat
                                 where tuotepaikat.yhtio    = '$kukarow[yhtio]'
                                 and tuotepaikat.tuoteno    = '$vresult_query[tuoteno]'
-                                AND tuotepaikat.hyllyalue != '!!M'
-                              ORDER BY tuotepaikat.oletus DESC";
+                                AND tuotepaikat.hyllyalue != '!!M' 
+                                $oletuspaikka_lisa
+                              ";
+
         $result_tuotepaikat = pupe_query($query_tuotepaikat);
 
         if (mysql_num_rows($result_tuotepaikat) > 0) {
@@ -635,8 +643,8 @@ if (isset($jatka)) {
                 $p_hyllynro    = $olerow["hyllynro"];
                 $p_hyllyvali  = $olerow["hyllyvali"];
                 $p_hyllytaso  = $olerow["hyllytaso"];
-
                 $loydetytpaikat = TRUE;
+
                 break;
               }
             }

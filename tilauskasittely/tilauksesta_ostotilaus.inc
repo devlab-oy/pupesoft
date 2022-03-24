@@ -372,10 +372,7 @@ if (!function_exists("tilauksesta_ostotilaus")) {
 
           while ($tilrivirow = mysql_fetch_assoc($tilrivires)) {
 
-            if ($tilrivirow['var'] == "T") {
-              $oletuspaikka_lisa = "AND tuotepaikat.hyllytaso = 'A'";
-            } 
-            else if ($oletusostovarasto != 0) {
+            if ($oletusostovarasto != 0) {
               $oletuspaikka_lisa = "AND tuotepaikat.varasto = '{$oletusostovarasto}'";
             } 
             else {
@@ -454,7 +451,7 @@ if (!function_exists("tilauksesta_ostotilaus")) {
                         tyyppi          = 'O',
                         toimaika        = '$tilrivirow[toimaika]',
                         kommentti       = '$tilrivirow[kommentti]',
-                        var             = '',
+                        var             = '$tilrivirow[var]',
                         try             = '$tilrivirow[try]',
                         osasto          = '$tilrivirow[osasto]',
                         perheid         = '{$pid1}',

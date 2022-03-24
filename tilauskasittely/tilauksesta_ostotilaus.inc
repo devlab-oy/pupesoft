@@ -372,11 +372,11 @@ if (!function_exists("tilauksesta_ostotilaus")) {
 
           while ($tilrivirow = mysql_fetch_assoc($tilrivires)) {
 
-            if ($oletusostovarasto != 0) {
-              $oletuspaikka_lisa = "AND tuotepaikat.varasto = '{$oletusostovarasto}'";
-            } 
-            else if($tilrivirow['var'] == "T") {
+            if($tilrivirow['var'] == "T") {
               $oletuspaikka_lisa = "AND tuotepaikat.hyllytaso = 'A'";
+            } 
+            else if ($oletusostovarasto != 0) {
+              $oletuspaikka_lisa = "AND tuotepaikat.varasto = '{$oletusostovarasto}'";
             } 
             else {
               $oletuspaikka_lisa = "AND tuotepaikat.oletus != ''";
@@ -389,6 +389,10 @@ if (!function_exists("tilauksesta_ostotilaus")) {
                       AND tuotepaikat.tuoteno = '{$tilrivirow['tuoteno']}'
                       {$oletuspaikka_lisa}
                       LIMIT 1";
+            echo "<pre>";
+            echo $query;
+            echo "</pre>";
+            die();
             $jtsre = pupe_query($query);
             $jtstu = mysql_fetch_assoc($jtsre);
 

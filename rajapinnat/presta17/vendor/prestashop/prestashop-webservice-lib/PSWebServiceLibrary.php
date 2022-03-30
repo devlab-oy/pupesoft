@@ -108,7 +108,7 @@ class PrestaShopWebservice
                 throw new PrestaShopWebserviceException(sprintf($error_label, $status_code, 'Unauthorized'));
                 break;
             case 404:
-                throw new PrestaShopWebserviceException(sprintf($error_label, $status_code, 'Not Found'));
+                //throw new PrestaShopWebserviceException(sprintf($error_label, $status_code, 'Not Found'));
                 break;
             case 405:
                 throw new PrestaShopWebserviceException(sprintf($error_label, $status_code, 'Method Not Allowed'));
@@ -263,7 +263,7 @@ class PrestaShopWebservice
             }
             return $xml;
         } else {
-            throw new PrestaShopWebserviceException('HTTP response is empty');
+            //throw new PrestaShopWebserviceException('HTTP response is empty');
         }
     }
 

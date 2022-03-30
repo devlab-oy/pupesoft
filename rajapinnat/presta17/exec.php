@@ -64,11 +64,12 @@ class Presta17RestApi
     $query = "SELECT * from tuote 
               JOIN puun_alkio on (tuote.yhtio =  puun_alkio.yhtio and tuote.tuoteno = puun_alkio.liitos) 
               JOIN dynaaminen_puu on (puun_alkio.yhtio = dynaaminen_puu.yhtio and puun_alkio.puun_tunnus = dynaaminen_puu.tunnus) 
-              where tuote.yhtio='$yhtio' and (
+              where tuote.yhtio='$yhtio' 
+              and (
               (tuote.muutospvm between date_sub(now(),INTERVAL '$days' DAY) and now()) 
               or 
               (puun_alkio.muutospvm between date_sub(now(),INTERVAL '$days' DAY) and now())
-              )
+              ) 
               ";
 
     $products = pupe_query($query);
@@ -529,6 +530,7 @@ class Presta17RestApi
   public function updatePrestashopProducts($prestashop_products, $pupesoft_products)
   {
     foreach ($prestashop_products['found'] as $prestashop_product) {
+
       $xml = $this->rest->get([
         'resource' => 'products',
         'id' => $prestashop_product,
@@ -537,7 +539,7 @@ class Presta17RestApi
       if ($productFields = $xml->product->children()) {
         $pupesoft_products_arr = $pupesoft_products[(string) $productFields->reference];
       } else {
-        $prestashop_products['missing'][] = $prestashop_product;
+        //$prestashop_products['missing'][] = $prestashop_product;
         continue;
       }
 
@@ -566,7 +568,6 @@ class Presta17RestApi
 
       unset($productFields->associations->product_features->product_feature);
 
-      //Yksikkö
       if ($pupesoft_product['yksikko'] and $pupesoft_product['yksikko'] != '') {
         $new_feat = $productFields->associations->product_features->addChild('product_feature');
         $new_feat->addChild('id', $this->getPrestashopProductFeature('Yksikkö'));
@@ -574,13 +575,14 @@ class Presta17RestApi
         $new_feat->addChild('id_feature_value', $product_val);
       }
 
-      //Myyntierä
       if ($pupesoft_product['myynti_era'] and $pupesoft_product['myynti_era'] != '') {
         $new_feat = $productFields->associations->product_features->addChild('product_feature');
         $new_feat->addChild('id', $this->getPrestashopProductFeature('Myyntierä'));
         $product_val = $this->getPrestashopProductFeatureValues($pupesoft_product['myynti_era'], $this->getPrestashopProductFeature('Myyntierä'));
         $new_feat->addChild('id_feature_value', $product_val);
       }
+
+      unset($productFields->associations->product_bundle);
 
       unset($productFields->associations->categories->category->id);
       foreach ($cat_data as $cat_data_single) {
@@ -661,6 +663,8 @@ class Presta17RestApi
       } else {
         $productFields->id_manufacturer = '';
       }
+
+      unset($productFields->associations->product_bundle);
 
       foreach ($cat_data as $cat_data_single) {
         if (isset($this->foundCategories[$cat_data_single->node_tunnus])) {
@@ -1135,7 +1139,7 @@ class Presta17RestApi
                 LEFT JOIN yhteyshenkilo ON (yhteyshenkilo.yhtio = asiakashinta.yhtio
                   AND yhteyshenkilo.liitostunnus = asiakashinta.asiakas)
                 WHERE asiakashinta.yhtio         = '{$yhtio}' 
-                AND asiakashinta.asiakas_ryhma != '' 
+                AND asiakashinta.asiakas_ryhma != '' AND presta_customergroup_id != '' AND asiakashinta.tuoteno != '' 
                 AND if(asiakashinta.alkupvm  = '0000-00-00', '0001-01-01', asiakashinta.alkupvm)  <= current_date
                 AND if(asiakashinta.loppupvm = '0000-00-00', '9999-12-31', asiakashinta.loppupvm) >= current_date
                 AND asiakashinta.hinta           > 0";
@@ -1153,6 +1157,7 @@ class Presta17RestApi
 
   public function begin($resource, $days = 7)
   {
+
     if ($resource == 'prepare' or $resource == 'all') {
       $this->setCategoryPupesoftIds();
     }
@@ -1170,20 +1175,20 @@ class Presta17RestApi
 
     if ($resource == 'customers' or $resource == 'all') {
       $pupesoft_customers = $this->getPupesoftCustomers($days);
-
-    
       $prestashop_addresses = $this->setPrestashopAddresses($pupesoft_customers);
     }
 
-    if ($resource == 'prices') {
+    if ($resource == 'prices' or $resource == 'all') {
       $this->pupesoft_products = $this->getPupesoftProducts($days);
       $this->prestashop_products = $this->getPrestashopProducts($this->pupesoft_products);
       $this->setPrestashopPrices($this->getPupesoftPrices(), $this->getPupesoftCustomers($days), $this->prestashop_products);
     }
+
   }
 
   public function setPrestashopPrice($group_id, $_group_price, $_presta_product, $alkupvm, $loppupvm)
   {
+
     $existing_price_ok = [
       'resource' => 'specific_prices',
       'filter[id_group]' => '[' . $group_id . ']',
@@ -1251,15 +1256,11 @@ class Presta17RestApi
   {
     if (!empty($specific_prices['ryhmat'])) {
       $data = $specific_prices['ryhmat'];
-
       foreach ($data as $info_k => $info) {
-        echo "<pre>";
-        print_r($data);
-        echo "</pre>";
-        die();
+        $this->setPrestashopPrice($info['presta_customergroup_id'], $info['hinta'], $info['tuoteno'], $info['alkupvm'], $info['loppupvm']);
       }
     }
-    die();
+
     if (!empty($specific_prices['piirit'])) {
       $data = $specific_prices['piirit'];
 

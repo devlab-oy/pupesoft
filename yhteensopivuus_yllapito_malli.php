@@ -183,9 +183,6 @@ if ($merkki != '') {
 }
 
 echo "</select></td>";
-
-echo "</select></td>";
-
 echo "<td>";
 echo "<input type='hidden' name='osasto' value='{$osasto}'>";
 echo "<input type='hidden' name='tuoteryhma' value='{$tuoteryhma}'>";

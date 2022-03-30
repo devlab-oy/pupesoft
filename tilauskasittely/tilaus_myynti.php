@@ -4833,8 +4833,24 @@ if ($tee == '') {
           vapauta_sarjanumerot($toim, $kukarow["kesken"], " and tilausrivi.tunnus = '$rivitunnus' ");
         }
 
+        $aladellaaperhetta = FALSE;
+        if ($yhtiorow["raaka_aineet_valmistusmyynti"] == "M" and $tapa == "MUOKKAAKOKORESEPTI") {
+          $tapa = "MUOKKAA";
+        }
+        elseif ($yhtiorow["raaka_aineet_valmistusmyynti"] == "M" and $tapa == "MUOKKAA" and $tilausrivi['tyyppi'] != 'L') {
+
+          if ($tilausrivi['tyyppi'] == 'M') {
+            $perheid = $rivitunnus * -1;
+          }
+          else {
+            $perheid = $rivitunnus;
+          }
+
+          $aladellaaperhetta = TRUE;
+        }
+
         // Poistetaan myös tuoteperheen lapset
-        if ($tapa != "VAIHDA" and $tapa != "POISJTSTA" and $tapa != "PUUTE" and $tapa != "JT") {
+        if ($tapa != "VAIHDA" and $tapa != "POISJTSTA" and $tapa != "PUUTE" and $tapa != "JT" and empty($aladellaaperhetta)) {
 
           // Nollataan sarjanumerolinkit lapsien ja isän ja dellataan ostorivit
           vapauta_sarjanumerot($toim, $kukarow["kesken"], " and (tilausrivi.tunnus = '$rivitunnus' or tilausrivi.perheid = '$rivitunnus') ");
@@ -8804,6 +8820,34 @@ if ($tee == '') {
                 <input type='hidden' name='orig_alatila'   value = '$orig_alatila'>
                 <input type='submit' value='$nappulanteksti'>
                 </form>";
+          }
+
+          if ((($row["tunnus"] == $row["perheid"] and $row["perheid"] != 0) or $row["perheid"] == 0) and ($toim == 'VALMISTAVARASTOON' or $toim == 'VALMISTAASIAKKAALLE') and $kukarow['extranet'] == '' and $row["tyyppi"] != "L") {
+            if ($yhtiorow["raaka_aineet_valmistusmyynti"] == "M" and empty($muokkauslukko_rivi)) {
+              echo "<form method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php' name='muokkaa' class='muokkaa_form'>
+                  <input type='hidden' name='toim'         value = '$toim'>
+                  <input type='hidden' name='lopetus'      value = '$lopetus'>
+                  <input type='hidden' name='ruutulimit'   value = '$ruutulimit'>
+                  <input type='hidden' name='projektilla'  value = '$projektilla'>
+                  <input type='hidden' name='tilausnumero' value = '$tilausnumero'>
+                  <input type='hidden' name='mista'        value = '$mista'>
+                  <input type='hidden' name='rivitunnus'   value = '$row[tunnus]'>
+                  <input type='hidden' name='keratty'      value = '$row[keratty]'>
+                  <input type='hidden' name='kerattyaika'  value = '$row[kerattyaika]'>
+                  <input type='hidden' name='toimitettu'   value = '$row[toimitettu]'>
+                  <input type='hidden' name='toimitettuaika' value = '$row[toimitettuaika]'>
+                  <input type='hidden' name='ale_peruste'  value = '$row[ale_peruste]'>
+                  <input type='hidden' name='rivilaadittu' value = '$row[laadittu]'>
+                  <input type='hidden' name='menutila'     value = '$menutila'>
+                  <input type='hidden' name='tuotenimitys' value = '$row[nimitys]'>
+                  <input type='hidden' name='orig_tila'    value = '$orig_tila'>
+                  <input type='hidden' name='orig_alatila' value = '$orig_alatila'>
+                  <input type='hidden' name='tila'         value = 'MUUTA'>
+                  <input type='hidden' name='tapa'         value = 'MUOKKAAKOKORESEPTI'>
+                  <input type='hidden' id='keratty_ja_ylitetty_warning' value = '".t('Tilaus on jo kerätty ja/tai toimitettu. Oletko varma että haluat muokata riviä?')."'>
+                  <input type='submit' value='".t("Palauta oletusresepti")."'>
+                  </form> ";
+            }
           }
 
           // Jos JT-rivit varaa saldoa, niin ei anneta tän kysisen rivin syödä omaa saldoaan.

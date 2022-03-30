@@ -4269,10 +4269,11 @@ if ($fieldname == 'ennakkolaskun_tyyppi') {
 if ($fieldname == 'raaka_aineet_valmistusmyynti') {
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
 
-  $sel = $trow[$i] == 'N' ? ' selected' : '';
+  $sel = array($trow[$i] => 'selected') + array('M' => '', 'N' => '');
 
   $ulos .= "<option value = ''>".t("N‰ytet‰‰n raaka-aineet valmistusmyynniss‰ (asiakkaallevalmistus)");
-  $ulos .= "<option value = 'N' $sel>".t("Ei n‰ytet‰ raaka-aineita valmistusmyynniss‰ (asiakkaallevalmistus)");
+  $ulos .= "<option value = 'M' {$sel['M']}>".t("N‰ytet‰‰n raaka-aineet valmistusmyynniss‰ (asiakkaallevalmistus) ja muokataan oletuksena vain is‰tuotetta");
+  $ulos .= "<option value = 'N' {$sel['N']}>".t("Ei n‰ytet‰ raaka-aineita valmistusmyynniss‰ (asiakkaallevalmistus)");
   $ulos .= "</select></td>";
 
   $jatko = 0;

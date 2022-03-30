@@ -4081,7 +4081,7 @@ if (!function_exists("alehinta")) {
     $hintaan_osunut_kampanja = null;
     $kampanjarajaus = '';
 
-    // Onko kyseessŠ kampanja, jos on niin kampanjamatch yliajaa pŠivŠmŠŠrŠrajauksen
+    // Onko kyseessÿ kampanja, jos on niin kampanjamatch yliajaa pÿivÿmÿÿrÿrajauksen
     if (isset($laskurow['campaign_id'])) {
       $kampanjarajaus = " or campaign_id = {$laskurow['campaign_id']} ";
     }
@@ -9274,7 +9274,7 @@ if (!function_exists("palauta_intrastat_tiedot")) {
     }
 
     return $laskurow;
-  }
+  } 
 }
 
 if (!function_exists("livesearch_asiakkaantilausnumero")) {
@@ -9329,9 +9329,27 @@ if (!function_exists("livesearch_asiakkaantilausnumero")) {
       $haku_array = explode(" ", $haku);
       $haku_query = "";
 
+      if ($hakukentta == 'viesti') {
+        $_erikoishaku = true;
+      } else {
+        $_erikoishaku = false;
+      }
+
       foreach ($haku_array as $haku) {
         $haku = mysql_real_escape_string($haku);
-        $haku_query .= "and {$hakukentta} like ('%$haku%') ";
+        if($_erikoishaku) {
+          $haku_query .= "and ({$hakukentta} = '$haku' or {$hakukentta} LIKE '%$haku%') ";
+          $haku_limit = "
+          ORDER BY
+            CASE
+            WHEN {$hakukentta} LIKE '$haku' THEN 1
+          ELSE 2 
+            END 
+          LIMIT 5";
+        } else {
+          $haku_query .= "and {$hakukentta} like ('%$haku%') ";
+          $haku_limit = "";
+        }
       }
 
       if ($hakukentta != "asiakkaan_tilausnumero") {
@@ -9346,13 +9364,16 @@ if (!function_exists("livesearch_asiakkaantilausnumero")) {
                 WHERE tila in ('L','U','N','R','E','D')
                 and DATEDIFF(luontiaika,NOW()) <= 365
                 $haku_query
-                and $logistiikka_yhtiolisa";
+                and $logistiikka_yhtiolisa 
+                $haku_limit";
+
       $result = pupe_query($query);
 
       $limit = 0;
 
       if (mysql_num_rows($result) > 0) {
         while ($row = mysql_fetch_assoc($result)) {
+          
           echo "  <div id='asiakastilausnumero_valinta_$hakuid$row[tunnus]'
                 name='selectOptions$hakuid'
                 onmouseover=\"this.className='liveSearchSelectedItem';
@@ -9387,8 +9408,11 @@ if (!function_exists("livesearch_asiakkaantilausnumero")) {
             break;
           }
         }
-
-        echo "<div style='padding-left:2px;padding-bottom:5px;padding-top:5px;'><font class='info'>".t("Haulla löytyi")." ".mysql_num_rows($result). " ", t("tilausta"), " ".t("näytetään")." 50 ".t("tarkinta osumaa").".</font></div>";
+        if($_erikoishaku) {
+          echo "<div style='padding-left:2px;padding-bottom:5px;padding-top:5px;'><font class='info'>".t("Haulla löytyi")." ".$limit. " ", t("tilausta"), " ".t("näytetään")." 50 ".t("tarkinta osumaa").".</font></div>";
+        } else {
+          echo "<div style='padding-left:2px;padding-bottom:5px;padding-top:5px;'><font class='info'>".t("Haulla löytyi")." ".mysql_num_rows($result). " ", t("tilausta"), " ".t("näytetään")." 50 ".t("tarkinta osumaa").".</font></div>";
+        }
       }
       else {
         echo "<div style='padding:2px'><font class='message'>".t("Ei tilauksia.")."</font></div>";
@@ -12633,10 +12657,10 @@ if (!function_exists("pupesoft_csvstring")) {
 if (!function_exists("pupesoft_invoicestring")) {
   function pupesoft_invoicestring($string, $extrachars="") {
     // Muutetaan X -merkiksi kaikki non-printable characterit
-    // Sallitaan merkit ja numerot: a-z A-Z 0-9 ja ÖöÄäÅåÜüÕõ
+    // Sallitaan merkit ja numerot: a-z A-Z 0-9 ja ÖöÄäÅåÿÿÕõ
     // Sallitaan välilyönti sekä merkit: !#$%()*+,-./:;=?@_|§
 
-    return preg_replace("/[^A-Za-z0-9ÖöÄäÅåÜüÕõ ".preg_quote("!#$%()*+,-./:;=?@_|§", "/")."{$extrachars}]/", " ", $string);
+    return preg_replace("/[^A-Za-z0-9ÖöÄäÅåÿÿÕõ ".preg_quote("!#$%()*+,-./:;=?@_|§", "/")."{$extrachars}]/", " ", $string);
   }
 }
 
@@ -31770,12 +31794,12 @@ if (!function_exists("poista_osakeyhtio_lyhenne")) {
   function poista_osakeyhtio_lyhenne($nimi) {
 
     // strtolower ei osaa pienentää tämmöisiä erikoismerkkejä
-    $old = array("Ü", "", "Ä", "Ö", "Å");
-    $new = array("ü", "", "ä", "ö", "å");
+    $old = array("ÿ", "ÿ", "Ä", "Ö", "Å");
+    $new = array("ÿ", "ÿ", "ä", "ö", "å");
     $nimi = str_replace($old, $new, $nimi);
     $nimi = strtolower($nimi);
 
-    $replace = "oy|ab|as|oü|ou|mtü|tü|ttü";
+    $replace = "oy|ab|as|oÿ|ou|mtÿ|tÿ|ttÿ";
 
     // Nimen edestä
     $nimi = preg_replace("/^($replace) /", "", $nimi);
@@ -31800,11 +31824,11 @@ if (!function_exists("poista_osakeyhtio_lyhenne_mysql")) {
                             REPLACE(LOWER({$kentta}), 'oy', ''),
                           'ab', ''),
                         'as', ''),
-                      'oü', ''),
+                      'oÿ', ''),
                     'ou', ''),
-                  'mtü', ''),
-                'tü', ''),
-              'ttü', ''))";
+                  'mtÿ', ''),
+                'tÿ', ''),
+              'ttÿ', ''))";
   }
 }
 

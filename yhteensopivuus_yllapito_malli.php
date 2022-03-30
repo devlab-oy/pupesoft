@@ -160,6 +160,15 @@ if (trim($tunnus) != '') {
 
 $brands = $td->getBrands($merkki);
 
+echo "<td>";
+?>
+  <select name='table' onchange='submit()'>
+    <option <?php if($table == "PC") { ?>selected<?php } ?> value="PC">PC</option>
+    <option <?php if($table == "CV") { ?>selected<?php } ?> value="CV">CV</option>
+  </select>
+<?php
+echo "</td>";
+
 echo "<td><select name='merkki' onchange='submit()'><option value=''>".t("Valitse merkki")."</option>";
 
 foreach ($brands as $brand) {
@@ -183,11 +192,10 @@ if ($merkki != '') {
 }
 
 echo "</select></td>";
-
 echo "<td>";
 echo "<input type='hidden' name='osasto' value='{$osasto}'>";
 echo "<input type='hidden' name='tuoteryhma' value='{$tuoteryhma}'>";
-echo "<input type='hidden' name='table' value='{$table}' /><input type='submit' value='".t("Hae")."'></td>";
+echo "<input type='submit' value='".t("Hae")."'></td>";
 echo "</tr>";
 echo "</table>";
 

@@ -451,7 +451,7 @@ if (!function_exists("tilauksesta_ostotilaus")) {
                         tyyppi          = 'O',
                         toimaika        = '$tilrivirow[toimaika]',
                         kommentti       = '$tilrivirow[kommentti]',
-                        var             = '$tilrivirow[var]',
+                        var             = '',
                         try             = '$tilrivirow[try]',
                         osasto          = '$tilrivirow[osasto]',
                         perheid         = '{$pid1}',

@@ -614,7 +614,7 @@ if (isset($jatka)) {
         // haetaan vielä tuotteen oletuspaikka puuteriville, jotta seuranta ois helpompaa
         //jos laskurow_tuotepaikat[varasto] on setattu niin yritetään löytää paikka siitä varastosta
 
-        if($vresult_query['var'] == 'T') {
+        if($vresult_query['var'] == 'T' and 1==2) {
           $oletuspaikka_lisa = "ORDER BY prio ASC";
         } else {
           $oletuspaikka_lisa = "ORDER BY tuotepaikat.oletus DESC";

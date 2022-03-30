@@ -458,6 +458,7 @@ if (!function_exists("tilauksesta_ostotilaus")) {
                         perheid2        = '{$pid2}',
                         nimitys         = '$tilrivirow[nimitys]',
                         jaksotettu      = ''";
+                        
               pupe_query($query);
               $lisatty_tun = mysql_insert_id($GLOBALS["masterlink"]);
 

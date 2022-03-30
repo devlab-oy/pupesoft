@@ -619,6 +619,7 @@ if (isset($jatka)) {
         } else {
           $oletuspaikka_lisa = "ORDER BY tuotepaikat.oletus DESC";
         }
+        
         $query_tuotepaikat = "SELECT tuotepaikat.*, tuotepaikat.varasto varastotunnus
                                 FROM tuotepaikat
                                 where tuotepaikat.yhtio    = '$kukarow[yhtio]'

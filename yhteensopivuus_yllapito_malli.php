@@ -187,7 +187,13 @@ echo "</select></td>";
 echo "<td>";
 echo "<input type='hidden' name='osasto' value='{$osasto}'>";
 echo "<input type='hidden' name='tuoteryhma' value='{$tuoteryhma}'>";
-echo "<input type='hidden' name='table' value='{$table}' /><input type='submit' value='".t("Hae")."'></td>";
+?>
+  <select name='table'>
+    <option <?php if($table == "PC") { ?>selected<?php } ?> value="PC">PC</option>
+    <option <?php if($table == "CV") { ?>selected<?php } ?> value="CV">CV</option>
+  </select>
+<?php
+echo "<input type='submit' value='".t("Hae")."'></td>";
 echo "</tr>";
 echo "</table>";
 

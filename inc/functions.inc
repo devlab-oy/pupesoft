@@ -9338,9 +9338,17 @@ if (!function_exists("livesearch_asiakkaantilausnumero")) {
       foreach ($haku_array as $haku) {
         $haku = mysql_real_escape_string($haku);
         if($_erikoishaku) {
-          $haku_query .= "and {$hakukentta} != '' ";
+          $haku_query .= "and ({$hakukentta} = '$haku' or {$hakukentta} LIKE '%$haku%') ";
+          $haku_limit = "
+          ORDER BY
+            CASE
+            WHEN {$hakukentta} LIKE '$haku' THEN 1
+          ELSE 2 
+            END 
+          LIMIT 5";
         } else {
           $haku_query .= "and {$hakukentta} like ('%$haku%') ";
+          $haku_limit = "";
         }
       }
 
@@ -9356,7 +9364,8 @@ if (!function_exists("livesearch_asiakkaantilausnumero")) {
                 WHERE tila in ('L','U','N','R','E','D')
                 and DATEDIFF(luontiaika,NOW()) <= 365
                 $haku_query
-                and $logistiikka_yhtiolisa";
+                and $logistiikka_yhtiolisa 
+                $haku_limit";
 
       $result = pupe_query($query);
 
@@ -9364,13 +9373,6 @@ if (!function_exists("livesearch_asiakkaantilausnumero")) {
 
       if (mysql_num_rows($result) > 0) {
         while ($row = mysql_fetch_assoc($result)) {
-
-          if ($_erikoishaku) {
-            $pos = strpos($row[$hakukentta], $haku);
-            if ($pos === false) {
-              continue;
-            }
-          }   
           
           echo "  <div id='asiakastilausnumero_valinta_$hakuid$row[tunnus]'
                 name='selectOptions$hakuid'

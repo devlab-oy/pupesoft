@@ -601,24 +601,44 @@ if (isset($jatka)) {
       $tosoite   = $varow["osoite"];
       $tpostino  = $varow["postino"];
       $tpostitp  = $varow["postitp"];
-      $tmaa       = $varow["maa"];
+      $tmaa      = $varow["maa"];
 
-      $vresult_query = "SELECT *  
-                          FROM tilausrivi
-                          WHERE yhtio     = '{$kukarow['yhtio']}'
-                        AND otunnus     = '{$tilausnumero}'";
+      $vresult_query = "SELECT * 
+                          FROM tilausrivi 
+                          WHERE yhtio = '{$kukarow['yhtio']}' 
+                        AND otunnus = '{$tilausnumero}'";
       
       $vresult = pupe_query($vresult_query);
 
       while ($vresult_query = mysql_fetch_assoc($vresult)) {
         // haetaan vielä tuotteen oletuspaikka puuteriville, jotta seuranta ois helpompaa
         //jos laskurow_tuotepaikat[varasto] on setattu niin yritetään löytää paikka siitä varastosta
+        //jos kyseessä var T, kyseessä on external partners
 
-        if($vresult_query['var'] == 'T') {
-          $oletuspaikka_lisa = "ORDER BY prio ASC";
+        if($vresult_query['var'] == 'T' and $vresult_query['tyyppi'] == 'O' and isset($varasto)) {
+          $_ext_oletuspaikat = Array(
+            '100' => '01',
+            '101' => '02',
+            '123' => '03',
+            '103' => '40',
+            '104' => '50',
+            '105' => '60',
+            '120' => '65',
+            '125' => '85'
+          );
+          $p_hyllyalue  = $_ext_oletuspaikat[$varasto];
+          $p_hyllynro    = '0A';
+          $p_hyllyvali  = '10';
+          $p_hyllytaso  = 'A';
+          $external_partners_osto = true;
+          $oletuspaikka_lisa = "AND hyllyalue = '$p_hyllyalue'
+                                AND hyllynro = '$p_hyllynro'
+                                AND hyllyvali = '$p_hyllyvali'
+                                AND hyllytaso = '$p_hyllytaso'";
         } else {
+          $external_partners_osto = false;
           $oletuspaikka_lisa = "ORDER BY tuotepaikat.oletus DESC";
-        } 
+        }
         
         $query_tuotepaikat = "SELECT tuotepaikat.*, tuotepaikat.varasto varastotunnus
                                 FROM tuotepaikat
@@ -630,10 +650,21 @@ if (isset($jatka)) {
 
         $result_tuotepaikat = pupe_query($query_tuotepaikat);
 
-        if (mysql_num_rows($result_tuotepaikat) > 0) {
+        // Lisätään uusi paikka jos external partners kyseessä ja oletuspaikka ei löydy
+        if (mysql_num_rows($result_tuotepaikat) < 1 and $external_partners_osto) {
+          if ($_lisatty_paikka = lisaa_tuotepaikka($vresult_query['tuoteno'], $p_hyllyalue, $p_hyllyalue, $p_hyllyalue, $p_hyllyalue, t('Lisätty paikka, koska käytössä oli external partner rivi.'))) {
+          }
+        }
+
+        if (mysql_num_rows($result_tuotepaikat) > 0 or $external_partners_osto) {
 
           // Yritetään löytää paras varastopaikka
           $loydetytpaikat = FALSE;
+
+          // Ohita external partnelle
+          if ($external_partners_osto) {
+            $loydetytpaikat = true;
+          }
 
           // löytyykö syötetty $varasto (muttujassa tulee myös $laskurow_tuotepaikat[varasto] tai $kukarow["varasto"] jos $varastoa ei olla eksplisiittisesti syötetty)?
           if (isset($varasto)) {
@@ -645,7 +676,6 @@ if (isset($jatka)) {
                 $p_hyllyvali  = $olerow["hyllyvali"];
                 $p_hyllytaso  = $olerow["hyllytaso"];
                 $loydetytpaikat = TRUE;
-
                 break;
               }
             }

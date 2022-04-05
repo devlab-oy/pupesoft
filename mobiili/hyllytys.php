@@ -69,9 +69,9 @@ $query = "SELECT
           WHERE tilausrivi.yhtio                            = '{$kukarow['yhtio']}' 
           AND tilausrivi.tunnus                         = '{$tilausrivi}' 
           AND tilausrivi.hyllyalue = tuotepaikat.hyllyalue 
-          AND tilausrivi.hyllynro =  tuotepaikat.hyllynro
+          AND tilausrivi.hyllynro =  tuotepaikat.hyllynro 
           AND tilausrivi.hyllyvali = tuotepaikat.hyllyvali 
-          AND tilausrivi.hyllytaso = tuotepaikat.hyllytaso
+          AND tilausrivi.hyllytaso = tuotepaikat.hyllytaso 
           AND lasku.tunnus                                = '{$ostotilaus}'
           AND lasku.vanhatunnus                           = '{$kukarow['toimipaikka']}'";
           

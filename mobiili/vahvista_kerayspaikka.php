@@ -29,8 +29,66 @@ $url = http_build_query($data);
 
 // Haetaan suuntalavan tuotteet
 if (!empty($alusta_tunnus) and !isset($siirtolista)) {
+  
   $res = suuntalavan_tuotteet(array($alusta_tunnus), $liitostunnus, "", "", "", $tilausrivi);
   $row = mysql_fetch_assoc($res);
+}
+
+// Jos suuntalavan_tuotteet() ei löytynyt mitään
+if (!isset($row)) {
+  
+  if (isset($siirtolista)) {
+    $query = "SELECT
+            tilausrivi.*,
+            tilausrivin_lisatiedot.kohde_hyllyalue AS tuotepaikat_hyllyalue,
+            tilausrivin_lisatiedot.kohde_hyllynro AS tuotepaikat_hyllynro,
+            tilausrivin_lisatiedot.kohde_hyllyvali AS tuotepaikat_hyllyvali,
+            tilausrivin_lisatiedot.kohde_hyllytaso AS tuotepaikat_hyllytaso,
+            tuotepaikat.varasto AS tuotepaikat_varasto,
+            tuotteen_toimittajat.toim_tuoteno
+            FROM tilausrivi
+            LEFT JOIN tilausrivin_lisatiedot
+            ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
+              AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus)
+            LEFT JOIN tuotteen_toimittajat
+              ON (tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno
+                AND tuotteen_toimittajat.yhtio=tilausrivi.yhtio)
+            JOIN tuotepaikat
+              ON (tuotepaikat.yhtio = tilausrivi.yhtio
+                AND tuotepaikat.tuoteno = tilausrivi.tuoteno
+                )
+            WHERE tilausrivi.tunnus='{$tilausrivi}' 
+            AND tilausrivi.hyllyalue = tuotepaikat.hyllyalue 
+            AND tilausrivi.hyllynro =  tuotepaikat.hyllynro 
+            AND tilausrivi.hyllyvali = tuotepaikat.hyllyvali 
+            AND tilausrivi.hyllytaso = tuotepaikat.hyllytaso 
+            AND tilausrivi.yhtio='{$kukarow['yhtio']}'";
+  } else {
+    $query = "SELECT
+            tilausrivi.*,
+            tuotepaikat.hyllyalue AS tuotepaikat_hyllyalue,
+            tuotepaikat.hyllynro AS tuotepaikat_hyllynro,
+            tuotepaikat.hyllyvali AS tuotepaikat_hyllyvali,
+            tuotepaikat.hyllytaso AS tuotepaikat_hyllytaso,
+            tuotepaikat.varasto AS tuotepaikat_varasto,
+            tuotteen_toimittajat.toim_tuoteno
+            FROM tilausrivi
+            LEFT JOIN tuotteen_toimittajat
+              ON (tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno
+                AND tuotteen_toimittajat.yhtio=tilausrivi.yhtio)
+            JOIN tuotepaikat
+              ON (tuotepaikat.yhtio = tilausrivi.yhtio
+                AND tuotepaikat.tuoteno = tilausrivi.tuoteno
+                )
+            WHERE tilausrivi.tunnus='{$tilausrivi}'
+            AND tilausrivi.hyllyalue = tuotepaikat.hyllyalue 
+            AND tilausrivi.hyllynro =  tuotepaikat.hyllynro 
+            AND tilausrivi.hyllyvali = tuotepaikat.hyllyvali 
+            AND tilausrivi.hyllytaso = tuotepaikat.hyllytaso 
+            AND tilausrivi.yhtio='{$kukarow['yhtio']}'";
+  }
+
+  $row = mysql_fetch_assoc(pupe_query($query));
 }
 
 // Jos suuntalavan_tuotteet() ei löytynyt mitään

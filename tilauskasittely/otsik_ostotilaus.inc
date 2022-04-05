@@ -652,7 +652,7 @@ if (isset($jatka)) {
 
         // Lisätään uusi paikka jos external partners kyseessä ja oletuspaikka ei löydy
         if (mysql_num_rows($result_tuotepaikat) < 1 and $external_partners_osto) {
-          if ($_lisatty_paikka = lisaa_tuotepaikka($vresult_query['tuoteno'], $p_hyllyalue, $p_hyllyalue, $p_hyllyalue, $p_hyllyalue, t('Lisätty paikka, koska käytössä oli external partner rivi.'))) {
+          if ($_lisatty_paikka = lisaa_tuotepaikka($vresult_query['tuoteno'], $p_hyllyalue, $p_hyllynro, $p_hyllyvali, $p_hyllytaso, t('Lisätty paikka, koska käytössä oli external partner rivi.'))) {
           }
         }
 

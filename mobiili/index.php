@@ -35,6 +35,7 @@ header("Cache-Control: post-check=0, pre-check=0", false);
 header("Pragma: no-cache");
 
 // Index.php ei sisällytä parametrit incistä headereita
+echo "<meta name='viewport' content='width=250,height=246, user-scalable=no, maximum-scale=1'>\n";
 echo "<link rel='stylesheet' type='text/css' href='kasipaate.css' />\n";
 echo "<body>";
 echo "<div class='header'><h1>", t("PÄÄVALIKKO", $browkieli), "</h1></div>";

@@ -159,6 +159,14 @@ elseif ($row['varasto'] == $row['tuotepaikat_varasto'] or isset($siirtolista)) {
   $row['hyllytaso'] = $row['tuotepaikat_hyllytaso'];
 }
 
+if($kerayspaikka) {
+  $kerayspaikka_exp = explode("|||", $kerayspaikka);
+  $row['hyllyalue'] = $kerayspaikka_exp[0];
+  $row['hyllynro'] = $kerayspaikka_exp[1];
+  $row['hyllyvali'] = $kerayspaikka_exp[2];
+  $row['hyllytaso'] = $kerayspaikka_exp[3];
+}
+
 $_varasto = kuuluukovarastoon($row['hyllyalue'], $row['hyllynro']);
 $onko_varaston_hyllypaikat_kaytossa = onko_varaston_hyllypaikat_kaytossa($_varasto);
 
@@ -187,6 +195,7 @@ if (isset($submit_button) and trim($submit_button) != '') {
     break;
 
   case 'submit':
+
     // Tarkistetaan m‰‰r‰
     if (isset($siirtolista)) {
       if (!is_numeric($maara) or $maara < 0) {
@@ -535,7 +544,7 @@ if (isset($errors)) {
 
 echo "<input type='button' id='myHiddenButton' visible='false' onclick='javascript:doFocus();' width='1px' style='display:none'>";
 echo "<div class='main'>
-<form name='vahvistaformi' method='post' action=''>
+<form name='vahvistaformi' id='vahvistaformiid' method='post' action=''>
 <table>
   <tr>
     <th>", t("Tuote"), "</th>
@@ -554,12 +563,57 @@ if (isset($siirtolista)) {
   echo "<td><input type='text' id='maara' name='maara' value='{$maara}' size='7' $disabled/> {$row['tilausrivi_tyyppi']}</td>";
 }
 
+$query_allpaikat = "SELECT
+            tilausrivi.*,
+            tuotepaikat.hyllyalue AS tuotepaikat_hyllyalue,
+            tuotepaikat.hyllynro AS tuotepaikat_hyllynro,
+            tuotepaikat.hyllyvali AS tuotepaikat_hyllyvali,
+            tuotepaikat.hyllytaso AS tuotepaikat_hyllytaso,
+            tuotepaikat.varasto AS tuotepaikat_varasto,
+            tuotteen_toimittajat.toim_tuoteno,
+            concat_ws('-',
+                tuotepaikat.hyllyalue,
+                tuotepaikat.hyllynro,
+                tuotepaikat.hyllyvali,
+                tuotepaikat.hyllytaso) AS tuotepaikat_text,
+            concat_ws('|||',
+                tuotepaikat.hyllyalue,
+                tuotepaikat.hyllynro,
+                tuotepaikat.hyllyvali,
+                tuotepaikat.hyllytaso) AS tuotepaikat_code
+          FROM tilausrivi
+            LEFT JOIN tuotteen_toimittajat
+            ON (tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno
+            AND tuotteen_toimittajat.yhtio=tilausrivi.yhtio)
+            JOIN tuotepaikat
+            ON (tuotepaikat.yhtio = tilausrivi.yhtio
+            AND tuotepaikat.tuoteno = tilausrivi.tuoteno
+            )
+            WHERE tilausrivi.yhtio='{$kukarow['yhtio']}'
+          AND tilausrivi.tunnus='{$tilausrivi}'
+          GROUP by tuotepaikat_text";
+
 echo "<td><span id='row_varattu' $hidden>{$row['varattu']}</span><span id='yksikko'>{$row['yksikko']}</span></td>
   </tr>
-  
   <tr>
     <th>", t("Ker‰yspaikka"), "</th>
-    <td colspan='2'>{$row['hyllyalue']}-{$row['hyllynro']}-{$row['hyllyvali']}-{$row['hyllytaso']}</td>
+    <td colspan='2'>
+    <select name='kerayspaikka' onchange='$(\"input#koodi\").val(\"\"); $(\"#vahvistaformiid\").submit();'>";
+$paikat_all_q = pupe_query($query_allpaikat);
+while($paikat_all = mysql_fetch_assoc($paikat_all_q)) 
+{ 
+  $sel = "";
+  if($row['hyllyalue']."|||".$row['hyllynro']."|||".$row['hyllyvali']."|||".$row['hyllytaso'] == $paikat_all['tuotepaikat_code']) {
+    $sel = "selected";
+  }
+  echo "
+  <option {$sel} value='{$paikat_all['tuotepaikat_code']}'>
+  {$paikat_all['tuotepaikat_text']}
+  </option>";
+}
+echo "
+    </select>
+    </td>
   </tr>
   ";
 

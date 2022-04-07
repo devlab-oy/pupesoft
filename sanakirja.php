@@ -10,7 +10,7 @@ echo "<th>".t("Valitse k‰‰nnett‰v‰t kielet")."</th>";
 echo "<td><table>";
 
 $r = 0;
-
+echo t('Lis‰tty paikka, koska k‰ytˆss‰ oli external partner rivi.');
 // k‰yd‰‰n l‰pi mahdolliset kielet
 foreach ($GLOBALS["sanakirja_kielet"] as $sanakirja_kieli => $sanakirja_kieli_nimi) {
   if ($sanakirja_kieli == "fi") continue;
@@ -140,6 +140,10 @@ if (count($kieli) > 0) {
   }
 
   $query .= " ORDER BY luontiaika desc,fi ";
+  echo "<pre>";
+  echo $query;
+  echo "</pre>";
+
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) > 0) {

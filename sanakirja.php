@@ -140,6 +140,10 @@ if (count($kieli) > 0) {
   }
 
   $query .= " ORDER BY luontiaika desc,fi ";
+  echo "<pre>";
+  echo $query;
+  echo "</pre>";
+
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) > 0) {

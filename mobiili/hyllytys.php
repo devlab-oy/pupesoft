@@ -14,8 +14,11 @@ if (!isset($saapumisnro_haku)) $saapumisnro_haku = '';
 if (empty($ostotilaus) or empty($tilausrivi)) {
   exit("Virheelliset parametrit");
 }
+
+
 // Haetaan tilausrivin ja laskun tiedot
 /* Ostotilausten_kohdistus rivi 847 - 895 */
+
 $query = "SELECT
           tilausrivi.varattu+tilausrivi.kpl AS siskpl,
           tilausrivi.tuoteno,
@@ -62,13 +65,74 @@ $query = "SELECT
           JOIN tuotepaikat
             ON (tuotepaikat.yhtio = lasku.yhtio
               AND tuotepaikat.tuoteno                     = tilausrivi.tuoteno
-              AND tuotepaikat.oletus                      = 'X')
-          WHERE tilausrivi.tunnus                         = '{$tilausrivi}'
-          AND tilausrivi.yhtio                            = '{$kukarow['yhtio']}'
+              )
+          WHERE tilausrivi.yhtio                            = '{$kukarow['yhtio']}' 
+          AND tilausrivi.tunnus                         = '{$tilausrivi}' 
+          AND tilausrivi.hyllyalue = tuotepaikat.hyllyalue 
+          AND tilausrivi.hyllynro =  tuotepaikat.hyllynro 
+          AND tilausrivi.hyllyvali = tuotepaikat.hyllyvali 
+          AND tilausrivi.hyllytaso = tuotepaikat.hyllytaso 
           AND lasku.tunnus                                = '{$ostotilaus}'
           AND lasku.vanhatunnus                           = '{$kukarow['toimipaikka']}'";
+          
 $result = pupe_query($query);
 $row = mysql_fetch_assoc($result);
+
+if (!$row) {
+  $query = "SELECT
+            tilausrivi.varattu+tilausrivi.kpl AS siskpl,
+            tilausrivi.tuoteno,
+            round((tilausrivi.varattu+tilausrivi.kpl) *
+              if (tuotteen_toimittajat.tuotekerroin <= 0
+                OR tuotteen_toimittajat.tuotekerroin is null, 1, tuotteen_toimittajat.tuotekerroin),
+              2) AS ulkkpl,
+            tuotteen_toimittajat.toim_tuoteno,
+            tuotteen_toimittajat.tuotekerroin,
+            if(tuotepaikat.varasto = tilausrivi.varasto,
+              concat_ws(' ',
+                tuotepaikat.hyllyalue,
+                tuotepaikat.hyllynro,
+                tuotepaikat.hyllyvali,
+                tuotepaikat.hyllytaso),
+              concat_ws(' ',
+                tilausrivi.hyllyalue,
+                tilausrivi.hyllynro,
+                tilausrivi.hyllyvali,
+                tilausrivi.hyllytaso)) AS kerayspaikka,
+            tilausrivi.varattu,
+            tilausrivi.yksikko,
+            tilausrivi.suuntalava,
+            tilausrivi.uusiotunnus,
+            lasku.liitostunnus,
+            toimi.selaus,
+            IFNULL(tilausrivin_lisatiedot.suoraan_laskutukseen, 'NORM') AS tilausrivi_tyyppi,
+            IFNULL(tilausrivin_lisatiedot.tilausrivitunnus, 0) AS tilausrivitunnus
+            FROM lasku
+            JOIN tilausrivi
+             ON (tilausrivi.yhtio = lasku.yhtio
+                AND tilausrivi.otunnus                      = lasku.tunnus
+                AND tilausrivi.tyyppi='O')
+            JOIN tuotteen_toimittajat
+              ON (tuotteen_toimittajat.tuoteno = tilausrivi.tuoteno
+                AND tuotteen_toimittajat.yhtio              = tilausrivi.yhtio)
+            JOIN toimi
+              ON (toimi.yhtio = tuotteen_toimittajat.yhtio
+                AND toimi.tunnus                            = tuotteen_toimittajat.liitostunnus)
+            LEFT JOIN tilausrivin_lisatiedot
+              ON (tilausrivin_lisatiedot.yhtio = lasku.yhtio
+                AND tilausrivin_lisatiedot.tilausrivilinkki = tilausrivi.tunnus
+                AND tilausrivin_lisatiedot.tilausrivilinkki <> 0)
+            JOIN tuotepaikat
+              ON (tuotepaikat.yhtio = lasku.yhtio
+                AND tuotepaikat.tuoteno                     = tilausrivi.tuoteno
+                AND tuotepaikat.oletus                      = 'X')
+            WHERE tilausrivi.tunnus                         = '{$tilausrivi}'
+            AND tilausrivi.yhtio                            = '{$kukarow['yhtio']}'
+            AND lasku.tunnus                                = '{$ostotilaus}'
+            AND lasku.vanhatunnus                           = '{$kukarow['toimipaikka']}'";
+  $result = pupe_query($query);
+  $row = mysql_fetch_assoc($result);
+}
 
 if (!$row) {
   exit("Virhe, riviä ei löydy");

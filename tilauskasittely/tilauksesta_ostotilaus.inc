@@ -374,7 +374,8 @@ if (!function_exists("tilauksesta_ostotilaus")) {
 
             if ($oletusostovarasto != 0) {
               $oletuspaikka_lisa = "AND tuotepaikat.varasto = '{$oletusostovarasto}'";
-            } 
+
+            }  
             else {
               $oletuspaikka_lisa = "AND tuotepaikat.oletus != ''";
             }
@@ -389,6 +390,51 @@ if (!function_exists("tilauksesta_ostotilaus")) {
 
             $jtsre = pupe_query($query);
             $jtstu = mysql_fetch_assoc($jtsre);
+
+            if($tilrivirow['var'] == 'T' and $jtstu['varasto']) {
+              $_ext_oletuspaikat = Array(
+                '100' => '01',
+                '101' => '02',
+                '123' => '03',
+                '103' => '40',
+                '104' => '50',
+                '105' => '60',
+                '120' => '65',
+                '125' => '85'
+            );
+              $p_hyllyalue  = $_ext_oletuspaikat[$jtstu['varasto']];
+              $p_hyllynro    = '0A';
+              $p_hyllyvali  = '10';
+              $p_hyllytaso  = 'A';
+              $external_partners_osto = true;
+              $_oletuspaikka_lisa = "AND hyllyalue = '$p_hyllyalue'
+                                     AND hyllynro = '$p_hyllynro'
+                                     AND hyllyvali = '$p_hyllyvali'
+                                     AND hyllytaso = '$p_hyllytaso'";
+                         
+              $query = "SELECT tuotepaikat.*
+                        FROM tuotepaikat
+                        WHERE tuotepaikat.yhtio = '{$kukarow['yhtio']}'
+                        AND tuotepaikat.tuoteno = '{$tilrivirow['tuoteno']}'
+                        {$_oletuspaikka_lisa}
+                      LIMIT 1";
+
+              $jtsre = pupe_query($query);
+              
+              // Lisätään uusi paikka jos external partners kyseessä ja oletuspaikka ei löydy
+              if (mysql_num_rows($jtsre) < 1) {
+                if ($_lisatty_paikka = lisaa_tuotepaikka($tilrivirow['tuoteno'], $p_hyllyalue, $p_hyllynro, $p_hyllyvali, $p_hyllytaso, t('Lisätty paikka, koska käytössä oli external partner rivi.'))) {
+                  $query = "SELECT tuotepaikat.*
+                              FROM tuotepaikat
+                              WHERE tuotepaikat.yhtio = '{$kukarow['yhtio']}'
+                              AND tuotepaikat.tuoteno = '{$tilrivirow['tuoteno']}'
+                              {$_oletuspaikka_lisa}
+                            LIMIT 1";
+                  $jtsre = pupe_query($query);
+                }
+              }
+              $jtstu = mysql_fetch_assoc($jtsre);
+            }
 
             // varattu määrää saa päivittää vain jos kpl = 0 ja uusiotunnus = 0, tila = O, alatila =''
             $query =  "SELECT tilausrivi.*
@@ -451,7 +497,7 @@ if (!function_exists("tilauksesta_ostotilaus")) {
                         tyyppi          = 'O',
                         toimaika        = '$tilrivirow[toimaika]',
                         kommentti       = '$tilrivirow[kommentti]',
-                        var             = '',
+                        var             = '$tilrivirow[var]',
                         try             = '$tilrivirow[try]',
                         osasto          = '$tilrivirow[osasto]',
                         perheid         = '{$pid1}',

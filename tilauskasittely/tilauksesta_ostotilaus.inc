@@ -377,7 +377,7 @@ if (!function_exists("tilauksesta_ostotilaus")) {
 
             }  
             else {
-              $oletuspaikka_lisa = "AND tuotepaikat.oletus != ''";
+              $oletuspaikka_lisa = $_oletuspaikka_lisa_alkup = "AND tuotepaikat.oletus != ''";
             }
 
             // haetaan oletuspaikan tiedot niin laitetaan se riville
@@ -401,29 +401,30 @@ if (!function_exists("tilauksesta_ostotilaus")) {
                 '105' => '60',
                 '120' => '65',
                 '125' => '85'
-            );
-              $p_hyllyalue  = $_ext_oletuspaikat[$jtstu['varasto']];
-              $p_hyllynro    = '0A';
-              $p_hyllyvali  = '10';
-              $p_hyllytaso  = 'A';
-              $external_partners_osto = true;
-              $_oletuspaikka_lisa = "AND hyllyalue = '$p_hyllyalue'
-                                     AND hyllynro = '$p_hyllynro'
-                                     AND hyllyvali = '$p_hyllyvali'
-                                     AND hyllytaso = '$p_hyllytaso'";
-                         
+              );
+              $_p_hyllyalue  = $_ext_oletuspaikat[$jtstu['varasto']];
+              $_p_hyllynro    = '0A';
+              $_p_hyllyvali  = '10';
+              $_p_hyllytaso  = 'A';
+              $_oletuspaikka_lisa = "AND hyllyalue = '$_p_hyllyalue'
+                                     AND hyllynro = '$_p_hyllynro'
+                                     AND hyllyvali = '$_p_hyllyvali'
+                                     AND hyllytaso = '$_p_hyllytaso'";
+              
               $query = "SELECT tuotepaikat.*
-                        FROM tuotepaikat
-                        WHERE tuotepaikat.yhtio = '{$kukarow['yhtio']}'
-                        AND tuotepaikat.tuoteno = '{$tilrivirow['tuoteno']}'
-                        {$_oletuspaikka_lisa}
-                      LIMIT 1";
-
+                          FROM tuotepaikat
+                          WHERE tuotepaikat.yhtio = '{$kukarow['yhtio']}'
+                          AND tuotepaikat.tuoteno = '{$tilrivirow['tuoteno']}'
+                          {$_oletuspaikka_lisa}
+                          LIMIT 1";
+                          echo "<pre>";
+                          print_r($query);
+                          echo "</pre>";
               $jtsre = pupe_query($query);
               
-              // Lis‰t‰‰n uusi paikka jos external partners kyseess‰ ja oletuspaikka ei lˆydy
+              // Lis‰t‰‰n uusi paikka jos external partners kyseess‰ ja oletuspaikka ei lˆydy ja varasto on X
               if (mysql_num_rows($jtsre) < 1) {
-                if ($_lisatty_paikka = lisaa_tuotepaikka($tilrivirow['tuoteno'], $p_hyllyalue, $p_hyllynro, $p_hyllyvali, $p_hyllytaso, t('Lis‰tty paikka, koska k‰ytˆss‰ oli external partner rivi.'))) {
+                if ($jtstu['varasto'] == 100 and $_lisatty_paikka = lisaa_tuotepaikka($tilrivirow['tuoteno'], $_p_hyllyalue, $_p_hyllynro, $_p_hyllyvali, $_p_hyllytaso, t('Lis‰tty paikka, koska k‰ytˆss‰ oli external partner rivi.'))) {
                   $query = "SELECT tuotepaikat.*
                               FROM tuotepaikat
                               WHERE tuotepaikat.yhtio = '{$kukarow['yhtio']}'
@@ -431,9 +432,21 @@ if (!function_exists("tilauksesta_ostotilaus")) {
                               {$_oletuspaikka_lisa}
                             LIMIT 1";
                   $jtsre = pupe_query($query);
+                  $jtstu = mysql_fetch_assoc($jtsre);
+                } else {
+                  // ei lˆydy eik‰ voi lis‰t‰ paikkaa -> toimii normaalisti.
+                  $query = "SELECT tuotepaikat.*
+                              FROM tuotepaikat
+                              WHERE tuotepaikat.yhtio = '{$kukarow['yhtio']}'
+                              AND tuotepaikat.tuoteno = '{$tilrivirow['tuoteno']}'
+                              {$_oletuspaikka_lisa_alkup}
+                              LIMIT 1";
+                  $jtsre = pupe_query($query);
+                  $jtstu = mysql_fetch_assoc($jtsre);
                 }
+              } else {
+                $jtstu = mysql_fetch_assoc($jtsre);
               }
-              $jtstu = mysql_fetch_assoc($jtsre);
             }
 
             // varattu m‰‰r‰‰ saa p‰ivitt‰‰ vain jos kpl = 0 ja uusiotunnus = 0, tila = O, alatila =''

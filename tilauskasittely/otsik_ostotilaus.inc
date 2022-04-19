@@ -626,18 +626,18 @@ if (isset($jatka)) {
             '120' => '65',
             '125' => '85'
           );
-          $p_hyllyalue  = $_ext_oletuspaikat[$varasto];
-          $p_hyllynro    = '0A';
-          $p_hyllyvali  = '10';
-          $p_hyllytaso  = 'A';
+          $_p_hyllyalue  = $_ext_oletuspaikat[$varasto];
+          $_p_hyllynro    = '0A';
+          $_p_hyllyvali  = '10';
+          $_p_hyllytaso  = 'A';
           $external_partners_osto = true;
-          $oletuspaikka_lisa = "AND hyllyalue = '$p_hyllyalue'
-                                AND hyllynro = '$p_hyllynro'
-                                AND hyllyvali = '$p_hyllyvali'
-                                AND hyllytaso = '$p_hyllytaso'";
+          $oletuspaikka_lisa = "AND hyllyalue = '$_p_hyllyalue'
+                                AND hyllynro = '$_p_hyllynro'
+                                AND hyllyvali = '$_p_hyllyvali'
+                                AND hyllytaso = '$_p_hyllytaso'";
         } else {
           $external_partners_osto = false;
-          $oletuspaikka_lisa = "ORDER BY tuotepaikat.oletus DESC";
+          $oletuspaikka_lisa = $oletuspaikka_lisa_alkup = "ORDER BY tuotepaikat.oletus DESC";
         }
         
         $query_tuotepaikat = "SELECT tuotepaikat.*, tuotepaikat.varasto varastotunnus
@@ -647,13 +647,32 @@ if (isset($jatka)) {
                                 AND tuotepaikat.hyllyalue != '!!M' 
                                 $oletuspaikka_lisa
                               ";
-
         $result_tuotepaikat = pupe_query($query_tuotepaikat);
 
-        // Lisätään uusi paikka jos external partners kyseessä ja oletuspaikka ei löydy
+        // Lisätään uusi paikka jos external partners kyseessä ja oletuspaikka ei löydy ja varasto on X
         if (mysql_num_rows($result_tuotepaikat) < 1 and $external_partners_osto) {
-          if ($_lisatty_paikka = lisaa_tuotepaikka($vresult_query['tuoteno'], $p_hyllyalue, $p_hyllynro, $p_hyllyvali, $p_hyllytaso, t('Lisätty paikka, koska käytössä oli external partner rivi.'))) {
+          if ($varasto == 100 and $_lisatty_paikka = lisaa_tuotepaikka($vresult_query['tuoteno'], $_p_hyllyalue, $_p_hyllynro, $_p_hyllyvali, $_p_hyllytaso, t('Lisätty paikka, koska käytössä oli external partner rivi.'))) {
+            $p_hyllyalue  = $_p_hyllyalue;
+            $p_hyllynro    = $_p_hyllynro;
+            $p_hyllyvali  = $_p_hyllyvali;
+            $p_hyllytaso  = $_p_hyllytaso;
+          } else {
+            // ei löydy eikä voi lisätä paikkaa -> toimii normaalisti.
+            $query_tuotepaikat = "SELECT tuotepaikat.*, tuotepaikat.varasto varastotunnus
+                                    FROM tuotepaikat
+                                    where tuotepaikat.yhtio    = '$kukarow[yhtio]'
+                                    and tuotepaikat.tuoteno    = '$vresult_query[tuoteno]'
+                                    AND tuotepaikat.hyllyalue != '!!M' 
+                                    $oletuspaikka_lisa_alkup
+                                  ";
+            $result_tuotepaikat = pupe_query($query_tuotepaikat);
+            $external_partners_osto = false;
           }
+        } else if($external_partners_osto) {
+          $p_hyllyalue  = $_p_hyllyalue;
+          $p_hyllynro    = $_p_hyllynro;
+          $p_hyllyvali  = $_p_hyllyvali;
+          $p_hyllytaso  = $_p_hyllytaso;
         }
 
         if (mysql_num_rows($result_tuotepaikat) > 0 or $external_partners_osto) {

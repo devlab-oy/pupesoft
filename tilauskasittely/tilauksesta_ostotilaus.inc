@@ -417,9 +417,6 @@ if (!function_exists("tilauksesta_ostotilaus")) {
                           AND tuotepaikat.tuoteno = '{$tilrivirow['tuoteno']}'
                           {$_oletuspaikka_lisa}
                           LIMIT 1";
-                          echo "<pre>";
-                          print_r($query);
-                          echo "</pre>";
               $jtsre = pupe_query($query);
               
               // Lisätään uusi paikka jos external partners kyseessä ja oletuspaikka ei löydy ja varasto on X

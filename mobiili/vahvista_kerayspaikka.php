@@ -563,6 +563,11 @@ if (isset($siirtolista)) {
   echo "<td><input type='text' id='maara' name='maara' value='{$maara}' size='7' $disabled/> {$row['tilausrivi_tyyppi']}</td>";
 }
 
+if ($kukarow['oletus_ostovarasto'] != 0) {
+  $oletusostovarasto = $kukarow['oletus_ostovarasto'];
+  $oletuspaikka_lisa = "AND tuotepaikat.varasto = '{$oletusostovarasto}'";
+}
+
 $query_allpaikat = "SELECT
             tilausrivi.*,
             tuotepaikat.hyllyalue AS tuotepaikat_hyllyalue,
@@ -590,7 +595,8 @@ $query_allpaikat = "SELECT
             AND tuotepaikat.tuoteno = tilausrivi.tuoteno
             )
             WHERE tilausrivi.yhtio='{$kukarow['yhtio']}'
-          AND tilausrivi.tunnus='{$tilausrivi}'
+          AND tilausrivi.tunnus='{$tilausrivi}' 
+          {$oletuspaikka_lisa} 
           GROUP by tuotepaikat_text";
 
 echo "<td><span id='row_varattu' $hidden>{$row['varattu']}</span><span id='yksikko'>{$row['yksikko']}</span></td>

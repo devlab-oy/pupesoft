@@ -563,8 +563,8 @@ if (isset($siirtolista)) {
   echo "<td><input type='text' id='maara' name='maara' value='{$maara}' size='7' $disabled/> {$row['tilausrivi_tyyppi']}</td>";
 }
 
-if ($kukarow['oletus_varasto'] != 0) {
-  $oletusostovarasto = $kukarow['oletus_varasto'];
+if ($kukarow['oletus_ostovarasto'] != 0) {
+  $oletusostovarasto = $kukarow['oletus_ostovarasto'];
   $oletuspaikka_lisa = "AND tuotepaikat.varasto = '{$oletusostovarasto}'";
 }
 

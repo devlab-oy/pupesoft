@@ -373,7 +373,7 @@ if (!function_exists("tilauksesta_ostotilaus")) {
           while ($tilrivirow = mysql_fetch_assoc($tilrivires)) {
 
             if ($oletusostovarasto != 0) {
-              $oletuspaikka_lisa = "AND tuotepaikat.varasto = '{$oletusostovarasto}'";
+              $oletuspaikka_lisa = $_oletuspaikka_lisa_alkup = "AND tuotepaikat.varasto = '{$oletusostovarasto}'";
 
             }  
             else {

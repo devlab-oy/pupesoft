@@ -50,7 +50,7 @@ class Presta17RestApi
     $this->rest = $rest;
     $this->url = $url;
     $this->fi_countries = Array(
-      'Suomi' => 'Finland', 
+      'Suomi' => 'Finland',
       'Ruotsi' => 'Sweden',
       'Viro' => 'Estonia',
       'Venäjä' => 'Russian Federation',
@@ -64,7 +64,7 @@ class Presta17RestApi
     $query = "SELECT * from tuote 
                 JOIN puun_alkio on (tuote.yhtio =  puun_alkio.yhtio and tuote.tuoteno = puun_alkio.liitos) 
                 JOIN dynaaminen_puu on (puun_alkio.yhtio = dynaaminen_puu.yhtio and puun_alkio.puun_tunnus = dynaaminen_puu.tunnus) 
-                where tuote.yhtio='$yhtio' 
+                where tuote.yhtio='$yhtio' and tuote.nakyvyys = 1
                 and (
                 (tuote.muutospvm between date_sub(now(),INTERVAL '$days' DAY) and now()) 
                 or 
@@ -107,6 +107,7 @@ class Presta17RestApi
     $missing_products = array();
 
     foreach ($pupesoft_products_ids as $pupesoft_products_id) {
+
       $presta_products_opt = Array(
         'resource' => 'products',
         'filter[reference]' => '[' . $pupesoft_products_id . ']'
@@ -511,7 +512,7 @@ class Presta17RestApi
   {
     $blankXml = $this->rest->get(Array('url' => $this->url . 'api/product_feature_values?schema=synopsis'));
     $product_feature_valueFields = $blankXml->product_feature_value->children();
-    $product_feature_valueFields->value = (string) $product_feature_value;
+    $product_feature_valueFields->value->language[0] = (string) $product_feature_value;
     $product_feature_valueFields->id_feature = $product_feature_id;
     $product_feature_values = Array(
       'resource' => 'product_feature_values',
@@ -529,7 +530,7 @@ class Presta17RestApi
   public function updatePrestashopProducts($prestashop_products, $pupesoft_products)
   {
     foreach ($prestashop_products['found'] as $prestashop_product) {
-
+      
       $xml = $this->rest->get(Array(
         'resource' => 'products',
         'id' => $prestashop_product,
@@ -583,12 +584,15 @@ class Presta17RestApi
 
       unset($productFields->associations->product_bundle);
 
-      unset($productFields->associations->categories->category->id);
+      unset($productFields->associations->categories->category);
+
       foreach ($cat_data as $cat_data_single) {
         if (isset($this->foundCategories[$cat_data_single->node_tunnus])) {
-          $productFields->associations->categories->category->addChild('id', $this->foundCategories[$cat_data_single->node_tunnus]);
+          $newcat = $productFields->associations->categories->addChild('category');
+          $newcat->addChild('id', $this->foundCategories[$cat_data_single->node_tunnus]);
         } else {
-          $productFields->associations->categories->category->addChild('id', $this->getPrestashopCategory($cat_data_single));
+          $newcat = $productFields->associations->categories->addChild('category');
+          $newcat->addChild('id', $this->getPrestashopCategory($cat_data_single));
         }
       }
 
@@ -668,9 +672,11 @@ class Presta17RestApi
 
       foreach ($cat_data as $cat_data_single) {
         if (isset($this->foundCategories[$cat_data_single->node_tunnus])) {
-          $productFields->associations->categories->category->addChild('id', $this->foundCategories[$cat_data_single->node_tunnus]);
+          $newcat = $productFields->associations->categories->addChild('category');
+          $newcat->addChild('id', $this->foundCategories[$cat_data_single->node_tunnus]);
         } else {
-          $productFields->associations->categories->category->addChild('id', $this->getPrestashopCategory($cat_data_single));
+          $newcat = $productFields->associations->categories->addChild('category');
+          $newcat->addChild('id', $this->getPrestashopCategory($cat_data_single));
         }
       }
 
@@ -854,7 +860,7 @@ class Presta17RestApi
       $log_file = './logs/errors' . date('d_m_Y') . '.log';
       $error_message = "\n\n\n\n-------------" . date('d.m.Y H:i:s') . ".............\n\n" . $error_container . "\n--------------------\n" . $error_message;
       error_log($error_message, 3, $log_file);
-
+      chmod($log_file, 0600);
       return true;
     }
 

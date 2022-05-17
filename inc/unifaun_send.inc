@@ -238,7 +238,7 @@ class Unifaun {
       $packsoft = $this->packsoft;
 
       if ($packsoft) {
-        $session = "po_SE";
+        $session = "ufo_SE";  //"po_SE" packsoft poistui käytöstä 05-2022 session täytyy jatkossa olla sama
       }
       else {
         $session = "ufo_SE";

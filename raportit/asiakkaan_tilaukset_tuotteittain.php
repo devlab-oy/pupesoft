@@ -292,6 +292,7 @@ if ($ytunnus != '' or $tuoteno != '' or (int) $asiakasid > 0 or (int) $toimittaj
               {$ale_query_select_lisa}
               round((tilausrivi.varattu+tilausrivi.kpl)*tilausrivi.hinta*if(lasku.vienti_kurssi=0, 1, lasku.vienti_kurssi)*if(tuotteen_toimittajat.tuotekerroin=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin)*{$query_ale_lisa},'$yhtiorow[hintapyoristys]') rivihinta,
               lasku.toimaika,
+              lasku.viite,
               tilausrivi.laskutettuaika tuloutettu,
               lasku.tila, lasku.alatila
               FROM tilausrivi
@@ -336,6 +337,7 @@ if ($ytunnus != '' or $tuoteno != '' or (int) $asiakasid > 0 or (int) $toimittaj
               if (tilausrivi.kpl!=0, tilausrivi.rivihinta, tilausrivi.hinta / if ('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}) rivihinta,
               tilausrivi.kate,
               lasku.toimaika,
+              lasku.viite,
               lasku.lahetepvm Käsittelyyn,
               lasku.tila,
               lasku.alatila,

@@ -33604,6 +33604,12 @@ if (!function_exists("piirra_maksupaate_formi")) {
     $maksuehtores = pupe_query($query_maksuehto);
     $maksuehtorow = mysql_fetch_assoc($maksuehtores);
 
+    // Pyöristetään lähimpään 5 senttiin, jos maksuehdossa on valittu, että pyöristetään.
+    if ($maksuehtorow['kateinen'] == 'p') {
+      $kaikkiyhteensa = round($kaikkiyhteensa / 0.05) * 0.05;
+      $maksettavaa_jaljella = round($maksettavaa_jaljella / 0.05) * 0.05;
+    }
+
     echo "<div id='dialog' title='" . t("Käteislaskuri") . "'>
           <form id='kateisFormi' class='multisubmit'>
             <ul class='list-unstyled'>

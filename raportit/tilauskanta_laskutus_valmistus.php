@@ -8,7 +8,7 @@ if (isset($_POST["tee"])) {
   if ($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/", "", $_POST["kaunisnimi"]);
 }
 
-if (strpos($_SERVER['SCRIPT_NAME'], "tilauskanta_laskutus.php") !== FALSE) {
+if (strpos($_SERVER['SCRIPT_NAME'], "tilauskanta_laskutus_valmistus.php") !== FALSE) {
   require "../inc/parametrit.inc";
 }
 
@@ -18,7 +18,6 @@ if (isset($tee) and $tee == "lataa_tiedosto") {
 }
 else {
   echo "<font class='head'>".t("Tilauskanta, Tilausten vastaanotto ja Laskutus")."</font><hr>";
-
 
   // hehe, näin on helpompi verrata päivämääriä
   $query  = "SELECT TO_DAYS('$vvl-$kkl-$ppl')-TO_DAYS('$vva-$kka-$ppa') ero";
@@ -44,11 +43,11 @@ else {
 
     $MONTH_ARRAY = array(1=> t('Tammikuu'), t('Helmikuu'), t('Maaliskuu'), t('Huhtikuu'), t('Toukokuu'), t('Kesäkuu'), t('Heinäkuu'), t('Elokuu'), t('Syyskuu'), t('Lokakuu'), t('Marraskuu'), t('Joulukuu'));
 
-    $start     = date("Y-m-d", mktime(0, 0, 0, $kka, $ppa,  $vva));
-    $start_ed   = date("Y-m-d", mktime(0, 0, 0, $kka, $ppa,  $vvaa));
+    $start = date("Y-m-d", mktime(0, 0, 0, $kka, $ppa,  $vva));
+    $start_ed = date("Y-m-d", mktime(0, 0, 0, $kka, $ppa,  $vvaa));
 
-    $startmonth  = date("Ymd", mktime(0, 0, 0, $kka, $ppa,  $vva));
-    $endmonth   = date("Ymd", mktime(0, 0, 0, $kkl, $ppl,  $vvl));
+    $startmonth = date("Ymd", mktime(0, 0, 0, $kka, $ppa,  $vva));
+    $endmonth = date("Ymd", mktime(0, 0, 0, $kkl, $ppl,  $vvl));
 
     $query_ale_lisa = generoi_alekentta('M');
 
@@ -60,24 +59,28 @@ else {
       $alku_ed  = date("Y-m-d", mktime(0, 0, 0, substr($i, 4, 2), substr($i, 6, 2),  substr($i, 0, 4)-1));
       $loppu_ed = date("Y-m-d", mktime(0, 0, 0, substr($i, 4, 2), date("t", mktime(0, 0, 0, substr($i, 4, 2), substr($i, 6, 2),  substr($i, 0, 4))),  substr($i, 0, 4)-1));
 
+      # Tilauskanta
       if ($i == $startmonth) {
-        $query .= " round(sum(if(tilausrivi.laadittu < '$alku 00:00:00' and (tilausrivi.laskutettuaika = '0000-00-00' or tilausrivi.laskutettuaika >= '$alku'), if(tilausrivi.laskutettuaika = '0000-00-00', tilausrivi.hinta / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}, tilausrivi.rivihinta),0))/1000,0) 'TKVA',\n";
+          $query .= " round(sum(if(tilausrivi.laadittu < '$alku 00:00:00' and (
+            if(tilausrivi.tyyppi='L', tilausrivi.laskutettuaika = '0000-00-00' or tilausrivi.laskutettuaika >= '$alku', tilausrivi.toimitettuaika = '0000-00-00 00:00:00' or (tilausrivi.toimitettuaika != '0000-00-00 00:00:00' and (lasku.tapvm = '0000-00-00' or lasku.tapvm >= '$alku')))
+          ), if(tilausrivi.laskutettuaika = '0000-00-00', tilausrivi.hinta / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * {$query_ale_lisa}, tilausrivi.rivihinta),0))/1000,0) 'TKVA',\n";
       }
 
-      $query .= " round(sum(if(tilausrivi.laadittu <= '$loppu 23:59:59' and (tilausrivi.laskutettuaika = '0000-00-00' or tilausrivi.laskutettuaika > '$loppu'), if(tilausrivi.laskutettuaika = '0000-00-00', tilausrivi.hinta / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}, tilausrivi.rivihinta),0))/1000,0) '".(substr($i, 4, 2)*1).".1',\n";
-      $query .= " round(sum(if(tilausrivi.laadittu <= '$loppu_ed 23:59:59' and (tilausrivi.laskutettuaika = '0000-00-00' or tilausrivi.laskutettuaika > '$loppu_ed'), if(tilausrivi.laskutettuaika = '0000-00-00', tilausrivi.hinta / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}, tilausrivi.rivihinta),0))/1000,0) '".(substr($i, 4, 2)*1).".2',\n";
+      $query .= " round(sum(if(tilausrivi.laadittu <= '$loppu 23:59:59' and (
+          if(tilausrivi.tyyppi='L', tilausrivi.laskutettuaika = '0000-00-00' or tilausrivi.laskutettuaika > '$loppu', tilausrivi.toimitettuaika = '0000-00-00 00:00:00' or (tilausrivi.toimitettuaika != '0000-00-00 00:00:00' and (lasku.tapvm = '0000-00-00' or lasku.tapvm > '$loppu')))
+      ), if(tilausrivi.laskutettuaika = '0000-00-00', tilausrivi.hinta / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * {$query_ale_lisa}, tilausrivi.rivihinta),0))/1000,0) '".(substr($i, 4, 2)*1).".1',\n";
 
-      $query .= " round(sum(if(tilausrivi.laadittu >= '$alku 00:00:00' and tilausrivi.laadittu <= '$loppu 23:59:59', if(tilausrivi.laskutettuaika = '0000-00-00', tilausrivi.hinta / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}, tilausrivi.rivihinta),0))/1000,0) '".(substr($i, 4, 2)*1).".3',\n";
-      $query .= " round(sum(if(tilausrivi.laadittu >= '$alku_ed 00:00:00' and tilausrivi.laadittu <= '$loppu_ed 23:59:59', if(tilausrivi.laskutettuaika = '0000-00-00', tilausrivi.hinta / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}, tilausrivi.rivihinta),0))/1000,0) '".(substr($i, 4, 2)*1).".4',\n";
+      $query .= " round(sum(if(tilausrivi.laadittu <= '$loppu_ed 23:59:59' and (
+          if(tilausrivi.tyyppi='L', tilausrivi.laskutettuaika = '0000-00-00' or tilausrivi.laskutettuaika > '$loppu_ed', tilausrivi.toimitettuaika = '0000-00-00 00:00:00' or (tilausrivi.toimitettuaika != '0000-00-00 00:00:00' and (lasku.tapvm = '0000-00-00' or lasku.tapvm > '$loppu_ed')))
+      ), if(tilausrivi.laskutettuaika = '0000-00-00', tilausrivi.hinta / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * {$query_ale_lisa}, tilausrivi.rivihinta),0))/1000,0) '".(substr($i, 4, 2)*1).".2',\n";
 
-      $query .= " round(sum(if(tilausrivi.laadittu >= '$start 00:00:00' and tilausrivi.laadittu <= '$loppu 23:59:59', if(tilausrivi.laskutettuaika = '0000-00-00', tilausrivi.hinta / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}, tilausrivi.rivihinta),0))/1000,0) '".(substr($i, 4, 2)*1).".5',\n";
-      $query .= " round(sum(if(tilausrivi.laadittu >= '$start_ed 00:00:00' and tilausrivi.laadittu <= '$loppu_ed 23:59:59', if(tilausrivi.laskutettuaika = '0000-00-00', tilausrivi.hinta / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}, tilausrivi.rivihinta),0))/1000,0) '".(substr($i, 4, 2)*1).".6',\n";
+      # Laskutus
+      $query .= " round(sum(if(tilausrivi.tyyppi = 'L' and tilausrivi.laskutettuaika >= '$alku'  and tilausrivi.laskutettuaika <= '$loppu', tilausrivi.rivihinta, 0))/1000,0) '".(substr($i, 4, 2)*1).".7',\n";
+      $query .= " round(sum(if(tilausrivi.tyyppi = 'L' and tilausrivi.laskutettuaika >= '$alku_ed'  and tilausrivi.laskutettuaika <= '$loppu_ed', tilausrivi.rivihinta, 0))/1000,0) '".(substr($i, 4, 2)*1).".8',\n";
 
-      $query .= " round(sum(if(tilausrivi.laskutettuaika >= '$alku'  and tilausrivi.laskutettuaika <= '$loppu', tilausrivi.rivihinta, 0))/1000,0) '".(substr($i, 4, 2)*1).".7',\n";
-      $query .= " round(sum(if(tilausrivi.laskutettuaika >= '$alku_ed'  and tilausrivi.laskutettuaika <= '$loppu_ed', tilausrivi.rivihinta, 0))/1000,0) '".(substr($i, 4, 2)*1).".8',\n";
-
-      $query .= " round(sum(if(tilausrivi.laskutettuaika >= '$start'  and tilausrivi.laskutettuaika <= '$loppu', tilausrivi.rivihinta, 0))/1000,0) '".(substr($i, 4, 2)*1).".9',\n";
-      $query .= " round(sum(if(tilausrivi.laskutettuaika >= '$start_ed'  and tilausrivi.laskutettuaika <= '$loppu_ed', tilausrivi.rivihinta, 0))/1000,0) '".(substr($i, 4, 2)*1).".10',\n";
+      # Laskutus kumulatiivinen
+      $query .= " round(sum(if(tilausrivi.tyyppi = 'L' and tilausrivi.laskutettuaika >= '$start'  and tilausrivi.laskutettuaika <= '$loppu', tilausrivi.rivihinta, 0))/1000,0) '".(substr($i, 4, 2)*1).".9',\n";
+      $query .= " round(sum(if(tilausrivi.tyyppi = 'L' and tilausrivi.laskutettuaika >= '$start_ed'  and tilausrivi.laskutettuaika <= '$loppu_ed', tilausrivi.rivihinta, 0))/1000,0) '".(substr($i, 4, 2)*1).".10',\n";
 
       $i = date("Ymd", mktime(0, 0, 0, substr($i, 4, 2)+1, 1,  substr($i, 0, 4)));
     }
@@ -96,14 +99,24 @@ else {
       $kustp2 = " ";
     }
 
-    $query .= "  FROM lasku use index (yhtio_tila_tapvm)
-          JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi='L')
-          $kustp1
-          WHERE lasku.yhtio = '$kukarow[yhtio]'
-          and lasku.tila in ('L','N')
-          and lasku.alatila in ('','A','B','C','D','J','E','F','T','U','X')
-          and ((lasku.tapvm = '0000-00-00') or (lasku.tapvm >= '$vva-$kka-$ppa' and lasku.tapvm <= '$vvl-$kkl-$ppl') or (lasku.tapvm >= '$vvaa-$kka-$ppa' and lasku.tapvm <= '$vvll-$kkl-$ppl'))
-          $kustp2";
+    $query .= " FROM lasku use index (yhtio_tila_tapvm)
+                JOIN tilausrivi use index (yhtio_otunnus) on (
+                  tilausrivi.yhtio = lasku.yhtio and
+                  tilausrivi.otunnus = lasku.tunnus and
+                  (
+                    tilausrivi.tyyppi='L' and (tilausrivi.kerattyaika != tilausrivi.laadittu or tilausrivi.kerattyaika = 0 or tilausrivi.laskutettuaika > 0)
+                    or tilausrivi.tyyppi in ('W','M')
+                  )
+                )
+                $kustp1
+                WHERE lasku.yhtio = '$kukarow[yhtio]'
+                and (
+                  (lasku.tila in ('L','N') and lasku.alatila in ('','A','B','C','D','J','E','F','T','U','X'))
+                  or
+                  (lasku.tila = 'V' and lasku.alatila in ('','A','B','J','V') and lasku.tilaustyyppi = 'V')
+                )
+                and (lasku.tapvm = '0000-00-00' or lasku.tapvm >= '$vvaa-$kka-$ppa')
+                $kustp2";
     $result = pupe_query($query);
 
     if (strpos($_SERVER['SCRIPT_NAME'], "tilauskanta_laskutus.php") !== FALSE) {

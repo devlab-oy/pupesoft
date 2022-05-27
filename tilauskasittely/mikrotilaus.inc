@@ -1193,11 +1193,9 @@ if ($tee == 'mikrotila') {
               toimi.suoratoimitus
             FROM tuotteen_toimittajat 
             JOIN toimi on (tuotteen_toimittajat.yhtio = toimi.yhtio AND tuotteen_toimittajat.liitostunnus = toimi.tunnus) 
-            JOIN tuote on (tuotteen_toimittajat.yhtio = tuote.yhtio AND tuotteen_toimittajat.tuoteno = tuote.tuoteno) 
               WHERE tuotteen_toimittajat.yhtio = '{$kukarow["yhtio"]}' 
               AND toimi.suoratoimitus = 'X' 
             GROUP BY tuotteen_toimittajat.liitostunnus ORDER by toimi.nimi ASC";
-            echo $_tuotteen_toimittajat_query;
   $_tuotteen_toimittajat_result = pupe_query($_tuotteen_toimittajat_query);
   echo "<option value=''>--".t("Ei valittu")."--</option>";
   while($_tuotteen_toimittajat_row = mysql_fetch_assoc($_tuotteen_toimittajat_result)) {

@@ -20,6 +20,17 @@
 </p>
 <?php } ?>
 
+<style>
+    .changepricein + span {
+        display: none;
+    }
+    .disabled {
+        pointer-events: none;
+        cursor: default;
+        background-color: #eee;
+    }
+</style>
+
 
 <?php if (!array_key_exists("ilmoitus", $template)) { // Tämä if-voidaan siirtää kontrolleriin, jos muutoksia vielä tehdään.?>
 <form id="lomake-katelaskenta-hakutulokset"
@@ -115,24 +126,24 @@
                 }
                 ?>
 
-                <td><span class="hinta" style="vertical-align: baseline;"><?php echo $tuote["myyntihinta"]; ?></span>
+                <td><?php if($hintojen_muutos) { ?><input type="text" size="6" class="changepricein" value="<?php echo $tuote["myyntihinta"]; ?>"></input><?php } ?><span class="hinta" style="vertical-align: baseline;"><?php echo $tuote["myyntihinta"]; ?></span>
                     <?php echo $template["yhtio"]["valkoodi"]; ?>
                 </td>
-                <td><input type="text"
+                <td><input <?php if($hintojen_muutos) { ?>class="disabled" disabled <?php } ?> type="text"
                         name="myyntikate['<?php echo $tuotetunnus; ?>']"
                         value="<?php echo $tuote["myyntikate"]; ?>"
                         size=4 /></td>
-                <td><span class="hinta" style="vertical-align: baseline;"><?php echo $tuote["myymalahinta"]; ?></span>
+                <td><?php if($hintojen_muutos) { ?><input type="text" size="6" class="changepricein" value="<?php echo $tuote["myymalahinta"]; ?>"></input><?php } ?><span class="hinta" style="vertical-align: baseline;"><?php echo $tuote["myymalahinta"]; ?></span>
                     <?php echo $template["yhtio"]["valkoodi"]; ?>
                 </td>
-                <td><input type="text"
+                <td><input <?php if($hintojen_muutos) { ?>class="disabled" disabled <?php } ?> type="text"
                         name="myymalakate['<?php echo $tuotetunnus; ?>']"
                         value="<?php echo $tuote["myymalakate"]; ?>"
                         size=4 /></td>
-                <td><span class="hinta" style="vertical-align: baseline;"><?php echo $tuote["nettohinta"]; ?></span>
+                <td><?php if($hintojen_muutos) { ?><input type="text" size="6" class="changepricein" value="<?php echo $tuote["nettohinta"]; ?>"></input><?php } ?><span class="hinta" style="vertical-align: baseline;"><?php echo $tuote["nettohinta"]; ?></span>
                     <?php echo $template["yhtio"]["valkoodi"]; ?>
                 </td>
-                <td><input type="text"
+                <td><input <?php if($hintojen_muutos) { ?>class="disabled" disabled <?php } ?> type="text"
                         name="nettokate['<?php echo $tuotetunnus; ?>']"
                         value="<?php echo $tuote["nettokate"]; ?>"
                         size=4 /></td>

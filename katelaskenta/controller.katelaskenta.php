@@ -167,6 +167,26 @@ else {
 }
 
 /**
+ * Seuraavat kaksi if-lausetta liittyvät "Hintojen muutos"
+ * -valintaan tuotehaussa.
+ */
+if (!isset($hintojen_muutos)) {
+  $hintojen_muutos = '';
+}
+if ($hintojen_muutos != "" and $laskekatecheck != "CHECKED") {
+  $hintojen_muutoscheck = "CHECKED";
+  $ulisa .= "&hintojen_muutos=checked";
+}
+else {
+  $hintojen_muutoscheck = "";
+}
+
+if($laskekatecheck == "CHECKED") {
+  $ulisa = str_replace("&hintojen_muutos=checked", "", $ulisa);
+  $hintojen_muutos = false;
+}
+
+/**
  * Seuraavat kaksi if-lausetta liittyvät "Nimitys"-hakuehtoon.
  */
 if (!isset($nimitys)) {
@@ -268,7 +288,13 @@ echo "<td><input type='checkbox' name='saldotonrajaus' $saldotoncheck></td>";
 echo "</tr>";
 echo "<tr>";
 echo "<th>" . t("Laske kate") . "</th>";
-echo "<td><input type='checkbox' name='laskekate' $laskekatecheck></td>";
+echo "<td><input type='checkbox' name='laskekate' $laskekatecheck>
+</td>";
+echo "</tr>";
+echo "<tr>";
+echo "<th>" . t("Hintojen muutos") . "</th>";
+echo "<td><input type='checkbox' name='hintojen_muutos' $hintojen_muutoscheck>
+</td>";
 echo "</tr>";
 echo "</table><br/>";
 echo "<br/>";

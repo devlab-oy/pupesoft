@@ -51,6 +51,18 @@ $(document).ready(function () {
         }
     });
 
+    $("[name='hintojen_muutos']").on("change",function() {
+        if(this.checked) {
+            $("[name='laskekate']").prop("checked", false);
+        }
+    });
+
+    $("[name='laskekate']").on("change",function() {
+        if(this.checked) {
+            $("[name='hintojen_muutos']").prop("checked", false);
+        }
+    });
+
     /**
      * Funtion toiminto on vain alustaa tavittavat muuttujat, joita
      * eri toiminnallisuuksissa käytetään. Näin elementtien hakuja
@@ -180,7 +192,11 @@ $(document).ready(function () {
             var uusiMyyntihinta = lisaaHintaanKate(keskihankintahinta, myyntikate.val());
             var uusiMyymalahinta = lisaaHintaanKate(keskihankintahinta, myymalakate.val());
             var uusiNettohinta = lisaaHintaanKate(keskihankintahinta, nettokate.val());
-            var uusiAsiakashinta = lisaaHintaanKate(keskiasiakashinta, asiakaskate.val());
+            if(asiakaskate.length) {
+                var uusiAsiakashinta = lisaaHintaanKate(keskiasiakashinta, asiakaskate.val());
+            } else {
+                var uusiAsiakashinta = false;
+            }
 
             if(uusiMyyntihinta !== false && myyntikate.val() > 0) {
                 asetaUusiHinta(uusiMyyntihinta, myyntihintaElementti);

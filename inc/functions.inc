@@ -33589,7 +33589,7 @@ if (!function_exists("choose_correct_date")) {
 if (!function_exists("piirra_maksupaate_formi")) {
   function piirra_maksupaate_formi($laskurow, $kaikkiyhteensa, $kateinen, $maksettavaa_jaljella,
     $loytyy_maksutapahtumia, $kateismaksu, $kateista_annettu,
-    $korttimaksutapahtuman_status, $maksuehto, $piirra_keraysnappula = true) {
+    $korttimaksutapahtuman_status, $piirra_keraysnappula = true) {
     global $kukarow, $mista, $valittu_kopio_tulostin, $kertakassa, $toim, $orig_tila, $orig_alatila,
     $kassalipas, $kieli, $valittu_tulostin;
 
@@ -33605,7 +33605,7 @@ if (!function_exists("piirra_maksupaate_formi")) {
                         AND kaytossa                  = ''
                         AND (maksuehto.sallitut_maat = ''
                           OR maksuehto.sallitut_maat  LIKE '%{$laskurow["maa"]}%')
-                        {$ehtolisa}";
+                        AND tunnus = {$laskurow['maksuehto']}";
 
     $maksuehtores = pupe_query($query_maksuehto);
     $maksuehtorow = mysql_fetch_assoc($maksuehtores);

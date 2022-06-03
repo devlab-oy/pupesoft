@@ -1000,7 +1000,7 @@ if ($tee == "VALITSE") {
       $kateista_annettu = isset($kateista_annettu) ? $kateista_annettu : 0;
       piirra_maksupaate_formi($ekarow, $ekarow["summa"], $kateinen, $maksettavaa_jaljella,
         $loytyy_maksutapahtumia, $kateismaksu, $kateista_annettu,
-        $korttimaksutapahtuman_status, reset($maksuehtoja), false);
+        $korttimaksutapahtuman_status, false);
     }
 
     echo "  <SCRIPT LANGUAGE=JAVASCRIPT>

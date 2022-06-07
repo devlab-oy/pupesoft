@@ -40,47 +40,60 @@ if (substr($ftppath, -1) != "/") {
   $ftppath .= "/";
 }
 
-$connection = ssh2_connect($ftphost, $sftpport);
+if (substr($ftppass, 0, 4) == "/CLI") {
+  # Use command line sftp with ssh key auth
+  $ftppass = substr($ftppass, 4);
+  $cmd = "sftp -o \"IdentityFile={$ftppass}\" {$ftpuser}@{$ftphost}: <<< $'put {$ftpfile}'";
+  exec($cmd, $devnull, $retval);
 
-if (!$connection) {
-  $palautus = "Could not connect to remote host. ($ftphost)";
-}
-
-if ($palautus == "") {
-  if (!empty($ftpskey)) {
-    @ssh2_auth_pubkey_file($connection, $ftpuser, $ftpskey.'.pub', $ftpskey);
-  }
-
-  if (!ssh2_auth_password($connection, $ftpuser, $ftppass)) {
-    $palautus = "Could not login to remote host ($ftpuser, $ftppass)";
+  if ($retval != 0) {
+    $palautus = "SFTP VIRHE";
   }
 }
+else {
+  # Use PHP sftp funtions
+  $connection = ssh2_connect($ftphost, $sftpport);
 
-if ($palautus == "") {
-  $sftp = ssh2_sftp($connection);
-
-  if (!$sftp) {
-    $palautus = "Could not initialize SFTP subsystem";
-  }
-}
-
-if ($palautus == "") {
-  $remotefile = $ftppath.basename($ftpfile);
-
-  $stream = fopen("ssh2.sftp://$sftp/$remotefile", "w");
-
-  if (!$stream) {
-    $palautus = "Could not open file ($remotefile)";
+  if (!$connection) {
+    $palautus = "Could not connect to remote host. ($ftphost)";
   }
 
   if ($palautus == "") {
-    $data_to_send = file_get_contents($ftpfile);
-
-    if (fwrite($stream, $data_to_send) === false) {
-      $palautus = "Could not send data from file: $ftpfile";
+    if (!empty($ftpskey)) {
+      @ssh2_auth_pubkey_file($connection, $ftpuser, $ftpskey.'.pub', $ftpskey);
     }
 
-    fclose($stream);
+    if (!ssh2_auth_password($connection, $ftpuser, $ftppass)) {
+      $palautus = "Could not login to remote host ($ftpuser, $ftppass)";
+    }
+  }
+
+  if ($palautus == "") {
+    $sftp = ssh2_sftp($connection);
+
+    if (!$sftp) {
+      $palautus = "Could not initialize SFTP subsystem";
+    }
+  }
+
+  if ($palautus == "") {
+    $remotefile = $ftppath.basename($ftpfile);
+
+    $stream = fopen("ssh2.sftp://$sftp/$remotefile", "w");
+
+    if (!$stream) {
+      $palautus = "Could not open file ($remotefile)";
+    }
+
+    if ($palautus == "") {
+      $data_to_send = file_get_contents($ftpfile);
+
+      if (fwrite($stream, $data_to_send) === false) {
+        $palautus = "Could not send data from file: $ftpfile";
+      }
+
+      fclose($stream);
+    }
   }
 }
 

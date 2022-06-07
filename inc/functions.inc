@@ -12604,8 +12604,8 @@ if (!function_exists("hae_yhtion_parametrit")) {
 
     // Jos meillä on toimipaikka, ylikirjataan yhtion parametrit toimipaikan parametreillä
     if ($toimipaikka > 0) {
-      $query = "SELECT *, 
-                maa as maa_vero, 
+      $query = "SELECT *,
+                maa as maa_vero,
                 tunnus as yhtion_toimipaikat_tunnus
                 FROM yhtion_toimipaikat
                 WHERE yhtio = '$yhtio'
@@ -27673,21 +27673,21 @@ if (!function_exists('luo_lasku_poikkeus_tilaukset')) {
     if(is_numeric($otunnukset)) {
 
       // Tarkistetaan, että onko lasku luotu, jos ei ole, niin luodaan.
-      $query_tark = "SELECT tunnus FROM lasku 
+      $query_tark = "SELECT tunnus FROM lasku
                      WHERE yhtio  = '{$kukarow['yhtio']}'
-                     AND tunnus   = '$otunnukset' 
-                     AND laskunro = 0 
+                     AND tunnus   = '$otunnukset'
+                     AND laskunro = 0
                      AND chn      = '999'";
       $ures_tark  = pupe_query($query_tark);
 
       if (mysql_num_rows($ures_tark) > 0) {
 
-        $query_tark = "UPDATE lasku SET 
-                       alatila = 'V', 
-                       chn      = '' 
+        $query_tark = "UPDATE lasku SET
+                       alatila = 'V',
+                       chn      = ''
                        WHERE yhtio  = '{$kukarow['yhtio']}'
-                       AND tunnus   = '$otunnukset' 
-                       AND laskunro = 0 
+                       AND tunnus   = '$otunnukset'
+                       AND laskunro = 0
                        AND chn      = '999'";
         $ures_tark  = pupe_query($query_tark);
 
@@ -27731,10 +27731,10 @@ if (!function_exists('luo_lasku_poikkeus_tilaukset')) {
         tulosta_asiakkaan_kuitti($otunnukset_cache, $kukarow["kuittitulostin"], $kuitin_parametrit);
 
         unset($valittu_tulostin);
-        
+
         // Laitetaan takaisin laskutuskielto 999
         $query_tark = "UPDATE lasku SET
-                       chn      = '999' 
+                       chn      = '999'
                        WHERE yhtio  = '{$kukarow['yhtio']}'
                        AND tunnus   IN ({$otunnukset_cache})
                        AND chn      = ''";
@@ -27796,21 +27796,21 @@ if (!function_exists('paivita_rahtikirjat_tulostetuksi_ja_toimitetuksi')) {
 
     if($from_tracking_code) {
       // Tarkistetaan, että onko magento lasku luotu, jos ei ole, niin luodaan.
-      $query_tark = "SELECT tunnus FROM lasku 
-                     WHERE yhtio  = '{$kukarow['yhtio']}' 
-                     AND tunnus   = '$otunnukset' 
-                     AND laskunro = 0 
-                     AND chn      = '999' 
-                     AND ohjelma_moduli          = 'MAGENTO' 
-                     AND asiakkaan_tilausnumero  != '' 
+      $query_tark = "SELECT tunnus FROM lasku
+                     WHERE yhtio  = '{$kukarow['yhtio']}'
+                     AND tunnus   = '$otunnukset'
+                     AND laskunro = 0
+                     AND chn      = '999'
+                     AND ohjelma_moduli          = 'MAGENTO'
+                     AND asiakkaan_tilausnumero  != ''
                      AND laatija                 = 'Magento'";
       $ures_tark  = pupe_query($query_tark);
       if (mysql_num_rows($ures_tark) > 0) {
         $query_tark = "UPDATE lasku SET
-                       chn      = '' 
+                       chn      = ''
                        WHERE yhtio  = '{$kukarow['yhtio']}'
-                       AND tunnus   = '$otunnukset' 
-                       AND laskunro = 0 
+                       AND tunnus   = '$otunnukset'
+                       AND laskunro = 0
                        AND chn      = '999'";
         $ures_tark  = pupe_query($query_tark);
 
@@ -27855,10 +27855,10 @@ if (!function_exists('paivita_rahtikirjat_tulostetuksi_ja_toimitetuksi')) {
           $kuitin_parametrit);
 
         unset($valittu_tulostin);
-        
+
         // Laitetaan takaisin laskutuskielto 999
         $query_tark = "UPDATE lasku SET
-                       chn      = '999' 
+                       chn      = '999'
                        WHERE yhtio  = '{$kukarow['yhtio']}'
                        AND tunnus   IN ({$otunnukset_cache})
                        AND chn      = ''";
@@ -33589,9 +33589,14 @@ if (!function_exists("choose_correct_date")) {
 if (!function_exists("piirra_maksupaate_formi")) {
   function piirra_maksupaate_formi($laskurow, $kaikkiyhteensa, $kateinen, $maksettavaa_jaljella,
     $loytyy_maksutapahtumia, $kateismaksu, $kateista_annettu,
-    $korttimaksutapahtuman_status, $piirra_keraysnappula = true) {
+    $korttimaksutapahtuman_status, $maksuehto, $piirra_keraysnappula = true) {
     global $kukarow, $mista, $valittu_kopio_tulostin, $kertakassa, $toim, $orig_tila, $orig_alatila,
     $kassalipas, $kieli, $valittu_tulostin;
+
+    $ehtolisa = "";
+    if (!empty($maksuehto)) {
+      $ehtolisa = " AND tunnus = {$maksuehto} ";
+    }
 
     $query_maksuehto = "SELECT *
                         FROM maksuehto
@@ -33599,10 +33604,17 @@ if (!function_exists("piirra_maksupaate_formi")) {
                         AND kateinen                 != ''
                         AND kaytossa                  = ''
                         AND (maksuehto.sallitut_maat = ''
-                          OR maksuehto.sallitut_maat  LIKE '%{$laskurow["maa"]}%')";
+                          OR maksuehto.sallitut_maat  LIKE '%{$laskurow["maa"]}%')
+                        {$ehtolisa}";
 
     $maksuehtores = pupe_query($query_maksuehto);
     $maksuehtorow = mysql_fetch_assoc($maksuehtores);
+
+    // Pyöristetään lähimpään 5 senttiin, jos maksuehdossa on valittu, että pyöristetään.
+    if ($maksuehtorow['kateinen'] == 'p') {
+      $kaikkiyhteensa = round($kaikkiyhteensa / 0.05) * 0.05;
+      $maksettavaa_jaljella = round($maksettavaa_jaljella / 0.05) * 0.05;
+    }
 
     echo "<div id='dialog' title='" . t("Käteislaskuri") . "'>
           <form id='kateisFormi' class='multisubmit'>

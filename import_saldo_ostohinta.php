@@ -25,6 +25,7 @@ if (!$yhtiorow) {
 cron_log();
 
 ini_set('memory_limit', '4000M');
+ini_set('max_execution_time', 10000);
 
 $ftptiedot = array(
   "hosts" => $ftphosts_impsaloh
@@ -627,7 +628,7 @@ class ImportSaldoHinta
     $varasto = false;
 
     while ($rivi = fgetcsv($impsaloh_csv, 100000, $csv_jakajaa)) {
-
+      usleep(10000);
       // Skipataan tyhjät rivit
       if ($rivi[0] == "" and $rivi[1] == "" and $rivi[2] == "") {
         continue;

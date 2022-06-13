@@ -119,7 +119,7 @@ else {
                 $kustp2";
     $result = pupe_query($query);
 
-    if (strpos($_SERVER['SCRIPT_NAME'], "tilauskanta_laskutus.php") !== FALSE) {
+    if (strpos($_SERVER['SCRIPT_NAME'], "tilauskanta_laskutus_valmistus.php") !== FALSE) {
       if (@include 'Spreadsheet/Excel/Writer.php') {
 
         //keksit‰‰n failille joku varmasti uniikki nimi:
@@ -309,7 +309,7 @@ else {
       echo "<tr><th>".t("Tallenna tulos").":</th>";
       echo "<form method='post' class='multisubmit'>";
       echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
-      echo "<input type='hidden' name='kaunisnimi' value='Tilauskanta_Laskutus.xls'>";
+      echo "<input type='hidden' name='kaunisnimi' value='Tilauskanta_laskutus_valmistus.xls'>";
       echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";
       echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
       echo "</table><br>";
@@ -377,7 +377,7 @@ else {
     echo "</form>";
   }
 
-  if (strpos($_SERVER['SCRIPT_NAME'], "tilauskanta_laskutus.php") !== FALSE) {
+  if (strpos($_SERVER['SCRIPT_NAME'], "tilauskanta_laskutus_valmistus.php") !== FALSE) {
     require "../inc/footer.inc";
   }
 }

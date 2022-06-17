@@ -45,16 +45,9 @@ $(document).ready(function () {
 
     $("[name='hintojen_muutos']").on("change",function() {
         if(this.checked) {
-            $("[name='laskekate']").prop("checked", false);
+            $("[name='laskekate']").prop("checked", true);
         }
     });
-
-    $("[name='laskekate']").on("change",function() {
-        if(this.checked) {
-            $("[name='hintojen_muutos']").prop("checked", false);
-        }
-    });
-    
 
     /**
      * Funtion toiminto on vain alustaa tavittavat muuttujat, joita

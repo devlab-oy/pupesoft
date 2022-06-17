@@ -173,7 +173,7 @@ else {
 if (!isset($hintojen_muutos)) {
   $hintojen_muutos = '';
 }
-if ($hintojen_muutos != "" and $laskekatecheck != "CHECKED") {
+if ($hintojen_muutos != "") {
   $hintojen_muutoscheck = "CHECKED";
   $ulisa .= "&hintojen_muutos=checked";
 }
@@ -181,9 +181,9 @@ else {
   $hintojen_muutoscheck = "";
 }
 
-if($laskekatecheck == "CHECKED") {
-  $ulisa = str_replace("&hintojen_muutos=checked", "", $ulisa);
-  $hintojen_muutos = false;
+if($hintojen_muutoscheck == "CHECKED") {
+  $ulisa .= "&laskekate=checked";
+  $laskekatecheck = "CHECKED";
 }
 
 /**
@@ -289,6 +289,7 @@ echo "</tr>";
 echo "<tr>";
 echo "<th>" . t("Laske kate") . "</th>";
 echo "<td><input type='checkbox' name='laskekate' $laskekatecheck>
+<small style=\"font-size: 80%;text-transform: none;position:relative;top:-2px;\">".t('P‰‰ll‰ aina, jos "Hintojen muutos" on valittu')."</small>
 </td>";
 echo "</tr>";
 echo "<tr>";

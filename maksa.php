@@ -1035,7 +1035,7 @@ else {
 }
 
 // N‰ytet‰‰n kaikki omat maksatukseen valitut
-if ($tee == 'DM') {
+if ($tee == 'DM' and !isset($_GET['ajax'])) {
   $query = "SELECT lasku.nimi, lasku.kapvm, lasku.erpcm, lasku.valkoodi,
             lasku.summa - lasku.kasumma kasumma,
             lasku.summa,
@@ -1253,7 +1253,7 @@ if ($tee == 'DM') {
 }
 
 // N‰ytet‰‰n maksuvalmiit laskut
-if ($tee == 'S') {
+if ($tee == 'S' and !isset($_GET['ajax'])) {
 
   $lisa = "";
 
@@ -1472,9 +1472,8 @@ if ($tee == 'S') {
           $kikkalisa = "";
         }
 
-        echo "<form action = 'maksa.php$kikkalisa' method='post'>";
         echo "<td class='ptop' nowrap>";
-
+        echo "<form action = 'maksa.php$kikkalisa' method='post'>";
         $query = "SELECT maksukielto
                   FROM toimi
                   WHERE yhtio = '$kukarow[yhtio]'
@@ -1493,7 +1492,8 @@ if ($tee == 'S') {
               <input type='hidden' name = 'kaikki' value='$kaikki'>
               <input type='hidden' name = 'nimihaku' value='$nimihaku'>
               <input type='hidden' name = 'tapa' value='$tapa'>
-              <input type='submit' value='".t("Poimi lasku")."'>";
+              <input type='submit' value='".t("Poimi lasku heti")."'>";
+          echo "  <div style='margin-top:5px;'><input type='checkbox' data='$trow[tunnus]' class='poimilask'>".t("Valitse poimittavaksi")."</div>";
         }
 
         echo "</td>";
@@ -1565,7 +1565,20 @@ if ($tee == 'S') {
       $dataseek++;
     }
 
-    echo "</tbody>";
+    echo "</tbody><tfoot>
+    <tr>
+    <td style='background-color: #eee;'></td>
+    <td style='background-color: #eee;'></td>
+    <td style='background-color: #eee;'></td>
+    <td style='background-color: #eee;'></td>
+    <td style='background-color: #eee;'></td>
+    <td style='background-color: #eee;'></td>
+    <td style='background-color: #eee;'></td>
+    <td style='background-color: #eee;'></td>
+    <td style='background-color: #eee;'><button data-ladattu='".t('Poimi valitut')."' data-ladataan='".t('Ladataan...')."' class='poimilaskpain'>".t('Poimi valitut')."</button><p></p></td>
+    <td style='background-color: #eee;'></td>
+    </tr>
+    </tfoot>";
     echo "</table>";
 
     echo "<br><font class='message'>".t("Haetut yhteens‰")."</font><hr>";
@@ -1730,5 +1743,46 @@ if ($tee == 'V') {
   echo "</table>";
 
 }
+?>
+
+<script>
+  $(".poimilaskpain").click(function() {
+    if($(".poimilask:checked").length) {
+      var poimilaskpain = $(this);
+      poimilaskpain.text($(this).attr("data-ladataan"));
+      $(".poimilask:checked").each(function() {
+        var poimila = $(this).parent().parent("form");
+        var poimilacheck = $(this);
+        poimila.each(function() {
+          var post_url = $(this).attr("action");
+          var request_method = $(this).attr("method");
+	        var form_data = new FormData(this);
+          var poimilaht = $(this);
+          
+          $.ajax({
+            url : "/maksa.php?ajax="+poimilacheck.attr("data"),
+            type: request_method,
+            data : form_data,
+		        contentType: false,
+		        cache: false,
+		        processData:false
+          }).success(function(response) {
+            poimilaht.find(".error").remove();
+            var scriptRegex = /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi;
+            var response = response.replace(scriptRegex, "");
+            var virheet = $('<div></div>').html(response).children(".error");
+            if(virheet.length) {
+              poimilaht.append(virheet);
+            } else {
+              poimilaht.parent().parent().remove();
+            }
+            poimilaskpain.text(poimilaskpain.attr("data-ladattu"));
+          });
+        });
+      });
+    }
+  });
+</script>
+<?php
 
 require "inc/footer.inc";

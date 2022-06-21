@@ -49,7 +49,7 @@ float: left;
 
 .dataTables_paginate {
 width: 44px;
-  * width: 50px;
+
 float: left;
 text-align: left;
 }
@@ -89,7 +89,6 @@ width: 90%;
 table.display thead th {
 font-weight: bold;
 cursor: pointer;
-  * cursor: hand;
 }
 
 table.display tfoot th {
@@ -226,7 +225,4 @@ height: 90px;
 padding: 10px;
 overflow: auto;
 }
-// ==========
-// = Banner =
-// ==========
 ";

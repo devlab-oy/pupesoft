@@ -1760,7 +1760,7 @@ if ($tee == 'V') {
           var poimilaht = $(this);
           
           $.ajax({
-            url : "/maksa.php?ajax="+poimilacheck.attr("data"),
+            url : "maksa.php?ajax="+poimilacheck.attr("data"),
             type: request_method,
             data : form_data,
 		        contentType: false,

@@ -197,6 +197,7 @@ if (mysql_field_name($result, $i) == "laji") {
 
   if ($lukitse_laji== "") $ulos .= "<optgroup label='".t("Tilauksen ja laskutuksen avainsanat")."'>";
   if ($lukitse_laji== "" or $lukitse_laji == "VAKIOVIESTI") $ulos .= "<option value='VAKIOVIESTI' $avain_sel[VAKIOVIESTI]>".t("Laskun vakioviesti")."</option>";
+  if ($lukitse_laji== "" or $lukitse_laji == "ASKOHVIESTI") $ulos .= "<option value='ASKOHVIESTI' $avain_sel[ASKOHVIESTI]>".t("Asiakaskohtainen viesti (asiakasnro / viesti)")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "MAINOSTXT_LASKU") $ulos .= "<option value='MAINOSTXT_LASKU' {$avain_sel['MAINOSTXT_LASKU']}>".t("Laskun mainosteksti")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "VAKIOVIESTI_TIL") $ulos .= "<option value='VAKIOVIESTI_TIL' {$avain_sel['VAKIOVIESTI_TIL']}>".t("Tilausvahvistuksen vakioviesti")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "KAANTALVVIESTI") $ulos .= "<option value='KAANTALVVIESTI' $avain_sel[KAANTALVVIESTI]>".t("Tilauksen/Laskun k‰‰nteisen verotuksen viesti")."</option>";

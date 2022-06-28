@@ -43,9 +43,17 @@ $(document).ready(function () {
     var lisaaHintaanKate;
     var asetaUusiHinta;
 
-    $("[name='hintojen_muutos']").on("change",function() {
-        if(this.checked) {
-            $("[name='laskekate']").prop("checked", true);
+    $(".changepricein").change(function() {
+        var katesarakechange = $(this).val();
+        if(katesarakechange > 0) {
+            var kehahintachange = $(this).parent().parent("[data-kehahinta]").data("kehahinta");
+            var changepricein_laskettu = lisaaHinnastaKate(kehahintachange, katesarakechange);
+            if(changepricein_laskettu >= 0) {
+                $(this).parent().next().find(".disabled").val(changepricein_laskettu);
+                $(this).css("color", "red");
+            } else {
+                alert("Uuden hinnan \""+katesarakechange+"\" laskettu kate ei voi olla negatiivinen!");
+            }
         }
     });
 
@@ -203,9 +211,7 @@ $(document).ready(function () {
                     var changepricein_laskettu = lisaaHinnastaKate(kehahintachange, katesarakechange);
                     if(changepricein_laskettu >= 0) {
                         $(this).parent().next().find(".disabled").val(changepricein_laskettu);
-                        if($(this).hasClass("colchanged")) {
-                            $(this).css("color", "red");
-                        }
+                        $(this).css("color", "red");
                     } else {
                         alert("Uuden hinnan \""+katesarakechange+"\" laskettu kate ei voi olla negatiivinen!");
                     }

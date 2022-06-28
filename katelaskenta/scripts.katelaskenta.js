@@ -147,15 +147,8 @@ $(document).ready(function () {
 
     $(".changepricein").each(function() {
         $(this).on("change", function() {
-            var katesarakechange = $(this).val();
-            var kehahintachange = $(this).parent().parent("[data-kehahinta]").data("kehahinta");
-            var changepricein_laskettu = lisaaHinnastaKate(kehahintachange, katesarakechange);
-            if(changepricein_laskettu >= 0) {
-                $(this).parent().next().find(".disabled").val(changepricein_laskettu);
-            } else {
-                alert("Uuden hinnan laskettu kate ei voi olla negatiivinen!");
-            }
-        })
+            $(this).addClass("colchanged");
+        });
     });
 
     /**
@@ -203,6 +196,22 @@ $(document).ready(function () {
 
         $(this).find(tuoteriviLaskeNappiSarake).on("click", function (event) {
             event.preventDefault();
+            $(this).parent().parent().find(".changepricein").each(function() {
+                var katesarakechange = $(this).val();
+                if(katesarakechange > 0) {
+                    var kehahintachange = $(this).parent().parent("[data-kehahinta]").data("kehahinta");
+                    var changepricein_laskettu = lisaaHinnastaKate(kehahintachange, katesarakechange);
+                    if(changepricein_laskettu >= 0) {
+                        $(this).parent().next().find(".disabled").val(changepricein_laskettu);
+                        if($(this).hasClass("colchanged")) {
+                            $(this).css("color", "red");
+                        }
+                    } else {
+                        alert("Uuden hinnan \""+katesarakechange+"\" laskettu kate ei voi olla negatiivinen!");
+                    }
+                }
+            });
+
             var uusiMyyntihinta = lisaaHintaanKate(keskihankintahinta, myyntikate.val());
             var uusiMyymalahinta = lisaaHintaanKate(keskihankintahinta, myymalakate.val());
             var uusiNettohinta = lisaaHintaanKate(keskihankintahinta, nettokate.val());

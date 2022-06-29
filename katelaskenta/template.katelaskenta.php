@@ -20,6 +20,27 @@
 </p>
 <?php } ?>
 
+<style>
+    .changepricein + span {
+        display: none;
+    }
+    .disabled {
+        pointer-events: none;
+        cursor: default;
+        background-color: #eee;
+    }
+</style>
+<?php if($hintojen_muutos) {
+    ?>
+    <style>
+    #katelaskenta-hakutulokset > tfoot {
+        display: none;
+    }
+    </style>
+    <?php
+}
+?>
+
 
 <?php if (!array_key_exists("ilmoitus", $template)) { // Tämä if-voidaan siirtää kontrolleriin, jos muutoksia vielä tehdään.?>
 <form id="lomake-katelaskenta-hakutulokset"
@@ -115,24 +136,24 @@
                 }
                 ?>
 
-                <td><span class="hinta" style="vertical-align: baseline;"><?php echo $tuote["myyntihinta"]; ?></span>
+                <td><?php if($hintojen_muutos) { ?><input type="text" size="6" class="changepricein" name="myyntihintamuutos" value="<?php echo $tuote["myyntihinta"]; ?>"></input><?php } ?><span class="hinta" style="vertical-align: baseline;"><?php echo $tuote["myyntihinta"]; ?></span>
                     <?php echo $template["yhtio"]["valkoodi"]; ?>
                 </td>
-                <td><input type="text"
+                <td><input <?php if($hintojen_muutos) { ?>class="disabled"  <?php } ?> type="text"
                         name="myyntikate['<?php echo $tuotetunnus; ?>']"
                         value="<?php echo $tuote["myyntikate"]; ?>"
                         size=4 /></td>
-                <td><span class="hinta" style="vertical-align: baseline;"><?php echo $tuote["myymalahinta"]; ?></span>
+                <td><?php if($hintojen_muutos) { ?><input type="text" size="6" class="changepricein" name="myymalahintamuutos" value="<?php echo $tuote["myymalahinta"]; ?>"></input><?php } ?><span class="hinta" style="vertical-align: baseline;"><?php echo $tuote["myymalahinta"]; ?></span>
                     <?php echo $template["yhtio"]["valkoodi"]; ?>
                 </td>
-                <td><input type="text"
+                <td><input <?php if($hintojen_muutos) { ?>class="disabled"  <?php } ?> type="text"
                         name="myymalakate['<?php echo $tuotetunnus; ?>']"
                         value="<?php echo $tuote["myymalakate"]; ?>"
                         size=4 /></td>
-                <td><span class="hinta" style="vertical-align: baseline;"><?php echo $tuote["nettohinta"]; ?></span>
+                <td><?php if($hintojen_muutos) { ?><input type="text" size="6" class="changepricein" name="nettohintamuutos" value="<?php echo $tuote["nettohinta"]; ?>"></input><?php } ?><span class="hinta" style="vertical-align: baseline;"><?php echo $tuote["nettohinta"]; ?></span>
                     <?php echo $template["yhtio"]["valkoodi"]; ?>
                 </td>
-                <td><input type="text"
+                <td><input <?php if($hintojen_muutos) { ?>class="disabled"  <?php } ?> type="text"
                         name="nettokate['<?php echo $tuotetunnus; ?>']"
                         value="<?php echo $tuote["nettokate"]; ?>"
                         size=4 /></td>
@@ -141,10 +162,10 @@
                 }?>
                 <?php if($mul_asiakasryhma or $mul_asiakaspiiri or $mul_asiakashinnasto_asiakas) {
                 ?>
-                <td class="tumma"><span class="hinta" style="vertical-align: baseline;"><?php echo $tuote["asiakashinta_hinta"]; ?></span>
+                <td class="tumma"><?php if($hintojen_muutos) { ?><input type="text" size="6" class="changepricein" name="asiakashinta_hintamuutos" value="<?php echo $tuote["asiakashinta_hinta"]; ?>"></input><?php } ?><span class="hinta" style="vertical-align: baseline;"><?php echo $tuote["asiakashinta_hinta"]; ?></span>
                         <?php echo $template["yhtio"]["valkoodi"]; ?>
                 </td>
-                <td class="tumma"><input type="text"
+                <td class="tumma"><input <?php if($hintojen_muutos) { ?>class="disabled"  <?php } ?> type="text"
                         name="asiakashintakate['<?php echo $tuote["asiakashinta_asiakas_tunnus"]."!!!".$tuotetunnus; ?>']"
                         value="<?php echo $tuote["asiakashinta_asiakas_myyntikate"]; ?>"
                         size=4 /></td>

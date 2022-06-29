@@ -43,11 +43,17 @@ $(document).ready(function () {
     var lisaaHintaanKate;
     var asetaUusiHinta;
 
-    $("#katelaskenta-hakutulokset td input").on("change, keyup", function() {
-        var nimike = $(this).attr("name");
-        var haesamanlaiset = $('#katelaskenta-hakutulokset td input[name|="'+nimike+'"]');
-        if(haesamanlaiset.length > 1) {
-            $('#katelaskenta-hakutulokset td input[name|="'+nimike+'"]').val($(this).val());
+    $(".changepricein").change(function() {
+        var katesarakechange = $(this).val();
+        if(katesarakechange > 0) {
+            var kehahintachange = $(this).parent().parent("[data-kehahinta]").data("kehahinta");
+            var changepricein_laskettu = lisaaHinnastaKate(kehahintachange, katesarakechange);
+            if(changepricein_laskettu >= 0) {
+                $(this).parent().next().find(".disabled").val(changepricein_laskettu);
+                $(this).css("color", "red");
+            } else {
+                alert("Uuden hinnan \""+katesarakechange+"\" laskettu kate ei voi olla negatiivinen!");
+            }
         }
     });
 
@@ -132,6 +138,27 @@ $(document).ready(function () {
         return floatKeskihankintaHinta / (1 - (floatMyyntikate / 100));
     };
 
+    var lisaaHinnastaKate = function(keskihankintahinta, myyntihinta) {
+        var floatKeskihankintaHinta = parseFloat(keskihankintahinta);
+        var floatMyyntihinta = parseFloat(myyntihinta);
+
+        if (onkoTyhja(floatMyyntihinta)) {
+            alert("Hinta ei voi olla tyhjä.");
+            return false;
+        }
+        if (isNaN(floatKeskihankintaHinta) || floatKeskihankintaHinta == 0) {
+            return false;
+        }
+        var laskettuhinnastakate = 100 - floatKeskihankintaHinta / floatMyyntihinta * 100;
+        return parseFloat(laskettuhinnastakate).toFixed(2);
+    };
+
+    $(".changepricein").each(function() {
+        $(this).on("change", function() {
+            $(this).addClass("colchanged");
+        });
+    });
+
     /**
      * Funktio asettaa elementtiin uuden hinnan.
      *
@@ -177,10 +204,28 @@ $(document).ready(function () {
 
         $(this).find(tuoteriviLaskeNappiSarake).on("click", function (event) {
             event.preventDefault();
+            $(this).parent().parent().find(".changepricein").each(function() {
+                var katesarakechange = $(this).val();
+                if(katesarakechange > 0) {
+                    var kehahintachange = $(this).parent().parent("[data-kehahinta]").data("kehahinta");
+                    var changepricein_laskettu = lisaaHinnastaKate(kehahintachange, katesarakechange);
+                    if(changepricein_laskettu >= 0) {
+                        $(this).parent().next().find(".disabled").val(changepricein_laskettu);
+                        $(this).css("color", "red");
+                    } else {
+                        alert("Uuden hinnan \""+katesarakechange+"\" laskettu kate ei voi olla negatiivinen!");
+                    }
+                }
+            });
+
             var uusiMyyntihinta = lisaaHintaanKate(keskihankintahinta, myyntikate.val());
             var uusiMyymalahinta = lisaaHintaanKate(keskihankintahinta, myymalakate.val());
             var uusiNettohinta = lisaaHintaanKate(keskihankintahinta, nettokate.val());
-            var uusiAsiakashinta = lisaaHintaanKate(keskiasiakashinta, asiakaskate.val());
+            if(asiakaskate.length) {
+                var uusiAsiakashinta = lisaaHintaanKate(keskiasiakashinta, asiakaskate.val());
+            } else {
+                var uusiAsiakashinta = false;
+            }
 
             if(uusiMyyntihinta !== false && myyntikate.val() > 0) {
                 asetaUusiHinta(uusiMyyntihinta, myyntihintaElementti);

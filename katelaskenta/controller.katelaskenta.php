@@ -167,6 +167,26 @@ else {
 }
 
 /**
+ * Seuraavat kaksi if-lausetta liittyv‰t "Hintojen muutos"
+ * -valintaan tuotehaussa.
+ */
+if (!isset($hintojen_muutos)) {
+  $hintojen_muutos = '';
+}
+if ($hintojen_muutos != "") {
+  $hintojen_muutoscheck = "CHECKED";
+  $ulisa .= "&hintojen_muutos=checked";
+}
+else {
+  $hintojen_muutoscheck = "";
+}
+
+if($hintojen_muutoscheck == "CHECKED") {
+  $ulisa .= "&laskekate=checked";
+  $laskekatecheck = "CHECKED";
+}
+
+/**
  * Seuraavat kaksi if-lausetta liittyv‰t "Nimitys"-hakuehtoon.
  */
 if (!isset($nimitys)) {
@@ -268,7 +288,14 @@ echo "<td><input type='checkbox' name='saldotonrajaus' $saldotoncheck></td>";
 echo "</tr>";
 echo "<tr>";
 echo "<th>" . t("Laske kate") . "</th>";
-echo "<td><input type='checkbox' name='laskekate' $laskekatecheck></td>";
+echo "<td><input type='checkbox' name='laskekate' $laskekatecheck>
+<small style=\"font-size: 80%;text-transform: none;position:relative;top:-2px;\">".t('P‰‰ll‰ aina, jos "Hintojen muutos" on valittu')."</small>
+</td>";
+echo "</tr>";
+echo "<tr>";
+echo "<th>" . t("Hintojen muutos") . "</th>";
+echo "<td><input type='checkbox' name='hintojen_muutos' $hintojen_muutoscheck>
+</td>";
 echo "</tr>";
 echo "</table><br/>";
 echo "<br/>";

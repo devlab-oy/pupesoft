@@ -509,7 +509,21 @@ if (!function_exists('alku')) {
         $page_lasku[$sivu], $norm);
     }
 
-    $pdf_lasku->draw_text(310, 595, t("Mahdolliset huomautukset tehtävä 8 päivän kuluessa", $kieli), $page_lasku[$sivu], $pieni);
+    $askohviesti = false;
+    $askohviestit = t_avainsana("ASKOHVIESTI", $kieli);
+    while($askohviesti_row = mysql_fetch_assoc($askohviestit)) {
+      if($asiakasrow['asiakasnro'] == $askohviesti_row['selite']) {
+        $askohviesti = $askohviesti_row['selitetark'];
+        break;
+      }
+    }
+
+    if($askohviesti) {
+      $pdf_lasku->draw_text(310, 602, t("Mahdolliset huomautukset tehtävä 8 päivän kuluessa", $kieli), $page_lasku[$sivu], $pieni);
+      $pdf_lasku->draw_text(310, 593, $askohviesti, $page_lasku[$sivu], $pieni);
+    } else {
+      $pdf_lasku->draw_text(310, 595, t("Mahdolliset huomautukset tehtävä 8 päivän kuluessa", $kieli), $page_lasku[$sivu], $pieni);
+    }
 
     if ($laskutyyppi != 21 and $laskutyyppi != 22) {
       list($page_lasku, $sivu, $kala) = laskun_kommentit($laskurow, $asiakasrow, $kieli, $pdf_lasku, $toim, $laskutyyppi, $kaanteinen_verotus, $page_lasku, $sivu, $pohja);

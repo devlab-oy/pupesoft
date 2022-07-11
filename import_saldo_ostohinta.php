@@ -628,7 +628,7 @@ class ImportSaldoHinta
     $varasto = false;
 
     while ($rivi = fgetcsv($impsaloh_csv, 100000, $csv_jakajaa)) {
-      usleep(10000);
+      usleep(3000);
       // Skipataan tyhjät rivit
       if ($rivi[0] == "" and $rivi[1] == "" and $rivi[2] == "") {
         continue;

@@ -1472,8 +1472,8 @@ if ($tee == 'S' and !isset($_GET['ajax'])) {
           $kikkalisa = "";
         }
 
-        echo "<td class='ptop' nowrap>";
         echo "<form action = 'maksa.php$kikkalisa' method='post'>";
+        echo "<td class='ptop' nowrap>";
         $query = "SELECT maksukielto
                   FROM toimi
                   WHERE yhtio = '$kukarow[yhtio]'
@@ -1523,9 +1523,9 @@ if ($tee == 'S' and !isset($_GET['ajax'])) {
           echo t("Älä lähetä pankkiin");
           echo "<br>";
         }
-
-        echo "</form>";
+        
         echo "</td>";
+        echo "</form>";
 
         //Tutkitaan voidaanko lasku poistaa
         $query = "SELECT tunnus

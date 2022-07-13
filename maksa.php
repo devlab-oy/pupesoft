@@ -1524,8 +1524,8 @@ if ($tee == 'S' and !isset($_GET['ajax'])) {
           echo "<br>";
         }
 
-        echo "</td>";
         echo "</form>";
+        echo "</td>";
 
         //Tutkitaan voidaanko lasku poistaa
         $query = "SELECT tunnus

@@ -1751,7 +1751,8 @@ if ($tee == 'V') {
       var poimilaskpain = $(this);
       poimilaskpain.text($(this).attr("data-ladataan"));
       $(".poimilask:checked").each(function() {
-        var poimila = $(this).parent().parent("form");
+        
+        var poimila = $(this).parent().parent().parent().children("form");
         var poimilacheck = $(this);
         poimila.each(function() {
           var post_url = $(this).attr("action");
@@ -1774,7 +1775,7 @@ if ($tee == 'V') {
             if(virheet.length) {
               poimilaht.append(virheet);
             } else {
-              poimilaht.parent().parent().remove();
+              poimilaht.parent().remove();
             }
             poimilaskpain.text(poimilaskpain.attr("data-ladattu"));
           });

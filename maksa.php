@@ -1768,12 +1768,12 @@ if ($tee == 'V') {
 		        cache: false,
 		        processData:false
           }).success(function(response) {
-            poimilaht.find(".error").remove();
+            poimilaht.parent().find(".error").remove();
             var scriptRegex = /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi;
             var response = response.replace(scriptRegex, "");
             var virheet = $('<div></div>').html(response).children(".error");
             if(virheet.length) {
-              poimilaht.append(virheet);
+              poimilaht.parent().find("input[name='nimihaku']").parent().append(virheet);
             } else {
               poimilaht.parent().remove();
             }

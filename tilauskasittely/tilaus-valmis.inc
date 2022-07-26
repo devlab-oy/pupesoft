@@ -263,7 +263,7 @@ elseif ($luottorajavirhe != '' or $ylivito > 0) {
       $alatila = "";
       if(isset($editilaus_hyvaksyttava) 
       and $tilausvalmiskutsuja == "EDITILAUS" 
-      and $editilaus_hyvaksyttava == "" 
+      and $editilaus_hyvaksyttava === "" 
       and $editilaus_orumnet != "") {
         $alatila = "F";
       }

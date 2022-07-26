@@ -261,6 +261,12 @@ elseif ($luottorajavirhe != '' or $ylivito > 0) {
     }
     elseif ($yhtiorow["luottorajan_ylitys"] == "J" or $yhtiorow["erapaivan_ylityksen_toimenpide"] == "J" or $yhtiorow["luottorajan_ylitys"] == "L" or $yhtiorow["erapaivan_ylityksen_toimenpide"] == "L") {
       $alatila = "";
+      if(isset($editilaus_hyvaksyttava) 
+      and $tilausvalmiskutsuja == "EDITILAUS" 
+      and $editilaus_hyvaksyttava == "" 
+      and $editilaus_orumnet != "") {
+        $alatila = "F";
+      }
     }
     else {
       $alatila = "G";

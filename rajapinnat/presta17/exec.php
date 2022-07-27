@@ -450,6 +450,16 @@ class Presta17RestApi
     }
   }
 
+  public function get_tax_group_id($vat) {
+    $taxes = array(
+      "0" => "0",
+      "10.00" => "3",
+      "14.00" => "2",
+      "24.00" => "1"
+    );
+    return $taxes[$vat];
+  }
+
   public function updatePrestashopCategory($cat)
   {
     $cat_data = $cat['data'];
@@ -598,6 +608,8 @@ class Presta17RestApi
 
       $productFields->id_category_default = $this->getPrestashopCategory($cat_data[0]);
 
+      $productFields->id_tax_rules_group = $this->get_tax_group_id($pupesoft_product["alv"]);
+
       $productFields->price = $pupesoft_product['myyntihinta'];
       $pupesoft_product['nimitys'] = trim($pupesoft_product['nimitys']);
       $productFields->name->language[0] = $pupesoft_product['nimitys'];
@@ -695,6 +707,8 @@ class Presta17RestApi
       }
 
       $productFields->id_category_default = $this->getPrestashopCategory($cat_data[0]);
+
+      $productFields->id_tax_rules_group = $this->get_tax_group_id($pupesoft_product["alv"]);
 
       $productFields->price = $pupesoft_product['myyntihinta'];
       $pupesoft_product['nimitys'] = trim($pupesoft_product['nimitys']);

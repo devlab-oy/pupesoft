@@ -968,7 +968,7 @@ if (empty($id) and $echotaanko) {
   while ($varow = mysql_fetch_assoc($vares)) {
 
     $sel = '';
-    if ( (!empty($varastorajaus) and $varow['tunnus'] == $varastorajaus) or ($varastorajaus === 0 and $kukarow['oletus_varasto'] == $varow['tunnus']) ) {
+    if ( (!empty($varastorajaus) and $varow['tunnus'] == $varastorajaus) or (!$varastorajaus and $kukarow['oletus_varasto'] == $varow['tunnus']) ) {
       $sel = 'selected';
     }
 

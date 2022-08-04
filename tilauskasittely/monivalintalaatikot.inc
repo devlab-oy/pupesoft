@@ -399,9 +399,10 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
                     AND node.lft     > 1
                     {$liitoksetlisawhere}
                     ORDER BY node.lft";
+
           $kaikki_puun_tunnukset_res = pupe_query($query, $link);
           $kaikki_puun_tunnukset_row = mysql_fetch_assoc($kaikki_puun_tunnukset_res);
-
+          
           if ($kaikki_puun_tunnukset_row["tunnukset"] != "") {
             // Nollataan joinit tässä vaiheessa näin, koska syvempi puun taso rajaa enemmän kuin edelliset tasot, joten turha joinata monta kertaa
             $lisa_dynaaminen[$param] = "";
@@ -783,11 +784,8 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
                 ORDER BY avainsana.selitetark";
     }
     else {
-      $query = "SELECT toimi.nimi, toimi.tunnus
+      $query = "SELECT toimi.nimi, toimi.tunnus 
                 FROM toimi
-                RIGHT JOIN tuotteen_toimittajat AS tt
-                ON tt.yhtio = toimi.yhtio
-                AND tt.liitostunnus = toimi.tunnus
                 WHERE toimi.yhtio   = '$kukarow[yhtio]'
                 GROUP BY toimi.nimi";
     }
@@ -826,7 +824,18 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
       echo "<tr><td nowrap style='padding:0px'><select name='mul_toimi[]' $multiple_lisa $autosubmit>";
       echo "<option value=''>".t("Ei valintaa")."</option>";
 
+
+      $query = "SELECT GROUP_CONCAT(DISTINCT liitostunnus) as liitostunnukset
+                  FROM tuotteen_toimittajat 
+                  WHERE tuotteen_toimittajat.yhtio   = '$kukarow[yhtio]'";
+      $sresult_test = pupe_query($query);
+      $liitostunnukset_test = mysql_fetch_assoc($sresult_test);
+      $liitostunnukset_test = array_flip(explode(",", $liitostunnukset_test['liitostunnukset']));
+
       while ($sxrow = mysql_fetch_assoc($sresult)) {
+        if(!isset($liitostunnukset_test[strtolower(trim($sxrow['tunnus']))])) {
+          continue;
+        }
         $sel = '';
 
         if (count($mul_toimi) > 0) {

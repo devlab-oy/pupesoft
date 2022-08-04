@@ -1641,6 +1641,11 @@ if (!function_exists("var_kaannos")) {
 
 if (!function_exists("saldo_myytavissa")) {
   function saldo_myytavissa($tuoteno, $tyyppi = '', $varasto = 0, $yhtio = '', $hyllyalue = '', $hyllynro = '', $hyllyvali = '', $hyllytaso = '', $maa = '', $pvm = '', $era = '', $tulevaisuuteen = TRUE) {
+    
+    $tuoteno_row = $tuoteno;
+    if(is_array($tuoteno)) {
+      $tuoteno = $tuoteno["tuoteno"];
+    }
 
     // Tämä funktio palauttaa myytävissä olevan saldon sallituista varastoista (tyyppi='')
     // Laskuttamattomia hyvityksiä ei katsota myytäviksi vaan ne pitää laskuttaa ennenkuin näkyvät täällä (varattu > 0)
@@ -1653,7 +1658,7 @@ if (!function_exists("saldo_myytavissa")) {
         $pvm = date("Y-m-d");
       }
 
-      list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($tuoteno, $tyyppi, $varasto, $yhtio, $hyllyalue, $hyllynro, $hyllyvali, $hyllytaso, $maa, $pvm, $era, FALSE);
+      list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($tuoteno_row, $tyyppi, $varasto, $yhtio, $hyllyalue, $hyllynro, $hyllyvali, $hyllytaso, $maa, $pvm, $era, FALSE);
 
       $query  = "SELECT distinct tuoteno, kerayspvm
                  FROM tilausrivi use index (yhtio_tyyppi_tuoteno_kerayspvm)
@@ -1707,14 +1712,18 @@ if (!function_exists("saldo_myytavissa")) {
       }
     }
 
-    $query  = "SELECT *
-               FROM tuote
-               WHERE yhtio = '$kukarow[yhtio]'
-               AND tuoteno = '$tuoteno'";
-    $result = pupe_query($query);
-    $tuote  = mysql_fetch_assoc($result);
+    if(!is_array($tuoteno_row)) {
+      $query  = "SELECT *
+                  FROM tuote
+                  WHERE yhtio = '$kukarow[yhtio]'
+                  AND tuoteno = '$tuoteno'";
+      $result = pupe_query($query);
+      $tuote  = mysql_fetch_assoc($result);
+    } else {
+      $tuote = $tuoteno_row;
+    }
 
-    if (mysql_num_rows($result) == 0) {
+    if (mysql_num_rows($result) == 0 and !is_array($tuoteno_row)) {
       $saldo      = FALSE;
       $hyllyssa    = FALSE;
       $myytavissa    = FALSE;
@@ -1864,6 +1873,7 @@ if (!function_exists("saldo_myytavissa")) {
                   $valinta2
                   $valinta3";
       }
+
       $result = pupe_query($query);
 
       if (mysql_num_rows($result) == 0) {

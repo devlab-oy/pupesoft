@@ -1892,6 +1892,36 @@ if (    $tee == "VALMIS"
   $maksuehtores = pupe_query($query_maksuehto);
 }
 
+// Poistutaan tilaukselta ja jätetään se kesken
+if ($tee == 'VALMIS' and (int) $kukarow['kesken'] > 0 and !empty($tilaus_valmis_toiminto)) {
+  echo "<font class='message'>".t("$otsikko")." $kukarow[kesken] ".t("jätetty lepäämään")."!</font><br><br>";
+
+  $alatilaupdate = "";
+  if (
+    ($laskurow['tila'] == "N" and $laskurow['alatila'] == "A") or
+    ($laskurow['tila'] == "V" and $laskurow['alatila'] == "J")
+  ) {
+    $alatilaupdate = ", alatila = '' ";
+  }
+
+  $query  = "UPDATE lasku set
+              tilaus_valmis_toiminto = '$tilaus_valmis_toiminto'
+              {$alatilaupdate}
+              where yhtio = '$kukarow[yhtio]'
+              and tunnus  = '$kukarow[kesken]'";
+  pupe_query($query);
+
+  $tee = '';
+  $tilausnumero = '';
+  $laskurow = '';
+  $kukarow['kesken'] = '';
+
+  if ($lopetus != '') {
+    lopetus($lopetus, "META");
+  }
+}
+
+
 // Tilaus valmis
 if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
 
@@ -10245,7 +10275,7 @@ if ($tee == '') {
           //jos vain tietyt henkilöt saavat jyvittää ja henkilöllä on jyvitys sekä osajyvitys päällä TAI kaikki saavat jyvittää
           if ($toim != 'TARJOUS' and (($yhtiorow["salli_jyvitys_myynnissa"] == "V" and $kukarow['jyvitys'] == 'S') or $yhtiorow["salli_jyvitys_myynnissa"] == "S")) {
             echo "<tr>";
-            echo "<td class='back' colspan='".($sarakkeet_alku-5)."'>&nbsp;</td>";
+            echo "<td class='back' colspan='".($sarakkeet_alku-4)."'>&nbsp;</td>";
             echo "<th colspan='5'>".t("Pyöristä valitut rivit").":</th>";
             echo "<td class='spec'>";
             echo "<form id='jyvita_valitut_form' name='pyorista' method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php' autocomplete='off'>
@@ -10938,6 +10968,21 @@ if ($tee == '') {
 
         if (!$maksupaate_kassamyynti or $maksuehtorow["kateinen"] == "") {
           echo "<input type='submit' ACCESSKEY='V' value='$painike_txt'>";
+          if (
+            $yhtiorow["raaka_aineet_valmistusmyynti"] == "M" and (
+            ($laskurow['tila'] == "N" and in_array($laskurow['alatila'], array("", "A"))) or
+            ($laskurow['tila'] == "V" and in_array($laskurow['alatila'], array("", "J")))
+          )) {
+            $sel_tvt = array();
+            $sel_tvt[$laskurow['tilaus_valmis_toiminto']] = "SELECTED";
+            echo "<select name='tilaus_valmis_toiminto'>";
+            echo "<option value=''>".t("Tilaus valmis")."</option>";
+            echo "<option value='OO' {$sel_tvt['OO']}>".t("Odottaa ohjelmointia")."</option>";
+            echo "<option value='OM' {$sel_tvt['OM']}>".t("Odottaa materiaalia")."</option>";
+            echo "<option value='OT' {$sel_tvt['OT']}>".t("Odottaa toimitusaikaa")."</option>";
+            echo "<option value='OTA' {$sel_tvt['OTA']}>".t("Odottaa tietoa asiakkaalta")."</option>";
+            echo "</select>";
+          }
         }
 
         if ($kukarow["extranet"] == "" and (!$_kassamyyntiok or $kateinen != "X" or $kukarow["kassamyyja"] == "") and ($yhtiorow["tee_osto_myyntitilaukselta"] == "Z" or $yhtiorow["tee_osto_myyntitilaukselta"] == "Q") and in_array($toim, array("PROJEKTI", "RIVISYOTTO", "PIKATILAUS"))) {

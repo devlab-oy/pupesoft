@@ -497,11 +497,14 @@ if ($tee == "VALITSE") {
 
     // Onko yhtään jaksotettua tilausta
     $jaksotettuja = FALSE;
+    $tarkistettavia = FALSE;
 
     while ($row = mysql_fetch_assoc($res)) {
       if ($row["jaksotettu"] > 0) {
         $jaksotettuja = TRUE;
-        break;
+      }
+      if ($row["tarkista_ennen_laskutusta"] != '') {
+        $tarkistettavia = TRUE;
       }
     }
 
@@ -536,6 +539,7 @@ if ($tee == "VALITSE") {
     echo "<th>".t("Toimitustapa")."</th>";
     echo "<th>".t("Muokkaa tilausta")."</th>";
     if ($jaksotettuja) echo "<th>".t("Laskuta kaikki positiot")."</th>";
+    if ($tarkistettavia) echo "<th>".t("Tarkista ennen kuin laskutat")."</th>";
 
     $maksu_positiot = array();
 
@@ -717,6 +721,15 @@ if ($tee == "VALITSE") {
         }
         else {
           echo "<td>".t("Ei positioita")."</td>";
+        }
+      }
+
+      if ($tarkistettavia) {
+        if ($row["tarkista_ennen_laskutusta"] != '') {
+          echo "<td valign='top'><img src='$palvelin2/pics/lullacons/alert.png'> ".t("Tarkista tilaus ennen laskutusta")."!</td>";
+        }
+        else {
+          echo "<td></td>";
         }
       }
 
@@ -1391,6 +1404,7 @@ function hae_tilaukset_result($query_ale_lisa, $tunnukset, $alatilat, $vientilis
             lasku.verkkotunnus,
             lasku.erikoisale,
             lasku.hinta,
+            lasku.tarkista_ennen_laskutusta,
             round(sum(tilausrivi.hinta / if('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}),2) arvo,
             round(sum(tilausrivi.hinta * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}),2) summa
             FROM lasku use index (tila_index)
@@ -1410,7 +1424,7 @@ function hae_tilaukset_result($query_ale_lisa, $tunnukset, $alatilat, $vientilis
             GROUP BY ketjutuskentta, reklamaatiot_lasku, lasku.tunnus,lasku.luontiaika,lasku.chn,lasku.ytunnus,lasku.nimi,lasku.osoite,lasku.postino,lasku.postitp,lasku.maa,lasku.toim_nimi,lasku.toim_osoite,lasku.toim_postino,lasku.toim_postitp,lasku.toim_maa,lasku.laskutusvkopv,lasku.rahtivapaa,lasku.toimitustapa,
             laskun_lisatiedot.laskutus_nimi, laskun_lisatiedot.laskutus_nimitark, laskun_lisatiedot.laskutus_osoite, laskun_lisatiedot.laskutus_postino, laskun_lisatiedot.laskutus_postitp, laskun_lisatiedot.laskutus_maa,
             maksuehto.teksti,maksuehto.itsetulostus,maksuehto.kateinen,kuka.nimi,lasku.valkoodi,lasku.liitostunnus,lasku.tila,lasku.vienti,lasku.alv,lasku.kohdistettu,lasku.jaksotettu,lasku.verkkotunnus,lasku.erikoisale,
-            lasku.hinta
+            lasku.hinta,lasku.tarkista_ennen_laskutusta
             ORDER BY ketjutuskentta, reklamaatiot_lasku, lasku.tunnus";
   $res = pupe_query($query);
 

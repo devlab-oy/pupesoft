@@ -726,7 +726,7 @@ if ($tee == "VALITSE") {
 
       if ($tarkistettavia) {
         if ($row["tarkista_ennen_laskutusta"] != '') {
-          echo "<td valign='top'><img src='$palvelin2/pics/lullacons/alert.png'> ".t("Tarkista tilaus ennen laskutusta")."!</td>";
+          echo "<td valign='top'><img src='$palvelin2/pics/lullacons/alert.png'>&nbsp;<font class='error'>".t("HUOM: Tarkista tilaus ennen laskutusta")."!</font></td>";
         }
         else {
           echo "<td></td>";

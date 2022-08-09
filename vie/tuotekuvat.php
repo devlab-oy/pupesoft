@@ -34,16 +34,38 @@ if (!$yhtiorow) {
   exit;
 }
 
-$query = "SELECT * 
-          FROM liitetiedostot
-          where yhtio = '$yhtio' 
-          AND liitos = 'tuote'";
-$liiteres = pupe_query($query);
-system("rm -rf ".getcwd()."/tuotekuvat/*");
-while($liite = mysql_fetch_assoc($liiteres)) {
-  $_path = getcwd()."/tuotekuvat/".$liite['filename'];
-  file_put_contents($_path, $liite['data']);
+while($counter < 3000000) 
+{
+  $counter2 = $counter+10000;
+  $query = "SELECT 
+            liitetiedostot.filename, 
+            liitetiedostot.data,
+            tuote.tuotemerkki,
+            tuote.tuoteno
+           FROM liitetiedostot 
+           JOIN tuote on (tuote.tunnus = liitetiedostot.liitostunnus) 
+           WHERE liitetiedostot.yhtio = 'mergr' 
+           AND liitetiedostot.liitos = 'tuote' 
+           AND kayttotarkoitus = 'TK' 
+           LIMIT $counter,$counter2
+           ";
+  $counter = $counter + 10000;
+  $liiteres = pupe_query($link, $query);
+  system("rm -rf ".getcwd()."/tuotekuvat/*");
+
+  while($liite = mysql_fetch_assoc($liiteres)) {
+    usleep(100);
+    $liite['tuotemerkki'] = preg_replace("/[^a-zA-Z0-9]/", "", $liite['tuotemerkki']);
+    $liite['tuoteno'] = preg_replace("/[^a-zA-Z0-9]/", '', $liite['tuoteno']);
+    system("mkdir -p ".getcwd()."/tuotekuvat/".$liite['tuotemerkki']);
+    $folde = getcwd()."/tuotekuvat/".$liite['tuotemerkki']."/".$liite['tuoteno'];
+    system("mkdir -p ".$folde);
+    $_path = $folde."/".str_replace(array("..", "/"), "", $liite['filename']);
+    file_put_contents($_path, $liite['data']);
+  }
+  sleep(5);
 }
+
 system("tar -czvf ".getcwd()."/tuotekuvat.tar.gz ".getcwd()."/tuotekuvat");
 system("rm -rf ".getcwd()."/tuotekuvat/*");
 system("mv tuotekuvat.tar.gz ".getcwd()."/tuotekuvat/");

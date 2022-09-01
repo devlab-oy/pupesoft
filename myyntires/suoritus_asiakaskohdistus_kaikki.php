@@ -72,7 +72,7 @@ while ($suoritus = mysql_fetch_assoc($result)) {
     $asiakasokmaksaja = FALSE;
 
     // Kokeillaan eka suoraan suorituksen maksajalla, 12 merkkia, aktiiviset asiakkaat
-    $query = "SELECT nimi, konserniyhtio, tunnus
+    $query = "SELECT nimi, konserniyhtio, tunnus, toim_ovttunnus
               FROM asiakas
               WHERE yhtio  = '$kukarow[yhtio]'
               and laji    != 'R'
@@ -87,7 +87,7 @@ while ($suoritus = mysql_fetch_assoc($result)) {
 
     // Kokeillaan eka suoraan suorituksen maksajalla, 12 merkkia, kaikki asiakkaat
     if (!$asiakasokmaksaja) {
-      $query = "SELECT nimi, konserniyhtio, tunnus
+      $query = "SELECT nimi, konserniyhtio, tunnus, toim_ovttunnus 
                 FROM asiakas
                 WHERE yhtio  = '$kukarow[yhtio]'
                 and laji    != 'R'
@@ -102,7 +102,7 @@ while ($suoritus = mysql_fetch_assoc($result)) {
 
     // Kokeillaan suorituksen nimellä ilman osakeyhtiotunnusta, aktiiviset asiakkaat
     if (!$asiakasokmaksaja) {
-      $query = "SELECT nimi, konserniyhtio, tunnus
+      $query = "SELECT nimi, konserniyhtio, tunnus, toim_ovttunnus 
                 FROM asiakas
                 WHERE yhtio  = '$kukarow[yhtio]'
                 and laji    != 'R'
@@ -118,7 +118,7 @@ while ($suoritus = mysql_fetch_assoc($result)) {
 
     // Kokeillaan suorituksen nimellä ilman osakeyhtiotunnusta, kaikki asiakkaat
     if (!$asiakasokmaksaja) {
-      $query = "SELECT nimi, konserniyhtio, tunnus
+      $query = "SELECT nimi, konserniyhtio, tunnus, toim_ovttunnus 
                 FROM asiakas
                 WHERE yhtio  = '$kukarow[yhtio]'
                 and laji    != 'R'
@@ -133,7 +133,7 @@ while ($suoritus = mysql_fetch_assoc($result)) {
 
     // Kokeillaan suorituksen nimellä ilman osakeyhtiöntunnusta, 
     // asiakkaan nimestä 12 merkkia, aktiiviset asiakkaat
-    $query = "SELECT nimi, konserniyhtio, tunnus
+    $query = "SELECT nimi, konserniyhtio, tunnus, toim_ovttunnus 
               FROM asiakas
               WHERE yhtio  = '$kukarow[yhtio]'
               and laji    != 'R'
@@ -149,12 +149,24 @@ while ($suoritus = mysql_fetch_assoc($result)) {
     // Kokeillaan suorituksen nimellä ilman osakeyhtiöntunnusta, 
     // asiakkaan nimestä 12 merkkia, kaikki asiakkaat
     if (!$asiakasokmaksaja) {
-      $query = "SELECT nimi, konserniyhtio, tunnus
+      $query = "SELECT nimi, konserniyhtio, tunnus, toim_ovttunnus 
                 FROM asiakas
                 WHERE yhtio  = '$kukarow[yhtio]'
                 and laji    != 'R'
                 and left(nimi, 12) LIKE '{$unimi}%'";
       $asres = pupe_query($query);
+
+      if (mysql_num_rows($asres) == 1) {
+        $asiakas = mysql_fetch_assoc($asres);
+        $asiakasokmaksaja = TRUE;
+      }
+    }
+
+    if (!$asiakasokmaksaja and mysql_num_rows($asres) > 1 and 1==2) {
+      $asres = pupe_query(
+        $query." 
+        and right(toim_ovttunnus, 3) = '001'"
+      );
 
       if (mysql_num_rows($asres) == 1) {
         $asiakas = mysql_fetch_assoc($asres);

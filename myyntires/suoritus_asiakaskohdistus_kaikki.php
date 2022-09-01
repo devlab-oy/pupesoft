@@ -72,7 +72,7 @@ while ($suoritus = mysql_fetch_assoc($result)) {
     $asiakasokmaksaja = FALSE;
 
     // Kokeillaan eka suoraan suorituksen maksajalla, 12 merkkia, aktiiviset asiakkaat
-    $query = "SELECT nimi, konserniyhtio, tunnus, toim_ovttunnus
+    $query = "SELECT nimi, konserniyhtio, tunnus, toim_ovttunnus 
               FROM asiakas
               WHERE yhtio  = '$kukarow[yhtio]'
               and laji    != 'R'

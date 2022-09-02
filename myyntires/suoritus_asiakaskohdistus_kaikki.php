@@ -162,7 +162,7 @@ while ($suoritus = mysql_fetch_assoc($result)) {
       }
     }
 
-    if (!$asiakasokmaksaja and mysql_num_rows($asres) > 1 and 1==2) {
+    if (!$asiakasokmaksaja and mysql_num_rows($asres) > 1) {
       $asres = pupe_query(
         $query." 
         and right(toim_ovttunnus, 3) = '001'"

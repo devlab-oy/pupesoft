@@ -162,6 +162,45 @@ while ($suoritus = mysql_fetch_assoc($result)) {
       }
     }
 
+    // kokeillaan ilman mt?, o? ja as alussa. base64 encode auttaa UTF-8 vertailussa
+    if (!$asiakasokmaksaja and mysql_num_rows($asres) <= 0) {
+      
+      $utf_unimi = utf8_encode($unimi);
+
+      $_kokeilu3 = base64_encode(mb_substr($utf_unimi, 0, 3, 'UTF-8'));
+      $_kokeilu4 = base64_encode(mb_substr($utf_unimi, 0, 4, 'UTF-8'));
+
+      if(
+        $_kokeilu3 == "b8O8IA==" or 
+        $_kokeilu3 == "YXMg" or 
+        $_kokeilu4 == "bXTDvCA="
+      ) {
+
+        $utf_unimi = str_replace(
+          array(
+            base64_decode($_kokeilu3), 
+            base64_decode($_kokeilu4)
+          ), 
+          "", 
+          $utf_unimi
+        );
+        
+        if(strlen($utf_unimi) > 3) {
+          $query = "SELECT nimi, konserniyhtio, tunnus, toim_ovttunnus 
+                    FROM asiakas 
+                    WHERE yhtio  = '$kukarow[yhtio]' 
+                    and laji    != 'R' 
+                    and left(nimi, 12) LIKE '{$utf_unimi}%'";
+          $asres = pupe_query($query);
+
+          if (mysql_num_rows($asres) == 1) {
+            $asiakas = mysql_fetch_assoc($asres);
+            $asiakasokmaksaja = TRUE;
+          }
+        }
+      }
+    }
+
     if (!$asiakasokmaksaja and mysql_num_rows($asres) > 1) {
       $asres = pupe_query(
         $query." 

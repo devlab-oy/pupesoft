@@ -176,6 +176,12 @@ while ($suoritus = mysql_fetch_assoc($result)) {
         $_kokeilu4 == "bXTDvCA="
       ) {
 
+        if($_kokeilu4 == "bXTDvCA=") {
+          $laske_rivi_no = 8;
+        } else {
+          $laske_rivi_no = 9;
+        }
+
         $utf_unimi = str_replace(
           array(
             base64_decode($_kokeilu3), 
@@ -184,13 +190,13 @@ while ($suoritus = mysql_fetch_assoc($result)) {
           "", 
           $utf_unimi
         );
-        
+
         if(strlen($utf_unimi) > 3) {
           $query = "SELECT nimi, konserniyhtio, tunnus, toim_ovttunnus 
                     FROM asiakas 
                     WHERE yhtio  = '$kukarow[yhtio]' 
                     and laji    != 'R' 
-                    and left(nimi, 12) LIKE '{$utf_unimi}%'";
+                    and left(nimi, $laske_rivi_no) LIKE '{$utf_unimi}%'";
           $asres = pupe_query($query);
 
           if (mysql_num_rows($asres) == 1) {
@@ -203,13 +209,20 @@ while ($suoritus = mysql_fetch_assoc($result)) {
 
     if (!$asiakasokmaksaja and mysql_num_rows($asres) > 1) {
       $asres = pupe_query(
-        $query." 
-        and right(toim_ovttunnus, 3) = '001'"
+        $query." and right(toim_ovttunnus, 3) = '001' and laji != 'P'"
       );
 
       if (mysql_num_rows($asres) == 1) {
         $asiakas = mysql_fetch_assoc($asres);
         $asiakasokmaksaja = TRUE;
+      } else {
+        $asres = pupe_query(
+          $query." and right(toim_ovttunnus, 3) = '001' and laji != 'P' and nimi = '".$unimi." as'"
+        );
+        if (mysql_num_rows($asres) == 1) {
+          $asiakas = mysql_fetch_assoc($asres);
+          $asiakasokmaksaja = TRUE;
+        }
       }
     }
 

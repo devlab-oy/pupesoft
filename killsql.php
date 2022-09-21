@@ -15,7 +15,7 @@ $result = pupe_query("SHOW FULL PROCESSLIST");
 <option checked><?php echo t('Valitse kysely'); ?></option>
 <?php 
 while ($row = mysql_fetch_array($result)) {
-  if ($row["Time"] >= 10) {
+  if ($row["Time"] >= 10 and $row["Info"] !== NULL) {
     if($id and $row["Id"] == $id) {
       $result = pupe_query("KILL $id");
       sleep(1);

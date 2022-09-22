@@ -187,55 +187,55 @@ class ImportSaldoHinta
 
     $stocks_titles = $this->lisaa_otsikot[$tiedostonimi]['stocks'];
     $prices_titles = $this->lisaa_otsikot[$tiedostonimi]['prices'];
-
-    $oh = fopen($output, "w+");
-    $ih = fopen($input, "r");
-    $i=0;
-
-    $tuotenumerot_saldo = array();
-    while (false !== ($data = fgetcsv($ih, 100000, ";"))) {
-      if ($i==0) {
-        $outputData = $stocks_titles['titles'];
-        fputcsv($oh, $outputData, ";");
-      }
-      $outputData = array(
-        (string) $data[$stocks_titles['columns'][0]],
-        $data[$stocks_titles['columns'][1]], preg_replace(
-          "/[^0-9 ]/",
-          '',
-          $data[$stocks_titles['columns'][2]]
-        )
-      );
-      $tuotenumerot_saldo[$outputData[0]] = '';
-      fputcsv($oh, $outputData, ";");
-      $i++;
-    }
-
-    $oh2 = fopen($output2, "w+");
-    $ih2 = fopen($input2, "r");
-    $i=0;
-
-    while (false !== ($data2 = fgetcsv($ih2, 100000, ";"))) {
-      if ($i==0) {
-        $outputData2 = $prices_titles['titles'];
-        fputcsv($oh2, $outputData2, ";");
-      }
-      $outputData2 = array(
-        (string) $data2[$prices_titles['columns'][0]],
-        $data2[$prices_titles['columns'][1]]
-      );
-      if($reset_tuotenimet and !isset($tuotenumerot_saldo[$outputData2[0]])) {
-        fputcsv($oh, array($outputData2[0], 0, 1), ";");
-        fputcsv($oh, array($outputData2[0], 0, 72), ";");
-      }
-      fputcsv($oh2, $outputData2, ";");
-      $i++;
-    }
-    fclose($ih);
-    fclose($oh);
     
-    fclose($ih2);
-    fclose($oh2);
+    $tuotenumerot_saldo = array();
+
+    if($ih = fopen($input, "r")) {
+      $i=0;
+      $oh = fopen($output, "w+");
+      while (false !== ($data = fgetcsv($ih, 100000, ";"))) {
+        if ($i==0) {
+         $outputData = $stocks_titles['titles'];
+          fputcsv($oh, $outputData, ";");
+        }
+        $outputData = array(
+          (string) $data[$stocks_titles['columns'][0]],
+          $data[$stocks_titles['columns'][1]], preg_replace(
+            "/[^0-9 ]/",
+            '',
+            $data[$stocks_titles['columns'][2]]
+          )
+        );
+        $tuotenumerot_saldo[$outputData[0]] = '';
+        fputcsv($oh, $outputData, ";");
+        $i++;
+      }
+      fclose($ih);
+      fclose($oh);
+    }
+
+    if($ih2 = fopen($input2, "r")) {
+      $oh2 = fopen($output2, "w+");
+      $i=0;
+      while (false !== ($data2 = fgetcsv($ih2, 100000, ";"))) {
+        if ($i==0) {
+          $outputData2 = $prices_titles['titles'];
+          fputcsv($oh2, $outputData2, ";");
+        }
+        $outputData2 = array(
+          (string) $data2[$prices_titles['columns'][0]],
+          $data2[$prices_titles['columns'][1]]
+        );
+        if($reset_tuotenimet and !isset($tuotenumerot_saldo[$outputData2[0]])) {
+          fputcsv($oh, array($outputData2[0], 0, 1), ";");
+          fputcsv($oh, array($outputData2[0], 0, 72), ";");
+        }
+        fputcsv($oh2, $outputData2, ";");
+        $i++;
+      }
+      fclose($ih2);
+      fclose($oh2);
+    }
 
     copy($output, $this->impsaloh_polku_in."/../debug.csv");
 

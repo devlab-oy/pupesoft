@@ -192,6 +192,7 @@ while ($suoritus = mysql_fetch_assoc($result)) {
         );
 
         if(strlen($utf_unimi) > 3) {
+          $utf_unimi = utf8_decode($utf_unimi);
           $query = "SELECT nimi, konserniyhtio, tunnus, toim_ovttunnus 
                     FROM asiakas 
                     WHERE yhtio  = '$kukarow[yhtio]' 

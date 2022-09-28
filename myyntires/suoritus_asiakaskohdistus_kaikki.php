@@ -165,33 +165,41 @@ while ($suoritus = mysql_fetch_assoc($result)) {
     // kokeillaan ilman mt?, o? ja as alussa. base64 encode auttaa UTF-8 vertailussa
     if (!$asiakasokmaksaja and mysql_num_rows($asres) <= 0) {
       
-      $utf_unimi = utf8_encode($unimi);
+      $utf_unimi = mb_strtolower(utf8_encode($suoritus['nimi_maksaja']), 'UTF-8');
 
       $_kokeilu3 = base64_encode(mb_substr($utf_unimi, 0, 3, 'UTF-8'));
       $_kokeilu4 = base64_encode(mb_substr($utf_unimi, 0, 4, 'UTF-8'));
 
-      if(
-        $_kokeilu3 == "b8O8IA==" or 
-        $_kokeilu3 == "YXMg" or 
-        $_kokeilu4 == "bXTDvCA="
-      ) {
+      $laske_rivi_no = false;
 
-        if($_kokeilu4 == "bXTDvCA=") {
-          $laske_rivi_no = 8;
-        } else {
-          $laske_rivi_no = 9;
-        }
+      if(in_array($_kokeilu3, array(
+        "b8O8IA==", 
+        "YXMg"
+      ))) {
+        $laske_rivi_no = 9;
+        $_replace_prefix = trim(base64_decode($_kokeilu3));
+      }
 
-        $utf_unimi = str_replace(
+      if(in_array($_kokeilu4, array(
+        "bXTDvCA="
+      ))) {
+        $laske_rivi_no = 8;
+        $_replace_prefix = trim(base64_decode($_kokeilu4));
+      }
+
+      if($laske_rivi_no) {
+
+        $utf_unimi = trim(str_replace(
           array(
             base64_decode($_kokeilu3), 
             base64_decode($_kokeilu4)
           ), 
           "", 
           $utf_unimi
-        );
+        ));
 
         if(strlen($utf_unimi) > 3) {
+          $utf_unimi_prefix = utf8_decode($utf_unimi." ".$_replace_prefix);
           $utf_unimi = utf8_decode($utf_unimi);
           $query = "SELECT nimi, konserniyhtio, tunnus, toim_ovttunnus 
                     FROM asiakas 
@@ -203,6 +211,18 @@ while ($suoritus = mysql_fetch_assoc($result)) {
           if (mysql_num_rows($asres) == 1) {
             $asiakas = mysql_fetch_assoc($asres);
             $asiakasokmaksaja = TRUE;
+          } else if (mysql_num_rows($asres) > 1) {
+            $query = "SELECT nimi, konserniyhtio, tunnus, toim_ovttunnus 
+                      FROM asiakas 
+                      WHERE yhtio  = '$kukarow[yhtio]' 
+                      and laji    != 'R' 
+                      and left(nimi, 12) LIKE '{$utf_unimi_prefix}%'";
+            $asres = pupe_query($query);
+
+            if (mysql_num_rows($asres) == 1) {
+              $asiakas = mysql_fetch_assoc($asres);
+              $asiakasokmaksaja = TRUE;
+            }
           }
         }
       }

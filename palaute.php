@@ -2,13 +2,13 @@
 ob_start();
 require "inc/parametrit.inc";
 if (!isset($palaute_dl)) $palaute_dl = false;
-if($palaute_dl and $file = getcwd().'/palaute_dl.csv' and file_exists($file)) {
+if($palaute_dl and $file = getcwd().'/datain/palaute_dl.csv' and file_exists($file)) {
   ob_end_clean();
   header('Content-Description: File Transfer');
   header('Content-Type: application/octet-stream');
   header("Cache-Control: no-cache, must-revalidate");
   header("Expires: 0");
-  header('Content-Disposition: attachment; filename="'.basename($file).'"');
+  header('Content-Disposition: attachment; filename="'.date("d_m_Y-H_i_s", filemtime($file))."-".basename($file).'"');
   header('Content-Length: ' . filesize($file));
   header('Pragma: public');
   flush();
@@ -28,7 +28,7 @@ if($palaute_lisaa and $maara and $hinta and $tuoteno) {
     $maara, 
     $hinta
   );
-  $tiedosto = fopen(getcwd()."/palaute_dl.csv", "a");
+  $tiedosto = fopen(getcwd()."/datain/palaute_dl.csv", "a");
   fputcsv($tiedosto, $lisataan);
   fclose($handle); 
   echo '<div class="vastaus">';

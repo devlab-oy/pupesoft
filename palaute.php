@@ -16,6 +16,28 @@ if($palaute_dl and $file = getcwd().'/datain/palaute_dl.csv' and file_exists($fi
   exit;
 }
 
+if (!isset($palaute_mail)) $palaute_mail = false;
+if($palaute_mail and $file = getcwd().'/datain/palaute_dl.csv' and file_exists($file)) {
+  $viikko_obj = new DateTime();
+  $viikko = $viikko_obj->format("W");
+  ob_end_clean();
+  $params = array(
+    "to"       => "igor.olhovski@sprintit.fi",
+    "subject"     => t('Tuotepalautteet, viikko ').$viikko,
+    "ctype"       => "text",
+    "body"       => t('Tuotepalautteet, viikko ').$viikko,
+    "attachements"   => array(
+      array(
+        "filename"     => $file,
+        "newfilename"   => date("d_m_Y-H_i_s", filemtime($file))."-".basename($file),
+        "ctype"       => "csv"
+      )
+    )
+  );
+  $onko_sahkoposti_lahetetty = pupesoft_sahkoposti($params);
+  exit;
+}
+
 if (!isset($palaute_lisaa)) $palaute_lisaa = false;
 if (!isset($maara)) $maara = false;
 if (!isset($hinta)) $hinta = false;

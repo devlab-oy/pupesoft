@@ -22,7 +22,7 @@ if($palaute_mail and $file = getcwd().'/datain/palaute_dl.csv' and file_exists($
   $viikko = $viikko_obj->format("W");
   ob_end_clean();
   $params = array(
-    "to"       => $yhtiorow["tuotekopio_email"],
+    "to"       => $yhtiorow["talhal_email"],
     "subject"     => t('Tuotepalautteet, viikko ').$viikko,
     "ctype"       => "text",
     "body"       => t('Tuotepalautteet, viikko ').$viikko,

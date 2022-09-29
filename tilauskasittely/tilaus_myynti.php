@@ -492,6 +492,10 @@ if ($kukarow["extranet"] == "") {
   echo "<script src='../js/maksupaate.js'></script>";
 }
 
+if(tarkista_oikeus("palaute.php")) {
+  echo "<script src='../js/ajax.js'></script>";
+}
+
 if ((int) $luotunnusnippu > 0 and $tilausnumero == $kukarow["kesken"] and (int) $kukarow["kesken"] > 0) {
   $valitsetoimitus = $toim;
 }
@@ -9124,6 +9128,15 @@ if ($tee == '') {
                 <input type='hidden' name='jt_manual' value = 'KYLLA'>
                 <input type='submit' value='" . t("Jälkitoim, manuaalinen") . "'>
                 </form> ";
+          }
+          if(tarkista_oikeus("palaute.php")) {
+            echo "<form onsubmit='return false;' data-text='".t("Palaute")." &#128232;' data='".t('Oletko varma, että haluat lähettää palaute ? (tätä ei voi kumoa)')."' class='palaute_lisaa' action='{$palvelin2}palaute.php'>
+            <input type='hidden' name='tuoteno' value='".$row['tuoteno']."'>
+            <input type='hidden' name='maara' value='".$row['tilkpl']."'>
+            <input type='hidden' name='hinta' value='".$row['hinta']."'>
+            <input type='hidden' name='palaute_lisaa' value='1'>
+            <input type='submit' style='line-height: 20px; height: 35px;' value='".t("Palaute")." &#128232;'>
+            </form>";
           }
         }
         elseif ($row["laskutettuaika"] != '0000-00-00') {

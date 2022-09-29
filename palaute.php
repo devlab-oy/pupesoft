@@ -20,13 +20,16 @@ if (!isset($palaute_lisaa)) $palaute_lisaa = false;
 if (!isset($maara)) $maara = false;
 if (!isset($hinta)) $hinta = false;
 if (!isset($tuoteno)) $tuoteno = false;
+if (!isset($palaute_kuka)) $palaute_kuka = false;
 
-if($palaute_lisaa and $maara and $hinta and $tuoteno) {
+if($palaute_lisaa and $maara and $hinta and $tuoteno and $palaute_kuka) {
   ob_end_clean();
   $lisataan = array(
     $tuoteno, 
     $maara, 
-    $hinta
+    $hinta,
+    $palaute_kuka,
+    date("d.m.Y H:i:s")
   );
   $tiedosto = fopen(getcwd()."/datain/palaute_dl.csv", "a");
   fputcsv($tiedosto, $lisataan);

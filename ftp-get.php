@@ -145,6 +145,9 @@ if ($ftpget_host[$operaattori] != '' and $ftpget_user[$operaattori] != '' and $f
     default:
       $syy = t("Tuntematon errorkoodi")." ($palautus)!!";
     }
+
+    mail($ftpget_email,  mb_encode_mimeheader("VIRHE: FTP-get!", "ISO-8859-1", "Q"), "FTP-get sis‰‰nluvussa saattaa olla ongelma. Jokin tarvittavista tiedoista on v‰‰rin (operaattori: $operaattori)\nSyy: $syy", "From: ".mb_encode_mimeheader("Pupesoft", "ISO-8859-1", "Q")." <$ftpget_emailfrom>\n", "-f $ftpget_emailfrom");
+
   }
 }
 else {

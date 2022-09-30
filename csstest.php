@@ -50,6 +50,7 @@ $css_kuvaus = array(
   ,  'SUBMITBUTTON_BACKGROUND'          =>  'Normaalin Submit-nappulan tausta'
   ,  'SUBMITBUTTON_LISAA_BACKGROUND'    =>  'Lisää Submit-nappulan tausta'
   ,  'SUBMITBUTTON_TEE_TILAUKSESTA_TARJOUS_BACKGROUND' => '"Tee tilauksesta tarjous" Submit-nappulan tausta'
+  ,  'SUBMITBUTTON_TUOTEPALAUTE_BACKGROUND' => '"Palaute" Submit-nappulan tausta'
   ,  'SUBMITBUTTON_HAE_BACKGROUND'      =>  'Hae Submit-nappulan tausta'
   ,  'SUBMITBUTTON_TALLENNA_BACKGROUND' =>  'Tallenna Submit-nappulan tausta'
   ,  'SUBMITBUTTON_POISTA_BACKGROUND'   =>  'Poista Submit-nappulan tausta'
@@ -101,6 +102,7 @@ Tässä näkee miten formit käyttäytyy:<hr>
 <input type='submit' class='tallenna_btn' value='Tallenna submit-nappula'>
 <input type='submit' class='poista_btn' value='Poista submit-nappula'>
 <input type='submit' class='tee_tarjous_btn' value='", t("Tee tilauksesta tarjous"), "'>
+<input type='submit' class='tuotepalaute_btn' value='", t("Palaute"), "'>
 </form>
 
 <br>

@@ -28,7 +28,7 @@ if($palaute_mail and file_exists($palaute_dl_tiedosto)) {
   $viikko_obj = new DateTime();
   $viikko = $viikko_obj->format("W");
   $params = array(
-    "to"       => 'igor.olhovski@sprintit.fi',
+    "to"       => $yhtiorow["talhal_email"],
     "subject"     => t('Tuotepalautteet, viikko ').$viikko,
     "ctype"       => "text",
     "body"       => t('Tuotepalautteet, viikko ').$viikko,

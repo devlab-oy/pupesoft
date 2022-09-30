@@ -1,5 +1,7 @@
 <?php
-ob_start();
+if(isset($_GET['palaute_dl'])) {
+  $lataa_tiedosto = 1;
+}
 require "inc/parametrit.inc";
 
 if(!isset($palaute_dl_tiedosto) or !$palaute_dl_tiedosto) {
@@ -8,7 +10,6 @@ if(!isset($palaute_dl_tiedosto) or !$palaute_dl_tiedosto) {
 
 if (!isset($palaute_dl)) $palaute_dl = false;
 if($palaute_dl and file_exists($palaute_dl_tiedosto)) {
-  ob_end_clean();
   header('Content-Description: File Transfer');
   header('Content-Type: application/octet-stream');
   header("Cache-Control: no-cache, must-revalidate");
@@ -26,9 +27,8 @@ if (!isset($palaute_mail)) $palaute_mail = false;
 if($palaute_mail and file_exists($palaute_dl_tiedosto)) {
   $viikko_obj = new DateTime();
   $viikko = $viikko_obj->format("W");
-  ob_end_clean();
   $params = array(
-    "to"       => $yhtiorow["talhal_email"],
+    "to"       => 'igor.olhovski@sprintit.fi',
     "subject"     => t('Tuotepalautteet, viikko ').$viikko,
     "ctype"       => "text",
     "body"       => t('Tuotepalautteet, viikko ').$viikko,
@@ -51,7 +51,6 @@ if (!isset($tuoteno)) $tuoteno = false;
 if (!isset($palaute_kuka)) $palaute_kuka = false;
 
 if($palaute_lisaa and $maara and $hinta and $tuoteno and $palaute_kuka) {
-  ob_end_clean();
   $lisataan = array(
     $tuoteno, 
     $maara, 
@@ -75,7 +74,6 @@ if($palaute_lisaa and $maara and $hinta and $tuoteno and $palaute_kuka) {
 }
 
 if ($oikeurow['paivitys'] === '') {
-  ob_end_clean();
   echo "<table width='100%' height='70%'>";
   echo "<tr>";
   echo "<td style='text-align:center;font-size:9pt;font-family:Lucida,Verdana,Helvetica,Arial; color: #666;'>";

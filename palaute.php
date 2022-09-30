@@ -34,7 +34,7 @@ if($palaute_mail and $file = getcwd().'/datain/palaute_dl.csv' and file_exists($
       )
     )
   );
-  $onko_sahkoposti_lahetetty = pupesoft_sahkoposti($params);
+  pupesoft_sahkoposti($params);
   exit;
 }
 
@@ -76,10 +76,12 @@ if ($oikeurow['paivitys'] === '') {
 
 echo "<font class='head'>";
 echo t("Tuotepalautteet"), "</font><hr>";
-
+if($file = getcwd().'/datain/palaute_dl.csv' and file_exists($file)) {
 ?>
 <p><?php echo t('Alla on tiedosto, joka sisältää kaikki palautteet.'); ?>
 <div><a class="message warning" target="_blank" href="?palaute_dl=lataa"><?php echo t('Lataa CSV'); ?></a></div>
 <?php 
-
+} else {
+  echo '<div class="message warning">'.t("Tiedostoa ei vielä ole!").'</div>';
+}
 ?>

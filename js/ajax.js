@@ -22,10 +22,8 @@ function bind_palaute_painikkeet(e, formi) {
       url: palaute_lisaa_url,
       data: palaute_lisaa,
       success: function (html) {
-        var palaute = $("<div>", { id: "newDiv1", name: 'test', class: "aClass" });
-        palaute.html(html);
-        var vastaus = palaute.find(".vastaus").text();
-        formi.find("input[type=submit]").attr("value", vastaus).css("background-color", "#073759").css("width", "auto").attr("disabled", "disabled").css("pointer-events", "none");
+        html = $("<div/>").html(html).text();
+        formi.find("input[type=submit]").attr("value", html).css("background-color", "#073759").css("width", "auto").attr("disabled", "disabled").css("pointer-events", "none");
         formi.addClass("lahetetty");
       }
     });

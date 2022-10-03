@@ -494,7 +494,7 @@ if ($kukarow["extranet"] == "") {
 
 if(tarkista_oikeus("palaute.php")) {
   $_palaute_oikeus = true;
-  echo "<script src='../js/ajax.js?z'></script>";
+  echo "<script src='../js/ajax.js?a'></script>";
 }
 
 if ((int) $luotunnusnippu > 0 and $tilausnumero == $kukarow["kesken"] and (int) $kukarow["kesken"] > 0) {

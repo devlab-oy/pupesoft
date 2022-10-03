@@ -2,6 +2,10 @@
 if(isset($_GET['palaute_dl'])) {
   $lataa_tiedosto = 1;
 }
+if(isset($_POST['palaute_lisaa'])) {
+  $no_head = 'yes';
+}
+
 require "inc/parametrit.inc";
 
 if(!isset($palaute_dl_tiedosto) or !$palaute_dl_tiedosto) {
@@ -51,6 +55,7 @@ if (!isset($tuoteno)) $tuoteno = false;
 if (!isset($palaute_kuka)) $palaute_kuka = false;
 
 if($palaute_lisaa and $maara and $hinta and $tuoteno and $palaute_kuka) {
+  
   $lisataan = array(
     $tuoteno, 
     $maara, 
@@ -61,13 +66,9 @@ if($palaute_lisaa and $maara and $hinta and $tuoteno and $palaute_kuka) {
   if($tiedosto = fopen($palaute_dl_tiedosto, "a")) {
     fputcsv($tiedosto, $lisataan);
     fclose($handle); 
-    echo '<div class="vastaus">';
     echo t('Palaute lähetetty &#10003;');
-    echo '</div>';
   } else {
-    echo '<div class="vastaus">';
     echo t('VIRHE!');
-    echo '</div>';
   }
 
   exit;

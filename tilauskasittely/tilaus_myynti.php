@@ -6785,6 +6785,7 @@ if ($tee == '') {
                tuote.yksikko,
                tilausrivi.yksikko AS tilausrivin_yksikko,
                tuote.status,
+               tuote.ostoehdotus,
                tuote.ei_saldoa,
                tuote.vakkoodi,
                tilausrivi.ale_peruste,
@@ -9135,6 +9136,8 @@ if ($tee == '') {
             <input type='hidden' name='tuoteno' value='".$row['tuoteno']."'>
             <input type='hidden' name='maara' value='".$row['tilkpl']."'>
             <input type='hidden' name='hinta' value='".$row['hinta']."'>
+            <input type='hidden' name='status' value='".$row['status']."'>
+            <input type='hidden' name='ostoehdotus' value='".$row['ostoehdotus']."'>
             <input type='hidden' name='palaute_kuka' value='".$kukarow['kuka']."'>
             <input type='hidden' name='palaute_lisaa' value='1'>
             <input type='submit' class='tuotepalaute_btn' style='line-height: 20px; height: 35px;' value='".t("Palaute")." &#128232;'>

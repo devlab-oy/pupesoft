@@ -52,6 +52,8 @@ if (!isset($palaute_lisaa)) $palaute_lisaa = false;
 if (!isset($maara)) $maara = false;
 if (!isset($hinta)) $hinta = false;
 if (!isset($tuoteno)) $tuoteno = false;
+if (!isset($status)) $status = false;
+if (!isset($ostoehdotus)) $ostoehdotus = false;
 if (!isset($palaute_kuka)) $palaute_kuka = false;
 
 if($palaute_lisaa and $maara and $hinta and $tuoteno and $palaute_kuka) {
@@ -60,16 +62,34 @@ if($palaute_lisaa and $maara and $hinta and $tuoteno and $palaute_kuka) {
     $tuoteno, 
     $maara, 
     $hinta,
+    $status, 
+    $ostoehdotus, 
     $palaute_kuka,
     date("d.m.Y H:i:s")
   );
   if($tiedosto = fopen($palaute_dl_tiedosto, "a")) {
-    fputcsv($tiedosto, $lisataan);
-    fclose($handle); 
+
+    $first_row = false;
+    while (($data = fgetcsv(fopen($palaute_dl_tiedosto, "r"), 1000, ";")) !== FALSE) {
+      $first_row = $data;
+      break;
+    }
+ 
+    if(!$first_row) {
+      $header = utf8_encode("Tuotenumero;M‰‰r‰;Hinta;Status;Ostoehdotus;K‰ytt‰j‰,Milloin \r\n");
+      $tiedosto_data = file_get_contents($palaute_dl_tiedosto);
+      file_put_contents($palaute_dl_tiedosto, $header.$tiedosto_data);
+    }
+
+    fputcsv($tiedosto, $lisataan, ";");
+
+    fclose($tiedosto); 
     echo t('Palaute l‰hetetty &#10003;');
   } else {
     echo t('VIRHE!');
   }
+
+
 
   exit;
 }

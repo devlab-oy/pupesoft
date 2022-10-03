@@ -76,7 +76,7 @@ if($palaute_lisaa and $maara and $hinta and $tuoteno and $palaute_kuka) {
     }
  
     if(!$first_row) {
-      $header = utf8_encode("Tuotenumero;M‰‰r‰;Hinta;Status;Ostoehdotus;K‰ytt‰j‰,Milloin \r\n");
+      $header = "Tuotenumero;Maara;Hinta;Status;Ostoehdotus;Kayttaja;Milloin \r\n";
       $tiedosto_data = file_get_contents($palaute_dl_tiedosto);
       file_put_contents($palaute_dl_tiedosto, $header.$tiedosto_data);
     }

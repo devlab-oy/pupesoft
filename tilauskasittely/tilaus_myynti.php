@@ -494,7 +494,7 @@ if ($kukarow["extranet"] == "") {
 
 if(tarkista_oikeus("palaute.php")) {
   $_palaute_oikeus = true;
-  echo "<script src='../js/ajax.js'></script>";
+  echo "<script src='../js/ajax.js?z'></script>";
 }
 
 if ((int) $luotunnusnippu > 0 and $tilausnumero == $kukarow["kesken"] and (int) $kukarow["kesken"] > 0) {
@@ -9131,7 +9131,7 @@ if ($tee == '') {
                 </form> ";
           }
           if(isset($_palaute_oikeus) and $_palaute_oikeus) {
-            echo "<form onsubmit='return false;' data-text='".t("Palaute")." &#128232;' data='".t('Oletko varma, että haluat lähettää palaute ? (tätä ei voi kumoa)')."' class='palaute_lisaa' action='{$palvelin2}palaute.php'>
+            echo "<form onsubmit='return bind_palaute_painikkeet(event, this);' data-text='".t("Palaute")." &#128232;' data='".t('Oletko varma, että haluat lähettää palaute ? (tätä ei voi kumoa)')."' class='palaute_lisaa' action='{$palvelin2}palaute.php'>
             <input type='hidden' name='tuoteno' value='".$row['tuoteno']."'>
             <input type='hidden' name='maara' value='".$row['tilkpl']."'>
             <input type='hidden' name='hinta' value='".$row['hinta']."'>

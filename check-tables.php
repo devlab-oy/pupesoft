@@ -24,7 +24,7 @@ function decho($string) {
 // Ollaanko annettu --verbose komentoriviltä
 $verbose_mode = (in_array("--verbose", $argv) !== false) ? true : false;
 
-$query = "show tables from $dbkanta";
+$query = "SHOW FULL TABLES FROM `$dbkanta` WHERE Table_Type = 'BASE TABLE'";
 $result = pupe_query($query);
 
 decho("Check tables from $dbkanta.");

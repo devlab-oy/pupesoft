@@ -249,7 +249,7 @@ if ($error == 0 and $tee == "file") {
   $locktables['avainsana'] = "avainsana";
 
   //$dbkanta --> tulee salasanat.php:stä
-  $query  = "SHOW TABLES FROM $dbkanta";
+  $query  = "SHOW FULL TABLES FROM `$dbkanta` WHERE Table_Type = 'BASE TABLE'";
   $tabresult = pupe_query($query);
 
   while ($tables = mysql_fetch_array($tabresult)) {
@@ -529,13 +529,13 @@ if ($error == 0 and $tee == "file") {
                           AND liitos  = '$vantuoteno'";
                 pupe_query($query);
 
-				if ($uusi_on_jo != "SAMA") {
-                  $query = "DELETE FROM puun_alkio
-                            WHERE yhtio = '$kukarow[yhtio]'
-                            AND laji    = 'Tuote'
-                            AND liitos  = '$vantuoteno'";
-                  pupe_query($query);
-				}
+                if ($uusi_on_jo != "SAMA") {
+                          $query = "DELETE FROM puun_alkio
+                                    WHERE yhtio = '$kukarow[yhtio]'
+                                    AND laji    = 'Tuote'
+                                    AND liitos  = '$vantuoteno'";
+                          pupe_query($query);
+                }
               }
               elseif ($taulu == 'asn_sanomat') {
                 $query = "UPDATE asn_sanomat

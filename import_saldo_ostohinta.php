@@ -212,6 +212,8 @@ class ImportSaldoHinta
       }
       fclose($ih);
       fclose($oh);
+    } else {
+      return false;
     }
 
     if($ih2 = fopen($input2, "r")) {
@@ -241,6 +243,7 @@ class ImportSaldoHinta
 
     rename($output, $input);
     rename($output2, $input2);
+    return true;
   }
 
   public function jakaa_yksittaiset_tiedostot()
@@ -319,8 +322,10 @@ class ImportSaldoHinta
       if ($ftp_tiedot_nimi == 'autopartner') {
         // AutoPartner
         require 'ftp-get.php';
-        sleep(5);
-        $this->korjaa_csvt('STANY.csv', true);
+        if(!$this->korjaa_csvt('STANY.csv', true)) {
+          require 'ftp-get.php';
+          $this->korjaa_csvt('STANY.csv', true);
+        }
       }
       sleep(1);
       if ($ftp_tiedot_nimi == 'oletus') {

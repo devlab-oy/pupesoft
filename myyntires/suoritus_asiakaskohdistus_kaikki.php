@@ -206,12 +206,14 @@ while ($suoritus = mysql_fetch_assoc($result)) {
                     WHERE yhtio  = '$kukarow[yhtio]' 
                     and laji    != 'R' 
                     and left(nimi, $laske_rivi_no) LIKE '{$utf_unimi}%'";
+          $_alku_query = $query;
           $asres = pupe_query($query);
 
           if (mysql_num_rows($asres) == 1) {
             $asiakas = mysql_fetch_assoc($asres);
             $asiakasokmaksaja = TRUE;
           } else if (mysql_num_rows($asres) > 1) {
+            
             $query = "SELECT nimi, konserniyhtio, tunnus, toim_ovttunnus 
                       FROM asiakas 
                       WHERE yhtio  = '$kukarow[yhtio]' 
@@ -222,6 +224,14 @@ while ($suoritus = mysql_fetch_assoc($result)) {
             if (mysql_num_rows($asres) == 1) {
               $asiakas = mysql_fetch_assoc($asres);
               $asiakasokmaksaja = TRUE;
+            } else if (mysql_num_rows($asres) < 1) {
+              $asres = pupe_query(
+                $_alku_query." and right(toim_ovttunnus, 3) = '001' and laji != 'P'"
+              );
+              if (mysql_num_rows($asres) == 1) {
+                $asiakas = mysql_fetch_assoc($asres);
+                $asiakasokmaksaja = TRUE;
+              } 
             }
           }
         }

@@ -162,20 +162,23 @@ while ($suoritus = mysql_fetch_assoc($result)) {
       }
     }
 
-    // kokeillaan ilman mt?, o? ja as alussa. base64 encode auttaa UTF-8 vertailussa
     if (!$asiakasokmaksaja and mysql_num_rows($asres) <= 0) {
       
       $utf_unimi = mb_strtolower(utf8_encode($suoritus['nimi_maksaja']), 'UTF-8');
 
       $_kokeilu3 = base64_encode(mb_substr($utf_unimi, 0, 3, 'UTF-8'));
       $_kokeilu4 = base64_encode(mb_substr($utf_unimi, 0, 4, 'UTF-8'));
+      $_kokeilu5 = base64_encode(mb_substr($utf_unimi, -7, 7, 'UTF-8'));
 
       $laske_rivi_no = false;
+
+      $_vaihda_teksti = "";
 
       if(in_array($_kokeilu3, array(
         "b8O8IA==", 
         "YXMg"
       ))) {
+        $_vaihda_teksti = $_kokeilu3;
         $laske_rivi_no = 9;
         $_replace_prefix = trim(base64_decode($_kokeilu3));
       }
@@ -183,16 +186,24 @@ while ($suoritus = mysql_fetch_assoc($result)) {
       if(in_array($_kokeilu4, array(
         "bXTDvCA="
       ))) {
+        $_vaihda_teksti = $_kokeilu4;
         $laske_rivi_no = 8;
         $_replace_prefix = trim(base64_decode($_kokeilu4));
+      }
+
+      if(in_array($_kokeilu5, array(
+        "IGFrdHNpYQ=="
+      ))) {
+        $_vaihda_teksti = $_kokeilu5;
+        $laske_rivi_no = 5;
+        $_replace_prefix = trim(base64_decode($_kokeilu5));
       }
 
       if($laske_rivi_no) {
 
         $utf_unimi = trim(str_replace(
           array(
-            base64_decode($_kokeilu3), 
-            base64_decode($_kokeilu4)
+            base64_decode($_vaihda_teksti)
           ), 
           "", 
           $utf_unimi
@@ -206,6 +217,7 @@ while ($suoritus = mysql_fetch_assoc($result)) {
                     WHERE yhtio  = '$kukarow[yhtio]' 
                     and laji    != 'R' 
                     and left(nimi, $laske_rivi_no) LIKE '{$utf_unimi}%'";
+
           $_alku_query = $query;
           $asres = pupe_query($query);
 
@@ -246,9 +258,9 @@ while ($suoritus = mysql_fetch_assoc($result)) {
       if (mysql_num_rows($asres) == 1) {
         $asiakas = mysql_fetch_assoc($asres);
         $asiakasokmaksaja = TRUE;
-      } else {
+      } else if (mysql_num_rows($asres) > 1) {
         $asres = pupe_query(
-          $query." and right(toim_ovttunnus, 3) = '001' and laji != 'P' and nimi = '".$unimi." as'"
+          $query." and right(toim_ovttunnus, 3) = '001' and laji != 'P' and nimi in ('".$unimi." as', '".$unimi." aktsia')"
         );
         if (mysql_num_rows($asres) == 1) {
           $asiakas = mysql_fetch_assoc($asres);

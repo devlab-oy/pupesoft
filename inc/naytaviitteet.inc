@@ -83,7 +83,7 @@ elseif ($type == '3' or $type == 'S') {
   else {
     if (mysql_num_rows($suoritusresult)==1) {
       if ($suoritusrow['nimi'] != '') {
-        echo "<font class='error'>".t("Kohdistettu asiakkaaseen")." $suoritusrow[nimi]</font>";
+        echo "<font class='error' style='color:darkorange;'>".t("Kohdistettu asiakkaaseen")." $suoritusrow[nimi]</font>";
       }
       else {
         echo "<font class='error'>".t("Kohdistamatta asiakkaaseen")."</font>";

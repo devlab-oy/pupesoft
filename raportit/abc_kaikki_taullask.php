@@ -3,6 +3,8 @@
 //* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
 $useslave = 1;
 
+ini_set('memory_limit', '4000M');
+
 echo "<font class='head'>".t("ABC-Analyysi‰: ABC-pitk‰listaus")."<hr></font>";
 
 if ($toim == "kulutus") {

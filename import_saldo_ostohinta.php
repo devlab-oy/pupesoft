@@ -64,12 +64,21 @@ class ImportSaldoHinta
 
     $this->yhtio = $yhtiorow['yhtio'];
 
+    system("rm -rf ".$impsaloh_csv_cron_dirname."/*");
+
     $this->impsaloh_polku_in     = $impsaloh_csv_cron_dirname;
     $this->impsaloh_polku_ok     = $impsaloh_csv_cron_dirname."/ok";
     $this->impsaloh_polku_orig   = $impsaloh_csv_cron_dirname."/orig";
     $this->impsaloh_polku_orig_stocks   = $impsaloh_csv_cron_dirname."/orig/stocks";
     $this->impsaloh_polku_orig_prices   = $impsaloh_csv_cron_dirname."/orig/prices";
     $this->impsaloh_polku_error  = $impsaloh_csv_cron_dirname."/error";
+
+    mkdir($this->impsaloh_polku_in, 0755, true);
+    mkdir($this->impsaloh_polku_ok, 0755, true);
+    mkdir($this->impsaloh_polku_orig, 0755, true);
+    mkdir($this->impsaloh_polku_orig_stocks, 0755, true);
+    mkdir($this->impsaloh_polku_in, 0755, true);
+    mkdir($this->impsaloh_polku_orig_prices, 0755, true);
     
     $this->ftp_exclude_files = array_diff(scandir($this->impsaloh_polku_orig), array('..', '.', '.DS_Store'));
 
@@ -80,7 +89,8 @@ class ImportSaldoHinta
       "60046_ce.csv" => "1432",
       "meatdoria.csv" => "1525",
       "STANY.csv" => "1048",
-      "ItemsInStock.txt" => "101"
+      "ItemsInStock.txt" => "101",
+      "100005622_2874_motoprofil.csv" => "943"
     );
 
     /*
@@ -122,7 +132,15 @@ class ImportSaldoHinta
           "warehouse1" => "warehouse1",
           "warehouse2" => "warehouse2"
         )
-      )
+      ),
+      943 => array("Product code" =>
+        array(
+          "tuotekoodi" => "Product code",
+          "hinta" => "Price",
+          "warehouse1" => "Chorz?w saldo",
+          "warehouse2" => "HUB saldo"
+        )
+      ),
     );
 
     $this->erikois_price_nimet = array(
@@ -163,6 +181,10 @@ class ImportSaldoHinta
       "ItemsInStock.txt" => array(
         array(1,2,4),
         array(1)
+      ),
+      "100005622_2874_motoprofil.csv" => array(
+        array(0,3,4,5),
+        array(0)
       )
     );
 
@@ -251,6 +273,7 @@ class ImportSaldoHinta
     $laske_tiedostot = 0;
 
     foreach ($this->yksittaiset_tiedostot as $tiedostonimi => $tiedostokolumnit) {
+
       $input = $this->impsaloh_polku_in."/".$tiedostonimi;
       $output = $this->impsaloh_polku_in."/"."prices_".$tiedostonimi;
 
@@ -267,6 +290,7 @@ class ImportSaldoHinta
 
       $output2 = $this->impsaloh_polku_in."/uusi_".$tiedostonimi;
       if (false !== ($ih = fopen($input, 'r'))) {
+
         $oh = fopen($output, 'w');
         $oh2 = fopen($output2, 'w');
         $i=0;
@@ -275,18 +299,37 @@ class ImportSaldoHinta
         $product_data = $this->tuotekoodi_otsikot[$toimittaja_id][$product_code_header];
         
         $product_data_headers = array_keys($product_data);
-        $outputData = array($product_code_header, $product_data_headers[1], $product_data_headers[2]);
+        
+        $outputData = array(
+          $product_code_header, 
+          $product_data_headers[1], 
+          $product_data_headers[2]
+        );
+
+        if(count($product_data_headers) == 4) {
+          $outputData[] = $product_data_headers[3];
+        }
+
         $outputData2 = array($product_data['tuotekoodi']);
 
         while (false !== ($data = fgetcsv($ih, 0, ";"))) {
+
           if ($data[$tiedostokolumnit[0][2]] == "-" or $data[$tiedostokolumnit[0][2]] == "") {
+
             $data[$tiedostokolumnit[0][2]] = 0;
           }
           if ($i==0) {
             fputcsv($oh, $outputData, ";");
             fputcsv($oh2, $outputData2, ";");
           }
-          $outputData = array($data[$tiedostokolumnit[0][0]], $data[$tiedostokolumnit[0][1]], preg_replace("/[^0-9 ]/", '', $data[$tiedostokolumnit[0][2]]));
+
+          if(count($product_data_headers) == 3) {
+            $outputData = array($data[$tiedostokolumnit[0][0]], $data[$tiedostokolumnit[0][1]], preg_replace("/[^0-9 ]/", '', $data[$tiedostokolumnit[0][2]]));
+          }
+          if(count($product_data_headers) == 4) {
+            $outputData = array($data[$tiedostokolumnit[0][0]], $data[$tiedostokolumnit[0][1]], preg_replace("/[^0-9 ]/", '', $data[$tiedostokolumnit[0][2]]), preg_replace("/[^0-9 ]/", '', $data[$tiedostokolumnit[0][3]]));
+          }
+
           fputcsv($oh, $outputData, ";");
           $outputData2 = array($data[$tiedostokolumnit[1][0]]);
           fputcsv($oh2, $outputData2, ";");
@@ -310,7 +353,7 @@ class ImportSaldoHinta
     $argv[1] = 'external_partners';
 
     $ohita_tiedostot = $this->ohita_tiedostot;
-    
+
     foreach ($this->ftptiedot['hosts'] as $ftp_tiedot_nimi => $ftp_tiedot) {
       $ftpget_host['external_partners'] = $ftp_tiedot['ftphost'];
       $ftpget_user['external_partners'] = $ftp_tiedot['ftpuser'];

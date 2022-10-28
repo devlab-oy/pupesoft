@@ -29,7 +29,7 @@ if (!$yhtiorow) {
 // Logitetaan ajo
 cron_log();
 
-ini_set('memory_limit', '4000M');
+ini_set('memory_limit', '6000M');
 ini_set('max_execution_time', 30000);
 
 $ftptiedot = array(

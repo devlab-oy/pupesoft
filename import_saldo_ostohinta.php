@@ -1,4 +1,9 @@
 <?php
+
+/*
+  Katso asetukset alla
+*/
+
 // Kutsutaanko CLI:stä
 if (php_sapi_name() != 'cli') {
   die("Tätä scriptiä voi ajaa vain komentoriviltä!");
@@ -64,6 +69,9 @@ class ImportSaldoHinta
 
     $this->yhtio = $yhtiorow['yhtio'];
 
+    /*
+      Poistetaan kaikki ja luodaan rakenne uudestaan
+    */
     system("rm -rf ".$impsaloh_csv_cron_dirname."/*");
 
     $this->impsaloh_polku_in     = $impsaloh_csv_cron_dirname;
@@ -73,17 +81,22 @@ class ImportSaldoHinta
     $this->impsaloh_polku_orig_prices   = $impsaloh_csv_cron_dirname."/orig/prices";
     $this->impsaloh_polku_error  = $impsaloh_csv_cron_dirname."/error";
 
-    mkdir($this->impsaloh_polku_in, 0755, true);
     mkdir($this->impsaloh_polku_ok, 0755, true);
     mkdir($this->impsaloh_polku_orig, 0755, true);
     mkdir($this->impsaloh_polku_orig_stocks, 0755, true);
-    mkdir($this->impsaloh_polku_in, 0755, true);
     mkdir($this->impsaloh_polku_orig_prices, 0755, true);
+    mkdir($this->impsaloh_polku_error, 0755, true);
     
     $this->ftp_exclude_files = array_diff(scandir($this->impsaloh_polku_orig), array('..', '.', '.DS_Store'));
 
     $this->eankoodi_otsikot = array("GTIN");
 
+
+    /*------------------------ASETUKSET-ALKAVAT------------------------------*/
+
+    /*
+      Tiedostonimet (saldo) => toimittajan ID
+    */
     $this->toimittajat_tiedostot = array(
       "kavoparts.csv" => "1474",
       "60046_ce.csv" => "1432",
@@ -143,10 +156,16 @@ class ImportSaldoHinta
       ),
     );
 
+    /*
+      Annetaan price - tiedoston erikoisnimet, muuten price tiedoston nimi "prices_*"
+    */
     $this->erikois_price_nimet = array(
       "STANY.csv" => "2945497.csv",
     );
 
+    /*
+      Jos tiedostossa ei ole mit??n otsikoita, lis?t??n ne t?st?.
+    */
     $this->lisaa_otsikot = array(
       "STANY.csv" => array(
         'stocks' => array(
@@ -160,19 +179,33 @@ class ImportSaldoHinta
       ),
     );
 
+    /*
+      Ohita hintojen siirto kokonaan
+    */
     $this->ohita_hinnat = array(
       "ItemsInStock.txt" => true
     );
 
+    /*
+      Resetoi saldot, jos tuote ei en?? listassa. Avain: toimittaja ID
+    */
     $this->resetoittavat = array(
       "1048" => true
     );
 
+    /*
+      Ohitetaan tiedostot ftp palvelimista.
+    */
     $this->ohita_tiedostot = array(
       "2945497_KAUCJE.csv",
       "INDEKS_PARAMETR.csv"
     );
 
+    /*
+      Vain yksi tiedosto, ei ole price_tiedostoa.
+      Valitaan oikeat kolumnit.
+      Ensimm?inen: product_code, sitten hinta ja saldo kolumnit
+    */
     $this->yksittaiset_tiedostot = array(
       "60046_ce.csv" => array(
         array(0,4,3),
@@ -188,12 +221,19 @@ class ImportSaldoHinta
       )
     );
 
+    /*
+      Toimittajan saldoluokat muutetaan tavallisille saldolle.
+      Se voi olla esim. luokka A, tai jotain muuta.
+    */
     $this->saldo_levels = array(
       "0" => 0,
       "1" => 2,
       "2" => 5
     );
   }
+
+  /*------------------------ASETUKSET-LOPPUVAT------------------------------*/
+
 
   public function korjaa_csvt($tiedostonimi,$reset_tuotenimet=false)
   {

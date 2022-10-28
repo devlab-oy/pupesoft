@@ -36,6 +36,12 @@ $ftptiedot = array(
   "hosts" => $ftphosts_impsaloh
 );
 
+if (isset($argv[2]) and $argv[2]) {
+  $toimittajen_rajoitus = array_flip(explode(",",$argv[2]));
+} else {
+  $toimittajen_rajoitus = false;
+}
+
 /*
   Main class
 */
@@ -46,7 +52,7 @@ class ImportSaldoHinta
   /*
     Laitetaan kaikki muuttujat kuntoon
   */
-  public function __construct($yhtiorow, $ftptiedot, $suosittu_toimittajan_varasto)
+  public function __construct($yhtiorow, $ftptiedot, $suosittu_toimittajan_varasto, $toimittajen_rajoitus)
   {
     $this->ftptiedot = $ftptiedot;
     if($this->suosittu_toimittajan_varasto = $suosittu_toimittajan_varasto) {
@@ -105,6 +111,8 @@ class ImportSaldoHinta
       "ItemsInStock.txt" => "101",
       "motoprofil.csv" => "943"
     );
+
+    $this->toimittajen_rajoitus = $toimittajen_rajoitus;
 
     /*
       Otsikot etsitään tiedostossa.
@@ -311,7 +319,7 @@ class ImportSaldoHinta
   public function jakaa_yksittaiset_tiedostot()
   {
     $laske_tiedostot = 0;
-
+    
     foreach ($this->yksittaiset_tiedostot as $tiedostonimi => $tiedostokolumnit) {
 
       $input = $this->impsaloh_polku_in."/".$tiedostonimi;
@@ -325,6 +333,10 @@ class ImportSaldoHinta
         $toimittaja_id = $this->toimittajat_tiedostot[$tiedostonimi];
       } else {
         echo $toimittaja_id." toimittaja ei löydy!";
+        continue;
+      }
+
+      if($this->toimittajen_rajoitus and !isset($this->toimittajen_rajoitus[$toimittaja_id])) {
         continue;
       }
 
@@ -480,6 +492,7 @@ class ImportSaldoHinta
   */
   public function hae_tiedostot()
   {
+    $laske_tiedostot = 0;
     foreach (scandir($this->impsaloh_polku_in) as $impsaloh_csv_file_name) {
       $impsaloh_csv_file = $this->impsaloh_polku_in."/".$impsaloh_csv_file_name;
       $impsaloh_csv_file_prices = $this->impsaloh_polku_in."/prices_".$impsaloh_csv_file_name;
@@ -508,7 +521,11 @@ class ImportSaldoHinta
         echo $toimittaja_id." toimittaja ei löydy!";
         continue;
       }
-        
+
+      if($this->toimittajen_rajoitus and !isset($this->toimittajen_rajoitus[$toimittaja_id])) {
+        continue;
+      }
+      $laske_tiedostot++;
       copy($impsaloh_csv_file, $this->impsaloh_polku_orig_stocks."/".$toimittaja_id."___".$csv_hae_kolumnit['kolumneja'].$csv_hae_kolumnit['riveja'].$impsaloh_csv_file_name);
       copy($impsaloh_csv_file_prices, $this->impsaloh_polku_orig_prices."/prices_".$toimittaja_id."___".$csv_hae_kolumnit['kolumneja'].$csv_hae_kolumnit['riveja'].$impsaloh_csv_file_name);
     }
@@ -902,6 +919,7 @@ class ImportSaldoHinta
 $execute = new ImportSaldoHinta(
   $yhtiorow,
   $ftptiedot,
-  $suosittu_toimittajan_varasto
+  $suosittu_toimittajan_varasto,
+  $toimittajen_rajoitus
 );
 $execute->aloita();

@@ -223,7 +223,7 @@ class ImportSaldoHinta
         array(1,2,4),
         array(1)
       ),
-      "100005622_2874_motoprofil.csv" => array(
+      "motoprofil.csv" => array(
         array(0,3,4,5),
         array(0)
       )

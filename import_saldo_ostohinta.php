@@ -103,7 +103,7 @@ class ImportSaldoHinta
       "meatdoria.csv" => "1525",
       "STANY.csv" => "1048",
       "ItemsInStock.txt" => "101",
-      "100005622_2874_motoprofil.csv" => "943"
+      "motoprofil.csv" => "943"
     );
 
     /*

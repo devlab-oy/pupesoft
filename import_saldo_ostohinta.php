@@ -726,7 +726,7 @@ class ImportSaldoHinta
         $rivit_prices[$rivi_tuoteno] = array();
       }
 
-      if ($rivi_saldo and !$tuotemerkki) {
+      if ($rivi_saldo !== false and !$tuotemerkki) {
         $rivit_prices[$rivi_tuoteno][0] = array(
           "hinta" => $rivi_hinta,
           "saldo" => $rivi_saldo
@@ -757,6 +757,7 @@ class ImportSaldoHinta
     $kasitelty_tuotteet = array();
     $laskerivit = 0;
     $varasto = false;
+    $varastot = array();
 
     while ($rivi = fgetcsv($impsaloh_csv, 100000, $csv_jakajaa)) {
       usleep(1000);
@@ -830,16 +831,15 @@ class ImportSaldoHinta
             $tuotesaldo = $this->saldo_levels[$tuotesaldo];
           }
         }
-        
+
         if ($varasto) {
           $varasto_nro = intval($rivi[$varasto]);
         
           if (!isset($varastot[$tuotekoodi_tarkista1])) {
-            $varastot = array();
-            $varastot[$tuotekoodi_tarkista1][$varasto_nro] = intval($tuotesaldo);
-          } else {
-            $varastot[$tuotekoodi_tarkista1][$varasto_nro] = intval($tuotesaldo);
+            $varastot[$tuotekoodi_tarkista1] = array();
           }
+
+          $varastot[$tuotekoodi_tarkista1][$varasto_nro] = intval($tuotesaldo);
         
           if($this->suosittu_toimittajan_varasto and isset($this->suosittu_toimittajan_varasto[$toimittaja_id]) and isset(
             $varastot[$tuotekoodi_tarkista1][$this->suosittu_toimittajan_varasto[$toimittaja_id]]
@@ -906,6 +906,7 @@ class ImportSaldoHinta
                   $tuotemerkki_lisa 
                   AND(last_insert_id(tuotteen_toimittajat.tunnus))
                 ";
+        
         pupe_query($query);
         $onnistunut_tuote = false;
         

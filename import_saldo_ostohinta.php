@@ -92,7 +92,7 @@ class ImportSaldoHinta
     mkdir($this->impsaloh_polku_orig_stocks, 0755, true);
     mkdir($this->impsaloh_polku_orig_prices, 0755, true);
     mkdir($this->impsaloh_polku_error, 0755, true);
-    
+
     $this->ftp_exclude_files = array_diff(scandir($this->impsaloh_polku_orig), array('..', '.', '.DS_Store'));
 
     $this->eankoodi_otsikot = array("GTIN");
@@ -513,7 +513,6 @@ class ImportSaldoHinta
       fclose($impsaloh_csv_tarkista);
 
       // Siirett‰‰n ja kopioidaan tiedostot oikeaan kansioon
-
       copy($impsaloh_csv_file, $this->impsaloh_polku_orig."/".$impsaloh_csv_file_name);
       copy($impsaloh_csv_file_prices, $this->impsaloh_polku_orig."/prices_".$impsaloh_csv_file_name);
 
@@ -590,6 +589,11 @@ class ImportSaldoHinta
 
     $toimittaja_id = explode("___", basename($impsaloh_csv_file));
     $toimittaja_id = $toimittaja_id[0];
+
+    if($this->toimittajen_rajoitus and !isset($this->toimittajen_rajoitus[$toimittaja_id])) {
+      return;
+    }
+
     $query = "SELECT * FROM toimi 
                     WHERE tunnus = {$toimittaja_id}";
     $loydetty_toimittaja = pupe_query($query);
@@ -648,9 +652,11 @@ class ImportSaldoHinta
     // Loopataan ja j‰rjestet‰‰n prices tiedoston data
     $rivit_prices = array();
     $otsikkotiedot = false;
+
     while ($rivi = fgetcsv($impsaloh_prices_csv, 100000, $csv_jakajaa_prices)) {
 
       if (!isset($rivit[0])) {
+
         // Hae tuotekoodin kolumni
         $kolumninro = 0;
         foreach ($rivi as $hae_otsikko) {
@@ -677,21 +683,22 @@ class ImportSaldoHinta
           $kolumninro = 0;
           foreach ($rivi as $hae_otsikko) {
             $hae_otsikko = preg_replace("/[^A-Za-z0-9 ]/", '', $hae_otsikko);
-
             if ($otsikkotiedot['hinta'] == $hae_otsikko or $hae_otsikko == 'hinta') {
               break;
             }
             $kolumninro++;
           }
-
           $rivit[0] = false;
           continue;
-        }
-        die();
+        } 
       }
+      
       $hinta_kolumni = $kolumninro;
 
       $rivi_saldo = false;
+      $tuotemerkki = false;
+      $warehouse_1 = false;
+      $warehouse_2 = false;
 
       if (isset($rivi[2])) {
         $rivi_hinta = $rivi[$hinta_kolumni];
@@ -715,24 +722,28 @@ class ImportSaldoHinta
       unset($rivi[$hinta_kolumni]);
       unset($rivi[$tuotekoodin_kolumni]);
 
-      if ($rivi_saldo) {
-        $rivit_prices[$rivi_tuoteno] = array(
+      if(!isset($rivit_prices[$rivi_tuoteno])) {
+        $rivit_prices[$rivi_tuoteno] = array();
+      }
+
+      if ($rivi_saldo and !$tuotemerkki) {
+        $rivit_prices[$rivi_tuoteno][0] = array(
           "hinta" => $rivi_hinta,
           "saldo" => $rivi_saldo
-        );
-      } else if(isset($warehouse_1_kolumni) and isset($warehouse_2_kolumni) and isset($tuotemerkki)) {
-        $rivit_prices[$rivi_tuoteno] = array(
+        ); 
+      } else if($tuotemerkki and $rivi_hinta) {
+        $rivit_prices[$rivi_tuoteno][$tuotemerkki] = array(
           "hinta" => $rivi_hinta,
           "tuotemerkki" => $tuotemerkki,
           'warehouse_1' => $warehouse_1,
           'warehouse_2' => $warehouse_2
         );
-      } else if($rivi_hinta) {
-        $rivit_prices[$rivi_tuoteno] = array(
+      } else if($rivi_hinta and !$tuotemerkki) {
+        $rivit_prices[$rivi_tuoteno][0] = array(
           "hinta" => $rivi_hinta
         );
-      } else if(isset($warehouse_1_kolumni) and isset($warehouse_2_kolumni)) {
-        $rivit_prices[$rivi_tuoteno] = array(
+      } else if(isset($warehouse_1_kolumni) and isset($warehouse_2_kolumni) and !$tuotemerkki) {
+        $rivit_prices[$rivi_tuoteno][0] = array(
           'warehouse_1' => $warehouse_1,
           'warehouse_2' => $warehouse_2
         );
@@ -760,6 +771,7 @@ class ImportSaldoHinta
       if (!isset($rivit[0])) {
         // Hae tuotekoodin kolumni
         $tuotekoodin_kolumni = false;
+
         $kolumninro = 0;
         foreach ($rivi as $hae_otsikko) {
           $hae_otsikko = preg_replace("/[^A-Za-z0-9 ]/", '', $hae_otsikko);
@@ -798,88 +810,87 @@ class ImportSaldoHinta
         $laskerivit++;
       }
 
-      
       $tuotekoodi_tarkista1 = $rivi[$tuotekoodin_kolumni];
-      
+
       $kasitelty_tuotteet[$tuotekoodi_tarkista1] = 1;
 
       if (!isset($rivit_prices[$tuotekoodi_tarkista1])) {
-
         $epaonnistuneet_tuotteet[] = $rivi;
         continue;
       }
 
-      $tuotesaldo = 0;
+      foreach($rivit_prices[$tuotekoodi_tarkista1] as $rivit_prices_l) {
+        $tuotesaldo = 0;
 
-      if (isset($rivit_prices[$tuotekoodi_tarkista1]['saldo'])) {
-        $tuotesaldo = $rivit_prices[$tuotekoodi_tarkista1]['saldo'];
-      } elseif (isset($saldo_kolumni)) {
-        $tuotesaldo = $rivi[$saldo_kolumni];
-        if ($saldo_kolumin_nimi == "level") {
-          $tuotesaldo = $this->saldo_levels[$tuotesaldo];
-        }
-      }
-
-      if ($varasto) {
-        $varasto_nro = intval($rivi[$varasto]);
-
-        if (!isset($varastot[$tuotekoodi_tarkista1])) {
-          $varastot = array();
-          $varastot[$tuotekoodi_tarkista1][$varasto_nro] = intval($tuotesaldo);
-        } else {
-          $varastot[$tuotekoodi_tarkista1][$varasto_nro] = intval($tuotesaldo);
-        }
-
-        if($this->suosittu_toimittajan_varasto and isset($this->suosittu_toimittajan_varasto[$toimittaja_id]) and isset(
-          $varastot[$tuotekoodi_tarkista1][$this->suosittu_toimittajan_varasto[$toimittaja_id]]
-        )) {
-          $tuotesaldo = $varastot[$tuotekoodi_tarkista1][$this->suosittu_toimittajan_varasto[$toimittaja_id]];
-        }
-        
-        $varastot_serialized = json_encode($varastot[$tuotekoodi_tarkista1]);
-        $tehdas_saldo_varastot_lisa = "tuotteen_toimittajat.tehdas_saldo_varastot = '".$varastot_serialized."',";
-      }
-
-      if(
-        !$varasto and 
-        isset($rivit_prices[$tuotekoodi_tarkista1]['warehouse_1']) and 
-        isset($rivit_prices[$tuotekoodi_tarkista1]['warehouse_2'])
-      ) {
-        if($tuotesaldo == 0 and 
-        ($rivit_prices[$tuotekoodi_tarkista1]['warehouse_1'] > 0 or $rivit_prices[$tuotekoodi_tarkista1]['warehouse_2'] > 0)) {
-          if($rivit_prices[$tuotekoodi_tarkista1]['warehouse_1'] > 0) {
-            $tuotesaldo = $rivit_prices[$tuotekoodi_tarkista1]['warehouse_1'];
-          } else {
-            $tuotesaldo = $rivit_prices[$tuotekoodi_tarkista1]['warehouse_2'];
+        if (isset($rivit_prices_l['saldo'])) {
+          $tuotesaldo = $rivit_prices_l['saldo'];
+        } elseif (isset($saldo_kolumni)) {
+          $tuotesaldo = $rivi[$saldo_kolumni];
+          if ($saldo_kolumin_nimi == "level") {
+            $tuotesaldo = $this->saldo_levels[$tuotesaldo];
           }
         }
-        $varastot_serialized = json_encode(
-          array(
-            1 => $rivit_prices[$tuotekoodi_tarkista1]['warehouse_1'],
-            2 => $rivit_prices[$tuotekoodi_tarkista1]['warehouse_2']
-          )
-        );
-        $tehdas_saldo_varastot_lisa = "tuotteen_toimittajat.tehdas_saldo_varastot = '".$varastot_serialized."',";
-      }
+        
+        if ($varasto) {
+          $varasto_nro = intval($rivi[$varasto]);
+        
+          if (!isset($varastot[$tuotekoodi_tarkista1])) {
+            $varastot = array();
+            $varastot[$tuotekoodi_tarkista1][$varasto_nro] = intval($tuotesaldo);
+          } else {
+            $varastot[$tuotekoodi_tarkista1][$varasto_nro] = intval($tuotesaldo);
+          }
+        
+          if($this->suosittu_toimittajan_varasto and isset($this->suosittu_toimittajan_varasto[$toimittaja_id]) and isset(
+            $varastot[$tuotekoodi_tarkista1][$this->suosittu_toimittajan_varasto[$toimittaja_id]]
+          )) {
+            $tuotesaldo = $varastot[$tuotekoodi_tarkista1][$this->suosittu_toimittajan_varasto[$toimittaja_id]];
+          }
+        
+          $varastot_serialized = json_encode($varastot[$tuotekoodi_tarkista1]);
+          $tehdas_saldo_varastot_lisa = "tuotteen_toimittajat.tehdas_saldo_varastot = '".$varastot_serialized."',";
+        }
+        
+        if(
+          !$varasto and 
+          isset($rivit_prices_l['warehouse_1']) and 
+          isset($rivit_prices_l['warehouse_2'])
+        ) {
+          if($tuotesaldo == 0 and 
+          ($rivit_prices_l['warehouse_1'] > 0 or $rivit_prices_l['warehouse_2'] > 0)) {
+            if($rivit_prices_l['warehouse_1'] > 0) {
+              $tuotesaldo = $rivit_prices_l['warehouse_1'];
+            } else {
+              $tuotesaldo = $rivit_prices_l['warehouse_2'];
+            }
+          }
+          $varastot_serialized = json_encode(
+            array(
+              1 => $rivit_prices_l['warehouse_1'],
+              2 => $rivit_prices_l['warehouse_2']
+            )
+          );
+          $tehdas_saldo_varastot_lisa = "tuotteen_toimittajat.tehdas_saldo_varastot = '".$varastot_serialized."',";
+        }
+        
+        // Haetaan hintatiedot ja saldo price array:ista
+        if(isset($rivit_prices_l['hinta'])) {
+          $tuotehinta = $rivit_prices_l['hinta'];
+          $tuotehinta_lisa = "tuotteen_toimittajat.ostohinta = '".str_replace(",", ".", $tuotehinta)."',";
+        }
+        
+        // Haetaan hintatiedot ja saldo price array:ista
+        if(isset($rivit_prices_l['tuotemerkki'])) {
+          $tuotemerkki = $rivit_prices_l['tuotemerkki'];
+          $tuotemerkki_lisa = "AND tuotteen_toimittajat.tuotemerkki = '".$tuotemerkki."'";
+        }
 
-      // Haetaan hintatiedot ja saldo price array:ista
-      if(isset($rivit_prices[$tuotekoodi_tarkista1]['hinta'])) {
-        $tuotehinta = $rivit_prices[$tuotekoodi_tarkista1]['hinta'];
-        $tuotehinta_lisa = "tuotteen_toimittajat.ostohinta = '".str_replace(",", ".", $tuotehinta)."',";
-      }
-      
-      // Haetaan hintatiedot ja saldo price array:ista
-      if(isset($rivit_prices[$tuotekoodi_tarkista1]['tuotemerkki'])) {
-        $tuotemerkki = $rivit_prices[$tuotekoodi_tarkista1]['tuotemerkki'];
-        $tuotemerkki_lisa = "AND tuotteen_toimittajat.tuotemerkki = '".$tuotemerkki."'";
-      }
-
-      if(!is_numeric($tuotesaldo)) {
-        continue;
-      }
-
-      // yritet‰‰n p‰ivitt‰‰ suoraan tuotenumerolla
-      $query = "UPDATE LOW_PRIORITY tuotteen_toimittajat
+        if(!is_numeric($tuotesaldo)) {
+          continue;
+        }
+        
+        // yritet‰‰n p‰ivitt‰‰ suoraan tuotenumerolla
+        $query = "UPDATE LOW_PRIORITY tuotteen_toimittajat
                   SET 
                   $tuotehinta_lisa 
                   tehdas_saldo_paivitetty = NOW(), 
@@ -895,24 +906,25 @@ class ImportSaldoHinta
                   $tuotemerkki_lisa 
                   AND(last_insert_id(tuotteen_toimittajat.tunnus))
                 ";
-      pupe_query($query);
-
-      $onnistunut_tuote = false;
-      
-      // onnistui
-      if (mysql_insert_id()) {
-        $loydetyt_tuotteet[] = $rivi;
-        $onnistunut_tuote = true;
+        pupe_query($query);
+        $onnistunut_tuote = false;
+        
+        // onnistui
+        if (mysql_insert_id()) {
+          $loydetyt_tuotteet[] = $rivi;
+          $onnistunut_tuote = true;
+        }
+        
+        if (!$onnistunut_tuote) {
+          $epaonnistuneet_tuotteet[] = $rivi;
+        }
+        
+        echo $toimittaja_id."...Valmis: ".round($laskerivit/$impsaloh_csv_riveja, 2)*100;
+        echo "%";
+        echo "...Tuotteet OK: ".count($loydetyt_tuotteet);
+        echo "...\r";
       }
 
-      if (!$onnistunut_tuote) {
-        $epaonnistuneet_tuotteet[] = $rivi;
-      }
-      
-      echo $toimittaja_id."...Valmis: ".round($laskerivit/$impsaloh_csv_riveja, 2)*100;
-      echo "%";
-      echo "...Tuotteet OK: ".count($loydetyt_tuotteet);
-      echo "...\r";
     }
 
     $impsaloh_timestamp = $date = new DateTime();

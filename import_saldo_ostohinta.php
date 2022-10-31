@@ -159,7 +159,8 @@ class ImportSaldoHinta
           "tuotekoodi" => "Product code",
           "hinta" => "Price",
           "warehouse1" => "Chorz?w saldo",
-          "warehouse2" => "HUB saldo"
+          "warehouse2" => "HUB saldo",
+          "tuotemerkki" => "Brand"
         )
       ),
     );
@@ -224,7 +225,7 @@ class ImportSaldoHinta
         array(1)
       ),
       "motoprofil.csv" => array(
-        array(0,3,4,5),
+        array(0,3,4,5,2),
         array(0)
       )
     );
@@ -358,8 +359,9 @@ class ImportSaldoHinta
           $product_data_headers[2]
         );
 
-        if(count($product_data_headers) == 4) {
+        if(count($product_data_headers) == 5) {
           $outputData[] = $product_data_headers[3];
+          $outputData[] = $product_data_headers[4];
         }
 
         $outputData2 = array($product_data['tuotekoodi']);
@@ -378,8 +380,8 @@ class ImportSaldoHinta
           if(count($product_data_headers) == 3) {
             $outputData = array($data[$tiedostokolumnit[0][0]], $data[$tiedostokolumnit[0][1]], preg_replace("/[^0-9 ]/", '', $data[$tiedostokolumnit[0][2]]));
           }
-          if(count($product_data_headers) == 4) {
-            $outputData = array($data[$tiedostokolumnit[0][0]], $data[$tiedostokolumnit[0][1]], preg_replace("/[^0-9 ]/", '', $data[$tiedostokolumnit[0][2]]), preg_replace("/[^0-9 ]/", '', $data[$tiedostokolumnit[0][3]]));
+          if(count($product_data_headers) == 5) {
+            $outputData = array($data[$tiedostokolumnit[0][0]], $data[$tiedostokolumnit[0][1]], preg_replace("/[^0-9 ]/", '', $data[$tiedostokolumnit[0][2]]), preg_replace("/[^0-9 ]/", '', $data[$tiedostokolumnit[0][3]]), $data[$tiedostokolumnit[0][4]]);
           }
 
           fputcsv($oh, $outputData, ";");
@@ -663,6 +665,9 @@ class ImportSaldoHinta
           if ($hae_otsikko == 'warehouse2') {
             $warehouse_2_kolumni = $kolumninro;
           }
+          if ($hae_otsikko == 'tuotemerkki') {
+            $tuotemerkki_kolumni = $kolumninro;
+          }
           $kolumninro++;
         }
 
@@ -673,8 +678,7 @@ class ImportSaldoHinta
           foreach ($rivi as $hae_otsikko) {
             $hae_otsikko = preg_replace("/[^A-Za-z0-9 ]/", '', $hae_otsikko);
 
-            if ($otsikkotiedot['hinta'] == $hae_otsikko) {
-
+            if ($otsikkotiedot['hinta'] == $hae_otsikko or $hae_otsikko == 'hinta') {
               break;
             }
             $kolumninro++;
@@ -683,6 +687,7 @@ class ImportSaldoHinta
           $rivit[0] = false;
           continue;
         }
+        die();
       }
       $hinta_kolumni = $kolumninro;
 
@@ -699,6 +704,9 @@ class ImportSaldoHinta
       if(isset($warehouse_2_kolumni)) {
         $warehouse_2 = $rivi[$warehouse_2_kolumni];
       }
+      if(isset($tuotemerkki_kolumni)) {
+        $tuotemerkki = $rivi[$tuotemerkki_kolumni];
+      }
 
       $rivi_hinta = $rivi[$hinta_kolumni];
 
@@ -711,6 +719,13 @@ class ImportSaldoHinta
         $rivit_prices[$rivi_tuoteno] = array(
           "hinta" => $rivi_hinta,
           "saldo" => $rivi_saldo
+        );
+      } else if(isset($warehouse_1_kolumni) and isset($warehouse_2_kolumni) and isset($tuotemerkki)) {
+        $rivit_prices[$rivi_tuoteno] = array(
+          "hinta" => $rivi_hinta,
+          "tuotemerkki" => $tuotemerkki,
+          'warehouse_1' => $warehouse_1,
+          'warehouse_2' => $warehouse_2
         );
       } else if($rivi_hinta) {
         $rivit_prices[$rivi_tuoteno] = array(
@@ -852,6 +867,16 @@ class ImportSaldoHinta
         $tuotehinta = $rivit_prices[$tuotekoodi_tarkista1]['hinta'];
         $tuotehinta_lisa = "tuotteen_toimittajat.ostohinta = '".str_replace(",", ".", $tuotehinta)."',";
       }
+      
+      // Haetaan hintatiedot ja saldo price array:ista
+      if(isset($rivit_prices[$tuotekoodi_tarkista1]['tuotemerkki'])) {
+        $tuotemerkki = $rivit_prices[$tuotekoodi_tarkista1]['tuotemerkki'];
+        $tuotemerkki_lisa = "AND tuotteen_toimittajat.tuotemerkki = '".$tuotemerkki."'";
+      }
+
+      if(!is_numeric($tuotesaldo)) {
+        continue;
+      }
 
       // yritetään päivittää suoraan tuotenumerolla
       $query = "UPDATE LOW_PRIORITY tuotteen_toimittajat
@@ -866,7 +891,8 @@ class ImportSaldoHinta
                     END 
                   WHERE yhtio = '".$this->yhtio."'
                   AND tuotteen_toimittajat.liitostunnus = '".$toimittaja_id."' 
-                  AND tuotteen_toimittajat.toim_tuoteno = '".mysql_real_escape_string($tuotekoodi_tarkista1)."'  
+                  AND tuotteen_toimittajat.toim_tuoteno = '".mysql_real_escape_string($tuotekoodi_tarkista1)."' 
+                  $tuotemerkki_lisa 
                   AND(last_insert_id(tuotteen_toimittajat.tunnus))
                 ";
       pupe_query($query);
@@ -883,7 +909,7 @@ class ImportSaldoHinta
         $epaonnistuneet_tuotteet[] = $rivi;
       }
       
-      echo "...Valmis: ".round($laskerivit/$impsaloh_csv_riveja, 2)*100;
+      echo $toimittaja_id."...Valmis: ".round($laskerivit/$impsaloh_csv_riveja, 2)*100;
       echo "%";
       echo "...Tuotteet OK: ".count($loydetyt_tuotteet);
       echo "...\r";

@@ -2367,10 +2367,19 @@ else {
               elmaedi_otsik($tootedi, $lasrow, $masrow, $tyyppi, $timestamppi, $toimaikarow);
             }
             elseif ($lasrow["chn"] == "112") {
-              finvoice_otsik($tootsisainenfinvoice, $lasrow, $kieli, $pankkitiedot, $masrow, $myyrow, $tyyppi, $toimaikarow, $tulos_ulos, $silent);
+              if($yhtiorow["finvoice_versio"] == "3") {
+                finvoice_otsik($tootsisainenfinvoice, $lasrow, $kieli, $pankkitiedot, $masrow, $myyrow, $tyyppi, $toimaikarow, $tulos_ulos, $silent, "", $tunnukset, $asiakas_apu_row);
+              } else {
+                finvoice_otsik($tootsisainenfinvoice, $lasrow, $kieli, $pankkitiedot, $masrow, $myyrow, $tyyppi, $toimaikarow, $tulos_ulos, $silent, "");
+              }
             }
             elseif (in_array($yhtiorow["verkkolasku_lah"], array("iPost", "finvoice", "maventa", "trustpoint", "ppg", "apix", "sepa", "talenom", "arvato"))) {
-              finvoice_otsik($tootfinvoice, $lasrow, $kieli, $pankkitiedot, $masrow, $myyrow, $tyyppi, $toimaikarow, $tulos_ulos, $silent, $nosoap);
+              if($yhtiorow["finvoice_versio"] == "3") {
+                finvoice_otsik($tootfinvoice, $lasrow, $kieli, $pankkitiedot, $masrow, $myyrow, $tyyppi, $toimaikarow, $tulos_ulos, $silent, $nosoap, $tunnukset, $asiakas_apu_row);
+              } else {
+                finvoice_otsik($tootfinvoice, $lasrow, $kieli, $pankkitiedot, $masrow, $myyrow, $tyyppi, $toimaikarow, $tulos_ulos, $silent, $nosoap);
+              }
+              
             }
             else {
               pupevoice_otsik($tootxml, $lasrow, $laskun_kieli, $pankkitiedot, $masrow, $myyrow, $tyyppi, $toimaikarow);
@@ -2495,6 +2504,7 @@ else {
                       tilausrivi.yksikko,
                       tilausrivi.hinta,
                       tilausrivi.netto,
+                      tilausrivi.ale_peruste,
                       lasku.vienti_kurssi,
                       lasku.viesti laskuviesti,
                       lasku.asiakkaan_tilausnumero,
@@ -2553,8 +2563,6 @@ else {
                 $tilrows[] = $tilrow;
               }
             }
-
-            $finvoice_row_amount = 0;
 
             foreach ($tilrows as $tilrow) {
               // N‰ytet‰‰n vain perheen is‰ ja summataan lasten hinnat is‰riville
@@ -2763,10 +2771,18 @@ else {
                 elmaedi_rivi($tootedi, $tilrow, $rivinumero);
               }
               elseif ($lasrow["chn"] == "112") {
-                $finvoice_row_amount += floatval(str_replace(',', '.', finvoice_rivi($tootsisainenfinvoice, $tilrow, $lasrow, $vatamount, $laskutyyppi)));
+                if ($yhtiorow["finvoice_versio"] == "3") {
+                  finvoice_rivi($tootsisainenfinvoice, $tilrow, $lasrow, $vatamount, $laskutyyppi, $rivilaskuri);
+                } else {
+                  finvoice_rivi($tootsisainenfinvoice, $tilrow, $lasrow, $vatamount, $laskutyyppi);
+                }
               }
               elseif (in_array($yhtiorow["verkkolasku_lah"], array("iPost", "finvoice", "maventa", "trustpoint", "ppg", "apix", "sepa", "talenom", "arvato"))) {
-                $finvoice_row_amount += floatval(str_replace(',', '.', finvoice_rivi($tootfinvoice, $tilrow, $lasrow, $vatamount, $laskutyyppi)));
+                if ($yhtiorow["finvoice_versio"] == "3") {
+                  finvoice_rivi($tootfinvoice, $tilrow, $lasrow, $vatamount, $laskutyyppi, $rivilaskuri);
+                } else {
+                  finvoice_rivi($tootfinvoice, $tilrow, $lasrow, $vatamount, $laskutyyppi);
+                }
               }
               else {
                 pupevoice_rivi($tootxml, $tilrow, $vatamount);
@@ -2785,7 +2801,7 @@ else {
               $edilask++;
             }
             elseif ($lasrow["chn"] == "112") {
-              finvoice_lasku_loppu($tootsisainenfinvoice, $lasrow, $pankkitiedot, $masrow, $finvoice_row_amount);
+              finvoice_lasku_loppu($tootsisainenfinvoice, $lasrow, $pankkitiedot, $masrow);
 
               //N‰m‰ menee verkkolaskuputkeen
               $verkkolaskuputkeen_suora[$lasrow["laskunro"]] = $lasrow["nimi"];
@@ -2794,7 +2810,7 @@ else {
               $liitteet  = hae_liitteet_verkkolaskuun($yhtiorow["verkkolasku_lah"], $laskutettavat);
               $liitteita = !empty($liitteet);
 
-              finvoice_lasku_loppu($tootfinvoice, $lasrow, $pankkitiedot, $masrow, $liitteita, $finvoice_row_amount);
+              finvoice_lasku_loppu($tootfinvoice, $lasrow, $pankkitiedot, $masrow, $liitteita);
 
               if ($yhtiorow["verkkolasku_lah"] == "apix") {
                 //N‰m‰ menee verkkolaskuputkeen

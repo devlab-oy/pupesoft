@@ -1,7 +1,7 @@
 <?php
 
 if (!function_exists('finvoice_otsik')) {
-  function finvoice_otsik($tootfinvoice, $lasrow, $kieli, $pankkitiedot, $masrow, $myyrow, $tyyppi, $toimaikarow, $tulos_ulos, $silent, $nosoap = "") {
+  function finvoice_otsik($tootfinvoice, $lasrow, $kieli, $pankkitiedot, $masrow, $myyrow, $tyyppi, $toimaikarow, $tulos_ulos, $silent, $nosoap = "", $tunnukset=false, $asiakas_apu_row=false) {
     global $yhtiorow, $err_finvoice, $tulos_ulos, $palvelin2, $tulostettavat_email;
 
     //  Koitetaan ollaanko virheettˆmi‰
@@ -166,7 +166,7 @@ if (!function_exists('finvoice_otsik')) {
         xml_add("eb:Role", "Intermediator", $tootfinvoice);
         fputs($tootfinvoice, "</eb:To>\r\n");
 
-        xml_add("eb:CPAId", "yoursand-mycpa", $tootfinvoice); //  Ei ilmeisesti juuri merkitt‰v‰
+        xml_add("eb:CPAId", "yoursandmycpa", $tootfinvoice); //  Ei ilmeisesti juuri merkitt‰v‰
         xml_add("eb:ConversationId", "nnnnn", $tootfinvoice);  //   Ei ilmeisesti juuri merkitt‰v‰
         xml_add("eb:Service", "Routing", $tootfinvoice); //  Ei ilmeisesti juuri merkitt‰v‰
         xml_add("eb:Action", "ProcessInvoice", $tootfinvoice);
@@ -591,6 +591,8 @@ if (!function_exists('finvoice_otsik')) {
       }
 
       xml_add("AgreementIdentifier", substr($lasrow['viesti'], 0, 35), $tootfinvoice, 35);
+      
+      xml_add("RowsTotalVatExcludedAmount AmountCurrencyIdentifier=\"$lasrow[valkoodi]\"", finvoice_rivi_summat($tunnukset, $asiakas_apu_row), $tootfinvoice);
 
       xml_add("InvoiceTotalVatExcludedAmount AmountCurrencyIdentifier=\"$lasrow[valkoodi]\"", pp($lasrow['arvo'], 2), $tootfinvoice);
       xml_add("InvoiceTotalVatAmount AmountCurrencyIdentifier=\"$lasrow[valkoodi]\"", pp(($lasrow['summa']-$lasrow['arvo']), 2), $tootfinvoice);
@@ -626,6 +628,13 @@ if (!function_exists('finvoice_alvierittely')) {
       if ($alvrow["alv"] > 600) {
         xml_add("VatFreeText", t("Ostaja verovelvollinen AVL 8c ß", $kieli), $tootfinvoice, 70);
       }
+
+      if(floatval(str_replace(',', '.', $alvrow["alv"])) > 0) {
+        xml_add("VatCode", "S", $tootfinvoice);
+      } else {
+        xml_add("VatCode", "Z", $tootfinvoice);
+      }
+
       fputs($tootfinvoice, "</VatSpecificationDetails>\r\n");
     }
   }
@@ -690,8 +699,79 @@ if (!function_exists('finvoice_otsikko_loput')) {
   }
 }
 
+if (!function_exists('finvoice_rivi_summat')) {
+  function finvoice_rivi_summat($tunnukset, $asiakas_apu_row) {
+    global $yhtiorow, $kukarow;
+
+    $query_ale_lisa = generoi_alekentta('M');
+
+    // Haetaan laskun kaikki rivit
+    $query = "SELECT 
+              lasku.vienti_kurssi, 
+              tilausrivi.otunnus, 
+              tilausrivi.hinta,
+              tilausrivi.netto,
+              tilausrivi.alv, 
+              tilausrivi.varattu, 
+              tilausrivi.tyyppi, 
+              sum(tilausrivi.rivihinta) rivihinta, 
+              tilausrivi.kpl, 
+              sum(round(tilausrivi.hinta * if ('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.kpl) * {$query_ale_lisa}, $yhtiorow[hintapyoristys])) rivihinta_verollinen,
+              sum((tilausrivi.hinta / lasku.vienti_kurssi) / if ('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.kpl) * {$query_ale_lisa}) rivihinta_valuutassa,
+              sum((tilausrivi.hinta / lasku.vienti_kurssi) * if ('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.kpl) * {$query_ale_lisa}) rivihinta_valuutassa_verollinen 
+              FROM tilausrivi 
+                JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus) 
+                LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus 
+              WHERE tilausrivi.yhtio  = '$kukarow[yhtio]' 
+                and (tilausrivi.perheid = 0 or tilausrivi.perheid=tilausrivi.tunnus or tilausrivin_lisatiedot.ei_nayteta !='E' or tilausrivin_lisatiedot.ei_nayteta is null) 
+                and tilausrivi.kpl     != 0 
+                and tilausrivi.tyyppi   = 'L' 
+                and tilausrivi.otunnus  in ($tunnukset)
+              ";
+    $tilres = pupe_query($query);
+
+    $rivinumerot   = array(0 => 0);
+    $rivilaskuri   = 1;
+    $rivimaara     = mysql_num_rows($tilres);
+    $rivigrouppaus = FALSE;
+    $tilrows       = array();
+
+    // Asiakkaan / yhti?n laskutyyppi
+    if ($lasrow['laskutyyppi'] == -9 or $lasrow['laskutyyppi'] == 0) {
+      //jos laskulta l?ytyv?t laskutyyppi on Oletus k?ytet??n asiakkaan tai yhti?n oletus laskutyyppi?
+      if (isset($asiakas_apu_row['laskutyyppi']) and $asiakas_apu_row['laskutyyppi'] != -9) {
+        $laskutyyppi = $asiakas_apu_row['laskutyyppi'];
+      }
+      else {
+        $laskutyyppi = $yhtiorow['laskutyyppi'];
+      }
+    }
+    else {
+      $laskutyyppi = $lasrow['laskutyyppi'];
+    }
+
+    while ($tilrow = mysql_fetch_assoc($tilres)) {
+      if ($yhtiorow["pura_osaluettelot"] != "") {
+        // Korvataanko tilauksella oleva rivi osaluettelolla
+        $tilrows = array_merge($tilrows, pura_osaluettelot($lasrow, $tilrow, $laskutyyppi));
+      }
+      else {
+        $tilrows[] = $tilrow;
+      } 
+    }
+
+    $finvoice_row_amount = 0;
+
+    foreach ($tilrows as $tilrow) {
+      $finvoice_row_amount += $tilrow['rivihinta'];
+    }
+
+    return str_replace(".", ",", $finvoice_row_amount);
+  }
+}
+
 if (!function_exists('finvoice_rivi')) {
-  function finvoice_rivi($tootfinvoice, $tilrow, $lasrow, $vatamount, $laskutyyppi = 0) {
+  function finvoice_rivi($tootfinvoice, $tilrow, $lasrow, $vatamount, $laskutyyppi = 0, $tilausrivinro = 1) {
     global $err_finvoice, $yhtiorow, $kukarow, $tullinimike_ja_alkuperamaa, $kieli;
 
     if ($laskutyyppi == 10 or $laskutyyppi == 12) {
@@ -717,12 +797,17 @@ if (!function_exists('finvoice_rivi')) {
 
       xml_add("DeliveredQuantity QuantityUnitCode=\"$tilrow[yksikko]\"", pp($tilrow['kpl'], 2), $tootfinvoice);
       xml_add("OrderedQuantity QuantityUnitCode=\"$tilrow[yksikko]\"", pp($tilrow['tilkpl'], 2), $tootfinvoice);
+      xml_add("InvoicedQuantity QuantityUnitCodeUN=\"C62\"", pp($tilrow['kpl'], 2), $tootfinvoice);
+      xml_add("UnitPriceNetAmount AmountCurrencyIdentifier=\"$lasrow[valkoodi]\"", pp($tilrow['hinta'], $yhtiorow["hintapyoristys"], 5, 2), $tootfinvoice);
       xml_add("UnitPriceAmount AmountCurrencyIdentifier=\"$lasrow[valkoodi]\"", pp($tilrow['hinta'], $yhtiorow["hintapyoristys"], 5, 2), $tootfinvoice);
       xml_add("UnitPriceVatIncludedAmount AmountCurrencyIdentifier=\"$lasrow[valkoodi]\"", pp($tilrow['hinta_verollinen'], $yhtiorow["hintapyoristys"], 5, 2), $tootfinvoice);
 
       if ($tilrow['tilaajanrivinro'] != 0) {
         xml_add("RowIdentifier", $tilrow['tilaajanrivinro'], $tootfinvoice, 35);
+        
       }
+
+      xml_add("RowPositionIdentifier", $tilausrivinro, $tootfinvoice, 35);
 
       if ((int) str_replace("-", "", substr($tilrow['tilauspaiva'], 0, 10)) < (int) str_replace("-", "", substr($tilrow['toimitettuaika'], 0, 10))) {
         xml_add("RowIdentifierDate Format=\"CCYYMMDD\"", vlas_dateconv($tilrow['tilauspaiva']), $tootfinvoice);
@@ -739,7 +824,15 @@ if (!function_exists('finvoice_rivi')) {
       $alennukset_yhteensa = generoi_alekentta_php($tilrow, 'M', 'plain');
 
       xml_add("RowDiscountPercent", pp($alennukset_yhteensa, 2), $tootfinvoice);
+      xml_add("RowDiscountAmount", str_replace(".", ",", $tilrow['aleyhteensa']), $tootfinvoice);
+      xml_add("RowDiscountTypeText", str_replace("\n", ' | ', $tilrow['ale_peruste']), $tootfinvoice);
+
       xml_add("RowVatRatePercent", pp($tilrow['alv'], 2, 5, 2), $tootfinvoice);
+      if(floatval(str_replace(',', '.', $tilrow["alv"])) > 0) {
+        xml_add("RowVatCode", "S", $tootfinvoice);
+      } else {
+        xml_add("RowVatCode", "Z", $tootfinvoice);
+      }
       xml_add("RowVatAmount AmountCurrencyIdentifier=\"$lasrow[valkoodi]\"", pp($vatamount, $yhtiorow["hintapyoristys"], 5, 2), $tootfinvoice);  // veron m‰‰r‰
       xml_add("RowVatExcludedAmount AmountCurrencyIdentifier=\"$lasrow[valkoodi]\"", pp($tilrow['rivihinta'], $yhtiorow["hintapyoristys"], 5, 2), $tootfinvoice);  // veroton rivihinta
       xml_add("RowAmount AmountCurrencyIdentifier=\"$lasrow[valkoodi]\"", pp($tilrow["rivihinta_verollinen"], $yhtiorow["hintapyoristys"], 5, 2), $tootfinvoice);  // verollinen rivihinta
@@ -767,10 +860,11 @@ if (!function_exists('finvoice_rivi')) {
       }
 
       fputs($tootfinvoice, "</InvoiceRow>\r\n");
-      return pp($tilrow['rivihinta'], $yhtiorow["hintapyoristys"], 5, 2);
     }
   }
 }
+
+
 
 if (!function_exists('finvoice_row_freetext')) {
   function finvoice_row_freetext($tootfinvoice, $tilrow, $lasrow) {
@@ -911,7 +1005,6 @@ if (!function_exists('finvoice_lasku_loppu')) {
     global $yhtiorow, $err_finvoice;
 
     if ($err_finvoice == 0) {
-      xml_add("RowsTotalVatExcludedAmount AmountCurrencyIdentifier=\"$lasrow[valkoodi]\"", $finvoice_row_amount, $tootfinvoice);
 
       fputs($tootfinvoice, "<EpiDetails>\r\n");
 
@@ -945,6 +1038,8 @@ if (!function_exists('finvoice_lasku_loppu')) {
       xml_add("EpiInstructedAmount AmountCurrencyIdentifier=\"$lasrow[valkoodi]\"", pp($lasrow['summa']), $tootfinvoice);
       xml_add("EpiCharge ChargeOption=\"SHA\"", "SHA", $tootfinvoice);
       xml_add("EpiDateOptionDate Format=\"CCYYMMDD\"", vlas_dateconv($lasrow['erpcm']), $tootfinvoice);
+      xml_add("EpiPaymentMeansCode", "58", $tootfinvoice);
+      
       fputs($tootfinvoice, "</EpiPaymentInstructionDetails>\r\n");
       fputs($tootfinvoice, "</EpiDetails>\r\n");
 

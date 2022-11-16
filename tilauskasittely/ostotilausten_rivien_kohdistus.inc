@@ -513,6 +513,7 @@ if ((!isset($varaosavirhe) or $varaosavirhe == '') and ($tee == "TI" or $tee == 
     }
 
     if ($kpl != 0) {
+      $vahvistettu_kommentti = "F";
       require 'lisaarivi.inc';
     }
 

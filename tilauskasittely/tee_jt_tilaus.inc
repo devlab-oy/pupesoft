@@ -941,6 +941,8 @@ if (!function_exists("tee_jt_tilaus")) {
               $siirtolista_row = mysql_fetch_assoc($siirtolista_result);
             }
 
+            $vahvistettu_kommentti = "F";
+
             // Setataan lisaarivi.inc varten mistä tullaan muuttujaan JT_TILAUS,
             // jotta ei pyöristettäisi enää tässä vaiheessa täysiin myyntieriin,
             // jos kerran ollaan jo kertaalleen hyväksytty, että myydään vajaa erä

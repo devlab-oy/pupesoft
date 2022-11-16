@@ -460,6 +460,8 @@ if (!function_exists("tilauksesta_myyntitilaus")) {
         $hinta = $coprivirow['hinta'];
       }
 
+      $vahvistettu_kommentti = "F";
+
       // jos käytössä on myyntihinnan poikkeava määrä, kerrotaan hinta takaisin kuntoon.
       if ($tuoterow["myyntihinta_maara"] != 0) {
         $hinta = $hinta * $tuoterow["myyntihinta_maara"];

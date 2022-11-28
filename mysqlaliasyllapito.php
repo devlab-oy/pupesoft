@@ -116,7 +116,7 @@ if ($kopsaataulu != "" and $uusisetti != "") {
 }
 
 // Nyt selataan
-$query  = "SHOW TABLES FROM `$dbkanta`";
+$query  = "SHOW FULL TABLES FROM `$dbkanta` WHERE Table_Type = 'BASE TABLE'";
 $tabresult = pupe_query($query);
 
 $sel[$taulu] = "SELECTED";

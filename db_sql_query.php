@@ -45,11 +45,10 @@ else {
   echo "<tr><td><select name='table' onchange='submit();'>";
   echo "<option value=''></option>";
 
-  $query  = "SHOW tables FROM `$dbkanta`";
+  $query  = "SHOW FULL TABLES FROM `$dbkanta` WHERE Table_Type = 'BASE TABLE'";
   $result =  pupe_query($query);
 
   while ($row = mysql_fetch_array($result)) {
-
     $query  = "describe $row[0]";
     $fieldresult = pupe_query($query);
 

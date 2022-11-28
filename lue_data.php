@@ -634,7 +634,7 @@ if ($kasitellaan_tiedosto) {
   }
 
   // Otetaan pupen talut haltuun
-  $query = "SHOW TABLES FROM `$dbkanta`";
+  $query = "SHOW FULL TABLES FROM `$dbkanta` WHERE Table_Type = 'BASE TABLE'";
   $tableresult = pupe_query($query);
 
   $taulunrivit_keys = array_keys($taulunrivit);

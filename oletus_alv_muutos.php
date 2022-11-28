@@ -54,7 +54,7 @@ else {
 
     echo "<table>";
 
-    $query  = "SHOW TABLES FROM $dbkanta";
+    $query  = "SHOW FULL TABLES FROM `$dbkanta` WHERE Table_Type = 'BASE TABLE'";
     $tabresult = pupe_query($query);
 
     while ($tables = mysql_fetch_array($tabresult)) {

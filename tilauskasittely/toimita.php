@@ -280,6 +280,10 @@ if ($id == '0') {
             ORDER BY lasku.toimaika";
   $tilre = pupe_query($query);
 
+  if($kukarow['oletus_varasto'] and $kukarow['oletus_varasto'] != "") {
+    $varasto_lisa = "and lasku.varasto = '$kukarow[oletus_varasto]' ";
+  }
+
   while ($tilrow = mysql_fetch_assoc($tilre)) {
     // etsit‰‰n sopivia tilauksia
     $query = "SELECT lasku.yhtio, lasku.yhtio_nimi, lasku.tunnus 'tilaus',
@@ -292,11 +296,13 @@ if ($id == '0') {
               and lasku.tila     = 'L'
               $haku
               and lasku.$logistiikka_yhtiolisa
-              and lasku.alatila  in ('C','B')
+              and lasku.alatila  in ('C','B') 
+              $varasto_lisa
               ORDER by laadittu desc";
     $result = pupe_query($query);
 
     while ($row = mysql_fetch_assoc($result)) {
+
       // piirret‰‰n vaan kerran taulukko-otsikot
       if ($boob == '') {
         $boob = 'kala';

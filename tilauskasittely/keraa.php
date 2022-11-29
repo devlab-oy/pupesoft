@@ -4016,8 +4016,12 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
         $_ei_koonti = ($otsik_row['tulostustapa'] == 'H' or $otsik_row['tulostustapa'] == 'E');
         $_onko_unifaun = ($otsik_row["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc');
         $_onko_unifaun = ($_onko_unifaun or $otsik_row["rahtikirja"] == 'rahtikirja_unifaun_uo_siirto.inc');
+        $onko_nouto = ($otsik_row["nouto"] != '');
 
-        if (!empty($oslappkpl) and $_onko_unifaun and $_ei_koonti) {
+        if (
+          (!empty($oslappkpl) and $onko_nouto != "") or 
+          (!empty($oslappkpl) and $_onko_unifaun and $_ei_koonti)
+          ) {
           $yhtiorow["oletus_oslappkpl"] = 0;
           $oslappkpl = 0;
         }

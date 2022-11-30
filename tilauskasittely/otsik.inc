@@ -1089,7 +1089,7 @@ if ($tila == "" and !isset($jatka)) {
       'T' => t("Tarjoustilaus"),
       'U' => t("Takuutilaus"),
       'P' => t("Pullonpalautus"),
-      'V' => t("Valmis tilaus")
+      'V' => t("Valmistus")
     );
 
     if (mysql_num_rows($vk_kassalipas_res)) {

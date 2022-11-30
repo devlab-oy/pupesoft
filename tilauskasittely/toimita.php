@@ -280,8 +280,8 @@ if ($id == '0') {
             ORDER BY lasku.toimaika";
   $tilre = pupe_query($query);
 
-  if($kukarow['oletus_varasto'] and $kukarow['oletus_varasto'] != "") {
-    $varasto_lisa = "and lasku.varasto = '$kukarow[oletus_varasto]' ";
+  if($kukarow['toimitustapa'] and $kukarow['toimitustapa'] != "") {
+    $varasto_lisa = "and lasku.toimitustapa = '$kukarow[toimitustapa]' ";
   }
 
   while ($tilrow = mysql_fetch_assoc($tilre)) {

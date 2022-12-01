@@ -280,8 +280,9 @@ if ($id == '0') {
             ORDER BY lasku.toimaika";
   $tilre = pupe_query($query);
 
-  if($kukarow['toimitustapa'] and $kukarow['toimitustapa'] != "") {
-    $varasto_lisa = "and lasku.toimitustapa = '$kukarow[toimitustapa]' ";
+  if($varastot_toimpaikat and $kukarow['oletus_varasto'] and $kukarow['oletus_varasto'] != "") {
+    $varasto_toimpaikka = utf8_decode($varastot_toimpaikat[$kukarow['oletus_varasto']]);
+    $varasto_lisa = "and lasku.toimitustapa = '$varasto_toimpaikka' ";
   }
 
   while ($tilrow = mysql_fetch_assoc($tilre)) {

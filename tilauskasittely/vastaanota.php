@@ -1047,10 +1047,9 @@ if (empty($id) and $echotaanko) {
   if (isset($varastorajaus) and !empty($varastorajaus)) {
     $varasto .= ' AND lasku.clearing = '.(int) $varastorajaus;
   }
-  elseif ($varastorajaus === 0 and !empty($kukarow['oletus_varasto'])) {
+  elseif (!$varastorajaus and !empty($kukarow['oletus_varasto'])) {
     $varasto .= ' AND lasku.clearing = '.(int) $kukarow['oletus_varasto'];
   }
-
 
   if ($yhtiorow['toimipaikkakasittely'] == "L" and $toimipaikkares = hae_yhtion_toimipaikat($kukarow['yhtio']) and mysql_num_rows($toimipaikkares) > 0) {
     if (isset($toimipaikkarajaus) and $toimipaikkarajaus != 'kaikki') {

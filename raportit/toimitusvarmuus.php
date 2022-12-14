@@ -201,7 +201,7 @@ if (!empty($etsinappi)) {
 
   if ($toim == 'OSTO') {
 
-    $onkomyohassa_sql = "if(tilausrivi.laskutettuaika > 0, tilausrivi.laskutettuaika, CURDATE()) ";
+    $onkomyohassa_sql = "if(tilausrivi.laskutettuaika > 0, tilausrivi.laskutettuaika, DATE_ADD(CURDATE(), INTERVAL - lasku.toimitusaikaikkuna DAY)) ";
 
     if ($raptaso == "yritys") {
       $query = "SELECT
@@ -276,7 +276,7 @@ if (!empty($etsinappi)) {
                             if (
                               left(tilausrivi.kerattyaika, 10) > 0 and toimitustapa.nouto != '',
                               left(tilausrivi.kerattyaika, 10),
-                              CURDATE()
+                              DATE_ADD(CURDATE(), INTERVAL - lasku.toimitusaikaikkuna DAY)
                             )
                           ) ";
 
@@ -366,7 +366,7 @@ if (!empty($etsinappi)) {
                   and (tilausrivi.varattu + tilausrivi.jt) != 0
                   and tilausrivi.toimitettuaika = '0000-00-00 00:00:00'
                   and tilausrivi.laskutettuaika = '0000-00-00'
-                  and tilausrivi.toimaika < CURDATE()";
+                  and tilausrivi.toimaika < DATE_ADD(CURDATE(), INTERVAL - lasku.toimitusaikaikkuna DAY)";
     }
     elseif ($toim == 'KAIKKIAVOIMET') {
       $query .= " and tilausrivi.tyyppi in ('L','W')

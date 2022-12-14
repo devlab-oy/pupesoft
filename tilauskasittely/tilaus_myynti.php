@@ -3001,6 +3001,7 @@ if ($tee == '') {
       (isset($viesti) and $viesti != $laskurow["viesti"]) or
       (isset($asiakkaan_tilausnumero) and $asiakkaan_tilausnumero != $laskurow["asiakkaan_tilausnumero"]) or
       (isset($tilausvahvistus) and $tilausvahvistus != $laskurow["tilausvahvistus"]) or
+      (isset($toimitusaikaikkuna) and $toimitusaikaikkuna != $laskurow["toimitusaikaikkuna"]) or
       (isset($myyjanro) and $myyjanro > 0 and $myyjanro != $v_myyjanro) or
       (isset($myyja) and $myyja > 0 and $myyja != $laskurow["myyja"]) or
       (isset($maksutapa) and $maksutapa != ''))) {
@@ -3142,7 +3143,8 @@ if ($tee == '') {
                toimitustapa    = '$toimitustapa',
                rahtisopimus    = '$rahtisopimus',
                viesti          = '$viesti',
-               tilausvahvistus = '$tilausvahvistus',
+               tilausvahvistus = '$tilausvahvistus', 
+               toimitusaikaikkuna = '$toimitusaikaikkuna', 
                $asiakkaan_tilaunumero_lisa
                $pika_paiv_merahti
                $pika_paiv_myyja
@@ -3803,6 +3805,29 @@ if ($tee == '') {
       echo "<th>".t("Toimitusp‰iv‰").":</td>";
       echo "<td>";
       echo tv1dateconv($laskurow["toimaika"]);
+      echo " | <strong style='font-weight: bold;'>";
+      echo t("Aikaikkuna").":</strong> ";
+      
+      $_ikkunat_max = 7;
+      $_ikkunat_min = 0;
+
+      if($asiakasrow['toimitusaikaikkuna'] and $asiakasrow['toimitusaikaikkuna'] > 0 
+      and $laskurow['toimitusaikaikkuna'] == NULL) {
+        $laskurow['toimitusaikaikkuna'] = $asiakasrow['toimitusaikaikkuna'];
+      }
+      
+      echo "<select onchange='submit();' name='toimitusaikaikkuna' ".js_alasvetoMaxWidth($nimi, 300).">";
+    
+      while($_ikkunat_max >= $_ikkunat_min) {
+        echo "<option ";
+        if($_ikkunat_min == $laskurow['toimitusaikaikkuna']) {
+          echo "selected ";
+        }
+        echo "value='".$_ikkunat_min."'>+- ".$_ikkunat_min." p‰iv‰‰</option>";
+        $_ikkunat_min++;
+      }
+      echo "</select>";
+
       echo "</td>";
       echo "</tr>";
 

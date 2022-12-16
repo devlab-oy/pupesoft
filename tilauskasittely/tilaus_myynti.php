@@ -3812,7 +3812,7 @@ if ($tee == '') {
       $_ikkunat_min = 0;
 
       if($asiakasrow['toimitusaikaikkuna'] and $asiakasrow['toimitusaikaikkuna'] > 0 
-      and $laskurow['toimitusaikaikkuna'] == NULL) {
+      and $laskurow['toimitusaikaikkuna'] == 0) {
         $laskurow['toimitusaikaikkuna'] = $asiakasrow['toimitusaikaikkuna'];
       }
       

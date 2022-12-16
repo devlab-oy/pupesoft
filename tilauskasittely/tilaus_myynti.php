@@ -3810,13 +3810,15 @@ if ($tee == '') {
       
       $_ikkunat_max = 7;
       $_ikkunat_min = 0;
-
-      if($asiakasrow['toimitusaikaikkuna'] and $asiakasrow['toimitusaikaikkuna'] > 0 
-      and $laskurow['toimitusaikaikkuna'] == 0) {
-        $laskurow['toimitusaikaikkuna'] = $asiakasrow['toimitusaikaikkuna'];
-      }
       
       echo "<select onchange='submit();' name='toimitusaikaikkuna' ".js_alasvetoMaxWidth($nimi, 300).">";
+
+      if($asiakasrow['toimitusaikaikkuna'] and $asiakasrow['toimitusaikaikkuna'] > 0 
+      and ($toimitusaikaikkuna == 'x' or !$_POST['tilausnumero'])) {
+        $laskurow['toimitusaikaikkuna'] = $asiakasrow['toimitusaikaikkuna'];
+      } else if($asiakasrow['toimitusaikaikkuna'] and $asiakasrow['toimitusaikaikkuna'] > 0) {
+        echo "<option value='x'>".t("Asiakkaan oma ")."(+- ".$asiakasrow['toimitusaikaikkuna']." ".t("pvm").")</option>";
+      }
     
       while($_ikkunat_max >= $_ikkunat_min) {
         echo "<option ";

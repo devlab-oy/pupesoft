@@ -824,7 +824,7 @@ if (!function_exists('finvoice_rivi')) {
       $alennukset_yhteensa = generoi_alekentta_php($tilrow, 'M', 'plain');
 
       xml_add("RowDiscountPercent", pp($alennukset_yhteensa, 2), $tootfinvoice);
-      xml_add("RowDiscountAmount", str_replace(".", ",", $tilrow['aleyhteensa']), $tootfinvoice);
+      xml_add("RowDiscountAmount AmountCurrencyIdentifier=\"$lasrow[valkoodi]\"", str_replace(".", ",", $tilrow['aleyhteensa']), $tootfinvoice);
       xml_add("RowDiscountTypeText", str_replace("\n", ' | ', $tilrow['ale_peruste']), $tootfinvoice);
 
       xml_add("RowVatRatePercent", pp($tilrow['alv'], 2, 5, 2), $tootfinvoice);

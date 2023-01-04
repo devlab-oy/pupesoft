@@ -207,7 +207,7 @@ if (!empty($etsinappi)) {
       $query = "SELECT
                 count(distinct lasku.tunnus) tilauksia,
                 count(tilausrivi.tunnus) riveja,
-                count(distinct if($onkomyohassa_sql > tilausrivi.toimaika, lasku.tunnus, null)) myohassa_tilauksia,
+                count(distinct if($onkomyohassa_sql > DATE_ADD(tilausrivi.toimaika, INTERVAL - lasku.toimitusaikaikkuna DAY), lasku.tunnus, null)) myohassa_tilauksia,
                 sum(if($onkomyohassa_sql > tilausrivi.toimaika, 1, 0)) myohassa_riveja,
                 round(avg(
                   if($onkomyohassa_sql > tilausrivi.toimaika, DATEDIFF($onkomyohassa_sql, tilausrivi.toimaika), null)
@@ -220,7 +220,7 @@ if (!empty($etsinappi)) {
                 max(lasku.nimi) nimi,
                 count(distinct lasku.tunnus) tilauksia,
                 count(tilausrivi.tunnus) riveja,
-                count(distinct if($onkomyohassa_sql > tilausrivi.toimaika, lasku.tunnus, null)) myohassa_tilauksia,
+                count(distinct if($onkomyohassa_sql > DATE_ADD(tilausrivi.toimaika, INTERVAL - lasku.toimitusaikaikkuna DAY), lasku.tunnus, null)) myohassa_tilauksia,
                 sum(if($onkomyohassa_sql > tilausrivi.toimaika, 1, 0)) myohassa_riveja,
                 round(avg(
                   if($onkomyohassa_sql > tilausrivi.toimaika, DATEDIFF($onkomyohassa_sql, tilausrivi.toimaika), null)
@@ -239,14 +239,14 @@ if (!empty($etsinappi)) {
                   ), '%Y-%m-%d'
                 ) toimaika,
                 count(tilausrivi.tunnus) riveja,
-                sum(if($onkomyohassa_sql > tilausrivi.toimaika, 1, 0)) myohassa_riveja,
+                sum(if($onkomyohassa_sql > DATE_ADD(tilausrivi.toimaika, INTERVAL + lasku.toimitusaikaikkuna DAY), 1, 0)) myohassa_riveja,
                 from_unixtime(
                   avg(
                     unix_timestamp(tilausrivi.laskutettuaika)
                   ), '%Y-%m-%d'
                 ) toimitettu,
                 round(avg(
-                  DATEDIFF($onkomyohassa_sql, tilausrivi.toimaika)
+                  DATEDIFF($onkomyohassa_sql, DATE_ADD(tilausrivi.toimaika, INTERVAL + lasku.toimitusaikaikkuna DAY))
                 ), 1) myohassa_pva
                 ";
     }
@@ -284,10 +284,10 @@ if (!empty($etsinappi)) {
       $query = "SELECT
                 count(distinct lasku.tunnus) tilauksia,
                 count(tilausrivi.tunnus) riveja,
-                count(distinct if($onkomyohassa_sql > lasku.toimaika, lasku.tunnus, null)) myohassa_tilauksia,
-                sum(if($onkomyohassa_sql > lasku.toimaika, 1, 0)) myohassa_riveja,
+                count(distinct if($onkomyohassa_sql > DATE_ADD(lasku.toimaika, INTERVAL + lasku.toimitusaikaikkuna DAY), lasku.tunnus, null)) myohassa_tilauksia,
+                sum(if($onkomyohassa_sql > DATE_ADD(lasku.toimaika, INTERVAL + lasku.toimitusaikaikkuna DAY), 1, 0)) myohassa_riveja,
                 round(avg(
-                  if($onkomyohassa_sql > lasku.toimaika, DATEDIFF($onkomyohassa_sql, tilausrivi.toimaika), null)
+                  if($onkomyohassa_sql > DATE_ADD(lasku.toimaika, INTERVAL + lasku.toimitusaikaikkuna DAY), DATEDIFF($onkomyohassa_sql, tilausrivi.toimaika), null)
                 ), 1) myohassa_pva
                 ";
     }
@@ -297,10 +297,10 @@ if (!empty($etsinappi)) {
                 max(lasku.nimi) nimi,
                 count(distinct lasku.tunnus) tilauksia,
                 count(tilausrivi.tunnus) riveja,
-                count(distinct if($onkomyohassa_sql > lasku.toimaika, lasku.tunnus, null)) myohassa_tilauksia,
-                sum(if($onkomyohassa_sql > lasku.toimaika, 1, 0)) myohassa_riveja,
+                count(distinct if($onkomyohassa_sql > DATE_ADD(lasku.toimaika, INTERVAL + lasku.toimitusaikaikkuna DAY), lasku.tunnus, null)) myohassa_tilauksia,
+                sum(if($onkomyohassa_sql > DATE_ADD(lasku.toimaika, INTERVAL + lasku.toimitusaikaikkuna DAY), 1, 0)) myohassa_riveja,
                 round(avg(
-                  if($onkomyohassa_sql > lasku.toimaika, DATEDIFF($onkomyohassa_sql, tilausrivi.toimaika), null)
+                  if($onkomyohassa_sql > DATE_ADD(lasku.toimaika, INTERVAL + lasku.toimitusaikaikkuna DAY), DATEDIFF($onkomyohassa_sql, tilausrivi.toimaika), null)
                 ), 1) myohassa_pva
                 ";
     }
@@ -329,7 +329,7 @@ if (!empty($etsinappi)) {
                 lasku.tunnus tilaus,
                 lasku.toimaika,
                 count(tilausrivi.tunnus) riveja,
-                sum(if($onkomyohassa_sql > lasku.toimaika, 1, 0)) myohassa_riveja,
+                sum(if($onkomyohassa_sql > DATE_ADD(lasku.toimaika, INTERVAL + lasku.toimitusaikaikkuna DAY), 1, 0)) myohassa_riveja,
                 from_unixtime(
                   avg(
                     unix_timestamp(
@@ -342,7 +342,7 @@ if (!empty($etsinappi)) {
                   ), '%Y-%m-%d'
                 ) toimitettu,
                 round(avg(
-                  DATEDIFF($onkomyohassa_sql, tilausrivi.toimaika)
+                  DATEDIFF($onkomyohassa_sql, DATE_ADD(lasku.toimaika, INTERVAL + lasku.toimitusaikaikkuna DAY))
                 ), 1) myohassa_pva
                 ";
     }
@@ -366,7 +366,7 @@ if (!empty($etsinappi)) {
                   and (tilausrivi.varattu + tilausrivi.jt) != 0
                   and tilausrivi.toimitettuaika = '0000-00-00 00:00:00'
                   and tilausrivi.laskutettuaika = '0000-00-00'
-                  and tilausrivi.toimaika < CURDATE()";
+                  and tilausrivi.toimaika < DATE_ADD(CURDATE(), INTERVAL - lasku.toimitusaikaikkuna DAY)";
     }
     elseif ($toim == 'KAIKKIAVOIMET') {
       $query .= " and tilausrivi.tyyppi in ('L','W')

@@ -374,6 +374,27 @@ if ($fieldname == "toimitustapa") {
   $jatko = 0;
 }
 
+if ($fieldname == "toimitusaikaikkuna") {
+  $ulos = "<td>";
+
+  $_ikkunat_max = 7;
+  $_ikkunat_min = 0;
+  
+  $ulos .= "<select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
+
+  while($_ikkunat_max >= $_ikkunat_min) {
+
+    $ulos .= "<option ";
+    if($_ikkunat_min == $trow[$i]) {
+      $ulos .= "selected ";
+    }
+    $ulos .= "value='".$_ikkunat_min."'>+- ".$_ikkunat_min." päivää</option>";
+    $_ikkunat_min++;
+  }
+  $ulos .= "</select></td>";
+  $jatko = 0;
+}
+
 if ($fieldname == "alv") {
 
   //yhtiön oletusalvi!

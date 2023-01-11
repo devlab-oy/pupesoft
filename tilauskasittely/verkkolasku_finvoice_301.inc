@@ -766,6 +766,8 @@ if (!function_exists('finvoice_rivi_summat')) {
       $finvoice_row_amount += $tilrow['rivihinta'];
     }
 
+    $finvoice_row_amount = number_format((float)$finvoice_row_amount, 2, '.', '')
+
     return str_replace(".", ",", $finvoice_row_amount);
   }
 }

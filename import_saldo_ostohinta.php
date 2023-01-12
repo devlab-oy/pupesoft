@@ -414,6 +414,7 @@ class ImportSaldoHinta
           }
 
           if(count($product_data_headers) == 3) {
+            $data[$tiedostokolumnit[0][2]] = str_replace("> ", "", $data[$tiedostokolumnit[0][2]]);
             $outputData = array($data[$tiedostokolumnit[0][0]], $data[$tiedostokolumnit[0][1]], preg_replace("/[^0-9 ]/", '', round($data[$tiedostokolumnit[0][2]])));
           }
           if(count($product_data_headers) == 4) {

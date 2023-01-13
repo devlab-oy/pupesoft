@@ -18423,7 +18423,7 @@ if (!function_exists("tee_keraysera")) {
 
                UNION
 
-               (SELECT SQL_NO_CACHE
+               (SELECT 
                lasku.prioriteettinro as prioriteetti,
                0 as erotus,
                lasku.ohjausmerkki,

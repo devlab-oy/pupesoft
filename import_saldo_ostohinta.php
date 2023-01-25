@@ -924,8 +924,8 @@ class ImportSaldoHinta
           }
           $varastot_serialized = json_encode(
             array(
-              1 => $rivit_prices_l['warehouse_1'],
-              2 => $rivit_prices_l['warehouse_2']
+              "1" => (int) $rivit_prices_l['warehouse_1'],
+              "2" => (int) $rivit_prices_l['warehouse_2']
             )
           );
           $tehdas_saldo_varastot_lisa = "tuotteen_toimittajat.tehdas_saldo_varastot = '".$varastot_serialized."',";

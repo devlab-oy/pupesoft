@@ -346,7 +346,7 @@ class ImportSaldoHinta
       if (isset($this->toimittajat_tiedostot[$tiedostonimi])) {
         $toimittaja_id = $this->toimittajat_tiedostot[$tiedostonimi];
       } else {
-        echo $toimittaja_id." toimittaja ei löydy!";
+        echo $tiedostonimi." toimittaja ei löydy!";
         continue;
       }
 
@@ -564,7 +564,7 @@ class ImportSaldoHinta
       if (isset($this->toimittajat_tiedostot[$impsaloh_csv_file_name])) {
         $toimittaja_id = $this->toimittajat_tiedostot[$impsaloh_csv_file_name];
       } else {
-        echo $toimittaja_id." toimittaja ei löydy!";
+        echo $impsaloh_csv_file_name." toimittaja ei löydy!";
         continue;
       }
 
@@ -713,9 +713,10 @@ class ImportSaldoHinta
 
         foreach ($rivi as $hae_otsikko) {
           $hae_otsikko = preg_replace("/[^A-Za-z0-9 ]/", '', $hae_otsikko);
-          if (isset($tuotekoodi_otsikot[$hae_otsikko])) {
+          
+          if (isset($tuotekoodi_otsikot[$hae_otsikko]) or $tuotekoodi_otsikot['Product code']['tuotekoodi'] == $hae_otsikko) {
             $tuotekoodin_kolumni = (string) $kolumninro;
-            $otsikkotiedot = $tuotekoodi_otsikot[$hae_otsikko];
+            $otsikkotiedot = $tuotekoodi_otsikot['Product code'];
           }
           if ($hae_otsikko == 'warehouse1') {
             $warehouse_1_kolumni = $kolumninro;
@@ -734,6 +735,7 @@ class ImportSaldoHinta
           $hinta_kolumni = false;
           $kolumninro = 0;
           foreach ($rivi as $hae_otsikko) {
+            
             $hae_otsikko = preg_replace("/[^A-Za-z0-9 ]/", '', $hae_otsikko);
             if ($otsikkotiedot['hinta'] == $hae_otsikko or $hae_otsikko == 'hinta') {
               break;
@@ -779,6 +781,7 @@ class ImportSaldoHinta
       }
 
       if ($rivi_saldo !== false and !$tuotemerkki and !isset($warehouse_1_kolumni) and !isset($warehouse_2_kolumni)) {
+        
         $rivit_prices[$rivi_tuoteno][0] = array(
           "hinta" => $rivi_hinta,
           "saldo" => $rivi_saldo

@@ -110,7 +110,8 @@ class ImportSaldoHinta
       "STANY.csv" => "1048",
       "ItemsInStock.txt" => "101",
       "motoprofil.csv" => "943",
-      "gordon_database.csv" => "1407"
+      "gordon_database.csv" => "1407",
+      "30803_ce.csv" => "1598"
     );
 
     $this->toimittajen_rajoitus = $toimittajen_rajoitus;
@@ -142,6 +143,13 @@ class ImportSaldoHinta
         )
       ),
       1048 => array("Product code" =>
+        array(
+          "tuotekoodi" => "code",
+          "hinta" => "Mercantile price",
+          "saldo" => "saldo"
+        )
+      ),
+      1598 => array("Product code" =>
         array(
           "tuotekoodi" => "code",
           "hinta" => "Mercantile price",
@@ -195,6 +203,16 @@ class ImportSaldoHinta
           'titles' => array('Product code','Mercantile price')
         )
       ),
+      "30803_ce.csv" => array(
+        'stocks' => array(
+          'columns' => array(2,3),
+          'titles' => array('code','saldo')
+        ),
+        'prices' => array(
+          'columns' => array(2,4),
+          'titles' => array('Product code','Mercantile price')
+        )
+      ),
     );
 
     /*
@@ -228,6 +246,10 @@ class ImportSaldoHinta
       "60046_ce.csv" => array(
         array(0,4,3),
         array(0)
+      ),
+      "30803_ce.csv" => array(
+        array(2,4,3),
+        array(2)
       ),
       "ItemsInStock.txt" => array(
         array(1,2,4),
@@ -393,10 +415,10 @@ class ImportSaldoHinta
         $count_yrita_csv_tab = count($yrita_csv_tab);
         rewind($ih);
     
-        if ($count_yrita_csv_pilkku > 1) {
-          $csv_jakajaa = ",";
-        } elseif ($count_yrita_csv_pistepilkku > 1) {
+        if ($count_yrita_csv_pistepilkku > 1) {
           $csv_jakajaa = ";";
+        } elseif ($count_yrita_csv_pilkku > 1) {
+          $csv_jakajaa = ",";
         } elseif ($count_yrita_csv_tab > 1) {
           $csv_jakajaa = "\t";
         } elseif($count_yrita_csv_pilkku == 1 or $count_yrita_csv_pistepilkku == 1 or $count_yrita_csv_tab == 1) {
@@ -470,6 +492,7 @@ class ImportSaldoHinta
         require 'ftp-get.php';
         exec('gunzip -fd '.$this->impsaloh_polku_in.'/*.gz');
         exec('mv '.$this->impsaloh_polku_in.'/60046_ce '.$this->impsaloh_polku_in.'/60046_ce.csv');
+        exec('mv '.$this->impsaloh_polku_in.'/30803_ce '.$this->impsaloh_polku_in.'/30803_ce.csv');
       }
       sleep(1);
       if ($ftp_tiedot_nimi == 'triscan') {
@@ -484,6 +507,7 @@ class ImportSaldoHinta
     }
 
     $this->jakaa_yksittaiset_tiedostot();
+    //$this->korjaa_csvt('30803_ce.csv', true);
     $this->hae_tiedostot();
 
     foreach (scandir($this->impsaloh_polku_orig_stocks) as $impsaloh_csv_file_name) {
@@ -969,6 +993,10 @@ class ImportSaldoHinta
                   $tuotemerkki_lisa 
                   AND(last_insert_id(tuotteen_toimittajat.tunnus))
                 ";
+
+        echo "<pre>";
+        print_r($query);
+        echo "</pre>";
 
         pupe_query($query);
         $onnistunut_tuote = false;

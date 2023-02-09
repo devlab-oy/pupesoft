@@ -994,10 +994,6 @@ class ImportSaldoHinta
                   AND(last_insert_id(tuotteen_toimittajat.tunnus))
                 ";
 
-        echo "<pre>";
-        print_r($query);
-        echo "</pre>";
-
         pupe_query($query);
         $onnistunut_tuote = false;
         

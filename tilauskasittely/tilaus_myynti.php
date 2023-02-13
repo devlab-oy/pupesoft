@@ -9132,6 +9132,7 @@ if ($tee == '') {
                 </form> ";
           }
           if(isset($_palaute_oikeus) and $_palaute_oikeus) {
+            
             echo "<form onsubmit='return bind_palaute_painikkeet(event, this);' data-text='".t("Palaute")." &#128232;' data='".t('Oletko varma, että haluat lähettää palaute ? (tätä ei voi kumoa)')."' class='palaute_lisaa' action='{$palvelin2}palaute.php'>
             <input type='hidden' name='tuoteno' value='".$row['tuoteno']."'>
             <input type='hidden' name='maara' value='".$row['tilkpl']."'>
@@ -9139,6 +9140,7 @@ if ($tee == '') {
             <input type='hidden' name='status' value='".$row['status']."'>
             <input type='hidden' name='ostoehdotus' value='".$row['ostoehdotus']."'>
             <input type='hidden' name='palaute_kuka' value='".$kukarow['kuka']."'>
+            <input type='hidden' name='asiakas' value='".$asiakasrow['nimi']."'>
             <input type='hidden' name='palaute_lisaa' value='1'>
             <input type='submit' class='tuotepalaute_btn' style='line-height: 20px; height: 35px;' value='".t("Palaute")." &#128232;'>
             </form>";

@@ -1188,8 +1188,8 @@ if (!function_exists("apix_invoice_put_file")) {
     global $kukarow, $yhtiorow, $pupe_root_polku;
 
     // siirretään laskutiedosto operaattorille
-    $url           = "https://test-api.apix.fi/invoices";
-    //$url             = "https://api.apix.fi/invoices";
+    //$url           = "https://test-api.apix.fi/invoices";
+    $url             = "https://api.apix.fi/invoices";
     $transferkey     = $yhtiorow['apix_avain'];
     $transferid      = $yhtiorow['apix_tunnus'];
     $software        = "Pupesoft";
@@ -1197,10 +1197,6 @@ if (!function_exists("apix_invoice_put_file")) {
 
     if ($yhtiorow["finvoice_versio"] == "2") {
       $version = "1.1";
-    }
-
-    if ($yhtiorow["finvoice_versio"] == "3") {
-      $software = "Standard3";
     }
 
     $query = "SELECT chn
@@ -1301,8 +1297,8 @@ if (!function_exists("apix_edi_put_file")) {
     global $kukarow, $yhtiorow, $pupe_root_polku;
 
     // siirretään tiedosto Apixille
-    $url           = "https://test-api.apix.fi/invoices";
-    //$url             = "https://api.apix.fi/invoices";
+    //$url           = "https://test-api.apix.fi/invoices";
+    $url             = "https://api.apix.fi/invoices";
     $transferkey     = $yhtiorow['apix_edi_avain'];
     $transferid      = $yhtiorow['apix_edi_tunnus'];
     $software        = $soft;
@@ -4229,7 +4225,7 @@ if (!function_exists("alehinta")) {
     $hintaan_osunut_kampanja = null;
     $kampanjarajaus = '';
 
-    // Onko kyseessÿ kampanja, jos on niin kampanjamatch yliajaa pÿivÿmÿÿrÿrajauksen
+    // Onko kyseessŠ kampanja, jos on niin kampanjamatch yliajaa pŠivŠmŠŠrŠrajauksen
     if (isset($laskurow['campaign_id'])) {
       $kampanjarajaus = " or campaign_id = {$laskurow['campaign_id']} ";
     }
@@ -13106,10 +13102,10 @@ if (!function_exists("pupesoft_csvstring")) {
 if (!function_exists("pupesoft_invoicestring")) {
   function pupesoft_invoicestring($string, $extrachars="") {
     // Muutetaan X -merkiksi kaikki non-printable characterit
-    // Sallitaan merkit ja numerot: a-z A-Z 0-9 ja ÖöÄäÅåÿÿÕõ
+    // Sallitaan merkit ja numerot: a-z A-Z 0-9 ja ÖöÄäÅåÜüÕõ
     // Sallitaan välilyönti sekä merkit: !#$%()*+,-./:;=?@_|§
 
-    return preg_replace("/[^A-Za-z0-9ÖöÄäÅåÿÿÕõ ".preg_quote("!#$%()*+,-./:;=?@_|§", "/")."{$extrachars}]/", " ", $string);
+    return preg_replace("/[^A-Za-z0-9ÖöÄäÅåÜüÕõ ".preg_quote("!#$%()*+,-./:;=?@_|§", "/")."{$extrachars}]/", " ", $string);
   }
 }
 
@@ -32485,12 +32481,12 @@ if (!function_exists("poista_osakeyhtio_lyhenne")) {
   function poista_osakeyhtio_lyhenne($nimi) {
 
     // strtolower ei osaa pienentää tämmöisiä erikoismerkkejä
-    $old = array("ÿ", "ÿ", "Ä", "Ö", "Å");
-    $new = array("ÿ", "ÿ", "ä", "ö", "å");
+    $old = array("Ü", "", "Ä", "Ö", "Å");
+    $new = array("ü", "", "ä", "ö", "å");
     $nimi = str_replace($old, $new, $nimi);
     $nimi = strtolower($nimi);
 
-    $replace = "oy|ab|as|oÿ|ou|mtÿ|tÿ|ttÿ";
+    $replace = "oy|ab|as|oü|ou|mtü|tü|ttü";
 
     // Nimen edestä
     $nimi = preg_replace("/^($replace) /", "", $nimi);
@@ -32515,11 +32511,11 @@ if (!function_exists("poista_osakeyhtio_lyhenne_mysql")) {
                             REPLACE(LOWER({$kentta}), 'oy', ''),
                           'ab', ''),
                         'as', ''),
-                      'oÿ', ''),
+                      'oü', ''),
                     'ou', ''),
-                  'mtÿ', ''),
-                'tÿ', ''),
-              'ttÿ', ''))";
+                  'mtü', ''),
+                'tü', ''),
+              'ttü', ''))";
   }
 }
 

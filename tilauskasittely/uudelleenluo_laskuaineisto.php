@@ -277,10 +277,7 @@ if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumer
   //Haetaan tarvittavat funktiot aineistojen tekoa varten
   require "verkkolasku_elmaedi.inc";
 
-  if ($yhtiorow["finvoice_versio"] == "3") {
-    require "verkkolasku_finvoice_301.inc";
-  }
-  else if ($yhtiorow["finvoice_versio"] == "2") {
+  if ($yhtiorow["finvoice_versio"] == "2") {
     require "verkkolasku_finvoice_201.inc";
   }
   else {
@@ -537,10 +534,10 @@ if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumer
         elmaedi_otsik($tootedi, $lasrow, $masrow, $tyyppi, $timestamppi, $toimaikarow);
       }
       elseif ($lasrow["chn"] == "112") {
-        finvoice_otsik($tootsisainenfinvoice, $lasrow, $kieli, $pankkitiedot, $masrow, $myyrow, $tyyppi, $toimaikarow, "", "", $nosoap, $lasrow['tilausnumerot'], $asiakas_apu_row);
+        finvoice_otsik($tootsisainenfinvoice, $lasrow, $kieli, $pankkitiedot, $masrow, $myyrow, $tyyppi, $toimaikarow, "", "", $nosoap);
       }
       elseif (in_array($yhtiorow["verkkolasku_lah"], array("iPost", "finvoice", "maventa", "trustpoint", "ppg", "apix", "sepa", "talenom", "arvato"))) {
-        finvoice_otsik($tootfinvoice, $lasrow, $kieli, $pankkitiedot, $masrow, $myyrow, $tyyppi, $toimaikarow, "", "", $nosoap, $lasrow['tilausnumerot'], $asiakas_apu_row);
+        finvoice_otsik($tootfinvoice, $lasrow, $kieli, $pankkitiedot, $masrow, $myyrow, $tyyppi, $toimaikarow, "", "", $nosoap);
       }
       else {
         pupevoice_otsik($tootxml, $lasrow, $laskun_kieli, $pankkitiedot, $masrow, $myyrow, $tyyppi, $toimaikarow);
@@ -922,10 +919,10 @@ if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumer
           elmaedi_rivi($tootedi, $tilrow, $rivinumero);
         }
         elseif ($lasrow["chn"] == "112") {
-          finvoice_rivi($tootsisainenfinvoice, $tilrow, $lasrow, $vatamount, $laskutyyppi, $rivilaskuri);
+          finvoice_rivi($tootsisainenfinvoice, $tilrow, $lasrow, $vatamount, $laskutyyppi);
         }
         elseif (in_array($yhtiorow["verkkolasku_lah"], array("iPost", "finvoice", "maventa", "trustpoint", "ppg", "apix", "sepa", "talenom", "arvato"))) {
-          finvoice_rivi($tootfinvoice, $tilrow, $lasrow, $vatamount, $laskutyyppi, $rivilaskuri);
+          finvoice_rivi($tootfinvoice, $tilrow, $lasrow, $vatamount, $laskutyyppi);
         }
         else {
           pupevoice_rivi($tootxml, $tilrow, $vatamount);

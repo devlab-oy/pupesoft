@@ -94,19 +94,13 @@ if ($fieldname == "finvoice_versio") {
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
 
   $sel = "";
-  $sel2 = "";
 
   if ($trow[$i] == '2') {
     $sel = "selected";
   }
 
-  if ($trow[$i] == '3') {
-    $sel2 = "selected";
-  }
-
   $ulos .= "<option value = ''>".t("Finvoice 1.2");
   $ulos .= "<option value = '2' $sel>".t("Finvoice 2.01");
-  $ulos .= "<option value = '3' $sel2>".t("Finvoice 3");
   $ulos .= "</select></td>";
 
   $jatko = 0;

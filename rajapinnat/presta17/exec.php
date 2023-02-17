@@ -156,7 +156,7 @@ class Presta17RestApi
     $text = preg_replace('~[^-\w]+~', '', $text);
     $text = trim($text, $divider);
     $text = preg_replace('~-+~', $divider, $text);
-    $text = strtolower($text);
+    $text = mb_strtolower($text);
     if (empty($text)) {
       return 'n-a';
     }
@@ -912,7 +912,7 @@ class Presta17RestApi
 
     $customerFields->firstname = '-';
 
-    if (!preg_match("/^[a-zA-Z\s\ä\Ä\ö\Ö]+$/", $address['nimi'])) {
+    if (!preg_match("/^[a-zA-Z\s\ä\Ä\ö\Ö]+$/", $customer['nimi'])) {
       $address['nimi'] = 'Tuntematon';
     } 
     $customerFields->lastname = $customer['nimi'];
@@ -1028,6 +1028,8 @@ class Presta17RestApi
             asiakas.nimi as asiakas_nimi,
             asiakas.nimitark as asiakas_nimitark,
             yhteyshenkilo.tunnus as asiakas_tunnus,
+            yhteyshenkilo.liitostunnus as y_tun,
+            asiakas.tunnus as a_tun,
             yhteyshenkilo.fakta as fakta,
             asiakas.ytunnus,
             asiakas.ryhma,
@@ -1072,8 +1074,8 @@ class Presta17RestApi
     $result = pupe_query($query);
     $addresses = array();
     while ($customer = mysql_fetch_assoc($result)) {
-      
-      $addresses[] = Array(
+
+      $addresses[0] = Array(
         'asiakas_id' => $customer['asiakas_tunnus'],
         'asiakas_nimi' => $customer['asiakas_nimi'],
         'gsm' => $customer['gsm'],
@@ -1083,6 +1085,8 @@ class Presta17RestApi
         'osoite' => $customer['osoite'],
         'postino' => $customer['postino'],
         'postitp' => $customer['postitp'],
+        'y_tun' => $customer['y_tun'],
+        'a_tun' => $customer['a_tun'],
         'laskutus_osoite' => $customer['laskutus_osoite'],
         'laskutus_postino' => $customer['laskutus_postino'],
         'laskutus_postitp' => $customer['laskutus_postitp'],
@@ -1327,7 +1331,7 @@ class Presta17RestApi
         if(!isset($prestashop_products['found'][$data[$info_k]['tuoteno']])) {
           continue;
         }
-        $_group_tuoteno = substr(preg_replace('/[^A-Za-z0-9\-]/', '', $_group_data[0]), 0, 26);
+        $_group_tuoteno = mb_substr(preg_replace('/[^A-Za-z0-9\-]/', '', $_group_data[0]), 0, 26);
         $data[$info_k]['group_name'] = $_group_tuoteno . '|' . $_group_price;
         $data[$info_k]['price'] = $_group_price;
         $info['group_name'] = htmlentities($info['group_name']);
@@ -1377,9 +1381,10 @@ class Presta17RestApi
 
     foreach ($customers as $addresses) {
       foreach ($addresses as $customer) {
+        $customer_id = $customer['ulkoinen_asiakasnumero'];
+        $asiakas_idt = array();
         foreach ($customer['osoitteet'] as $address) {
-          $customer_id = $customer['ulkoinen_asiakasnumero'];
-
+          
           $existing_address_ok = Array(
             'resource' => 'addresses',
             'filter[id_customer]' => '[' . $customer_id . ']',
@@ -1389,7 +1394,9 @@ class Presta17RestApi
           $found = false;
 
           if ($existing_address_checker = $this->rest->get($existing_address_ok)) {
+
             $existing_address_check = $existing_address_checker->addresses;
+
             if ($existing_address_check->address) {
               $id = $existing_address_check->address->attributes()->id->__toString();
               $found = true;
@@ -1409,7 +1416,7 @@ class Presta17RestApi
 
           $addressesFields->id_customer = $customer_id;
 
-          if ($address['maa'] or $customer['asiakas_maa']) {
+          if ($address['maa'] or (isset($customer['asiakas_maa']) and $customer['asiakas_maa'])) {
             if ($addressesFields->id_country = $this->getPrestashopCountry($address['maa'], true)) {
             } else {
               $addressesFields->id_country = $this->getPrestashopCountry($customer['asiakas_maa']);
@@ -1455,18 +1462,50 @@ class Presta17RestApi
             }
             $addressesFields->other = $msg;
           }
+
           if (!$found) {
             $addresses = Array(
               'resource' => 'addresses',
               'postXml' => $xml->asXML(),
             );
             $createdXml = $this->rest->add($addresses);
+            $id_got = (string) $createdXml->address->children()->id;
           } else {
             $updatedXml = $this->rest->edit(Array(
               'resource' => 'addresses',
               'id' => $id,
               'putXml' => $xml->asXML(),
             ));
+            $id_got = $id;
+          }
+
+          $asiakas_idt[$id_got] = $id_got;
+        }
+
+        $existing_address_ok_clean = Array(
+          'resource' => 'addresses',
+          'filter[id_customer]' => '[' . $customer_id . ']'
+        );
+
+        if ($existing_address_checker_cl = $this->rest->get($existing_address_ok_clean)) {
+          $existing_address_check_cl = $existing_address_checker_cl->addresses->address;
+      
+          foreach ($existing_address_check_cl as $address_cl) {
+            $address_cl_id = (string) $address_cl->attributes()->id;
+
+            $xml = $this->rest->get(Array(
+              'resource' => 'addresses',
+              'id' => $address_cl_id,
+            ));
+            $addressesFields = $xml->address->children();
+            $addressesFieldsDni = (string) $addressesFields->dni;
+
+            if(!isset($asiakas_idt[$address_cl_id]) and $addressesFieldsDni) {
+              $this->rest->delete(Array(
+                'resource' => 'addresses',
+                'id' => $address_cl_id
+              ));
+            }
           }
         }
       }

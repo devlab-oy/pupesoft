@@ -1199,10 +1199,6 @@ if (!function_exists("apix_invoice_put_file")) {
       $version = "1.1";
     }
 
-    if ($yhtiorow["finvoice_versio"] == "3") {
-      $software = "Standard3";
-    }
-
     $query = "SELECT chn
               FROM lasku
               WHERE yhtio = '{$kukarow['yhtio']}'

@@ -322,6 +322,10 @@ if ($kollityht > 0) {
           echo "<br><font class='error'>".t("tiedoston kirjoitus EPÄONNISTUI")."</font><br>";
         }
 
+        if($dpd_debug_folder) {
+          system("cp $filenimi $dpd_debug_folder")
+        }
+
         // tarvitaan  $ftphost $ftpuser $ftppass $ftppath $ftpfile $ftpskey
         // palautetaan $palautus ja $syy
         $ftphost = $dpd_ds_host;
@@ -343,6 +347,10 @@ if ($kollityht > 0) {
 
         if (file_put_contents($filenimi, $aineisto) === FALSE) {
           echo "<br><font class='error'>".t("tiedoston kirjoitus EPÄONNISTUI")."</font><br>";
+        }
+
+        if($dpd_debug_folder) {
+          system("cp $filenimi $dpd_debug_folder")
         }
 
         // tarvitaan  $ftphost $ftpuser $ftppass $ftppath $ftpfile

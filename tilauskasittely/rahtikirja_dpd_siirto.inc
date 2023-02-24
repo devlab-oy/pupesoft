@@ -349,8 +349,6 @@ if ($kollityht > 0) {
           echo "<br><font class='error'>".t("tiedoston kirjoitus EPÄONNISTUI")."</font><br>";
         }
 
-        
-
         // tarvitaan  $ftphost $ftpuser $ftppass $ftppath $ftpfile
         // palautetaan $palautus ja $syy
         $ftphost = $dpd_ds_host;

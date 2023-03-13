@@ -242,13 +242,6 @@ class ImportSaldoHinta
     );
 
     /*
-      Resetoi saldot, jos tuote ei enää listassa. Avain: toimittaja ID
-    */
-    $this->resetoittavat = array(
-      "1048" => true
-    );
-
-    /*
       Ohitetaan tiedostot ftp palvelimista.
     */
     $this->ohita_tiedostot = array(
@@ -552,32 +545,30 @@ class ImportSaldoHinta
 
   public function resetoi_saldot($toimittaja_id, $kasitelty_tuotteet) {
 
-    if(isset($this->resetoittavat[$toimittaja_id])) {
-      $query = "SELECT tunnus, toim_tuoteno 
-                FROM tuotteen_toimittajat 
-                WHERE yhtio = '".$this->yhtio."' 
-                  AND liitostunnus = '".$toimittaja_id."' 
-                  AND tehdas_saldo_varastot != '' 
-                  AND tehdas_saldo != '' AND tehdas_saldo > 0 
-                ";
-      $resetoittavat = pupe_query($query);
+    $query = "SELECT tunnus, toim_tuoteno 
+              FROM tuotteen_toimittajat 
+              WHERE yhtio = '".$this->yhtio."' 
+                AND liitostunnus = '".$toimittaja_id."' 
+                AND tehdas_saldo_varastot != '' 
+                AND tehdas_saldo != '' AND tehdas_saldo > 0 
+              ";
+    $resetoittavat = pupe_query($query);
 
-      if (mysql_num_rows($resetoittavat) > 0) {
-        while($resetoittava = mysql_fetch_assoc($resetoittavat)) {
-          if(!isset($kasitelty_tuotteet[$resetoittava['toim_tuoteno']])) {
-            $query = "UPDATE LOW_PRIORITY tuotteen_toimittajat
-                      SET tehdas_saldo_paivitetty = NOW(), 
-                        tehdas_saldo = 0, 
-                        tehdas_saldo_varastot = '' 
-                      WHERE yhtio = '".$this->yhtio."' 
-                        AND tunnus = ".$resetoittava['tunnus']." 
-                      ";
-            pupe_query($query);
-          }
+    if (mysql_num_rows($resetoittavat) > 0) {
+      while($resetoittava = mysql_fetch_assoc($resetoittavat)) {
+        if(!isset($kasitelty_tuotteet[$resetoittava['toim_tuoteno']])) {
+          $query = "UPDATE LOW_PRIORITY tuotteen_toimittajat
+                    SET tehdas_saldo_paivitetty = NOW(), 
+                      tehdas_saldo = 0, 
+                      tehdas_saldo_varastot = '' 
+                    WHERE yhtio = '".$this->yhtio."' 
+                      AND tunnus = ".$resetoittava['tunnus']." 
+                    ";
+          pupe_query($query);
         }
       }
-      pupe_query($query);
     }
+    pupe_query($query);
   }
 
   /*

@@ -4,9 +4,9 @@
   Katso asetukset alla
 */
 
-// Kutsutaanko CLI:st×”
+// Kutsutaanko CLI:stä
 if (php_sapi_name() != 'cli') {
-  die("T×”t×” scripti×” voi ajaa vain komentorivilt×”!");
+  die("Tätä scriptiä voi ajaa vain komentoriviltä!");
 }
 
 if (!isset($argv[1]) || !$argv[1]) {
@@ -19,7 +19,7 @@ date_default_timezone_set('Europe/Helsinki');
 require "inc/connect.inc";
 require "inc/functions.inc";
 
-// ytiorow. Jos ei l×¦ydy, lopeta cron
+// ytiorow. Jos ei löydy, lopeta cron
 $yhtiorow = hae_yhtion_parametrit(pupesoft_cleanstring($argv[1]));
 if (!$yhtiorow) {
   echo "Vaara yhtio";
@@ -118,7 +118,7 @@ class ImportSaldoHinta
     $this->toimittajen_rajoitus = $toimittajen_rajoitus;
 
     /*
-      Otsikot etsit×”×”n tiedostossa.
+      Otsikot etsitään tiedostossa.
       $tuotekoodi_otsikot rakenne on: stocks prices tiedoston otsikko => stocks tiedoston otsikko / prices hinta
     */
     $this->tuotekoodi_otsikot = array(
@@ -198,7 +198,7 @@ class ImportSaldoHinta
     );
 
     /*
-      Jos tiedostossa ei ole mit×”×”n otsikoita, lis×”t×”×”n ne t×”st×”.
+      Jos tiedostossa ei ole mitään otsikoita, lisätään ne tästä.
     */
     $this->lisaa_otsikot = array(
       "orum.csv" => array(
@@ -237,12 +237,12 @@ class ImportSaldoHinta
       Ohita hintojen siirto kokonaan
     */
     $this->ohita_hinnat = array(
-      "ItemsInStock.txt" => true,
-      "orum.csv" => true
+      "101" => true,
+      "200" => true
     );
 
     /*
-      Resetoi saldot, jos tuote ei en×”×” listassa. Avain: toimittaja ID
+      Resetoi saldot, jos tuote ei enää listassa. Avain: toimittaja ID
     */
     $this->resetoittavat = array(
       "1048" => true
@@ -259,7 +259,7 @@ class ImportSaldoHinta
     /*
       Vain yksi tiedosto, ei ole price_tiedostoa.
       Valitaan oikeat kolumnit.
-      Ensimm×”inen: price_tiedoston - product_code, sitten hinta ja saldo kolumnit
+      Ensimmäinen: price_tiedoston - product_code, sitten hinta ja saldo kolumnit
       Toinen: stocks_tiedoston - product_code
     */
     $this->yksittaiset_tiedostot = array(
@@ -392,7 +392,7 @@ class ImportSaldoHinta
       if (isset($this->toimittajat_tiedostot[$tiedostonimi])) {
         $toimittaja_id = $this->toimittajat_tiedostot[$tiedostonimi];
       } else {
-        echo $tiedostonimi." toimittaja ei l×¦ydy!";
+        echo $tiedostonimi." toimittaja ei löydy!";
         continue;
       }
 
@@ -485,8 +485,8 @@ class ImportSaldoHinta
   }
   
   /*
-    Ensin haetaan tiedostot, sortataan niit×”
-    Sitten k×”sitell×”×”n stocks kansiossa olevat tiedostot.
+    Ensin haetaan tiedostot, sortataan niitä
+    Sitten käsitellään stocks kansiossa olevat tiedostot.
   */
   public function aloita()
   {
@@ -537,7 +537,7 @@ class ImportSaldoHinta
     foreach (scandir($this->impsaloh_polku_orig_stocks) as $impsaloh_csv_file_name) {
       $impsaloh_csv_file = $this->impsaloh_polku_orig_stocks."/".$impsaloh_csv_file_name;
 
-      // skipataan kansiot, orig kansiossa olevat tiedostot sek×” pisteet
+      // skipataan kansiot, orig kansiossa olevat tiedostot sekä pisteet
       if (is_dir($impsaloh_csv_file) or
         substr($impsaloh_csv_file_name, 0, 1) == '.' or
         substr($impsaloh_csv_file_name, 0, 7) == 'prices_' or
@@ -581,9 +581,9 @@ class ImportSaldoHinta
   }
 
   /*
-    Tunnistaa mik×” tiedosto on kyseess×”
-    Jos tiedostossa on v×”h×”n revej×”, se on stock tiedosto
-    Siirt×”×” tiedostot oikeaan kansioon.
+    Tunnistaa mikä tiedosto on kyseessä
+    Jos tiedostossa on vähän revejä, se on stock tiedosto
+    Siirtää tiedostot oikeaan kansioon.
   */
   public function hae_tiedostot()
   {
@@ -592,7 +592,7 @@ class ImportSaldoHinta
       $impsaloh_csv_file = $this->impsaloh_polku_in."/".$impsaloh_csv_file_name;
       $impsaloh_csv_file_prices = $this->impsaloh_polku_in."/prices_".$impsaloh_csv_file_name;
 
-      // skipataan kansiot, orig kansiossa olevat tiedostot sek×” pisteet
+      // skipataan kansiot, orig kansiossa olevat tiedostot sekä pisteet
       if (is_dir($impsaloh_csv_file) or
         substr($impsaloh_csv_file_name, 0, 1) == '.' or
         substr($impsaloh_csv_file_name, 0, 7) == 'prices_' or
@@ -600,19 +600,19 @@ class ImportSaldoHinta
         continue;
       }
       
-      // Selvitet×”×”n mik×” tyyppinen tiedosto on - prices tai stocks
+      // Selvitetään mikä tyyppinen tiedosto on - prices tai stocks
       $impsaloh_csv_tarkista = fopen($impsaloh_csv_file, 'r');
       $csv_hae_kolumnit = $this->csv_jakajaa_ja_kolumnit($impsaloh_csv_tarkista, $impsaloh_csv_file);
       fclose($impsaloh_csv_tarkista);
 
-      // Siirett×”×”n ja kopioidaan tiedostot oikeaan kansioon
+      // Siirettään ja kopioidaan tiedostot oikeaan kansioon
       copy($impsaloh_csv_file, $this->impsaloh_polku_orig."/".$impsaloh_csv_file_name);
       copy($impsaloh_csv_file_prices, $this->impsaloh_polku_orig."/prices_".$impsaloh_csv_file_name);
 
       if (isset($this->toimittajat_tiedostot[$impsaloh_csv_file_name])) {
         $toimittaja_id = $this->toimittajat_tiedostot[$impsaloh_csv_file_name];
       } else {
-        echo $impsaloh_csv_file_name." toimittaja ei l×¦ydy!";
+        echo $impsaloh_csv_file_name." toimittaja ei löydy!";
         continue;
       }
 
@@ -627,8 +627,8 @@ class ImportSaldoHinta
 
 
   /*
-    Selvitt×”×” ett×” mik×” jakajaa on CSV tiedostossa, "," tai ";"
-    laskee kolumnit tiedostossa sek×” rivit
+    Selvittää että mikä jakajaa on CSV tiedostossa, "," tai ";"
+    laskee kolumnit tiedostossa sekä rivit
   */
   public function csv_jakajaa_ja_kolumnit($impsaloh_csv, $impsaloh_csv_file)
   {
@@ -667,7 +667,7 @@ class ImportSaldoHinta
 
 
   /*
-    K×”sittelee tiedostot
+    Käsittelee tiedostot
   */
   public function kasittele_tiedosto($impsaloh_csv_file, $impsaloh_csv_prices_file)
   {
@@ -699,7 +699,7 @@ class ImportSaldoHinta
     if (mysql_num_rows($loydetty_toimittaja) > 0) {
       $toimittaja = mysql_fetch_assoc($loydetty_toimittaja);
     } else {
-      echo "Toimittaja {$toimittaja_id} ei l×¦ydy ! Oliko se poistettu?";
+      echo "Toimittaja {$toimittaja_id} ei löydy ! Oliko se poistettu?";
       return;
     }
     
@@ -722,11 +722,11 @@ class ImportSaldoHinta
 
 
   /*
-    Looppaa kaikki rivit tiedostossa ja jos kysesss×” on stock tiedosto,
-    Hakee my×¦s toisesta tiedostosta hinnat ja saldot.
+    Looppaa kaikki rivit tiedostossa ja jos kysesssä on stock tiedosto,
+    Hakee myös toisesta tiedostosta hinnat ja saldot.
     esim.:
-    toimittajax.csv -> siirt×”×” sen stock kansioon ja etsii samassa kansiossa prices_toimittajatx.csv
-    sen j×”lkeen siirt×”×” sen prices kansioon j×” k×”sittelee prices_toimittajax.csv tiedosto
+    toimittajax.csv -> siirtää sen stock kansioon ja etsii samassa kansiossa prices_toimittajatx.csv
+    sen jälkeen siirtää sen prices kansioon jä käsittelee prices_toimittajax.csv tiedosto
   */
   public function kasittele_rivit($stocks_file, $prices_file)
   {
@@ -748,7 +748,7 @@ class ImportSaldoHinta
 
     $eankoodi_otsikot = $this->eankoodi_otsikot;
 
-    // Loopataan ja j×”rjestet×”×”n prices tiedoston data
+    // Loopataan ja järjestetään prices tiedoston data
     $rivit_prices = array();
     $otsikkotiedot = false;
 
@@ -778,7 +778,7 @@ class ImportSaldoHinta
           $kolumninro++;
         }
 
-        // Jos l×¦ydetty tuotekoodin kolumni, etsit×”×”n hintakolumni ja skipataan koko otsikkorivi
+        // Jos löydetty tuotekoodin kolumni, etsitään hintakolumni ja skipataan koko otsikkorivi
         if (isset($tuotekoodin_kolumni)) {
           $hinta_kolumni = false;
           $kolumninro = 0;
@@ -859,7 +859,7 @@ class ImportSaldoHinta
       }
     }
 
-    // K×”sitell×”×”n tiedostojen rivit ja etsit×”×”n / muokataan tuotteet pupeessa
+    // Käsitellään tiedostojen rivit ja etsitään / muokataan tuotteet pupeessa
     $rivit = array();
     $loydetyt_tuotteet = array();
     $epaonnistuneet_tuotteet = array();
@@ -870,13 +870,13 @@ class ImportSaldoHinta
 
     while ($rivi = fgetcsv($impsaloh_csv, 100000, $csv_jakajaa)) {
       usleep(500);
-      // Skipataan tyhj×”t rivit
+      // Skipataan tyhjät rivit
       if ($rivi[0] == "" and $rivi[1] == "" and $rivi[2] == "") {
         continue;
       }
 
       $laskekolumnit = 0;
-      // Jos ensimm×”inen rivi
+      // Jos ensimmäinen rivi
 
       if (!isset($rivit[0])) {
         // Hae tuotekoodin kolumni
@@ -983,7 +983,7 @@ class ImportSaldoHinta
         }
         
         // Haetaan hintatiedot ja saldo price array:ista
-        if(isset($rivit_prices_l['hinta'])) {
+        if(isset($rivit_prices_l['hinta']) and !isset($this->ohita_hinnat[$toimittaja_id])) {
           $tuotehinta = $rivit_prices_l['hinta'];
           $tuotehinta_lisa = "tuotteen_toimittajat.ostohinta = '".str_replace(",", ".", $tuotehinta)."',";
         }
@@ -1000,7 +1000,7 @@ class ImportSaldoHinta
 
         $tuotesaldo = round($tuotesaldo);
         
-        // yritet×”×”n p×”ivitt×”×” suoraan tuotenumerolla
+        // yritetään päivittää suoraan tuotenumerolla
         $query = "UPDATE LOW_PRIORITY tuotteen_toimittajat
                   SET 
                   $tuotehinta_lisa 

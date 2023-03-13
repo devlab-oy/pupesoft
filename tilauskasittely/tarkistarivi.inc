@@ -871,7 +871,7 @@ if (
             }
           }
 
-          if (!in_array($yhtiorow["tee_osto_myyntitilaukselta"], array('U', 'B')) and in_array($krow["suoratoimitus"], array('', 'X')) and $tmp_varastoon == 1) {
+          if (!in_array($yhtiorow["tee_osto_myyntitilaukselta"], array('U', 'B')) and in_array($krow["suoratoimitus"], array('', 'X')) and $tmp_varastoon == 1 and $krow['tehdas_saldo'] > 0) {
             // tallennetaan riville toimittajan tunnus
             $title = "$krow[nimi] --> ".t("tilaa")." ".t("varastoon");
             $title = $title." | ".t("Tehtaan saldo").": ".$krow['tehdas_saldo']." | ".t("Ostohinta").": ".round($krow['ostohinta'], 2). " | ".t("Annettu kerroin").": ".round($krow['myyntihinta_kerroin'],2);
@@ -879,7 +879,7 @@ if (
             $paikatlask++;
           }
 
-          if (in_array($yhtiorow["tee_osto_myyntitilaukselta"], array('U', 'Y', 'W', 'J', 'B', 'C')) and in_array($krow["suoratoimitus"], array('', 'U')) and $tmp_asiakkaalle == 1) {
+          if (in_array($yhtiorow["tee_osto_myyntitilaukselta"], array('U', 'Y', 'W', 'J', 'B', 'C')) and in_array($krow["suoratoimitus"], array('', 'U')) and $tmp_asiakkaalle == 1 and $krow['tehdas_saldo'] > 0) {
             $title = "$krow[nimi] --> ".t("tilaa")." ".t("asiakkaalle");
             $title = $title." | ".t("Tehtaan saldo").": ".$krow['tehdas_saldo']." | ".t("Ostohinta").": ".round($krow['ostohinta'], 2). " | ".t("Annettu kerroin").": ".round($krow['myyntihinta_kerroin'],2);
             $paikat .= "<option value='!!!$krow[liitostunnus]' title='$title' $sel2>$title</option>";

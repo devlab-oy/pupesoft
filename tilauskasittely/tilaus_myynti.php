@@ -1923,6 +1923,14 @@ if ($tee == 'VALMIS' and (int) $kukarow['kesken'] > 0 and !empty($tilaus_valmis_
   }
 }
 
+if ($tee == 'VALMIS' and (int) $kukarow['kesken'] > 0 and empty($tilaus_valmis_toiminto)) {
+  $query  = "UPDATE lasku set
+              tilaus_valmis_toiminto = ''
+              where yhtio = '$kukarow[yhtio]'
+              and tunnus  = '$kukarow[kesken]'";
+  pupe_query($query);
+}
+
 
 // Tilaus valmis
 if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {

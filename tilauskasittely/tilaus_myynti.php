@@ -944,6 +944,19 @@ if ((int) $kukarow["kesken"] > 0) {
       $seka = "kylla";
     }
 
+    if($maksupaate_kateinen_id and $maksupaate_kortti_id) {
+      if($kateismaksu['kateinen']) {
+        $_paivita_maksuehto = $maksupaate_kateinen_id;
+      } else {
+        $_paivita_maksuehto = $maksupaate_kortti_id;
+      }
+      $maksuehto_query = "UPDATE lasku 
+                          SET maksuehto   = '$_paivita_maksuehto' 
+                          WHERE yhtio = '$kukarow[yhtio]'
+                          AND tunnus  = '$laskurow[tunnus]'";
+      pupe_query($maksuehto_query);
+    }
+
   }
 
   if ($yhtiorow["extranet_poikkeava_toimitusosoite"] == "Y") {
@@ -3139,14 +3152,6 @@ if ($tee == '') {
 
     if ((isset($asiakkaan_tilausnumero) and $asiakkaan_tilausnumero != $laskurow["asiakkaan_tilausnumero"])) {
       $asiakkaan_tilaunumero_lisa = "asiakkaan_tilausnumero = '$asiakkaan_tilausnumero',";
-    }
-
-    if($maksupaate_kateinen_id and $maksupaate_kortti_id and $maksupaate_kassamyynti and isset($maksupaatetapahtuma)) {
-      if($kateismaksu['kateinen']) {
-        $laskurow['maksuehto'] = $maksupaate_kateinen_id;
-      } else {
-        $laskurow['maksuehto'] = $maksupaate_kortti_id;
-      }
     }
 
     $query  = "UPDATE lasku SET

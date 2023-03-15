@@ -1886,7 +1886,7 @@ if (    $tee == "VALMIS"
     $kertakassa = $kukarow["kassamyyja"];
   }
 
-  if($maksupaate_kateinen_id and $maksupaate_kortti_id) {
+  if($maksupaate_kassamyynti and isset($maksupaatetapahtuma) and $maksupaate_kateinen_id and $maksupaate_kortti_id) {
     if($kateismaksu['kateinen']) {
       $maksutapa = $maksupaate_kateinen_id;
     } else {

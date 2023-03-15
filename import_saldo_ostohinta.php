@@ -545,7 +545,7 @@ class ImportSaldoHinta
 
   public function resetoi_saldot($toimittaja_id, $kasitelty_tuotteet) {
 
-    $query = "SELECT tunnus, toim_tuoteno 
+    $query = "SELECT tunnus, toim_tuoteno, tuotemerkki 
               FROM tuotteen_toimittajat 
               WHERE yhtio = '".$this->yhtio."' 
                 AND liitostunnus = '".$toimittaja_id."' 
@@ -556,7 +556,10 @@ class ImportSaldoHinta
 
     if (mysql_num_rows($resetoittavat) > 0) {
       while($resetoittava = mysql_fetch_assoc($resetoittavat)) {
-        if(!isset($kasitelty_tuotteet[$resetoittava['toim_tuoteno']])) {
+        if(!isset($kasitelty_tuotteet[$resetoittava['toim_tuoteno']]) or 
+        (!isset($kasitelty_tuotteet[$resetoittava['toim_tuoteno']][0]) and 
+        !isset($kasitelty_tuotteet[$resetoittava['toim_tuoteno']][$resetoittava['tuotemerkki']]))
+        ) {
           $query = "UPDATE LOW_PRIORITY tuotteen_toimittajat
                     SET tehdas_saldo_paivitetty = NOW(), 
                       tehdas_saldo = 0, 
@@ -913,8 +916,6 @@ class ImportSaldoHinta
 
       $tuotekoodi_tarkista1 = $rivi[$tuotekoodin_kolumni];
 
-      $kasitelty_tuotteet[$tuotekoodi_tarkista1] = 1;
-
       if (!isset($rivit_prices[$tuotekoodi_tarkista1])) {
         $epaonnistuneet_tuotteet[] = $rivi;
         continue;
@@ -983,6 +984,9 @@ class ImportSaldoHinta
         if(isset($rivit_prices_l['tuotemerkki'])) {
           $tuotemerkki = $rivit_prices_l['tuotemerkki'];
           $tuotemerkki_lisa = "AND tuotteen_toimittajat.tuotemerkki = '".utf8_decode($tuotemerkki)."'";
+          $kasitelty_tuotteet[$tuotekoodi_tarkista1][$tuotemerkki] = 1;
+        } else {
+          $kasitelty_tuotteet[$tuotekoodi_tarkista1][0] = 1;
         }
 
         if(!is_numeric($tuotesaldo)) {

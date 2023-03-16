@@ -741,6 +741,21 @@ if ($fieldname == "kuljetusvakuutus_tyyppi") {
   $jatko = 0;
 }
 
+if ($fieldname == "ei_lisakulja_kateismyynneille") {
+
+  $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+  $sel = array();
+  $apu = $trow[$i];
+  $sel[$apu] = "selected";
+
+  $ulos .= "<option value = ''>".t("Ei")."</option>";
+  $ulos .= "<option value = 'X' $sel[X]>".t("Kyllä")."</option>";
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
 if ($fieldname == "toim_maa" or
   $fieldname == "maa_maara") {
 

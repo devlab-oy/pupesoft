@@ -3581,7 +3581,7 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
               WHERE yhtio          = '$kukarow[yhtio]'
               and perheid = '$lisatty_tun'";
     $perhe_lisatied_res = pupe_query($query);
-    if(mysql_num_rows($perhe_lisatied_res) > 1 and $trow['suoratoimitus'] != '' and $toimittajan_tunnus and $rivityyppi == 'L') {
+    if(mysql_num_rows($perhe_lisatied_res) > 1 and $trow['suoratoimitus'] != '' and $toimittajan_tunnus and $rivityyppi == 'L' and $paikka) {
       $query = "UPDATE tilausrivi 
                   SET 
                     hyllyalue       = '',
@@ -3598,9 +3598,15 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
 
     if (mysql_num_rows($lisatied_res) > 0) {
       $lisatied_row = mysql_fetch_assoc($lisatied_res);
-      
+      if($trow['suoratoimitus'] != '' and $toimittajan_tunnus and $rivityyppi == 'L' and $paikka) {
+        $and_t_lisa = 'and otunnus = '.$laskurow['tunnus'].' and perheid = '.$lisatty_tun;
+        $join_t_lisa = 'JOIN tilausrivi on (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus) ';
+      } else {
+        $and_t_lisa = 'and tilausrivitunnus = '.$lisatty_tun;
+        $join_t_lisa = '';
+      }
       $query = "UPDATE tilausrivin_lisatiedot 
-                JOIN tilausrivi on (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus) 
+                $join_t_lisa
                 SET
                 positio              = if (positio = '' or '$valmistuslinja' != '', '{$positio}', positio),
                 toimittajan_tunnus   = '$toimittajan_tunnus',
@@ -3611,9 +3617,9 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
                 {$tlisatied_lisa}
                 {$tlisatied_lisa2}
                 {$jt_manual_lisa}
-                WHERE tilausrivin_lisatiedot.yhtio          = '$kukarow[yhtio]' 
-                and otunnus = '$laskurow[tunnus]' 
-                and perheid = '$lisatty_tun'";
+                WHERE tilausrivin_lisatiedot.yhtio = '$kukarow[yhtio]' 
+                $and_t_lisa
+                ";
 
       $result = pupe_query($query);
       $lisatty_toimittajan_tun = mysql_insert_id($GLOBALS["masterlink"]);

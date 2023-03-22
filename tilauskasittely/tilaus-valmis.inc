@@ -646,9 +646,9 @@ else {
       }
 
       if($maksuehtorow['kateinen'] != '' and $torow['ei_lisakulja_kateismyynneille'] != '') {
-        $_lisataan_toimituslisa = true;
-      } else {
         $_lisataan_toimituslisa = false;
+      } else {
+        $_lisataan_toimituslisa = true;
       }
 
       // lisätään toimituslisäkulu jos toimituslisäkulua ei ole tilauksella ja lisäkulutuote löytyy JA rajasumma ei täyty

@@ -645,8 +645,14 @@ else {
         $lisakulu_alarajasumma_rivit += $totaalirivi["rivihinta"];
       }
 
+      if($maksuehtorow['kateinen'] != '' and $torow['ei_lisakulja_kateismyynneille'] != '') {
+        $_lisataan_toimituslisa = false;
+      } else {
+        $_lisataan_toimituslisa = true;
+      }
+
       // lisätään toimituslisäkulu jos toimituslisäkulua ei ole tilauksella ja lisäkulutuote löytyy JA rajasumma ei täyty
-      if (mysql_num_rows($rhire) == 1 and mysql_num_rows($result) == 0 and $lisakulu_alarajasumma_rivit != 0 and ($lisakulu_alarajasumma_rivit < $torow['lisakulu_summa'])) {
+      if ($_lisataan_toimituslisa and mysql_num_rows($rhire) == 1 and mysql_num_rows($result) == 0 and $lisakulu_alarajasumma_rivit != 0 and ($lisakulu_alarajasumma_rivit < $torow['lisakulu_summa'])) {
 
         $trow = mysql_fetch_assoc($rhire);
 

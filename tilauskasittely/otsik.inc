@@ -2728,16 +2728,14 @@ if ($tila == "" and !isset($jatka)) {
     } else {
       $vasen_sarake[$vasen] .= '<td><input type="number" class="noutopiste" data="'.$asiarow['noutopiste'].'" name="noutopisteen_tunnus" value="'.$srow['noutopisteen_tunnus'].'">';
     }
-    if (isset($asiarow['noutopiste']) and !empty($asiarow['noutopiste']) and $asiarow['noutopiste'] != "") {
-      $vasen_sarake[$vasen] .= '
-      <a style="cursor: pointer; padding: 5px; background-color: #ddd; border: 1px solid #ccc; color: #000" class="noutopiste_hae">Hae</a>
-      <script>
-        $(".noutopiste_hae").click(function() {
-        $(".noutopiste").val($(".noutopiste").attr("data"));
-      });
-      </script>';
-    }
-    $vasen_sarake[$vasen] .= '</td>';
+    $vasen_sarake[$vasen] .= '
+    <a style="cursor: pointer; padding: 5px; background-color: #ddd; border: 1px solid #ccc; color: #000" class="noutopiste_hae">Hae</a>
+    <script>
+      $(".noutopiste_hae").click(function() {
+      $(".noutopiste").val($(".noutopiste").attr("data"));
+    });
+    </script>
+    </td>';
 
     $vasen++;
 

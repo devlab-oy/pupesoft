@@ -187,6 +187,7 @@ class Presta17RestApi
     $blankXml = $this->rest->get(Array('url' => $this->url . 'api/product_features?schema=synopsis'));
     $product_featureFields = $blankXml->product_feature->children();
     $product_featureFields->name = (string) $product_feature;
+    $product_featureFields->name->language[0] = (string) $product_feature;
     $product_features = Array(
       'resource' => 'product_features',
       'postXml' => $blankXml->asXML(),
@@ -611,7 +612,7 @@ class Presta17RestApi
       $productFields->id_tax_rules_group = $this->get_tax_group_id($pupesoft_product["alv"]);
 
       $productFields->price = $pupesoft_product['myyntihinta'];
-      $pupesoft_product['nimitys'] = trim($pupesoft_product['nimitys']);
+      $pupesoft_product['nimitys'] = trim(str_replace('=', '-', $pupesoft_product['nimitys']));
       $productFields->name->language[0] = $pupesoft_product['nimitys'];
       $productFields->link_rewrite->language[0] = $this->slugify($pupesoft_product['nimitys']);
       $productFields->meta_title->language[0] = $pupesoft_product['nimitys'];
@@ -628,7 +629,10 @@ class Presta17RestApi
       }
 
       $productFields->minimal_quantity = (int) $pupesoft_product['myynti_era'];
-      $productFields->ean13 = mb_strimwidth(preg_replace('/\s+/', '', $pupesoft_product['eankoodi']), 0, 13, '', 'utf-8');
+      if($pupesoft_product['eankoodi'] and strlen(preg_replace("/[^0-9]/", "", $pupesoft_product['eankoodi']) == 13)) {
+        $productFields->ean13 = preg_replace("/[^0-9]/", "", $pupesoft_product['eankoodi']);
+      }
+      
       $productFields->state = 1;
 
       if ($pupesoft_product['status'] != 'A') {
@@ -711,7 +715,7 @@ class Presta17RestApi
       $productFields->id_tax_rules_group = $this->get_tax_group_id($pupesoft_product["alv"]);
 
       $productFields->price = $pupesoft_product['myyntihinta'];
-      $pupesoft_product['nimitys'] = trim($pupesoft_product['nimitys']);
+      $pupesoft_product['nimitys'] = trim(str_replace('=', '-', $pupesoft_product['nimitys']));
       $productFields->name->language[0] = $pupesoft_product['nimitys'];
       $productFields->meta_title->language[0] = $pupesoft_product['nimitys'];
       $productFields->link_rewrite->language[0] = $this->slugify($pupesoft_product['nimitys']);
@@ -725,9 +729,12 @@ class Presta17RestApi
       if ($pupesoft_product['kuvaus'] and $pupesoft_product['kuvaus'] != '') {
         $productFields->description->language[0] = nl2br($pupesoft_product['kuvaus']);
       }
-
+      
       $productFields->minimal_quantity = (int) $pupesoft_product['myynti_era'];
-      $productFields->ean13 = mb_strimwidth(preg_replace('/\s+/', '', $pupesoft_product['eankoodi']), 0, 13, '', 'utf-8');
+      if($pupesoft_product['eankoodi'] and strlen(preg_replace("/[^0-9]/", "", $pupesoft_product['eankoodi']) == 13)) {
+        $productFields->ean13 = preg_replace("/[^0-9]/", "", $pupesoft_product['eankoodi']);
+      }
+      
       $productFields->state = 1;
       $productFields->reference = $pupesoft_product['tuoteno'];
 

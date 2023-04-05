@@ -186,7 +186,6 @@ class Presta17RestApi
   {
     $blankXml = $this->rest->get(Array('url' => $this->url . 'api/product_features?schema=synopsis'));
     $product_featureFields = $blankXml->product_feature->children();
-    $product_featureFields->name = (string) $product_feature;
     $product_featureFields->name->language[0] = (string) $product_feature;
     $product_features = Array(
       'resource' => 'product_features',
@@ -398,12 +397,15 @@ class Presta17RestApi
     $yhtio = $this->yhtiorow['yhtio'];
     $categories = Array(
       'resource' => 'categories',
-      'display' => 'full'
+      'display' => 'full',
+      'sort' => '[level_depth_ASC]'
     );
 
     $categories = $this->rest->get($categories);
     foreach ($categories->categories->category as $cat) {
+      
       $cur_level = $cat->level_depth->__toString();
+      
       if ($cur_level < 2) {
         continue;
       }
@@ -411,43 +413,55 @@ class Presta17RestApi
       $cur_id = $cat->pupesoft_id->language->__toString();
 
       $cur_level = $cur_level - 1;
-      if (!$cur_id or 1 == 1) {
-        $cur_presta_id = $cat->id->__toString();
 
-        $cur_name = $cat->name->language->__toString();
-        $query = "SELECT tunnus
-                  FROM dynaaminen_puu
-                    WHERE yhtio = '{$yhtio}' 
-                    AND syvyys    = '{$cur_level}' 
-                    AND nimi = '{$cur_name}'
-                  LIMIT 1";
-        $result = pupe_query($query);
+      $cur_presta_id = $cat->id->__toString();
+      $par_presta_id = $cat->id_parent->__toString();
 
-        $result = mysql_fetch_assoc($result);
-
-        $xml = $this->rest->get(Array(
-          'resource' => 'categories',
-          'id' => $cur_presta_id
-        ));
-
-        $categoryFields = $xml->category->children();
-
-        if ($result) {
-          $categoryFields->pupesoft_id->language[0] = $result['tunnus'];
-          $categoryFields->active = 1;
-        } else {
-          $categoryFields->active = 0;
-          $categoryFields->pupesoft_id->language[0] = '';
-        }
-
-        unset($categoryFields->level_depth, $categoryFields->nb_products_recursive);
-
-        $updatedXml = $this->rest->edit(Array(
-          'resource' => 'categories',
-          'id' => (int) $categoryFields->id,
-          'putXml' => $xml->asXML(),
-        ));
+      $parent_cat = $this->rest->get(Array(
+        'resource' => 'categories',
+        'id' => $par_presta_id
+      ));
+      $parent_cat_pupe_fields = $parent_cat->category->children();
+      if($parent_cat_pupe_fields->pupesoft_id->language->__toString()) {
+        $parent_lisa = "AND parent_id = '".$parent_cat_pupe_fields->pupesoft_id->language->__toString()."'";
+      } else {
+        $parent_lisa = '';
       }
+
+      $cur_name = $cat->name->language->__toString();
+      $query = "SELECT tunnus
+                  FROM dynaaminen_puu
+                  WHERE yhtio = '{$yhtio}' 
+                  AND syvyys    = '{$cur_level}' 
+                  AND nimi = '{$cur_name}' 
+                  $parent_lisa 
+                ";
+      $result_q = pupe_query($query);
+
+      $result = mysql_fetch_assoc($result_q);
+
+      $xml = $this->rest->get(Array(
+        'resource' => 'categories',
+        'id' => $cur_presta_id
+      ));
+
+      $categoryFields = $xml->category->children();
+
+      if ($result) {
+        $categoryFields->pupesoft_id->language[0] = $result['tunnus'];
+        $categoryFields->active = 1;
+      } else {
+        $categoryFields->active = 0;
+        $categoryFields->pupesoft_id->language[0] = '';
+      }
+
+      unset($categoryFields->level_depth, $categoryFields->nb_products_recursive);
+
+      $updatedXml = $this->rest->edit(Array(
+        'resource' => 'categories',
+        'id' => (int) $categoryFields->id,
+        'putXml' => $xml->asXML(),
+      ));
     }
   }
 
@@ -922,7 +936,7 @@ class Presta17RestApi
     if (!preg_match("/^[a-zA-Z\s\ä\Ä\ö\Ö]+$/", $customer['nimi'])) {
       $address['nimi'] = 'Tuntematon';
     } 
-    $customerFields->lastname = $customer['nimi'];
+    $customerFields->lastname = str_replace(array(".","@"), " ", $customer['nimi']);
 
     if (isset($customer['asiakas_nimi'])) {
       $customerFields->company = (string) $customer['asiakas_nimi'];
@@ -1236,7 +1250,7 @@ class Presta17RestApi
           ));
  
           if ($productFields = $xml->product->children()) {
-            unset($productFields->associations->product_bundle, $productFields->manufacturer_name, $productFields->quantity, $productFields->id_shop_default, $productFields->id_default_image, $productFields->id_default_combination, $productFields->position_in_category, $productFields->type, $productFields->pack_stock_type);
+            unset($productFields->associations->product_bundle, $productFields->description_short, $productFields->manufacturer_name, $productFields->quantity, $productFields->id_shop_default, $productFields->id_default_image, $productFields->id_default_combination, $productFields->position_in_category, $productFields->type, $productFields->pack_stock_type);
             $productFields->active = 0;
             $updatedXml = $this->rest->edit(Array(
               'resource' => 'products',
@@ -1438,7 +1452,7 @@ class Presta17RestApi
           if (!preg_match("/^[a-zA-Z\s\ä\Ä\ö\Ö]+$/", $address['nimi'])) {
             $address['nimi'] = 'Tuntematon';
           }
-          $addressesFields->lastname = $address['nimi'];
+          $addressesFields->lastname = str_replace(array(".","@"), " ", $address['nimi']);
           $addressesFields->address2 = $address['asiakas_nimitark'];
           $addressesFields->vat_number = $address['ytunnus'];
           if (!$address['osoite']) {
@@ -1453,8 +1467,8 @@ class Presta17RestApi
           $addressesFields->address1 = $address['osoite'];
           $addressesFields->postcode = $address['postino'];
           $addressesFields->city = $address['postitp'];
-          $addressesFields->phone = $address['puh'];
-          $addressesFields->phone_mobile = $address['gsm'];
+          $addressesFields->phone = preg_replace('/[^\dxX+]/', '', $address['puh']);
+          $addressesFields->phone_mobile = preg_replace('/[^\dxX+]/', '', $address['gsm']);
           $addressesFields->dni = $address['asiakas_id'];
           if ($address['laskutus_osoite'] or $address['laskutus_postino'] or $address['laskutus_postitp']) {
             $msg = "Laskutusosoite:\n";

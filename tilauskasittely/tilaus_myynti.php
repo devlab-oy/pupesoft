@@ -1939,7 +1939,6 @@ if ($tee == 'VALMIS' and (int) $kukarow['kesken'] > 0 and empty($tilaus_valmis_t
   pupe_query($query);
 }
 
-
 // Tilaus valmis
 if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
 
@@ -11020,12 +11019,21 @@ if ($tee == '') {
           )) {
             $sel_tvt = array();
             $sel_tvt[$laskurow['tilaus_valmis_toiminto']] = "SELECTED";
+            if((empty($sel_tvt) or $laskurow['tilaus_valmis_toiminto'] == '') and 
+            ($laskurow['tila'] == "V" and $laskurow['alatila'] != "J"
+            )) {
+              $sel_tvt['OTS'] = "SELECTED";
+            }
+            
             echo "<select name='tilaus_valmis_toiminto'>";
             echo "<option value=''>".t("Tilaus valmis")."</option>";
             echo "<option value='OO' {$sel_tvt['OO']}>".t("Odottaa ohjelmointia")."</option>";
             echo "<option value='OM' {$sel_tvt['OM']}>".t("Odottaa materiaalia")."</option>";
             echo "<option value='OT' {$sel_tvt['OT']}>".t("Odottaa toimitusaikaa")."</option>";
             echo "<option value='OTA' {$sel_tvt['OTA']}>".t("Odottaa tietoa asiakkaalta")."</option>";
+            if($laskurow['tila'] == "V") {
+              echo "<option value='OTS' {$sel_tvt['OTS']}>".t("Odottaa tuotannonsuunnittelua")."</option>";
+            }
             echo "</select>";
           }
         }

@@ -281,8 +281,9 @@ if ($tee == 'TOIMITA') {
   else {
     $laskutettavaa_on = FALSE;
   }
-
+  
   if ($laskutettavaa_on) {
+
     // merkataan tässä vaiheessa toimittamattomat rivi toimitetuiksi
     $query = "UPDATE tilausrivi
               SET toimitettu = '$kukarow[kuka]', toimitettuaika = now()
@@ -293,9 +294,16 @@ if ($tee == 'TOIMITA') {
               and toimitettu  = ''
               and tyyppi      = 'L'";
     $result = pupe_query($query);
-
+    
     if (isset($vaihdakateista) and $vaihdakateista == "KYLLA") {
       $katlisa = ", kassalipas = '$kassalipas', maksuehto = '$maksutapa'";
+    } else if($maksupaate_kassamyynti and isset($maksupaatetapahtuma) and $maksupaate_kateinen_id and $maksupaate_kortti_id) {
+      if($kateismaksu['kateinen']) {
+        $maksutapa = $maksupaate_kateinen_id;
+      } else {
+        $maksutapa = $maksupaate_kortti_id;
+      }
+      $katlisa = ", maksuehto = '$maksutapa'";
     }
     else {
       $katlisa = "";
@@ -307,6 +315,7 @@ if ($tee == 'TOIMITA') {
               $katlisa
               where tunnus in ($laskutettavat)
               and yhtio    = '$kukarow[yhtio]'";
+
     $result = pupe_query($query);
 
     $tee           = "TARKISTA";

@@ -17,6 +17,7 @@ date_default_timezone_set('Europe/Helsinki');
 require 'inc/connect.inc';
 require 'inc/functions.inc';
 require_once './vendor/autoload.php';
+require_once "../edi.php";
 
 if (!isset($argv[1]) || !$argv[1]) {
   exit;
@@ -30,6 +31,10 @@ if (!$yhtiorow) {
   exit;
 }
 
+if (!isset($presta_varastot)) {
+  $presta_varastot = array(0);
+}
+
 $resource = pupesoft_cleanstring($argv[2]);
 $days = pupesoft_cleanstring($argv[3]);
 
@@ -41,7 +46,7 @@ class Presta17RestApi
   /*
   Default variables and values in the class
   */
-  public function __construct($yhtiorow, $rest, $url)
+  public function __construct($yhtiorow, $rest, $url, $presta_varastot, $edi, $presta17_api_customer, $presta17_api_edipath, $presta17_api_payment_rule)
   {
     $php_cli = true;
     $this->kukarow = hae_kukarow('admin', $yhtiorow['yhtio']);
@@ -49,6 +54,11 @@ class Presta17RestApi
     $this->foundCategories = array();
     $this->rest = $rest;
     $this->url = $url;
+    $this->presta17_api_payment_rule = $presta17_api_payment_rule;
+    $this->warehouses = $presta_varastot;
+    $this->presta17_api_customer = $presta17_api_customer;
+    $this->presta17_api_edipath = $presta17_api_edipath;
+    $this->edi = $edi;
     $this->fi_countries = Array(
       'Suomi' => 'Finland',
       'Ruotsi' => 'Sweden',
@@ -127,6 +137,63 @@ class Presta17RestApi
       'found' => $prestashop_products,
       'missing' => $missing_products
     );
+  }
+
+  public function setStocks($id, $qty) {
+    if(!$qty) {
+      $qty = 0;
+    }
+    $qty = round($qty, 0, PHP_ROUND_HALF_DOWN);
+    $stocks = Array(
+      'resource' => 'stock_availables',
+      'filter[id_product]' => '[' . $id . ']',
+      'filter[quantity]' => '[' . $qty . ']',
+      'filter[id_product_attribute]' => '[]',
+      'limit' => 1
+    );
+    $stocks_check = $this->rest->get($stocks);
+    $checker = $stocks_check->stock_availables->children();
+    if (!empty($checker)) {
+      return true;
+    }
+
+    $stocks = Array(
+      'resource' => 'stock_availables',
+      'filter[id_product]' => '[' . $id . ']',
+      'filter[id_product_attribute]' => '[]',
+      'limit' => 1,
+    );
+    $stocks_check = $this->rest->get($stocks);
+    $checker = $stocks_check->stock_availables->children();
+    if (!empty($checker)) {
+      $xml = $this->rest->get(Array(
+        'resource' => 'stock_availables',
+        'id' =>  $stocks_check->stock_availables->stock_available->attributes()->id->__toString(),
+      ));
+      if ($stock_availableFields = $xml->stock_available->children()) {
+        $stock_availableFields->out_of_stock = 0;
+        $stock_availableFields->quantity = $qty;
+        $updatedXml = $this->rest->edit(Array(
+          'resource' => 'stock_availables',
+          'id' => (int) $stock_availableFields->id->__toString(),
+          'putXml' => $xml->asXML(),
+        )); 
+        return true;
+      }
+    }
+
+    $blankXml = $this->rest->get(Array('url' => $this->url . 'api/stock_availables?schema=synopsis'));
+    $stock_availableFields = $blankXml->stock_available->children();
+    $stock_availableFields->out_of_stock = 0;
+    $stock_availableFields->quantity = $qty;
+    $stock_availables = Array(
+      'resource' => 'stock_availables',
+      'postXml' => $blankXml->asXML(),
+    );
+    if($createdXml = $this->rest->add($stock_availables)) {
+      return true;
+    }
+    
   }
 
   public function setPrestashopManufacturer($manufacturer)
@@ -600,11 +667,11 @@ class Presta17RestApi
         $new_feat->addChild('id_feature_value', $product_val);
       }
 
-      if ($pupesoft_product['myynti_era'] and $pupesoft_product['myynti_era'] != '') {
-        $new_feat = $productFields->associations->product_features->addChild('product_feature');
-        $new_feat->addChild('id', $this->getPrestashopProductFeature('Myyntierä'));
-        $product_val = $this->getPrestashopProductFeatureValues($pupesoft_product['myynti_era'], $this->getPrestashopProductFeature('Myyntierä'));
-        $new_feat->addChild('id_feature_value', $product_val);
+      if ($pupesoft_product['myynti_era'] and $pupesoft_product['myynti_era'] != '' and $pupesoft_product['myynti_era'] > 0) {
+          $new_feat = $productFields->associations->product_features->addChild('product_feature');
+          $new_feat->addChild('id', $this->getPrestashopProductFeature('Myyntierä'));
+          $product_val = $this->getPrestashopProductFeatureValues($pupesoft_product['myynti_era'], $this->getPrestashopProductFeature('Myyntierä'));
+          $new_feat->addChild('id_feature_value', $product_val);
       }
 
       unset($productFields->associations->product_bundle);
@@ -626,12 +693,15 @@ class Presta17RestApi
       $productFields->id_tax_rules_group = $this->get_tax_group_id($pupesoft_product["alv"]);
 
       $productFields->price = $pupesoft_product['myyntihinta'];
-      $pupesoft_product['nimitys'] = trim(str_replace('=', '-', $pupesoft_product['nimitys']));
+      $pupesoft_product['nimitys'] = trim(str_replace(array('='), '-', $pupesoft_product['nimitys']));
+      $pupesoft_product['nimitys'] = trim(str_replace(array('#'), '?', $pupesoft_product['nimitys']));
       $productFields->name->language[0] = $pupesoft_product['nimitys'];
       $productFields->link_rewrite->language[0] = $this->slugify($pupesoft_product['nimitys']);
       $productFields->meta_title->language[0] = $pupesoft_product['nimitys'];
 
       $productFields->meta_keywords->language[0] = $pupesoft_product['try_nimike'];
+
+      $productFields->available_later->language[0] = 'JÄLKITOIMITUS';
 
       if ($pupesoft_product['lyhytkuvaus'] and $pupesoft_product['lyhytkuvaus'] != '') {
         $productFields->description_short->language[0] = mb_strimwidth($pupesoft_product['lyhytkuvaus'], 0, 400, '...');
@@ -643,13 +713,13 @@ class Presta17RestApi
       }
 
       $productFields->minimal_quantity = (int) $pupesoft_product['myynti_era'];
-      if($pupesoft_product['eankoodi'] and strlen(preg_replace("/[^0-9]/", "", $pupesoft_product['eankoodi']) == 13)) {
+      if($pupesoft_product['eankoodi'] and mb_strlen(preg_replace("/[^0-9]/", "", $pupesoft_product['eankoodi']) == 13)) {
         $productFields->ean13 = preg_replace("/[^0-9]/", "", $pupesoft_product['eankoodi']);
       }
       
       $productFields->state = 1;
 
-      if ($pupesoft_product['status'] != 'A') {
+      if ($pupesoft_product['status'] == 'P') {
         $productFields->active = 0;
         $productFields->available_for_order = 0;
       } else {
@@ -717,7 +787,7 @@ class Presta17RestApi
         $new_feat->addChild('id_feature_value', $product_val);
       }
 
-      if ($pupesoft_product['myynti_era'] and $pupesoft_product['myynti_era'] != '') {
+      if ($pupesoft_product['myynti_era'] and $pupesoft_product['myynti_era'] != '' and $pupesoft_product['myynti_era'] > 0) {
         $new_feat = $productFields->associations->product_features->addChild('product_feature');
         $new_feat->addChild('id', $this->getPrestashopProductFeature('Myyntierä'));
         $product_val = $this->getPrestashopProductFeatureValues($pupesoft_product['myynti_era'], $this->getPrestashopProductFeature('Myyntierä'));
@@ -729,11 +799,14 @@ class Presta17RestApi
       $productFields->id_tax_rules_group = $this->get_tax_group_id($pupesoft_product["alv"]);
 
       $productFields->price = $pupesoft_product['myyntihinta'];
-      $pupesoft_product['nimitys'] = trim(str_replace('=', '-', $pupesoft_product['nimitys']));
+      $pupesoft_product['nimitys'] = trim(str_replace(array('='), '-', $pupesoft_product['nimitys']));
+      $pupesoft_product['nimitys'] = trim(str_replace(array('#'), '?', $pupesoft_product['nimitys']));
       $productFields->name->language[0] = $pupesoft_product['nimitys'];
       $productFields->meta_title->language[0] = $pupesoft_product['nimitys'];
       $productFields->link_rewrite->language[0] = $this->slugify($pupesoft_product['nimitys']);
       $productFields->meta_keywords->language[0] = $pupesoft_product['try_nimike'];
+
+      $productFields->available_later->language[0] = 'JÄLKITOIMITUS';
 
       if ($pupesoft_product['lyhytkuvaus'] and $pupesoft_product['lyhytkuvaus'] != '') {
         $productFields->description_short->language[0] = mb_strimwidth($pupesoft_product['lyhytkuvaus'], 0, 400, '...');
@@ -745,14 +818,14 @@ class Presta17RestApi
       }
       
       $productFields->minimal_quantity = (int) $pupesoft_product['myynti_era'];
-      if($pupesoft_product['eankoodi'] and strlen(preg_replace("/[^0-9]/", "", $pupesoft_product['eankoodi']) == 13)) {
+      if($pupesoft_product['eankoodi'] and mb_strlen(preg_replace("/[^0-9]/", "", $pupesoft_product['eankoodi']) == 13)) {
         $productFields->ean13 = preg_replace("/[^0-9]/", "", $pupesoft_product['eankoodi']);
       }
       
       $productFields->state = 1;
       $productFields->reference = $pupesoft_product['tuoteno'];
 
-      if ($pupesoft_product['status'] != 'A') {
+      if ($pupesoft_product['status'] == 'P') {
         $productFields->active = 0;
         $productFields->available_for_order = 0;
       } else {
@@ -854,7 +927,8 @@ class Presta17RestApi
     if (!$group_id) {
       $blankXml = $this->rest->get(Array('url' => $this->url . 'api/groups?schema=synopsis'));
       $groupFields = $blankXml->group->children();
-      $groupFields->name->language[0] = (string) $group['selite'];
+      $group_name = (string) $group['selite'];
+      $groupFields->name->language[0] = $group_name;
       $groupFields->price_display_method = 1;
       $groupFields->show_prices = 1;
       $groups = Array(
@@ -873,7 +947,6 @@ class Presta17RestApi
         'resource' => 'groups',
         'id' => $group_id,
       ));
-
       $groupFields = $xml->group->children();
 
       $groupFields->name->language[0] = (string) $group['selite'];
@@ -882,7 +955,6 @@ class Presta17RestApi
         'id' => (int) $groupFields->id,
         'putXml' => $xml->asXML(),
       ));
-
       return $groupFields->id;
     }
   }
@@ -975,26 +1047,27 @@ class Presta17RestApi
       $group = $groups->addChild('groups');
       $group->addChild('id', $group_id);
     }
-
+    
     if ($customer_id) {
       $updatedXml = $this->rest->edit(Array(
         'resource' => 'customers',
         'id' => $customer_id,
         'putXml' => $xml->asXML(),
       ));
-
+      
       return $customer_id;
     } else {
       $customers = Array(
         'resource' => 'customers',
         'postXml' => $xml->asXML(),
       );
+      $createdXml = $this->rest->add($customers);
 
-      if ($createdXml = $this->rest->add($customers)) {
-        if ($this->errors_found($customer, $createdXml)) {
-          return;
-        }
+      if ($this->errors_found($customer, $createdXml)) {
+        return false;
+      }
 
+      if ($createdXml) {
         $newGroupFields = $createdXml->customer->children();
         $yhteyshenkilon_tunnus = $customer['yhteyshenkilo_tunnus'];
         $query = "UPDATE yhteyshenkilo
@@ -1002,12 +1075,9 @@ class Presta17RestApi
                   WHERE yhtio = '{$yhtio}'
                   AND tunnus  = {$yhteyshenkilon_tunnus}";
         pupe_query($query);
-
         return $newGroupFields->id;
       }
     }
-
-    return;
   }
 
   public function getPrestashopCountry($search, $by_name = false)
@@ -1038,68 +1108,75 @@ class Presta17RestApi
     return;
   }
 
-  public function getPupesoftCustomers($days)
+  public function getPupesoftCustomers($days, $presta_customergroup_id = "")
   {
     $yhtio = $this->yhtiorow['yhtio'];
 
     $customers = array();
 
+    if($presta_customergroup_id != "") {
+      $presta_customergroup_id = "AND ulkoinen_asiakasnumero = $presta_customergroup_id";
+    }
+    
     $query = "SELECT
-            asiakas.kuljetusohje,
-            asiakas.nimi as asiakas_nimi,
-            asiakas.nimitark as asiakas_nimitark,
-            yhteyshenkilo.tunnus as asiakas_tunnus,
-            yhteyshenkilo.liitostunnus as y_tun,
-            asiakas.tunnus as a_tun,
-            yhteyshenkilo.fakta as fakta,
-            asiakas.ytunnus,
-            asiakas.ryhma,
-            asiakas.yhtio,
-            asiakas.maa as asiakas_maa, 
-            avainsana.selitetark_5,
-            yhteyshenkilo.email,
-            yhteyshenkilo.gsm,
-            yhteyshenkilo.maa as maa,
-            yhteyshenkilo.nimi,
-            asiakas.laskutus_osoite,
-            asiakas.laskutus_postino,
-            asiakas.laskutus_postitp,
-            COALESCE(NULLIF(yhteyshenkilo.postino,''), asiakas.postino) as postino,
-            COALESCE(NULLIF(yhteyshenkilo.postitp,''), asiakas.postitp) as postitp, 
-            COALESCE(NULLIF(yhteyshenkilo.osoite,''), asiakas.osoite) as osoite, 
-            yhteyshenkilo.puh,
-            yhteyshenkilo.tunnus as yhteyshenkilo_tunnus,
-            yhteyshenkilo.ulkoinen_asiakasnumero,
-            yhteyshenkilo.verkkokauppa_nakyvyys,
-            yhteyshenkilo.verkkokauppa_salasana,
-            yhteyshenkilo.yhtio,
-            avainsana.selitetark_5 as presta_customergroup_id
-            FROM yhteyshenkilo
-            INNER JOIN asiakas
-            ON (asiakas.yhtio = yhteyshenkilo.yhtio
-              AND asiakas.tunnus      = yhteyshenkilo.liitostunnus )
-            LEFT JOIN avainsana
-            ON (avainsana.yhtio = asiakas.yhtio
-              AND avainsana.selite    = asiakas.ryhma
-              AND avainsana.laji      = 'ASIAKASRYHMA')
-            WHERE yhteyshenkilo.yhtio = '{$yhtio}' 
-            AND asiakas.laji != 'P' 
-            AND yhteyshenkilo.rooli   = 'Presta' 
-            AND (
-              (yhteyshenkilo.muutospvm between date_sub(now(),INTERVAL '$days' DAY) AND now()) 
-            OR 
-              (asiakas.muutospvm between date_sub(now(),INTERVAL '$days' DAY) AND now())
-            )
-            ";
+                asiakas.kuljetusohje,
+                asiakas.nimi as asiakas_nimi,
+                asiakas.nimitark as asiakas_nimitark,
+                yhteyshenkilo.tunnus as asiakas_tunnus,
+                yhteyshenkilo.liitostunnus as y_tun,
+                asiakas.tunnus as a_tun,
+                yhteyshenkilo.fakta as fakta,
+                asiakas.ytunnus,
+                asiakas.ryhma,
+                asiakas.yhtio,
+                asiakas.gsm as gsm2,
+                asiakas.puhelin as puh2,
+                asiakas.maa as asiakas_maa, 
+                avainsana.selitetark_5,
+                yhteyshenkilo.email,
+                yhteyshenkilo.gsm,
+                yhteyshenkilo.maa as maa,
+                yhteyshenkilo.nimi,
+                asiakas.laskutus_osoite,
+                asiakas.laskutus_postino,
+                asiakas.laskutus_postitp,
+                COALESCE(NULLIF(yhteyshenkilo.postino,''), asiakas.postino) as postino,
+                COALESCE(NULLIF(yhteyshenkilo.postitp,''), asiakas.postitp) as postitp, 
+                COALESCE(NULLIF(yhteyshenkilo.osoite,''), asiakas.osoite) as osoite, 
+                yhteyshenkilo.puh,
+                yhteyshenkilo.tunnus as yhteyshenkilo_tunnus,
+                yhteyshenkilo.ulkoinen_asiakasnumero,
+                yhteyshenkilo.verkkokauppa_nakyvyys,
+                yhteyshenkilo.verkkokauppa_salasana,
+                yhteyshenkilo.yhtio,
+                avainsana.selitetark_5 as presta_customergroup_id
+              FROM yhteyshenkilo
+              INNER JOIN asiakas
+              ON (asiakas.yhtio = yhteyshenkilo.yhtio
+                AND asiakas.tunnus      = yhteyshenkilo.liitostunnus )
+              LEFT JOIN avainsana
+              ON (avainsana.yhtio = asiakas.yhtio
+                AND avainsana.selite    = asiakas.ryhma
+                AND avainsana.laji      = 'ASIAKASRYHMA')
+              WHERE yhteyshenkilo.yhtio = '{$yhtio}' 
+                AND asiakas.laji != 'P' 
+                AND yhteyshenkilo.rooli   = 'Presta' 
+              $presta_customergroup_id 
+                AND (
+                (yhteyshenkilo.muutospvm between date_sub(now(),INTERVAL '$days' DAY) AND now()) 
+                OR 
+                (asiakas.muutospvm between date_sub(now(),INTERVAL '$days' DAY) AND now())
+              )
+              ";
 
     $result = pupe_query($query);
     $addresses = array();
     while ($customer = mysql_fetch_assoc($result)) {
-
       $addresses[0] = Array(
         'asiakas_id' => $customer['asiakas_tunnus'],
         'asiakas_nimi' => $customer['asiakas_nimi'],
         'gsm' => $customer['gsm'],
+        'gsm2' => $customer['gsm2'],
         'maa' => $customer['maa'],
         'asiakas_maa' => $customer['asiakas_maa'],
         'nimi' => $customer['nimi'],
@@ -1112,14 +1189,44 @@ class Presta17RestApi
         'laskutus_postino' => $customer['laskutus_postino'],
         'laskutus_postitp' => $customer['laskutus_postitp'],
         'puh' => $customer['puh'],
+        'puh2' => $customer['puh2'],
         'ytunnus' => $customer['ytunnus'],
         'asiakas_nimitark' => $customer['asiakas_nimitark'],
       );
 
+      $presta_id = false;
+
       if (!$customer['ulkoinen_asiakasnumero'] or $customer['ulkoinen_asiakasnumero'] == '') {
-        $presta_id = $customer['ulkoinen_asiakasnumero'] = $this->setPupesoftCustomer($customer);
+
+        $addresses_search = Array(
+          'resource' => 'addresses',
+          'filter[lastname]' => '[' . $customer['nimi'] . ']',
+          'filter[company]' => '[' . $customer['asiakas_nimi'] . ']',
+          'filter[dni]' => '![]',
+          'display' => 'full'
+        );
+    
+        if ($address_search = $this->rest->get($addresses_search)) {
+          if ($address_search = $address_search->addresses->address) {
+            $presta_id = $customer['ulkoinen_asiakasnumero'] = $address_search->id_customer->__toString();
+            $pupe_id = $address_search->dni->__toString();
+            $customer['ulkoinen_asiakasnumero'] = $presta_id;
+            $query = "UPDATE yhteyshenkilo
+                        SET ulkoinen_asiakasnumero = {$presta_id}
+                      WHERE yhtio = '{$yhtio}'
+                        AND tunnus  = {$pupe_id}";
+            pupe_query($query);
+          }
+        }
+        if(!$presta_id) {
+          $presta_id = $customer['ulkoinen_asiakasnumero'] = $this->setPupesoftCustomer($customer);
+        }
       } else {
         $presta_id = $customer['ulkoinen_asiakasnumero'] = $this->setPupesoftCustomer($customer, $customer['ulkoinen_asiakasnumero']);
+      }
+
+      if(!$presta_id) {
+        continue;
       }
 
       $customers[$presta_id][] = Array(
@@ -1139,7 +1246,262 @@ class Presta17RestApi
     return $customers;
   }
 
-  public function getPupesoftPrices()
+  public function setPupesoftOrder($pupesoft_customer_id, $order, $invoice_address, $delivery_address) {
+
+    $order_id = $order->id->__toString();
+
+    $query = "SELECT * from asiakas where tunnus = $pupesoft_customer_id";
+    $pupesoft_customer_search = pupe_query($query);
+
+    $options = array(
+      'edi_polku'         => $this->presta17_api_edipath,
+      'ovt_tunnus'        => '123',
+      'rahtikulu_nimitys' => 'Toimituskulut',
+      'rahtikulu_tuoteno' => 'RAHTI',
+      'tilaustyyppi'      => '2',
+      'maksuehto_ohjaus'  => $this->presta17_api_payment_rule,
+      'erikoiskasittely'  => array(),
+      'verkkokauppa_verollisen_hinnan_kentta' => '',
+    );
+    $tilaus['payment']['method'] = $order->payment->__toString();
+
+    $carrier_search = $this->rest->get(Array(
+      'resource' => 'carriers',
+      'id' => $order->id_carrier->__toString()
+    ));
+    if($carrier = $carrier_search->carrier) {
+      $tilaus['shipping_description'] = $carrier->name->__toString();
+      $tilaus['shipping_description_line'] = $carrier->name->__toString();
+    }
+
+    $prestashop_customer_search = $this->rest->get(Array(
+      'resource' => 'customers',
+      'id' => $order->id_customer->__toString()
+    ));
+    if($customer = $prestashop_customer_search->customer) {
+      $tilaus['customer_email'] = $customer->email->__toString();
+    }
+
+    while ($pupesoft_customer = mysql_fetch_assoc($pupesoft_customer_search)) {
+      $options['asiakasnro'] = $pupesoft_customer['asiakasnro'];
+
+      $tilaus['billing_address']['city'] = $invoice_address->city->__toString();
+      $tilaus['billing_address']['company'] = $invoice_address->company->__toString();
+      $tilaus['billing_address']['fax'] = "";
+      $tilaus['billing_address']['firstname'] = $invoice_address->firstname->__toString();
+      $tilaus['billing_address']['lastname'] = $invoice_address->lastname->__toString();
+      $tilaus['billing_address']['postcode'] = $invoice_address->postcode->__toString();
+      $tilaus['billing_address']['street'] = $invoice_address->address1->__toString();
+      $tilaus['billing_address']['telephone'] = $invoice_address->phone_mobile->__toString();
+      if(!$tilaus['billing_address']['telephone'] or $tilaus['billing_address']['telephone'] == "") {
+        $tilaus['billing_address']['telephone'] = $invoice_address->phone->__toString();
+      }
+
+      $tilaus['shipping_address']['city'] = $delivery_address->city->__toString();
+      $tilaus['shipping_address']['company'] = $delivery_address->company->__toString();
+
+      $country_search = $this->rest->get(Array(
+        'resource' => 'countries',
+        'id' => $delivery_address->id_country->__toString()
+      ));
+      if($country = $country_search->country) {
+        $tilaus['shipping_address']['country_id'] = $country->iso_code->__toString();
+      }
+
+      $tilaus['shipping_address']['firstname'] = $delivery_address->firstname->__toString();
+      $tilaus['shipping_address']['lastname'] = $delivery_address->lastname->__toString();
+      $tilaus['shipping_address']['postcode'] = $delivery_address->postcode->__toString();
+      $tilaus['shipping_address']['street'] = $delivery_address->address1->__toString();
+      $tilaus['shipping_address']['telephone'] = $delivery_address->phone_mobile->__toString();
+      if(!$tilaus['shipping_address']['telephone'] or $tilaus['shipping_address']['telephone'] == "") {
+        $tilaus['shipping_address']['telephone'] = $delivery_address->phone->__toString();
+      }
+
+      $tilaus['order_number'] = $order_id;
+      $tilaus['increment_id'] = $order_id;
+
+      $tilaus['store_name'] = "Presta";
+      $tilaus['status'] = "processing";
+      $tilaus['reference_number'] = "";
+      $tilaus['target'] = "";
+      $tilaus['webtex_giftcard'] = "";
+
+      $tilaus['customer_id'] = $pupesoft_customer_id;
+
+      $messages_search = $this->rest->get(Array(
+        'resource' => 'customer_threads',
+        'filter[id_order]' => '['.$order_id.']',
+        'display' => 'full'
+      ));
+
+      $tilaus['customer_note'] = '';
+
+      foreach ($messages_search->customer_threads->customer_thread as $messages) {
+        if($message_id = $messages->associations->customer_messages->customer_message->id->__toString()) {
+          $message_search = $this->rest->get(Array(
+            'resource' => 'customer_messages',
+            'id' => $message_id
+          ));
+          if($message = $message_search->customer_message) {
+            $tilaus['customer_note'] = $message->message->__toString();
+            break;
+          }
+        }
+      }
+
+      $tilaus['grand_total'] = (float) $order->total_paid;
+      $tilaus['tax_amount'] = (float) $order->total_paid_tax_incl - (float) $order->total_paid_tax_excl;
+      $tilaus['shipping_tax_amount'] = (float) $order->total_shipping_tax_incl - (float) $order->total_shipping_tax_excl;
+      $tilaus['shipping_amount'] = (float) $order->total_shipping_tax_excl;
+      $tilaus['order_currency_code'] = "EUR";
+
+      $tilaus['items'] = array();
+
+      foreach ($order->associations->order_rows->order_row as $product) {
+
+        $item = array();
+
+        $item['sku'] = (string) $product->product_reference;
+        $item['name'] = (string) $product->product_name;
+
+        $item['qty_ordered'] = (int) $product->product_quantity;
+
+        $item['base_discount_amount'] = 0;
+        $item['discount_percent'] = 0;
+
+        $item['original_price'] = (float) $product->unit_price_tax_incl;
+
+        $item['price'] = (float) $product->unit_price_tax_excl;
+
+        $item['tax_percent'] = (($item['original_price'] / $item['price']) - 1) * 100;
+        $item['parent_item_id'] = "";
+        $item['product_id'] = "";
+        $item['product_type'] = "";
+
+        $tilaus['items'][] = $item;
+      }
+
+      if($this->edi->create($tilaus, $options)) {
+        $xml = $this->rest->get(Array(
+          'resource' => 'orders',
+          'id' => $order_id,
+        ));
+  
+        if ($orderFields = $xml->order->children()) {
+          $orderFields->note = $orderFields->note->__toString()."\nTilaus pupeessa";
+          $updatedXml = $this->rest->edit(Array(
+            'resource' => 'orders',
+            'id' => (int) $orderFields->id,
+            'putXml' => $xml->asXML(),
+          ));
+        }
+      }
+
+    }
+  }
+
+  public function getPrestashopOrders() {
+
+    $orders = Array(
+      'resource' => 'orders',
+      'filter[note]' => '%[Tilaus pupeessa]%',
+      'display' => 'full'
+    );
+    $orders_processed = array();
+    $pupesoft_orders = $this->rest->get($orders);
+    foreach ($pupesoft_orders->orders->order as $order) {
+      if($order->id_customer->__toString() != 0) {
+        $orders_processed[$order->id->__toString()] = $order;
+      }
+    }
+
+    $orders = Array(
+      'resource' => 'orders',
+      'display' => 'full'
+    );
+    $missing_orders = array();
+    $prestashop_orders = $this->rest->get($orders);
+
+    foreach ($prestashop_orders->orders->order as $order) {
+      if(!isset($orders_processed[$order->id->__toString()]) and $customer_id = $order->id_customer->__toString()) {
+        $customer_dummy = array(
+          $customer_id => array(
+            0 => array(
+              'osoitteet' => array(
+                'asiakas_id' => false
+              )
+            )
+          )
+        );
+
+        if($customer = $this->getPupesoftCustomers("99999", $customer_id) or $customer = $customer_dummy) {
+
+          foreach($customer[$customer_id] as $address_arr) {
+
+            foreach($address_arr['osoitteet'] as $address) {
+
+              if($address['asiakas_id']) {
+                $found_invoice_add = $this->rest->get(Array(
+                  'resource' => 'addresses',
+                  'filter[id_customer]' => '[' . $customer_id . ']',
+                  'filter[dni]' => '[' . $address['asiakas_id'] . ']',
+                  'filter[id]' => '[' . $order->id_address_invoice->__toString() . ']',
+                  'display' => 'full'
+                ));
+  
+                $found_delivery_add = $this->rest->get(Array(
+                  'resource' => 'addresses',
+                  'filter[id_customer]' => '[' . $customer_id . ']',
+                  'filter[dni]' => '[' . $address['asiakas_id'] . ']',
+                  'filter[id]' => '[' . $order->id_address_delivery->__toString() . ']',
+                  'display' => 'full'
+                ));
+
+                $pupesoft_customer_id = $address['a_tun'];
+              } else {
+                $found_invoice_add = $this->rest->get(Array(
+                  'resource' => 'addresses',
+                  'filter[id_customer]' => '[' . $customer_id . ']',
+                  'filter[id]' => '[' . $order->id_address_invoice->__toString() . ']',
+                  'display' => 'full'
+                ));
+  
+                $found_delivery_add = $this->rest->get(Array(
+                  'resource' => 'addresses',
+                  'filter[id_customer]' => '[' . $customer_id . ']',
+                  'filter[id]' => '[' . $order->id_address_delivery->__toString() . ']',
+                  'display' => 'full'
+                ));
+
+                $pupesoft_customer_id = $this->presta17_api_customer;
+              }
+
+              if(
+                $invoice_address = $found_invoice_add->addresses->address and 
+                $delivery_address = $found_delivery_add->addresses->address
+              ) {
+
+                $this->setPupesoftOrder(
+                  $pupesoft_customer_id, 
+                  $order, 
+                  $invoice_address,
+                  $delivery_address
+                );
+              } 
+
+            }
+          }
+        }
+      }
+    }
+
+    return array(
+      "processed" => $orders_processed,
+      "missing" => $missing_orders
+    );
+  }
+
+  public function getPupesoftPrices($days)
   {
     $yhtio = $this->yhtiorow['yhtio'];
 
@@ -1148,16 +1510,20 @@ class Presta17RestApi
                 GROUP_CONCAT(asiakas.tunnus) AS asiakas_pupe_id,
                 concat(asiakashinta.tuoteno, '|||', asiakashinta.hinta) AS group_name, 
                 asiakashinta.alkupvm, asiakashinta.loppupvm
-                FROM asiakashinta
+              FROM asiakashinta
                 JOIN asiakas ON ((asiakas.yhtio = asiakashinta.yhtio AND asiakas.piiri = asiakashinta.piiri)
-                OR (asiakas.yhtio = asiakashinta.yhtio AND asiakas.tunnus = asiakashinta.asiakas))
-                JOIN yhteyshenkilo ON (yhteyshenkilo.yhtio = asiakashinta.yhtio AND yhteyshenkilo.liitostunnus = asiakas.tunnus)
-                WHERE asiakashinta.yhtio = '{$yhtio}'
+                  OR (asiakas.yhtio = asiakashinta.yhtio AND asiakas.tunnus = asiakashinta.asiakas))
+                JOIN yhteyshenkilo ON (yhteyshenkilo.yhtio = asiakashinta.yhtio AND yhteyshenkilo.liitostunnus = asiakas.tunnus) 
+                LEFT JOIN tuote on (tuote.yhtio = asiakashinta.yhtio AND tuote.tuoteno = asiakashinta.tuoteno) 
+              WHERE asiakashinta.yhtio = '{$yhtio}'
                 AND asiakashinta.piiri != '' AND yhteyshenkilo.ulkoinen_asiakasnumero > '' 
                 AND if(asiakashinta.alkupvm  = '0000-00-00', '0001-01-01', asiakashinta.alkupvm)  <= current_date 
                 AND if(asiakashinta.loppupvm = '0000-00-00', '9999-12-31', asiakashinta.loppupvm) >= current_date 
                 AND asiakashinta.hinta > 0 
-                GROUP by group_name";
+                AND tuote.status != 'P' 
+                AND tuote.nakyvyys != '' 
+                AND asiakashinta.muutospvm between date_sub(now(),INTERVAL '$days' DAY) and now()
+              GROUP by group_name";
     $price_targets_q = pupe_query($query);
     $prices_targets = array();
     while ($price_targets = mysql_fetch_assoc($price_targets_q)) {
@@ -1174,17 +1540,23 @@ class Presta17RestApi
                 avainsana.selitetark_5 AS presta_customergroup_id,
                 yhteyshenkilo.ulkoinen_asiakasnumero AS presta_customer_id,
                 'asiakashinta' AS tyyppi
-                FROM asiakashinta
+              FROM asiakashinta
                 LEFT JOIN avainsana ON (avainsana.yhtio = asiakashinta.yhtio
                   AND avainsana.selite           = asiakashinta.asiakas_ryhma
                   AND avainsana.laji             = 'ASIAKASRYHMA')
                 LEFT JOIN yhteyshenkilo ON (yhteyshenkilo.yhtio = asiakashinta.yhtio
-                  AND yhteyshenkilo.liitostunnus = asiakashinta.asiakas)
-                WHERE asiakashinta.yhtio         = '{$yhtio}' 
+                  AND yhteyshenkilo.liitostunnus = asiakashinta.asiakas) 
+                LEFT JOIN tuote on (tuote.yhtio = asiakashinta.yhtio 
+                  AND tuote.tuoteno = asiakashinta.tuoteno) 
+              WHERE asiakashinta.yhtio         = '{$yhtio}' 
                 AND asiakashinta.asiakas_ryhma != '' AND avainsana.selitetark_5 != '' AND asiakashinta.tuoteno != '' 
                 AND if(asiakashinta.alkupvm  = '0000-00-00', '0001-01-01', asiakashinta.alkupvm)  <= current_date
                 AND if(asiakashinta.loppupvm = '0000-00-00', '9999-12-31', asiakashinta.loppupvm) >= current_date
-                AND asiakashinta.hinta           > 0";
+                AND asiakashinta.hinta           > 0 
+                AND tuote.status != 'P' 
+                AND tuote.nakyvyys != '' 
+                AND asiakashinta.muutospvm between date_sub(now(),INTERVAL '$days' DAY) and now()
+              ";
     $price_groups_q = pupe_query($query);
 
     $prices_groups = array();
@@ -1224,10 +1596,18 @@ class Presta17RestApi
     if ($resource == 'prices' or $resource == 'all') {
       $this->pupesoft_products = $this->getPupesoftProducts(99999);
       $this->prestashop_products = $this->getPrestashopProducts($this->pupesoft_products);
-      $this->setPrestashopPrices($this->getPupesoftPrices(), $this->getPupesoftCustomers(99999), $this->prestashop_products);
+      $this->setPrestashopPrices($this->getPupesoftPrices($days), $this->getPupesoftCustomers(99999), $this->prestashop_products);
     }
 
-    if ($resource == 'clean' or $resource == 'products') {
+    if ($resource = 'orders') {
+      $this->prestashop_orders = $this->getPrestashopOrders();
+    }
+
+    if ($resource == 'clean' or $resource == 'products' or $resource == 'stocks') {
+      global $kukarow, $yhtiorow;
+      $kukarow = $this->kukarow;
+      $yhtiorow = $this->yhtiorow;
+
       $all_products = $this->getPupesoftProducts(99999);
       $presta_products_opt = Array(
         'resource' => 'products',
@@ -1257,7 +1637,10 @@ class Presta17RestApi
               'id' => (int) $productFields->id,
               'putXml' => $xml->asXML(),
             ));
-          } 
+          }
+        } else if($resource == 'stocks') {
+          list(, , $stock) = saldo_myytavissa($product_ref, '', $this->warehouses);
+          $this->setStocks($product->id->__toString(), $stock);
         }
       }
     }
@@ -1331,6 +1714,7 @@ class Presta17RestApi
 
   public function setPrestashopPrices($specific_prices, $pupesoft_customers, $prestashop_products)
   {
+
     if (!empty($specific_prices['ryhmat'])) {
       $data = $specific_prices['ryhmat'];
       foreach ($data as $info_k => $info) {
@@ -1344,8 +1728,8 @@ class Presta17RestApi
 
     if (!empty($specific_prices['piirit'])) {
       $data = $specific_prices['piirit'];
-
       foreach ($data as $info_k => $info) {
+        
         $_group_data = explode('|||', $info['group_name']);
         $_group_price = round((float) $_group_data[1], 2);
         $data[$info_k]['tuoteno'] = $_group_data[0];
@@ -1356,6 +1740,9 @@ class Presta17RestApi
         $data[$info_k]['group_name'] = $_group_tuoteno . '|' . $_group_price;
         $data[$info_k]['price'] = $_group_price;
         $info['group_name'] = htmlentities($info['group_name']);
+        if(mb_strlen($info['group_name']) > 32) {
+          $info['group_name'] = str_replace('.000000', '', $info['group_name']);
+        }
         $groups = Array(
           'resource' => 'groups',
           'filter[name]' => $info['group_name']
@@ -1371,7 +1758,7 @@ class Presta17RestApi
         }
         $all_groups[$data[$info_k]['group_name']] = $group_id;
       }
- 
+
       foreach ($data as $info) {
         $_group_price = $info['price'];
         $_group_tuoteno = $info['tuoteno'];
@@ -1458,6 +1845,9 @@ class Presta17RestApi
           if (!$address['osoite']) {
             $address['osoite'] = $address['laskutus_osoite'];
           }
+          if(!$address['osoite'] and !$address['laskutus_osoite']) {
+            continue;
+          }
           if (!$address['postino']) {
             $address['postino'] = $address['laskutus_postino'];
           }
@@ -1466,9 +1856,23 @@ class Presta17RestApi
           }
           $addressesFields->address1 = $address['osoite'];
           $addressesFields->postcode = $address['postino'];
+          if(!$address['postitp'] and $address['postino']) {
+            $address['postitp'] = $address['postino'];
+          } else if(!$address['postitp']) {
+            $address['postitp'] = "-";
+          }
+          if(!$address['gsm'] and $address['gsm2']) {
+            $address['gsm'] = $address['gsm2'];
+          }
+          if(!$address['puh'] and $address['puh2']) {
+            $address['puh'] = $address['puh2'];
+          }
+
           $addressesFields->city = $address['postitp'];
+          $addressesFields->company = $address['asiakas_nimi'];
           $addressesFields->phone = preg_replace('/[^\dxX+]/', '', $address['puh']);
           $addressesFields->phone_mobile = preg_replace('/[^\dxX+]/', '', $address['gsm']);
+
           $addressesFields->dni = $address['asiakas_id'];
           if ($address['laskutus_osoite'] or $address['laskutus_postino'] or $address['laskutus_postitp']) {
             $msg = "Laskutusosoite:\n";
@@ -1533,12 +1937,17 @@ class Presta17RestApi
     }
   }
 }
-
+$edi = new Edi();
 $webService = new PrestaShopWebservice($presta17_api_url, $presta17_api_pass, $presta17_api_debug);
 $execute = new Presta17RestApi(
   $yhtiorow,
   $webService,
-  $presta17_api_url
+  $presta17_api_url,
+  $presta_varastot,
+  $edi,
+  $presta17_api_customer,
+  $presta17_api_edipath,
+  $presta17_api_payment_rule
 );
 
 $execute->begin($resource, $days);

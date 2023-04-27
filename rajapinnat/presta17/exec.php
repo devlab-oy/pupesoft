@@ -46,7 +46,7 @@ class Presta17RestApi
   /*
   Default variables and values in the class
   */
-  public function __construct($yhtiorow, $rest, $url, $presta_varastot, $edi, $presta17_api_customer, $presta17_api_edipath, $presta17_api_payment_rule)
+  public function __construct($yhtiorow, $rest, $url, $presta_varastot, $edi, $presta17_api_customer, $presta17_api_edipath, $presta17_api_payment_rule, $presta17_api_ovt)
   {
     $php_cli = true;
     $this->kukarow = hae_kukarow('admin', $yhtiorow['yhtio']);
@@ -59,6 +59,7 @@ class Presta17RestApi
     $this->presta17_api_customer = $presta17_api_customer;
     $this->presta17_api_edipath = $presta17_api_edipath;
     $this->edi = $edi;
+    $this->presta17_api_ovt = $presta17_api_ovt;
     $this->fi_countries = Array(
       'Suomi' => 'Finland',
       'Ruotsi' => 'Sweden',
@@ -1255,7 +1256,7 @@ class Presta17RestApi
 
     $options = array(
       'edi_polku'         => $this->presta17_api_edipath,
-      'ovt_tunnus'        => '123',
+      'ovt_tunnus'        => $this->presta17_api_ovt,
       'rahtikulu_nimitys' => 'Toimituskulut',
       'rahtikulu_tuoteno' => 'RAHTI',
       'tilaustyyppi'      => '2',
@@ -1947,7 +1948,8 @@ $execute = new Presta17RestApi(
   $edi,
   $presta17_api_customer,
   $presta17_api_edipath,
-  $presta17_api_payment_rule
+  $presta17_api_payment_rule,
+  $presta17_api_ovt
 );
 
 $execute->begin($resource, $days);

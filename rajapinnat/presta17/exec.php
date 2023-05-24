@@ -1767,7 +1767,6 @@ class Presta17RestApi
           foreach ($pupesoft_customers[$_group_customer] as $cus) {
             $add_customer_groups[$_group_customer]['cus'] = $cus;
             $add_customer_groups[$_group_customer]['ids'][] = $group_id;
-            //$this->setPupesoftCustomer($cus, $_group_customer, $group_id);
           }
         }
 

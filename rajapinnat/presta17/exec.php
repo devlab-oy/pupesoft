@@ -702,7 +702,7 @@ class Presta17RestApi
 
       $productFields->meta_keywords->language[0] = $pupesoft_product['try_nimike'];
 
-      $productFields->available_later->language[0] = 'JÄLKITOIMITUS';
+      $productFields->available_later->language[0] = 'TILAUSTUOTE';
 
       if ($pupesoft_product['lyhytkuvaus'] and $pupesoft_product['lyhytkuvaus'] != '') {
         $productFields->description_short->language[0] = mb_strimwidth($pupesoft_product['lyhytkuvaus'], 0, 400, '...');
@@ -807,7 +807,7 @@ class Presta17RestApi
       $productFields->link_rewrite->language[0] = $this->slugify($pupesoft_product['nimitys']);
       $productFields->meta_keywords->language[0] = $pupesoft_product['try_nimike'];
 
-      $productFields->available_later->language[0] = 'JÄLKITOIMITUS';
+      $productFields->available_later->language[0] = 'TILAUSTUOTE';
 
       if ($pupesoft_product['lyhytkuvaus'] and $pupesoft_product['lyhytkuvaus'] != '') {
         $productFields->description_short->language[0] = mb_strimwidth($pupesoft_product['lyhytkuvaus'], 0, 400, '...');
@@ -1039,7 +1039,7 @@ class Presta17RestApi
     $groups = $customerFields->associations->addChild('groups');
 
     if ($group_add) {
-      $all_groups = Array(1, 2, 3, $group_id, $group_add);
+      $all_groups = array_merge(Array(1, 2, 3, $group_id),$group_add);
     } else {
       $all_groups = Array(1, 2, 3, $group_id);
     }
@@ -1595,12 +1595,12 @@ class Presta17RestApi
     }
 
     if ($resource == 'prices' or $resource == 'all') {
-      $this->pupesoft_products = $this->getPupesoftProducts(99999);
+      $this->pupesoft_products = $this->getPupesoftProducts(999999);
       $this->prestashop_products = $this->getPrestashopProducts($this->pupesoft_products);
-      $this->setPrestashopPrices($this->getPupesoftPrices($days), $this->getPupesoftCustomers(99999), $this->prestashop_products);
+      $this->setPrestashopPrices($this->getPupesoftPrices($days), $this->getPupesoftCustomers(999999), $this->prestashop_products);
     }
 
-    if ($resource = 'orders') {
+    if ($resource == 'orders') {
       $this->prestashop_orders = $this->getPrestashopOrders();
     }
 
@@ -1716,21 +1716,9 @@ class Presta17RestApi
   public function setPrestashopPrices($specific_prices, $pupesoft_customers, $prestashop_products)
   {
 
-    if (!empty($specific_prices['ryhmat'])) {
-      $data = $specific_prices['ryhmat'];
-      foreach ($data as $info_k => $info) {
-        if(!isset($prestashop_products['found'][$info['tuoteno']])) {
-          continue;
-        }
-        $_presta_product = $prestashop_products['found'][$info['tuoteno']]; 
-        $this->setPrestashopPrice($info['presta_customergroup_id'], $info['hinta'], $_presta_product, $info['alkupvm'], $info['loppupvm']);
-      }
-    }
-
     if (!empty($specific_prices['piirit'])) {
       $data = $specific_prices['piirit'];
       foreach ($data as $info_k => $info) {
-        
         $_group_data = explode('|||', $info['group_name']);
         $_group_price = round((float) $_group_data[1], 2);
         $data[$info_k]['tuoteno'] = $_group_data[0];
@@ -1753,12 +1741,13 @@ class Presta17RestApi
         
         if (!empty($checker)) {
           $group_id = $checker->group->attributes()->id->__toString();
-          $group_id = $this->setPupesoftCustomerGroup(Array('selite' => $info['group_name']), $group_id);
         } else {
           $group_id = $this->setPupesoftCustomerGroup(Array('selite' => $info['group_name']));
         }
         $all_groups[$data[$info_k]['group_name']] = $group_id;
       }
+
+      $add_customer_groups = array();
 
       foreach ($data as $info) {
         $_group_price = $info['price'];
@@ -1774,14 +1763,33 @@ class Presta17RestApi
           if (!isset($pupesoft_customers[$_group_customer])) {
             continue;
           }
+          
           foreach ($pupesoft_customers[$_group_customer] as $cus) {
-            $this->setPupesoftCustomer($cus, $_group_customer, $group_id);
+            $add_customer_groups[$_group_customer]['cus'] = $cus;
+            $add_customer_groups[$_group_customer]['ids'][] = $group_id;
+            //$this->setPupesoftCustomer($cus, $_group_customer, $group_id);
           }
         }
-        
+
         $this->setPrestashopPrice($group_id, $_group_price, $_presta_product, $info['alkupvm'], $info['loppupvm']);
       }
+      
+      foreach($add_customer_groups as $add_customer_groups_id => $groups_add) {
+        $this->setPupesoftCustomer($groups_add['cus'], $add_customer_groups_id, $groups_add['ids']);
+      }
     }
+
+    if (!empty($specific_prices['ryhmat'])) {
+      $data = $specific_prices['ryhmat'];
+      foreach ($data as $info_k => $info) {
+        if(!isset($prestashop_products['found'][$info['tuoteno']])) {
+          continue;
+        }
+        $_presta_product = $prestashop_products['found'][$info['tuoteno']]; 
+        $this->setPrestashopPrice($info['presta_customergroup_id'], $info['hinta'], $_presta_product, $info['alkupvm'], $info['loppupvm']);
+      }
+    }
+    
   }
 
   public function setPrestashopAddresses($customers)

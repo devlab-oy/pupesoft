@@ -72,6 +72,7 @@ foreach ($suoritukset as $suoritus) {
       // Jos summa on vähintään 0.01 EUR voidaan tehdä maksutapahtuma
       if ($korttimaksu_f >= 1) {
         $onnistuuko = $clientti->startTransaction($korttimaksu_f);
+        $onnistuuko_lisays = " | Yhteys epäonnistui!";
       }
       elseif ($korttimaksu_f < 0) {
         // Jos summa on negatiivinen tehdään viimeisimmän tapahtuman hyvitys/peruutus
@@ -97,11 +98,13 @@ foreach ($suoritukset as $suoritus) {
         $korttimaksu_f = $korttimaksu_f * 100;
         $onnistuuko = $clientti->reverseTransaction($korttimaksu_f);
         $korttimaksu = $korttimaksu * -1;
+        $onnistuuko_lisays_p = " | Toiminto: peruutus";
       }
       else {
         $onnistuuko = "HYLÄTTY";
+        $onnistuuko_lisays = " | Summa: ".$korttimaksu_f;
       }
-      $onnistuuko = $onnistuuko === true ? "VELOITETTU" : "HYLÄTTY";
+      $onnistuuko = $onnistuuko === true ? "VELOITETTU" : "HYLÄTTY".$onnistuuko_lisays. $onnistuuko_lisays_p;
       break;
 
     case '2':

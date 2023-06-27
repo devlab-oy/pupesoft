@@ -362,7 +362,26 @@ if ($tee != "" and isset($painoinnappia)) {
         $worksheet->writeString($excelrivi, $excelsarake++, t("Kulutus 12kk"), $format_bold);
         $worksheet->writeString($excelrivi, $excelsarake++, t("Kulutus 6kk"), $format_bold);
         $worksheet->writeString($excelrivi, $excelsarake++, t("Kulutus 3kk"), $format_bold);
+        $kuukausittainen_lista = array(
+          t('kktammi') => t('Tammi'),
+          t('kkhelmi') => t('Helmi'),
+          t('kkmaalis') => t('Maalis'),
+          t('kkhuhti') => t('Huhti'),
+          t('kktouko') => t('Touko'),
+          t('kkkesa') => t('Kesäk'),
+          t('kkheina') => t('Heinäk'),
+          t('kkelo') => t('Elo'),
+          t('kksyys') => t('Syys'),
+          t('kkloka') => t('Loka'),
+          t('kkmarras') => t('Marras'),
+          t('kkjoulu') => t('Joulu')
+        );
+        foreach($kuukausittainen_lista as $kuukausittainen_lista_id => $kuukausittainen_lista_val) {
+          $worksheet->writeString($excelrivi, $excelsarake++, t($kuukausittainen_lista_val." eur, myynti"), $format_bold);
+          $worksheet->writeString($excelrivi, $excelsarake++, t($kuukausittainen_lista_val." kpl, kulutus"), $format_bold);
+        }
       }
+
     }
 
     $excelrivi++;
@@ -451,12 +470,38 @@ if ($tee != "" and isset($painoinnappia)) {
 
         $tyyppi_lisa = ($listaustyyppi == "kappaleet" or $listaustyyppi == "kappaleet2" or $listaustyyppi == "kappaleet3") ? "kpl" : "rivihinta";
 
+        if($kuukausittainen_lista) {
+          $kuukausittainen_lisa = ", ";
+          $kuukausittainen_rivit = array();
+          $ed_vvl = $vvl-1;
+          $_lask = 1;
+          foreach($kuukausittainen_lista as $kuukausittainen_id => $kuukausittainen_val) {
+            $_kk = str_pad($_lask, 2, '0', STR_PAD_LEFT);
+            $_kk_2 = str_pad($_lask+1, 2, '0', STR_PAD_LEFT);
+            if($_lask < 12) {
+              $ed_vvl_2 = $ed_vvl;
+            } else {
+              $ed_vvl_2 = $vvl;
+              $_kk_2 = "01";
+            }
+            $kuukausittainen_lisa .= "round(sum(if((laskutettuaika >= '$ed_vvl-$_kk-01' and laskutettuaika < '$ed_vvl_2-$_kk_2-01'), rivihinta, 0))) h_$kuukausittainen_id,";
+            $kuukausittainen_lisa .= "round(sum(if((laskutettuaika >= '$ed_vvl-$_kk-01' and laskutettuaika < '$ed_vvl_2-$_kk_2-01'), kpl, 0))) k_$kuukausittainen_id";
+            $kuukausittainen_rivit["h_".$kuukausittainen_id] = $kuukausittainen_val." €";
+            $kuukausittainen_rivit["k_".$kuukausittainen_id] = $kuukausittainen_val." kpl";
+            if($_lask < 12) {
+              $kuukausittainen_lisa .= ",";
+            }
+            $_lask++;
+          }
+        }
+        
         // myyntipuoli
         $query = "SELECT
                   round(sum(if(laskutettuaika >= '{$vvl}-01-01', $tyyppi_lisa, 0))) myyntiVA,
                   round(sum(if(laskutettuaika >= date_sub(CURDATE(), interval 12 month), $tyyppi_lisa, 0))) myynti12kk,
                   round(sum(if(laskutettuaika >= date_sub(CURDATE(), interval 6 month), $tyyppi_lisa, 0))) myynti6kk,
-                  round(sum(if(laskutettuaika >= date_sub(CURDATE(), interval 3 month), $tyyppi_lisa, 0))) myynti3kk
+                  round(sum(if(laskutettuaika >= date_sub(CURDATE(), interval 3 month), $tyyppi_lisa, 0))) myynti3kk 
+                  $kuukausittainen_lisa
                   FROM tilausrivi
                   WHERE yhtio         = '{$kukarow["yhtio"]}'
                   AND tuoteno         = '{$row["tuoteno"]}'
@@ -464,6 +509,7 @@ if ($tee != "" and isset($painoinnappia)) {
                   and laskutettuaika  >= date_sub(CURDATE(), interval 12 month)
                   AND kpl            != 0
                   {$varasto_tilausrivi_filter}";
+        
         $myyntiresult = pupe_query($query);
         $myyntirivi = mysql_fetch_assoc($myyntiresult);
 
@@ -530,6 +576,9 @@ if ($tee != "" and isset($painoinnappia)) {
       $myyntirivi["myynti12kk"] = empty($myyntirivi["myynti12kk"]) ? "" : $myyntirivi["myynti12kk"];
       $myyntirivi["myynti6kk"]  = empty($myyntirivi["myynti6kk"]) ? "" : $myyntirivi["myynti6kk"];
       $myyntirivi["myynti3kk"]  = empty($myyntirivi["myynti3kk"]) ? "" : $myyntirivi["myynti3kk"];
+      foreach($kuukausittainen_rivit as $kuukausittainen_rivi_id => $kuukausittainen_rivi_val) {
+        $myyntirivi[$kuukausittainen_rivi_id]  = empty($myyntirivi[$kuukausittainen_rivi_id]) ? "" : $myyntirivi[$kuukausittainen_rivi_id];
+      }
 
       $kulutusrivi["kulutusVA"]   = empty($kulutusrivi["kulutusVA"]) ? "" : $kulutusrivi["kulutusVA"];
       $kulutusrivi["kulutus12kk"] = empty($kulutusrivi["kulutus12kk"]) ? "" : $kulutusrivi["kulutus12kk"];
@@ -759,6 +808,9 @@ if ($tee != "" and isset($painoinnappia)) {
         $worksheet->writeNumber($excelrivi, $excelsarake++, $myyntirivi["myynti12kk"]);
         $worksheet->writeNumber($excelrivi, $excelsarake++, $myyntirivi["myynti6kk"]);
         $worksheet->writeNumber($excelrivi, $excelsarake++, $myyntirivi["myynti3kk"]);
+        foreach($kuukausittainen_rivit as $kuukausittainen_rivi_id => $kuukausittainen_rivi_val) {
+          $worksheet->writeNumber($excelrivi, $excelsarake++, $myyntirivi[$kuukausittainen_rivi_id]);
+        }
 
         if ($listaustyyppi == "kappaleet2") {
           $worksheet->writeNumber($excelrivi, $excelsarake++, $kulutusrivi["kulutusVA"]);

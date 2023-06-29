@@ -489,7 +489,7 @@ if ($tee != "" and isset($painoinnappia)) {
             , round(
               sum(
                 if(
-                  (laskutettuaika >= date_sub(CURDATE(), interval $_lask_s month) and laskutettuaika < date_sub(CURDATE(), interval $_lask month)), 
+                  (toimitettuaika >= date_sub(CURDATE(), interval $_lask_s month) and toimitettuaika < date_sub(CURDATE(), interval $_lask month)), 
                 rivihinta, 0)
               )
             ) h_".$kuukausittainen_lista[$_saa_kk]['i'];

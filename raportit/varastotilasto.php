@@ -481,7 +481,7 @@ if ($tee != "" and isset($painoinnappia)) {
           $_lask_s = 1;
 
           while($_lask < count($kuukausittainen_lista)) {
-            $_saa_kk = date('m', strtotime("-$_lask month"));
+            $_saa_kk = date('m', strtotime("last day of -$_lask month"));
 
             $_saa_kk = str_pad($_saa_kk, 2, '0', STR_PAD_LEFT);
 
@@ -489,7 +489,7 @@ if ($tee != "" and isset($painoinnappia)) {
             , round(
               sum(
                 if(
-                  (toimitettuaika >= date_sub(CURDATE(), interval $_lask_s month) and toimitettuaika < date_sub(CURDATE(), interval $_lask month)), 
+                  (toimitettuaika > LAST_DAY(date_sub(CURDATE(), interval $_lask_s month)) and toimitettuaika <= LAST_DAY(date_sub(CURDATE(), interval $_lask month))), 
                 rivihinta, 0)
               )
             ) h_".$kuukausittainen_lista[$_saa_kk]['i'];
@@ -497,7 +497,7 @@ if ($tee != "" and isset($painoinnappia)) {
             , round(
               sum(
                 if(
-                  (toimitettuaika >= date_sub(CURDATE(), interval $_lask_s month) and toimitettuaika < date_sub(CURDATE(), interval $_lask month)), 
+                  (toimitettuaika > LAST_DAY(date_sub(CURDATE(), interval $_lask_s month)) and toimitettuaika <= LAST_DAY(date_sub(CURDATE(), interval $_lask month))), 
                 kpl, 0)
               )
             ) k_".$kuukausittainen_lista[$_saa_kk]['i'];
@@ -506,6 +506,7 @@ if ($tee != "" and isset($painoinnappia)) {
             $_lask++;
             $_lask_s++;
           }
+
         }
         
         // myyntipuoli
@@ -834,7 +835,6 @@ if ($tee != "" and isset($painoinnappia)) {
               $worksheet->writeNumber($excelrivi, $excelsarake++, $kulutusrivi[$kuukausittainen_rivi_id]);
             }
           }
-
         }
       }
 

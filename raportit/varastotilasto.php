@@ -378,8 +378,8 @@ if ($tee != "" and isset($painoinnappia)) {
         );
         $_otsik_lask = 0;
         while($_otsik_lask < count($kuukausittainen_lista)) {
-          $_saa_kk = date('m', strtotime("-$_otsik_lask month"));
-          $_saa_v = date('Y', strtotime("-$_otsik_lask month"));
+          $_saa_kk = date('m', strtotime("last day of -$_otsik_lask month"));
+          $_saa_v = date('Y', strtotime("last day of -$_otsik_lask month"));
           $_otsik_lask++;
           $worksheet->writeString($excelrivi, $excelsarake++, t($kuukausittainen_lista[$_saa_kk]['o']." $_saa_v eur"), $format_bold);
           $worksheet->writeString($excelrivi, $excelsarake++, t($kuukausittainen_lista[$_saa_kk]['o']." $_saa_v kpl"), $format_bold);

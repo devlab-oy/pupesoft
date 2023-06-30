@@ -613,15 +613,6 @@ if ($tee != "" and isset($painoinnappia)) {
         $varastonarvo = ((float) $varastonarvo == 0) ? "" : $varastonarvo;
       }
 
-      foreach($kuukausittainen_rivit as $kuukausittainen_rivi_id => $kuukausittainen_rivi_val) {
-        if(substr($kuukausittainen_rivi_id, 0, 2) == "h_") {
-          $kehahint_kk = round($kulutusrivi["k_".substr($kuukausittainen_rivi_id, 2)] * $kehahin, 2);
-          $myyntirivi[$kuukausittainen_rivi_id]  = empty($kehahint_kk) ? "" : $kehahint_kk;
-        } else {
-          $kulutusrivi[$kuukausittainen_rivi_id]  = empty($kulutusrivi[$kuukausittainen_rivi_id]) ? "" : $kulutusrivi[$kuukausittainen_rivi_id];
-        }
-      }
-
       $varattu = empty($varattu) ? "" : (float) $varattu;
       $vapaa_saldo = empty($myytavissa) ? "" : (float) $myytavissa;
       $saldo = empty($row['saldo']) ? "" : (float) $row['saldo'];
@@ -843,6 +834,7 @@ if ($tee != "" and isset($painoinnappia)) {
               $worksheet->writeNumber($excelrivi, $excelsarake++, $kulutusrivi[$kuukausittainen_rivi_id]);
             }
           }
+
         }
       }
 

@@ -600,21 +600,6 @@ if ($tee != "" and isset($painoinnappia)) {
       $tapahtumarivi["tulotVA"] = empty($tapahtumarivi["tulotVA"]) ? "" : $tapahtumarivi["tulotVA"];
       $tapahtumarivi["tulotkplVA"] = empty($tapahtumarivi["tulotkplVA"]) ? "" : $tapahtumarivi["tulotkplVA"];
       $tapahtumarivi["siirrotVA"] = empty($tapahtumarivi["siirrotVA"]) ? "" : $tapahtumarivi["siirrotVA"];
-
-      foreach($kuukausittainen_rivit as $kuukausittainen_rivi_id => $kuukausittainen_rivi_val) {
-        if(substr($kuukausittainen_rivi_id, 0, 2) == "h_") {
-          $myyntirivi[$kuukausittainen_rivi_id]  = empty($myyntirivi[$kuukausittainen_rivi_id]) ? "" : $myyntirivi[$kuukausittainen_rivi_id];
-        } else {
-          $kulutusrivi[$kuukausittainen_rivi_id]  = empty($kulutusrivi[$kuukausittainen_rivi_id]) ? "" : $kulutusrivi[$kuukausittainen_rivi_id];
-        }
-      }
-
-      $varattu = empty($varattu) ? "" : (float) $varattu;
-      $vapaa_saldo = empty($myytavissa) ? "" : (float) $myytavissa;
-      $saldo = empty($row['saldo']) ? "" : (float) $row['saldo'];
-      $row["varmuus_varasto"] = empty($row["varmuus_varasto"]) ? "" : $row["varmuus_varasto"];
-      $jalkitoimituksessa = empty($jalkitoimituksessa) ? "" : (float) $jalkitoimituksessa;
-
       if ($toim == "") {
         if     ($row["epakurantti100pvm"] != '0000-00-00') $kehahin = 0;
         elseif ($row["epakurantti75pvm"]  != '0000-00-00') $kehahin = round($row["kehahin"] * 0.25, 6);
@@ -627,6 +612,21 @@ if ($tee != "" and isset($painoinnappia)) {
 
         $varastonarvo = ((float) $varastonarvo == 0) ? "" : $varastonarvo;
       }
+
+      foreach($kuukausittainen_rivit as $kuukausittainen_rivi_id => $kuukausittainen_rivi_val) {
+        if(substr($kuukausittainen_rivi_id, 0, 2) == "h_") {
+          $kehahint_kk = round($kulutusrivi["k_".substr($kuukausittainen_rivi_id, 2)] * $kehahin, 2);
+          $myyntirivi[$kuukausittainen_rivi_id]  = empty($kehahint_kk) ? "" : $kehahint_kk;
+        } else {
+          $kulutusrivi[$kuukausittainen_rivi_id]  = empty($kulutusrivi[$kuukausittainen_rivi_id]) ? "" : $kulutusrivi[$kuukausittainen_rivi_id];
+        }
+      }
+
+      $varattu = empty($varattu) ? "" : (float) $varattu;
+      $vapaa_saldo = empty($myytavissa) ? "" : (float) $myytavissa;
+      $saldo = empty($row['saldo']) ? "" : (float) $row['saldo'];
+      $row["varmuus_varasto"] = empty($row["varmuus_varasto"]) ? "" : $row["varmuus_varasto"];
+      $jalkitoimituksessa = empty($jalkitoimituksessa) ? "" : (float) $jalkitoimituksessa;
 
       if ($listaustyyppi == "ostoryhma" and !empty($edrow) and $row['malli'] != $edrow["malli"] and $excelrivi >= $mallisummarivi) {
         $excelsarake = 0;
@@ -834,9 +834,11 @@ if ($tee != "" and isset($painoinnappia)) {
           $worksheet->writeNumber($excelrivi, $excelsarake++, $kulutusrivi["kulutus12kk"]);
           $worksheet->writeNumber($excelrivi, $excelsarake++, $kulutusrivi["kulutus6kk"]);
           $worksheet->writeNumber($excelrivi, $excelsarake++, $kulutusrivi["kulutus3kk"]);
+
           foreach($kuukausittainen_rivit as $kuukausittainen_rivi_id => $kuukausittainen_rivi_val) {
             if(substr($kuukausittainen_rivi_id, 0, 2) == "h_") {
-              $worksheet->writeNumber($excelrivi, $excelsarake++, $myyntirivi[$kuukausittainen_rivi_id]);
+              $kehahint_kk = round($kulutusrivi["k_".substr($kuukausittainen_rivi_id, 2)] * $kehahin, 2);
+              $worksheet->writeNumber($excelrivi, $excelsarake++, $kehahint_kk);
             } else {
               $worksheet->writeNumber($excelrivi, $excelsarake++, $kulutusrivi[$kuukausittainen_rivi_id]);
             }

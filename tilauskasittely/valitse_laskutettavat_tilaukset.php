@@ -96,7 +96,7 @@ if ($maksupaate_kassamyynti) {
   if ($kaytetaan_maksupaatetta) {
     list($loytyy_maksutapahtumia, $maksettavaa_jaljella, $kateismaksu["luottokortti"],
       $kateismaksu["pankkikortti"]) =
-      jaljella_oleva_maksupaatesumma($ekarow["tunnus"], $ekarow["summa"]);
+      jaljella_oleva_maksupaatesumma($ekarow["tunnus"], $ekarow["summa"], $kateismaksu);
 
     if (isset($maksupaatetapahtuma)) {
       if ($maksupaatetapahtuma) {
@@ -106,7 +106,7 @@ if ($maksupaate_kassamyynti) {
 
       list($loytyy_maksutapahtumia, $maksettavaa_jaljella, $kateismaksu["luottokortti"],
         $kateismaksu["pankkikortti"]) =
-        jaljella_oleva_maksupaatesumma($ekarow["tunnus"], $ekarow["summa"]);
+        jaljella_oleva_maksupaatesumma($ekarow["tunnus"], $ekarow["summa"], $kateismaksu);
 
       if (($loytyy_maksutapahtumia and ($maksettavaa_jaljella - $kateista_annettu) == 0 and
           ($kateismaksu["luottokortti"] != 0 or

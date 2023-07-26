@@ -33734,7 +33734,7 @@ if (!function_exists("pyorista_kolikot")) {
 }
 
 if (!function_exists("jaljella_oleva_maksupaatesumma")) {
-  function jaljella_oleva_maksupaatesumma($tilausnumero, $kaikkiyhteensa) {
+  function jaljella_oleva_maksupaatesumma($tilausnumero, $kaikkiyhteensa, $kateismaksu = false) {
     global $kukarow, $yhtiorow;
 
     $loytyy = false;
@@ -33777,7 +33777,10 @@ if (!function_exists("jaljella_oleva_maksupaatesumma")) {
     if ($kaikkiyhteensa) {
       $totaalisumma =
         number_format($kaikkiyhteensa - $valisumma, $yhtiorow['hintapyoristys'], '.', '');
-      $palautettava = array($loytyy, pyorista_kolikot($totaalisumma), $maksettu_lkortilla, $maksettu_pkortilla);
+      if($kateismaksu and isset($kateismaksu['kateinen']) and !empty($kateismaksu['kateinen'])) {
+        $totaalisumma = pyorista_kolikot($totaalisumma);
+      }
+      $palautettava = array($loytyy, $totaalisumma, $maksettu_lkortilla, $maksettu_pkortilla);
     }
     else {
       $palautettava = array($loytyy, false, $maksettu_lkortilla, $maksettu_pkortilla);

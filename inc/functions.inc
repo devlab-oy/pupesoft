@@ -33620,7 +33620,7 @@ if (!function_exists("piirra_maksupaate_formi")) {
             <ul class='list-unstyled'>
               <li class='text-medium'>" . t("Summa") . ":</li>
               <li>
-                <span id='jaljella' class='text-large'>{$maksettavaa_jaljella}</span>
+                <span id='jaljella' class='text-large'>".number_format(pyorista_kolikot($maksettavaa_jaljella), $yhtiorow['hintapyoristys'], '.', '')."</span>
                 <span class='text-large'>{$laskurow["valkoodi"]}</span>
               </li>
               <li class='text-medium'>" . t("Annettu") . ":</li>

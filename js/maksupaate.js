@@ -48,6 +48,7 @@ $(function() {
   $('#kateismaksunappi').on('click', function() {
     var kateisFloat = parseFloat(kateinen.val());
     var korttimaksuFloat = parseFloat(korttimaksu.val());
+    korttimaksuFloat = (Math.ceil(korttimaksuFloat*20 - 0.5)/20).toFixed(2);
 
     if (kateisFloat) {
       annettu.val(korttimaksuFloat + kateisFloat);

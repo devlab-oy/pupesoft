@@ -1022,7 +1022,7 @@ if ($tee == "VALITSE") {
       $kateista_annettu = isset($kateista_annettu) ? $kateista_annettu : 0;
       piirra_maksupaate_formi($ekarow, $ekarow["summa"], $kateinen, $maksettavaa_jaljella,
         $loytyy_maksutapahtumia, $kateismaksu, $kateista_annettu,
-        $korttimaksutapahtuman_status, reset($maksuehtoja), false);
+        $korttimaksutapahtuman_status, false);
     }
 
     echo "  <SCRIPT LANGUAGE=JAVASCRIPT>
@@ -1395,7 +1395,8 @@ function hae_tilaukset_result($query_ale_lisa, $tunnukset, $alatilat, $vientilis
             lasku.toim_postitp,
             lasku.toim_maa,
             lasku.laskutusvkopv,
-            lasku.rahtivapaa,
+            lasku.rahtivapaa, 
+            lasku.maksuehto, 
             lasku.toimitustapa,
             laskun_lisatiedot.laskutus_nimi, laskun_lisatiedot.laskutus_nimitark, laskun_lisatiedot.laskutus_osoite, laskun_lisatiedot.laskutus_postino, laskun_lisatiedot.laskutus_postitp, laskun_lisatiedot.laskutus_maa,
             maksuehto.teksti meh,

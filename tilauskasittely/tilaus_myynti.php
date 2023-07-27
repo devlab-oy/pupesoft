@@ -10530,7 +10530,7 @@ if ($tee == '') {
 
       piirra_maksupaate_formi($laskurow, $kaikkiyhteensa, $kateinen, $maksettavaa_jaljella,
         $loytyy_maksutapahtumia, $kateismaksu, $kateista_annettu,
-        $korttimaksutapahtuman_status, $maksuehtorow['tunnus'], true);
+        $korttimaksutapahtuman_status, true);
     }
 
     echo "<br><table width='100%'><tr>$jarjlisa";

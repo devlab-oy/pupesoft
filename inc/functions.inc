@@ -33593,14 +33593,9 @@ if (!function_exists("choose_correct_date")) {
 if (!function_exists("piirra_maksupaate_formi")) {
   function piirra_maksupaate_formi($laskurow, $kaikkiyhteensa, $kateinen, $maksettavaa_jaljella,
     $loytyy_maksutapahtumia, $kateismaksu, $kateista_annettu,
-    $korttimaksutapahtuman_status, $maksuehto, $piirra_keraysnappula = true) {
+    $korttimaksutapahtuman_status, $piirra_keraysnappula = true) {
     global $kukarow, $mista, $valittu_kopio_tulostin, $kertakassa, $toim, $orig_tila, $orig_alatila,
-    $kassalipas, $kieli, $valittu_tulostin;
-
-    $ehtolisa = "";
-    if (!empty($maksuehto)) {
-      $ehtolisa = " AND tunnus = {$maksuehto} ";
-    }
+    $kassalipas, $kieli, $valittu_tulostin, $yhtiorow;
 
     $query_maksuehto = "SELECT *
                         FROM maksuehto
@@ -33608,11 +33603,14 @@ if (!function_exists("piirra_maksupaate_formi")) {
                         AND kateinen                 != ''
                         AND kaytossa                  = ''
                         AND (maksuehto.sallitut_maat = ''
-                          OR maksuehto.sallitut_maat  LIKE '%{$laskurow["maa"]}%')
-                        {$ehtolisa}";
+                          OR maksuehto.sallitut_maat  LIKE '%{$laskurow["maa"]}%') 
+                        AND tunnus = {$laskurow[maksuehto]}";
 
     $maksuehtores = pupe_query($query_maksuehto);
     $maksuehtorow = mysql_fetch_assoc($maksuehtores);
+
+    $kaikkiyhteensa_old = $kaikkiyhteensa;
+    $maksettavaa_jaljella_old = $maksettavaa_jaljella;
 
     // Pyöristetään lähimpään 5 senttiin, jos maksuehdossa on valittu, että pyöristetään.
     if ($maksuehtorow['kateinen'] == 'p') {
@@ -33625,7 +33623,7 @@ if (!function_exists("piirra_maksupaate_formi")) {
             <ul class='list-unstyled'>
               <li class='text-medium'>" . t("Summa") . ":</li>
               <li>
-                <span id='jaljella' class='text-large'>{$maksettavaa_jaljella}</span>
+                <span id='jaljella' class='text-large'>".number_format(pyorista_kolikot($maksettavaa_jaljella), $yhtiorow['hintapyoristys'], '.', '')."</span>
                 <span class='text-large'>{$laskurow["valkoodi"]}</span>
               </li>
               <li class='text-medium'>" . t("Annettu") . ":</li>
@@ -33646,7 +33644,7 @@ if (!function_exists("piirra_maksupaate_formi")) {
     echo "<input type='hidden' name='mista' value='{$mista}'>";
     echo "<input type='hidden' name='tee' id='laskuriTee' value=''>";
     echo "<input type='hidden' name='maksutapa' value='{$maksuehtorow["tunnus"]}'>";
-    echo "<input type='hidden' name='kaikkiyhteensa' value='{$kaikkiyhteensa}'>";
+    echo "<input type='hidden' data='$kaikkiyhteensa_old' name='kaikkiyhteensa' value='{$kaikkiyhteensa}'>";
     echo "<input type='hidden' name='valittu_kopio_tulostin' value='{$valittu_kopio_tulostin}'>";
     echo "<input type='hidden' name='kateinen' value='{$kateinen}'>";
     echo "<input type='hidden' name='kertakassa' value='{$kertakassa}'>";
@@ -33668,7 +33666,7 @@ if (!function_exists("piirra_maksupaate_formi")) {
     echo "<tr><td class='back'><font class='head'>" . t("Maksutapa") . "</font></td></tr>";
     echo "<tr>";
     echo "<td><label for='korttimaksu'>" . t("Summa") . "</label>";
-    echo "<input type='text' name='korttimaksu' id='korttimaksu' value='{$maksettavaa_jaljella}'
+    echo "<input type='text' data='$maksettavaa_jaljella_old' name='korttimaksu' id='korttimaksu' value='{$maksettavaa_jaljella}'
                size='7' autocomplete='off'>";
     echo "<span class='error'>" . t($korttimaksutapahtuman_status) . "</span>";
     echo "</td></tr>";
@@ -33727,8 +33725,14 @@ if (!function_exists("maksa_maksupaatteella")) {
   }
 }
 
+if (!function_exists("pyorista_kolikot")) {
+  function pyorista_kolikot($x){
+    return round($x * 2, 1) / 2;
+  }
+}
+
 if (!function_exists("jaljella_oleva_maksupaatesumma")) {
-  function jaljella_oleva_maksupaatesumma($tilausnumero, $kaikkiyhteensa) {
+  function jaljella_oleva_maksupaatesumma($tilausnumero, $kaikkiyhteensa, $kateismaksu = false) {
     global $kukarow, $yhtiorow;
 
     $loytyy = false;
@@ -33771,6 +33775,9 @@ if (!function_exists("jaljella_oleva_maksupaatesumma")) {
     if ($kaikkiyhteensa) {
       $totaalisumma =
         number_format($kaikkiyhteensa - $valisumma, $yhtiorow['hintapyoristys'], '.', '');
+      if($kateismaksu and isset($kateismaksu['kateinen']) and !empty($kateismaksu['kateinen'])) {
+        $totaalisumma = pyorista_kolikot($totaalisumma);
+      }
       $palautettava = array($loytyy, $totaalisumma, $maksettu_lkortilla, $maksettu_pkortilla);
     }
     else {

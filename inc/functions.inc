@@ -33595,7 +33595,7 @@ if (!function_exists("piirra_maksupaate_formi")) {
     $loytyy_maksutapahtumia, $kateismaksu, $kateista_annettu,
     $korttimaksutapahtuman_status, $piirra_keraysnappula = true) {
     global $kukarow, $mista, $valittu_kopio_tulostin, $kertakassa, $toim, $orig_tila, $orig_alatila,
-    $kassalipas, $kieli, $valittu_tulostin;
+    $kassalipas, $kieli, $valittu_tulostin, $yhtiorow;
 
     $query_maksuehto = "SELECT *
                         FROM maksuehto

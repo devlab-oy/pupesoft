@@ -289,7 +289,7 @@ if ($tee != "" and isset($painoinnappia)) {
             FROM tuote
             {$left} JOIN tuotepaikat ON (tuote.tuoteno = tuotepaikat.tuoteno AND tuote.yhtio = tuotepaikat.yhtio)
             {$toimittaja_join}
-            WHERE tuote.yhtio = '{$kukarow["yhtio"]}'
+            WHERE tuote.yhtio = '{$kukarow["yhtio"]}' 
             {$lisa}
             {$varasto_tp_filter}
             {$saldolisa}
@@ -486,27 +486,36 @@ if ($tee != "" and isset($painoinnappia)) {
             $_saa_kk = str_pad($_saa_kk, 2, '0', STR_PAD_LEFT);
 
             $kuukausittainen_lisa_myynti .= "
-            , round(
-              sum(
+            , 
+              avg(
                 if(
-                  (toimitettuaika > LAST_DAY(date_sub(CURDATE(), interval $_lask_s month)) and toimitettuaika <= LAST_DAY(date_sub(CURDATE(), interval $_lask month))), 
-                rivihinta, 0)
-              )
+                  (laadittu > LAST_DAY(date_sub(CURDATE(), interval $_lask_s month)) and laadittu <= LAST_DAY(date_sub(CURDATE(), interval $_lask month))), 
+                hinta, NULL)
             ) h_".$kuukausittainen_lista[$_saa_kk]['i'];
             $kuukausittainen_lisa_kulutus .= "
-            , round(
-              sum(
+            , sum(
                 if(
                   (toimitettuaika > LAST_DAY(date_sub(CURDATE(), interval $_lask_s month)) and toimitettuaika <= LAST_DAY(date_sub(CURDATE(), interval $_lask month))), 
                 kpl, 0)
-              )
             ) k_".$kuukausittainen_lista[$_saa_kk]['i'];
             $kuukausittainen_rivit["h_".$kuukausittainen_lista[$_saa_kk]['i']] = $kuukausittainen_lista[$_saa_kk]['o']." €";
             $kuukausittainen_rivit["k_".$kuukausittainen_lista[$_saa_kk]['i']] = $kuukausittainen_lista[$_saa_kk]['o']." kpl";
             $_lask++;
             $_lask_s++;
           }
+          
+          // haetaan kehahin jokaiselle kuukaudelle
+          $query = "SELECT laji
+                    $kuukausittainen_lisa_myynti
+                    FROM tapahtuma
+                    WHERE yhtio         = '{$kukarow["yhtio"]}'
+                    AND tuoteno         = '{$row["tuoteno"]}'
+                    and laadittu  >= date_sub(CURDATE(), interval 12 month)
+                    AND kpl            < 0
+                    {$varasto_tilausrivi_filter}";
 
+          $kehahinresult = pupe_query($query);
+          $kehahinnat = mysql_fetch_assoc($kehahinresult);
         }
         
         // myyntipuoli
@@ -515,7 +524,6 @@ if ($tee != "" and isset($painoinnappia)) {
                   round(sum(if(laskutettuaika >= date_sub(CURDATE(), interval 12 month), $tyyppi_lisa, 0))) myynti12kk,
                   round(sum(if(laskutettuaika >= date_sub(CURDATE(), interval 6 month), $tyyppi_lisa, 0))) myynti6kk,
                   round(sum(if(laskutettuaika >= date_sub(CURDATE(), interval 3 month), $tyyppi_lisa, 0))) myynti3kk 
-                  $kuukausittainen_lisa_myynti
                   FROM tilausrivi
                   WHERE yhtio         = '{$kukarow["yhtio"]}'
                   AND tuoteno         = '{$row["tuoteno"]}'
@@ -601,6 +609,7 @@ if ($tee != "" and isset($painoinnappia)) {
       $tapahtumarivi["tulotVA"] = empty($tapahtumarivi["tulotVA"]) ? "" : $tapahtumarivi["tulotVA"];
       $tapahtumarivi["tulotkplVA"] = empty($tapahtumarivi["tulotkplVA"]) ? "" : $tapahtumarivi["tulotkplVA"];
       $tapahtumarivi["siirrotVA"] = empty($tapahtumarivi["siirrotVA"]) ? "" : $tapahtumarivi["siirrotVA"];
+
       if ($toim == "") {
         if     ($row["epakurantti100pvm"] != '0000-00-00') $kehahin = 0;
         elseif ($row["epakurantti75pvm"]  != '0000-00-00') $kehahin = round($row["kehahin"] * 0.25, 6);
@@ -829,7 +838,8 @@ if ($tee != "" and isset($painoinnappia)) {
 
           foreach($kuukausittainen_rivit as $kuukausittainen_rivi_id => $kuukausittainen_rivi_val) {
             if(substr($kuukausittainen_rivi_id, 0, 2) == "h_") {
-              $kehahint_kk = round($kulutusrivi["k_".substr($kuukausittainen_rivi_id, 2)] * $kehahin, 2);
+              $_kehahin = $kehahinnat[$kuukausittainen_rivi_id];
+              $kehahint_kk = round($kulutusrivi["k_".substr($kuukausittainen_rivi_id, 2)] * $_kehahin, 2);
               $worksheet->writeNumber($excelrivi, $excelsarake++, $kehahint_kk);
             } else {
               $worksheet->writeNumber($excelrivi, $excelsarake++, $kulutusrivi[$kuukausittainen_rivi_id]);

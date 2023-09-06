@@ -827,7 +827,20 @@ if (!function_exists('finvoice_rivi')) {
 
       xml_add("RowDiscountPercent", pp($alennukset_yhteensa, 2), $tootfinvoice);
       xml_add("RowDiscountAmount AmountCurrencyIdentifier=\"$lasrow[valkoodi]\"", str_replace(".", ",", $tilrow['aleyhteensa']), $tootfinvoice);
-      xml_add("RowDiscountTypeText", str_replace("\n", ' | ', $tilrow['ale_peruste']), $tootfinvoice);
+
+      $RowDiscountTypeText = str_replace("\n", ' | ', $tilrow['ale_peruste']);
+      $RowDiscountTypeText = str_replace(
+        Array(
+          "Käyttäjän antama hinta. ",
+          " XXXHINTAPERUSTE:1",
+          " XXXHINTAPERUSTE:0",
+          " XXXHINTAPERUSTE:2"
+        ), "", $RowDiscountTypeText);
+      if(strlen($RowDiscountTypeText) > 35) {
+        $RowDiscountTypeText = substr($RowDiscountTypeText, 0, 35);
+      }
+
+      xml_add("RowDiscountTypeText", $RowDiscountTypeText, $tootfinvoice);
 
       xml_add("RowVatRatePercent", pp($tilrow['alv'], 2, 5, 2), $tootfinvoice);
       if(floatval(str_replace(',', '.', $tilrow["alv"])) > 0) {

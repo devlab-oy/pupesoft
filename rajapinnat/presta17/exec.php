@@ -183,17 +183,7 @@ class Presta17RestApi
       }
     }
 
-    $blankXml = $this->rest->get(Array('url' => $this->url . 'api/stock_availables?schema=synopsis'));
-    $stock_availableFields = $blankXml->stock_available->children();
-    $stock_availableFields->out_of_stock = 0;
-    $stock_availableFields->quantity = $qty;
-    $stock_availables = Array(
-      'resource' => 'stock_availables',
-      'postXml' => $blankXml->asXML(),
-    );
-    if($createdXml = $this->rest->add($stock_availables)) {
-      return true;
-    }
+    return false;
     
   }
 

@@ -1391,7 +1391,7 @@ class Presta17RestApi
     }
   }
 
-  public function getPrestashopOrders() {
+  public function getPrestashopOrders($days) {
 
     $orders = Array(
       'resource' => 'orders',
@@ -1413,8 +1413,18 @@ class Presta17RestApi
     $missing_orders = array();
     $prestashop_orders = $this->rest->get($orders);
 
+    $date_now = new DateTime();
+    $date_now->modify("-$days day");
+    
     foreach ($prestashop_orders->orders->order as $order) {
       if(!isset($orders_processed[$order->id->__toString()]) and $customer_id = $order->id_customer->__toString()) {
+
+        $date2 = new DateTime($order->date_add->__toString());
+
+        if ($date_now > $date2) {
+          continue;
+        }
+
         $customer_dummy = array(
           $customer_id => array(
             0 => array(
@@ -1591,7 +1601,7 @@ class Presta17RestApi
     }
 
     if ($resource == 'orders') {
-      $this->prestashop_orders = $this->getPrestashopOrders();
+      $this->prestashop_orders = $this->getPrestashopOrders($days);
     }
 
     if ($resource == 'clean' or $resource == 'products' or $resource == 'stocks') {

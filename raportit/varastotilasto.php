@@ -490,13 +490,13 @@ if ($tee != "" and isset($painoinnappia)) {
               avg(
                 if(
                   (laadittu > LAST_DAY(date_sub(CURDATE(), interval $_lask_s month)) and laadittu <= LAST_DAY(date_sub(CURDATE(), interval $_lask month))), 
-                hinta, NULL)
+                ABS(hinta), NULL)
             ) h_".$kuukausittainen_lista[$_saa_kk]['i'];
             $kuukausittainen_lisa_kulutus .= "
             , sum(
                 if(
-                  (toimitettuaika > LAST_DAY(date_sub(CURDATE(), interval $_lask_s month)) and toimitettuaika <= LAST_DAY(date_sub(CURDATE(), interval $_lask month))), 
-                kpl, 0)
+                  (laadittu > LAST_DAY(date_sub(CURDATE(), interval $_lask_s month)) and laadittu <= LAST_DAY(date_sub(CURDATE(), interval $_lask month))), 
+                ABS(kpl), 0)
             ) k_".$kuukausittainen_lista[$_saa_kk]['i'];
             $kuukausittainen_rivit["h_".$kuukausittainen_lista[$_saa_kk]['i']] = $kuukausittainen_lista[$_saa_kk]['o']." €";
             $kuukausittainen_rivit["k_".$kuukausittainen_lista[$_saa_kk]['i']] = $kuukausittainen_lista[$_saa_kk]['o']." kpl";
@@ -511,11 +511,24 @@ if ($tee != "" and isset($painoinnappia)) {
                     WHERE yhtio         = '{$kukarow["yhtio"]}'
                     AND tuoteno         = '{$row["tuoteno"]}'
                     and laadittu  >= date_sub(CURDATE(), interval 12 month)
-                    AND kpl            < 0
+                    AND laji = 'laskutus' 
                     {$varasto_tilausrivi_filter}";
 
           $kehahinresult = pupe_query($query);
           $kehahinnat = mysql_fetch_assoc($kehahinresult);
+
+          // haetaan kehahin jokaiselle kuukaudelle
+                    $query = "SELECT laji
+                    $kuukausittainen_lisa_kulutus
+                    FROM tapahtuma
+                    WHERE yhtio         = '{$kukarow["yhtio"]}'
+                    AND tuoteno         = '{$row["tuoteno"]}'
+                    and laadittu  >= date_sub(CURDATE(), interval 12 month)
+                    AND laji = 'laskutus' 
+                    {$varasto_tilausrivi_filter}";
+
+          $kplresult = pupe_query($query);
+          $kplmyynti = mysql_fetch_assoc($kplresult);
         }
         
         // myyntipuoli
@@ -542,7 +555,6 @@ if ($tee != "" and isset($painoinnappia)) {
                     round(sum(if(toimitettuaika >= date_sub(CURDATE(), interval 12 month), $tyyppi_lisa, 0))) kulutus12kk,
                     round(sum(if(toimitettuaika >= date_sub(CURDATE(), interval 6 month), $tyyppi_lisa, 0))) kulutus6kk,
                     round(sum(if(toimitettuaika >= date_sub(CURDATE(), interval 3 month), $tyyppi_lisa, 0))) kulutus3kk
-                    $kuukausittainen_lisa_kulutus
                     FROM tilausrivi
                     WHERE yhtio         = '{$kukarow["yhtio"]}'
                     AND tuoteno         = '{$row["tuoteno"]}'
@@ -839,10 +851,10 @@ if ($tee != "" and isset($painoinnappia)) {
           foreach($kuukausittainen_rivit as $kuukausittainen_rivi_id => $kuukausittainen_rivi_val) {
             if(substr($kuukausittainen_rivi_id, 0, 2) == "h_") {
               $_kehahin = $kehahinnat[$kuukausittainen_rivi_id];
-              $kehahint_kk = round($kulutusrivi["k_".substr($kuukausittainen_rivi_id, 2)] * $_kehahin, 2);
+              $kehahint_kk = round($kplmyynti["k_".substr($kuukausittainen_rivi_id, 2)] * $_kehahin, 2);
               $worksheet->writeNumber($excelrivi, $excelsarake++, $kehahint_kk);
             } else {
-              $worksheet->writeNumber($excelrivi, $excelsarake++, $kulutusrivi[$kuukausittainen_rivi_id]);
+              $worksheet->writeNumber($excelrivi, $excelsarake++, $kplmyynti[$kuukausittainen_rivi_id]);
             }
           }
         }

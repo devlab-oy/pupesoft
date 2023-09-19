@@ -1244,12 +1244,20 @@ class Presta17RestApi
     $query = "SELECT * from asiakas where tunnus = $pupesoft_customer_id";
     $pupesoft_customer_search = pupe_query($query);
 
+    $order_type = "2";
+    $ordertype_keywords = t_avainsana("VERKAUPRESTATIL");
+    while ($ordertype_keyword = mysql_fetch_assoc($ordertype_keywords)) {
+      if($ordertype_keyword['selite'] == "K") {
+        $order_type = "K";
+      }
+    }
+
     $options = array(
       'edi_polku'         => $this->presta17_api_edipath,
       'ovt_tunnus'        => $this->presta17_api_ovt,
       'rahtikulu_nimitys' => 'Toimituskulut',
       'rahtikulu_tuoteno' => 'RAHTI',
-      'tilaustyyppi'      => '2',
+      'tilaustyyppi'      => $order_type,
       'maksuehto_ohjaus'  => $this->presta17_api_payment_rule,
       'erikoiskasittely'  => array(),
       'verkkokauppa_verollisen_hinnan_kentta' => '',
@@ -1412,7 +1420,7 @@ class Presta17RestApi
     );
     $missing_orders = array();
     $prestashop_orders = $this->rest->get($orders);
-
+    
     $date_now = new DateTime();
     $date_now->modify("-$days day");
     

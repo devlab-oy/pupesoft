@@ -487,10 +487,10 @@ if ($tee != "" and isset($painoinnappia)) {
 
             $kuukausittainen_lisa_myynti .= "
             , 
-              avg(
+              sum(
                 if(
                   (laadittu > LAST_DAY(date_sub(CURDATE(), interval $_lask_s month)) and laadittu <= LAST_DAY(date_sub(CURDATE(), interval $_lask month))), 
-                ABS(hinta), NULL)
+                ABS(hinta*kpl), NULL)
             ) h_".$kuukausittainen_lista[$_saa_kk]['i'];
             $kuukausittainen_lisa_kulutus .= "
             , sum(
@@ -504,7 +504,7 @@ if ($tee != "" and isset($painoinnappia)) {
             $_lask_s++;
           }
           
-          // haetaan kehahin jokaiselle kuukaudelle
+          // haetaan myynti jokaiselle kuukaudelle
           $query = "SELECT laji
                     $kuukausittainen_lisa_myynti
                     FROM tapahtuma
@@ -514,8 +514,8 @@ if ($tee != "" and isset($painoinnappia)) {
                     AND laji = 'laskutus' 
                     {$varasto_tilausrivi_filter}";
 
-          $kehahinresult = pupe_query($query);
-          $kehahinnat = mysql_fetch_assoc($kehahinresult);
+          $eurmyyntiresult = pupe_query($query);
+          $eurmyynti = mysql_fetch_assoc($eurmyyntiresult);
 
           // haetaan kehahin jokaiselle kuukaudelle
                     $query = "SELECT laji
@@ -850,9 +850,9 @@ if ($tee != "" and isset($painoinnappia)) {
 
           foreach($kuukausittainen_rivit as $kuukausittainen_rivi_id => $kuukausittainen_rivi_val) {
             if(substr($kuukausittainen_rivi_id, 0, 2) == "h_") {
-              $_kehahin = $kehahinnat[$kuukausittainen_rivi_id];
-              $kehahint_kk = round($kplmyynti["k_".substr($kuukausittainen_rivi_id, 2)] * $_kehahin, 2);
-              $worksheet->writeNumber($excelrivi, $excelsarake++, $kehahint_kk);
+              //$_eurmyynti = $eurmyynti[$kuukausittainen_rivi_id];
+              //$kehahint_kk = round($kplmyynti["k_".substr($kuukausittainen_rivi_id, 2)] * $_kehahin, 2);
+              $worksheet->writeNumber($excelrivi, $excelsarake++, $eurmyynti[$kuukausittainen_rivi_id]);
             } else {
               $worksheet->writeNumber($excelrivi, $excelsarake++, $kplmyynti[$kuukausittainen_rivi_id]);
             }

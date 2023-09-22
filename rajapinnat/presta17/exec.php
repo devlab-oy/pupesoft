@@ -183,17 +183,7 @@ class Presta17RestApi
       }
     }
 
-    $blankXml = $this->rest->get(Array('url' => $this->url . 'api/stock_availables?schema=synopsis'));
-    $stock_availableFields = $blankXml->stock_available->children();
-    $stock_availableFields->out_of_stock = 0;
-    $stock_availableFields->quantity = $qty;
-    $stock_availables = Array(
-      'resource' => 'stock_availables',
-      'postXml' => $blankXml->asXML(),
-    );
-    if($createdXml = $this->rest->add($stock_availables)) {
-      return true;
-    }
+    return false;
     
   }
 
@@ -1254,12 +1244,20 @@ class Presta17RestApi
     $query = "SELECT * from asiakas where tunnus = $pupesoft_customer_id";
     $pupesoft_customer_search = pupe_query($query);
 
+    $order_type = "2";
+    $ordertype_keywords = t_avainsana("VERKAUPRESTATIL");
+    while ($ordertype_keyword = mysql_fetch_assoc($ordertype_keywords)) {
+      if($ordertype_keyword['selite'] == "K") {
+        $order_type = "K";
+      }
+    }
+
     $options = array(
       'edi_polku'         => $this->presta17_api_edipath,
       'ovt_tunnus'        => $this->presta17_api_ovt,
       'rahtikulu_nimitys' => 'Toimituskulut',
       'rahtikulu_tuoteno' => 'RAHTI',
-      'tilaustyyppi'      => '2',
+      'tilaustyyppi'      => $order_type,
       'maksuehto_ohjaus'  => $this->presta17_api_payment_rule,
       'erikoiskasittely'  => array(),
       'verkkokauppa_verollisen_hinnan_kentta' => '',
@@ -1401,7 +1399,7 @@ class Presta17RestApi
     }
   }
 
-  public function getPrestashopOrders() {
+  public function getPrestashopOrders($days) {
 
     $orders = Array(
       'resource' => 'orders',
@@ -1422,9 +1420,19 @@ class Presta17RestApi
     );
     $missing_orders = array();
     $prestashop_orders = $this->rest->get($orders);
-
+    
+    $date_now = new DateTime();
+    $date_now->modify("-$days day");
+    
     foreach ($prestashop_orders->orders->order as $order) {
       if(!isset($orders_processed[$order->id->__toString()]) and $customer_id = $order->id_customer->__toString()) {
+
+        $date2 = new DateTime($order->date_add->__toString());
+
+        if ($date_now > $date2) {
+          continue;
+        }
+
         $customer_dummy = array(
           $customer_id => array(
             0 => array(
@@ -1601,7 +1609,7 @@ class Presta17RestApi
     }
 
     if ($resource == 'orders') {
-      $this->prestashop_orders = $this->getPrestashopOrders();
+      $this->prestashop_orders = $this->getPrestashopOrders($days);
     }
 
     if ($resource == 'clean' or $resource == 'products' or $resource == 'stocks') {

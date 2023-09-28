@@ -1244,8 +1244,9 @@ class Presta17RestApi
     $query = "SELECT * from asiakas where tunnus = $pupesoft_customer_id";
     $pupesoft_customer_search = pupe_query($query);
 
+    $yhtio = $this->yhtiorow['yhtio'];
     $order_type = "2";
-    $ordertype_keywords = t_avainsana("VERKAUPRESTATIL");
+    $ordertype_keywords = t_avainsana('VERKAUPRESTATIL', '', "", "'$yhtio'");
     while ($ordertype_keyword = mysql_fetch_assoc($ordertype_keywords)) {
       if($ordertype_keyword['selite'] == "K") {
         $order_type = "K";

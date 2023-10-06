@@ -289,7 +289,7 @@ if ($tee != "" and isset($painoinnappia)) {
             FROM tuote
             {$left} JOIN tuotepaikat ON (tuote.tuoteno = tuotepaikat.tuoteno AND tuote.yhtio = tuotepaikat.yhtio)
             {$toimittaja_join}
-            WHERE tuote.yhtio = '{$kukarow["yhtio"]}' AND tuote.tuoteno = '6PELON H' 
+            WHERE tuote.yhtio = '{$kukarow["yhtio"]}' 
             {$lisa}
             {$varasto_tp_filter}
             {$saldolisa}

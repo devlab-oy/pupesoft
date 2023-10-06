@@ -289,7 +289,7 @@ if ($tee != "" and isset($painoinnappia)) {
             FROM tuote
             {$left} JOIN tuotepaikat ON (tuote.tuoteno = tuotepaikat.tuoteno AND tuote.yhtio = tuotepaikat.yhtio)
             {$toimittaja_join}
-            WHERE tuote.yhtio = '{$kukarow["yhtio"]}' 
+            WHERE tuote.yhtio = '{$kukarow["yhtio"]}' AND tuote.tuoteno = '6PELON H' 
             {$lisa}
             {$varasto_tp_filter}
             {$saldolisa}
@@ -511,20 +511,20 @@ if ($tee != "" and isset($painoinnappia)) {
                     WHERE yhtio         = '{$kukarow["yhtio"]}'
                     AND tuoteno         = '{$row["tuoteno"]}'
                     and laadittu  >= date_sub(CURDATE(), interval 12 month)
-                    AND laji = 'laskutus' 
+                    AND laji in ('laskutus', 'kulutus') 
                     {$varasto_tilausrivi_filter}";
 
           $eurmyyntiresult = pupe_query($query);
           $eurmyynti = mysql_fetch_assoc($eurmyyntiresult);
 
-          // haetaan kehahin jokaiselle kuukaudelle
+          // haetaan kpl jokaiselle kuukaudelle
                     $query = "SELECT laji
                     $kuukausittainen_lisa_kulutus
                     FROM tapahtuma
                     WHERE yhtio         = '{$kukarow["yhtio"]}'
                     AND tuoteno         = '{$row["tuoteno"]}'
                     and laadittu  >= date_sub(CURDATE(), interval 12 month)
-                    AND laji = 'laskutus' 
+                    AND laji in ('laskutus', 'kulutus') 
                     {$varasto_tilausrivi_filter}";
 
           $kplresult = pupe_query($query);

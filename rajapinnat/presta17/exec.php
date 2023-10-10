@@ -1216,7 +1216,7 @@ class Presta17RestApi
         $presta_id = $customer['ulkoinen_asiakasnumero'] = $this->setPupesoftCustomer($customer, $customer['ulkoinen_asiakasnumero']);
       }
 
-      if(!$presta_id) {
+      if(!$presta_id or $presta_id == "") {
         continue;
       }
 

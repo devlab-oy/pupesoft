@@ -518,7 +518,7 @@ if ($tee != "" and isset($painoinnappia)) {
           $eurmyynti = mysql_fetch_assoc($eurmyyntiresult);
 
           // haetaan kpl jokaiselle kuukaudelle
-                    $query = "SELECT laji
+          $query = "SELECT laji
                     $kuukausittainen_lisa_kulutus
                     FROM tapahtuma
                     WHERE yhtio         = '{$kukarow["yhtio"]}'
@@ -850,8 +850,6 @@ if ($tee != "" and isset($painoinnappia)) {
 
           foreach($kuukausittainen_rivit as $kuukausittainen_rivi_id => $kuukausittainen_rivi_val) {
             if(substr($kuukausittainen_rivi_id, 0, 2) == "h_") {
-              //$_eurmyynti = $eurmyynti[$kuukausittainen_rivi_id];
-              //$kehahint_kk = round($kplmyynti["k_".substr($kuukausittainen_rivi_id, 2)] * $_kehahin, 2);
               $worksheet->writeNumber($excelrivi, $excelsarake++, $eurmyynti[$kuukausittainen_rivi_id]);
             } else {
               $worksheet->writeNumber($excelrivi, $excelsarake++, $kplmyynti[$kuukausittainen_rivi_id]);

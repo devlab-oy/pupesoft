@@ -1603,7 +1603,7 @@ class Presta17RestApi
       $prestashop_addresses = $this->setPrestashopAddresses($pupesoft_customers);
     }
 
-    if ($resource == 'prices' or $resource == 'all') {
+    if ($resource == 'prices') {
       $this->pupesoft_products = $this->getPupesoftProducts(999999);
       $this->prestashop_products = $this->getPrestashopProducts($this->pupesoft_products);
       $this->setPrestashopPrices($this->getPupesoftPrices($days), $this->getPupesoftCustomers(999999), $this->prestashop_products);

@@ -128,7 +128,6 @@ else {
 }
 
 if ($tee == 'TOIMITA' and isset($maksutapa) and $maksutapa == 'seka') {
-
   echo "<table><form name='laskuri' method='post'>";
 
   //käydään kaikki ruksatut tilaukset läpi
@@ -296,6 +295,7 @@ if ($tee == 'TOIMITA') {
     $result = pupe_query($query);
     
     if (isset($vaihdakateista) and $vaihdakateista == "KYLLA") {
+      
       $katlisa = ", kassalipas = '$kassalipas', maksuehto = '$maksutapa'";
     } else if($maksupaate_kassamyynti and isset($maksupaatetapahtuma) and $maksupaate_kateinen_id and $maksupaate_kortti_id) {
       if($kateismaksu['kateinen']) {
@@ -303,7 +303,7 @@ if ($tee == 'TOIMITA') {
       } else {
         $maksutapa = $maksupaate_kortti_id;
       }
-      $katlisa = ", maksuehto = '$maksutapa'";
+      $katlisa = ", kassalipas = '$kassalipas', maksuehto = '$maksutapa'";
     }
     else {
       $katlisa = "";

@@ -1609,6 +1609,40 @@ class Presta17RestApi
       $this->setPrestashopPrices($this->getPupesoftPrices($days), $this->getPupesoftCustomers(999999), $this->prestashop_products);
     }
 
+    if ($resource == 'cleanprices') {
+      $this->pupesoft_products = $this->getPupesoftProducts(99999);
+      $this->prestashop_products = $this->getPrestashopProducts($this->pupesoft_products);
+      foreach($this->prestashop_products['found'] as $product_sku => $product_id) {
+        $existing_price_ok = Array(
+          'resource' => 'specific_prices',
+          'filter[id_product]' => '[' . $product_id . ']',
+          'display' => 'full'
+        );
+
+        $specific_prices_arr = $this->rest->get($existing_price_ok);
+        if($specific_prices_arr->specific_prices->specific_price) {
+          foreach ($specific_prices_arr->specific_prices->specific_price as $specific_price) {
+            $xml = $this->rest->get(Array(
+              'resource' => 'groups',
+              'id' => $specific_price->id_group,
+            ));
+
+            if($xml) {
+              $groupFields = $xml->group->children();
+              if($_group_data = explode('|||', $groupFields->name->language[0]) and isset($_group_data[1])) {
+                if($_group_data[0] != $product_sku) {
+                  $this->rest->delete(Array(
+                    'resource' => 'specific_prices',
+                    'id' => $specific_price->id
+                  ));
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+
     if ($resource == 'orders') {
       $this->prestashop_orders = $this->getPrestashopOrders($days);
     }
@@ -1726,14 +1760,16 @@ class Presta17RestApi
   {
 
     if (!empty($specific_prices['piirit'])) {
+      
       $data = $specific_prices['piirit'];
       foreach ($data as $info_k => $info) {
         $_group_data = explode('|||', $info['group_name']);
-        $_group_price = round((float) $_group_data[1], 2);
         $data[$info_k]['tuoteno'] = $_group_data[0];
         if(!isset($prestashop_products['found'][$data[$info_k]['tuoteno']])) {
+          unset($data[$info_k]);
           continue;
         }
+        $_group_price = round((float) $_group_data[1], 2);
         $_group_tuoteno = mb_substr(preg_replace('/[^A-Za-z0-9\-]/', '', $_group_data[0]), 0, 26);
         $data[$info_k]['group_name'] = $_group_tuoteno . '|' . $_group_price;
         $data[$info_k]['price'] = $_group_price;
@@ -1759,11 +1795,9 @@ class Presta17RestApi
       $add_customer_groups = array();
 
       foreach ($data as $info) {
-        $_group_price = $info['price'];
+        
         $_group_tuoteno = $info['tuoteno'];
-        if(!isset($prestashop_products['found'][$_group_tuoteno])) {
-          continue;
-        }
+        $_group_price = $info['price'];
         $group_id = $all_groups[$info['group_name']];
         $_group_customers = explode(',', $info['asiakas_presta_id']);
         $_presta_product = $prestashop_products['found'][$_group_tuoteno];

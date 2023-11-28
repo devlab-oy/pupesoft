@@ -10528,6 +10528,17 @@ if ($tee == '') {
           jaljella_oleva_maksupaatesumma($laskurow["tunnus"], $kaikkiyhteensa);
       }
 
+      if(isset($_piilota_maksutavat) and $_piilota_maksutavat) {
+        ?>
+        <style>
+          #kateismaksunappi, #korttimaksunappi,
+          #maksupaate > table tr:not(:last-child) {
+            display: none;
+          }
+        </style>
+        <?php
+      }
+
       piirra_maksupaate_formi($laskurow, $kaikkiyhteensa, $kateinen, $maksettavaa_jaljella,
         $loytyy_maksutapahtumia, $kateismaksu, $kateista_annettu,
         $korttimaksutapahtuman_status, true);

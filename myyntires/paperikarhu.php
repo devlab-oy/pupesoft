@@ -874,6 +874,9 @@ if ($yhtiorow["verkkolasku_lah"] == "maventa" and $_REQUEST['maventa_laheta'] ==
   // Tuotanto
   $client = new SoapClient('https://secure.maventa.com/apis/bravo/wsdl/');
 
+  if ($yhtiorow["finvoice_versio"] == "3") {
+    require "tilauskasittely/verkkolasku_finvoice_301.inc";
+  }
   if ($yhtiorow["finvoice_versio"] == "2") {
     require "tilauskasittely/verkkolasku_finvoice_201.inc";
   }
@@ -931,7 +934,15 @@ if ($yhtiorow["verkkolasku_lah"] == "maventa" and $_REQUEST['maventa_laheta'] ==
     'nimi' => ''
   );
 
-  finvoice_otsik($tootfinvoice, $laskurow, $kieli, $pankkitiedot, $masrow, $myyrow, $tyyppi, $toimaikarow, "", $silent);
+  if(!isset($verkkolasku_talenom_saanto)) {
+    $verkkolasku_talenom_saanto = false;
+  }
+
+  if($yhtiorow["finvoice_versio"] == "3") {
+    finvoice_otsik($tootfinvoice, $laskurow, $kieli, $pankkitiedot, $masrow, $myyrow, $tyyppi, $toimaikarow, "", $silent, "", $ltunnukset, $asiakastiedot, $verkkolasku_talenom_saanto);
+  } else {
+    finvoice_otsik($tootfinvoice, $laskurow, $kieli, $pankkitiedot, $masrow, $myyrow, $tyyppi, $toimaikarow, "", $silent, "", $verkkolasku_talenom_saanto);
+  }
   finvoice_alvierittely($tootfinvoice, $laskurow, $alvrow);
   finvoice_otsikko_loput($tootfinvoice, $laskurow, $masrow, $pankkitiedot);
 

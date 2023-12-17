@@ -124,7 +124,7 @@ if (!function_exists('finvoice_otsik')) {
         $receiverpartyid = "Email";
 
         // halutaan lähettää lasku suoraan asiakkaalle sähköpostilla.. mutta ei nollalaskua
-        if ($lasrow["chn_orig"] == "666" and $lasrow["summa"] != 0) {
+        if ($lasrow["chn_orig"] == "666" and $lasrow["summa"] != 0 and !$verkkolasku_talenom_saanto) {
           $tulostettavat_email[] = $lasrow["tunnus"];
         }
       }

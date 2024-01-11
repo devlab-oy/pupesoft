@@ -300,7 +300,7 @@ if (!function_exists('finvoice_otsik')) {
         // PPG:llä ja Arvatolla tässä voi olla sähköpostiosoite, siksi pitempi.
         $toid_len = ($yhtiorow["verkkolasku_lah"] == "ppg" or $yhtiorow["verkkolasku_lah"] == "arvato")? 76 : 35;
 
-        if($yhtiorow["verkkolasku_lah"] == "talenom" and $lasrow["chn"] == "666" and $verkkolasku_talenom_saanto) {
+        if($yhtiorow["verkkolasku_lah"] == "talenom" and $lasrow["chn_orig"] == "666" and $verkkolasku_talenom_saanto) {
           //Poikkeus talenomille
           xml_add("ToIdentifier", "tulostukseen", $tootfinvoice, $toid_len, 2);
         } else {
@@ -496,7 +496,7 @@ if (!function_exists('finvoice_otsik')) {
 
       xml_add("BuyerContactPersonName", $asiakkaan_yhteyshenkilo, $tootfinvoice, 35);
 
-      if($yhtiorow["verkkolasku_lah"] == "talenom" and $lasrow["chn"] == "666" and $verkkolasku_talenom_saanto) {
+      if($yhtiorow["verkkolasku_lah"] == "talenom" and $lasrow["chn_orig"] == "666" and $verkkolasku_talenom_saanto) {
         fputs($tootfinvoice, "<BuyerCommunicationDetails>\r\n");
         xml_add("BuyerEmailaddressIdentifier", $asiakasrow['lasku_email'], $tootfinvoice, 35);
         fputs($tootfinvoice, "</BuyerCommunicationDetails>\r\n");

@@ -124,7 +124,7 @@ if (!function_exists('finvoice_otsik')) {
         $receiverpartyid = "Email";
 
         // halutaan lähettää lasku suoraan asiakkaalle sähköpostilla.. mutta ei nollalaskua
-        if ($lasrow["chn_orig"] == "666" and $lasrow["summa"] != 0 and !$verkkolasku_talenom_saanto) {
+        if ($lasrow["chn_orig"] == "666" and $lasrow["summa"] != 0 and ($yhtiorow["verkkolasku_lah"] != "talenom" or !$verkkolasku_talenom_saanto)) {
           $tulostettavat_email[] = $lasrow["tunnus"];
         }
       }
@@ -300,7 +300,12 @@ if (!function_exists('finvoice_otsik')) {
         // PPG:llä ja Arvatolla tässä voi olla sähköpostiosoite, siksi pitempi.
         $toid_len = ($yhtiorow["verkkolasku_lah"] == "ppg" or $yhtiorow["verkkolasku_lah"] == "arvato")? 76 : 35;
 
-        xml_add("ToIdentifier", $receiverpartyid, $tootfinvoice, $toid_len, 2);
+        if($yhtiorow["verkkolasku_lah"] == "talenom" and $lasrow["chn"] == "666" and $verkkolasku_talenom_saanto) {
+          //Poikkeus talenomille
+          xml_add("ToIdentifier", "tulostukseen", $tootfinvoice, $toid_len, 2);
+        } else {
+          xml_add("ToIdentifier", $receiverpartyid, $tootfinvoice, $toid_len, 2);
+        }
         xml_add("ToIntermediator", $receiverintermediator, $tootfinvoice, 35, 2);
         fputs($tootfinvoice, "</MessageReceiverDetails>\r\n");
 
@@ -491,7 +496,7 @@ if (!function_exists('finvoice_otsik')) {
 
       xml_add("BuyerContactPersonName", $asiakkaan_yhteyshenkilo, $tootfinvoice, 35);
 
-      if($verkkolasku_talenom_saanto and $asiakasrow['chn'] == "666") {
+      if($yhtiorow["verkkolasku_lah"] == "talenom" and $lasrow["chn"] == "666" and $verkkolasku_talenom_saanto) {
         fputs($tootfinvoice, "<BuyerCommunicationDetails>\r\n");
         xml_add("BuyerEmailaddressIdentifier", $asiakasrow['lasku_email'], $tootfinvoice, 35);
         fputs($tootfinvoice, "</BuyerCommunicationDetails>\r\n");

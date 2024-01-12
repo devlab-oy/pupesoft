@@ -2362,22 +2362,26 @@ else {
             // Laskun kaikki tilaukset
             $lasrow['tilausnumerot'] = $tunnukset;
 
+            if(!isset($verkkolasku_talenom_saanto)) {
+              $verkkolasku_talenom_saanto = false;
+            }
+
             //Kirjoitetaan failiin laskun otsikkotiedot
             if ($lasrow["chn"] == "111") {
               elmaedi_otsik($tootedi, $lasrow, $masrow, $tyyppi, $timestamppi, $toimaikarow);
             }
             elseif ($lasrow["chn"] == "112") {
               if($yhtiorow["finvoice_versio"] == "3") {
-                finvoice_otsik($tootsisainenfinvoice, $lasrow, $kieli, $pankkitiedot, $masrow, $myyrow, $tyyppi, $toimaikarow, $tulos_ulos, $silent, "", $tunnukset, $asiakas_apu_row);
+                finvoice_otsik($tootsisainenfinvoice, $lasrow, $kieli, $pankkitiedot, $masrow, $myyrow, $tyyppi, $toimaikarow, $tulos_ulos, $silent, "", $tunnukset, $asiakas_apu_row, $verkkolasku_talenom_saanto);
               } else {
-                finvoice_otsik($tootsisainenfinvoice, $lasrow, $kieli, $pankkitiedot, $masrow, $myyrow, $tyyppi, $toimaikarow, $tulos_ulos, $silent, "");
+                finvoice_otsik($tootsisainenfinvoice, $lasrow, $kieli, $pankkitiedot, $masrow, $myyrow, $tyyppi, $toimaikarow, $tulos_ulos, $silent, "", $verkkolasku_talenom_saanto);
               }
             }
             elseif (in_array($yhtiorow["verkkolasku_lah"], array("iPost", "finvoice", "maventa", "trustpoint", "ppg", "apix", "sepa", "talenom", "arvato"))) {
               if($yhtiorow["finvoice_versio"] == "3") {
-                finvoice_otsik($tootfinvoice, $lasrow, $kieli, $pankkitiedot, $masrow, $myyrow, $tyyppi, $toimaikarow, $tulos_ulos, $silent, $nosoap, $tunnukset, $asiakas_apu_row);
+                finvoice_otsik($tootfinvoice, $lasrow, $kieli, $pankkitiedot, $masrow, $myyrow, $tyyppi, $toimaikarow, $tulos_ulos, $silent, $nosoap, $tunnukset, $asiakas_apu_row, $verkkolasku_talenom_saanto);
               } else {
-                finvoice_otsik($tootfinvoice, $lasrow, $kieli, $pankkitiedot, $masrow, $myyrow, $tyyppi, $toimaikarow, $tulos_ulos, $silent, $nosoap);
+                finvoice_otsik($tootfinvoice, $lasrow, $kieli, $pankkitiedot, $masrow, $myyrow, $tyyppi, $toimaikarow, $tulos_ulos, $silent, $nosoap, $verkkolasku_talenom_saanto);
               }
               
             }

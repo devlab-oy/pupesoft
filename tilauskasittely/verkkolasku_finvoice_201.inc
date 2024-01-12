@@ -1,7 +1,7 @@
 <?php
 
 if (!function_exists('finvoice_otsik')) {
-  function finvoice_otsik($tootfinvoice, $lasrow, $kieli, $pankkitiedot, $masrow, $myyrow, $tyyppi, $toimaikarow, $tulos_ulos, $silent, $nosoap = "") {
+  function finvoice_otsik($tootfinvoice, $lasrow, $kieli, $pankkitiedot, $masrow, $myyrow, $tyyppi, $toimaikarow, $tulos_ulos, $silent, $nosoap = "", $verkkolasku_talenom_saanto = false) {
     global $yhtiorow, $err_finvoice, $tulos_ulos, $palvelin2, $tulostettavat_email;
 
     //  Koitetaan ollaanko virheettömiä
@@ -124,7 +124,7 @@ if (!function_exists('finvoice_otsik')) {
         $receiverpartyid = "Email";
 
         // halutaan lähettää lasku suoraan asiakkaalle sähköpostilla.. mutta ei nollalaskua
-        if ($lasrow["chn_orig"] == "666" and $lasrow["summa"] != 0) {
+        if ($lasrow["chn_orig"] == "666" and $lasrow["summa"] != 0 and ($yhtiorow["verkkolasku_lah"] != "talenom" or !$verkkolasku_talenom_saanto)) {
           $tulostettavat_email[] = $lasrow["tunnus"];
         }
       }
@@ -300,7 +300,12 @@ if (!function_exists('finvoice_otsik')) {
         // PPG:llä ja Arvatolla tässä voi olla sähköpostiosoite, siksi pitempi.
         $toid_len = ($yhtiorow["verkkolasku_lah"] == "ppg" or $yhtiorow["verkkolasku_lah"] == "arvato")? 76 : 35;
 
-        xml_add("ToIdentifier", $receiverpartyid, $tootfinvoice, $toid_len, 2);
+        if($yhtiorow["verkkolasku_lah"] == "talenom" and $lasrow["chn_orig"] == "666" and $verkkolasku_talenom_saanto) {
+          //Poikkeus talenomille
+          xml_add("ToIdentifier", "tulostukseen", $tootfinvoice, $toid_len, 2);
+        } else {
+          xml_add("ToIdentifier", $receiverpartyid, $tootfinvoice, $toid_len, 2);
+        }
         xml_add("ToIntermediator", $receiverintermediator, $tootfinvoice, 35, 2);
         fputs($tootfinvoice, "</MessageReceiverDetails>\r\n");
 
@@ -491,7 +496,12 @@ if (!function_exists('finvoice_otsik')) {
 
       xml_add("BuyerContactPersonName", $asiakkaan_yhteyshenkilo, $tootfinvoice, 35);
 
-      if ($yhtiorow["verkkolasku_lah"] == "trustpoint" and $receiverintermediator == "EMAIL") {
+      if($yhtiorow["verkkolasku_lah"] == "talenom" and $lasrow["chn_orig"] == "666" and $verkkolasku_talenom_saanto) {
+        fputs($tootfinvoice, "<BuyerCommunicationDetails>\r\n");
+        xml_add("BuyerEmailaddressIdentifier", $asiakasrow['lasku_email'], $tootfinvoice, 35);
+        fputs($tootfinvoice, "</BuyerCommunicationDetails>\r\n");
+      }
+      else if ($yhtiorow["verkkolasku_lah"] == "trustpoint" and $receiverintermediator == "EMAIL") {
         fputs($tootfinvoice, "<BuyerCommunicationDetails>\r\n");
         xml_add("BuyerEmailaddressIdentifier", $receiverpartyid, $tootfinvoice, 35);
         fputs($tootfinvoice, "</BuyerCommunicationDetails>\r\n");
@@ -499,7 +509,7 @@ if (!function_exists('finvoice_otsik')) {
       else {
         $BuyerEmailaddressIdentifier_avainsana_where = "and selitetark = 'BuyerEmailaddressIdentifier' and selitetark_2 !='' ";
         $BuyerEmailaddressIdentifier_avainsana_kentta = t_avainsana("VERKLASKKENTSIS", "", $BuyerEmailaddressIdentifier_avainsana_where, "", "", "selitetark_2");
-        if ($BuyerEmailaddressIdentifier_avainsana_kentta != "" and isset($asiakasrow[$BuyerEmailaddressIdentifier_avainsana_kentta])){
+        if ($BuyerEmailaddressIdentifier_avainsana_kentta != "" and isset($asiakasrow[$BuyerEmailaddressIdentifier_avainsana_kentta])) {
           fputs($tootfinvoice, "<BuyerCommunicationDetails>\r\n");
           xml_add("BuyerEmailaddressIdentifier", $asiakasrow[$BuyerEmailaddressIdentifier_avainsana_kentta], $tootfinvoice, 35);
           fputs($tootfinvoice, "</BuyerCommunicationDetails>\r\n");

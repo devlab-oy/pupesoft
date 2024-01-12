@@ -9548,7 +9548,8 @@ if ($tee == '') {
                      tilausrivi.tunnus,
                      tilausrivi.varattu+tilausrivi.jt varattu,
                      tilausrivin_lisatiedot.osto_vai_hyvitys,
-                     tuote.tuotemassa, (tuote.tuoteleveys * tuote.tuotekorkeus * tuote.tuotesyvyys) AS tuotetilavuus,
+                     tuote.tuotemassa, (tuote.tuoteleveys * tuote.tuotekorkeus * tuote.tuotesyvyys) AS tuotetilavuus, 
+                     tilausrivi.var, 
                      {$lisat}
                      FROM tilausrivi
                      JOIN tuote ON tilausrivi.yhtio=tuote.yhtio and tilausrivi.tuoteno=tuote.tuoteno
@@ -9657,14 +9658,20 @@ if ($tee == '') {
               }
             }
 
-            $summa      += hintapyoristys($arow["rivihinta"]+$arow["alv"]);
-            $summa_eieri  += hintapyoristys($arow["rivihinta_ei_erikoisaletta"]+$arow["alv_ei_erikoisaletta"]);
-            $arvo      += hintapyoristys($arow["rivihinta"]);
-            $arvo_eieri    += hintapyoristys($arow["rivihinta_ei_erikoisaletta"]);
-            $kotiarvo    += hintapyoristys($arow["kotirivihinta"]);
-            $kotiarvo_eieri  += hintapyoristys($arow["kotirivihinta_ei_erikoisaletta"]);
-            $kate      += $rivikate;
-            $kate_eieri    += $rivikate_eieri;
+            if(!isset($summa_jt)) {
+              $summa_jt = 0;
+            }
+            if($arow["var"] == "J") {
+              $summa_jt     += hintapyoristys($arow["rivihinta"]+$arow["alv"]);
+            }
+            $summa          += hintapyoristys($arow["rivihinta"]+$arow["alv"]);
+            $summa_eieri    += hintapyoristys($arow["rivihinta_ei_erikoisaletta"]+$arow["alv_ei_erikoisaletta"]);
+            $arvo           += hintapyoristys($arow["rivihinta"]);
+            $arvo_eieri     += hintapyoristys($arow["rivihinta_ei_erikoisaletta"]);
+            $kotiarvo       += hintapyoristys($arow["kotirivihinta"]);
+            $kotiarvo_eieri += hintapyoristys($arow["kotirivihinta_ei_erikoisaletta"]);
+            $kate           += $rivikate;
+            $kate_eieri     += $rivikate_eieri;
           }
         }
 
@@ -9905,7 +9912,10 @@ if ($tee == '') {
         }
 
         if (isset($summa) and (float) $summa != 0) {
-          $kaikkiyhteensa = yhtioval($summa, $laskurow["vienti_kurssi"]); // käännetään yhteensäsumma yhtiövaluuttaan
+          if(!isset($summa_jt)) {
+            $summa_jt = 0;
+          }
+          $kaikkiyhteensa = yhtioval(hintapyoristys($summa-$summa_jt), $laskurow["vienti_kurssi"]); // k??nnet??n yhteens?summa yhti?valuuttaan
         }
         else {
           $kaikkiyhteensa = 0;

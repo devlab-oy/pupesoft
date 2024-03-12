@@ -32,21 +32,15 @@ if (strpos($file, "maventa") !== false) {
 }
 
 $ohita_InvoiceRecipientOrganisationUnitNumber = false;
-
-$_querykiel = "SELECT kieli FROM yhtio WHERE yhtio = '$kukarow[yhtio]'";
-$_kielresult = pupe_query($_querykiel);
-if($_kielrow = mysql_fetch_assoc($_kielresult)) {
-  $_kieli = strtolower($_kielrow['kieli']);
-  $ohita_InvoiceRecipientOrganisationUnitNumber_q = "SELECT distinct selite
-                                                      FROM avainsana 
-                                                      WHERE laji  = 'EDI_OHITA_ORGUN'
-                                                    ";
-  $ohita_InvoiceRecipientOrganisationUnitNumber_a = pupe_query($ohita_InvoiceRecipientOrganisationUnitNumber_q);
-  while ($ohita_InvoiceRecipientOrganisationUnitNumber_t = mysql_fetch_assoc($ohita_InvoiceRecipientOrganisationUnitNumber_a)) {
-    if($ohita_InvoiceRecipientOrganisationUnitNumber_t['selite'] == 1) {
-      $ohita_InvoiceRecipientOrganisationUnitNumber = true;
-      break;
-    }
+$ohita_InvoiceRecipientOrganisationUnitNumber_q = "SELECT distinct selite
+                                                    FROM avainsana 
+                                                    WHERE laji  = 'EDI_OHITA_ORGUN'
+                                                  ";
+$ohita_InvoiceRecipientOrganisationUnitNumber_a = pupe_query($ohita_InvoiceRecipientOrganisationUnitNumber_q);
+while ($ohita_InvoiceRecipientOrganisationUnitNumber_t = mysql_fetch_assoc($ohita_InvoiceRecipientOrganisationUnitNumber_a)) {
+  if($ohita_InvoiceRecipientOrganisationUnitNumber_t['selite'] == 1) {
+    $ohita_InvoiceRecipientOrganisationUnitNumber = true;
+    break;
   }
 }
 

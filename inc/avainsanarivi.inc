@@ -372,6 +372,7 @@ if (mysql_field_name($result, $i) == "laji") {
   if ($lukitse_laji== "" or $lukitse_laji == "MYYNTITILASTO") $ulos .= "<option value='MYYNTITILASTO' {$avain_sel['MYYNTITILASTO']}>".t("Myyntimittarin raja-arvot")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "VERKLASKKENTSIS") $ulos .= "<option value='VERKLASKKENTSIS' {$avain_sel['VERKLASKKENTSIS']}>".t("Verkkolaskukentän sisältö")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "EDI_OSTOHINTA") $ulos .= "<option value='EDI_OSTOHINTA' {$avain_sel['EDI_OSTOHINTA']}>".t("Edi-ostotilaus exceliin ostohinnalla")."</option>";
+  if ($lukitse_laji== "" or $lukitse_laji == "EDI_OHITA_ORGUN") $ulos .= "<option value='EDI_OHITA_ORGUN' {$avain_sel['EDI_OHITA_ORGUN']}>".t("Ohita \"InvoiceRecipientOrganisationUnitNumber\" finvoice:n ominaisuus verkkolaskuissa")."</option>";
   if ($lukitse_laji== "") $ulos .= "</optgroup>";
 
   $ulos .= "</select></td>";

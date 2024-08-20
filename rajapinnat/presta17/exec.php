@@ -632,9 +632,6 @@ class Presta17RestApi
 
       $pupesoft_product = $pupesoft_products_arr[0];
 
-      $pupesoft_product['try_nimike'] = $pupesoft_product['try_nimike'];
-      $pupesoft_product['tuotemerkki'] = $pupesoft_product['tuotemerkki'];
-
       if (isset($pupesoft_product['tuotemerkki'])
       and $pupesoft_product['tuotemerkki']
       and $pupesoft_product['tuotemerkki'] != ''
@@ -685,7 +682,9 @@ class Presta17RestApi
       $productFields->link_rewrite->language[0] = $this->slugify($pupesoft_product['nimitys']);
       $productFields->meta_title->language[0] = $pupesoft_product['nimitys'];
 
-      $productFields->meta_keywords->language[0] = $pupesoft_product['try_nimike'];
+      if(isset($pupesoft_product['try_nimike'])) {
+        $productFields->meta_keywords->language[0] = $pupesoft_product['try_nimike'];
+      }
 
       $productFields->available_later->language[0] = 'TILAUSTUOTE';
 
@@ -790,7 +789,9 @@ class Presta17RestApi
       $productFields->name->language[0] = $pupesoft_product['nimitys'];
       $productFields->meta_title->language[0] = $pupesoft_product['nimitys'];
       $productFields->link_rewrite->language[0] = $this->slugify($pupesoft_product['nimitys']);
-      $productFields->meta_keywords->language[0] = $pupesoft_product['try_nimike'];
+      if(isset($pupesoft_product['try_nimike'])) {
+        $productFields->meta_keywords->language[0] = $pupesoft_product['try_nimike'];
+      }
 
       $productFields->available_later->language[0] = 'TILAUSTUOTE';
 

@@ -46,7 +46,7 @@ class Presta17RestApi
   /*
   Default variables and values in the class
   */
-  public function __construct($yhtiorow, $rest, $url, $presta_varastot, $edi, $presta17_api_customer, $presta17_api_edipath, $presta17_api_payment_rule, $presta17_api_ovt)
+  public function __construct($yhtiorow, $rest, $url, $presta_varastot, $edi, $presta17_api_customer, $presta17_api_edipath, $presta17_api_payment_rule, $presta17_api_ovt, $presta17_api_taxes)
   {
     $php_cli = true;
     $this->kukarow = hae_kukarow('admin', $yhtiorow['yhtio']);

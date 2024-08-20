@@ -60,6 +60,7 @@ class Presta17RestApi
     $this->presta17_api_edipath = $presta17_api_edipath;
     $this->edi = $edi;
     $this->presta17_api_ovt = $presta17_api_ovt;
+    $this->presta17_api_taxes = $presta17_api_taxes;
     $this->fi_countries = Array(
       'Suomi' => 'Finland',
       'Ruotsi' => 'Sweden',
@@ -524,13 +525,7 @@ class Presta17RestApi
   }
 
   public function get_tax_group_id($vat) {
-    $taxes = array(
-      "0" => "0",
-      "10.00" => "3",
-      "14.00" => "2",
-      "24.00" => "1"
-    );
-    return $taxes[$vat];
+    return $this->presta17_api_taxes[$vat];
   }
 
   public function updatePrestashopCategory($cat)
@@ -1999,7 +1994,8 @@ $execute = new Presta17RestApi(
   $presta17_api_customer,
   $presta17_api_edipath,
   $presta17_api_payment_rule,
-  $presta17_api_ovt
+  $presta17_api_ovt,
+  $presta17_api_taxes
 );
 
 $execute->begin($resource, $days);

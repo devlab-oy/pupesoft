@@ -47,13 +47,13 @@ function alv_update_lisaa_avainsanat($query_where_lisa = "") {
               and selite  in ('24')";
     $result = pupe_query($query);
 
-    // Lisätään 25 verokanta
+    // Lisätään 25.5 verokanta
     $query = "INSERT into avainsana SET
               yhtio      = '$yhtio',
               kieli      = 'fi',
               laji       = 'ALV',
-              selite     = '25',
-              jarjestys  = '25',
+              selite     = '25.5',
+              jarjestys  = '25.5',
               laatija    = 'devlab',
               luontiaika = now()";
     $result = pupe_query($query);
@@ -71,7 +71,7 @@ function alv_update_lisaa_avainsanat($query_where_lisa = "") {
               selitetark  = 'o'
               where yhtio = '$yhtio'
               and laji    = 'ALV'
-              and selite  = '25'";
+              and selite  = '25.5'";
     $result = pupe_query($query);
   }
 }
@@ -95,14 +95,14 @@ function alv_update_paivita_tuote_ja_asiakas($query_where_lisa = "") {
     echo date("H:i:s d.m.Y"), ": Tuote-/asiakasmuutos yritykselle $yhtio\n";
 
     $query = "UPDATE asiakas
-              SET alv = 25
+              SET alv = 25.5
               WHERE yhtio  = '$yhtio'
               AND alv     != 0";
     $result = pupe_query($query);
     $update_count += mysql_affected_rows();
 
     $query = "UPDATE tuote
-              SET alv = 25
+              SET alv = 25.5
               WHERE yhtio = '$yhtio'
               AND alv     = 24";
     $result = pupe_query($query);
@@ -136,12 +136,15 @@ function alv_update_paivita_avoimet($query_where_lisa = "") {
                 AND lasku.tunnus     = tilausrivi.otunnus
                 AND lasku.tila       = 'T'
                 AND lasku.alatila    NOT IN ('X', 'B'))
-              SET tilausrivi.alv = if(tilausrivi.alv = 24, 25)
+              SET tilausrivi.alv = if(tilausrivi.alv = 24, 25.5, tilausrivi.alv)
               WHERE tilausrivi.yhtio = '$yhtio'
               AND tilausrivi.alv     in (24)
               AND tilausrivi.tyyppi  = 'T'";
+              
     $result = pupe_query($query);
     $update_count += mysql_affected_rows();
+
+
 
     // Ylläpitosopimus
     $query = "UPDATE tilausrivi
@@ -149,10 +152,11 @@ function alv_update_paivita_avoimet($query_where_lisa = "") {
                 AND lasku.tunnus      = tilausrivi.otunnus
                 AND lasku.tila        = '0'
                 AND lasku.alatila    != 'D')
-              SET tilausrivi.alv = if(tilausrivi.alv = 24, 25)
+              SET tilausrivi.alv = if(tilausrivi.alv = 24, 25.5, tilausrivi.alv)
               WHERE tilausrivi.yhtio  = '$yhtio'
               AND tilausrivi.alv      in (24)
               AND tilausrivi.tyyppi   = '0'";
+
     $result = pupe_query($query);
     $update_count += mysql_affected_rows();
 
@@ -162,7 +166,7 @@ function alv_update_paivita_avoimet($query_where_lisa = "") {
                 AND lasku.tunnus             = tilausrivi.otunnus
                 AND lasku.tila               IN ('A', 'C', 'L', 'N', 'E', 'F')
                 AND lasku.alatila           != 'X')
-              SET tilausrivi.alv = if(tilausrivi.alv = 24, 25)
+              SET tilausrivi.alv = if(tilausrivi.alv = 24, 25.5, tilausrivi.alv)
               WHERE tilausrivi.yhtio         = '$yhtio'
               AND tilausrivi.tyyppi          IN ('L', 'V', 'W', 'E', 'F')
               AND tilausrivi.alv             in (24)
@@ -177,7 +181,7 @@ function alv_update_paivita_avoimet($query_where_lisa = "") {
                 AND lasku.tunnus             = tilausrivi.otunnus
                 AND lasku.tila               = 'V'
                 AND lasku.alatila           != 'V')
-              SET tilausrivi.alv = if(tilausrivi.alv = 24, 25)
+              SET tilausrivi.alv = if(tilausrivi.alv = 24, 25.5, tilausrivi.alv)
               WHERE tilausrivi.yhtio         = '$yhtio'
               AND tilausrivi.tyyppi          in ('V', 'W', 'M', 'L')
               AND tilausrivi.alv             in (24)
@@ -188,7 +192,7 @@ function alv_update_paivita_avoimet($query_where_lisa = "") {
 
     // Kaikkien ym. tyyppien otsikot
     $query = "UPDATE lasku
-              SET lasku.alv = 25
+              SET lasku.alv = 25.5
               WHERE lasku.yhtio = '$yhtio'
               AND lasku.alv     = 24
               AND ((lasku.tila = 'V' AND lasku.alatila != 'V')
@@ -225,9 +229,9 @@ function alv_update_paivita_hinnat($query_where_lisa = "") {
     echo date("H:i:s d.m.Y"), ": Hintamuutos yritykselle $yhtio\n";
 
     $query = "UPDATE tuote set
-              tuote.myyntihinta  = round(tuote.myyntihinta  / 1.24 * 1.25, {$yhtiorow['hintapyoristys']}),
-              tuote.myymalahinta = round(tuote.myymalahinta / 1.24 * 1.25, {$yhtiorow['hintapyoristys']}),
-              tuote.nettohinta   = round(tuote.nettohinta   / 1.24 * 1.25, {$yhtiorow['hintapyoristys']})
+              tuote.myyntihinta  = round(tuote.myyntihinta  / 1.24 * 1.255, {$yhtiorow['hintapyoristys']}),
+              tuote.myymalahinta = round(tuote.myymalahinta / 1.24 * 1.255, {$yhtiorow['hintapyoristys']}),
+              tuote.nettohinta   = round(tuote.nettohinta   / 1.24 * 1.255, {$yhtiorow['hintapyoristys']})
               WHERE tuote.yhtio  = '$yhtio'
               AND tuote.alv      = 24";
     $result = pupe_query($query);
@@ -237,14 +241,14 @@ function alv_update_paivita_hinnat($query_where_lisa = "") {
               JOIN tuote on (tuote.yhtio = hinnasto.yhtio
                 AND tuote.tuoteno  = hinnasto.tuoteno
                 AND tuote.alv      = 24)
-              SET hinnasto.hinta = round(hinnasto.hinta / 1.24 * 1.25, {$yhtiorow['hintapyoristys']})
+              SET hinnasto.hinta = round(hinnasto.hinta / 1.24 * 1.255, {$yhtiorow['hintapyoristys']})
               WHERE hinnasto.yhtio = '$yhtio'";
     $result = pupe_query($query);
     $update_count += mysql_affected_rows();
 
     // Oletetaan, että toimitustapojen JV-kulut ovat alv 24% (pyöristys aina kaksi)
     $query = "UPDATE toimitustapa set
-              toimitustapa.jvkulu      = round(toimitustapa.jvkulu / 1.24 * 1.25, 2)
+              toimitustapa.jvkulu      = round(toimitustapa.jvkulu / 1.24 * 1.255, 2)
               WHERE toimitustapa.yhtio = '$yhtio'";
     $result = pupe_query($query);
     $update_count += mysql_affected_rows();
@@ -253,7 +257,7 @@ function alv_update_paivita_hinnat($query_where_lisa = "") {
               JOIN tuote on (tuote.yhtio = asiakashinta.yhtio
                 AND tuote.tuoteno       = asiakashinta.tuoteno
                 AND tuote.alv           = 24)
-              SET asiakashinta.hinta = round(asiakashinta.hinta / 1.24 * 1.25, {$yhtiorow['hintapyoristys']})
+              SET asiakashinta.hinta = round(asiakashinta.hinta / 1.24 * 1.255, {$yhtiorow['hintapyoristys']})
               WHERE asiakashinta.yhtio  = '$yhtio'
               AND asiakashinta.tuoteno != ''";
     $result = pupe_query($query);
@@ -261,7 +265,7 @@ function alv_update_paivita_hinnat($query_where_lisa = "") {
 
     // HUOM!! Oletetaan, että kaikki asiakashinnat, jota ei olla liitetty tuotteisiin on 24%
     $query = "UPDATE asiakashinta set
-              asiakashinta.hinta       = round(asiakashinta.hinta / 1.24 * 1.25, {$yhtiorow['hintapyoristys']})
+              asiakashinta.hinta       = round(asiakashinta.hinta / 1.24 * 1.255, {$yhtiorow['hintapyoristys']})
               WHERE asiakashinta.yhtio = '$yhtio'
               AND asiakashinta.tuoteno = ''";
     $result = pupe_query($query);
@@ -269,22 +273,22 @@ function alv_update_paivita_hinnat($query_where_lisa = "") {
 
     // HUOM!! Oletetaan, että kaikki rahtimaksut on 24% (pyöristys aina kaksi)
     $query = "UPDATE rahtimaksut set
-              rahtimaksut.rahtihinta  = round(rahtimaksut.rahtihinta / 1.24 * 1.25, 2)
+              rahtimaksut.rahtihinta  = round(rahtimaksut.rahtihinta / 1.24 * 1.255, 2)
               WHERE rahtimaksut.yhtio = '$yhtio'";
     $result = pupe_query($query);
     $update_count += mysql_affected_rows();
 
     // HUOM!! Oletetaan, että rajasummat ovat 24%
     $query = "UPDATE yhtion_parametrit set
-              yhtion_parametrit.suoratoim_ulkomaan_alarajasumma        = round(yhtion_parametrit.suoratoim_ulkomaan_alarajasumma / 1.24 * 1.25, 2),
-              yhtion_parametrit.erikoisvarastomyynti_alarajasumma      = round(yhtion_parametrit.erikoisvarastomyynti_alarajasumma / 1.24 * 1.25, 2),
-              yhtion_parametrit.erikoisvarastomyynti_alarajasumma_rivi = round(yhtion_parametrit.erikoisvarastomyynti_alarajasumma_rivi / 1.24 * 1.25, 2),
-              yhtion_parametrit.rahtivapaa_alarajasumma                = round(yhtion_parametrit.rahtivapaa_alarajasumma / 1.24 * 1.25, 2),
+              yhtion_parametrit.suoratoim_ulkomaan_alarajasumma        = round(yhtion_parametrit.suoratoim_ulkomaan_alarajasumma / 1.24 * 1.255, 2),
+              yhtion_parametrit.erikoisvarastomyynti_alarajasumma      = round(yhtion_parametrit.erikoisvarastomyynti_alarajasumma / 1.24 * 1.255, 2),
+              yhtion_parametrit.erikoisvarastomyynti_alarajasumma_rivi = round(yhtion_parametrit.erikoisvarastomyynti_alarajasumma_rivi / 1.24 * 1.255, 2),
+              yhtion_parametrit.rahtivapaa_alarajasumma                = round(yhtion_parametrit.rahtivapaa_alarajasumma / 1.24 * 1.255, 2),
               yhtion_parametrit.laskutuslisa                           = if (yhtion_parametrit.laskutuslisa_tyyppi not in ('L', 'K', 'N'),
-                                                                              round(yhtion_parametrit.laskutuslisa / 1.24 * 1.25, 2),
+                                                                              round(yhtion_parametrit.laskutuslisa / 1.24 * 1.255, 2),
                                                                               yhtion_parametrit.laskutuslisa),
               yhtion_parametrit.kuljetusvakuutus                       = if (yhtion_parametrit.kuljetusvakuutus_tyyppi not in ('B', 'G'),
-                                                                              round(yhtion_parametrit.kuljetusvakuutus / 1.24 * 1.25, 2),
+                                                                              round(yhtion_parametrit.kuljetusvakuutus / 1.24 * 1.255, 2),
                                                                               yhtion_parametrit.kuljetusvakuutus)
               WHERE yhtion_parametrit.yhtio                            = '$yhtio'";
     $result = pupe_query($query);
@@ -292,7 +296,7 @@ function alv_update_paivita_hinnat($query_where_lisa = "") {
 
     // HUOM!! Oletetaan että asiakkaan rajasumma on 24%
     $query = "UPDATE asiakas set
-              asiakas.rahtivapaa_alarajasumma = round(asiakas.rahtivapaa_alarajasumma / 1.24 * 1.25, 2)
+              asiakas.rahtivapaa_alarajasumma = round(asiakas.rahtivapaa_alarajasumma / 1.24 * 1.255, 2)
               WHERE asiakas.yhtio             = '$yhtio'";
     $result = pupe_query($query);
     $update_count += mysql_affected_rows();

@@ -33471,7 +33471,7 @@ if (!function_exists('paivita_saapumisen_summa')) {
         $alvit = 0;
       }
       // Onko miellä oletuksista poikkeava alvi. Verokantoja ennen viimeisintä alv-muutosta.
-      elseif (in_array($simualv, array(23, 13, 9))) {
+      elseif (in_array($simualv, array(24, 23, 13, 9))) {
         $alvti = $simualv;
         $alvit = $simualv;
       }

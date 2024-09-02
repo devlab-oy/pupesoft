@@ -451,7 +451,7 @@ if ($kurssirow["arvo"] != 0) $simualv = round(100 * (($kurssirow["summa"]/$kurss
 else $simualv = 0;
 
 // Onko miellä oletuksista poikkeava alvi. Verokantoja ennen viimeisintä alv-muutosta.
-if (in_array($simualv, array(23, 13, 9))) {
+if (in_array($simualv, array(24, 23, 13, 9))) {
   $simualv = (float) $simualv;
 }
 else {

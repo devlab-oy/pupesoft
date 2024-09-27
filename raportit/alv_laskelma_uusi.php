@@ -6,6 +6,7 @@ if (strpos($_SERVER['SCRIPT_NAME'], "viranomaisilmoitukset.php") === FALSE) {
 
 /*
 300 "Vero kotimaan myynnistä verokannoittain"
+301.1 "25.5% vero"
 301 "24% vero"
 302 "14% vero"
 303 "10% vero"
@@ -34,6 +35,10 @@ if (isset($vv) and isset($kk) and $vv == '2010' and $kk < 7) {
 // suomen oletus ALV muuttui 1.1.2013
 elseif (isset($vv) and $vv < '2013') {
   $oletus_verokanta = 23;
+}
+// suomen oletus ALV muuttui 1.9.2024
+elseif ((isset($vv) and $vv > '2024') or (isset($vv) and $vv == '2024' and (isset($kk) and $kk > '8'))) {
+  $oletus_verokanta = 25.5;
 }
 else {
   $oletus_verokanta = 24;
@@ -212,7 +217,7 @@ if (isset($tee) and $tee == 'VSRALVKK_UUSI_erittele') {
   }
 
   // Tasot kuntoon
-  if ($ryhma == 'fi301' or $ryhma == 'fi302' or $ryhma == 'fi303') {
+  if ($ryhma == 'fi3011' or $ryhma == 'fi301' or $ryhma == 'fi302' or $ryhma == 'fi303') {
     // Vero Kotimaan Myynnistä Verokannoittain
     $taso = 'fi300';
     $kerroin = ' * -1 ';
@@ -264,6 +269,9 @@ if (isset($tee) and $tee == 'VSRALVKK_UUSI_erittele') {
     echo "<tr>";
 
     switch ($ryhma) {
+    case 'fi3011' :
+      $tiliointilisa .= " and tiliointi.vero in (25.5) ";
+      break;
     case 'fi301' :
       $tiliointilisa .= " and tiliointi.vero in (22, 23, 24) ";
       break;
@@ -307,6 +315,7 @@ if (isset($tee) and $tee == 'VSRALVKK_UUSI_erittele') {
               AND ($tilinolisa)
               GROUP BY 1, 2, 3, 4, 5
               ORDER BY maa, valuutta, vero, tilino, nimi";
+
     $result = pupe_query($query);
 
     echo "<table><tr>";
@@ -948,6 +957,7 @@ function alvlaskelma($kk, $vv) {
 
     $fi3xx = array();
 
+    $fi3011 = 0.0;
     $fi301 = 0.0;
     $fi302 = 0.0;
     $fi303 = 0.0;
@@ -971,6 +981,9 @@ function alvlaskelma($kk, $vv) {
       while ($verorow = mysql_fetch_assoc($verores)) {
 
         switch ($verorow['vero']) {
+        case 25.5 :
+          $fi3011 += $verorow['veronmaara'];
+          break;
         case 24 :
         case 23 :
         case 22 :
@@ -1009,7 +1022,7 @@ function alvlaskelma($kk, $vv) {
     $fi307 = laskeveroja('fi307', 'veronmaara') + $fi305 + $fi306 + $fi304 + $fi318;
 
     // 308 laskennallinen
-    $fi308 = $fi301 + $fi302 + $fi303 + $fi305 + $fi306 + $fi304 + $fi318 - $fi307;
+    $fi308 = $fi3011 + $fi301 + $fi302 + $fi303 + $fi305 + $fi306 + $fi304 + $fi318 - $fi307;
 
     // 309 sääntö fi309
     $fi309 = laskeveroja('fi309', 'summa') * -1;
@@ -1058,7 +1071,13 @@ function alvlaskelma($kk, $vv) {
       echo "<tr class='aktiivi'><td><a href = '?tee=VSRALVKK_UUSI_erittele&ryhma=fi302&vv=$vv&kk=$kk&etsivirheita=$etsivirheita'>302</a> ", t("13% :n vero"), "</td><td align='right'>".sprintf('%.2f', $fi302)."</td></tr>";
       echo "<tr class='aktiivi'><td><a href = '?tee=VSRALVKK_UUSI_erittele&ryhma=fi303&vv=$vv&kk=$kk&etsivirheita=$etsivirheita'>303</a> ", t("9% :n vero"), "</td><td align='right'>".sprintf('%.2f', $fi303)."</td></tr>";
     }
+    elseif ($oletus_verokanta == 24) {
+      echo "<tr class='aktiivi'><td><a href = '?tee=VSRALVKK_UUSI_erittele&ryhma=fi301&vv=$vv&kk=$kk&etsivirheita=$etsivirheita'>301</a> ", t("24% :n vero"), "</td><td align='right'>".sprintf('%.2f', $fi301)."</td></tr>";
+      echo "<tr class='aktiivi'><td><a href = '?tee=VSRALVKK_UUSI_erittele&ryhma=fi302&vv=$vv&kk=$kk&etsivirheita=$etsivirheita'>302</a> ", t("14% :n vero"), "</td><td align='right'>".sprintf('%.2f', $fi302)."</td></tr>";
+      echo "<tr class='aktiivi'><td><a href = '?tee=VSRALVKK_UUSI_erittele&ryhma=fi303&vv=$vv&kk=$kk&etsivirheita=$etsivirheita'>303</a> ", t("10% :n vero"), "</td><td align='right'>".sprintf('%.2f', $fi303)."</td></tr>";
+    }
     else {
+      echo "<tr class='aktiivi'><td><a href = '?tee=VSRALVKK_UUSI_erittele&ryhma=fi3011&vv=$vv&kk=$kk&etsivirheita=$etsivirheita'>301.1</a> ", t("25.5% :n vero"), "</td><td align='right'>".sprintf('%.2f', $fi3011)."</td></tr>";
       echo "<tr class='aktiivi'><td><a href = '?tee=VSRALVKK_UUSI_erittele&ryhma=fi301&vv=$vv&kk=$kk&etsivirheita=$etsivirheita'>301</a> ", t("24% :n vero"), "</td><td align='right'>".sprintf('%.2f', $fi301)."</td></tr>";
       echo "<tr class='aktiivi'><td><a href = '?tee=VSRALVKK_UUSI_erittele&ryhma=fi302&vv=$vv&kk=$kk&etsivirheita=$etsivirheita'>302</a> ", t("14% :n vero"), "</td><td align='right'>".sprintf('%.2f', $fi302)."</td></tr>";
       echo "<tr class='aktiivi'><td><a href = '?tee=VSRALVKK_UUSI_erittele&ryhma=fi303&vv=$vv&kk=$kk&etsivirheita=$etsivirheita'>303</a> ", t("10% :n vero"), "</td><td align='right'>".sprintf('%.2f', $fi303)."</td></tr>";
@@ -1177,6 +1196,7 @@ function alvlaskelma($kk, $vv) {
       $file .= "050:K\n";
       $file .= "052:$ilmoituskausi\n";
       $file .= "053:$ilmoitusvuosi\n";
+      $file .= "301.1:".round($fi3011*100, 0)."\n";
       $file .= "301:".round($fi301*100, 0)."\n";
       $file .= "302:".round($fi302*100, 0)."\n";
       $file .= "303:".round($fi303*100, 0)."\n";

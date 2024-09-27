@@ -17,6 +17,15 @@ $file .= "050:K\n";
 $file .= "052:$kk_vsralvkv\n";
 $file .= "053:$vv_vsralvkv\n";
 
+$_3011 = $fi3011;
+if ($_3011 == "-0") {
+  $_3011 = str_replace("-0", "0.00", $_3011);
+}
+$_3011 = number_format($_3011, 2, ',', '');
+if ($_3011 != "") {
+  $file .= "3011:".$_3011."\n";
+}
+
 for ($fx = 1; $fx <= 20; $fx++) {
     $fx_num = $fx + 300;
     $fi_3 = "fi".$fx_num;

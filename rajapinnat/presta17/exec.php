@@ -225,6 +225,7 @@ class Presta17RestApi
 
   public function getPrestashopProductFeature($product_feature)
   {
+    $product_feature = mb_convert_encoding((string) $product_feature, 'UTF-8', 'Windows-1252');
     $product_feature_name = $product_feature;
     $product_features = Array(
       'resource' => 'product_features',
@@ -572,6 +573,7 @@ class Presta17RestApi
 
   public function getPrestashopProductFeatureValues($product_feature, $product_feature_id)
   {
+    $product_feature = mb_convert_encoding((string) $product_feature, 'UTF-8', 'Windows-1252');
     $product_feature_name = $product_feature;
     $product_feature_values = Array(
       'resource' => 'product_feature_values',

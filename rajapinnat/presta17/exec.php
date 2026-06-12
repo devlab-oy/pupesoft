@@ -37,6 +37,7 @@ if (!isset($presta_varastot)) {
 
 $resource = pupesoft_cleanstring($argv[2]);
 $days = pupesoft_cleanstring($argv[3]);
+$api_url = (isset($argv[4]) && $argv[4]) ? pupesoft_cleanstring($argv[4]) : $presta17_api_url;
 
 /*
   Main class
@@ -2076,11 +2077,11 @@ class Presta17RestApi
   }
 }
 $edi = new Edi();
-$webService = new PrestaShopWebservice($presta17_api_url, $presta17_api_pass, $presta17_api_debug);
+$webService = new PrestaShopWebservice($api_url, $presta17_api_pass, $presta17_api_debug);
 $execute = new Presta17RestApi(
   $yhtiorow,
   $webService,
-  $presta17_api_url,
+  $api_url,
   $presta_varastot,
   $edi,
   $presta17_api_customer,
